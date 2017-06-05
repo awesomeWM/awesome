@@ -6,9 +6,9 @@
 -- @classmod wibox.layout.rotate
 ---------------------------------------------------------------------------
 
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 
-return util.deprecate_class(
+return gdebug.deprecate_class(
     require("wibox.container.rotate"),
     "wibox.layout.rotate",
     "wibox.container.rotate"

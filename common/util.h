@@ -319,6 +319,12 @@ void _fatal(int, const char *, const char *, ...)
 void _warn(int, const char *, const char *, ...)
     __attribute__ ((format(printf, 3, 4)));
 
+#define check(condition) do { \
+        if (!(condition)) \
+            _warn(__LINE__, __FUNCTION__, \
+                    "Checking assertion failed: " #condition); \
+    } while (0)
+
 const char *a_current_time_str(void);
 
 void a_exec(const char *);

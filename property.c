@@ -160,9 +160,15 @@ property_get_wm_normal_hints(client_t *c)
 void
 property_update_wm_normal_hints(client_t *c, xcb_get_property_cookie_t cookie)
 {
+    lua_State *L = globalconf_get_lua_State();
+
     xcb_icccm_get_wm_normal_hints_reply(globalconf.connection,
 					cookie,
 					&c->size_hints, NULL);
+
+    luaA_object_push(L, c);
+    luaA_object_emit_signal(L, -1, "property::size_hints", 0);
+    lua_pop(L, 1);
 }
 
 xcb_get_property_cookie_t
@@ -206,8 +212,6 @@ property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
             else
                 client_set_icon_from_pixmaps(c, wmh.icon_pixmap, XCB_NONE);
         }
-        else
-            client_set_icon(c, NULL);
     }
 
     lua_pop(L, 1);
@@ -262,14 +266,14 @@ property_get_net_wm_icon(client_t *c)
 void
 property_update_net_wm_icon(client_t *c, xcb_get_property_cookie_t cookie)
 {
-    cairo_surface_t *surface = ewmh_window_icon_get_reply(cookie, globalconf.preferred_icon_size);
-
-    if(!surface)
+    cairo_surface_array_t array = ewmh_window_icon_get_reply(cookie);
+    if (array.len == 0)
+    {
+        cairo_surface_array_wipe(&array);
         return;
-
+    }
     c->have_ewmh_icon = true;
-    client_set_icon(c, surface);
-    cairo_surface_destroy(surface);
+    client_set_icons(c, array);
 }
 
 xcb_get_property_cookie_t
@@ -343,7 +347,8 @@ property_handle_xembed_info(uint8_t state,
                              XCB_GET_PROPERTY_TYPE_ANY, 0, 3);
         xcb_get_property_reply_t *propr =
             xcb_get_property_reply(globalconf.connection, cookie, 0);
-        xembed_property_update(globalconf.connection, emwin, propr);
+        xembed_property_update(globalconf.connection, emwin,
+                               globalconf.timestamp, propr);
         p_delete(&propr);
     }
 

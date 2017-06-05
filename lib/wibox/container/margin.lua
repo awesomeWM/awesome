@@ -11,7 +11,7 @@ local setmetatable = setmetatable
 local base = require("wibox.widget.base")
 local gcolor = require("gears.color")
 local cairo = require("lgi").cairo
-local util = require("awful.util")
+local gtable = require("gears.table")
 
 local margin = { mt = {} }
 
@@ -188,7 +188,7 @@ end
 local function new(widget, left, right, top, bottom, color, draw_empty)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, margin, true)
+    gtable.crush(ret, margin, true)
 
     ret:set_left(left or 0)
     ret:set_right(right or 0)

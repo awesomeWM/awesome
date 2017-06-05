@@ -259,6 +259,67 @@ describe("wibox.hierarchy", function()
             assert.is.same({ rect.x, rect.y, rect.width, rect.height }, { 4, 0, 5, 2 })
         end)
     end)
+
+    describe("widget counts", function()
+        local child, intermediate, parent
+        local unrelated
+        local context, instance
+        before_each(function()
+            local function nop() end
+            context = {}
+            child = make_widget(nil)
+            intermediate = make_widget({
+                make_child(child, 10, 20, matrix.identity)
+            })
+            parent = make_widget({
+                make_child(intermediate, 10, 20, matrix.identity),
+                make_child(child, 0, 20, matrix.identity)
+            })
+            unrelated = make_widget(nil)
+
+            hierarchy.count_widget(child)
+            hierarchy.count_widget(parent)
+            hierarchy.count_widget(unrelated)
+            instance = hierarchy.new(context, parent, 10, 20, nop, nop)
+        end)
+
+        it("basic counts", function()
+            local unrelated_other = make_widget(nil)
+            assert.is.equal(1, instance:get_count(child))
+            -- intermediate was not passed to hierarchy.count_widget()!
+            assert.is.equal(0, instance:get_count(intermediate))
+            assert.is.equal(1, instance:get_count(parent))
+            assert.is.equal(0, instance:get_count(unrelated))
+            assert.is.equal(0, instance:get_count(unrelated_other))
+        end)
+
+        it("after update", function()
+            -- Replace child and intermediate by just a new_child
+            local new_child = make_widget(nil)
+            parent.layout = function()
+                return { make_child(new_child, 10, 20, matrix.identity) }
+            end
+            parent:emit_signal("widget::layout_changed")
+            instance:update(context, parent, 10, 20)
+
+            assert.is.equal(0, instance:get_count(child))
+            -- new_child was not passed to hierarchy.count_widget()!
+            assert.is.equal(0, instance:get_count(new_child))
+            assert.is.equal(1, instance:get_count(parent))
+            assert.is.equal(0, instance:get_count(unrelated))
+        end)
+
+        it("collectible", function()
+            -- This test that hierarchy.count_widget() does not prevent garbage collection of the widget.
+            local weak = setmetatable({}, { __mode = "v"})
+            weak[1], weak[2], weak[3], weak[4] = child, intermediate, parent, instance
+            child, intermediate, parent, instance = nil, nil, nil, nil
+
+            assert.is.equal(4, #weak)
+            collectgarbage("collect")
+            assert.is.equal(0, #weak)
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

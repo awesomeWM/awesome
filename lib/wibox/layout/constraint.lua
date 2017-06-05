@@ -6,9 +6,9 @@
 -- @classmod wibox.layout.constraint
 ---------------------------------------------------------------------------
 
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 
-return util.deprecate_class(
+return gdebug.deprecate_class(
     require("wibox.container.constraint"),
     "wibox.layout.constraint",
     "wibox.container.constraint"

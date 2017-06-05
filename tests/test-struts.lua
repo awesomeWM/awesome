@@ -9,6 +9,49 @@ local parent, small
 
 local twibar, bwibar, lwibar, rwibar = screen.primary.mywibox
 
+-- Pretty print issues
+local function print_expected()
+    local wa, sa = mouse.screen.workarea, mouse.screen.geometry
+    local ret = table.concat{
+        "\nSCREEN: ", sa.x, " ", sa.y," ", sa.width, " ", sa.height
+    }
+    ret = table.concat{ret,
+        "\nWORKAREA: ", wa.x, " ", wa.y," ", wa.width, " ", wa.height
+    }
+    ret = table.concat{ret,
+        "\nSTRUTS: l:",
+        wa.x, " t:",
+        wa.y," r:",
+        sa.width - wa.width - wa.x, " b:",
+        sa.height - wa.height - wa.y
+    }
+
+    for k, w in ipairs {lwibar, rwibar, twibar, bwibar} do
+        ret = table.concat{
+            ret , "\n " , k, ": ", w.position, " [",
+                w.width, ", ",
+                w.height ,
+            "]"
+        }
+    end
+    return ret
+end
+
+-- All wibars on top and bottom are full width and all on left and right
+-- must honor the workarea height
+local function validate_wibar_geometry()
+    for _, w in ipairs {lwibar, rwibar, twibar, bwibar} do
+        assert(w and w.position and w.screen)
+        if w.visible then
+            if w.position == "top" or w.position == "bottom" then
+                assert(w.width == w.screen.geometry.width, print_expected())
+            else
+                assert(w.height == w.screen.workarea.height, print_expected())
+            end
+        end
+    end
+end
+
 -- Test the struts without using wibars
 table.insert(steps, function()
     local sgeo = screen.primary.geometry
@@ -99,6 +142,9 @@ table.insert(steps, function()
     assert(parent:geometry().width == small:geometry().width )
     assert(small:geometry().height == 24)
 
+    -- Hide (and hopefully GC) the old "small"
+    small.visible = false
+
     -- Do the same, but with placement compositing
     small = wibox {
         bg      = "#ff0000",
@@ -173,6 +219,8 @@ table.insert(steps, function()
     bwibar = wibar {position = "bottom", bg = "#00ff00"}
     lwibar = wibar {position = "left"  , bg = "#0000ff"}
     rwibar = wibar {position = "right" , bg = "#ff00ff"}
+
+    validate_wibar_geometry()
 
     return true
 end)
@@ -254,6 +302,8 @@ table.insert(steps, function()
     assert(lwibar.position == "top")
     assert(lwibar.y == twibar.height)
 
+    validate_wibar_geometry()
+
     return true
 end)
 
@@ -265,6 +315,8 @@ table.insert(steps, function()
     rwibar.ontop = true
     assert(bwibar.position == "right")
 
+    validate_wibar_geometry()
+
     return true
 end)
 
@@ -272,6 +324,8 @@ table.insert(steps, function()
     check_maximize()
 
     rwibar.position = "top"
+
+    validate_wibar_geometry()
 
     return true
 end)
@@ -281,6 +335,8 @@ table.insert(steps, function()
 
     bwibar.position = "top"
 
+    validate_wibar_geometry()
+
     return true
 end)
 
@@ -289,7 +345,9 @@ table.insert(steps, function()
 
     for _, w in ipairs {twibar, lwibar, rwibar, bwibar} do
         w.position = "right"
+        validate_wibar_geometry()
     end
+
 
     return true
 end)
@@ -364,29 +422,116 @@ table.insert(steps, function()
     -- Test some simple struts
     c:struts { left = 50 }
     test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+    validate_wibar_geometry()
 
     -- A tag switch should make the client no longer apply
     screen.primary.tags[2]:view_only()
     test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+    validate_wibar_geometry()
 
     -- But sticky clients always 'count'
     c.sticky = true
     test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+    validate_wibar_geometry()
 
     c.sticky = false
     test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+    validate_wibar_geometry()
 
     -- And switch back to the right tag
     c.first_tag:view_only()
     test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+    validate_wibar_geometry()
 
     -- What if we move the client to another tag?
     c:tags{ screen.primary.tags[2] }
     test_workarea(c.screen.geometry, c.screen.workarea, 0, 0, 0, 0)
+    validate_wibar_geometry()
 
     -- Move it back to the selected tag
     c:tags{ screen.primary.tags[1] }
     test_workarea(c.screen.geometry, c.screen.workarea, 50, 0, 0, 0)
+    validate_wibar_geometry()
+
+    return true
+end)
+
+local s
+
+table.insert(steps, function()
+    c = client.get()[1]
+    assert(c)
+    s = c.screen
+    c:kill()
+
+    bwibar:remove()
+    lwibar:remove()
+    rwibar:remove()
+    twibar:remove()
+
+    return true
+end)
+
+table.insert(steps, function()
+    if client.get()[1] then
+        return
+    end
+
+    test_workarea(s.geometry, s.workarea, 0, 0, 0, 0)
+    validate_wibar_geometry()
+
+    local wdg = {
+        layout = wibox.layout.align.vertical,
+        wibox.widget.textbox("BEGIN"),
+        nil,
+        wibox.widget.textbox("END")
+    }
+
+    local wdg2 = {
+        layout = wibox.layout.align.horizontal,
+        wibox.widget.textbox("BEGIN"),
+        nil,
+        wibox.widget.textbox("END")
+    }
+
+    lwibar = wibar{position = "top", screen = s, height = 15,
+        visible = true, bg = "#660066"}
+    lwibar:setup(wdg2)
+
+    rwibar = wibar{position = "top", screen = s, height = 15,
+        visible = true, bg = "#660000"}
+    rwibar:setup(wdg2)
+
+    bwibar = wibar{position = "left", screen = s, ontop = true, width = 64,
+        visible = true, bg = "#006600"}
+    bwibar:setup(wdg)
+
+    twibar = wibar{position = "bottom", screen = s,
+        height = 15, bg = "#666600"}
+    twibar:setup(wdg2)
+
+    test_workarea(s.geometry, s.workarea, 64, 0, 30, 15)
+    validate_wibar_geometry()
+
+    bwibar:remove()
+
+    test_workarea(s.geometry, s.workarea, 0, 0, 30, 15)
+    validate_wibar_geometry()
+
+    lwibar:remove()
+
+    test_workarea(s.geometry, s.workarea, 0, 0, 15, 15)
+    validate_wibar_geometry()
+
+    rwibar:remove()
+
+    test_workarea(s.geometry, s.workarea, 0, 0, 0, 15)
+    validate_wibar_geometry()
+
+    twibar:remove()
+
+    test_workarea(s.geometry, s.workarea, 0, 0, 0, 0)
+    validate_wibar_geometry()
 
     return true
 end)

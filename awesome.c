@@ -59,7 +59,7 @@
 awesome_t globalconf;
 
 /** argv used to run awesome */
-static char *awesome_argv;
+static char **awesome_argv;
 
 /** time of last main loop wakeup */
 static struct timeval last_wakeup;
@@ -107,7 +107,7 @@ awesome_atexit(bool restart)
      * Work around this by placing the focus where we like it to be.
      */
     xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_POINTER_ROOT,
-            XCB_NONE, XCB_CURRENT_TIME);
+            XCB_NONE, globalconf.timestamp);
     xcb_aux_sync(globalconf.connection);
 
     xkb_free();
@@ -266,7 +266,7 @@ acquire_WM_Sn(bool replace)
 
     /* Acquire the selection */
     xcb_set_selection_owner(globalconf.connection, globalconf.selection_owner_window,
-                            globalconf.selection_atom, XCB_CURRENT_TIME);
+                            globalconf.selection_atom, globalconf.timestamp);
     if (get_sel_reply->owner != XCB_NONE)
     {
         /* Wait for the old owner to go away */
@@ -286,12 +286,55 @@ acquire_WM_Sn(bool replace)
     ev.window = globalconf.screen->root;
     ev.format = 32;
     ev.type = MANAGER;
-    ev.data.data32[0] = XCB_CURRENT_TIME;
+    ev.data.data32[0] = globalconf.timestamp;
     ev.data.data32[1] = globalconf.selection_atom;
     ev.data.data32[2] = globalconf.selection_owner_window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
 
     xcb_send_event(globalconf.connection, false, globalconf.screen->root, 0xFFFFFF, (char *) &ev);
+}
+
+static void
+acquire_timestamp(void)
+{
+    /* Getting a current timestamp is hard. ICCCM recommends a zero-length
+     * append to a property, so let's do that.
+     */
+    xcb_generic_event_t *event;
+    xcb_window_t win = globalconf.screen->root;
+    xcb_atom_t atom = XCB_ATOM_RESOURCE_MANAGER; /* Just something random */
+    xcb_atom_t type = XCB_ATOM_STRING; /* Equally random */
+
+    xcb_grab_server(globalconf.connection);
+    xcb_change_window_attributes(globalconf.connection, win,
+            XCB_CW_EVENT_MASK, (uint32_t[]) { XCB_EVENT_MASK_PROPERTY_CHANGE });
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_APPEND, win,
+            atom, type, 8, 0, "");
+    xcb_change_window_attributes(globalconf.connection, win,
+            XCB_CW_EVENT_MASK, (uint32_t[]) { 0 });
+    xcb_ungrab_server(globalconf.connection);
+    xcb_flush(globalconf.connection);
+
+    /* Now wait for the event */
+    while((event = xcb_wait_for_event(globalconf.connection)))
+    {
+        /* Is it the event we are waiting for? */
+        if(XCB_EVENT_RESPONSE_TYPE(event) == XCB_PROPERTY_NOTIFY)
+        {
+            xcb_property_notify_event_t *ev = (void *) event;
+            globalconf.timestamp = ev->time;
+            p_delete(&event);
+            break;
+        }
+
+        /* Hm, not the right event. */
+        if (globalconf.pending_event != NULL)
+        {
+            event_handle(globalconf.pending_event);
+            p_delete(&globalconf.pending_event);
+        }
+        globalconf.pending_event = event;
+    }
 }
 
 static xcb_generic_event_t *poll_for_event(void)
@@ -420,7 +463,8 @@ void
 awesome_restart(void)
 {
     awesome_atexit(true);
-    a_exec(awesome_argv);
+    execvp(awesome_argv[0], spawn_transform_commandline(awesome_argv));
+    fatal("execv() failed: %s", strerror(errno));
 }
 
 /** Function to restart awesome on some signals.
@@ -468,8 +512,7 @@ main(int argc, char **argv)
 {
     char *confpath = NULL;
     string_array_t searchpath;
-    int xfd, i, opt;
-    ssize_t cmdlen = 1;
+    int xfd, opt;
     xdgHandle xdg;
     bool no_argb = false;
     bool run_test = false;
@@ -484,6 +527,7 @@ main(int argc, char **argv)
         { "search",  1, NULL, 's' },
         { "no-argb", 0, NULL, 'a' },
         { "replace", 0, NULL, 'r' },
+        { "reap",    1, NULL, '\1' },
         { NULL,      0, NULL, 0 }
     };
 
@@ -500,17 +544,7 @@ main(int argc, char **argv)
     string_array_init(&searchpath);
 
     /* save argv */
-    for(i = 0; i < argc; i++)
-        cmdlen += a_strlen(argv[i]) + 1;
-
-    awesome_argv = p_new(char, cmdlen);
-    a_strcpy(awesome_argv, cmdlen, argv[0]);
-
-    for(i = 1; i < argc; i++)
-    {
-        a_strcat(awesome_argv, cmdlen, " ");
-        a_strcat(awesome_argv, cmdlen, argv[i]);
-    }
+    awesome_argv = argv;
 
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
@@ -542,6 +576,9 @@ main(int argc, char **argv)
             break;
           case 'r':
             replace_wm = true;
+            break;
+          case '\1':
+            spawn_handle_reap(optarg);
             break;
           default:
             exit_help(EXIT_FAILURE);
@@ -635,6 +672,9 @@ main(int argc, char **argv)
                 globalconf.visual->visual_id);
     }
 
+    /* Get a recent timestamp */
+    acquire_timestamp();
+
     /* Prefetch all the extensions we might need */
     xcb_prefetch_extension_data(globalconf.connection, &xcb_big_requests_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_test_id);
@@ -691,6 +731,16 @@ main(int argc, char **argv)
     /* check for shape extension */
     query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
     globalconf.have_shape = query && query->present;
+    if (globalconf.have_shape)
+    {
+        xcb_shape_query_version_reply_t *reply =
+            xcb_shape_query_version_reply(globalconf.connection,
+                    xcb_shape_query_version_unchecked(globalconf.connection),
+                    NULL);
+        globalconf.have_input_shape = reply && (reply->major_version > 1 ||
+                (reply->major_version == 1 && reply->minor_version >= 1));
+        p_delete(&reply);
+    }
 
     event_init();
 

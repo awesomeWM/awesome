@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
---- An extandable mouse resizing handler.
+--- An extendable mouse resizing handler.
 --
--- This module offer a resizing and moving mechanism for drawable such as
+-- This module offers a resizing and moving mechanism for drawables such as
 -- clients and wiboxes.
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
@@ -43,8 +43,8 @@ local cursors = {
 --- Set the resize mode.
 -- The available modes are:
 --
--- * **live**: Resize the layout everytime the mouse move
--- * **after**: Resize the layout only when the mouse is released
+-- * **live**: Resize the layout everytime the mouse moves.
+-- * **after**: Resize the layout only when the mouse is released.
 --
 -- Some clients, such as XTerm, may lose information if resized too often.
 --
@@ -89,19 +89,19 @@ function module.add_leave_callback(cb, context)
     table.insert(callbacks.leave[context], cb)
 end
 
--- Resize, the drawable.
+--- Resize the drawable.
 --
 -- Valid `args` are:
 --
--- * *enter_callback*: A function called before the `mousegrabber` start
--- * *move_callback*: A function called when the mouse move
--- * *leave_callback*: A function called before the `mousegrabber` is released
--- * *mode*: The resize mode
+-- * *enter_callback*: A function called before the `mousegrabber` starts.
+-- * *move_callback*: A function called when the mouse moves.
+-- * *leave_callback*: A function called before the `mousegrabber` is released.
+-- * *mode*: The resize mode.
 --
 -- @function awful.mouse.resize
--- @tparam client client A client
--- @tparam[default=mouse.resize] string context The resizing context
--- @tparam[opt={}] table args A set of `awful.placement` arguments
+-- @tparam client client A client.
+-- @tparam[default=mouse.resize] string context The resizing context.
+-- @tparam[opt={}] table args A set of `awful.placement` arguments.
 
 local function handler(_, client, context, args) --luacheck: no unused_args
     args = args or {}
@@ -156,10 +156,10 @@ local function handler(_, client, context, args) --luacheck: no unused_args
     capi.mousegrabber.run(function (_mouse)
         if not client.valid then return end
 
-        -- Resize everytime the mouse move (default behavior)
+        -- Resize everytime the mouse moves (default behavior).
         if args.mode == "live" then
             -- Get the new geometry
-            geo = setmetatable(args.placement(client, args),{__index=args})
+            geo = setmetatable(args.placement(client, args), {__index=args})
         end
 
         -- Execute the move callbacks. This can be used to add features such as
@@ -186,7 +186,7 @@ local function handler(_, client, context, args) --luacheck: no unused_args
 
         if args.mode == "live" then
             -- Ask the resizing handler to resize the client
-            client:emit_signal( req, context, geo)
+            client:emit_signal(req, context, geo)
         end
 
         -- Quit when the button is released
@@ -194,15 +194,15 @@ local function handler(_, client, context, args) --luacheck: no unused_args
             if v then return true end
         end
 
-        -- Only resize after the mouse is released, this avoid losing content
-        -- in resize sensitive apps such as XTerm or allow external modules
+        -- Only resize after the mouse is released, this avoids losing content
+        -- in resize sensitive apps such as XTerm or allows external modules
         -- to implement custom resizing.
         if args.mode == "after" then
             -- Get the new geometry
             geo = args.placement(client, args)
 
             -- Ask the resizing handler to resize the client
-            client:emit_signal( req, context, geo)
+            client:emit_signal(req, context, geo)
         end
 
         geo = nil
@@ -220,7 +220,7 @@ local function handler(_, client, context, args) --luacheck: no unused_args
         -- In case it was modified
         setmetatable(geo,{__index=args})
 
-        client:emit_signal( req, context, geo)
+        client:emit_signal(req, context, geo)
 
         return false
     end, cursor)

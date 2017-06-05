@@ -5,9 +5,9 @@
 -- @copyright 2009 Julien Danjou
 -- @classmod awful.widget.progressbar
 ---------------------------------------------------------------------------
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 
-return util.deprecate_class(
+return gdebug.deprecate_class(
     require("wibox.widget.progressbar"),
     "awful.widget.progressbar",
     "wibox.widget.progressbar"

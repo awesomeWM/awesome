@@ -1,4 +1,19 @@
 cmake_minimum_required(VERSION 3.0.0)
+
+# Require an out-of-source build. We generate an awesomerc.lua in the build dir
+# from the one in the source dir and this does not work otherwise.
+if(CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_CURRENT_BINARY_DIR)
+    message(SEND_ERROR "\
+You appear to be doing an in-source build, which means that the binaries are \
+generated in the same directory where the source code is. This is currently not \
+supported. Instead, do, for example, the following:\n\
+   mkdir build && cd build && cmake ..\n\
+Beware that CMake likely already generated a CMakeCache.txt in the source \
+directory which you first have to delete. \
+")
+    message(FATAL_ERROR "In-source builds are not supported")
+endif()
+
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS  TRUE)
 
 if(COMMAND cmake_policy)
@@ -375,12 +390,23 @@ endif()
 # }}}
 
 # {{{ Tests
+add_executable(test-gravity tests/test-gravity.c)
+target_link_libraries(test-gravity
+    ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
 add_custom_target(check-integration
     sh -c "CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${CMAKE_SOURCE_DIR}/tests/run.sh"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running integration tests"
     USES_TERMINAL
     VERBATIM)
+add_dependencies(check-integration test-gravity)
+add_custom_target(check-requires
+    lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
+    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    COMMENT "Checking use of require()"
+    USES_TERMINAL
+    VERBATIM)
+list(APPEND CHECK_QA_TARGETS check-requires)
 a_find_program(BUSTED_EXECUTABLE busted FALSE)
 if(BUSTED_EXECUTABLE)
     # Keep the arguments in sync with the version below!

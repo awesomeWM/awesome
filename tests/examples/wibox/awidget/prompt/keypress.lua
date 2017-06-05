@@ -4,6 +4,7 @@ local awful     = { prompt = require("awful.prompt"),--DOC_HIDE
                     util   = require("awful.util"),--DOC_HIDE
                     screen = require("awful.screen")}--DOC_HIDE
 local beautiful = require( "beautiful" ) --DOC_HIDE
+local gfs       = require("gears.filesystem") --DOC_HIDE
 local naughty   = {} --DOC_HIDE
 
     local atextbox = wibox.widget.textbox()
@@ -23,7 +24,7 @@ local naughty   = {} --DOC_HIDE
             end
         end,
         textbox              = atextbox,
-        history_path         = awful.util.getdir("cache") .. "/history",
+        history_path         = gfs.get_dir("cache") .. "/history",
     }
 
 parent:add( wibox.widget {    --DOC_HIDE

@@ -8,7 +8,7 @@ local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
 local protected_call = require("gears.protected_call")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
@@ -440,7 +440,7 @@ local function parse_table(t, leave_empty)
 
     -- Pack the sparse table, if the container doesn't support sparse tables.
     if not leave_empty then
-        widgets = util.table.from_sparse(widgets)
+        widgets = gtable.from_sparse(widgets)
         max = #widgets
     end
 
@@ -504,7 +504,9 @@ local function drill(ids, content)
         end
     end
     -- Replace all children (if any) with the new ones.
-    l:set_children(widgets)
+    if widgets then
+        l:set_children(widgets)
+    end
     return l, id
 end
 

@@ -68,7 +68,7 @@ new_type("clientlayout", "Client layouts", false, "param")
 new_type("callback", "Callback functions prototype", false, "Parameters")
 
 -- More fitting section names
-kind_names={topic='Documentation', module='Libraries'}
+kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
 -- Sort modules alphabetically
 sort_modules=true
@@ -88,6 +88,8 @@ file = {
     '../objects/',
     -- LUA libraries
     '../lib/',
+    -- Auto generated scripts
+    '../script_files/',
     -- Old APIs the user should not longer use directly
     '../docs/aliases/awful_client.lua',
     '../docs/aliases/awful_screen.lua',
@@ -103,7 +105,6 @@ file = {
         '../lib/awful/startup_notification.lua',
         '../lib/gears/init.lua',
         '../lib/wibox/layout/init.lua',
-        '../lib/wibox/widget/init.lua',
         '../lib/wibox/container/init.lua',
 
         -- Ignore some parts of the widget library

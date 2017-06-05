@@ -49,9 +49,9 @@ ewmh_client_update_hints(lua_State *L)
         state[i++] = _NET_WM_STATE_MODAL;
     if(c->fullscreen)
         state[i++] = _NET_WM_STATE_FULLSCREEN;
-    if(c->maximized_vertical)
+    if(c->maximized_vertical || c->maximized)
         state[i++] = _NET_WM_STATE_MAXIMIZED_VERT;
-    if(c->maximized_horizontal)
+    if(c->maximized_horizontal || c->maximized)
         state[i++] = _NET_WM_STATE_MAXIMIZED_HORZ;
     if(c->sticky)
         state[i++] = _NET_WM_STATE_STICKY;
@@ -207,6 +207,28 @@ ewmh_init(void)
                         father, _NET_WM_PID, XCB_ATOM_CARDINAL, 32, 1, &i);
 }
 
+static void
+ewmh_update_maximize(bool h, bool status, bool toggle)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    if (h)
+        lua_pushstring(L, "client_maximize_horizontal");
+    else
+        lua_pushstring(L, "client_maximize_vertical");
+
+    /* Create table argument with raise=true. */
+    lua_newtable(L);
+    lua_pushstring(L, "toggle");
+    lua_pushboolean(L, toggle);
+    lua_settable(L, -3);
+    lua_pushstring(L, "status");
+    lua_pushboolean(L, status);
+    lua_settable(L, -3);
+
+    luaA_object_emit_signal(L, -3, "request::geometry", 2);
+}
+
 void
 ewmh_init_lua(void)
 {
@@ -220,6 +242,7 @@ ewmh_init_lua(void)
     luaA_class_connect_signal(L, &client_class, "property::fullscreen" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::maximized_horizontal" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::maximized_vertical" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::maximized" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::sticky" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::skip_taskbar" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::above" , ewmh_client_update_hints);
@@ -332,20 +355,20 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     else if(state == _NET_WM_STATE_MAXIMIZED_HORZ)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_maximized_horizontal(L, -1, false);
+            ewmh_update_maximize(true, false, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_maximized_horizontal(L, -1, true);
+            ewmh_update_maximize(true, true, false);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_maximized_horizontal(L, -1, !c->maximized_horizontal);
+            ewmh_update_maximize(true, false, true);
     }
     else if(state == _NET_WM_STATE_MAXIMIZED_VERT)
     {
         if(set == _NET_WM_STATE_REMOVE)
-            client_set_maximized_vertical(L, -1, false);
+            ewmh_update_maximize(false, false, false);
         else if(set == _NET_WM_STATE_ADD)
-            client_set_maximized_vertical(L, -1, true);
+            ewmh_update_maximize(false, true, false);
         else if(set == _NET_WM_STATE_TOGGLE)
-            client_set_maximized_vertical(L, -1, !c->maximized_vertical);
+            ewmh_update_maximize(false, false, true);
     }
     else if(state == _NET_WM_STATE_ABOVE)
     {
@@ -553,6 +576,8 @@ ewmh_client_check_hints(client_t *c)
     void *data = NULL;
     xcb_get_property_cookie_t c0, c1, c2;
     xcb_get_property_reply_t *reply;
+    bool is_h_max = false;
+    bool is_v_max = false;
 
     /* Send the GetProperty requests which will be processed later */
     c0 = xcb_get_property_unchecked(globalconf.connection, false, c->window,
@@ -577,7 +602,34 @@ ewmh_client_check_hints(client_t *c)
     {
         state = (xcb_atom_t *) data;
         for(int i = 0; i < xcb_get_property_value_length(reply) / ssizeof(xcb_atom_t); i++)
-            ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
+            if (state[i] == _NET_WM_STATE_MAXIMIZED_HORZ)
+                is_h_max = true;
+            else if (state[i] == _NET_WM_STATE_MAXIMIZED_VERT)
+                is_v_max = true;
+            else
+                ewmh_process_state_atom(c, state[i], _NET_WM_STATE_ADD);
+    }
+
+    /* Check maximization manually */
+    if (is_h_max && is_v_max) {
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, c);
+        client_set_maximized(L, -1, true);
+        lua_pop(L, 1);
+    }
+    else if(is_h_max)
+    {
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, c);
+        client_set_maximized_horizontal(L, -1, true);
+        lua_pop(L, 1);
+    }
+    else if(is_v_max)
+    {
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, c);
+        client_set_maximized_vertical(L, -1, true);
+        lua_pop(L, 1);
     }
 
     p_delete(&reply);
@@ -675,63 +727,62 @@ ewmh_window_icon_get_unchecked(xcb_window_t w)
 }
 
 static cairo_surface_t *
-ewmh_window_icon_from_reply(xcb_get_property_reply_t *r, uint32_t preferred_size)
+ewmh_window_icon_from_reply_next(uint32_t **data, uint32_t *data_end)
 {
-    uint32_t *data, *end, *found_data = 0;
-    uint32_t found_size = 0;
+    uint32_t width, height;
+    uint64_t data_len;
+    uint32_t *icon_data;
 
-    if(!r || r->type != XCB_ATOM_CARDINAL || r->format != 32 || r->length < 2)
-        return 0;
+    if(data_end - *data <= 2)
+        return NULL;
 
-    data = (uint32_t *) xcb_get_property_value(r);
-    if (!data) return 0;
+    width = (*data)[0];
+    height = (*data)[1];
 
-    end = data + r->length;
+    /* Check that we have enough data, handling overflow */
+    data_len = width * (uint64_t) height;
+    if (width < 1 || height < 1 || data_len > (uint64_t) (data_end - *data) - 2)
+        return NULL;
 
-    /* Goes over the icon data and picks the icon that best matches the size preference.
-     * In case the size match is not exact, picks the closest bigger size if present,
-     * closest smaller size otherwise.
-     */
-    while (data + 1 < end) {
-        /* check whether the data size specified by width and height fits into the array we got */
-        uint64_t data_size = (uint64_t) data[0] * data[1];
-        if (data_size > (uint64_t) (end - data - 2)) break;
+    icon_data = *data + 2;
+    *data += 2 + data_len;
+    return draw_surface_from_data(width, height, icon_data);
+}
 
-        /* use the greater of the two dimensions to match against the preferred size */
-        uint32_t size = MAX(data[0], data[1]);
+static cairo_surface_array_t
+ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
+{
+    uint32_t *data, *data_end;
+    cairo_surface_array_t result;
+    cairo_surface_t *s;
 
-        /* pick the icon if it's a better match than the one we already have */
-        bool found_icon_too_small = found_size < preferred_size;
-        bool found_icon_too_large = found_size > preferred_size;
-        bool icon_empty = data[0] == 0 || data[1] == 0;
-        bool better_because_bigger =  found_icon_too_small && size > found_size;
-        bool better_because_smaller = found_icon_too_large &&
-            size >= preferred_size && size < found_size;
-        if (!icon_empty && (better_because_bigger || better_because_smaller || found_size == 0))
-        {
-            found_data = data;
-            found_size = size;
-        }
+    cairo_surface_array_init(&result);
+    if(!r || r->type != XCB_ATOM_CARDINAL || r->format != 32)
+        return result;
 
-        data += data_size + 2;
+    data = (uint32_t*) xcb_get_property_value(r);
+    data_end = &data[r->length];
+    if(!data)
+        return result;
+
+    while ((s = ewmh_window_icon_from_reply_next(&data, data_end)) != NULL) {
+        cairo_surface_array_push(&result, s);
     }
 
-    if (!found_data) return 0;
-
-    return draw_surface_from_data(found_data[0], found_data[1], found_data + 2);
+    return result;
 }
 
 /** Get NET_WM_ICON.
  * \param cookie The cookie.
- * \return The number of elements on stack.
+ * \return An array of icons.
  */
-cairo_surface_t *
-ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie, uint32_t preferred_size)
+cairo_surface_array_t
+ewmh_window_icon_get_reply(xcb_get_property_cookie_t cookie)
 {
     xcb_get_property_reply_t *r = xcb_get_property_reply(globalconf.connection, cookie, NULL);
-    cairo_surface_t *surface = ewmh_window_icon_from_reply(r, preferred_size);
+    cairo_surface_array_t result = ewmh_window_icon_from_reply(r);
     p_delete(&r);
-    return surface;
+    return result;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

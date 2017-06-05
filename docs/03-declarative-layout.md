@@ -33,17 +33,27 @@ configurable rules.
 
 ### A simple layout
 
-* Display `my_first_widget` only on screen one
-* Add a background color to `my_third_widget`
+* Display `my_first_widget` only on primary screen
+* Display `my_second_widget` only on screen two
+* Add a background color to `my_fourth_widget`
 * Dispose in a `wibox.layout.fixed.horizontal` layout
 
 Code:
 
     s.mywibox : setup {
-        s == 1 and my_first_widget, -- Only display on screen 1
-        my_second_widget,
-        { -- Add a background color/pattern for my_third_widget
-              my_third_widget,
+        {
+            layout = awful.widget.only_on_screen,
+            screen = "primary", -- Only display on primary screen
+            my_first_widget,
+        },
+        {
+            layout = awful.widget.only_on_screen,
+            screen = 2, -- Only display on screen 2
+            my_second_widget,
+        },
+        my_third_widget, -- Displayed on all screens
+        { -- Add a background color/pattern for my_fourth_widget
+              my_fourth_widget,
               bg     = beautiful.bg_focus,
               widget = wibox.container.background,
         },
@@ -51,10 +61,12 @@ Code:
     }
 
 
-In this example `s == 1` is an inline expression. In the default `rc.lua`,
-there is an `s` variable represent to define the current screen. Any Lua
-logic expression can be used as long as it returns a valid widget or a
-declarative layout, or `nil`.
+This examples uses the `awful.widget.only_on_screen` container to display
+widgets only on some screens.
+
+### Composite widgets
+
+@DOC_wibox_widget_progressbar_encapsulation_EXAMPLE@
 
 
 ### Define widgets inline and place them
@@ -227,11 +239,15 @@ caught by a Lua `metatable` (operator overload).
 
 Code:
 
-    -- "Monkeypatch" a new function to wibox.widget.textbox to add vicious
+    -- "Monkeypatch" a new function to 3 widget classes to add vicious
     -- extension support
-    function wibox.widget.textbox:vicious(args)
-        local f = unpack or table.unpack -- Lua 5.1 compat
-        vicious.register(w, f(args))
+    for _, wdg in ipairs {
+        wibox.widget.textbox , wibox.widget.progressbar, wibox.widget.graph
+    } do
+        function wdg:vicious(args)
+            local f = unpack or table.unpack -- Lua 5.1 compat
+            vicious.register(self, f(args))
+        end
     end
 
     s.mywibox : setup {
@@ -243,7 +259,7 @@ Code:
     }
 
 
-In this example, the system is extended to that the popular
+In this example, the system is extended so that the popular
 [Vicious](https://github.com/Mic92/vicious) extension module can be
 used directly in the layout declaration. This example will update the textbox
 every 3 seconds to show the CPU usage.

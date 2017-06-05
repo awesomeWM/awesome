@@ -4,7 +4,7 @@ set(PROJECT_AWE_NAME awesome)
 # `git describe` later.
 set(VERSION devel)
 
-set(CODENAME "Harder, Better, Faster, Stronger")
+set(CODENAME "Technologic")
 
 project(${PROJECT_AWE_NAME} C)
 
@@ -123,7 +123,7 @@ pkg_check_modules(AWESOME_COMMON_REQUIRED REQUIRED
     xcb>=1.6)
 
 set(AWESOME_DEPENDENCIES
-    glib-2.0
+    glib-2.0>=2.40
     gdk-pixbuf-2.0
     cairo
     x11
@@ -159,43 +159,6 @@ endforeach()
 
 # Do it again, but this time with the CFLAGS/LDFLAGS
 pkg_check_modules(AWESOME_REQUIRED REQUIRED ${AWESOME_DEPENDENCIES})
-
-# On Mac OS X, the executable of Awesome has to be linked against libiconv
-# explicitly.  Unfortunately, libiconv doesn't have its pkg-config file,
-# and CMake doesn't provide a module for looking up the library.  Thus, we
-# have to do everything for ourselves...
-if(APPLE)
-    if(NOT DEFINED AWESOME_ICONV_SEARCH_PATHS)
-        set(AWESOME_ICONV_SEARCH_PATHS /opt/local /opt /usr/local /usr)
-    endif()
-
-    if(NOT DEFINED AWESOME_ICONV_INCLUDE_DIR)
-        find_path(AWESOME_ICONV_INCLUDE_DIR
-                  iconv.h
-                  PATHS ${AWESOME_ICONV_SEARCH_PATHS}
-                  PATH_SUFFIXES include
-                  NO_CMAKE_SYSTEM_PATH)
-    endif()
-
-    if(NOT DEFINED AWESOME_ICONV_LIBRARY_PATH)
-        get_filename_component(AWESOME_ICONV_BASE_DIRECTORY ${AWESOME_ICONV_INCLUDE_DIR} DIRECTORY)
-        find_library(AWESOME_ICONV_LIBRARY_PATH
-                     NAMES iconv
-                     HINTS ${AWESOME_ICONV_BASE_DIRECTORY}
-                     PATH_SUFFIXES lib)
-    endif()
-
-    if(NOT DEFINED AWESOME_ICONV_LIBRARY_PATH)
-        message(FATAL_ERROR "Looking for iconv library - not found.")
-    else()
-        message(STATUS "Looking for iconv library - found: ${AWESOME_ICONV_LIBRARY_PATH}")
-    endif()
-
-    set(AWESOME_REQUIRED_LDFLAGS
-        ${AWESOME_REQUIRED_LDFLAGS} ${AWESOME_ICONV_LIBRARY_PATH})
-    set(AWESOME_REQUIRED_INCLUDE_DIRS
-        ${AWESOME_REQUIRED_INCLUDE_DIRS} ${AWESOME_ICONV_INCLUDE_DIR})
-endif(APPLE)
 
 macro(a_find_library variable library)
     find_library(${variable} ${library})
@@ -389,6 +352,9 @@ endif()
 #}}}
 
 # {{{ Generate some aggregated documentation from lua script
+
+file(MAKE_DIRECTORY ${BUILD_DIR}/script_files/)
+
 add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/06-appearance.md
         COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
@@ -398,13 +364,30 @@ add_custom_command(
 
 add_custom_command(
         OUTPUT ${BUILD_DIR}/awesomerc.lua ${BUILD_DIR}/docs/05-awesomerc.md
+            ${BUILD_DIR}/script_files/rc.lua
         COMMAND lua ${SOURCE_DIR}/docs/05-awesomerc.md.lua
         ${BUILD_DIR}/docs/05-awesomerc.md ${SOURCE_DIR}/awesomerc.lua
         ${BUILD_DIR}/awesomerc.lua
+        ${BUILD_DIR}/script_files/rc.lua
 )
 
-# Create a target for the auto-generated awesomerc.lua
-add_custom_target(generate_awesomerc DEPENDS ${BUILD_DIR}/awesomerc.lua)
+add_custom_command(
+        OUTPUT ${BUILD_DIR}/script_files/theme.lua
+        COMMAND lua ${SOURCE_DIR}/docs/sample_theme.lua ${BUILD_DIR}/script_files/
+)
+
+# Create a target for the auto-generated awesomerc.lua and other files
+add_custom_target(generate_awesomerc DEPENDS
+    ${BUILD_DIR}/awesomerc.lua
+    ${BUILD_DIR}/script_files/theme.lua
+    ${BUILD_DIR}/script_files/rc.lua
+    ${SOURCE_DIR}/awesomerc.lua
+    ${BUILD_DIR}/docs/06-appearance.md
+    ${SOURCE_DIR}/docs/05-awesomerc.md.lua
+    ${SOURCE_DIR}/docs/sample_theme.lua
+    ${SOURCE_DIR}/docs/sample_files.lua
+    ${SOURCE_DIR}/awesomerc.lua
+)
 
 
 #}}}

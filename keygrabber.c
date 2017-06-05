@@ -126,10 +126,10 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
  *       keygrabber.run(function(mod, key, event)
  *         if event == "release" then return end
  *
- *         if     key == 'Up'   then awful.client.moveresize(0, 0, 0, 5, c)
- *         elseif key == 'Down' then awful.client.moveresize(0, 0, 0, -5, c)
- *         elseif key == 'Right' then awful.client.moveresize(0, 0, 5, 0, c)
- *         elseif key == 'Left'  then awful.client.moveresize(0, 0, -5, 0, c)
+ *         if     key == 'Up'   then c:relative_move(0, 0, 0, 5)
+ *         elseif key == 'Down' then c:relative_move(0, 0, 0, -5)
+ *         elseif key == 'Right' then c:relative_move(0, 0, 5, 0)
+ *         elseif key == 'Left'  then c:relative_move(0, 0, -5, 0)
  *         else   keygrabber.stop()
  *         end
  *       end)

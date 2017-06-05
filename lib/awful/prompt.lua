@@ -122,9 +122,13 @@ local capi =
 }
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local keygrabber = require("awful.keygrabber")
-local util = require("awful.util")
 local beautiful = require("beautiful")
 local akey = require("awful.key")
+local gdebug = require('gears.debug')
+local gtable = require("gears.table")
+local gcolor = require("gears.color")
+local gstring = require("gears.string")
+local gfs = require("gears.filesystem")
 
 local prompt = {}
 
@@ -155,7 +159,7 @@ local function history_check_load(id, max)
 
         -- Read history file
         for line in f:lines() do
-            if util.table.hasitem(data.history[id].table, line) == nil then
+            if gtable.hasitem(data.history[id].table, line) == nil then
                 table.insert(data.history[id].table, line)
                 if #data.history[id].table >= data.history[id].max then
                     break
@@ -206,15 +210,8 @@ end
 -- @param id The data.history identifier
 local function history_save(id)
     if data.history[id] then
-        local f = io.open(id, "w")
-        if not f then
-            local i = 0
-            for d in id:gmatch(".-/") do
-                i = i + #d
-            end
-            util.mkdir(id:sub(1, i - 1))
-            f = assert(io.open(id, "w"))
-        end
+        assert(gfs.make_parent_directories(id))
+        local f = assert(io.open(id, "w"))
         for i = 1, math.min(#data.history[id].table, data.history[id].max) do
             f:write(data.history[id].table[i] .. "\n")
         end
@@ -238,7 +235,7 @@ end
 -- @param command The command to add
 local function history_add(id, command)
     if data.history[id] and command ~= "" then
-        local index = util.table.hasitem(data.history[id].table, command)
+        local index = gtable.hasitem(data.history[id].table, command)
         if index == nil then
             table.insert(data.history[id].table, command)
 
@@ -275,24 +272,24 @@ local function prompt_text_with_cursor(args)
     local underline = args.cursor_ul or "none"
 
     if args.selectall then
-        if #text == 0 then char = " " else char = util.escape(text) end
+        if #text == 0 then char = " " else char = gstring.xml_escape(text) end
         spacer = " "
         text_start = ""
         text_end = ""
     elseif #text < args.cursor_pos then
         char = " "
         spacer = ""
-        text_start = util.escape(text)
+        text_start = gstring.xml_escape(text)
         text_end = ""
     else
-        char = util.escape(text:sub(args.cursor_pos, args.cursor_pos))
+        char = gstring.xml_escape(text:sub(args.cursor_pos, args.cursor_pos))
         spacer = " "
-        text_start = util.escape(text:sub(1, args.cursor_pos - 1))
-        text_end = util.escape(text:sub(args.cursor_pos + 1))
+        text_start = gstring.xml_escape(text:sub(1, args.cursor_pos - 1))
+        text_end = gstring.xml_escape(text:sub(args.cursor_pos + 1))
     end
 
-    local cursor_color = util.ensure_pango_color(args.cursor_color)
-    local text_color = util.ensure_pango_color(args.text_color)
+    local cursor_color = gcolor.ensure_pango_color(args.cursor_color)
+    local text_color = gcolor.ensure_pango_color(args.text_color)
 
     if args.highlighter then
         text_start, text_end = args.highlighter(text_start, text_end)
@@ -473,45 +470,19 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local highlighter = args.highlighter
     local hooks = {}
 
-    -- A function with 9 parameters deserve to die
-    if textbox then
-        util.deprecate("Use args.textbox instead of the textbox parameter")
+    local deprecated = function(name)
+        gdebug.deprecate(string.format(
+            'awful.prompt.run: the argument %s is deprecated, please use args.%s instead',
+            name, name), {raw=true, deprecated_in=4})
     end
-    if exe_callback then
-        util.deprecate(
-            "Use args.exe_callback instead of the exe_callback parameter"
-        )
-    end
-    if completion_callback then
-        util.deprecate(
-            "Use args.completion_callback instead of the completion_callback parameter"
-        )
-    end
-    if history_path then
-        util.deprecate(
-            "Use args.history_path instead of the history_path parameter"
-        )
-    end
-    if history_max then
-        util.deprecate(
-            "Use args.history_max instead of the history_max parameter"
-        )
-    end
-    if done_callback then
-        util.deprecate(
-            "Use args.done_callback instead of the done_callback parameter"
-        )
-    end
-    if changed_callback then
-        util.deprecate(
-            "Use args.changed_callback instead of the changed_callback parameter"
-        )
-    end
-    if keypressed_callback then
-        util.deprecate(
-            "Use args.keypressed_callback instead of the keypressed_callback parameter"
-        )
-    end
+    if textbox             then deprecated('textbox') end
+    if exe_callback        then deprecated('exe_callback') end
+    if completion_callback then deprecated('completion_callback') end
+    if history_path        then deprecated('history_path') end
+    if history_max         then deprecated('history_max') end
+    if done_callback       then deprecated('done_callback') end
+    if changed_callback    then deprecated('changed_callback') end
+    if keypressed_callback then deprecated('keypressed_callback') end
 
     -- This function has already an absurd number of parameters, allow them
     -- to be set using the args to avoid a "nil, nil, nil, nil, foo" scenario
@@ -544,10 +515,10 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                 hooks[key] = hooks[key] or {}
                 hooks[key][#hooks[key]+1] = v
             else
-                assert("The hook's 3rd parameter has to be a function.")
+                gdebug.print_warning("The hook's 3rd parameter has to be a function.")
             end
         else
-            assert("The hook has to have 3 parameters.")
+            gdebug.print_warning("The hook has to have 3 parameters.")
         end
     end
 
@@ -618,7 +589,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         if hooks[key] then
             -- Remove caps and num lock
             for _, m in ipairs(modifiers) do
-                if not util.table.hasitem(akey.ignore_modifiers, m) then
+                if not gtable.hasitem(akey.ignore_modifiers, m) then
                     table.insert(filtered_modifiers, m)
                 end
             end

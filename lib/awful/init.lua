@@ -9,8 +9,9 @@
 -- TODO: This is a hack for backwards-compatibility with 3.5, remove!
 local util = require("awful.util")
 local gtimer = require("gears.timer")
+local gdebug = require("gears.debug")
 function timer(...) -- luacheck: ignore
-    util.deprecate("gears.timer")
+    gdebug.deprecate("gears.timer", {deprecated_in=4})
     return gtimer(...)
 end
 
@@ -19,18 +20,18 @@ end
 local spawn = require("awful.spawn")
 
 util.spawn = function(...)
-   util.deprecate("awful.spawn")
+   gdebug.deprecate("awful.spawn", {deprecated_in=4})
    return spawn.spawn(...)
 end
 
 util.spawn_with_shell = function(...)
-   util.deprecate("awful.spawn.with_shell")
+   gdebug.deprecate("awful.spawn.with_shell", {deprecated_in=4})
    return spawn.with_shell(...)
 end
 
 util.pread = function()
-    util.deprecate("Use io.popen() directly or look at awful.spawn.easy_async() "
-            .. "for an asynchronous alternative")
+    gdebug.deprecate("Use io.popen() directly or look at awful.spawn.easy_async() "
+            .. "for an asynchronous alternative", {deprecated_in=4})
     return ""
 end
 

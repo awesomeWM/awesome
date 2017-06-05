@@ -221,7 +221,7 @@ event_handle_button(xcb_button_press_event_t *ev)
         if(ev->child == XCB_NONE)
             xcb_allow_events(globalconf.connection,
                              XCB_ALLOW_ASYNC_POINTER,
-                             XCB_CURRENT_TIME);
+                             ev->time);
     }
     else if((c = client_getbyframewin(ev->event)) || (c = client_getbywin(ev->event)))
     {
@@ -263,7 +263,7 @@ event_handle_button(xcb_button_press_event_t *ev)
         }
         xcb_allow_events(globalconf.connection,
                          XCB_ALLOW_REPLAY_POINTER,
-                         XCB_CURRENT_TIME);
+                         ev->time);
     }
     else if(ev->child == XCB_NONE)
         if(globalconf.screen->root == ev->event)
@@ -341,6 +341,8 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         uint16_t deco_bottom = bw + tb_bottom;
         int16_t diff_w = 0, diff_h = 0, diff_border = 0;
 
+        lua_State *L = globalconf_get_lua_State();
+
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
         {
             int16_t diff = 0;
@@ -373,8 +375,6 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
         {
-            lua_State *L = globalconf_get_lua_State();
-
             diff_border = ev->border_width - bw;
             diff_h += diff_border;
             diff_w += diff_border;
@@ -396,7 +396,33 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         }
 
         c->got_configure_request = true;
-        client_resize(c, geometry, false);
+
+        /* Request the changes to be applied */
+        luaA_object_push(L, c);
+        lua_pushstring(L, "ewmh");     /* context */
+        lua_newtable(L);               /* props */
+
+        /* area, it needs to be directly in the `hints` table to comply with
+           the "protocol"
+         */
+        lua_pushstring(L, "x");
+        lua_pushinteger(L, geometry.x);
+        lua_rawset(L, -3);
+
+        lua_pushstring(L, "y");
+        lua_pushinteger(L, geometry.y);
+        lua_rawset(L, -3);
+
+        lua_pushstring(L, "width");
+        lua_pushinteger(L, geometry.width);
+        lua_rawset(L, -3);
+
+        lua_pushstring(L, "height");
+        lua_pushinteger(L, geometry.height);
+        lua_rawset(L, -3);
+
+        luaA_object_emit_signal(L, -3, "request::geometry", 2);
+        lua_pop(L, 1);
     }
     else if (xembed_getbywin(&globalconf.embedded, ev->window))
     {
@@ -751,7 +777,7 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
     if((em = xembed_getbywin(&globalconf.embedded, ev->window)))
     {
         xcb_map_window(globalconf.connection, ev->window);
-        xembed_window_activate(globalconf.connection, ev->window);
+        xembed_window_activate(globalconf.connection, ev->window, globalconf.timestamp);
         /* The correct way to set this is via the _XEMBED_INFO property. Neither
          * of the XEMBED not the systray spec talk about mapping windows.
          * Apparently, Qt doesn't care and does not set an _XEMBED_INFO
@@ -816,10 +842,14 @@ event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *
     /* Do (part of) what XRRUpdateConfiguration() would do (update our state) */
     if (ev->rotation & (XCB_RANDR_ROTATION_ROTATE_90 | XCB_RANDR_ROTATION_ROTATE_270)) {
         globalconf.screen->width_in_pixels = ev->height;
+        globalconf.screen->width_in_millimeters = ev->mheight;
         globalconf.screen->height_in_pixels = ev->width;
+        globalconf.screen->height_in_millimeters = ev->mwidth;
     } else {
         globalconf.screen->width_in_pixels = ev->width;
+        globalconf.screen->width_in_millimeters = ev->mwidth;
         globalconf.screen->height_in_pixels = ev->height;
+        globalconf.screen->height_in_millimeters = ev->mheight;;
     }
 
     globalconf.screen_need_refresh = true;
@@ -837,6 +867,10 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
         xcb_randr_get_output_info_reply_t *info = NULL;
         lua_State *L = globalconf_get_lua_State();
 
+        /* The following explicitly uses XCB_CURRENT_TIME since we want to know
+         * the final state of the connection. There could be more notification
+         * events underway and using some "old" timestamp causes problems.
+         */
         info = xcb_randr_get_output_info_reply(globalconf.connection,
             xcb_randr_get_output_info_unchecked(globalconf.connection,
                 output,
@@ -917,16 +951,6 @@ event_handle_clientmessage(xcb_client_message_event_t *ev)
         systray_process_client_message(ev);
     else
         ewmh_process_client_message(ev);
-}
-
-/** The keymap change notify event handler.
- * \param ev The event.
- */
-static void
-event_handle_mappingnotify(xcb_mapping_notify_event_t *ev)
-{
-    /* Since we use XKB, we shouldn't get this event */
-    warn("Unexpected MappingNotify of type %d", ev->request);
 }
 
 static void
@@ -1049,7 +1073,6 @@ void event_handle(xcb_generic_event_t *event)
         EVENT(XCB_KEY_PRESS, event_handle_key);
         EVENT(XCB_KEY_RELEASE, event_handle_key);
         EVENT(XCB_LEAVE_NOTIFY, event_handle_leavenotify);
-        EVENT(XCB_MAPPING_NOTIFY, event_handle_mappingnotify);
         EVENT(XCB_MAP_REQUEST, event_handle_maprequest);
         EVENT(XCB_MOTION_NOTIFY, event_handle_motionnotify);
         EVENT(XCB_PROPERTY_NOTIFY, property_handle_propertynotify);

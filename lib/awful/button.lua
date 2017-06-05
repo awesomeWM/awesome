@@ -10,7 +10,8 @@
 local setmetatable = setmetatable
 local ipairs = ipairs
 local capi = { button = button }
-local util = require("awful.util")
+local gmath = require("gears.math")
+local gtable = require("gears.table")
 
 local button = { mt = {} }
 
@@ -38,9 +39,9 @@ local ignore_modifiers = { "Lock", "Mod2" }
 -- @treturn table A table with one or several button objects.
 function button.new(mod, _button, press, release)
     local ret = {}
-    local subsets = util.subsets(ignore_modifiers)
+    local subsets = gmath.subsets(ignore_modifiers)
     for _, set in ipairs(subsets) do
-        ret[#ret + 1] = capi.button({ modifiers = util.table.join(mod, set),
+        ret[#ret + 1] = capi.button({ modifiers = gtable.join(mod, set),
                                       button = _button })
         if press then
             ret[#ret]:connect_signal("press", function(_, ...) press(...) end)

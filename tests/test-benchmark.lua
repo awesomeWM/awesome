@@ -8,7 +8,8 @@ local create_wibox = require("_wibox_helper").create_wibox
 
 local BENCHMARK_EXACT = os.getenv("BENCHMARK_EXACT")
 if not BENCHMARK_EXACT then
-    print("Doing quick and inexact measurements. Set BENCHMARK_EXACT=1 as an environment variable when you actually want to look at the results.")
+    print("Doing quick and inexact measurements. Set BENCHMARK_EXACT=1 as an "..
+          "environment variable when you actually want to look at the results.")
 end
 
 local measure, benchmark

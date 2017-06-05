@@ -62,6 +62,12 @@
 /** 20 seconds timeout */
 #define AWESOME_SPAWN_TIMEOUT 20.0
 
+static int
+compare_pids(const void *a, const void *b)
+{
+    return *(GPid *) a - *(GPid *)b;
+}
+
 /** Wrapper for unrefing startup sequence.
  */
 static inline void
@@ -73,7 +79,11 @@ a_sn_startup_sequence_unref(SnStartupSequence **sss)
 DO_ARRAY(SnStartupSequence *, SnStartupSequence, a_sn_startup_sequence_unref)
 
 /** The array of startup sequence running */
-SnStartupSequence_array_t sn_waits;
+static SnStartupSequence_array_t sn_waits;
+
+DO_BARRAY(GPid, pid, DO_NOTHING, compare_pids)
+
+static pid_array_t running_children;
 
 /** Remove a SnStartupSequence pointer from an array and forget about it.
  * \param s The startup sequence to found, remove and unref.
@@ -256,6 +266,20 @@ spawn_start_notify(client_t *c, const char * startup_id)
     }
 }
 
+static void
+remove_running_child(GPid pid, gint status, gpointer user_data)
+{
+    (void) status;
+    (void) user_data;
+
+    GPid *pid_in_array = pid_array_lookup(&running_children, &pid);
+    if (pid_in_array != NULL) {
+        pid_array_remove(&running_children, pid_in_array);
+    } else {
+        warn("(Partially) unknown child %d exited?!", (int) pid);
+    }
+}
+
 /** Initialize program spawner.
  */
 void
@@ -267,6 +291,61 @@ spawn_init(void)
                                                   globalconf.default_screen,
                                                   spawn_monitor_event,
                                                   NULL, NULL);
+}
+
+void
+spawn_handle_reap(const char *arg)
+{
+    GPid pid = atoll(arg);
+    pid_array_insert(&running_children, pid);
+    g_child_watch_add((GPid) pid, remove_running_child, NULL);
+}
+
+/** Called right before exit, serialise state in case of a restart.
+ */
+char * const *
+spawn_transform_commandline(char **argv)
+{
+    size_t offset = 0;
+    size_t length = 0;
+    while(argv[offset] != NULL)
+    {
+        if(A_STREQ(argv[offset], "--reap"))
+            offset += 2;
+        else {
+            length++;
+            offset++;
+        }
+    }
+
+    length += 2*running_children.len;
+
+    const char ** transformed = p_new(const char *, length+1);
+    size_t index = 0;
+    offset = 0;
+    while(argv[index + offset] != NULL)
+    {
+        if(A_STREQ(argv[index + offset], "--reap"))
+            offset += 2;
+        else {
+            transformed[index] = argv[index + offset];
+            index++;
+        }
+    }
+
+    foreach(pid, running_children)
+    {
+        buffer_t buffer;
+        buffer_init(&buffer);
+        buffer_addf(&buffer, "%d", (int) *pid);
+
+        transformed[index++] = "--reap";
+        transformed[index++] = buffer_detach(&buffer);
+        buffer_wipe(&buffer);
+    }
+    transformed[index++] = NULL;
+
+    return (char * const *) transformed;
 }
 
 static gboolean
@@ -345,13 +424,14 @@ child_exit_callback(GPid pid, gint status, gpointer user_data)
 {
     lua_State *L = globalconf_get_lua_State();
     int exit_callback = GPOINTER_TO_INT(user_data);
+    remove_running_child(pid, status, user_data);
 
     /* 'Decode' the exit status */
     if (WIFEXITED(status)) {
         lua_pushliteral(L, "exit");
         lua_pushinteger(L, WEXITSTATUS(status));
     } else {
-        assert(WIFSIGNALED(status));
+        check(WIFSIGNALED(status));
         lua_pushliteral(L, "signal");
         lua_pushinteger(L, WTERMSIG(status));
     }
@@ -439,7 +519,7 @@ luaA_spawn(lua_State *L)
         g_timeout_add_seconds(AWESOME_SPAWN_TIMEOUT, spawn_launchee_timeout, context);
     }
 
-    flags |= G_SPAWN_SEARCH_PATH;
+    flags |= G_SPAWN_SEARCH_PATH | G_SPAWN_CLOEXEC_PIPES;
     retval = g_spawn_async_with_pipes(NULL, argv, NULL, flags,
                                       spawn_callback, context, &pid,
                                       stdin_ptr, stdout_ptr, stderr_ptr, &error);
@@ -458,6 +538,7 @@ luaA_spawn(lua_State *L)
         int exit_callback = LUA_REFNIL;
         /* Only do this down here to avoid leaks in case of errors */
         luaA_registerfct(L, 6, &exit_callback);
+        pid_array_insert(&running_children, pid);
         g_child_watch_add(pid, child_exit_callback, GINT_TO_POINTER(exit_callback));
     }
 

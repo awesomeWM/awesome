@@ -1,5 +1,6 @@
 local timer = require("gears.timer")
 local awful = require("awful")
+local gtable = require("gears.table")
 
 local runner = {
     quit_awesome_on_error = os.getenv('TEST_PAUSE_ON_ERRORS') ~= '1',
@@ -8,9 +9,9 @@ local runner = {
 -- Helpers.
 
 --- Add some rules to awful.rules.rules, after the defaults.
-local default_rules = awful.util.table.clone(awful.rules.rules)
+local default_rules = gtable.clone(awful.rules.rules)
 runner.add_to_default_rules = function(r)
-    awful.rules.rules = awful.util.table.clone(default_rules)
+    awful.rules.rules = gtable.clone(default_rules)
     table.insert(awful.rules.rules, r)
 end
 
@@ -70,7 +71,7 @@ runner.run_steps = function(steps)
             end
 
         elseif result == false then
-            io.stderr:write("Step "..step_as_string.." failed (returned false).")
+            io.stderr:write("Step "..step_as_string.." failed (returned false).\n")
             if not runner.quit_awesome_on_error then
                 io.stderr:write("Keeping awesome open...\n")
                 return

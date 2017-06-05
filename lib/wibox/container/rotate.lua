@@ -13,7 +13,7 @@ local setmetatable = setmetatable
 local tostring = tostring
 local base = require("wibox.widget.base")
 local matrix = require("gears.matrix")
-local util = require("awful.util")
+local gtable = require("gears.table")
 
 local rotate = { mt = {} }
 
@@ -141,7 +141,7 @@ end
 local function new(widget, dir)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, rotate, true)
+    gtable.crush(ret, rotate, true)
 
     ret:set_widget(widget)
     ret:set_direction(dir or "north")

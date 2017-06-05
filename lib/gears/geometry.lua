@@ -117,7 +117,7 @@ local function calculate_distance(dir, _gA, _gB)
         gAx = _gA.x + _gA.width
     end
 
-    return math.sqrt(math.pow(gBx - gAx, 2) + math.pow(gBy - gAy, 2))
+    return math.sqrt((gBx - gAx) ^ 2 + (gBy - gAy) ^ 2)
 end
 
 --- Get the nearest rectangle in the given direction. Every rectangle is specified as a table
@@ -176,6 +176,9 @@ function gears.geometry.rectangle.get_intersection(a, b)
     g.y = math.max(a.y, b.y)
     g.width = math.min(a.x + a.width, b.x + b.width) - g.x
     g.height = math.min(a.y + a.height, b.y + b.height) - g.y
+    if g.width <= 0 or g.height <= 0 then
+        g.width, g.height = 0, 0
+    end
     return g
 end
 

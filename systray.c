@@ -90,7 +90,7 @@ systray_register(void)
     ev.window = xscreen->root;
     ev.format = 32;
     ev.type = MANAGER;
-    ev.data.data32[0] = XCB_CURRENT_TIME;
+    ev.data.data32[0] = globalconf.timestamp;
     ev.data.data32[1] = globalconf.systray.atom;
     ev.data.data32[2] = globalconf.systray.window;
     ev.data.data32[3] = ev.data.data32[4] = 0;
@@ -98,7 +98,7 @@ systray_register(void)
     xcb_set_selection_owner(globalconf.connection,
                             globalconf.systray.window,
                             globalconf.systray.atom,
-                            XCB_CURRENT_TIME);
+                            globalconf.timestamp);
 
     xcb_send_event(globalconf.connection, false, xscreen->root, 0xFFFFFF, (char *) &ev);
 }
@@ -116,7 +116,7 @@ systray_cleanup(void)
     xcb_set_selection_owner(globalconf.connection,
                             XCB_NONE,
                             globalconf.systray.atom,
-                            XCB_CURRENT_TIME);
+                            globalconf.timestamp);
 
     xcb_unmap_window(globalconf.connection,
                      globalconf.systray.window);
@@ -166,7 +166,7 @@ systray_request_handle(xcb_window_t embed_win)
     }
 
     xembed_embedded_notify(globalconf.connection, em.win,
-                           globalconf.systray.window,
+                           globalconf.timestamp, globalconf.systray.window,
                            MIN(XEMBED_VERSION, em.info.version));
 
     xembed_window_array_append(&globalconf.embedded, em);
@@ -241,7 +241,8 @@ xembed_process_client_message(xcb_client_message_event_t *ev)
     switch(ev->data.data32[1])
     {
       case XEMBED_REQUEST_FOCUS:
-        xembed_focus_in(globalconf.connection, ev->window, XEMBED_FOCUS_CURRENT);
+        xembed_focus_in(globalconf.connection, ev->window,
+                        globalconf.timestamp, XEMBED_FOCUS_CURRENT);
         break;
     }
     return 0;
@@ -337,7 +338,10 @@ luaA_systray(lua_State *L)
 {
     systray_register();
 
-    if(lua_gettop(L) != 0)
+    if(lua_gettop(L) == 1)
+        luaA_drawin_systray_kickout(L);
+
+    if(lua_gettop(L) > 1)
     {
         size_t bg_len;
         drawin_t *w = luaA_checkudata(L, 1, &drawin_class);

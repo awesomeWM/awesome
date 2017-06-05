@@ -1,8 +1,10 @@
 local parent    = ... --DOC_NO_USAGE --DOC_HIDE
 local wibox     = require( "wibox"     ) --DOC_HIDE
 local awful     = { prompt = require("awful.prompt"),--DOC_HIDE
-                    util   = require("awful.util")}--DOC_HIDE
+                    util   = require("awful.util"), --DOC_HIDE
+                    spawn  = function () end } --DOC_HIDE
 local beautiful = require( "beautiful" ) --DOC_HIDE
+local gfs       = require("gears.filesystem") --DOC_HIDE
 
     local atextbox = wibox.widget.textbox()
 
@@ -52,7 +54,7 @@ local beautiful = require( "beautiful" ) --DOC_HIDE
         prompt        = "<b>Run: </b>",
         hooks         = hooks,
         textbox       = atextbox,
-        history_path  = awful.util.getdir("cache") .. "/history",
+        history_path  = gfs.get_dir("cache") .. "/history",
         done_callback = clear,
     }
 

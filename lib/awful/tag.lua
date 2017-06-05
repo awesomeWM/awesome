@@ -7,11 +7,13 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 local ascreen = require("awful.screen")
 local beautiful = require("beautiful")
+local gmath = require("gears.math")
 local object = require("gears.object")
 local timer = require("gears.timer")
+local gtable = require("gears.table")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -147,7 +149,7 @@ end
 -- selected tag is used.
 -- @see index
 function tag.move(new_index, target_tag)
-    util.deprecate("Use t.index = new_index instead of awful.tag.move")
+    gdebug.deprecate("Use t.index = new_index instead of awful.tag.move", {deprecated_in=4})
 
     target_tag = target_tag or ascreen.focused().selected_tag
     tag.object.set_index(target_tag, new_index)
@@ -180,7 +182,7 @@ end
 -- @param tag1 The first tag
 -- @param tag2 The second tag
 function tag.swap(tag1, tag2)
-    util.deprecate("Use t:swap(tag2) instead of awful.tag.swap")
+    gdebug.deprecate("Use t:swap(tag2) instead of awful.tag.swap", {deprecated_in=4})
 
     tag.object.swap(tag1, tag2)
 end
@@ -261,7 +263,7 @@ function tag.find_fallback(screen, invalids)
     local t = invalids or scr.selected_tags
 
     for _, v in pairs(scr.tags) do
-        if not util.table.hasitem(t, v) then return v end
+        if not gtable.hasitem(t, v) then return v end
     end
 end
 
@@ -354,7 +356,7 @@ end
 -- If after deleting the tag there is no selected tag, try and restore from
 -- history or select the first tag on the screen.
 function tag.delete(target_tag, fallback_tag)
-    util.deprecate("Use t:delete(fallback_tag) instead of awful.tag.delete")
+    gdebug.deprecate("Use t:delete(fallback_tag) instead of awful.tag.delete", {deprecated_in=4})
 
     return tag.object.delete(target_tag, fallback_tag)
 end
@@ -442,18 +444,27 @@ end
 -- @return A table with all available tags
 -- @see screen.tags
 function tag.gettags(s)
-    util.deprecate("Use s.tags instead of awful.tag.gettags")
+    gdebug.deprecate("Use s.tags instead of awful.tag.gettags", {deprecated_in=4})
 
     s = get_screen(s)
 
     return s and s.tags or {}
 end
 
---- Find a tag by name
--- @tparam[opt] screen s The screen of the tag
+--- Find a tag by name.
+-- @tparam screen s The screen of the tag
 -- @tparam string name The name of the tag
 -- @return The tag found, or `nil`
+-- @usage -- For the current screen
+-- local t = awful.tag.find_by_name(awful.screen.focused(), "name")
+--
+-- -- For a screen index
+-- local t = awful.tag.find_by_name(screen[1], "name")
+--
+-- -- For all screens
+-- local t = awful.tag.find_by_name(nil, "name")
 function tag.find_by_name(s, name)
+    --TODO v5: swap the arguments and make screen [opt]
     local tags = s and s.tags or root.tags()
     for _, t in ipairs(tags) do
         if name == t.name then
@@ -475,7 +486,7 @@ end
 function tag.object.set_screen(t, s)
 
     s = get_screen(s or ascreen.focused())
-    local sel = tag.selected
+    local sel = t.selected
     local old_screen = get_screen(tag.getproperty(t, "screen"))
 
     if s == old_screen then return end
@@ -516,7 +527,7 @@ function tag.setscreen(s, t)
         s, t = t, s
     end
 
-    util.deprecate("Use t.screen = s instead of awful.tag.setscreen(t, s)")
+    gdebug.deprecate("Use t.screen = s instead of awful.tag.setscreen(t, s)", {deprecated_in=4})
 
     tag.object.set_screen(t, s)
 end
@@ -527,7 +538,7 @@ end
 -- @param[opt] t tag object
 -- @return Screen number
 function tag.getscreen(t)
-    util.deprecate("Use t.screen instead of awful.tag.getscreen(t)")
+    gdebug.deprecate("Use t.screen instead of awful.tag.getscreen(t)", {deprecated_in=4})
 
     -- A new getter is not required
 
@@ -542,7 +553,7 @@ end
 -- @return A table with all selected tags.
 -- @see screen.selected_tags
 function tag.selectedlist(s)
-    util.deprecate("Use s.selected_tags instead of awful.tag.selectedlist")
+    gdebug.deprecate("Use s.selected_tags instead of awful.tag.selectedlist", {deprecated_in=4})
 
     s = get_screen(s or ascreen.focused())
 
@@ -554,7 +565,7 @@ end
 -- @param s Screen.
 -- @see screen.selected_tag
 function tag.selected(s)
-    util.deprecate("Use s.selected_tag instead of awful.tag.selected")
+    gdebug.deprecate("Use s.selected_tag instead of awful.tag.selected", {deprecated_in=4})
 
     s = get_screen(s or ascreen.focused())
 
@@ -608,9 +619,9 @@ end
 -- @param mwfact Master width factor.
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setmwfact(mwfact, t)
-    util.deprecate("Use t.master_width_factor = mwfact instead of awful.tag.setmwfact")
+    gdebug.deprecate("Use t.master_width_factor = mwfact instead of awful.tag.setmwfact", {deprecated_in=4})
 
-    tag.object.get_master_width_factor(t or ascreen.focused().selected_tag, mwfact)
+    tag.object.set_master_width_factor(t or ascreen.focused().selected_tag, mwfact)
 end
 
 --- Increase master width factor.
@@ -629,7 +640,7 @@ end
 -- @see master_fill_policy
 -- @param[opt] t The tag.
 function tag.getmwfact(t)
-    util.deprecate("Use t.master_width_factor instead of awful.tag.getmwfact")
+    gdebug.deprecate("Use t.master_width_factor instead of awful.tag.getmwfact", {deprecated_in=4})
 
     return tag.object.get_master_width_factor(t or ascreen.focused().selected_tag)
 end
@@ -737,7 +748,7 @@ end
 -- @param t The tag to modify
 -- @return The layout
 function tag.setlayout(layout, t)
-    util.deprecate("Use t.layout = layout instead of awful.tag.setlayout")
+    gdebug.deprecate("Use t.layout = layout instead of awful.tag.setlayout", {deprecated_in=4})
 
     return tag.object.set_layout(t, layout)
 end
@@ -771,7 +782,7 @@ end
 -- @tparam boolean volatile If the tag must be deleted when the last client is untagged
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setvolatile(volatile, t)
-    util.deprecate("Use t.volatile = volatile instead of awful.tag.setvolatile")
+    gdebug.deprecate("Use t.volatile = volatile instead of awful.tag.setvolatile", {deprecated_in=4})
 
     tag.setproperty(t, "volatile", volatile)
 end
@@ -782,7 +793,7 @@ end
 -- @param t The tag to modify, if null tag.selected() is used.
 -- @treturn boolean If the tag will be deleted when the last client is untagged
 function tag.getvolatile(t)
-    util.deprecate("Use t.volatile instead of awful.tag.getvolatile")
+    gdebug.deprecate("Use t.volatile instead of awful.tag.getvolatile", {deprecated_in=4})
 
     return tag.getproperty(t, "volatile") or false
 end
@@ -825,7 +836,7 @@ end
 -- @param useless_gap The spacing between clients
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setgap(useless_gap, t)
-    util.deprecate("Use t.gap = useless_gap instead of awful.tag.setgap")
+    gdebug.deprecate("Use t.gap = useless_gap instead of awful.tag.setgap", {deprecated_in=4})
 
     tag.object.set_gap(t or ascreen.focused().selected_tag, useless_gap)
 end
@@ -880,7 +891,7 @@ end
 --   return 0 for a single client.  You can override this function to change
 --   this behavior.
 function tag.getgap(t, numclients)
-    util.deprecate("Use t.gap instead of awful.tag.getgap")
+    gdebug.deprecate("Use t.gap instead of awful.tag.getgap", {deprecated_in=4})
 
     if numclients == 1 then
         return 0
@@ -930,7 +941,7 @@ end
 -- "master_width_factor" (fill only an area inside the master width factor)
 -- @tparam[opt=tag.selected()] tag t The tag to modify
 function tag.setmfpol(policy, t)
-    util.deprecate("Use t.master_fill_policy = policy instead of awful.tag.setmfpol")
+    gdebug.deprecate("Use t.master_fill_policy = policy instead of awful.tag.setmfpol", {deprecated_in=4})
 
     t = t or ascreen.focused().selected_tag
     tag.setproperty(t, "master_fill_policy", policy)
@@ -959,7 +970,7 @@ end
 -- "expand" (fill all the available workarea, default one) or
 -- "master_width_factor" (fill only an area inside the master width factor)
 function tag.getmfpol(t)
-    util.deprecate("Use t.master_fill_policy instead of awful.tag.getmfpol")
+    gdebug.deprecate("Use t.master_fill_policy instead of awful.tag.getmfpol", {deprecated_in=4})
 
     t = t or ascreen.focused().selected_tag
     return tag.getproperty(t, "master_fill_policy")
@@ -1002,7 +1013,7 @@ end
 -- @param nmaster The number of master windows.
 -- @param[opt] t The tag.
 function tag.setnmaster(nmaster, t)
-    util.deprecate("Use t.master_count = nmaster instead of awful.tag.setnmaster")
+    gdebug.deprecate("Use t.master_count = nmaster instead of awful.tag.setnmaster", {deprecated_in=4})
 
     tag.object.set_master_count(t or ascreen.focused().selected_tag, nmaster)
 end
@@ -1012,7 +1023,7 @@ end
 -- @see master_count
 -- @param[opt] t The tag.
 function tag.getnmaster(t)
-    util.deprecate("Use t.master_count instead of awful.tag.setnmaster")
+    gdebug.deprecate("Use t.master_count instead of awful.tag.setnmaster", {deprecated_in=4})
 
     t = t or ascreen.focused().selected_tag
     return tag.getproperty(t, "master_count") or 1
@@ -1064,7 +1075,7 @@ end
 -- @param icon the icon to set, either path or image object
 -- @param _tag the tag
 function tag.seticon(icon, _tag)
-    util.deprecate("Use t.icon = icon instead of awful.tag.seticon")
+    gdebug.deprecate("Use t.icon = icon instead of awful.tag.seticon", {deprecated_in=4})
 
     _tag = _tag or ascreen.focused().selected_tag
     tag.setproperty(_tag, "icon", icon)
@@ -1075,7 +1086,7 @@ end
 -- @see icon
 -- @param _tag the tag
 function tag.geticon(_tag)
-    util.deprecate("Use t.icon instead of awful.tag.geticon")
+    gdebug.deprecate("Use t.icon instead of awful.tag.geticon", {deprecated_in=4})
 
     _tag = _tag or ascreen.focused().selected_tag
     return tag.getproperty(_tag, "icon")
@@ -1116,7 +1127,7 @@ end
 -- @param ncol The number of column.
 -- @param t The tag to modify, if null tag.selected() is used.
 function tag.setncol(ncol, t)
-    util.deprecate("Use t.column_count = new_index instead of awful.tag.setncol")
+    gdebug.deprecate("Use t.column_count = new_index instead of awful.tag.setncol", {deprecated_in=4})
 
     t = t or ascreen.focused().selected_tag
     if ncol >= 1 then
@@ -1130,7 +1141,7 @@ end
 -- @see column_count
 -- @param[opt] t The tag.
 function tag.getncol(t)
-    util.deprecate("Use t.column_count instead of awful.tag.getncol")
+    gdebug.deprecate("Use t.column_count instead of awful.tag.getncol", {deprecated_in=4})
 
     t = t or ascreen.focused().selected_tag
     return tag.getproperty(t, "column_count") or 1
@@ -1198,7 +1209,7 @@ function tag.viewidx(i, screen)
     tag.viewnone(screen)
     for k, t in ipairs(showntags) do
         if t == sel then
-            showntags[util.cycle(#showntags, k + i)].selected = true
+            showntags[gmath.cycle(#showntags, k + i)].selected = true
         end
     end
     screen:emit_signal("tag::history::update")
@@ -1210,7 +1221,7 @@ end
 -- @param query_tag The tag object to find. [selected()]
 -- @return The index of the tag, nil if the tag is not found.
 function tag.getidx(query_tag)
-    util.deprecate("Use t.index instead of awful.tag.getidx")
+    gdebug.deprecate("Use t.index instead of awful.tag.getidx", {deprecated_in=4})
 
     return tag.object.get_index(query_tag or ascreen.focused().selected_tag)
 end
@@ -1252,7 +1263,7 @@ end
 -- @see tag.view_only
 -- @param t The tag object.
 function tag.viewonly(t)
-    util.deprecate("Use t:view_only() instead of awful.tag.viewonly")
+    gdebug.deprecate("Use t:view_only() instead of awful.tag.viewonly", {deprecated_in=4})
 
     tag.object.view_only(t)
 end
@@ -1265,7 +1276,7 @@ function tag.viewmore(tags, screen)
     screen = get_screen(screen or ascreen.focused())
     local screen_tags = screen.tags
     for _, _tag in ipairs(screen_tags) do
-        if not util.table.hasitem(tags, _tag) then
+        if not gtable.hasitem(tags, _tag) then
             _tag.selected = false
         end
     end
@@ -1335,7 +1346,7 @@ end
 -- @deprecated awful.tag.withcurrent
 -- @param c The client to tag.
 function tag.withcurrent(c)
-    util.deprecate("Use c:to_selected_tags() instead of awful.tag.selectedlist")
+    gdebug.deprecate("Use c:to_selected_tags() instead of awful.tag.selectedlist", {deprecated_in=4})
 
     -- It can't use c:to_selected_tags() because awful.tag is loaded before
     -- awful.client
@@ -1451,6 +1462,20 @@ capi.tag.connect_signal("request::select", tag.object.view_only)
 --- The number of urgent tagged clients
 -- @signal property::urgent_count
 -- @see client.urgent
+
+--- Emitted when a screen is removed.
+-- This can be used to salvage existing tags by moving them to a new
+-- screen (or creating a virtual screen). By default, there is no
+-- handler for this request. The tags will be deleted. To prevent
+-- this, an handler for this request must simply set a new screen
+-- for the tag.
+-- @signal request::screen
+
+--- Emitted after `request::screen` if no new screen has been set.
+-- The tag will be deleted, this is a last chance to move its clients
+-- before they are sent to a fallback tag. Connect to `request::screen`
+-- if you wish to salvage the tag.
+-- @signal removal-pending
 
 capi.screen.connect_signal("tag::history::update", tag.history.update)
 

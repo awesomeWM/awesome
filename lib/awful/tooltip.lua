@@ -41,7 +41,7 @@
 
 local mouse = mouse
 local timer = require("gears.timer")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local object = require("gears.object")
 local color = require("gears.color")
 local wibox = require("wibox")
@@ -558,7 +558,7 @@ function tooltip.new(args)
     end
 
     -- export functions
-    util.table.crush(self, tooltip, true)
+    gtable.crush(self, tooltip, true)
 
     -- setup the timer action only if needed
     if args.timer_function then

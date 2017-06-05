@@ -20,7 +20,7 @@ local ipairs = ipairs
 local error = error
 local wibox = require("wibox")
 local beautiful = require("beautiful")
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 local placement = require("awful.placement")
 
 local function get_screen(s)
@@ -32,6 +32,70 @@ local awfulwibar = { mt = {} }
 --- Array of table with wiboxes inside.
 -- It's an array so it is ordered.
 local wiboxes = setmetatable({}, {__mode = "v"})
+
+--- If the wibar needs to be stretched to fill the screen.
+-- @property stretch
+-- @tparam boolean stretch
+
+--- The wibar's width.
+-- @property width
+-- @tparam integer width
+
+--- The wibar's height.
+-- @property height
+-- @tparam integer height
+
+--- If the wibar needs to be stretched to fill the screen.
+-- @beautiful beautiful.wibar_stretch
+-- @tparam boolean stretch
+
+--- The wibar border width.
+-- @beautiful beautiful.wibar_border_width
+-- @tparam integer border_width
+
+--- The wibar border color.
+-- @beautiful beautiful.wibar_border_color
+-- @tparam string border_color
+
+--- If the wibar is to be on top of other windows.
+-- @beautiful beautiful.wibar_ontop
+-- @tparam boolean ontop
+
+--- The wibar's mouse cursor.
+-- @beautiful beautiful.wibar_cursor
+-- @tparam string cursor
+
+--- The wibar opacity, between 0 and 1.
+-- @beautiful beautiful.wibar_opacity
+-- @tparam number opacity
+
+--- The window type (desktop, normal, dock, …).
+-- @beautiful beautiful.wibar_type
+-- @tparam string type
+
+--- The wibar's width.
+-- @beautiful beautiful.wibar_width
+-- @tparam integer width
+
+--- The wibar's height.
+-- @beautiful beautiful.wibar_height
+-- @tparam integer height
+
+--- The wibar's background color.
+-- @beautiful beautiful.wibar_bg
+-- @tparam color bg
+
+--- The wibar's background image.
+-- @beautiful beautiful.wibar_bgimage
+-- @tparam surface bgimage
+
+--- The wibar's foreground (text) color.
+-- @beautiful beautiful.wibar_fg
+-- @tparam color fg
+
+--- The wibar's shape.
+-- @beautiful beautiful.wibar_shape
+-- @tparam gears.shape shape
 
 -- Compute the margin on one side
 local function get_margin(w, position, auto_stop)
@@ -108,7 +172,7 @@ local function get_position(wb)
     return wb._position or "top"
 end
 
-local function set_position(wb, position)
+local function set_position(wb, position, skip_reattach)
     -- Detach first to avoid any uneeded callbacks
     if wb.detach_callback then
         wb.detach_callback()
@@ -137,16 +201,20 @@ local function set_position(wb, position)
         wb.width = math.ceil(beautiful.get_font_height(wb.font) * 1.5)
     end
 
-    -- Changing the position will also cause the other margins to be invalidated.
-    -- For example, adding a wibar to the top will change the margins of any left
-    -- or right wibars. To solve, this, they need to be re-attached.
-    reattach(wb)
-
     -- Set the new position
     wb._position = position
 
     -- Attach to the new position
     attach(wb, position)
+
+    -- A way to skip reattach is required when first adding a wibar as it's not
+    -- in the `wiboxes` table yet and can't be added until it's attached.
+    if not skip_reattach then
+        -- Changing the position will also cause the other margins to be invalidated.
+        -- For example, adding a wibar to the top will change the margins of any left
+        -- or right wibars. To solve, this, they need to be re-attached.
+        reattach(wb)
+    end
 end
 
 --- Stretch the wibar.
@@ -188,7 +256,7 @@ end
 -- @deprecated awful.wibar.get_position
 -- @return The wibox position.
 function awfulwibar.get_position(wb)
-    util.deprecate("Use wb:get_position() instead of awful.wibar.get_position")
+    gdebug.deprecate("Use wb:get_position() instead of awful.wibar.get_position", {deprecated_in=4})
     return get_position(wb)
 end
 
@@ -198,7 +266,7 @@ end
 -- @param screen This argument is deprecated, use wb.screen directly.
 -- @deprecated awful.wibar.set_position
 function awfulwibar.set_position(wb, position, screen) --luacheck: no unused args
-    util.deprecate("Use wb:set_position(position) instead of awful.wibar.set_position")
+    gdebug.deprecate("Use wb:set_position(position) instead of awful.wibar.set_position", {deprecated_in=4})
 
     set_position(wb, position)
 end
@@ -214,8 +282,9 @@ end
 -- @see awful.placement
 -- @deprecated awful.wibar.attach
 function awfulwibar.attach(wb, position, screen) --luacheck: no unused args
-    util.deprecate("awful.wibar.attach is deprecated, use the 'attach' property"..
-        " of awful.placement. This method doesn't do anything anymore"
+    gdebug.deprecate("awful.wibar.attach is deprecated, use the 'attach' property"..
+        " of awful.placement. This method doesn't do anything anymore",
+        {deprecated_in=4}
     )
 end
 
@@ -243,12 +312,12 @@ end
 -- @see awful.placement.align
 function awfulwibar.align(wb, align, screen) --luacheck: no unused args
     if align == "center" then
-        util.deprecate("awful.wibar.align(wb, 'center' is deprecated, use 'centered'")
+        gdebug.deprecate("awful.wibar.align(wb, 'center' is deprecated, use 'centered'", {deprecated_in=4})
         align = "centered"
     end
 
     if screen then
-        util.deprecate("awful.wibar.align 'screen' argument is deprecated")
+        gdebug.deprecate("awful.wibar.align 'screen' argument is deprecated", {deprecated_in=4})
     end
 
     if placement[align] then
@@ -278,19 +347,20 @@ end
 -- @tparam boolean arg.ontop On top of other windows.
 -- @tparam string arg.cursor The mouse cursor.
 -- @tparam boolean arg.visible Visibility.
--- @tparam number arg.opacity The opacity of the wibox, between 0 and 1.
+-- @tparam number arg.opacity The wibar's opacity, between 0 and 1.
 -- @tparam string arg.type The window type (desktop, normal, dock, …).
 -- @tparam integer arg.x The x coordinates.
 -- @tparam integer arg.y The y coordinates.
--- @tparam integer arg.width The width of the wibox.
--- @tparam integer arg.height The height of the wibox.
+-- @tparam integer arg.width The wibar's width.
+-- @tparam integer arg.height The wibar's height.
 -- @tparam screen arg.screen The wibox screen.
 -- @tparam wibox.widget arg.widget The widget that the wibox displays.
 -- @param arg.shape_bounding The wibox’s bounding shape as a (native) cairo surface.
 -- @param arg.shape_clip The wibox’s clip shape as a (native) cairo surface.
--- @tparam color arg.bg The background of the wibox.
+-- @param arg.shape_input The wibox’s input shape as a (native) cairo surface.
+-- @tparam color arg.bg The wibar's background.
 -- @tparam surface arg.bgimage The background image of the drawable.
--- @tparam color arg.fg The foreground (text) of the wibox.
+-- @tparam color arg.fg The wibar's foreground (text) color.
 -- @return The new wibar
 -- @function awful.wibar
 function awfulwibar.new(arg)
@@ -334,6 +404,16 @@ function awfulwibar.new(arg)
 
     arg.screen = nil
 
+    -- The C code scans the table directly, so metatable magic cannot be used.
+    for _, prop in ipairs {
+        "border_width", "border_color", "font", "opacity", "ontop", "cursor",
+        "height", "width", "bgimage", "bg", "fg", "type", "stretch", "shape"
+    } do
+        if (arg[prop] == nil) and beautiful["wibar_"..prop] ~= nil then
+            arg[prop] = beautiful["wibar_"..prop]
+        end
+    end
+
     local w = wibox(arg)
 
     w.screen   = screen
@@ -349,9 +429,15 @@ function awfulwibar.new(arg)
 
     if arg.visible == nil then w.visible = true end
 
-    w:set_position(position)
+    -- `w` needs to be inserted in `wiboxes` before reattach or its own offset
+    -- will not be taken into account by the "older" wibars when `reattach` is
+    -- called. `skip_reattach` is required.
+    w:set_position(position, true)
 
     table.insert(wiboxes, w)
+
+    -- Force all the wibars to be moved
+    reattach(w)
 
     w:connect_signal("property::visible", function() reattach(w) end)
 
@@ -359,10 +445,14 @@ function awfulwibar.new(arg)
 end
 
 capi.screen.connect_signal("removed", function(s)
+    local wibars = {}
     for _, wibar in ipairs(wiboxes) do
         if wibar._screen == s then
-            wibar:remove()
+            table.insert(wibars, wibar)
         end
+    end
+    for _, wibar in ipairs(wibars) do
+        wibar:remove()
     end
 end)
 

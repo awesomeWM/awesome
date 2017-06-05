@@ -12,7 +12,7 @@ local ipairs = ipairs
 local setmetatable = setmetatable
 local base = require("wibox.widget.base")
 local matrix = require("gears.matrix")
-local util = require("awful.util")
+local gtable = require("gears.table")
 
 local mirror = { mt = {} }
 
@@ -118,7 +118,7 @@ local function new(widget, reflection)
     ret._private.horizontal = false
     ret._private.vertical = false
 
-    util.table.crush(ret, mirror, true)
+    gtable.crush(ret, mirror, true)
 
     ret:set_widget(widget)
     ret:set_reflection(reflection or {})

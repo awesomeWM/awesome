@@ -9,7 +9,7 @@
 -- Grab environment
 local awesome = awesome
 local screen = screen
-local round = require("awful.util").round
+local round = require("gears.math").round
 local gears_debug = require("gears.debug")
 
 local xresources = {}
@@ -83,6 +83,22 @@ function xresources.get_dpi(s)
         if awesome and awesome.xrdb_get_value then
             xresources.dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi"))
         end
+        -- Following Keith Packard's whitepaper on Xft,
+        -- https://keithp.com/~keithp/talks/xtc2001/paper/xft.html#sec-editing
+        -- the proper fallback for Xft.dpi is the vertical DPI reported by
+        -- the X server. This will generally be 96 on Xorg, unless the user
+        -- has configured it differently
+        if not xresources.dpi then
+            if root then
+                local mm_to_inch = 25.4
+                local _, h = root.size()
+                local _, hmm = root.size_mm()
+                if hmm ~= 0 then
+                    xresources.dpi = round(h*mm_to_inch/hmm)
+                end
+            end
+        end
+        -- ultimate fallback
         if not xresources.dpi then
             xresources.dpi = 96
         end

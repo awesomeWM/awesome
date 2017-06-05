@@ -87,9 +87,9 @@ DO_ARRAY(xembed_window_t, xembed_window, DO_NOTHING)
 #define XEMBED_ACCELERATOR_OVERLOADED   (1 << 0)
 
 
-void xembed_message_send(xcb_connection_t *, xcb_window_t, long, long, long, long);
+void xembed_message_send(xcb_connection_t *, xcb_window_t, xcb_timestamp_t, uint32_t, uint32_t, uint32_t, uint32_t);
 xembed_window_t * xembed_getbywin(xembed_window_array_t *, xcb_window_t);
-void xembed_property_update(xcb_connection_t *, xembed_window_t *, xcb_get_property_reply_t *);
+void xembed_property_update(xcb_connection_t *, xembed_window_t *, xcb_timestamp_t, xcb_get_property_reply_t *);
 xcb_get_property_cookie_t xembed_info_get_unchecked(xcb_connection_t *,
                                                     xcb_window_t);
 bool xembed_info_get_reply(xcb_connection_t *connection,
@@ -100,46 +100,50 @@ bool xembed_info_get_reply(xcb_connection_t *connection,
 /** Indicate to an embedded window that it has focus.
  * \param c The X connection.
  * \param client The client.
+ * \param timestamp The timestamp.
  * \param focus_type The type of focus.
  */
 static inline void
-xembed_focus_in(xcb_connection_t *c, xcb_window_t client, long focus_type)
+xembed_focus_in(xcb_connection_t *c, xcb_window_t client, xcb_timestamp_t timestamp, uint32_t focus_type)
 {
-    xembed_message_send(c, client, XEMBED_FOCUS_IN, focus_type, 0, 0);
+    xembed_message_send(c, client, timestamp, XEMBED_FOCUS_IN, focus_type, 0, 0);
 }
 
 /** Notify a window that it has become active.
  * \param c The X connection.
  * \param client The window to notify.
+ * \param timestamp The timestamp.
  */
 static inline void
-xembed_window_activate(xcb_connection_t *c, xcb_window_t client)
+xembed_window_activate(xcb_connection_t *c, xcb_window_t client, xcb_timestamp_t timestamp)
 {
-    xembed_message_send(c, client, XEMBED_WINDOW_ACTIVATE, 0, 0, 0);
+    xembed_message_send(c, client, timestamp, XEMBED_WINDOW_ACTIVATE, 0, 0, 0);
 }
 
 /** Notify a window that it has become inactive.
  * \param c The X connection.
  * \param client The window to notify.
+ * \param timestamp The timestamp.
  */
 static inline
-void xembed_window_deactivate(xcb_connection_t *c, xcb_window_t client)
+void xembed_window_deactivate(xcb_connection_t *c, xcb_window_t client, xcb_timestamp_t timestamp)
 {
-    xembed_message_send(c, client, XEMBED_WINDOW_DEACTIVATE, 0, 0, 0);
+    xembed_message_send(c, client, timestamp, XEMBED_WINDOW_DEACTIVATE, 0, 0, 0);
 }
 
 /** Notify a window that its embed request has been received and accepted.
  * \param c The X connection.
  * \param client The client to send message to.
+ * \param timestamp The timestamp.
  * \param embedder The embedder window.
  * \param version The version.
  */
 static inline void
 xembed_embedded_notify(xcb_connection_t *c,
-                       xcb_window_t client, xcb_window_t embedder,
-                       long version)
+                       xcb_window_t client, xcb_timestamp_t timestamp,
+                       xcb_window_t embedder, uint32_t version)
 {
-    xembed_message_send(c, client, XEMBED_EMBEDDED_NOTIFY, 0, embedder, version);
+    xembed_message_send(c, client, timestamp, XEMBED_EMBEDDED_NOTIFY, 0, embedder, version);
 }
 
 /** Have the embedder end XEMBED protocol communication with a child.
@@ -156,11 +160,12 @@ xembed_window_unembed(xcb_connection_t *connection, xcb_window_t child, xcb_wind
 /** Indicate to an embedded window that it has lost focus.
  * \param c The X connection.
  * \param client The client to send message to.
+ * \param timestamp The timestamp.
  */
 static inline void
-xembed_focus_out(xcb_connection_t *c, xcb_window_t client)
+xembed_focus_out(xcb_connection_t *c, xcb_window_t client, xcb_timestamp_t timestamp)
 {
-    xembed_message_send(c, client, XEMBED_FOCUS_OUT, 0, 0, 0);
+    xembed_message_send(c, client, timestamp, XEMBED_FOCUS_OUT, 0, 0, 0);
 }
 
 

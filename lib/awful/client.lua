@@ -7,10 +7,13 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local util = require("awful.util")
+local gdebug = require("gears.debug")
 local spawn = require("awful.spawn")
+local set_shape = require("awful.client.shape").update.all
 local object = require("gears.object")
 local grect = require("gears.geometry").rectangle
+local gmath = require("gears.math")
+local gtable = require("gears.table")
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -67,7 +70,7 @@ client.focus = require("awful.client.focus")
 --   If it is a function, it will be called with the client and its first
 --   tag as arguments.
 function client.jumpto(c, merge)
-    util.deprecate("Use c:jump_to(merge) instead of awful.client.jumpto")
+    gdebug.deprecate("Use c:jump_to(merge) instead of awful.client.jumpto", {deprecated_in=4})
     client.object.jump_to(c, merge)
 end
 
@@ -137,6 +140,7 @@ function client.tiled(s, stacked)
     for _, c in pairs(clients) do
         if not client.object.get_floating(c)
             and not c.fullscreen
+            and not c.maximized
             and not c.maximized_vertical
             and not c.maximized_horizontal then
             table.insert(tclients, c)
@@ -176,7 +180,7 @@ function client.next(i, sel, stacked)
         for idx, c in ipairs(cls) do
             if c == sel then
                 -- Cycle
-                return cls[util.cycle(#cls, idx + i)]
+                return cls[gmath.cycle(#cls, idx + i)]
             end
         end
     end
@@ -288,7 +292,7 @@ end
 -- @legacylayout awful.client.setmaster
 -- @client c The window to set as master.
 function client.setmaster(c)
-    local cls = util.table.reverse(capi.client.get(c.screen))
+    local cls = gtable.reverse(capi.client.get(c.screen))
     for _, v in pairs(cls) do
         c:swap(v)
     end
@@ -313,7 +317,7 @@ end
 -- @client[opt] c The client, otherwise focused one is used.
 -- @see client.relative_move
 function client.moveresize(x, y, w, h, c)
-    util.deprecate("Use c:relative_move(x, y, w, h) instead of awful.client.moveresize")
+    gdebug.deprecate("Use c:relative_move(x, y, w, h) instead of awful.client.moveresize", {deprecated_in=4})
     client.object.relative_move(c or capi.client.focus, x, y, w, h)
 end
 
@@ -339,7 +343,7 @@ end
 -- @client[opt] c The client to move, otherwise the focused one is used.
 -- @see client.move_to_tag
 function client.movetotag(target, c)
-    util.deprecate("Use c:move_to_tag(target) instead of awful.client.movetotag")
+    gdebug.deprecate("Use c:move_to_tag(target) instead of awful.client.movetotag", {deprecated_in=4})
     client.object.move_to_tag(c or capi.client.focus, target)
 end
 
@@ -364,7 +368,7 @@ end
 -- @client[opt] c The client to toggle, otherwise the focused one is used.
 -- @see client.toggle_tag
 function client.toggletag(target, c)
-    util.deprecate("Use c:toggle_tag(target) instead of awful.client.toggletag")
+    gdebug.deprecate("Use c:toggle_tag(target) instead of awful.client.toggletag", {deprecated_in=4})
     client.object.toggle_tag(c or capi.client.focus, target)
 end
 
@@ -400,7 +404,7 @@ end
 -- @see screen
 -- @see client.move_to_screen
 function client.movetoscreen(c, s)
-    util.deprecate("Use c:move_to_screen(s) instead of awful.client.movetoscreen")
+    gdebug.deprecate("Use c:move_to_screen(s) instead of awful.client.movetoscreen", {deprecated_in=4})
     client.object.move_to_screen(c or capi.client.focus, s)
 end
 
@@ -502,7 +506,7 @@ end
 -- @deprecated awful.client.mark
 -- @client c The client to mark, the focused one if not specified.
 function client.mark(c)
-    util.deprecate("Use c.marked = true instead of awful.client.mark")
+    gdebug.deprecate("Use c.marked = true instead of awful.client.mark", {deprecated_in=4})
     client.object.set_marked(c or capi.client.focus, true)
 end
 
@@ -510,7 +514,7 @@ end
 -- @deprecated awful.client.unmark
 -- @client c The client to unmark, or the focused one if not specified.
 function client.unmark(c)
-    util.deprecate("Use c.marked = false instead of awful.client.unmark")
+    gdebug.deprecate("Use c.marked = false instead of awful.client.unmark", {deprecated_in=4})
     client.object.set_marked(c or capi.client.focus, false)
 end
 
@@ -518,7 +522,7 @@ end
 -- @deprecated awful.client.ismarked
 -- @client c The client to check, or the focused one otherwise.
 function client.ismarked(c)
-    util.deprecate("Use c.marked instead of awful.client.ismarked")
+    gdebug.deprecate("Use c.marked instead of awful.client.ismarked", {deprecated_in=4})
     return client.object.get_marked(c or capi.client.focus)
 end
 
@@ -526,7 +530,7 @@ end
 -- @deprecated awful.client.togglemarked
 -- @client c The client to toggle mark.
 function client.togglemarked(c)
-    util.deprecate("Use c.marked = not c.marked instead of awful.client.togglemarked")
+    gdebug.deprecate("Use c.marked = not c.marked instead of awful.client.togglemarked", {deprecated_in=4})
     c = c or capi.client.focus
     if c then
         c.marked = not c.marked
@@ -537,7 +541,7 @@ end
 -- @function awful.client.getmarked
 -- @return A table with all marked clients.
 function client.getmarked()
-    local copy = util.table.clone(client.data.marked, false)
+    local copy = gtable.clone(client.data.marked, false)
 
     for _, v in pairs(copy) do
         client.property.set(v, "marked", false)
@@ -555,7 +559,7 @@ end
 -- @client c A client.
 -- @param s True or false.
 function client.floating.set(c, s)
-    util.deprecate("Use c.floating = true instead of awful.client.floating.set")
+    gdebug.deprecate("Use c.floating = true instead of awful.client.floating.set", {deprecated_in=4})
     client.object.set_floating(c, s)
 end
 
@@ -599,7 +603,7 @@ capi.client.connect_signal("property::geometry", store_floating_geometry)
 -- @see is_fixed
 -- @see size_hints_honor
 function client.isfixed(c)
-    util.deprecate("Use c.is_fixed instead of awful.client.isfixed")
+    gdebug.deprecate("Use c.is_fixed instead of awful.client.isfixed", {deprecated_in=4})
     c = c or capi.client.focus
     return client.object.is_fixed(c)
 end
@@ -638,7 +642,7 @@ end
 -- did not set them manually. For example, windows with a type different than
 -- normal.
 function client.floating.get(c)
-    util.deprecate("Use c.floating instead of awful.client.floating.get")
+    gdebug.deprecate("Use c.floating instead of awful.client.floating.get", {deprecated_in=4})
     return client.object.get_floating(c)
 end
 
@@ -663,16 +667,39 @@ function client.object.get_floating(c)
         if value ~= nil then
             return value
         end
-        if c.type ~= "normal"
+        return client.property.get(c, "_implicitly_floating") or false
+    end
+end
+
+-- When a client is not explicitly assigned a floating state, it might
+-- implicitly end up being floating. The following makes sure that
+-- property::floating is still emitted if this implicit floating state changes.
+
+local function update_implicitly_floating(c)
+    local explicit = client.property.get(c, "floating")
+    if explicit ~= nil then
+        return
+    end
+    local cur = client.property.get(c, "_implicitly_floating")
+    local new = c.type ~= "normal"
             or c.fullscreen
             or c.maximized_vertical
             or c.maximized_horizontal
-            or client.object.is_fixed(c) then
-            return true
-        end
-        return false
+            or c.maximized
+            or client.object.is_fixed(c)
+    if cur ~= new then
+        client.property.set(c, "_implicitly_floating", new)
+        c:emit_signal("property::floating")
     end
 end
+
+capi.client.connect_signal("property::type", update_implicitly_floating)
+capi.client.connect_signal("property::fullscreen", update_implicitly_floating)
+capi.client.connect_signal("property::maximized_vertical", update_implicitly_floating)
+capi.client.connect_signal("property::maximized_horizontal", update_implicitly_floating)
+capi.client.connect_signal("property::maximized", update_implicitly_floating)
+capi.client.connect_signal("property::size_hints", update_implicitly_floating)
+capi.client.connect_signal("manage", update_implicitly_floating)
 
 --- Toggle the floating state of a client between 'auto' and 'true'.
 -- Use `c.floating = not c.floating`
@@ -751,7 +778,7 @@ function client.restore(s)
         local ctags = c:tags()
         if c.minimized then
             for _, t in ipairs(tags) do
-                if util.table.hasitem(ctags, t) then
+                if gtable.hasitem(ctags, t) then
                     c.minimized = false
                     return c
                 end
@@ -930,7 +957,7 @@ end
 -- @treturn bool
 -- @deprecated awful.client.dockable.get
 function client.dockable.get(c)
-    util.deprecate("Use c.dockable instead of awful.client.dockable.get")
+    gdebug.deprecate("Use c.dockable instead of awful.client.dockable.get", {deprecated_in=4})
     return client.object.get_dockable(c)
 end
 
@@ -973,7 +1000,7 @@ end
 -- @param value True or false.
 -- @deprecated awful.client.dockable.set
 function client.dockable.set(c, value)
-    util.deprecate("Use c.dockable = value instead of awful.client.dockable.set")
+    gdebug.deprecate("Use c.dockable = value instead of awful.client.dockable.set", {deprecated_in=4})
     client.property.set(c, "dockable", value)
 end
 
@@ -1062,8 +1089,8 @@ end
 function client.iterate(filter, start, s)
     local clients = capi.client.get(s)
     local focused = capi.client.focus
-    start         = start or util.table.hasitem(clients, focused)
-    return util.table.iterate(clients, filter, start)
+    start         = start or gtable.hasitem(clients, focused)
+    return gtable.iterate(clients, filter, start)
 end
 
 --- Switch to a client matching the given condition if running, else spawn it.
@@ -1086,8 +1113,8 @@ end
 -- end);
 function client.run_or_raise(cmd, matcher, merge)
     local clients = capi.client.get()
-    local findex  = util.table.hasitem(clients, capi.client.focus) or 1
-    local start   = util.cycle(#clients, findex + 1)
+    local findex  = gtable.hasitem(clients, capi.client.focus) or 1
+    local start   = gmath.cycle(#clients, findex + 1)
 
     local c = client.iterate(matcher, start)()
     if c then
@@ -1106,8 +1133,8 @@ end
 --   a matching parent client is found.
 -- @treturn client.client|nil The matching parent client or nil.
 function client.get_transient_for_matching(c, matcher)
-    util.deprecate("Use c:get_transient_for_matching(matcher) instead of"..
-        "awful.client.get_transient_for_matching")
+    gdebug.deprecate("Use c:get_transient_for_matching(matcher) instead of"..
+        "awful.client.get_transient_for_matching", {deprecated_in=4})
 
     return client.object.get_transient_for_matching(c, matcher)
 end
@@ -1135,8 +1162,8 @@ end
 -- @client c2 The parent client to check.
 -- @treturn client.client|nil The parent client or nil.
 function client.is_transient_for(c, c2)
-    util.deprecate("Use c:is_transient_for(c2) instead of"..
-        "awful.client.is_transient_for")
+    gdebug.deprecate("Use c:is_transient_for(c2) instead of"..
+        "awful.client.is_transient_for", {deprecated_in=4})
     return client.object.is_transient_for(c, c2)
 end
 
@@ -1153,6 +1180,15 @@ function client.object.is_transient_for(self, c2)
         tc = tc.transient_for
     end
     return nil
+end
+
+--- Set the client shape.
+-- @property shape
+-- @tparam gears.shape A gears.shape compatible function.
+-- @see gears.shape
+function client.object.set_shape(self, shape)
+    client.property.set(self, "_shape", shape)
+    set_shape(self)
 end
 
 -- Register standards signals

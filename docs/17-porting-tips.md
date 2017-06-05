@@ -8,6 +8,13 @@ The
 you might have added to your `rc.lua`.
 This avoids most of the possible errors due to missing important changes.
 
+To do this, you can download the default rc.lua for 3.5.9
+[here](https://github.com/awesomeWM/awesome/blob/v3.5.9/awesomerc.lua.in), and
+then compare your existing rc.lua with the 3.5.9 default using your diff tool of
+choice. Write down the changes, then apply these to the 4.0 default rc.lua,
+which you can find at /etc/xdg/awesome/rc.lua after the upgrade, or
+[here](../sample%20files/rc.lua.html) if you have not yet performed the upgrade.
+
 If you still wish to ignore this advice, first read the
 <a href="89-NEWS.md.html#v4">NEWS</a> section about the breaking changes. This
 document assumes you did.
@@ -354,4 +361,11 @@ now access tags by name.
     -    --   properties = { tag = tags[1][2] } },
     +    --   properties = { screen = 1, tag = "2" } },
 
+If you need to get the current client object in global context, currently you can use
+`client.focus` for it. E.g., to mark/unmark the client:
 
+    -    awful.client.mark()
+    +    client.focus.marked = true
+
+    -    awful.client.unmark()
+    +    client.focus.marked = false

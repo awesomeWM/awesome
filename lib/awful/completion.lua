@@ -106,7 +106,8 @@ function completion.shell(command, cur_pos, ncomp, shell)
             -- check commands, aliases, builtins, functions and reswords
             shell_cmd = "/usr/bin/env zsh -c 'local -a res; "..
             "res=( "..
-            "\"${(k)commands[@]}\" \"${(k)aliases[@]}\" \"${(k)builtins[@]}\" \"${(k)functions[@]}\" \"${(k)reswords[@]}\" "..
+            "\"${(k)commands[@]}\" \"${(k)aliases[@]}\" \"${(k)builtins[@]}\" \"${(k)functions[@]}\" "..
+            "\"${(k)reswords[@]}\" "..
             "${PWD}/*(:t)"..
             "); "..
             "print -ln -- ${(M)res[@]:#" .. string.format('%q', words[cword_index]) .. "*}'"

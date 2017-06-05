@@ -3,6 +3,7 @@
 local runner = require("_runner")
 local test_client = require("_client")
 local awful = require("awful")
+local gtable = require("gears.table")
 
 local c
 local s = screen[1]
@@ -10,7 +11,7 @@ local tags = s.tags
 
 local function wait_for_current_desktop(tag)
     -- The X property has 0-based indicies
-    local idx = awful.util.table.hasitem(tags, tag) - 1
+    local idx = gtable.hasitem(tags, tag) - 1
     return function()
         local file = io.popen("xprop -notype -root _NET_CURRENT_DESKTOP")
         local result = file:read("*all")
@@ -23,6 +24,7 @@ local function wait_for_current_desktop(tag)
             return true
         end
         print(string.format("Got _NET_CURRENT_DESKTOP = '%s', expected %d", value, idx))
+        return false
     end
 end
 
@@ -72,10 +74,13 @@ local steps = {
     wait_for_current_desktop(tags[4]),
 
     -- Killing the client means the first selected tag counts
-    function()
-        assert(client.focus == c)
-        c:kill()
-        c = nil
+    function(count)
+        if count == 1 then
+            assert(client.focus == c)
+            c:kill()
+            c = nil
+            return
+        end
         return true
     end,
     wait_for_current_desktop(tags[3]),

@@ -25,6 +25,8 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 
 local visible_drawables = {}
 
+local systray_widget
+
 -- Get the widget context. This should always return the same table (if
 -- possible), so that our draw and fit caches can work efficiently.
 local function get_widget_context(self)
@@ -76,8 +78,15 @@ local function do_redraw(self)
     if self._need_relayout or self._need_complete_repaint then
         self._need_relayout = false
         if self._widget_hierarchy and self.widget then
+            local had_systray = systray_widget and self._widget_hierarchy:get_count(systray_widget) > 0
+
             self._widget_hierarchy:update(context,
                 self.widget, width, height, self._dirty_area)
+
+            local has_systray = systray_widget and self._widget_hierarchy:get_count(systray_widget) > 0
+            if had_systray and not has_systray then
+                systray_widget:_kickout(context)
+            end
         else
             self._need_complete_repaint = true
             if self.widget then
@@ -209,6 +218,11 @@ function drawable:find_widgets(x, y)
     return result
 end
 
+-- Private API. Not documented on purpose.
+function drawable._set_systray_widget(widget)
+    hierarchy.count_widget(widget)
+    systray_widget = widget
+end
 
 --- Set the widget that the drawable displays
 function drawable:set_widget(widget)

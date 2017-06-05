@@ -45,6 +45,9 @@ awesome.startup = true
 function awesome.register_xproperty()
 end
 
+-- Always show deprecated messages
+awesome.version = "v9999"
+
 return awesome
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

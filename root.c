@@ -119,12 +119,13 @@ root_set_wallpaper(cairo_pattern_t *pattern)
                                  globalconf.screen->root,
                                  XCB_CW_EVENT_MASK,
                                  (uint32_t[]) { 0 });
-    root_set_wallpaper_pixmap(c, p);
+    root_set_wallpaper_pixmap(globalconf.connection, p);
     xcb_change_window_attributes(globalconf.connection,
                                  globalconf.screen->root,
                                  XCB_CW_EVENT_MASK,
                                  ROOT_WINDOW_EVENT_MASK);
     xcb_ungrab_server(globalconf.connection);
+    xcb_flush(globalconf.connection);
 
     /* Make sure our pixmap is not destroyed when we disconnect. */
     xcb_set_close_down_mode(c, XCB_CLOSE_DOWN_RETAIN_PERMANENT);
@@ -276,7 +277,7 @@ luaA_root_fake_input(lua_State *L)
     xcb_test_fake_input(globalconf.connection,
                         type,
                         detail,
-                        XCB_CURRENT_TIME,
+                        0, /* This is a delay, not a timestamp! */
                         XCB_NONE,
                         x, y,
                         0);
@@ -448,6 +449,20 @@ luaA_root_size(lua_State *L)
     return 2;
 }
 
+/** Get the physical size of the root window, in millimeter.
+ *
+ * @return Width of the root window, in millimeters.
+ * @return height of the root window, in millimeters.
+ * @function size_mm
+ */
+static int
+luaA_root_size_mm(lua_State *L)
+{
+    lua_pushinteger(L, globalconf.screen->width_in_millimeters);
+    lua_pushinteger(L, globalconf.screen->height_in_millimeters);
+    return 2;
+}
+
 /** Get the attached tags.
  * @return A table with all tags.
  * @function tags
@@ -474,6 +489,7 @@ const struct luaL_Reg awesome_root_lib[] =
     { "drawins", luaA_root_drawins },
     { "wallpaper", luaA_root_wallpaper },
     { "size", luaA_root_size },
+    { "size_mm", luaA_root_size_mm },
     { "tags", luaA_root_tags },
     { "__index", luaA_default_index },
     { "__newindex", luaA_default_newindex },

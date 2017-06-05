@@ -53,7 +53,7 @@ environment):
   introspection
 - [Pango](http://www.pango.org/) with support for Cairo and GObject
   introspection
-- [GLib](https://wiki.gnome.org/Projects/GLib) with support for GObject
+- [GLib >= 2.40](https://wiki.gnome.org/Projects/GLib) with support for GObject
   introspection
 - [GIO](https://developer.gnome.org/gio/stable/) with support for GObject
   introspection
@@ -98,7 +98,7 @@ the `DISPLAY` environment variable is set correctly, e.g.:
 The configuration of awesome is done by creating a
 `$XDG_CONFIG_HOME/awesome/rc.lua` file, typically `~/.config/awesome/rc.lua`.
 
-An example configuration named `awesomerc.lua.in` is provided in the source.
+An example configuration named `awesomerc.lua` is provided in the source.
 
 ## Troubleshooting
 
@@ -119,10 +119,6 @@ Then in gdb set any args and run it:
 
     (gdb) set arg --replace
     (gdb) run
-
-Inside gdb you can use the following to print the current Lua stack traceback:
-
-    (gdb) print luaL_dostring(globalconf.L.real_L_dont_use_directly, "print(debug.traceback())")
 
 ## Reporting issues
 

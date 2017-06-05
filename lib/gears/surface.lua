@@ -218,6 +218,7 @@ end
 --- Create an SVG file with this widget content.
 -- This is dynamic, so the SVG will be updated along with the widget content.
 -- because of this, the painting may happen hover multiple event loop cycles.
+-- @deprecated wibox.widget.draw_to_svg_file
 -- @tparam widget widget A widget
 -- @tparam string path The output file path
 -- @tparam number width The surface width
@@ -225,6 +226,8 @@ end
 -- @return The cairo surface
 -- @return The hierarchy
 function surface.widget_to_svg(widget, path, width, height)
+    gdebug.deprecate("Use wibox.widget.draw_to_svg_file instead of "..
+        "gears.surface.render_to_svg", {deprecated_in=5})
     local img = cairo.SvgSurface.create(path, width, height)
     local cr = cairo.Context(img)
 
@@ -234,6 +237,7 @@ end
 --- Create a cairo surface with this widget content.
 -- This is dynamic, so the SVG will be updated along with the widget content.
 -- because of this, the painting may happen hover multiple event loop cycles.
+-- @deprecated wibox.widget.draw_to_image_surface
 -- @tparam widget widget A widget
 -- @tparam number width The surface width
 -- @tparam number height The surface height
@@ -241,6 +245,8 @@ end
 -- @return The cairo surface
 -- @return The hierarchy
 function surface.widget_to_surface(widget, width, height, format)
+    gdebug.deprecate("Use wibox.widget.draw_to_image_surface instead of "..
+        "gears.surface.render_to_surface", {deprecated_in=5})
     local img = cairo.ImageSurface(format or cairo.Format.ARGB32, width, height)
     local cr = cairo.Context(img)
 

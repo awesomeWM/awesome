@@ -8,7 +8,7 @@
 
 local base = require("wibox.widget.base")
 local surface = require("gears.surface")
-local util = require("awful.util")
+local gtable = require("gears.table")
 local setmetatable = setmetatable
 local type = type
 local print = print
@@ -91,7 +91,7 @@ function imagebox:set_image(image)
         end
     end
 
-    image = surface.load(image)
+    image = image and surface.load(image)
 
     if image then
         local w = image.width
@@ -104,7 +104,7 @@ function imagebox:set_image(image)
     if self._private.image == image then
         -- The image could have been modified, so better redraw
         self:emit_signal("widget::redraw_needed")
-        return
+        return true
     end
 
     self._private.image = image
@@ -160,7 +160,7 @@ end
 local function new(image, resize_allowed, clip_shape)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
-    util.table.crush(ret, imagebox, true)
+    gtable.crush(ret, imagebox, true)
 
     if image then
         ret:set_image(image)

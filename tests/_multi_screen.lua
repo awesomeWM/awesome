@@ -248,7 +248,7 @@ local dispositions = {
         end,
     },
 
-    -- Corner case 2: Nothing at 0x0.
+    -- Corner case 2a: Nothing at 0x0.
     -- As some position may fallback to 0x0 this need to be tested often. It
     -- also caused issues such as #154
     {
@@ -268,6 +268,13 @@ local dispositions = {
                 height = canvas_h,
             }
         end
+    },
+
+    -- Corner case 2b: Still nothing at 0x0
+    {
+        function() return { x = 0, y = 32, width  = 32, height = 32, } end,
+        function() return { x = 32, y = 0, width = 32, height = 32, } end,
+        function() return { x = 64, y = 16, width = 32, height = 32, } end,
     },
 
     -- Corner case 3: Many very small screens.
@@ -515,6 +522,29 @@ local function add_steps(real_steps, new_steps)
             table.insert(real_steps, step)
         end
     end
+end
+
+-- This is a very ugly hack to speed up the test. Luacov get exponentially
+-- slower / more memory hungry when it has more work to do in a single test.
+-- A lot of that work is building wibars and widgets for those screen. This
+-- has value when tried once (already covered by the test-screen-changes suit),
+-- but not done 180 times in a row. This code monkey-patch `wibox` with the
+-- intent of breaking it without causing errors. This way it stops doing too
+-- many things (resulting in a faster luacov execution)
+function module.disable_wibox()
+    local awful = require("awful")
+
+    setmetatable(wibox, {
+        __call = function() return {
+            geometry = function()
+                return{x=0, y=0, width=0, height=0}
+            end,
+            set_widget = function() end,
+            setup = function() return {} end
+        }
+    end })
+
+    awful.wibar = wibox
 end
 
 return setmetatable(module, {

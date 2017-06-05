@@ -17,6 +17,7 @@ local lgi = require("lgi")
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local gears_debug = require("gears.debug")
+local Gio = require("lgi").Gio
 local protected_call = require("gears.protected_call")
 
 local xresources = require("beautiful.xresources")
@@ -94,6 +95,9 @@ local active_font
 --- The Awesome icon path.
 -- @beautiful beautiful.awesome_icon
 
+--- The current theme path (if any)
+-- @tfield string beautiful.theme_path
+
 --- Load a font from a string or a font description.
 --
 -- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string
@@ -124,6 +128,12 @@ local function load_font(name)
     -- Calculate font height.
     local metrics = ctx:get_metrics(desc, nil)
     local height = math.ceil((metrics:get_ascent() + metrics:get_descent()) / Pango.SCALE)
+    if height == 0 then
+        height = desc:get_size() / Pango.SCALE
+        gears_debug.print_warning(string.format(
+            "beautiful.load_font: could not get height for '%s' (likely missing font), using %d.",
+            name, height))
+    end
 
     local font = { name = name, description = desc, height = height }
     fonts[name] = font
@@ -181,6 +191,8 @@ function beautiful.init(config)
         if type(config) == 'string' then
             -- Expand the '~' $HOME shortcut
             config = config:gsub("^~/", homedir .. "/")
+            local dir = Gio.File.new_for_path(config):get_parent()
+            beautiful.theme_path = dir and (dir:get_path().."/") or nil
             theme = protected_call(dofile, config)
         elseif type(config) == 'table' then
             theme = config

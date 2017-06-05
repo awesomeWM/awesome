@@ -10,7 +10,7 @@ local table = table
 local pairs = pairs
 local type = type
 local floor = math.floor
-local util = require("awful.util")
+local gtable = require("gears.table")
 local base = require("wibox.widget.base")
 
 local align = {}
@@ -186,7 +186,7 @@ end
 -- @property children
 
 function align:get_children()
-    return util.from_sparse {self._private.first, self._private.second, self._private.third}
+    return gtable.from_sparse {self._private.first, self._private.second, self._private.third}
 end
 
 function align:set_children(children)

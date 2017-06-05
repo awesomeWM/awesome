@@ -76,7 +76,11 @@ local function widget_layout(state, arguments)
     return false
 end
 say:set("assertion.widget_layout.positive", "Expected:\n%s\nbut got:\n%s\nwhen offering (%s, %s) to widget")
-assert:register("assertion", "widget_layout", widget_layout, "assertion.widget_layout.positive", "assertion.widget_layout.positive")
+assert:register("assertion",
+                "widget_layout",
+                widget_layout,
+                "assertion.widget_layout.positive",
+                "assertion.widget_layout.positive")
 -- }}}
 
 return {
@@ -92,6 +96,12 @@ return {
             end
         end
         w._private.widget_caches = {}
+        w:connect_signal("widget::layout_changed", function()
+            -- TODO: This is not completely correct, since our parent's caches
+            -- are not cleared. For the time being, tests just have to handle
+            -- this clearing-part themselves.
+            w._private.widget_caches = {}
+        end)
 
         return w
     end,

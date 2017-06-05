@@ -382,6 +382,19 @@
  */
 
 /**
+ * The available sizes of client icons. This is a table where each entry
+ * contains the width and height of an icon.
+ *
+ * **Signal:**
+ *
+ *  * *property::icon\_sizes*
+ *
+ * @property icon_sizes
+ * @tparam table sizes
+ * @see get_icon
+ */
+
+/**
  * Client screen.
  *
  * **Signal:**
@@ -670,6 +683,17 @@
  */
 
 /**
+ * The client's input shape as set by awesome as a (native) cairo surface.
+ *
+ * **Signal:**
+ *
+ *  * *property::shape\_input*
+ *
+ * @property shape_input
+ * @param surface
+ */
+
+/**
  * The client's bounding shape as set by the program as a (native) cairo surface.
  *
  * **Signal:**
@@ -733,6 +757,16 @@
  * @param tag
  */
 
+/** When the height or width changed.
+ * @signal property::size
+ * @see client.geometry
+ */
+
+/** When the x or y coordinate changed.
+ * @signal property::position
+ * @see client.geometry
+ */
+
 /**
  * The border color when the client is focused.
  *
@@ -784,9 +818,17 @@
  * @function set_newindex_miss_handler
  */
 
+typedef enum {
+    CLIENT_MAXIMIZED_NONE = 0 << 0,
+    CLIENT_MAXIMIZED_V    = 1 << 0,
+    CLIENT_MAXIMIZED_H    = 1 << 1,
+    CLIENT_MAXIMIZED_BOTH = 1 << 2, /* V|H == BOTH, but ~(V|H) != ~(BOTH)... */
+} client_maximized_t;
+
 static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
 static void client_resize_do(client_t *c, area_t geometry);
+static void client_set_maximized_common(lua_State *L, int cidx, bool s, const char* type, const int val);
 
 /** Collect a client.
  * \param L The Lua VM state.
@@ -797,6 +839,7 @@ client_wipe(client_t *c)
 {
     key_array_wipe(&c->keys);
     xcb_icccm_get_wm_protocols_reply_wipe(&c->protocols);
+    cairo_surface_array_wipe(&c->icons);
     p_delete(&c->machine);
     p_delete(&c->class);
     p_delete(&c->instance);
@@ -805,8 +848,6 @@ client_wipe(client_t *c)
     p_delete(&c->name);
     p_delete(&c->alt_name);
     p_delete(&c->startup_id);
-    if(c->icon)
-        cairo_surface_destroy(c->icon);
 }
 
 /** Change the clients urgency flag.
@@ -1018,7 +1059,9 @@ client_ban(client_t *c)
 {
     if(!c->isbanned)
     {
+        client_ignore_enterleave_events();
         xcb_unmap_window(globalconf.connection, c->frame_window);
+        client_restore_enterleave_events();
 
         c->isbanned = true;
 
@@ -1035,7 +1078,7 @@ client_ban(client_t *c)
 void
 client_ignore_enterleave_events(void)
 {
-    assert(globalconf.pending_enter_leave_begin.sequence == 0);
+    check(globalconf.pending_enter_leave_begin.sequence == 0);
     globalconf.pending_enter_leave_begin = xcb_grab_server(globalconf.connection);
     /* If the connection is broken, we get a request with sequence number 0
      * which would then trigger an assertion in
@@ -1044,7 +1087,7 @@ client_ignore_enterleave_events(void)
     if(xcb_connection_has_error(globalconf.connection))
         fatal("X server connection broke (error %d)",
                 xcb_connection_has_error(globalconf.connection));
-    assert(globalconf.pending_enter_leave_begin.sequence != 0);
+    check(globalconf.pending_enter_leave_begin.sequence != 0);
 }
 
 void
@@ -1052,7 +1095,7 @@ client_restore_enterleave_events(void)
 {
     sequence_pair_t pair;
 
-    assert(globalconf.pending_enter_leave_begin.sequence != 0);
+    check(globalconf.pending_enter_leave_begin.sequence != 0);
     pair.begin = globalconf.pending_enter_leave_begin;
     pair.end = xcb_no_operation(globalconf.connection);
     xcb_ungrab_server(globalconf.connection);
@@ -1405,8 +1448,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
      * (Else, reparent could cause an UnmapNotify) */
     xcb_change_window_attributes(globalconf.connection, w, XCB_CW_EVENT_MASK, select_input_val);
 
-    luaA_object_emit_signal(L, -1, "property::window", 0);
-
     /* The frame window gets the border, not the real client window */
     xcb_configure_window(globalconf.connection, w,
                          XCB_CONFIG_WINDOW_BORDER_WIDTH,
@@ -1429,15 +1470,17 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     /* Store initial geometry and emits signals so we inform that geometry have
      * been set. */
-#define HANDLE_GEOM(attr) \
-    c->geometry.attr = wgeom->attr; \
-    luaA_object_emit_signal(L, -1, "property::" #attr, 0);
-HANDLE_GEOM(x)
-HANDLE_GEOM(y)
-HANDLE_GEOM(width)
-HANDLE_GEOM(height)
-#undef HANDLE_GEOM
 
+    c->geometry.x = wgeom->x;
+    c->geometry.y = wgeom->y;
+    c->geometry.width = wgeom->width;
+    c->geometry.height = wgeom->height;
+
+    luaA_object_emit_signal(L, -1, "property::x", 0);
+    luaA_object_emit_signal(L, -1, "property::y", 0);
+    luaA_object_emit_signal(L, -1, "property::width", 0);
+    luaA_object_emit_signal(L, -1, "property::height", 0);
+    luaA_object_emit_signal(L, -1, "property::window", 0);
     luaA_object_emit_signal(L, -1, "property::geometry", 0);
 
     /* Set border width */
@@ -1647,14 +1690,22 @@ client_resize_do(client_t *c, area_t geometry)
     luaA_object_push(L, c);
     if (!AREA_EQUAL(old_geometry, geometry))
         luaA_object_emit_signal(L, -1, "property::geometry", 0);
-    if (old_geometry.x != geometry.x)
-        luaA_object_emit_signal(L, -1, "property::x", 0);
-    if (old_geometry.y != geometry.y)
-        luaA_object_emit_signal(L, -1, "property::y", 0);
-    if (old_geometry.width != geometry.width)
-        luaA_object_emit_signal(L, -1, "property::width", 0);
-    if (old_geometry.height != geometry.height)
-        luaA_object_emit_signal(L, -1, "property::height", 0);
+    if (old_geometry.x != geometry.x || old_geometry.y != geometry.y)
+    {
+        luaA_object_emit_signal(L, -1, "property::position", 0);
+        if (old_geometry.x != geometry.x)
+            luaA_object_emit_signal(L, -1, "property::x", 0);
+        else
+            luaA_object_emit_signal(L, -1, "property::y", 0);
+    }
+    if (old_geometry.width != geometry.width || old_geometry.height != geometry.height)
+    {
+        luaA_object_emit_signal(L, -1, "property::size", 0);
+        if (old_geometry.width != geometry.width)
+            luaA_object_emit_signal(L, -1, "property::width", 0);
+        else
+            luaA_object_emit_signal(L, -1, "property::height", 0);
+    }
     lua_pop(L, 1);
 
     screen_client_moveto(c, new_screen, false);
@@ -1692,20 +1743,6 @@ client_resize_do(client_t *c, area_t geometry)
 bool
 client_resize(client_t *c, area_t geometry, bool honor_hints)
 {
-    area_t area;
-
-    /* offscreen appearance fixes */
-    area = display_area_get();
-
-    if(geometry.x > area.width)
-        geometry.x = area.width - geometry.width;
-    if(geometry.y > area.height)
-        geometry.y = area.height - geometry.height;
-    if(geometry.x + geometry.width < 0)
-        geometry.x = 0;
-    if(geometry.y + geometry.height < 0)
-        geometry.y = 0;
-
     if (honor_hints) {
         /* We could get integer underflows in client_remove_titlebar_geometry()
          * without these checks here.
@@ -1904,53 +1941,79 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
     }
 }
 
-/** Get a clients maximized state (horizontally and vertically).
- * \param c The client.
- * \return The maximized state.
- */
-static int
-client_get_maximized(client_t *c)
-{
-    return c->maximized_horizontal && c->maximized_vertical;
-}
-
 /** Set a client horizontally|vertically maximized.
  * \param L The Lua VM state.
  * \param cidx The client index.
  * \param s The maximized status.
  */
-#define DO_FUNCTION_CLIENT_MAXIMIZED(type) \
-    void \
-    client_set_maximized_##type(lua_State *L, int cidx, bool s) \
-    { \
-        client_t *c = luaA_checkudata(L, cidx, &client_class); \
-        if(c->maximized_##type != s) \
-        { \
-            int abs_cidx = luaA_absindex(L, cidx); \
-            int max_before = client_get_maximized(c); \
-            c->maximized_##type = s; \
-            lua_pushstring(L, "maximized_"#type);\
-            luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1); \
-            luaA_object_emit_signal(L, abs_cidx, "property::maximized_" #type, 0); \
-            if(max_before != client_get_maximized(c)) \
-                luaA_object_emit_signal(L, abs_cidx, "property::maximized", 0); \
-            stack_windows(); \
-        } \
-    }
-DO_FUNCTION_CLIENT_MAXIMIZED(vertical)
-DO_FUNCTION_CLIENT_MAXIMIZED(horizontal)
-#undef DO_FUNCTION_CLIENT_MAXIMIZED
+void
+client_set_maximized_common(lua_State *L, int cidx, bool s, const char* type, const int val)
+{
+    client_t *c = luaA_checkudata(L, cidx, &client_class);
 
-/** Set a client maximized (horizontally and vertically).
- * \param L The Lua VM state.
- * \param cidx The client index.
- * \param s Set or not the client maximized attribute.
- */
+    /* Store the current and next state on 2 bit */
+    const client_maximized_t current = (
+        (c->maximized_vertical   ? CLIENT_MAXIMIZED_V    : CLIENT_MAXIMIZED_NONE)|
+        (c->maximized_horizontal ? CLIENT_MAXIMIZED_H    : CLIENT_MAXIMIZED_NONE)|
+        (c->maximized            ? CLIENT_MAXIMIZED_BOTH : CLIENT_MAXIMIZED_NONE)
+    );
+    client_maximized_t next = s ? (val | current) : (current & (~val));
+
+    /* When both are already set during startup, assume `maximized` is true*/
+    if (next == (CLIENT_MAXIMIZED_H|CLIENT_MAXIMIZED_V) && !globalconf.loop)
+        next = CLIENT_MAXIMIZED_BOTH;
+
+    if(current != next)
+    {
+        int abs_cidx   = luaA_absindex(L, cidx);
+        int max_before = c->maximized;
+        int h_before   = c->maximized_horizontal;
+        int v_before   = c->maximized_vertical;
+
+        /*Update the client properties */
+        c->maximized_horizontal = !!(next & CLIENT_MAXIMIZED_H   );
+        c->maximized_vertical   = !!(next & CLIENT_MAXIMIZED_V   );
+        c->maximized            = !!(next & CLIENT_MAXIMIZED_BOTH);
+
+
+        /* Request the changes to be applied */
+        lua_pushstring(L, type);
+        luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1);
+
+        /* Notify changes in the relevant properties */
+        if (h_before != c->maximized_horizontal)
+            luaA_object_emit_signal(L, abs_cidx, "property::maximized_horizontal", 0);
+        if (v_before != c->maximized_vertical)
+            luaA_object_emit_signal(L, abs_cidx, "property::maximized_vertical", 0);
+        if(max_before != c->maximized)
+            luaA_object_emit_signal(L, abs_cidx, "property::maximized", 0);
+
+        stack_windows();
+    }
+}
+
 void
 client_set_maximized(lua_State *L, int cidx, bool s)
 {
-    client_set_maximized_horizontal(L, cidx, s);
-    client_set_maximized_vertical(L, cidx, s);
+    return client_set_maximized_common(
+        L, cidx, s, "maximized", CLIENT_MAXIMIZED_BOTH
+    );
+}
+
+void
+client_set_maximized_horizontal(lua_State *L, int cidx, bool s)
+{
+    return client_set_maximized_common(
+        L, cidx, s, "maximized_horizontal", CLIENT_MAXIMIZED_H
+    );
+}
+
+void
+client_set_maximized_vertical(lua_State *L, int cidx, bool s)
+{
+    return client_set_maximized_common(
+        L, cidx, s, "maximized_vertical", CLIENT_MAXIMIZED_V
+    );
 }
 
 /** Set a client above, or not.
@@ -2055,7 +2118,9 @@ client_unban(client_t *c)
     lua_State *L = globalconf_get_lua_State();
     if(c->isbanned)
     {
+        client_ignore_enterleave_events();
         xcb_map_window(globalconf.connection, c->frame_window);
+        client_restore_enterleave_events();
 
         c->isbanned = false;
 
@@ -2256,26 +2321,38 @@ luaA_client_isvisible(lua_State *L)
     return 1;
 }
 
+/** Set client icons.
+ * \param L The Lua VM state.
+ * \param array Array of icons to set.
+ */
+void
+client_set_icons(client_t *c, cairo_surface_array_t array)
+{
+    cairo_surface_array_wipe(&c->icons);
+    c->icons = array;
+
+    lua_State *L = globalconf_get_lua_State();
+    luaA_object_push(L, c);
+    luaA_object_emit_signal(L, -1, "property::icon", 0);
+    luaA_object_emit_signal(L, -1, "property::icon_sizes", 0);
+    lua_pop(L, 1);
+}
+
 /** Set a client icon.
  * \param L The Lua VM state.
  * \param cidx The client index on the stack.
  * \param iidx The image index on the stack.
  */
-void
+static void
 client_set_icon(client_t *c, cairo_surface_t *s)
 {
-    lua_State *L = globalconf_get_lua_State();
-
-    if (s)
-        s = draw_dup_image_surface(s);
-    if(c->icon)
-        cairo_surface_destroy(c->icon);
-    c->icon = s;
-
-    luaA_object_push(L, c);
-    luaA_object_emit_signal(L, -1, "property::icon", 0);
-    lua_pop(L, 1);
+    cairo_surface_array_t array;
+    cairo_surface_array_init(&array);
+    if (s && cairo_surface_status(s) == CAIRO_STATUS_SUCCESS)
+        cairo_surface_array_push(&array, draw_dup_image_surface(s));
+    client_set_icons(c, array);
 }
+
 
 /** Set a client icon.
  * \param c The client to change.
@@ -2991,14 +3068,8 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, sticky, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, size_hints_honor, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
+LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, startup_id, lua_pushstring)
-
-static int
-luaA_client_get_maximized(lua_State *L, client_t *c)
-{
-    lua_pushboolean(L, client_get_maximized(c));
-    return 1;
-}
 
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
@@ -3022,10 +3093,38 @@ luaA_client_get_content(lua_State *L, client_t *c)
 static int
 luaA_client_get_icon(lua_State *L, client_t *c)
 {
-    if(!c->icon)
+    if(c->icons.len == 0)
         return 0;
+
+    /* Pick the closest available size, only picking a smaller icon if no bigger
+     * one is available.
+     */
+    cairo_surface_t *found = NULL;
+    int found_size = 0;
+    int preferred_size = globalconf.preferred_icon_size;
+
+    foreach(surf, c->icons)
+    {
+        int width = cairo_image_surface_get_width(*surf);
+        int height = cairo_image_surface_get_height(*surf);
+        int size = MAX(width, height);
+
+        /* pick the icon if it's a better match than the one we already have */
+        bool found_icon_too_small = found_size < preferred_size;
+        bool found_icon_too_large = found_size > preferred_size;
+        bool icon_empty = width == 0 || height == 0;
+        bool better_because_bigger =  found_icon_too_small && size > found_size;
+        bool better_because_smaller = found_icon_too_large &&
+            size >= preferred_size && size < found_size;
+        if (!icon_empty && (better_because_bigger || better_because_smaller || found_size == 0))
+        {
+            found = *surf;
+            found_size = size;
+        }
+    }
+
     /* lua gets its own reference which it will have to destroy */
-    lua_pushlightuserdata(L, cairo_surface_reference(c->icon));
+    lua_pushlightuserdata(L, cairo_surface_reference(found));
     return 1;
 }
 
@@ -3271,6 +3370,41 @@ luaA_client_set_shape_clip(lua_State *L, client_t *c)
     return 0;
 }
 
+/** Get the client's frame window input shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_get_shape_input(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = xwindow_get_shape(c->frame_window, XCB_SHAPE_SK_INPUT);
+    if (!surf)
+        return 0;
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
+}
+
+/** Set the client's frame window input shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_set_shape_input(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = NULL;
+    if(!lua_isnil(L, -1))
+        surf = (cairo_surface_t *)lua_touserdata(L, -1);
+    xwindow_set_shape(c->frame_window,
+            c->geometry.width + (c->border_width * 2),
+            c->geometry.height + (c->border_width * 2),
+            XCB_SHAPE_SK_INPUT, surf, -c->border_width);
+    luaA_object_emit_signal(L, -3, "property::shape_input", 0);
+    return 0;
+}
+
 /** Get or set keys bindings for a client.
  *
  * @param keys_table An array of key bindings objects, or nothing.
@@ -3293,6 +3427,50 @@ luaA_client_keys(lua_State *L)
     }
 
     return luaA_key_array_get(L, 1, keys);
+}
+
+static int
+luaA_client_get_icon_sizes(lua_State *L)
+{
+    int index = 1;
+    client_t *c = luaA_checkudata(L, 1, &client_class);
+
+    lua_newtable(L);
+    foreach (s, c->icons) {
+        /* Create a table { width, height } and append it to the table */
+        lua_createtable(L, 2, 0);
+
+        lua_pushinteger(L, cairo_image_surface_get_width(*s));
+        lua_rawseti(L, -2, 1);
+
+        lua_pushinteger(L, cairo_image_surface_get_height(*s));
+        lua_rawseti(L, -2, 2);
+
+        lua_rawseti(L, -2, index++);
+    }
+    return 1;
+}
+
+/** Get the client's n-th icon.
+ *
+ * **Signal:**
+ *
+ *  * *property::icon*
+ *
+ * @tparam interger index The index in the list of icons to get.
+ * @treturn surface A lightuserdata for a cairo surface. This reference must be
+ * destroyed!
+ * @function get_icon
+ */
+static int
+luaA_client_get_some_icon(lua_State *L)
+{
+    client_t *c = luaA_checkudata(L, 1, &client_class);
+    int index = luaL_checkinteger(L, 2);
+    luaL_argcheck(L, (index >= 1 && index <= c->icons.len), 2,
+            "invalid icon index");
+    lua_pushlightuserdata(L, cairo_surface_reference(c->icons.tab[index-1]));
+    return 1;
 }
 
 static int
@@ -3380,6 +3558,7 @@ client_class_setup(lua_State *L)
         { "titlebar_right", luaA_client_titlebar_right },
         { "titlebar_bottom", luaA_client_titlebar_bottom },
         { "titlebar_left", luaA_client_titlebar_left },
+        { "get_icon", luaA_client_get_some_icon },
         { NULL, NULL }
     };
 
@@ -3478,6 +3657,10 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_icon,
                             (lua_class_propfunc_t) luaA_client_get_icon,
                             (lua_class_propfunc_t) luaA_client_set_icon);
+    luaA_class_add_property(&client_class, "icon_sizes",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_icon_sizes,
+                            NULL);
     luaA_class_add_property(&client_class, "ontop",
                             (lua_class_propfunc_t) luaA_client_set_ontop,
                             (lua_class_propfunc_t) luaA_client_get_ontop,
@@ -3518,6 +3701,10 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_shape_clip,
                             (lua_class_propfunc_t) luaA_client_get_shape_clip,
                             (lua_class_propfunc_t) luaA_client_set_shape_clip);
+    luaA_class_add_property(&client_class, "shape_input",
+                            (lua_class_propfunc_t) luaA_client_set_shape_input,
+                            (lua_class_propfunc_t) luaA_client_get_shape_input,
+                            (lua_class_propfunc_t) luaA_client_set_shape_input);
     luaA_class_add_property(&client_class, "startup_id",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_startup_id,

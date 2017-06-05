@@ -82,6 +82,10 @@ struct client_t
     bool maximized_horizontal;
     /** True if the client is maximized vertically */
     bool maximized_vertical;
+    /** True if the client is maximized both horizontally and vertically by the
+      * the user
+      */
+    bool maximized;
     /** True if the client is above others */
     bool above;
     /** True if the client is below others */
@@ -112,8 +116,8 @@ struct client_t
     xcb_icccm_get_wm_protocols_reply_t protocols;
     /** Key bindings */
     key_array_t keys;
-    /** Icon */
-    cairo_surface_t *icon;
+    /** Icons */
+    cairo_surface_array_t icons;
     /** True if we ever got an icon from _NET_WM_ICON */
     bool have_ewmh_icon;
     /** Size hints */
@@ -182,7 +186,7 @@ void client_set_transient_for(lua_State *L, int, client_t *);
 void client_set_name(lua_State *L, int, char *);
 void client_set_alt_name(lua_State *L, int, char *);
 void client_set_group_window(lua_State *, int, xcb_window_t);
-void client_set_icon(client_t *, cairo_surface_t *);
+void client_set_icons(client_t *, cairo_surface_array_t);
 void client_set_icon_from_pixmaps(client_t *, xcb_pixmap_t, xcb_pixmap_t);
 void client_set_skip_taskbar(lua_State *, int, bool);
 void client_focus(client_t *);

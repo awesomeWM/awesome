@@ -13,7 +13,7 @@
 local color     = require( "gears.color"       )
 local base      = require( "wibox.widget.base" )
 local beautiful = require( "beautiful"         )
-local util      = require( "awful.util"        )
+local gtable    = require( "gears.table"       )
 local pie       = require( "gears.shape"       ).pie
 local unpack    = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
@@ -224,7 +224,7 @@ local function new(data_list)
         enable_properties = true,
     })
 
-    util.table.crush(ret, piechart)
+    gtable.crush(ret, piechart)
 
     rawset(ret, "fit" , fit )
     rawset(ret, "draw", draw)

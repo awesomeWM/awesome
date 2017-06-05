@@ -16,18 +16,35 @@ local function open_window(class, title, options)
         default_height = 100,
         title          = title
     }
+    if options.gravity then
+        window:set_gravity(tonumber(options.gravity))
+    end
     if options.snid and options.snid ~= "" then
         window:set_startup_id(options.snid)
     end
     if options.resize_increment then
+        -- This requires Gtk3, but fails with an obscure message with Gtk2.
+        -- Produce a better error message instead.
+        assert(tonumber(require("lgi").Gtk._version) >= 3, "Gtk 3 required, but not found")
         local geom = Gdk.Geometry {
             width_inc = 200,
             height_inc = 200,
         }
         window:set_geometry_hints(nil, geom, Gdk.WindowHints.RESIZE_INC)
     end
+    if options.maximize_before then
+        window:maximize()
+    end
     window:set_wmclass(class, class)
     window:show_all()
+    if options.maximize_after then
+        window:maximize()
+    end
+    if options.resize_after_width and options.resize_after_height then
+       window:resize(
+           tonumber(options.resize_after_width), tonumber(options.resize_after_height)
+       )
+    end
 end
 
 local function parse_options(options)
@@ -103,7 +120,8 @@ local function get_snid(sn_rules, callback)
     return snid
 end
 
-return function(class, title, sn_rules, callback, resize_increment)
+return function(class, title, sn_rules, callback, resize_increment, args)
+    args  = args or {}
     class = class or "test_app"
     title = title or "Awesome test client"
 
@@ -117,6 +135,26 @@ return function(class, title, sn_rules, callback, resize_increment)
     if resize_increment then
         options = options .. "resize_increment,"
     end
+    if args.maximize_before then
+        options = options .. "maximize_before,"
+    end
+    if args.maximize_after then
+        options = options .. "maximize_after,"
+    end
+    if args.resize then
+        options = table.concat {
+            options,
+            "resize_after_width=",
+            args.resize.height, ",",
+            "resize_after_height=",
+            args.resize.width, ","
+        }
+    end
+    if args.gravity then
+        assert(type(args.gravity)=="number","Use `lgi.Gdk.Gravity.NORTH_WEST`")
+        options = options .. "gravity=" .. args.gravity .. ","
+    end
+
     local data = class .. "\n" .. title .. "\n" .. options .. "\n"
     local success, msg = pipe:write_all(data)
     assert(success, tostring(msg))

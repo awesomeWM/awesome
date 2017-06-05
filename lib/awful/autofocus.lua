@@ -13,6 +13,10 @@ local client = client
 local aclient = require("awful.client")
 local timer = require("gears.timer")
 
+local function filter_sticky(c)
+    return not c.sticky and aclient.focus.filter(c)
+end
+
 --- Give focus when clients appear/disappear.
 --
 -- @param obj An object that should have a .screen property.
@@ -20,7 +24,10 @@ local function check_focus(obj)
     if not obj.screen.valid then return end
     -- When no visible client has the focus...
     if not client.focus or not client.focus:isvisible() then
-        local c = aclient.focus.history.get(screen[obj.screen], 0, aclient.focus.filter)
+        local c = aclient.focus.history.get(screen[obj.screen], 0, filter_sticky)
+        if not c then
+            c = aclient.focus.history.get(screen[obj.screen], 0, aclient.focus.filter)
+        end
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus",
                           {raise=false})
@@ -43,7 +50,10 @@ local function check_focus_tag(t)
     s = screen[s]
     check_focus({ screen = s })
     if client.focus and screen[client.focus.screen] ~= s then
-        local c = aclient.focus.history.get(s, 0, aclient.focus.filter)
+        local c = aclient.focus.history.get(s, 0, filter_sticky)
+        if not c then
+            c = aclient.focus.history.get(s, 0, aclient.focus.filter)
+        end
         if c then
             c:emit_signal("request::activate", "autofocus.check_focus_tag",
                           {raise=false})

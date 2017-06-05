@@ -12,6 +12,8 @@ local capi = {
     keygrabber = keygrabber,
 }
 local awful = require("awful")
+local gtable = require("gears.table")
+local gstring = require("gears.string")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
@@ -32,6 +34,17 @@ function markup.bg(color, text)
     return '<span background="' .. tostring(color) .. '">' .. tostring(text) .. '</span>'
 end
 
+local function join_plus_sort(modifiers)
+    if #modifiers<1 then return "none" end
+    table.sort(modifiers)
+    return table.concat(modifiers, '+')
+end
+
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
+
 local widget = {
     group_rules = {},
 }
@@ -44,22 +57,86 @@ widget.hide_without_description = true
 widget.merge_duplicates = true
 
 
+--- Hotkeys widget background color.
+-- @beautiful beautiful.hotkeys_bg
+-- @tparam color hotkeys_bg
+
+--- Hotkeys widget foreground color.
+-- @beautiful beautiful.hotkeys_fg
+-- @tparam color hotkeys_fg
+
+--- Hotkeys widget border width.
+-- @beautiful beautiful.hotkeys_border_width
+-- @tparam int hotkeys_border_width
+
+--- Hotkeys widget border color.
+-- @beautiful beautiful.hotkeys_border_color
+-- @tparam color hotkeys_border_color
+
+--- Hotkeys widget shape.
+-- @beautiful beautiful.hotkeys_shape
+-- @tparam[opt] gears.shape hotkeys_shape
+-- @see gears.shape
+
+--- Foreground color used for hotkey modifiers (Ctrl, Alt, Super, etc).
+-- @beautiful beautiful.hotkeys_modifiers_fg
+-- @tparam color hotkeys_modifiers_fg
+
+--- Background color used for miscellaneous labels of hotkeys widget.
+-- @beautiful beautiful.hotkeys_label_bg
+-- @tparam color hotkeys_label_bg
+
+--- Foreground color used for hotkey groups and other labels.
+-- @beautiful beautiful.hotkeys_label_fg
+-- @tparam color hotkeys_label_fg
+
+--- Main hotkeys widget font.
+-- @beautiful beautiful.hotkeys_font
+-- @tparam string|lgi.Pango.FontDescription hotkeys_font
+
+--- Font used for hotkeys' descriptions.
+-- @beautiful beautiful.hotkeys_description_font
+-- @tparam string|lgi.Pango.FontDescription hotkeys_description_font
+
+--- Margin between hotkeys groups.
+-- @beautiful beautiful.hotkeys_group_margin
+-- @tparam int hotkeys_group_margin
+
+
 --- Create an instance of widget with hotkeys help.
--- @return widget instance.
-function widget.new()
+-- @tparam[opt] table args Configuration options for the widget.
+-- @tparam[opt] boolean args.hide_without_description Don't show hotkeys without descriptions.
+-- @tparam[opt] boolean args.merge_duplicates Merge hotkey records into one if
+-- they have the same modifiers and description.
+-- @tparam[opt] int args.width Widget width.
+-- @tparam[opt] int args.height Widget height.
+-- @tparam[opt] color args.bg Widget background color.
+-- @tparam[opt] color args.fg Widget foreground color.
+-- @tparam[opt] int args.border_width Border width.
+-- @tparam[opt] color args.border_color Border color.
+-- @tparam[opt] gears.shape args.shape Widget shape.
+-- @tparam[opt] string|lgi.Pango.FontDescription args.font Main widget font.
+-- @tparam[opt] string|lgi.Pango.FontDescription args.description_font Font used for hotkeys' descriptions.
+-- @tparam[opt] color args.modifiers_fg Foreground color used for hotkey
+-- modifiers (Ctrl, Alt, Super, etc).
+-- @tparam[opt] color args.label_bg Background color used for miscellaneous labels.
+-- @tparam[opt] color args.label_fg Foreground color used for group and other
+-- labels.
+-- @tparam[opt] int args.group_margin Margin between hotkeys groups.
+-- @tparam[opt] table args.labels Labels used for displaying human-readable keynames.
+-- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
+-- @return Widget instance.
+function widget.new(args)
+    args = args or {}
     local widget_instance = {
-        hide_without_description = widget.hide_without_description,
-        merge_duplicates = widget.merge_duplicates,
-        group_rules = awful.util.table.clone(widget.group_rules),
-        title_font = "Monospace Bold 9",
-        description_font = "Monospace 8",
-        width = dpi(1200),
-        height = dpi(800),
-        border_width = beautiful.border_width or dpi(2),
-        modifiers_color = beautiful.bg_minimize or "#555555",
-        group_margin = dpi(6),
-        additional_hotkeys = {},
-        labels = {
+        hide_without_description = (
+            args.hide_without_description == nil
+        ) and widget.hide_without_description or args.hide_without_description,
+        merge_duplicates = (
+            args.merge_duplicates == nil
+        ) and widget.merge_duplicates or args.merge_duplicates,
+        group_rules = args.group_rules or gtable.clone(widget.group_rules),
+        labels = args.labels or {
             Mod4="Super",
             Mod1="Alt",
             Escape="Esc",
@@ -100,47 +177,72 @@ function widget.new()
             ['#21']="=",
             Control="Ctrl"
         },
+        _additional_hotkeys = {},
+        _cached_wiboxes = {},
+        _cached_awful_keys = nil,
+        _colors_counter = {},
+        _group_list = {},
+        _widget_settings_loaded = false,
     }
 
-    local cached_wiboxes = {}
-    local cached_awful_keys = nil
-    local colors_counter = {}
-    local colors = beautiful.xresources.get_current_theme()
-    local group_list = {}
+
+    function widget_instance:_load_widget_settings()
+        if self._widget_settings_loaded then return end
+        self.width = args.width or dpi(1200)
+        self.height = args.height or dpi(800)
+        self.bg = args.bg or
+            beautiful.hotkeys_bg or beautiful.bg_normal
+        self.fg = args.fg or
+            beautiful.hotkeys_fg or beautiful.fg_normal
+        self.border_width = args.border_width or
+            beautiful.hotkeys_border_width or beautiful.border_width
+        self.border_color = args.border_color or
+            beautiful.hotkeys_border_color or self.fg
+        self.shape = args.shape or beautiful.hotkeys_shape
+        self.modifiers_fg = args.modifiers_fg or
+            beautiful.hotkeys_modifiers_fg or beautiful.bg_minimize or "#555555"
+        self.label_bg = args.label_bg or
+            beautiful.hotkeys_label_bg or self.fg
+        self.label_fg = args.label_fg or
+            beautiful.hotkeys_label_fg or self.bg
+        self.opacity = args.opacity or
+            beautiful.hotkeys_opacity or 1
+        self.font = args.font or
+            beautiful.hotkeys_font or "Monospace Bold 9"
+        self.description_font = args.description_font or
+            beautiful.hotkeys_description_font or "Monospace 8"
+        self.group_margin = args.group_margin or
+            beautiful.hotkeys_group_margin or dpi(6)
+        self.label_colors = beautiful.xresources.get_current_theme()
+        self._widget_settings_loaded = true
+    end
 
 
-    local function get_next_color(id)
+    function widget_instance:_get_next_color(id)
         id = id or "default"
-        if colors_counter[id] then
-            colors_counter[id] = math.fmod(colors_counter[id] + 1, 15) + 1
+        if self._colors_counter[id] then
+            self._colors_counter[id] = math.fmod(self._colors_counter[id] + 1, 15) + 1
         else
-            colors_counter[id] = 1
+            self._colors_counter[id] = 1
         end
-        return colors["color"..tostring(colors_counter[id], 15)]
+        return self.label_colors["color"..tostring(self._colors_counter[id], 15)]
     end
 
 
-    local function join_plus_sort(modifiers)
-        if #modifiers<1 then return "none" end
-        table.sort(modifiers)
-        return table.concat(modifiers, '+')
-    end
-
-
-    local function add_hotkey(key, data, target)
-        if widget_instance.hide_without_description and not data.description then return end
+    function widget_instance:_add_hotkey(key, data, target)
+        if self.hide_without_description and not data.description then return end
 
         local readable_mods = {}
         for _, mod in ipairs(data.mod) do
-            table.insert(readable_mods, widget_instance.labels[mod] or mod)
+            table.insert(readable_mods, self.labels[mod] or mod)
         end
         local joined_mods = join_plus_sort(readable_mods)
 
         local group = data.group or "none"
-        group_list[group] = true
+        self._group_list[group] = true
         if not target[group] then target[group] = {} end
         local new_key = {
-            key = (widget_instance.labels[key] or key),
+            key = (self.labels[key] or key),
             mod = joined_mods,
             description = data.description
         }
@@ -148,7 +250,7 @@ function widget.new()
         if not target[group][index] then
             target[group][index] = new_key
         else
-            if widget_instance.merge_duplicates and joined_mods == target[group][index].mod then
+            if self.merge_duplicates and joined_mods == target[group][index].mod then
                 target[group][index].key = target[group][index].key .. "/" .. new_key.key
             else
                 while target[group][index] do
@@ -160,9 +262,8 @@ function widget.new()
     end
 
 
-    local function sort_hotkeys(target)
-        -- @TODO: add sort by 12345qwertyasdf etc
-        for group, _ in pairs(group_list) do
+    function widget_instance:_sort_hotkeys(target)
+        for group, _ in pairs(self._group_list) do
             if target[group] then
                 local sorted_table = {}
                 for _, key in pairs(target[group]) do
@@ -178,62 +279,58 @@ function widget.new()
     end
 
 
-    local function import_awful_keys()
-        if cached_awful_keys then
+    function widget_instance:_import_awful_keys()
+        if self._cached_awful_keys then
             return
         end
-        cached_awful_keys = {}
+        self._cached_awful_keys = {}
         for _, data in pairs(awful.key.hotkeys) do
-            add_hotkey(data.key, data, cached_awful_keys)
+            self:_add_hotkey(data.key, data, self._cached_awful_keys)
         end
-        sort_hotkeys(cached_awful_keys)
+        self:_sort_hotkeys(self._cached_awful_keys)
     end
 
 
-    local function group_label(group, color)
+    function widget_instance:_group_label(group, color)
         local textbox = wibox.widget.textbox(
-            markup.font(widget_instance.title_font,
+            markup.font(self.font,
                 markup.bg(
-                    color or (widget_instance.group_rules[group] and
-                        widget_instance.group_rules[group].color or get_next_color("group_title")
+                    color or (self.group_rules[group] and
+                        self.group_rules[group].color or self:_get_next_color("group_title")
                     ),
-                    markup.fg(beautiful.bg_normal or "#000000", " "..group.." ")
+                    markup.fg(self.label_fg, " "..group.." ")
                 )
             )
         )
         local margin = wibox.container.margin()
         margin:set_widget(textbox)
-        margin:set_top(widget_instance.group_margin)
+        margin:set_top(self.group_margin)
         return margin
     end
 
-    local function get_screen(s)
-        return s and capi.screen[s]
-    end
 
-    local function create_wibox(s, available_groups)
+    function widget_instance:_create_wibox(s, available_groups)
         s = get_screen(s)
-
         local wa = s.workarea
-        local height = (widget_instance.height < wa.height) and widget_instance.height or
-            (wa.height - widget_instance.border_width * 2)
-        local width = (widget_instance.width < wa.width) and widget_instance.width or
-            (wa.width - widget_instance.border_width * 2)
+        local height = (self.height < wa.height) and self.height or
+            (wa.height - self.border_width * 2)
+        local width = (self.width < wa.width) and self.width or
+            (wa.width - self.border_width * 2)
 
         -- arrange hotkey groups into columns
-        local line_height = beautiful.get_font_height(widget_instance.title_font)
-        local group_label_height = line_height + widget_instance.group_margin
+        local line_height = beautiful.get_font_height(self.font)
+        local group_label_height = line_height + self.group_margin
         -- -1 for possible pagination:
         local max_height_px = height - group_label_height
         local column_layouts = {}
         for _, group in ipairs(available_groups) do
-            local keys = cached_awful_keys[group] or widget_instance.additional_hotkeys[group]
+            local keys = gtable.join(self._cached_awful_keys[group], self._additional_hotkeys[group])
             local joined_descriptions = ""
             for i, key in ipairs(keys) do
                 joined_descriptions = joined_descriptions .. key.description .. (i~=#keys and "\n" or "")
             end
             -- +1 for group label:
-            local items_height = awful.util.linecount(joined_descriptions) * line_height + group_label_height
+            local items_height = gstring.linecount(joined_descriptions) * line_height + group_label_height
             local current_column
             local available_height_px = max_height_px
             local add_new_column = true
@@ -257,12 +354,12 @@ function widget.new()
                     table.insert(((i<available_height_items) and new_keys or overlap_leftovers), keys[i])
                 end
                 keys = new_keys
-                table.insert(keys, {key=markup.fg(widget_instance.modifiers_color, "▽"), description=""})
+                table.insert(keys, {key=markup.fg(self.modifiers_fg, "▽"), description=""})
             end
             if not current_column then
                 current_column = {layout=wibox.layout.fixed.vertical()}
             end
-            current_column.layout:add(group_label(group))
+            current_column.layout:add(self:_group_label(group))
 
             local function insert_keys(_keys, _add_new_column)
                 local max_label_width = 0
@@ -275,11 +372,11 @@ function widget.new()
                         modifiers = ""
                     else
                         length = length + string.len(modifiers) + 1 -- +1 for "+" character
-                        modifiers = markup.fg(widget_instance.modifiers_color, modifiers.."+")
+                        modifiers = markup.fg(self.modifiers_fg, modifiers.."+")
                     end
-                    local rendered_hotkey = markup.font(widget_instance.title_font,
+                    local rendered_hotkey = markup.font(self.font,
                         modifiers .. (key.key or "") .. " "
-                    ) .. markup.font(widget_instance.description_font,
+                    ) .. markup.font(self.description_font,
                         key.description or ""
                     )
                     if length > max_label_width then
@@ -290,13 +387,13 @@ function widget.new()
                     end
                 current_column.layout:add(wibox.widget.textbox(joined_labels))
                 local max_width, _ = wibox.widget.textbox(max_label_content):get_preferred_size(s)
-                max_width = max_width + widget_instance.group_margin
+                max_width = max_width + self.group_margin
                 if not current_column.max_width or max_width > current_column.max_width then
                     current_column.max_width = max_width
                 end
                 -- +1 for group label:
                 current_column.height_px = (current_column.height_px or 0) +
-                    awful.util.linecount(joined_labels)*line_height + group_label_height
+                    gstring.linecount(joined_labels)*line_height + group_label_height
                 if _add_new_column then
                     table.insert(column_layouts, current_column)
                 end
@@ -317,20 +414,20 @@ function widget.new()
         for _, item in ipairs(column_layouts) do
             if item.max_width > available_width_px then
                 previous_page_last_layout:add(
-                    group_label("PgDn - Next Page", beautiful.fg_normal)
+                    self:_group_label("PgDn - Next Page", self.label_bg)
                 )
                 table.insert(pages, columns)
                 columns = wibox.layout.fixed.horizontal()
                 available_width_px = width - item.max_width
                 item.layout:insert(
-                    1, group_label("PgUp - Prev Page", beautiful.fg_normal)
+                    1, self:_group_label("PgUp - Prev Page", self.label_bg)
                 )
             else
                 available_width_px = available_width_px - item.max_width
             end
             local column_margin = wibox.container.margin()
             column_margin:set_widget(item.layout)
-            column_margin:set_left(widget_instance.group_margin)
+            column_margin:set_left(self.group_margin)
             columns:add(column_margin)
             previous_page_last_layout = item.layout
         end
@@ -338,18 +435,21 @@ function widget.new()
 
         local mywibox = wibox({
             ontop = true,
-            opacity = beautiful.notification_opacity or 1,
-            border_width = widget_instance.border_width,
-            border_color = beautiful.fg_normal,
+            bg=self.bg,
+            fg=self.fg,
+            opacity = self.opacity,
+            border_width = self.border_width,
+            border_color = self.border_color,
+            shape = self.shape,
         })
         mywibox:geometry({
-            x = wa.x + math.floor((wa.width - width - widget_instance.border_width*2) / 2),
-            y = wa.y + math.floor((wa.height - height - widget_instance.border_width*2) / 2),
+            x = wa.x + math.floor((wa.width - width - self.border_width*2) / 2),
+            y = wa.y + math.floor((wa.height - height - self.border_width*2) / 2),
             width = width,
             height = height,
         })
         mywibox:set_widget(pages[1])
-        mywibox:buttons(awful.util.table.join(
+        mywibox:buttons(gtable.join(
                 awful.button({ }, 1, function () mywibox.visible=false end),
                 awful.button({ }, 3, function () mywibox.visible=false end)
         ))
@@ -357,21 +457,21 @@ function widget.new()
         local widget_obj = {}
         widget_obj.current_page = 1
         widget_obj.wibox = mywibox
-        function widget_obj:page_next()
-            if self.current_page == #pages then return end
-            self.current_page = self.current_page + 1
-            self.wibox:set_widget(pages[self.current_page])
+        function widget_obj.page_next(_self)
+            if _self.current_page == #pages then return end
+            _self.current_page = _self.current_page + 1
+            _self.wibox:set_widget(pages[_self.current_page])
         end
-        function widget_obj:page_prev()
-            if self.current_page == 1 then return end
-            self.current_page = self.current_page - 1
-            self.wibox:set_widget(pages[self.current_page])
+        function widget_obj.page_prev(_self)
+            if _self.current_page == 1 then return end
+            _self.current_page = _self.current_page - 1
+            _self.wibox:set_widget(pages[_self.current_page])
         end
-        function widget_obj:show()
-            self.wibox.visible = true
+        function widget_obj.show(_self)
+            _self.wibox.visible = true
         end
-        function widget_obj:hide()
-            self.wibox.visible = false
+        function widget_obj.hide(_self)
+            _self.wibox.visible = false
         end
 
         return widget_obj
@@ -381,15 +481,17 @@ function widget.new()
     --- Show popup with hotkeys help.
     -- @tparam[opt] client c Client.
     -- @tparam[opt] screen s Screen.
-    function widget_instance.show_help(c, s)
-        import_awful_keys()
+    function widget_instance:show_help(c, s)
+        self:_import_awful_keys()
+        self:_load_widget_settings()
+
         c = c or capi.client.focus
         s = s or (c and c.screen or awful.screen.focused())
 
         local available_groups = {}
-        for group, _ in pairs(group_list) do
+        for group, _ in pairs(self._group_list) do
             local need_match
-            for group_name, data in pairs(widget_instance.group_rules) do
+            for group_name, data in pairs(self.group_rules) do
                 if group_name==group and (
                     data.rule or data.rule_any or data.except or data.except_any
                 ) then
@@ -408,13 +510,13 @@ function widget.new()
         end
 
         local joined_groups = join_plus_sort(available_groups)
-        if not cached_wiboxes[s] then
-            cached_wiboxes[s] = {}
+        if not self._cached_wiboxes[s] then
+            self._cached_wiboxes[s] = {}
         end
-        if not cached_wiboxes[s][joined_groups] then
-            cached_wiboxes[s][joined_groups] = create_wibox(s, available_groups)
+        if not self._cached_wiboxes[s][joined_groups] then
+            self._cached_wiboxes[s][joined_groups] = self:_create_wibox(s, available_groups)
         end
-        local help_wibox = cached_wiboxes[s][joined_groups]
+        local help_wibox = self._cached_wiboxes[s][joined_groups]
         help_wibox:show()
 
         return capi.keygrabber.run(function(_, key, event)
@@ -432,28 +534,34 @@ function widget.new()
         end)
     end
 
-
     --- Add hotkey descriptions for third-party applications.
     -- @tparam table hotkeys Table with bindings,
     -- see `awful.hotkeys_popup.key.vim` as an example.
-    function widget_instance.add_hotkeys(hotkeys)
+    function widget_instance:add_hotkeys(hotkeys)
         for group, bindings in pairs(hotkeys) do
             for _, binding in ipairs(bindings) do
                 local modifiers = binding.modifiers
                 local keys = binding.keys
                 for key, description in pairs(keys) do
-                    add_hotkey(key, {
+                    self:_add_hotkey(key, {
                         mod=modifiers,
                         description=description,
                         group=group},
-                    widget_instance.additional_hotkeys
+                    self._additional_hotkeys
                 )
                 end
             end
         end
-        sort_hotkeys(widget_instance.additional_hotkeys)
+        self:_sort_hotkeys(self._additional_hotkeys)
     end
 
+    --- Add hotkey group rules for third-party applications.
+    -- @tparam string group hotkeys group name,
+    -- @tparam table data rule data for the group
+    -- see `awful.hotkeys_popup.key.vim` as an example.
+    function widget_instance:add_group_rules(group, data)
+        self.group_rules[group] = data
+    end
 
     return widget_instance
 end
@@ -469,7 +577,7 @@ end
 -- @tparam[opt] client c Client.
 -- @tparam[opt] screen s Screen.
 function widget.show_help(...)
-    return get_default_widget().show_help(...)
+    return get_default_widget():show_help(...)
 end
 
 --- Add hotkey descriptions for third-party applications
@@ -477,7 +585,16 @@ end
 -- @tparam table hotkeys Table with bindings,
 -- see `awful.hotkeys_popup.key.vim` as an example.
 function widget.add_hotkeys(...)
-    return get_default_widget().add_hotkeys(...)
+    return get_default_widget():add_hotkeys(...)
+end
+
+--- Add hotkey group rules for third-party applications
+-- (default widget instance will be used).
+-- @tparam string group rule group name,
+-- @tparam table data rule data for the group
+-- see `awful.hotkeys_popup.key.vim` as an example.
+function widget.add_group_rules(group, data)
+    return get_default_widget():add_group_rules(group, data)
 end
 
 return widget

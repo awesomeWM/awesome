@@ -332,6 +332,15 @@ function color.recolor_image(image, new_color)
     return image
 end
 
+--- Get a valid color for Pango markup
+-- @param check_color The color to check.
+-- @tparam string fallback The color to return if the first is invalid. (default: black)
+-- @treturn string color if it is valid, else fallback.
+function color.ensure_pango_color(check_color, fallback)
+    check_color = tostring(check_color)
+    return Pango.Color.parse(Pango.Color(), check_color) and check_color or fallback or "black"
+end
+
 function color.mt.__call(_, ...)
     return color.create_pattern(...)
 end

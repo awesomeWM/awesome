@@ -14,7 +14,8 @@ local flex  = require("wibox.layout.flex" )
 local table = table
 local pairs = pairs
 local floor = math.floor
-local util  = require("awful.util")
+local gmath = require("gears.math")
+local gtable = require("gears.table")
 
 local ratio = {}
 
@@ -87,11 +88,11 @@ function ratio:layout(_, width, height)
 
         if self._private.dir == "y" then
             space = height * self._private.ratios[k]
-            x, y = 0, util.round(pos)
+            x, y = 0, gmath.round(pos)
             w, h = width, floor(space)
         else
             space = width * self._private.ratios[k]
-            x, y = util.round(pos), 0
+            x, y = gmath.round(pos), 0
             w, h = floor(space), height
         end
 
@@ -101,8 +102,8 @@ function ratio:layout(_, width, height)
 
         -- Make sure all widgets fit in the layout, if they aren't, something
         -- went wrong
-        if (self._private.dir == "y" and util.round(pos) >= height) or
-            (self._private.dir ~= "y" and util.round(pos) >= width) then
+        if (self._private.dir == "y" and gmath.round(pos) >= height) or
+            (self._private.dir ~= "y" and gmath.round(pos) >= width) then
             break
         end
     end
@@ -293,7 +294,7 @@ end
 local function get_layout(dir, widget1, ...)
     local ret = flex[dir](widget1, ...)
 
-    util.table.crush(ret, ratio, true)
+    gtable.crush(ret, ratio, true)
 
     ret._private.fill_space = nil
 

@@ -566,7 +566,7 @@ screen_scan(void)
         screen_scan_xinerama(L, &globalconf.screens);
     if (globalconf.screens.len == 0)
         screen_scan_x11(L, &globalconf.screens);
-    assert(globalconf.screens.len > 0);
+    check(globalconf.screens.len > 0);
 
     screen_deduplicate(L, &globalconf.screens);
 
@@ -859,20 +859,6 @@ void screen_update_workarea(screen_t *screen)
     lua_pop(L, 1);
 }
 
-/** Get display info.
- * \return The display area.
- */
-area_t
-display_area_get(void)
-{
-    xcb_screen_t *s = globalconf.screen;
-    area_t area = { .x = 0,
-                    .y = 0,
-                    .width = s->width_in_pixels,
-                    .height = s->height_in_pixels };
-    return area;
-}
-
 /** Move a client to a virtual screen.
  * \param c The client to move.
  * \param new_screen The destination screen.
@@ -928,22 +914,24 @@ screen_client_moveto(client_t *c, screen_t *new_screen, bool doresize)
         new_geometry.x = to.x + to.width - new_geometry.width;
     if(new_geometry.y + new_geometry.height > to.y + to.height)
         new_geometry.y = to.y + to.height - new_geometry.height;
+    if(!screen_area_in_screen(new_screen, new_geometry))
+    {
+        /* If all else fails, force the client to end up on screen. */
+        new_geometry.x = to.x;
+        new_geometry.y = to.y;
+    }
 
     /* move / resize the client */
     client_resize(c, new_geometry, false);
 
-    /* Emit signal, but only in case the call to client_resize had not changed
-     * it already. */
-    if(old_screen != c->screen)
-    {
-        luaA_object_push(L, c);
-        if(old_screen != NULL)
-            luaA_object_push(L, old_screen);
-        else
-            lua_pushnil(L);
-        luaA_object_emit_signal(L, -2, "property::screen", 1);
-        lua_pop(L, 1);
-    }
+    /* emit signal */
+    luaA_object_push(L, c);
+    if(old_screen != NULL)
+        luaA_object_push(L, old_screen);
+    else
+        lua_pushnil(L);
+    luaA_object_emit_signal(L, -2, "property::screen", 1);
+    lua_pop(L, 1);
 
     if(had_focus)
         client_focus(c);
@@ -1010,7 +998,14 @@ screen_t *
 screen_get_primary(void)
 {
     if (!globalconf.primary_screen && globalconf.screens.len > 0)
+    {
         globalconf.primary_screen = globalconf.screens.tab[0];
+
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, globalconf.primary_screen);
+        luaA_object_emit_signal(L, -1, "primary_changed", 0);
+        lua_pop(L, 1);
+    }
     return globalconf.primary_screen;
 }
 

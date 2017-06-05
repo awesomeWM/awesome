@@ -34,6 +34,7 @@ if [ -z "$build_dir" ]; then
         build_dir="$source_dir"
     fi
 fi
+export build_dir
 
 # Get test files: test*, or the ones provided as args (relative to tests/).
 if [ $# != 0 ]; then
@@ -210,7 +211,7 @@ for f in $tests; do
     DISPLAY=$D "$AWESOME_CLIENT" 2>&1 < "$f"
 
     # Tail the log and quit, when awesome quits.
-    tail -n 100000 -f --pid "$awesome_pid" "$awesome_log"
+    tail -n 100000 -s 0.1 -f --pid "$awesome_pid" "$awesome_log"
 
     set +e
     wait $awesome_pid

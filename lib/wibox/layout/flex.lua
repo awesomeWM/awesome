@@ -11,7 +11,8 @@ local fixed = require("wibox.layout.fixed")
 local table = table
 local pairs = pairs
 local floor = math.floor
-local util = require("awful.util")
+local gmath = require("gears.math")
+local gtable = require("gears.table")
 
 local flex = {}
 
@@ -69,10 +70,10 @@ function flex:layout(_, width, height)
     for _, v in pairs(self._private.widgets) do
         local x, y, w, h
         if self._private.dir == "y" then
-            x, y = 0, util.round(pos)
+            x, y = 0, gmath.round(pos)
             w, h = width, floor(space_per_item)
         else
-            x, y = util.round(pos), 0
+            x, y = gmath.round(pos), 0
             w, h = floor(space_per_item), height
         end
 
@@ -140,7 +141,7 @@ end
 local function get_layout(dir, widget1, ...)
     local ret = fixed[dir](widget1, ...)
 
-    util.table.crush(ret, flex, true)
+    gtable.crush(ret, flex, true)
 
     ret._private.fill_space = nil
 
