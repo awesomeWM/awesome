@@ -176,6 +176,9 @@ end
 --- Increase the ratio of "widget"
 -- If the increment produce an invalid ratio (not between 0 and 1), the method
 -- do nothing.
+--
+--@DOC_wibox_layout_ratio_inc_ratio_EXAMPLE@
+--
 -- @tparam number index The widget index to change
 -- @tparam number increment An floating point value between -1 and 1 where the
 --   end result is within 0 and 1
@@ -249,7 +252,10 @@ function ratio:set_widget_ratio(widget, percent)
 end
 
 --- Update all widgets to match a set of a ratio.
--- The sum of before, itself and after must be 1 or nothing will be done
+-- The sum of before, itself and after must be 1 or nothing will be done.
+--
+--@DOC_wibox_layout_ratio_ajust_ratio_EXAMPLE@
+--
 -- @tparam number index The index of the widget to change
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
