@@ -36,8 +36,6 @@ util.shell = os.getenv("SHELL") or "/bin/sh"
 --- Execute a system command and road the output
 -- @deprecated awful.util.pread
 
-local displayed_deprecations = {}
-
 --- Display a deprecation notice, but only once per traceback.
 -- @deprecated deprecate
 -- @param[opt] see The message to a new method / function to use.
