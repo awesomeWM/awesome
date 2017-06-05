@@ -35,6 +35,9 @@ util.table = {}
 --- The default shell used when spawing processes.
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
+--- Execute a system command and road the output
+-- @deprecated awful.util.pread
+
 local displayed_deprecations = {}
 --- Display a deprecation notice, but only once per traceback.
 -- @param[opt] see The message to a new method / function to use.
@@ -342,14 +345,6 @@ function util.get_rectangle_in_direction(dir, recttbl, cur)
     util.deprecate("gears.geometry.rectangle.get_in_direction")
 
     return grect.get_in_direction(dir, recttbl, cur)
-end
-
---- Execute a system command and road the output
--- @deprecated awful.util.pread
-function util.pread ()
-    util.deprecate("Use io.popen() directly or look at awful.spawn.easy_async() "
-            .. "for an asynchronous alternative")
-    return ""
 end
 
 --- Join all tables given as parameters.
