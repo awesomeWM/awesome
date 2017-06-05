@@ -11,7 +11,8 @@ local capi = { screen = screen, tag = tag }
 local layout = require("awful.layout")
 local tooltip = require("awful.tooltip")
 local beautiful = require("beautiful")
-local imagebox = require("wibox.widget.imagebox")
+local wibox = require("wibox")
+local surface = require("gears.surface")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -25,7 +26,10 @@ local function update(w, screen)
     screen = get_screen(screen)
     local name = layout.getname(layout.get(screen))
     w._layoutbox_tooltip:set_text(name or "[no name]")
-    w:set_image(name and beautiful["layout_" .. name])
+
+    local img = surface.load_silently(beautiful["layout_" .. name], false)
+    w.imagebox.image = img
+    w.textbox.text   = img and "" or name
 end
 
 local function update_from_tag(t)
@@ -61,7 +65,18 @@ function layoutbox.new(screen)
     -- Do we already have a layoutbox for this screen?
     local w = boxes[screen]
     if not w then
-        w = imagebox()
+        w = wibox.widget {
+            {
+                id     = "imagebox",
+                widget = wibox.widget.imagebox
+            },
+            {
+                id     = "textbox",
+                widget = wibox.widget.textbox
+            },
+            layout = wibox.layout.fixed.horizontal
+        }
+
         w._layoutbox_tooltip = tooltip {objects = {w}, delay_show = 1}
 
         update(w, screen)
