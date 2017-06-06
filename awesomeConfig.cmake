@@ -199,6 +199,20 @@ else()
     message(STATUS "checking for round -- builtin")
 endif()
 
+# Do we need libm for round()?
+check_function_exists(round HAS_ROUND_WITHOUT_LIBM)
+if(NOT HAS_ROUND_WITHOUT_LIBM)
+    SET(CMAKE_REQUIRED_LIBRARIES ${CMAKE_REQUIRED_LIBRARIES} m)
+    set(AWESOME_REQUIRED_LDFLAGS ${AWESOME_REQUIRED_LDFLAGS} m)
+    check_function_exists(round HAS_ROUND_WITH_LIBM)
+    if(NOT HAS_ROUND_WITH_LIBM)
+        message(FATAL_ERROR "Did not find round()")
+    endif()
+    message(STATUS "checking for round -- in libm")
+else()
+    message(STATUS "checking for round -- builtin")
+endif()
+
 set(AWESOME_REQUIRED_LDFLAGS
     ${AWESOME_COMMON_REQUIRED_LDFLAGS}
     ${AWESOME_REQUIRED_LDFLAGS}
