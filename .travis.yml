@@ -120,6 +120,8 @@ install:
         test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
         travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
+        gcov **/*.o
+        travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1_c" || return 1
         rm build/luacov.stats.out
       fi
       return 0
