@@ -63,16 +63,8 @@ typedef enum
     strut_t strut; \
     /** Button bindings */ \
     button_array_t buttons; \
-    /** Do we have pending border changes? */ \
-    bool border_need_update; \
-    /** Border color */ \
-    color_t border_color; \
-    /** Border width */ \
-    uint16_t border_width; \
     /** The window type */ \
     window_type_t type; \
-    /** The border width callback */ \
-    void (*border_width_callback)(void *, uint16_t old, uint16_t new);
 
 /** Window structure */
 typedef struct
@@ -85,8 +77,6 @@ lua_class_t window_class;
 void window_class_setup(lua_State *);
 
 void window_set_opacity(lua_State *, int, double);
-void window_set_border_width(lua_State *, int, int);
-void window_border_refresh(window_t *);
 int luaA_window_get_type(lua_State *, window_t *);
 int luaA_window_set_type(lua_State *, window_t *);
 uint32_t window_translate_type(window_type_t);

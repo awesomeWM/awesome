@@ -150,6 +150,14 @@
  */
 
 /**
+ * @signal property::border_color
+ */
+
+/**
+ * @signal property::border_width
+ */
+
+/**
  * @signal property::window
  */
 
@@ -1199,11 +1207,31 @@ client_focus_refresh(void)
                         win, globalconf.timestamp);
 }
 
+static uint16_t
+client_get_border_width(client_t *c)
+{
+    return c->fullscreen ? 0 : c->border_width;
+}
+
 static void
 client_border_refresh(void)
 {
-    foreach(c, globalconf.clients)
-        window_border_refresh((window_t *) *c);
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
+        if(c->border_need_update)
+        {
+            c->border_need_update = false;
+            xwindow_set_border_color(c->frame_window, &c->border_color);
+            if(c->frame_window)
+            {
+                int width = client_get_border_width(c);
+                xcb_configure_window(globalconf.connection, c->frame_window,
+                                     XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                                     (uint32_t[]) { width });
+            }
+        }
+    }
 }
 
 static void
@@ -1313,24 +1341,6 @@ client_destroy_later(void)
 }
 
 static void
-border_width_callback(client_t *c, uint16_t old_width, uint16_t new_width)
-{
-    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
-    {
-        area_t geometry = c->geometry;
-        int16_t diff = new_width - old_width;
-        int16_t diff_x = 0, diff_y = 0;
-        xwindow_translate_for_gravity(c->size_hints.win_gravity,
-                                      diff, diff, diff, diff,
-                                      &diff_x, &diff_y);
-        geometry.x += diff_x;
-        geometry.y += diff_y;
-        /* inform client about changes */
-        client_resize_do(c, geometry);
-    }
-}
-
-static void
 client_update_properties(lua_State *L, int cidx, client_t *c)
 {
     /* get all hints */
@@ -1401,7 +1411,6 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     client_t *c = client_new(L);
     xcb_screen_t *s = globalconf.screen;
-    c->border_width_callback = (void (*) (void *, uint16_t, uint16_t)) border_width_callback;
 
     /* consider the window banned */
     c->isbanned = true;
@@ -1484,7 +1493,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
     luaA_object_emit_signal(L, -1, "property::geometry", 0);
 
     /* Set border width */
-    window_set_border_width(L, -1, wgeom->border_width);
+    client_set_border_width(L, -1, wgeom->border_width);
 
     /* we honor size hints by default */
     c->size_hints_honor = true;
@@ -1566,7 +1575,7 @@ client_send_configure(client_t *c)
 
     if (!c->fullscreen)
         client_remove_titlebar_geometry(c, &geometry);
-    xwindow_configure(c->window, geometry, c->border_width);
+    xwindow_configure(c->window, geometry, client_get_border_width(c));
 }
 
 /** Apply size hints to the client's new geometry.
@@ -1935,6 +1944,12 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         c->fullscreen = s;
         luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
+        if (c->border_width != 0)
+        {
+            /* We force border_width = 0 while fullscreen */
+            c->border_need_update = true;
+            luaA_object_emit_signal(L, abs_cidx, "property::border_width", 0);
+        }
         /* Force a client resize, so that titlebars get shown/hidden */
         client_resize_do(c, c->geometry);
         stack_windows();
@@ -2893,6 +2908,68 @@ luaA_client_apply_size_hints(lua_State *L)
     return 2;
 }
 
+/** Set the client border color.
+ * \param L The Lua VM state.
+ * \param window The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_set_border_color(lua_State *L, client_t *c)
+{
+    size_t len;
+    const char *color_name = luaL_checklstring(L, -1, &len);
+
+    if(color_name &&
+       color_init_reply(color_init_unchecked(&c->border_color, color_name, len)))
+    {
+        c->border_need_update = true;
+        luaA_object_emit_signal(L, -3, "property::border_color", 0);
+    }
+
+    return 0;
+}
+
+/** Set a client border width.
+ * \param L The Lua VM state.
+ * \param idx The client index.
+ * \param width The border width.
+ */
+void
+client_set_border_width(lua_State *L, int idx, int width)
+{
+    client_t *c = luaA_checkudata(L, idx, &client_class);
+    uint16_t old_width = c->border_width;
+
+    if(width == c->border_width || width < 0)
+        return;
+
+    c->border_need_update = true;
+    c->border_width = width;
+
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+    {
+        area_t geometry = c->geometry;
+        int16_t diff = width - old_width;
+        int16_t diff_x = 0, diff_y = 0;
+        xwindow_translate_for_gravity(c->size_hints.win_gravity,
+                                      diff, diff, diff, diff,
+                                      &diff_x, &diff_y);
+        geometry.x += diff_x;
+        geometry.y += diff_y;
+        /* inform client about changes */
+        client_resize_do(c, geometry);
+    }
+
+    luaA_object_emit_signal(L, idx, "property::border_width", 0);
+}
+
+static int
+luaA_client_set_border_width(lua_State *L, client_t *c)
+{
+    client_set_border_width(L, -3, round(luaA_checknumber_range(L, -1, 0, MAX_X11_SIZE)));
+    return 0;
+}
+
 static int
 luaA_client_set_screen(lua_State *L, client_t *c)
 {
@@ -3070,6 +3147,14 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboole
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, startup_id, lua_pushstring)
+LUA_OBJECT_EXPORT_PROPERTY(client, client_t, border_color, luaA_pushcolor)
+
+static int
+luaA_client_get_border_width(lua_State *L, client_t *c)
+{
+    lua_pushinteger(L, client_get_border_width(c));
+    return 1;
+}
 
 static int
 luaA_client_get_content(lua_State *L, client_t *c)
@@ -3314,9 +3399,9 @@ luaA_client_set_shape_bounding(lua_State *L, client_t *c)
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
     xwindow_set_shape(c->frame_window,
-            c->geometry.width + (c->border_width * 2),
-            c->geometry.height + (c->border_width * 2),
-            XCB_SHAPE_SK_BOUNDING, surf, -c->border_width);
+            c->geometry.width + (client_get_border_width(c) * 2),
+            c->geometry.height + (client_get_border_width(c) * 2),
+            XCB_SHAPE_SK_BOUNDING, surf, -client_get_border_width(c));
     luaA_object_emit_signal(L, -3, "property::shape_bounding", 0);
     return 0;
 }
@@ -3398,9 +3483,9 @@ luaA_client_set_shape_input(lua_State *L, client_t *c)
     if(!lua_isnil(L, -1))
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
     xwindow_set_shape(c->frame_window,
-            c->geometry.width + (c->border_width * 2),
-            c->geometry.height + (c->border_width * 2),
-            XCB_SHAPE_SK_INPUT, surf, -c->border_width);
+            c->geometry.width + (client_get_border_width(c) * 2),
+            c->geometry.height + (client_get_border_width(c) * 2),
+            XCB_SHAPE_SK_INPUT, surf, -client_get_border_width(c));
     luaA_object_emit_signal(L, -3, "property::shape_input", 0);
     return 0;
 }
@@ -3721,6 +3806,14 @@ client_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_first_tag,
                             NULL);
+    luaA_class_add_property(&client_class, "border_width",
+                            (lua_class_propfunc_t) luaA_client_set_border_width,
+                            (lua_class_propfunc_t) luaA_client_get_border_width,
+                            (lua_class_propfunc_t) luaA_client_set_border_width);
+    luaA_class_add_property(&client_class, "border_color",
+                            (lua_class_propfunc_t) luaA_client_set_border_color,
+                            (lua_class_propfunc_t) luaA_client_get_border_color,
+                            (lua_class_propfunc_t) luaA_client_set_border_color);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

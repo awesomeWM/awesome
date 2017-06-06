@@ -380,7 +380,7 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
             diff_w += diff_border;
 
             luaA_object_push(L, c);
-            window_set_border_width(L, -1, ev->border_width);
+            client_set_border_width(L, -1, ev->border_width);
             lua_pop(L, 1);
         }
 
