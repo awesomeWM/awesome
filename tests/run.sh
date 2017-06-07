@@ -182,6 +182,9 @@ start_awesome() {
     awesome_pid=$!
     cd - >/dev/null
 
+    # Do not put too much load on this, it will deadlock
+    sleep 0.5
+
     # Wait until the interface for awesome-client is ready (D-Bus interface).
     # Do this with dbus-send so that we can specify a low --reply-timeout
     wait_until_success "wait for awesome startup via awesome-client" "dbus-send --reply-timeout=100 --dest=org.awesomewm.awful --print-reply / org.awesomewm.awful.Remote.Eval 'string:return 1' 2>&1"
