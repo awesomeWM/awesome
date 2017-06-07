@@ -125,6 +125,26 @@ table.insert(steps, function()
     return true
 end)
 
+-- Set a widget in the tooltip
+table.insert(steps, function(count)
+    tt:set_widget(wibox.widget.imagebox(beautiful.awesome_icon), 500, 300)
+
+    -- Wait for redraw
+    if count > 1 then
+        return true
+    end
+end)
+
+-- And switch back to text
+table.insert(steps, function(count)
+    tt.text = "I live!"
+
+    -- Wait for redraw
+    if count > 1 then
+        return true
+    end
+end)
+
 runner.run_steps(steps)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
