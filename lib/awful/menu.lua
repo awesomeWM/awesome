@@ -116,7 +116,7 @@ local function load_theme(a, b)
     ret.border = a.border_color or b.menu_border_color or b.border_normal or
                  fallback.menu_border_color or fallback.border_normal
     ret.border_width= a.border_width or b.menu_border_width or b.border_width or
-                      fallback.menu_border_width or fallback.border_width or 0
+                      fallback.menu_border_width or fallback.border_width or dpi(0)
     ret.fg_focus = a.fg_focus or b.menu_fg_focus or b.fg_focus or
                    fallback.menu_fg_focus or fallback.fg_focus
     ret.bg_focus = a.bg_focus or b.menu_bg_focus or b.bg_focus or
@@ -130,9 +130,9 @@ local function load_theme(a, b)
     ret.submenu = a.submenu or b.menu_submenu or b.submenu or
                       fallback.menu_submenu or fallback.submenu or "▶"
     ret.height = a.height or b.menu_height or b.height or
-                 fallback.menu_height or 16
+                 fallback.menu_height or dpi(16)
     ret.width = a.width or b.menu_width or b.width or
-                fallback.menu_width or 100
+                fallback.menu_width or dpi(100)
     ret.font = a.font or b.font or fallback.font
     for _, prop in ipairs({"width", "height", "menu_width"}) do
         if type(ret[prop]) ~= "number" then ret[prop] = tonumber(ret[prop]) end
