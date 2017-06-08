@@ -134,6 +134,21 @@ describe("wibox.layout.flex", function()
             assert.is.equal(layout_changed, 2)
         end)
     end)
+
+    it("set_children", function()
+        local w1, w2 = base.empty_widget(), base.empty_widget()
+
+        assert.is.same({}, layout:get_children())
+
+        layout:add(w1)
+        assert.is.same({ w1 }, layout:get_children())
+
+        layout:add(w2)
+        assert.is.same({ w1, w2 }, layout:get_children())
+
+        layout:reset()
+        assert.is.same({}, layout:get_children())
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
