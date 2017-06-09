@@ -409,7 +409,7 @@ function awfulwibar.new(arg)
     -- The C code scans the table directly, so metatable magic cannot be used.
     for _, prop in ipairs {
         "border_width", "border_color", "font", "opacity", "ontop", "cursor",
-        "height", "width", "bgimage", "bg", "fg", "type", "stretch", "shape"
+        "bgimage", "bg", "fg", "type", "stretch", "shape"
     } do
         if (arg[prop] == nil) and beautiful["wibar_"..prop] ~= nil then
             arg[prop] = beautiful["wibar_"..prop]
