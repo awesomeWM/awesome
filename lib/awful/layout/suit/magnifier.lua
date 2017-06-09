@@ -146,6 +146,10 @@ end
 
 magnifier.name = "magnifier"
 
+-- This layout handles the currently focused client specially and needs to be
+-- called again when the focus changes.
+magnifier.need_focus_update = true
+
 return magnifier
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

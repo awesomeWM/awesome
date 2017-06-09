@@ -269,6 +269,12 @@ capi.tag.connect_signal("tagged", arrange_tag)
 capi.screen.connect_signal("property::workarea", layout.arrange)
 capi.screen.connect_signal("padding", layout.arrange)
 
+capi.client.connect_signal("focus", function(c)
+    local screen = c.screen
+    if layout.get(screen).need_focus_update then
+        layout.arrange(screen)
+    end
+end)
 capi.client.connect_signal("raised", function(c) layout.arrange(c.screen) end)
 capi.client.connect_signal("lowered", function(c) layout.arrange(c.screen) end)
 capi.client.connect_signal("list", function()

@@ -29,6 +29,67 @@ local steps = {
 
 }
 
+-- Test if layouts are called
+do
+    local c1, c2
+    local arrange_expected = false
+    local fake_layout = {
+        arrange = function()
+            assert(arrange_expected)
+            arrange_expected = false
+        end,
+        name = "fake",
+    }
+
+    table.insert(steps, function()
+        c1, c2 = client.get()[1], client.get()[2]
+        client.focus = c1
+
+        arrange_expected = true
+        awful.layout.set(fake_layout)
+        return true
+    end)
+
+    table.insert(steps, function()
+        assert(arrange_expected == false)
+
+        arrange_expected = false
+        client.focus = c2
+        return true
+    end)
+
+    table.insert(steps, function()
+        -- This sync is needed to avoid a race: Consider the code
+        --   client.focus = c2
+        --   gears.timer.start_new(0, function()
+        --       client.focus = c1
+        --   end)
+        -- The C code would focus c2, but Lua would then change the focus to c1
+        -- before the X11 server acknowledged the focus change (FocusIn event).
+        -- Thus, when that event comes in, the C code things that c1 currently
+        -- has the focus and thus would do c2:emit_signal("focus"). Then, when
+        -- the FocusIn event for c1 comes, it would do c1:emit_signal("focus").
+        awesome.sync()
+        return true
+    end)
+
+    table.insert(steps, function()
+        assert(arrange_expected == false)
+
+        arrange_expected = true
+        fake_layout.need_focus_update = true
+        client.focus = c1
+        return true
+    end)
+
+    table.insert(steps, function()
+        assert(arrange_expected == false)
+
+        awful.layout.set(awful.layout.suit.floating)
+        return true
+    end)
+end
+
 local function next_layout()
     awful.layout.inc(1)
 
