@@ -279,6 +279,28 @@ describe("wibox.layout.align", function()
             assert.is.equal(layout_changed, 0)
         end)
     end)
+
+    it("set_children", function()
+        local w1, w2, w3 = { w1 = true }, { w2 = true }, { w3 = true }
+        local layout = align.vertical()
+
+        assert.is.same({}, layout:get_children())
+
+        layout:set_second(w2)
+        assert.is.same({ w2 }, layout:get_children())
+
+        layout:set_first(w1)
+        assert.is.same({ w1, w2 }, layout:get_children())
+
+        layout:set_third(w3)
+        assert.is.same({ w1, w2, w3 }, layout:get_children())
+
+        layout:set_second(nil)
+        assert.is.same({ w1, w3 }, layout:get_children())
+
+        layout:reset()
+        assert.is.same({}, layout:get_children())
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
