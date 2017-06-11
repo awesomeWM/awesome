@@ -78,8 +78,10 @@ extern const struct luaL_Reg awesome_mouse_meta[];
 
 /** A deprecated Lua function was called.
  *
- * @param hint String with a hint on what to use instead of the
+ * @tparam string hint String with a hint on what to use instead of the
  * deprecated functionality.
+ * @tparam[opt=nil] string|nil see The name of the newer API
+ * @tparam[opt=nil] table|nil args The name of the newer API
  * @signal debug::deprecation
  */
 

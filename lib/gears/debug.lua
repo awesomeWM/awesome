@@ -75,6 +75,10 @@ end
 
 local displayed_deprecations = {}
 --- Display a deprecation notice, but only once per traceback.
+--
+-- This function also emits the `debug::deprecate` signal on the `awesome`
+-- global object.
+--
 -- @param[opt] see The message to a new method / function to use.
 -- @tparam table args Extra arguments
 -- @tparam boolean args.raw Print the message as-is without the automatic context
@@ -108,6 +112,10 @@ function debug.deprecate(see, args)
         end
     end
     debug.print_warning(msg .. ".\n" .. tb)
+
+    if awesome then
+        awesome.emit_signal("debug::deprecation", msg, see, args)
+    end
 end
 
 --- Create a class proxy with deprecation messages.
