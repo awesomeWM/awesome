@@ -1191,6 +1191,23 @@ function client.object.set_shape(self, shape)
     set_shape(self)
 end
 
+--- Register a new xproperty.
+--
+-- @param name The name of the X11 property
+-- @param type One of "string", "number" or "boolean"
+-- @function register_xproperty
+
+--- Change a xproperty.
+--
+-- @param name The name of the X11 property
+-- @param value The new value for the property
+-- @function set_xproperty
+
+--- Get the value of a xproperty.
+--
+-- @param name The name of the X11 property
+-- @function get_xproperty
+
 -- Register standards signals
 
 --- The last geometry when client was floating.
