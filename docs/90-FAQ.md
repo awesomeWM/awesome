@@ -168,7 +168,7 @@ You can ensure no application ever starts maximized in the first rule of your
 
     -- Search for this rule,
     keys = clientkeys,
-    
+
     -- add the following two:
     maximized_vertical   = false,
     maximized_horizontal = false,
@@ -217,7 +217,7 @@ terminal output you can use the following to match clients in awesome:
                         |           |--- class
                         |
                         |--- instance
-    
+
     WM_NAME(STRING) = "SMPlayer"
                        |
                        |--- name

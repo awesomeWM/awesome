@@ -215,7 +215,7 @@ drawin_apply_moveresize(drawin_t *w)
 
     w->geometry_dirty = false;
     client_ignore_enterleave_events();
-    xcb_configure_window(globalconf.connection, w->window, 
+    xcb_configure_window(globalconf.connection, w->window,
                          XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
                          | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                          (const uint32_t [])

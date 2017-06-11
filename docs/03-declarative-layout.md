@@ -175,7 +175,7 @@ Code:
 
     local tb = wibox.widget.textbox()
     tb:set_markup("Hello world! ")
-    
+
     -- Repeat "tb" 3 times
     s.mywibox : setup {
         tb,
@@ -222,7 +222,7 @@ Code:
         id     = "first",
         layout = wibox.layout.fixed.horizontal,
     }
-    
+
     s.mywibox.first.second:set_markup("changed!")
     s.mywibox:get_children_by_id("third")[1]:set_markup("Also changed!")
 
@@ -284,10 +284,10 @@ Code:
         end,
         layout = wibox.widget.base.make_widget,
     }
-    
+
     -- Define a layout with the imperative syntax
     local l = wibox.widget.align()
-    
+
     -- 3 circle
     s.mywibox : setup {
         circle,
@@ -296,12 +296,12 @@ Code:
         l,
         layout = wibox.layout.align.horizontal
     }
-    
+
     -- This can be done instead
     local three_circle = {layout = wibox.layout.align.horizontal}
     for i=1, 3 do
         table.insert(three_circle, circle)
     end
-    
+
     s.mywibox : setup (three_circle)
 
