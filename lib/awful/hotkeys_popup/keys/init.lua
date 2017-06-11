@@ -8,7 +8,9 @@
 
 
 local keys = {
-  vim = require("awful.hotkeys_popup.keys.vim")
+  vim = require("awful.hotkeys_popup.keys.vim"),
+  firefox = require("awful.hotkeys_popup.keys.firefox"),
+  qutebrowser = require("awful.hotkeys_popup.keys.qutebrowser"),
 }
 return keys
 
