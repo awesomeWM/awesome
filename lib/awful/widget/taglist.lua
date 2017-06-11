@@ -384,12 +384,12 @@ end
 -- @tparam[opt=nil] string|pattern style.fg_empty
 -- @tparam[opt=nil] string|pattern style.bg_volatile
 -- @tparam[opt=nil] string|pattern style.fg_volatile
--- @tparam[opt=nil] string style.taglist_squares_sel
--- @tparam[opt=nil] string style.taglist_squares_unsel
--- @tparam[opt=nil] string style.taglist_squares_sel_empty
--- @tparam[opt=nil] string style.taglist_squares_unsel_empty
--- @tparam[opt=nil] string style.taglist_squares_resize
--- @tparam[opt=nil] string style.taglist_disable_icon
+-- @tparam[opt=nil] string style.squares_sel
+-- @tparam[opt=nil] string style.squares_unsel
+-- @tparam[opt=nil] string style.squares_sel_empty
+-- @tparam[opt=nil] string style.squares_unsel_empty
+-- @tparam[opt=nil] string style.squares_resize
+-- @tparam[opt=nil] string style.disable_icon
 -- @tparam[opt=nil] string style.font
 -- @tparam[opt=nil] number style.spacing The spacing between tags.
 -- @param[opt] update_function Function to create a tag widget on each
