@@ -1479,6 +1479,13 @@ capi.tag.connect_signal("request::select", tag.object.view_only)
 
 capi.screen.connect_signal("tag::history::update", tag.history.update)
 
+-- Make sure the history is set early
+timer.delayed_call(function()
+    for s in capi.screen do
+        s:emit_signal("tag::history::update")
+    end
+end)
+
 capi.screen.connect_signal("removed", function(s)
     -- First give other code a chance to move the tag to another screen
     for _, t in pairs(s.tags) do

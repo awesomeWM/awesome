@@ -302,22 +302,7 @@ end
 function rules.delayed_properties.switchtotag(c, value)
     if not value then return end
 
-    local selected_tags = {}
-
-    for _,v in ipairs(c.screen.selected_tags) do
-        selected_tags[v] = true
-    end
-
-    local tags = c:tags()
-
-    for _, t in ipairs(tags) do
-        t.selected = true
-        selected_tags[t] = nil
-    end
-
-    for t in pairs(selected_tags) do
-        t.selected = false
-    end
+    atag.viewmore(c:tags())
 end
 
 function rules.extra_properties.geometry(c, _, props)
