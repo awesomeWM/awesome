@@ -51,7 +51,8 @@ local stack = {mt={}}
 -- @name remove_widgets
 -- @class function
 
---- Add spacing between each layout widgets
+--- Add spacing around the widget, similar to the margin container.
+--@DOC_wibox_layout_stack_spacing_EXAMPLE@
 -- @property spacing
 -- @tparam number spacing Spacing between widgets.
 
@@ -59,8 +60,14 @@ function stack:layout(_, width, height)
     local result = {}
     local spacing = self._private.spacing
 
+    width  = width  - math.abs(self._private.h_offset * #self._private.widgets) - 2*spacing
+    height = height - math.abs(self._private.v_offset * #self._private.widgets) - 2*spacing
+
+    local h_off, v_off = spacing, spacing
+
     for _, v in pairs(self._private.widgets) do
-        table.insert(result, base.place_widget_at(v, spacing, spacing, width - 2*spacing, height - 2*spacing))
+        table.insert(result, base.place_widget_at(v, h_off, v_off, width, height))
+        h_off, v_off = h_off + self._private.h_offset, v_off + self._private.v_offset
         if self._private.top_only then break end
     end
 
@@ -121,6 +128,35 @@ function stack:raise_widget(widget, recursive)
     end
 end
 
+--- Add an horizontal offset to each layers.
+--
+-- Note that this reduces the overall size of each widgets by the sum of all
+-- layers offsets.
+--
+--@DOC_wibox_layout_stack_offset_EXAMPLE@
+--
+-- @property horizontal_offset
+-- @param number
+
+--- Add an vertical offset to each layers.
+--
+-- Note that this reduces the overall size of each widgets by the sum of all
+-- layers offsets.
+--
+-- @property vertial_offset
+-- @param number
+-- @see horizontal_offset
+
+function stack:set_horizontal_offset(value)
+    self._private.h_offset = value
+    self:emit_signal("widget::layout_changed")
+end
+
+function stack:set_vertical_offset(value)
+    self._private.v_offset = value
+    self:emit_signal("widget::layout_changed")
+end
+
 --- Create a new stack layout.
 -- @function wibox.layout.stack
 -- @treturn widget A new stack layout
@@ -129,6 +165,9 @@ local function new(...)
     local ret = fixed.horizontal(...)
 
     gtable.crush(ret, stack, true)
+
+    ret._private.h_offset = 0
+    ret._private.v_offset = 0
 
     return ret
 end
