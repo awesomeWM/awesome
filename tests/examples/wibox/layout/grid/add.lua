@@ -8,9 +8,9 @@ local w = generic_before_after(wibox.layout.grid, {
     forced_num_cols = 3,
     forced_num_rows = 2,
     homogeneous     = true,
-}, 6, "add_widget_at", {wibox.widget( --DOC_HIDE
+}, 6, "add_widget_at", {--DOC_HIDE
     generic_widget("__new__",beautiful.bg_highlight) --DOC_HIDE
-    ), 1, 4, 1, 1 --DOC_HIDE
+    , 1, 4, 1, 1 --DOC_HIDE
 }) --DOC_HIDE
 
 return w, w:fit({dpi=96}, 9999, 9999) --DOC_HIDE
