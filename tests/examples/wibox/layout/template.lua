@@ -8,7 +8,7 @@ local unpack    = unpack or table.unpack -- luacheck: globals unpack (compatibil
 
 -- Create a generic rectangle widget to show layout disposition
 local function generic_widget(text, col)
-    return {
+    return wibox.widget {
         {
             {
                 draw = function(_, _, cr, width, height)
@@ -21,15 +21,20 @@ local function generic_widget(text, col)
                 end,
                 widget = wibox.widget.base.make_widget
             },
-            text and {
+            {
+                id     = "text",
                 align  = "center",
                 valign = "center",
-                text   = text,
+                text   = text or "foobar",
                 widget = wibox.widget.textbox
             } or nil,
             widget = wibox.layout.stack
         },
         margins = 5,
+        set_text = function(self, text2)
+            self:get_children_by_id("text")[1]:set_text(text2)
+        end,
+        is_widget = true,
         widget  = wibox.container.margin,
     }
 end

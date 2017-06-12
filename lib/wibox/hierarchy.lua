@@ -317,12 +317,15 @@ function hierarchy:draw(context, cr)
     -- Draw if needed
     if not empty_clip(cr) then
         local opacity = widget:get_opacity()
-        local function call(func, extra_arg1, extra_arg2)
+        local function call(func, extra_arg1, extra_arg2, ...)
             if not func then return end
+            local w, h = self:get_size()
             if not extra_arg2 then
-                protected_call(func, widget, context, cr, self:get_size())
+                protected_call(func, widget, context, cr, w, h, ...)
             else
-                protected_call(func, widget, context, extra_arg1, extra_arg2, cr, self:get_size())
+                protected_call(
+                    func, widget, context, extra_arg1, extra_arg2, cr, w, h, ...
+                )
             end
         end
 
@@ -339,13 +342,13 @@ function hierarchy:draw(context, cr)
         cr:restore()
 
         -- Draw its children (We already clipped to the draw extents above)
-        call(widget.before_draw_children)
+        call(widget.before_draw_children, nil, nil, self)
         for i, wi in ipairs(self:get_children()) do
-            call(widget.before_draw_child, i, wi:get_widget())
+            call(widget.before_draw_child, i, wi:get_widget(), wi)
             wi:draw(context, cr)
-            call(widget.after_draw_child, i, wi:get_widget())
+            call(widget.after_draw_child, i, wi:get_widget(), wi)
         end
-        call(widget.after_draw_children)
+        call(widget.after_draw_children, nil, nil, self)
 
         -- Apply opacity
         if opacity ~= 1 then
