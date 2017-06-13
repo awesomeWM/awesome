@@ -81,9 +81,6 @@ install:
   - sudo apt-get install -y gir1.2-pango-1.0 libgirepository1.0-dev
   - travis_retry sudo luarocks install lgi $LGIVER
 
-  # Pin lua-term (https://github.com/hoelzro/lua-term/issues/16).
-  - travis_retry sudo luarocks install lua-term 0.4-1
-
   # Install busted for "make check-unit".
   - travis_retry sudo luarocks install busted
   # Install luacheck for "make check-qa".
