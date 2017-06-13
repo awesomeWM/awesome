@@ -21,9 +21,19 @@
 
 /** awesome core API
  *
+ * Additionally to the classes described here, one can also use X properties as
+ * described in @{xproperties}.
+ *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @module awesome
+ */
+
+/** Register a new xproperty.
+ *
+ * @tparam string name The name of the X11 property.
+ * @tparam string type One of "string", "number" or "boolean".
+ * @function register_xproperty
  */
 
 #define _GNU_SOURCE
