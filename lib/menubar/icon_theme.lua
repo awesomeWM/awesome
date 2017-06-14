@@ -70,7 +70,7 @@ local get_default_icon_theme_name = function()
             end
         end
     end
-    return nil
+    return "hicolor"
 end
 
 local icon_theme = { mt = {} }
