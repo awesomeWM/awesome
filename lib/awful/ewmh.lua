@@ -120,12 +120,12 @@ end
 -- * **context** (*string*) The activation context.
 -- * **hints** (*table*) Some additional hints (depending on the context)
 --
--- If the callback returns `true`, the client will be activated unless the `force`
--- hint is set. If the callback returns `false`, the activation request is
--- cancelled. If the callback returns `nil`, the previous callback will be
--- executed. This will continue until either a callback handles the request or
--- when it runs out of callbacks. In that case, the request will be granted if
--- the client is visible.
+-- If the callback returns `true`, the client will be activated. If the callback
+-- returns `false`, the activation request is cancelled unless the `force` hint is
+-- set. If the callback returns `nil`, the previous callback will be executed.
+-- This will continue until either a callback handles the request or when it runs
+-- out of callbacks. In that case, the request will be granted if the client is
+-- visible.
 --
 -- For example, to block Firefox from stealing the focus, use:
 --
