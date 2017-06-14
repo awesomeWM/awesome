@@ -62,31 +62,30 @@ local function path_to_module(path)
     error("Cannot figure out module for " .. tostring(path))
 end
 
-local function module_to_html(mod)
-    mod = mod:gsub(".init", "")
-
-    local f = io.open("doc/classes/".. mod ..".html","r")
-
-    if f~=nil then
-        f:close()
-        return "../classes/".. mod ..".html"
+local function path_to_html(path)
+    local mod = path_to_module(path):gsub(".init", "")
+    local f = assert(io.open(path))
+    while true do
+        local line = f:read()
+        if not line then break end
+        if line:match("@classmod") then
+            f:close()
+            return "../classes/".. mod ..".html"
+        end
+        if line:match("@module") or line:match("@submodule") then
+            f:close()
+            return "../libraries/".. mod ..".html"
+        end
     end
+    f:close()
 
-    f = io.open("doc/libraries/".. mod ..".html","r")
-
-    if f~=nil then
-        f:close()
-        return "../libraries/".. mod ..".html"
-    end
-
-    -- This can happen
-    return ""
+    error("Cannot figure out if module or class: " .. tostring(path))
 end
 
 local function get_link(file, element)
     return table.concat {
         "<a href='",
-        module_to_html(path_to_module(file)),
+        path_to_html(file),
         "#",
         element,
         "'>",
