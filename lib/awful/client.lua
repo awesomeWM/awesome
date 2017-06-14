@@ -616,7 +616,7 @@ end
 --
 -- This property is read only.
 -- @property is_fixed
--- @param boolean The floating state
+-- @param boolean The fixed size state
 -- @see size_hints
 -- @see size_hints_honor
 
@@ -736,7 +736,7 @@ end
 -- @property y
 -- @param integer
 
---- The width of the wibox.
+--- The width of the client.
 --
 -- **Signal:**
 --
@@ -745,7 +745,7 @@ end
 -- @property width
 -- @param width
 
---- The height of the wibox.
+--- The height of the client.
 --
 -- **Signal:**
 --
