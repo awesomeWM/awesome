@@ -200,14 +200,44 @@ function layout.arrange(screen)
         local p = layout.parameters(nil, screen)
 
         local useless_gap = p.useless_gap
+        local ugap_edge = 0
+        local ugap_d = math.floor(useless_gap/2)
+        local ugap_m = math.fmod(useless_gap,2)
+        local m = 0
+
 
         p.geometries = setmetatable({}, {__mode = "k"})
         layout.get(screen).arrange(p)
         for c, g in pairs(p.geometries) do
-            g.width = math.max(1, g.width - c.border_width * 2 - useless_gap * 2)
-            g.height = math.max(1, g.height - c.border_width * 2 - useless_gap * 2)
-            g.x = g.x + useless_gap
-            g.y = g.y + useless_gap
+            if g.x ~= p.workarea.x
+                then m = ugap_d
+                else m = ugap_edge
+            end
+            g.x = g.x + m
+            g.width = g.width - m
+
+            if (g.x + g.width) ~= (p.workarea.x + p.workarea.width)
+                then m = ugap_d + ugap_m
+                else m = ugap_edge
+            end
+            g.width = g.width - m
+
+            if g.y ~= p.workarea.y 
+                then m = ugap_d
+                else m = ugap_edge
+            end
+            g.y = g.y + m
+            g.height = g.height - m
+
+            if (g.y + g.height) ~= (p.workarea.y + p.workarea.height)
+                then m = ugap_d + ugap_m
+                else m = ugap_edge
+            end
+            g.height = g.height - m
+
+            g.width = g.width - c.border_width * 2 
+            g.height = g.height - c.border_width * 2
+            
             c:geometry(g)
         end
         arrange_lock = false
