@@ -33,9 +33,9 @@ util.table = {}
 --- The default shell used when spawing processes.
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
---- Execute a system command and road the output.
+--- Execute a system command and read the output.
 -- This function implementation **has been removed** and no longer
--- do anything. Use `awful.spawn.easy_async`.
+-- does anything. Use `awful.spawn.easy_async`.
 -- @deprecated awful.util.pread
 
 --- Display a deprecation notice, but only once per traceback.
