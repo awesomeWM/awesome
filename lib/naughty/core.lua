@@ -22,11 +22,11 @@ local screen = require("awful.screen")
 local util = require("awful.util")
 local gtable = require("gears.table")
 local gfs = require("gears.filesystem")
-local bt = require("beautiful")
+local beautiful = require("beautiful")
 local wibox = require("wibox")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
-local dpi = bt.xresources.apply_dpi
+local dpi = beautiful.xresources.apply_dpi
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -591,8 +591,7 @@ function naughty.notify(args)
     local destroy_cb = args.destroy
 
     -- beautiful
-    local beautiful = bt.get()
-    local font = args.font or preset.font or
+    local font = args.font or preset.font or beautiful.notification_font or
         beautiful.font or capi.awesome.font
     local fg = args.fg or preset.fg or
         beautiful.notification_fg or beautiful.fg_normal or '#ffffff'
