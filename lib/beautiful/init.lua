@@ -227,6 +227,10 @@ function beautiful.mt:__index(k)
     return theme[k]
 end
 
+function beautiful.mt:__newindex(k, v)
+    theme[k] = v
+end
+
 -- Set the default font
 set_font("sans 8")
 
