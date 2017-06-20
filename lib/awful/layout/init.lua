@@ -21,6 +21,7 @@ local client = require("awful.client")
 local ascreen = require("awful.screen")
 local timer = require("gears.timer")
 local gmath = require("gears.math")
+local protected_call = require("gears.protected_call")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -197,19 +198,22 @@ function layout.arrange(screen)
         if arrange_lock then return end
         arrange_lock = true
 
-        local p = layout.parameters(nil, screen)
+        -- protected call to ensure that arrange_lock will be reset
+        protected_call(function()
+            local p = layout.parameters(nil, screen)
 
-        local useless_gap = p.useless_gap
+            local useless_gap = p.useless_gap
 
-        p.geometries = setmetatable({}, {__mode = "k"})
-        layout.get(screen).arrange(p)
-        for c, g in pairs(p.geometries) do
-            g.width = math.max(1, g.width - c.border_width * 2 - useless_gap * 2)
-            g.height = math.max(1, g.height - c.border_width * 2 - useless_gap * 2)
-            g.x = g.x + useless_gap
-            g.y = g.y + useless_gap
-            c:geometry(g)
-        end
+            p.geometries = setmetatable({}, {__mode = "k"})
+            layout.get(screen).arrange(p)
+            for c, g in pairs(p.geometries) do
+                g.width = math.max(1, g.width - c.border_width * 2 - useless_gap * 2)
+                g.height = math.max(1, g.height - c.border_width * 2 - useless_gap * 2)
+                g.x = g.x + useless_gap
+                g.y = g.y + useless_gap
+                c:geometry(g)
+            end
+        end)
         arrange_lock = false
         delayed_arrange[screen] = nil
 
