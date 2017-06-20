@@ -240,11 +240,15 @@ end
 -- @return A table with all created tags.
 function tag.new(names, screen, layout)
     screen = get_screen(screen or 1)
+    -- True if `layout` should be used as the layout of each created tag
+    local have_single_layout = (not layout) or (layout.arrange and layout.name)
     local tags = {}
     for id, name in ipairs(names) do
-        table.insert(tags, id, tag.add(name, {screen = screen,
-                                            layout = (layout and layout[id]) or
-                                                        layout}))
+        local l = layout
+        if not have_single_layout then
+            l = layout[id] or layout[1]
+        end
+        table.insert(tags, id, tag.add(name, {screen = screen, layout = l}))
         -- Select the first tag.
         if id == 1 then
             tags[id].selected = true
