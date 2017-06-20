@@ -1,5 +1,6 @@
 sudo: required
 dist: trusty
+group: edge
 language: c
 
 # Build only master and stable branches.  Other branches go through PRs.
