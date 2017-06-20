@@ -240,11 +240,20 @@ end
 -- @return A table with all created tags.
 function tag.new(names, screen, layout)
     screen = get_screen(screen or 1)
-    local tags = {}
+
+    if layout and layout[1] and #names > #layout then
+        gdebug.print_warning("The number of tags is greater than the number of layouts")
+    end
+
+    local tags, overflow = {}, false
     for id, name in ipairs(names) do
-        table.insert(tags, id, tag.add(name, {screen = screen,
-                                            layout = (layout and layout[id]) or
-                                                        layout}))
+        table.insert(tags, id, tag.add(name, {
+            screen = screen,
+            layout = (layout and layout[id]) or (overflow and layout[1] or layout)
+        }))
+
+        overflow = overflow or (layout and layout[id])
+
         -- Select the first tag.
         if id == 1 then
             tags[id].selected = true
