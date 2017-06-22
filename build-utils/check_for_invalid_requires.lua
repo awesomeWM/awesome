@@ -18,6 +18,9 @@ local allowed_deps = {
     gears = {
         lgi = true,
     },
+    ["gears.require_luarocks"] = {
+        ["*"] = true,
+    },
     beautiful = {
         gears = true,
         lgi = true,
