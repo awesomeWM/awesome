@@ -1,5 +1,3 @@
-builddir=.build-$(shell hostname)-$(shell gcc -dumpmachine)-$(shell gcc -dumpversion)
-
 ifeq (,$(VERBOSE))
     MAKEFLAGS:=$(MAKEFLAGS)s
     ECHO=echo
@@ -8,40 +6,38 @@ else
 endif
 
 TARGETS=awesome
-BUILDLN=build
+BUILDDIR=build
 
-all: $(TARGETS) $(BUILDLN) ;
+all: $(TARGETS) ;
 
 $(TARGETS): cmake-build
-	ln -s -f ${builddir}/$@ $@
+	ln -s -f $(BUILDDIR)/$@ $@
 
-$(BUILDLN):
-	test -e $(BUILDLN) || ln -s -f ${builddir} $(BUILDLN)
-
-cmake ${builddir}/CMakeCache.txt:
-	mkdir -p ${builddir}
+$(BUILDDIR)/CMakeCache.txt:
+	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
+	$(ECHO)
+	mkdir -p $(BUILDDIR)
 	$(ECHO) "Running cmake…"
-	cd ${builddir} && cmake $(CMAKE_ARGS) "$(@D)" ..
+	cd $(BUILDDIR) && cmake $(CMAKE_ARGS) "$(@D)" ..
 
-cmake-build: ${builddir}/CMakeCache.txt
+cmake-build: $(BUILDDIR)/CMakeCache.txt
 	$(ECHO) "Building…"
-	$(MAKE) -C ${builddir}
+	$(MAKE) -C $(BUILDDIR)
 
 tags:
 	git ls-files | xargs ctags
 
 install:
 	$(ECHO) "Installing…"
-	$(MAKE) -C ${builddir} install
+	$(MAKE) -C $(BUILDDIR) install
 
 distclean:
 	$(ECHO) -n "Cleaning up build directory…"
-	$(RM) -r ${builddir} $(BUILDLN) $(TARGETS)
+	$(RM) -r $(BUILDDIR) $(TARGETS)
 	$(ECHO) " done"
 
-%: cmake
+%: $(BUILDDIR)/CMakeCache.txt
 	$(ECHO) "Running make $@…"
-	$(MAKE) -C ${builddir} $@
-	$(and $(filter clean,$@),$(RM) $(BUILDLN) $(TARGETS))
+	$(MAKE) -C $(BUILDDIR) $@
 
-.PHONY: cmake-build cmake install distclean $(BUILDLN) tags
+.PHONY: cmake-build install distclean tags
