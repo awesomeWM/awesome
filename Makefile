@@ -8,7 +8,7 @@ endif
 TARGETS=awesome
 BUILDDIR=build
 
-all: $(TARGETS) ;
+all: check-unit $(TARGETS) ;
 
 $(TARGETS): cmake-build
 	ln -s -f $(BUILDDIR)/$@ $@
