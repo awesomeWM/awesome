@@ -308,7 +308,7 @@ end
 -- @callback exe_callback
 -- @tparam string command The command (as entered).
 
---- The callback function to call to get completion.
+--- The callback function to get completions.
 -- @usage local function my_completion_cb(command_before_comp, cur_pos_before_comp, ncomp)
 --    return command_before_comp.."foo", cur_pos_before_comp+3, 1
 -- end
@@ -316,7 +316,7 @@ end
 -- @callback completion_callback
 -- @tparam string command_before_comp The current command.
 -- @tparam number cur_pos_before_comp The current cursor position.
--- @tparam number ncomp The number of completion elements.
+-- @tparam number ncomp The number of the currently completed element.
 -- @treturn string command
 -- @treturn number cur_pos
 -- @treturn number matches
@@ -790,7 +790,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
         else
             if completion_callback then
                 if key == "Tab" or key == "ISO_Left_Tab" then
-                    if key == "ISO_Left_Tab" then
+                    if key == "ISO_Left_Tab" or mod.Shift then
                         if ncomp == 1 then return end
                         if ncomp == 2 then
                             command = command_before_comp
@@ -799,6 +799,8 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                                 text = command_before_comp, text_color = inv_col, cursor_color = cur_col,
                                 cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
                                 prompt = prettyprompt })
+                            cur_pos = cur_pos_before_comp
+                            ncomp = 1
                             return
                         end
 
@@ -816,7 +818,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                         exec(exe_callback)
                         return
                     end
-                else
+                elseif key ~= "Shift_L" and key ~= "Shift_R" then
                     ncomp = 1
                 end
             end
