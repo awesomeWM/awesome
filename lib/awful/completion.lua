@@ -54,12 +54,15 @@ local function bash_escape(str)
     return str
 end
 
---- Use shell completion system to complete command and filename.
--- @param command The command line.
--- @param cur_pos The cursor position.
--- @param ncomp The element number to complete.
--- @param shell The shell to use for completion (bash (default) or zsh).
--- @return The new command, the new cursor position, the table of all matches.
+--- Use shell completion system to complete commands and filenames.
+-- @tparam string command The command line.
+-- @tparam number cur_pos The cursor position.
+-- @tparam number ncomp The element number to complete.
+-- @tparam[opt=based on SHELL] string shell The shell to use for completion.
+--   Supports "bash" and "zsh".
+-- @treturn string The new command.
+-- @treturn number The new cursor position.
+-- @treturn table The table with all matches.
 function completion.shell(command, cur_pos, ncomp, shell)
     local wstart = 1
     local wend = 1
