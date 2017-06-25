@@ -36,6 +36,12 @@ distclean:
 	$(RM) -r $(BUILDDIR) $(TARGETS)
 	$(ECHO) " done"
 
+BUSTED_TESTS:=$(wildcard spec/**/*.lua)
+$(BUSTED_TESTS):
+	busted --lpath="lib/?.lua;lib/?/init.lua;spec/?.lua" \
+	  --helper spec/preload.lua $@
+.PHONY: $(BUSTED_TESTS)
+
 %: $(BUILDDIR)/CMakeCache.txt
 	$(ECHO) "Running make $@…"
 	$(MAKE) -C $(BUILDDIR) $@
