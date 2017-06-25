@@ -494,6 +494,9 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     completion_callback = completion_callback or args.completion_callback
     exe_callback        = exe_callback        or args.exe_callback
     textbox             = textbox             or args.textbox
+    if not textbox then
+        return
+    end
 
     search_term=nil
 
@@ -503,9 +506,6 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local cur_pos = (selectall and 1) or text:wlen() + 1
     -- The completion element to use on completion request.
     local ncomp = 1
-    if not textbox then
-        return
-    end
 
     -- Build the hook map
     for _,v in ipairs(args.hooks or {}) do
@@ -555,7 +555,6 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
             if args.keyreleased_callback then
                 args.keyreleased_callback(mod, key, command)
             end
-
             return
         end
 
