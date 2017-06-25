@@ -134,7 +134,7 @@ a_dbus_message_iter(lua_State *L, DBusMessageIter *iter)
 
                     switch(array_type)
                     {
-                      int datalen = 0;
+                      int datalen;
 #define DBUS_MSG_HANDLE_ARRAY_TYPE_NUMBER_OR_INT(type, dbustype, pusher) \
                       case dbustype: \
                         { \
