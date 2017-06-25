@@ -410,7 +410,7 @@ list(APPEND CHECK_QA_TARGETS check-requires)
 a_find_program(BUSTED_EXECUTABLE busted FALSE)
 if(BUSTED_EXECUTABLE)
     # Keep the arguments in sync with the version below!
-    add_custom_target(check-unit ALL
+    add_custom_target(check-unit
         ${BUSTED_EXECUTABLE} "--helper=${CMAKE_SOURCE_DIR}/spec/preload.lua"
         "--lpath=lib/?.lua;lib/?/init.lua;spec/?.lua"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
