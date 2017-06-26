@@ -1,9 +1,78 @@
 # NEWS
 
-<a name="v41"></a>
-# Awesome window manager framework version 4.1 changes
+<a name="v42"></a>
+# Awesome window manager framework version 4.2 changes
 
 <center> <img src="../images/AUTOGEN_wibox_logo_logo_and_name.svg" /> </center>
+
+Awesome v4.2 is the second release of the 4.x API. It mostly fix the bugs
+reported over the last 3 months and add a couple widgets. Almost 150 issues
+have been resolved or decided to be obsolete.
+
+## Noteworthy fixes
+
+ * The annoying maximization regression from v4.1 have been fixed
+ * Fixes broken drag&drop with some applications like FlowBlade
+ * Changing the keyboard layout using `xmodmap` is now much faster
+ * Fixes a regression that prevents Awesome to start with the wallpaper is invalid
+ * The client history is now more reliable
+ * Another instance where clients ended up in the wrong screen has been fixed
+ * Awesome will no longer generate zombie processes when restarted
+ * All official themes now support HiDPI screens
+ * The `magnifier` layout has been fixed
+ * The menubar has been fixed for Lua 5.1 users
+
+## New features
+
+ * The hotkey popup has been extended to support Firefox and TMUX
+ * Naughty (the notification system) has a new `ignore_suspend` flag
+ * The `textclock` widget now supports timezones
+ * New utility functions have been added:
+   * `gears.string.split`
+   * `gears.table.map`
+   * `gears.filesystem.make_parent_directories`
+ * New widget functions (moved out of the `gears` module):
+   * `wibox.widget.draw_to_cairo_context`
+   * `wibox.widget.draw_to_svg_file`
+   * `wibox.widget.draw_to_image_surface`
+ * Maximization requests from clients can now be intercepted using a
+   `request::geometry` signal handler.
+ * A new `wibox.layout.manual` layout has been added (see below)
+ * Two new `calendar` widgets have been added, a widget and a popup (see below)
+ * The `ratio` layout now supports various strategies to redistribute space
+ * The `stack` layout now supports offsets
+
+The stack layout offsets:
+
+[![The stack offset](../images/AUTOGEN_wibox_layout_stack_offset.svg)](../classes/wibox.layout.stack.html)
+
+The ratio layout new full strategies:
+
+[![The ratio strategies](../images/AUTOGEN_wibox_layout_ratio_strategy.svg)](../classes/wibox.layout.ratio.html)
+
+The `manual` layout fix a capability gap where hierarchical elements need to be
+placed manually. It has multiple modes including an `awful.placement` integration.
+
+[![The manual layout](../images/AUTOGEN_wibox_layout_manual_add_at.svg)](../classes/wibox.layout.manual.html)
+
+The new calendar widgets are very flexible and can be themed down to the very small details:
+
+[![The calendar widget](../images/AUTOGEN_wibox_widget_calendar_fn_embed_cell.svg)](../classes/wibox.widget.calendar.html)
+[![The calendar widget](../images/AUTOGEN_wibox_widget_calendar_font.svg)](../classes/wibox.widget.calendar.html)
+
+
+## Behavior changes
+
+ * The client `property::floating` is now also emitted when when the floating
+   state changes implicitly, e.g. because the client gets maximized or
+   fullscreened.
+ * Building Awesome from its root source directory is no longer supported and
+   will print an error.
+
+<hr />
+
+<a name="v41"></a>
+# Awesome window manager framework version 4.1 changes
 
 Awesome v4.1 is the first stable release for the Awesome 4.0 API. It adds
 non-breaking new features and fixes bugs. The main purpose of the release is to
@@ -182,6 +251,7 @@ new code should use the functions from `gears` instead of `awful.util`.
    an issue in the menubar module when used with 0.7.3.
  * GTK+3 is now required to run the integration tests.
 
+<hr />
 
 <a name="v4"></a>
 # Awesome window manager framework version 4.0 changes
