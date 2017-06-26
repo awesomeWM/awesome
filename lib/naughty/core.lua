@@ -51,6 +51,10 @@ notifications, e.g.
         args.text = 'prefix: ' .. args.text
         return args
     end
+  To reject a notification return `nil` from the callback.
+  If the notification is a freedesktop notification received via DBUS, you can
+  access the freedesktop hints via `args.freedesktop_hints` if any where
+  specified.
 
 @tfield table presets Notification presets.  See `config.presets`.
 
