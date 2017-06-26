@@ -323,14 +323,12 @@ end
 --- Asynchronously spawn a program and capture its output.
 -- (wraps `spawn.with_line_callback`).
 -- @tparam string|table cmd The command.
--- @function callback Function with the following arguments:
+-- @tab callback Function with the following arguments
 --   @tparam string callback.stdout Output on stdout.
 --   @tparam string callback.stderr Output on stderr.
---   @tparam string callback.exitreason Exit Reason.
---   @tparam integer callback.exitcode Exit code.
---   The exitreason argument can either be "exit" or "signal".
---   For "exit" reason it's the exit code.
---   For "signal" reason it's the signal causing process termination.
+--   @tparam string callback.exitreason Exit reason ("exit" or "signal").
+--   @tparam integer callback.exitcode Exit code (exit code or signal number,
+--     depending on "exitreason").
 -- @treturn[1] Integer the PID of the forked process.
 -- @treturn[2] string Error message.
 -- @see spawn.with_line_callback
@@ -372,17 +370,15 @@ function spawn.easy_async(cmd, callback)
     })
 end
 
---- Call spawn.easy_async with a shell.
+--- Call `spawn.easy_async` with a shell.
 -- This calls `cmd` with `$SHELL -c` (via `awful.util.shell`).
 -- @tparam string|table cmd The command.
--- @function callback Function with the following arguments:
+-- @tab callback Function with the following arguments
 --   @tparam string callback.stdout Output on stdout.
 --   @tparam string callback.stderr Output on stderr.
---   @tparam string callback.exitreason Exit Reason.
---   @tparam integer callback.exitcode Exit code.
---   The exitreason argument can either be "exit" or "signal".
---   For "exit" reason it's the exit code.
---   For "signal" reason it's the signal causing process termination.
+--   @tparam string callback.exitreason Exit reason ("exit" or "signal").
+--   @tparam integer callback.exitcode Exit code (exit code or signal number,
+--     depending on "exitreason").
 -- @treturn[1] Integer the PID of the forked process.
 -- @treturn[2] string Error message.
 -- @see spawn.with_line_callback
