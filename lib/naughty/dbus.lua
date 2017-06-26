@@ -181,6 +181,7 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                 if expire and expire > -1 then
                     args.timeout = expire / 1000
                 end
+                args.freedesktop_hints = hints
                 notification = naughty.notify(args)
                 return "u", notification.id
             end
