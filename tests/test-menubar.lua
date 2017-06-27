@@ -14,6 +14,20 @@ if _VERSION == "Lua 5.3" or debug.gethook() then
     return
 end
 
+-- Make sure no error messages for non-existing directories are printed. If the
+-- word "error" appears in our output, the test is considered to have failed.
+do
+    local gdebug = require("gears.debug")
+    local orig_error = gdebug.print_error
+    function gdebug.print_error(msg)
+        msg = tostring(msg)
+        if (msg ~= "Error opening directory '/dev/null/.local/share/applications': Not a directory") and
+                (not msg:match("No such file or directory")) then
+            orig_error(msg)
+        end
+    end
+end
+
 runner.run_steps {
     function(count)
         -- Just show the menubar and hide it.
@@ -21,13 +35,6 @@ runner.run_steps {
         -- nothing (and tells us when errors are thrown).
 
         if count == 1 then
-            -- Remove the entry for $HOME/.... from the search path. We run with
-            -- HOME=/dev/null and this would cause an error message to be
-            -- printed which would be interpreted as the test failing
-            local entry = menubar.menu_gen.all_menu_dirs[1]
-            assert(string.find(entry, "/dev/null"), entry)
-            table.remove(menubar.menu_gen.all_menu_dirs, 1)
-
             menubar.show()
         end
 
