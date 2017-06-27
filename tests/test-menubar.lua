@@ -7,8 +7,10 @@ local menubar = require("menubar")
 -- bugs in lgi. Thus, do not run this test with Lua 5.3 until lgi is fixed.
 -- We run into the same bug when doing code-coverage analysis, supposedly
 -- because the additional GC activity means that something which is GC-able when
--- it should not gets collected too early
-if _VERSION == "Lua 5.3" or debug.gethook() then
+-- it should not gets collected too early.
+-- This test also sporadically errors on LuaJIT ("attempt to call a number
+-- value"). This might be a different issue, but still, disable the test.
+if _VERSION == "Lua 5.3" or debug.gethook() or jit then --luacheck: globals jit
     print("Skipping this test since it would just fail.")
     runner.run_steps { function() return true end }
     return
