@@ -16,6 +16,7 @@ local pairs = pairs
 local floor = math.floor
 local gmath = require("gears.math")
 local gtable = require("gears.table")
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local ratio = {}
 
@@ -78,15 +79,19 @@ local function normalize(self)
     assert(new_sum > 0.99 and new_sum < 1.01)
 end
 
-function ratio:layout(_, width, height)
-    local result = {}
+function ratio:layout(context, width, height)
+    local preliminary_results = {}
     local pos,spacing = 0, self._private.spacing
+    local strategy = self:get_inner_fill_strategy()
+    local has_stragety = strategy ~= "default"
+    local to_redistribute, void_count = 0, 0
+    local dir = self._private.dir or "x"
 
     for k, v in ipairs(self._private.widgets) do
-        local space
-        local x, y, w, h
+        local space, is_void
+        local x, y, w, h, fit_h, fit_w
 
-        if self._private.dir == "y" then
+        if dir == "y" then
             space = height * self._private.ratios[k]
             x, y = 0, gmath.round(pos)
             w, h = width, floor(space)
@@ -96,16 +101,73 @@ function ratio:layout(_, width, height)
             w, h = floor(space), height
         end
 
-        table.insert(result, base.place_widget_at(v, x, y, w, h))
+        -- Keep track of the unused entries
+        if has_stragety then
+            fit_h, fit_w = base.fit_widget(
+                self, context, v,
+                dir == "x" and floor(space) or w,
+                dir == "y" and floor(space) or h
+            )
+
+            is_void = (v.visible == false)
+                or (dir == "x" and fit_w == 0)
+                or (dir == "y" and fit_h == 0)
+
+            if is_void then
+                to_redistribute = to_redistribute + space + spacing
+                void_count = void_count + 1
+            end
+        end
+
+        table.insert(preliminary_results, {v, x, y, w, h, is_void})
 
         pos = pos + space + spacing
 
         -- Make sure all widgets fit in the layout, if they aren't, something
         -- went wrong
-        if (self._private.dir == "y" and gmath.round(pos) >= height) or
-            (self._private.dir ~= "y" and gmath.round(pos) >= width) then
+        if (dir == "y" and gmath.round(pos) >= height) or
+            (dir ~= "y" and gmath.round(pos) >= width) then
             break
         end
+    end
+
+    local active = #preliminary_results - void_count
+    local result, real_pos, space_front = {}, 0, strategy == "right" and
+        to_redistribute or (
+            strategy == "center" and math.floor(to_redistribute/2) or 0
+        )
+
+    -- The number of spaces between `n` element is `n-1`, if there is spaces
+    -- outside, then it is `n+1`
+    if strategy == "spacing" then
+        space_front = (space_front+to_redistribute/(active + 1))
+        to_redistribute = (to_redistribute/(active + 1))*(active - 1)
+    end
+
+    spacing = strategy:match("spacing")
+        and to_redistribute/(active - 1) or 0
+
+    -- Only the `justify` strategy changes the original widget size.
+    to_redistribute = (strategy == "justify") and to_redistribute or 0
+
+    for _, entry in ipairs(preliminary_results) do
+        local v, x, y, w, h, is_void = unpack(entry)
+
+        -- Redistribute the space or move the widgets
+        if strategy ~= "default" then
+            if dir == "y" then
+                h = is_void and 0 or h + (to_redistribute / (active))
+                y = space_front + real_pos
+                real_pos = real_pos + h + (is_void and 0 or spacing)
+
+            else
+                w = is_void and 0 or w + (to_redistribute / (active))
+                x = space_front + real_pos
+                real_pos = real_pos + w + (is_void and 0 or spacing)
+            end
+        end
+
+        table.insert(result, base.place_widget_at(v, x, y, w, h))
     end
 
     return result
@@ -114,6 +176,9 @@ end
 --- Increase the ratio of "widget"
 -- If the increment produce an invalid ratio (not between 0 and 1), the method
 -- do nothing.
+--
+--@DOC_wibox_layout_ratio_inc_ratio_EXAMPLE@
+--
 -- @tparam number index The widget index to change
 -- @tparam number increment An floating point value between -1 and 1 where the
 --   end result is within 0 and 1
@@ -187,7 +252,10 @@ function ratio:set_widget_ratio(widget, percent)
 end
 
 --- Update all widgets to match a set of a ratio.
--- The sum of before, itself and after must be 1 or nothing will be done
+-- The sum of before, itself and after must be 1 or nothing will be done.
+--
+--@DOC_wibox_layout_ratio_ajust_ratio_EXAMPLE@
+--
 -- @tparam number index The index of the widget to change
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
@@ -289,6 +357,44 @@ function ratio:insert(index, widget)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::inserted", widget, #self._private.widgets)
+end
+
+--- Set how the space of invisible or `0x0` sized widget is redistributed.
+--
+-- Possible values:
+--
+-- * "default": Honor the ratio and do not redistribute the space.
+-- * "justify": Distribute the space among remaining widgets.
+-- * "center": Squash remaining widgets and leave equal space on both side.
+-- * "inner_spacing": Add equal spacing between all widgets.
+-- * "spacing": Add equal spacing between all widgets and on the outside.
+-- * "left": Squash remaining widgets and leave empty space on the left.
+-- * "right": Squash remaining widgets and leave empty space on the right.
+--
+--@DOC_wibox_layout_ratio_strategy_EXAMPLE@
+--
+-- @property inner_fill_strategy
+-- @tparam string inner_fill_strategy One of the value listed above.
+
+function ratio:get_inner_fill_strategy()
+    return self._private.inner_fill_strategy or "default"
+end
+
+local valid_strategies = {
+    default       = true,
+    justify       = true,
+    center        = true,
+    inner_spacing = true,
+    spacing       = true,
+    left          = true,
+    right         = true
+}
+
+function ratio:set_inner_fill_strategy(strategy)
+    assert(valid_strategies[strategy] ~= nil, "Invalid strategy: "..(strategy or ""))
+
+    self._private.inner_fill_strategy = strategy
+    self:emit_signal("widget::layout_changed")
 end
 
 local function get_layout(dir, widget1, ...)

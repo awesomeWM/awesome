@@ -96,9 +96,9 @@ end
 
 --- Get the reflection of this mirror layout.
 -- @property reflection
--- @param table reflection A table of booleans with the keys "horizontal", "vertical".
--- @param boolean reflection.horizontal
--- @param boolean reflection.vertical
+-- @tparam table reflection A table of booleans with the keys "horizontal", "vertical".
+-- @tparam boolean reflection.horizontal
+-- @tparam boolean reflection.vertical
 
 function mirror:get_reflection()
     return { horizontal = self._private.horizontal, vertical = self._private.vertical }
