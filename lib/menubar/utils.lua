@@ -305,9 +305,13 @@ function utils.parse_dir(dir_path, callback)
                 local file_child = enum:get_child(info)
                 if file_type == 'REGULAR' then
                     local path = file_child:get_path()
-                    local program = path and utils.parse_desktop_file(path)
-                    if program then
-                        table.insert(programs, program)
+                    if path then
+                        local success, program = pcall(utils.parse_desktop_file, path)
+                        if not success then
+                            gdebug.print_error("Error while reading '" .. path .. "': " .. program)
+                        elseif program then
+                            table.insert(programs, program)
+                        end
                     end
                 elseif file_type == 'DIRECTORY' then
                     parser(file_child, programs)
