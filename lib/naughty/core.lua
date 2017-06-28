@@ -221,11 +221,7 @@ end)
 
 capi.screen.connect_signal("removed", function(scr)
     -- Destroy all notifications on this screen
-    for _, list in pairs(naughty.notifications[scr]) do
-        while #list > 0 do
-            naughty.destroy(list[1])
-        end
-    end
+    naughty.destroy_all_notifications({scr})
     naughty.notifications[scr] = nil
 end)
 
@@ -366,6 +362,32 @@ function naughty.destroy(notification, reason, keep_visible)
         end
         return true
     end
+end
+
+--- Destroy all notifications on given screens.
+--
+-- @tparam table screens Table of screens on which notifications should be
+-- destroyed. If nil, destroy notifications on all screens.
+-- @tparam naughty.notificationClosedReason reason Reason for closing
+-- notifications.
+-- @treturn true|nil True if all notifications were successfully destroyed, nil
+-- otherwise.
+function naughty.destroy_all_notifications(screens, reason)
+    if not screens then
+        screens = {}
+        for key, _ in pairs(naughty.notifications) do
+            table.insert(screens, key)
+        end
+    end
+    local ret = true
+    for _, scr in pairs(screens) do
+        for _, list in pairs(naughty.notifications[scr]) do
+            while #list > 0 do
+                ret = ret and naughty.destroy(list[1], reason)
+            end
+        end
+    end
+    return ret
 end
 
 --- Get notification by ID
