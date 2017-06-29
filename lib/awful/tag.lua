@@ -1278,7 +1278,7 @@ end
 function tag.viewmore(tags)
     local screens = {}
     for _, _tag in ipairs(tags) do
-        screens[_tag.screen] = true
+        screens[get_screen(_tag.screen)] = true
     end
     for screen, _ in pairs(screens) do
         local screen_tags = screen.tags
@@ -1290,8 +1290,8 @@ function tag.viewmore(tags)
         for _, _tag in ipairs(tags) do
             _tag.selected = true
         end
+        screen:emit_signal("tag::history::update")
     end
-    screen:emit_signal("tag::history::update")
 end
 
 --- Toggle selection of a tag
