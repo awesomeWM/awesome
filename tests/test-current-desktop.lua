@@ -30,11 +30,11 @@ end
 
 local steps = {
 
-    -- Set up the state we want
+    -- Setup.
     function(count)
         if count == 1 then
             test_client()
-            awful.tag.viewmore({ tags[3], tags[4], tags[5] }, s)
+            awful.tag.viewmore({ tags[3], tags[4], tags[5] })
         end
 
         c = awful.client.visible()[1]

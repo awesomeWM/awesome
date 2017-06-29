@@ -514,7 +514,7 @@ function menu.clients(args, item_args, filter)
             function ()
                 if not c.valid then return end
                 if not c:isvisible() then
-                    tags.viewmore(c:tags(), c.screen)
+                    tags.viewmore(c:tags())
                 end
                 c:emit_signal("request::activate", "menu.clients", {raise=true})
             end,
