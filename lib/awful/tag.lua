@@ -1275,17 +1275,21 @@ end
 --- View only a set of tags.
 -- @function awful.tag.viewmore
 -- @param tags A table with tags to view only.
--- @param[opt] screen The screen of the tags.
-function tag.viewmore(tags, screen)
-    screen = get_screen(screen or ascreen.focused())
-    local screen_tags = screen.tags
-    for _, _tag in ipairs(screen_tags) do
-        if not gtable.hasitem(tags, _tag) then
-            _tag.selected = false
-        end
-    end
+function tag.viewmore(tags)
+    local screens = {}
     for _, _tag in ipairs(tags) do
-        _tag.selected = true
+        screens[_tag.screen] = true
+    end
+    for screen, _ in pairs(screens) do
+        local screen_tags = screen.tags
+        for _, _tag in ipairs(screen_tags) do
+            if not gtable.hasitem(tags, _tag) then
+                _tag.selected = false
+            end
+        end
+        for _, _tag in ipairs(tags) do
+            _tag.selected = true
+        end
     end
     screen:emit_signal("tag::history::update")
 end
