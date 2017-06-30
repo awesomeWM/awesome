@@ -1274,8 +1274,9 @@ end
 
 --- View only a set of tags.
 -- @function awful.tag.viewmore
--- @param tags A table with tags to view only.
-function tag.viewmore(tags)
+-- @tparam table tags A table with tags to view only.
+-- @param ignored_screen Ignored (only kept for backward compatibility).
+function tag.viewmore(tags, ignored_screen)  -- luacheck: ignore
     local screens = {}
     for _, _tag in ipairs(tags) do
         screens[get_screen(_tag.screen)] = true
