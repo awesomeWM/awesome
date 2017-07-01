@@ -610,7 +610,7 @@ a_dbus_connect(DBusBusType type, const char *type_name, GSourceFunc cb, GSource 
     dbus_connection = dbus_bus_get(type, &err);
     if(dbus_error_is_set(&err))
     {
-        warn("D-Bus session bus %s failed: %s", type_name, err.message);
+        warn("Could not connect to D-Bus %s bus: %s", type_name, err.message);
         dbus_connection = NULL;
         dbus_error_free(&err);
     }
