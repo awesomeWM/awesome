@@ -15,7 +15,7 @@ addons:
     packages:
     - luarocks
     - lua-lgi
-    - busted
+    - lua-busted
     - ${LUA_PKG}
 
 env:
