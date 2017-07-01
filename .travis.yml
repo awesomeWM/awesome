@@ -142,7 +142,7 @@ install:
     travis_run_in_fold() {
       travis_fold_start "$1"
       shift
-      "$@" || return
+      "$@" || return 1
       travis_fold_end
       return 0
     }
@@ -189,15 +189,14 @@ script:
          && cmake $CMAKE_ARGS ..)
         do_codecov samples
 
-        (make check-unit-coverage \
-         && do_codecov unittests \
-         && tests/run.sh \
-         && do_codecov functionaltests \
-         && gcov $(find -name '*.o') \
-         && do_codecov_gcov c_code)
-        ret=$?
+        make check-unit-coverage
+        do_codecov unittests
+        tests/run.sh
+        do_codecov functionaltests
+        gcov $(find -name '*.o')
+        do_codecov_gcov c_code
+
         travis_fold_end
-        [ "$ret" = 0 ]
       else
         travis_run_in_fold "make.check-unit" make check-unit
         travis_run_in_fold "make.check-integration" make check-integration
