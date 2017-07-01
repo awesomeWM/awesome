@@ -11,7 +11,9 @@ branches:
 addons:
   apt:
     sources:
-    - debian-sid
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ zesty main universe
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ zesty-security main universe
+    - sourceline: deb http://archive.ubuntu.com/ubuntu/ zesty-updates main universe
     packages:
     - ${LUA_PKG}
     - lua-lgi
