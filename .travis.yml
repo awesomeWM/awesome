@@ -19,16 +19,33 @@ addons:
     - lua-lgi
     - luarocks
 
-    # # Build deps. See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
-    # - libxcb-xrm0
-    #
-    # # Deps for tests.
-    # - lua-busted
-    # - dbus-x11
-    # - xterm xdotool
-    # - xterm
-    # - xvfb
-    # - zsh
+    # Build deps. See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
+    - libpango1.0-dev
+    - libxcb-xtest0-dev
+    - libxcb-icccm4-dev
+    - libxcb-randr0-dev
+    - libxcb-keysyms1-dev
+    - libxcb-xinerama0-dev
+    - libdbus-1-dev
+    - libxdg-basedir-dev
+    - libstartup-notification0-dev
+    - libxcb1-dev
+    - libxcb-shape0-dev
+    - libxcb-util0-dev
+    - libx11-xcb-dev
+    - libxcb-cursor-dev
+    - libxcb-xkb-dev
+    - libxkbcommon-dev
+    - libxkbcommon-x11-dev
+    - libxcb-xrm0
+
+    # Deps for tests.
+    - lua-busted
+    - dbus-x11
+    - xterm xdotool
+    - xterm
+    - xvfb
+    - zsh
 
 env:
   matrix:
