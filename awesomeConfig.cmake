@@ -67,6 +67,12 @@ a_find_program(CONVERT_EXECUTABLE convert TRUE)
 include(FindPkgConfig)
 # lua
 include(FindLua)
+if (NOT LUA_FOUND)
+    message(FATAL_ERROR
+        "Could not find Lua. See the error above.\n"
+        "You might want to hint it using the LUA_DIR environment variable, "
+        "or set the LUA_INCLUDE_DIR / LUA_LIBRARY CMake variables.")
+endif()
 # }}}
 
 # {{{ Check if documentation can be build
