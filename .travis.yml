@@ -20,28 +20,6 @@ addons:
     - luarocks
 
     # Build deps. See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
-    - libcairo2-dev
-    - gir1.2-gtk-3.0
-    - xmlto
-    - asciidoc
-    - libpango1.0-dev
-    - libxcb-xtest0-dev
-    - libxcb-icccm4-dev
-    - libxcb-randr0-dev
-    - libxcb-keysyms1-dev
-    - libxcb-xinerama0-dev
-    - libdbus-1-dev
-    - libxdg-basedir-dev
-    - libstartup-notification0-dev
-    - imagemagick
-    - libxcb1-dev
-    - libxcb-shape0-dev
-    - libxcb-util0-dev
-    - libx11-xcb-dev
-    - libxcb-cursor-dev
-    - libxcb-xkb-dev
-    - libxkbcommon-dev
-    - libxkbcommon-x11-dev
     - libxcb-xrm0
 
     # Deps for tests.
@@ -68,13 +46,20 @@ env:
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
 
 before_install:
+  - |
+    for f in find /etc/apt -type f; do
+      echo "======== $f ==========="
+      cat $f
+    done
+
   - if [ "$BUILD_APIDOC" = true ] && [ -n "$DO_COVERAGE" ]; then echo "BUILD_APIDOC and DO_COVERAGE are not meant to be used together." >&2; exit 1; fi
   - if [ -z $LUAINCLUDE ]; then LUAINCLUDE=/usr/include/${LUANAME}; fi
   - if [ -z $LUALIBRARY ]; then LUALIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so; fi
   - cmake --version
 
 install:
-  - eval $(luarocks path)
+  # TODO: required?!
+  - eval "$(luarocks path)"
 
   # Install luacheck for "make check-qa".
   - if [ "$DO_CHECKQA" = 1 ]; then travis_retry luarocks --local install luacheck; fi
