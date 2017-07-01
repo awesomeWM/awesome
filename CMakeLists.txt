@@ -426,6 +426,10 @@ if(BUSTED_EXECUTABLE)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests under LuaCov"
         VERBATIM)
+else()
+    add_custom_target(check-unit true
+        COMMENT "Skipping check-unit, since busted was not found"
+        VERBATIM)
 endif()
 a_find_program(LUACHECK_EXECUTABLE luacheck FALSE)
 if(LUACHECK_EXECUTABLE)
