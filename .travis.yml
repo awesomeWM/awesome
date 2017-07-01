@@ -19,35 +19,32 @@ addons:
     - lua-lgi
     - luarocks
 
-    # Build deps. See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
-    - libxcb-xrm0
-
-    # Deps for tests.
-    - lua-busted
-    - dbus-x11
-    - xterm xdotool
-    - xterm
-    - xvfb
-    - zsh
+    # # Build deps. See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
+    # - libxcb-xrm0
+    #
+    # # Deps for tests.
+    # - lua-busted
+    # - dbus-x11
+    # - xterm xdotool
+    # - xterm
+    # - xvfb
+    # - zsh
 
 env:
   matrix:
     - LUA=5.2 LUA_PKG=lua5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
-    # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
-    - LUA=5.3 LUA_PKG=lua5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
-    # luajit: installed from source.
-    - LUA=5.1 LUA_PKG=luajit LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1
-    # Note: luarocks does not work with Lua 5.0.
-    - LUA=5.1 LUA_PKG=lua5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
-    # Lua 5.2 with older lgi and screen size not divisible by 2.
-    - LUA=5.2 LUA_PKG=lua5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079 BUILD_APIDOC=true DO_CHECKQA=1 EMPTY_THEME_WHILE_LOADING=1
+    # - LUA=5.3 LUA_PKG=lua5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
+    # - LUA=5.1 LUA_PKG=luajit LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1
+    # - LUA=5.1 LUA_PKG=lua5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
+    # # Lua 5.2 with older lgi and screen size not divisible by 2.
+    # - LUA=5.2 LUA_PKG=lua5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079 BUILD_APIDOC=true DO_CHECKQA=1 EMPTY_THEME_WHILE_LOADING=1
   global:
     # Secure GH_APIDOC_TOKEN to push to awesomeWM/apidoc.
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
 
 before_install:
   - |
-    for f in find /etc/apt -type f; do
+    for f in $(find /etc/apt -type f); do
       echo "======== $f ==========="
       cat $f
     done
