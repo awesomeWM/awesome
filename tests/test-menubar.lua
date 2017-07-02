@@ -3,6 +3,13 @@
 local runner = require("_runner")
 local menubar = require("menubar")
 
+local menubar_refreshed = false
+local orig_refresh = menubar.refresh
+function menubar.refresh(...)
+    menubar_refreshed = true
+    orig_refresh(...)
+end
+
 -- XXX We are building Lua 5.3 with -DLUA_USE_APICHECK=1 and this catches some
 -- bugs in lgi. Thus, do not run this test with Lua 5.3 until lgi is fixed.
 -- We run into the same bug when doing code-coverage analysis, supposedly
@@ -41,7 +48,7 @@ runner.run_steps {
         end
 
         -- Test that the async population of the menubar is done
-        if #menubar.menu_entries > 0 then
+        if menubar_refreshed then
             menubar.hide()
             awesome.sync()
             return true
