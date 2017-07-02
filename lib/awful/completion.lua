@@ -79,6 +79,10 @@ function completion.shell(command, cur_pos, ncomp, shell)
     local i = 1
     local comptype = "file"
 
+    local function str_starts(str, start)
+        return string.sub(str, 1, string.len(start)) == start
+    end
+
     -- do nothing if we are on a letter, i.e. not at len + 1 or on a space
     if cur_pos ~= #command + 1 and command:sub(cur_pos, cur_pos) ~= " " then
         return command, cur_pos
