@@ -53,6 +53,17 @@ function filesystem.file_readable(filename)
         gfileinfo:get_attribute_boolean("access::can-read")
 end
 
+--- Check if a file exists, is executable and not a directory.
+-- @tparam string filename The file path.
+-- @treturn boolean True if file exists and is executable.
+function filesystem.file_executable(filename)
+    local gfile = Gio.File.new_for_path(filename)
+    local gfileinfo = gfile:query_info("standard::type,access::can-execute",
+                                       Gio.FileQueryInfoFlags.NONE)
+    return gfileinfo and gfileinfo:get_file_type() ~= "DIRECTORY" and
+        gfileinfo:get_attribute_boolean("access::can-execute")
+end
+
 --- Check if a path exists, is readable and a directory.
 -- @tparam string path The directory path.
 -- @treturn boolean True if path exists and is readable.
