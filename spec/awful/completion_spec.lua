@@ -60,21 +60,16 @@ local function get_test_dir()
 end
 
 describe("awful.completion.shell in empty directory", function()
-    local orig_popen = io.popen
     local orig_dir = lfs.currentdir()
 
     setup(function()
         test_dir = get_test_dir()
-        io.popen = function(...)  --luacheck: ignore
-            return orig_popen(string.format('cd %s && ', test_dir) .. ...)
-        end
         lfs.chdir(test_dir)
         test_path = get_test_path_dir()
     end)
 
     teardown(function()
         assert.True(os.remove(test_dir))
-        io.popen = orig_popen  --luacheck: ignore
         remove_test_path_dir(test_path)
         lfs.chdir(orig_dir)
     end)
@@ -95,7 +90,6 @@ describe("awful.completion.shell in empty directory", function()
 end)
 
 describe("awful.completion.shell", function()
-    local orig_popen = io.popen
     local orig_dir = lfs.currentdir()
 
     setup(function()
@@ -104,9 +98,6 @@ describe("awful.completion.shell", function()
         gfs.make_directories(test_dir .. '/just_a_directory')
         os.execute(string.format(
             'cd %s && touch localcommand && chmod +x localcommand', test_dir))
-        io.popen = function(...)  --luacheck: ignore
-            return orig_popen(string.format('cd %s && ', test_dir) .. ...)
-        end
         lfs.chdir(test_dir)
         test_path = get_test_path_dir()
     end)
@@ -116,7 +107,6 @@ describe("awful.completion.shell", function()
         assert.True(os.remove(test_dir .. '/localcommand'))
         assert.True(os.remove(test_dir .. '/true'))
         assert.True(os.remove(test_dir))
-        io.popen = orig_popen  --luacheck: ignore
         remove_test_path_dir(test_path)
         lfs.chdir(orig_dir)
     end)
