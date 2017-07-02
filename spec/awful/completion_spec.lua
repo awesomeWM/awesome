@@ -146,6 +146,20 @@ describe("awful.completion.shell", function()
             assert.same(shell('ls l', 5, 1, 'zsh'), {'ls localcommand', 16, {'localcommand'}})
         end)
     end
+
+    if has_bash then
+        it("completes command regardless of local directory (bash)", function()
+            assert.same(shell('true', 5, 1, 'bash'), {'true', 5, {'true'}})
+        end)
+    end
+    if has_zsh then
+        it("completes command regardless of local directory (zsh)", function()
+            assert.same(shell('true', 5, 1, 'zsh'), {'true', 5, {'true'}})
+        end)
+    end
+    it("completes command regardless of local directory (nil)", function()
+        assert.same(shell('true', 5, 1, nil), {'true', 5, {'true'}})
+    end)
 end)
 
 describe("awful.completion.shell handles $SHELL", function()
