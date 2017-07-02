@@ -95,6 +95,8 @@ describe("awful.completion.shell", function()
 
     setup(function()
         test_dir = get_test_dir()
+        gfs.make_directories(test_dir .. '/true')
+        gfs.make_directories(test_dir .. '/just_a_directory')
         os.execute(string.format(
             'cd %s && touch localcommand && chmod +x localcommand', test_dir))
         io.popen = function(...)  --luacheck: ignore
@@ -104,7 +106,9 @@ describe("awful.completion.shell", function()
     end)
 
     teardown(function()
+        assert.True(os.remove(test_dir .. '/just_a_directory'))
         assert.True(os.remove(test_dir .. '/localcommand'))
+        assert.True(os.remove(test_dir .. '/true'))
         assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
         remove_test_path_dir(test_path)
