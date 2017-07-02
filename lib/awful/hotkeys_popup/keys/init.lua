@@ -3,7 +3,7 @@
 --
 -- @author Yauheni Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2014-2015 Yauheni Kirylau
--- @module awful.hotkeys_popup.keys
+-- @submodule awful.hotkeys_popup
 ---------------------------------------------------------------------------
 
 

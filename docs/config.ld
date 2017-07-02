@@ -85,7 +85,14 @@ file = {
     '../spawn.c',
     '../xkb.c',
     '../common/luaobject.c',
-    '../objects/',
+    '../objects/button.c',
+    '../objects/client.c',
+    '../objects/drawable.c',
+    '../objects/key.c',
+    '../objects/screen.c',
+    '../objects/tag.c',
+    '../objects/window.c',
+
     -- LUA libraries
     '../lib/',
     -- Auto generated scripts
@@ -109,9 +116,6 @@ file = {
 
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',
-
-        -- Ignore the drawing window, users should only care about wiboxes
-        '../objects/drawin.c',
     }
 }
 

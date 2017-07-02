@@ -3,7 +3,7 @@
 --
 -- @author nahsi nashi@airmail.cc
 -- @copyright 2017 nahsi
--- @module awful.hotkeys_popup.keys.tmux
+-- @submodule  awful.hotkeys_popup
 ---------------------------------------------------------------------------
 
 local hotkeys_popup = require("awful.hotkeys_popup.widget")

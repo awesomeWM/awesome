@@ -3,7 +3,7 @@
 --
 -- @author Jonathan &lt;jonathan@tinypulse.com&gt;
 -- @copyright 2017 Jonathan
--- @module awful.hotkeys_popup.keys.firefox
+-- @submodule awful.hotkeys_popup
 ---------------------------------------------------------------------------
 
 local hotkeys_popup = require("awful.hotkeys_popup.widget")
