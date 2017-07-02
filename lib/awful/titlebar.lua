@@ -1,9 +1,15 @@
 ---------------------------------------------------------------------------
 --- Titlebars for awful.
+--**Create a titlebar:**
+--
+-- This example reproduces what the default `rc.lua` does. It shows how to
+-- handle the titlebars on a lower level.
+--
+-- @DOC_awful_titlebar_default_EXAMPLE@
 --
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
--- @module awful.titlebar
+-- @classmod awful.titlebar
 ---------------------------------------------------------------------------
 
 local error = error
@@ -447,8 +453,7 @@ local function get_titlebar_function(c, position)
     end
 end
 
---- Get a client's titlebar
--- @class function
+--- Get a client's titlebar.
 -- @tparam client c The client for which a titlebar is wanted.
 -- @tparam[opt={}] table args A table with extra arguments for the titlebar.
 -- @tparam[opt=font.height*1.5] number args.size The height of the titlebar.
@@ -461,7 +466,7 @@ end
 -- @tparam[opt=top] string args.fg_normal
 -- @tparam[opt=top] string args.fg_focus
 -- @tparam[opt=top] string args.font
--- @name titlebar
+-- @function awful.titlebar
 local function new(c, args)
     args = args or {}
     local position = args.position or "top"
