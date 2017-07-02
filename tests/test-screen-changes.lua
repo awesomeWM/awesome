@@ -47,10 +47,11 @@ local steps = {
         -- Everything should be done by now
         local geom = test_client2:geometry()
         local bw = test_client2.border_width
-        assert(geom.x == 100, geom.x)
-        assert(geom.y == 110, geom.y)
-        assert(geom.width + 2*bw == 600, geom.width + 2*bw)
-        assert(geom.height + 2*bw == 610, geom.height + 2*bw)
+        local ug = test_client2:tags()[1].gap
+        assert(geom.x - 2*ug == 100, geom.x - 2*ug)
+        assert(geom.y - 2*ug == 110, geom.y - 2*ug)
+        assert(geom.width + 2*bw + 4*ug == 600, geom.width + 2*bw + 4*ug)
+        assert(geom.height + 2*bw + 4*ug == 610, geom.height + 2*bw + 4*ug)
 
         local wb = fake_screen.mywibox
         assert(wb.screen == fake_screen, tostring(wb.screen) .. " ~= " .. tostring(fake_screen))
