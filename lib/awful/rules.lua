@@ -301,8 +301,7 @@ end
 
 function rules.delayed_properties.switchtotag(c, value)
     if not value then return end
-
-    atag.viewmore(c:tags())
+    atag.viewmore(c:tags(), c.screen)
 end
 
 function rules.extra_properties.geometry(c, _, props)
