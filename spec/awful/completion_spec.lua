@@ -137,12 +137,12 @@ describe("awful.completion.shell", function()
 
     if has_bash then
         it("completes local file (bash)", function()
-            assert.same(shell('ls ', 4, 1, 'bash'), {'ls localcommand', 16, {'localcommand'}})
+            assert.same(shell('ls l', 5, 1, 'bash'), {'ls localcommand', 16, {'localcommand'}})
         end)
     end
     if has_zsh then
         it("completes local file (zsh)", function()
-            assert.same(shell('ls ', 4, 1, 'zsh'), {'ls localcommand', 16, {'localcommand'}})
+            assert.same(shell('ls l', 5, 1, 'zsh'), {'ls localcommand', 16, {'localcommand'}})
         end)
     end
 end)
