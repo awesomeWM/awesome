@@ -6,6 +6,7 @@ end
 local gfs = require("gears.filesystem")
 local Gio = require("lgi").Gio
 local GLib = require("lgi").GLib
+local lfs = require("lfs")
 
 local has_bash = GLib.find_program_in_path("bash")
 local has_zsh = GLib.find_program_in_path("zsh")
@@ -60,12 +61,14 @@ end
 
 describe("awful.completion.shell in empty directory", function()
     local orig_popen = io.popen
+    local orig_dir = lfs.currentdir()
 
     setup(function()
         test_dir = get_test_dir()
         io.popen = function(...)  --luacheck: ignore
             return orig_popen(string.format('cd %s && ', test_dir) .. ...)
         end
+        lfs.chdir(test_dir)
         test_path = get_test_path_dir()
     end)
 
@@ -73,6 +76,7 @@ describe("awful.completion.shell in empty directory", function()
         assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
         remove_test_path_dir(test_path)
+        lfs.chdir(orig_dir)
     end)
 
     if has_bash then
@@ -92,6 +96,7 @@ end)
 
 describe("awful.completion.shell", function()
     local orig_popen = io.popen
+    local orig_dir = lfs.currentdir()
 
     setup(function()
         test_dir = get_test_dir()
@@ -102,6 +107,7 @@ describe("awful.completion.shell", function()
         io.popen = function(...)  --luacheck: ignore
             return orig_popen(string.format('cd %s && ', test_dir) .. ...)
         end
+        lfs.chdir(test_dir)
         test_path = get_test_path_dir()
     end)
 
@@ -112,6 +118,7 @@ describe("awful.completion.shell", function()
         assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
         remove_test_path_dir(test_path)
+        lfs.chdir(orig_dir)
     end)
 
     if has_bash then
