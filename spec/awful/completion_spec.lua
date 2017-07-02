@@ -181,6 +181,20 @@ describe("awful.completion.shell", function()
     it("completes command regardless of local directory (nil)", function()
         assert.same(shell('true', 5, 1, nil), {'true', 5, {'true'}})
     end)
+
+    if has_bash then
+        it("completes local directories starting with ./ (bash)", function()
+            assert.same(shell('./just', 7, 1, 'bash'), {'./just_a_directory/', 20, {'./just_a_directory/'}})
+            assert.same(shell('./t', 4, 1, 'bash'), {'./true/', 8, {'./true/'}})
+        end)
+    end
+    if has_zsh then
+        it("completes local directories starting with ./ (zsh, non-empty)", function()
+            assert.same(shell('./just', 7, 1, 'zsh'), {'./just_a_directory/', 20, {'./just_a_directory/'}})
+            assert.same(shell('./t', 4, 1, 'zsh'), {'./true/', 8, {'./true/'}})
+        end)
+    end
+    --]]
 end)
 
 describe("awful.completion.shell handles $SHELL", function()
