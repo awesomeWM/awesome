@@ -4,9 +4,10 @@ local runner = require("_runner")
 local menubar = require("menubar")
 
 local menubar_refreshed = false
-
-function menubar.refresh(scr)
-    menubar_refreshed = scr or true
+local orig_refresh = menubar.refresh
+function menubar.refresh(...)
+    menubar_refreshed = true
+    orig_refresh(...)
 end
 
 -- XXX We are building Lua 5.3 with -DLUA_USE_APICHECK=1 and this catches some
