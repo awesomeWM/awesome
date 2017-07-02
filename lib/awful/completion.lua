@@ -9,6 +9,8 @@
 -- @module awful.completion
 ---------------------------------------------------------------------------
 
+local gfs = require("gears.filesystem")
+
 -- Grab environment we need
 local io = io
 local os = os
