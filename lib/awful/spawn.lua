@@ -132,17 +132,17 @@
 --
 --    awful.spawn.with_line_callback(noisy, {
 --        stdout = function(line)
---            naughty.notify { text = "LINE:"..line }
+--            naughty.notification { text = "LINE:"..line }
 --        end,
 --        stderr = function(line)
---            naughty.notify { text = "ERR:"..line}
+--            naughty.notification { text = "ERR:"..line}
 --        end,
 --    })
 --
 -- If only the full output is needed, then `easy_async` is the right choice:
 --
 --    awful.spawn.easy_async(noisy, function(stdout, stderr, reason, exit_code)
---        naughty.notify { text = stdout }
+--        naughty.notification { text = stdout }
 --    end)
 --
 -- **Default applications**:

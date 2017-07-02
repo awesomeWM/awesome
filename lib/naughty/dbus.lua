@@ -25,11 +25,14 @@ local tcat = table.concat
 local tins = table.insert
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local naughty = require("naughty.core")
+local cst     = require("naughty.constants")
+local nnotif = require("naughty.notification")
 
 --- Notification library, dbus bindings
 local dbus = { config = {} }
 
 -- DBUS Notification constants
+-- https://developer.gnome.org/notification-spec/#urgency-levels
 local urgency = {
     low = "\0",
     normal = "\1",
@@ -46,9 +49,9 @@ local urgency = {
 -- @tfield table 3 critical urgency
 -- @table config.mapping
 dbus.config.mapping = {
-    {{urgency = urgency.low}, naughty.config.presets.low},
-    {{urgency = urgency.normal}, naughty.config.presets.normal},
-    {{urgency = urgency.critical}, naughty.config.presets.critical}
+    {{urgency = urgency.low}, cst.config.presets.low},
+    {{urgency = urgency.normal}, cst.config.presets.normal},
+    {{urgency = urgency.critical}, cst.config.presets.critical}
 }
 
 local function sendActionInvoked(notificationId, action)
@@ -140,7 +143,7 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                     args.preset = gtable.join(args.preset, preset)
                 end
             end
-            local preset = args.preset or naughty.config.defaults
+            local preset = args.preset or cst.config.defaults
             local notification
             if actions then
                 args.actions = {}
@@ -152,12 +155,12 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                     if action_id == "default" then
                         args.run = function()
                             sendActionInvoked(notification.id, "default")
-                            naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
+                            notification:destroy(cst.notification_closed_reason.dismissed_by_user)
                         end
                     elseif action_id ~= nil and action_text ~= nil then
                         args.actions[action_text] = function()
                             sendActionInvoked(notification.id, action_id)
-                            naughty.destroy(notification, naughty.notificationClosedReason.dismissedByUser)
+                            notification:destroy(cst.notification_closed_reason.dismissed_by_user)
                         end
                     end
                 end
@@ -190,14 +193,14 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                     args.timeout = expire / 1000
                 end
                 args.freedesktop_hints = hints
-                notification = naughty.notify(args)
+                notification = nnotif(args)
                 return "u", notification.id
             end
             return "u", "0"
         elseif data.member == "CloseNotification" then
-            local obj = naughty.getById(appname)
+            local obj = naughty.get_by_id(appname)
             if obj then
-            naughty.destroy(obj, naughty.notificationClosedReason.dismissedByCommand)
+                obj:destroy(cst.notification_closed_reason.dismissed_by_command)
             end
         elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
             -- name of notification app, name of vender, version, specification version
