@@ -4,25 +4,55 @@ local shell = function(...)
     return {command, pos, matches}
 end
 local gfs = require("gears.filesystem")
+local Gio = require("lgi").Gio
+local GLib = require("lgi").GLib
+
+local has_bash = GLib.find_program_in_path("bash")
+local has_zsh = GLib.find_program_in_path("zsh")
+
+if not has_bash and not has_zsh then
+    print('Skipping spec/awful/completion_spec.lua: bash and zsh are not installed.')
+    return
+end
+
+local test_dir
+
+--- Get and create a temporary test dir based on `pat`, where %d gets replaced by
+-- the current PID.
+local function get_test_dir()
+    local tfile = Gio.File.new_tmp("awesome-tests-XXXXXX")
+    local path = tfile:get_path()
+    tfile:delete()
+    gfs.make_directories(path)
+    return path
+end
 
 describe("awful.completion.shell in empty directory", function()
     local orig_popen = io.popen
 
     setup(function()
-        gfs.make_directories('/tmp/awesome-tests/empty')
+        test_dir = get_test_dir()
         io.popen = function(...)  --luacheck: ignore
-            return orig_popen('cd /tmp/awesome-tests/empty && ' .. ...)
+            return orig_popen(string.format('cd %s && ', test_dir) .. ...)
         end
     end)
 
     teardown(function()
-        os.remove('/tmp/awesome-tests/empty')
+        assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
     end)
 
-    it("handles completion of true", function()
-        assert.same(shell('true', 5, 1, 'zsh'), {'true', 5, {'true'}})
-        assert.same(shell('true', 5, 1, 'bash'), {'true', 5, {'true'}})
+    if has_bash then
+        it("handles completion of true (bash)", function()
+            assert.same(shell('true', 5, 1, 'bash'), {'true', 5, {'true'}})
+        end)
+    end
+    if has_zsh then
+        it("handles completion of true (zsh)", function()
+            assert.same(shell('true', 5, 1, 'zsh'), {'true', 5, {'true'}})
+        end)
+    end
+    it("handles completion of true (nil)", function()
         assert.same(shell('true', 5, 1, nil), {'true', 5, {'true'}})
     end)
 end)
@@ -31,33 +61,55 @@ describe("awful.completion.shell", function()
     local orig_popen = io.popen
 
     setup(function()
-        gfs.make_directories('/tmp/awesome-tests/dir')
-        os.execute('cd /tmp/awesome-tests/dir && touch localcommand && chmod +x localcommand')
+        test_dir = get_test_dir()
+        os.execute(string.format(
+            'cd %s && touch localcommand && chmod +x localcommand', test_dir))
         io.popen = function(...)  --luacheck: ignore
-            return orig_popen('cd /tmp/awesome-tests/dir && ' .. ...)
+            return orig_popen(string.format('cd %s && ', test_dir) .. ...)
         end
     end)
 
     teardown(function()
-        os.remove('/tmp/awesome-tests/dir')
+        assert.True(os.remove(test_dir .. '/localcommand'))
+        assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
     end)
 
-    it("handles empty input", function()
-        assert.same(shell('', 1, 1, 'zsh'), {'', 1})
-        assert.same(shell('', 1, 1, 'bash'), {'', 1})
+    if has_bash then
+        it("handles empty input (bash)", function()
+            assert.same(shell('', 1, 1, 'bash'), {'', 1})
+        end)
+    end
+    if has_zsh then
+        it("handles empty input (zsh)", function()
+            assert.same(shell('', 1, 1, 'zsh'), {'', 1})
+        end)
+    end
+    it("handles empty input (nil)", function()
         assert.same(shell('', 1, 1, nil), {'', 1})
     end)
 
-    it("completes local command", function()
-        assert.same(shell('./localcomm', 12, 1, 'zsh'), {'./localcommand', 15, {'./localcommand'}})
-        assert.same(shell('./localcomm', 12, 1, 'bash'), {'./localcommand', 15, {'./localcommand'}})
-    end)
+    if has_bash then
+        it("completes local command (bash)", function()
+            assert.same(shell('./localcomm', 12, 1, 'bash'), {'./localcommand', 15, {'./localcommand'}})
+        end)
+    end
+    if has_zsh then
+        it("completes local command (zsh)", function()
+            assert.same(shell('./localcomm', 12, 1, 'zsh'), {'./localcommand', 15, {'./localcommand'}})
+        end)
+    end
 
-    it("completes local file", function()
-        assert.same(shell('ls ', 4, 1, 'zsh'), {'ls localcommand', 16, {'localcommand'}})
-        assert.same(shell('ls ', 4, 1, 'bash'), {'ls localcommand', 16, {'localcommand'}})
-    end)
+    if has_bash then
+        it("completes local file (bash)", function()
+            assert.same(shell('ls ', 4, 1, 'bash'), {'ls localcommand', 16, {'localcommand'}})
+        end)
+    end
+    if has_zsh then
+        it("completes local file (zsh)", function()
+            assert.same(shell('ls ', 4, 1, 'zsh'), {'ls localcommand', 16, {'localcommand'}})
+        end)
+    end
 end)
 
 describe("awful.completion.shell handles $SHELL", function()
