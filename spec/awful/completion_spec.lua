@@ -60,4 +60,55 @@ describe("awful.completion.shell", function()
     end)
 end)
 
+describe("awful.completion.shell handles $SHELL", function()
+    local orig_getenv = os.getenv
+    local gdebug = require("gears.debug")
+    local orig_print_warning
+    local print_warning_message
+    local os_getenv_shell
+
+    setup(function()
+        os.getenv = function(name)  -- luacheck: ignore
+            if name == 'SHELL' then return os_getenv_shell end
+            return orig_getenv(name)
+        end
+
+        orig_print_warning = gdebug.print_warning
+        gdebug.print_warning = function(message)
+            print_warning_message = message
+        end
+    end)
+
+    teardown(function()
+        os.getenv = orig_getenv  --luacheck: ignore
+        gdebug.print_warning = orig_print_warning
+    end)
+
+    before_each(function()
+        compl.default_shell = nil
+        print_warning_message = nil
+    end)
+
+    it("falls back to bash if unset", function()
+        assert.same(shell('true', 5, 1, nil), {'true', 5, {'true'}})
+        assert.same(print_warning_message,
+                    'SHELL not set in environment, falling back to bash.')
+        assert.same(compl.default_shell, "bash")
+    end)
+
+    it("uses zsh from path", function()
+        os_getenv_shell = '/opt/bin/zsh'
+        assert.same(shell('true', 5, 1, nil), {'true', 5, {'true'}})
+        assert.same(compl.default_shell, "zsh")
+        assert.is_nil(print_warning_message)
+    end)
+
+    it("uses bash for unknown", function()
+        os_getenv_shell = '/dev/null'
+        assert.same(shell('true', 5, 1, nil), {'true', 5, {'true'}})
+        assert.same(compl.default_shell, "bash")
+        assert.is_nil(print_warning_message)
+    end)
+end)
+
 -- vim: ft=lua:et:sw=4:ts=8:sts=4:tw=80

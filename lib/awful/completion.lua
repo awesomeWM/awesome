@@ -18,6 +18,8 @@ local print = print
 local pairs = pairs
 local string = string
 
+local gears_debug = require("gears.debug")
+
 local completion = {}
 
 -- mapping of command/completion function
@@ -53,6 +55,8 @@ local function bash_escape(str)
     str = str:gsub("%)", "\\)")
     return str
 end
+
+completion.default_shell = nil
 
 --- Use shell completion system to complete commands and filenames.
 -- @tparam string command The command line.
@@ -98,7 +102,21 @@ function completion.shell(command, cur_pos, ncomp, shell)
     end
 
     local shell_cmd
-    if shell == "zsh" or (not shell and os.getenv("SHELL"):match("zsh$")) then
+    if not shell then
+        if not completion.default_shell then
+            local env_shell = os.getenv('SHELL')
+            if not env_shell then
+                gears_debug.print_warning('SHELL not set in environment, falling back to bash.')
+                completion.default_shell = 'bash'
+            elseif env_shell:match('zsh$') then
+                completion.default_shell = 'zsh'
+            else
+                completion.default_shell = 'bash'
+            end
+        end
+        shell = completion.default_shell
+    end
+    if shell == 'zsh' then
         if comptype == "file" then
             -- NOTE: ${~:-"..."} turns on GLOB_SUBST, useful for expansion of
             -- "~/" ($HOME).  ${:-"foo"} is the string "foo" as var.
