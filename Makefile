@@ -35,6 +35,9 @@ distclean:
 	$(RM) -r $(BUILDDIR) $(TARGETS)
 	$(ECHO) " done"
 
+docker_%:
+	$(MAKE) -C docker $@
+
 %: $(BUILDDIR)/Makefile
 	$(ECHO) "Running make $@ in $(BUILDDIR)…"
 	$(MAKE) -C $(BUILDDIR) $@

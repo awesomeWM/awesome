@@ -1,0 +1,39 @@
+#!/bin/sh
+# A wrapper script used as entrypoint to (re)build and then run the tests.
+
+set -e
+
+echo "Running build-and-test: LUA_PKG=$LUA_PKG"
+
+# XXX: should get moved into building (as ARG (and ENV)?!)
+if [ "$LUA_PKG" = luajit ]; then
+  export CMAKE_ARGS='-DLUA_INCLUDE_DIR=/usr/include/luajit-2.1 -DLUA_LIBRARY=/usr/lib/libluajit-5.1.so'
+fi
+
+# DEBUG
+# find /usr/include -type d | grep lua
+# find /usr/lib -type d | grep lua
+# env | grep -i lua
+
+# Create a user based on AWESOME_UID, which is supposed to be the user's id.
+# This might get drooped after having moved to named volumed already?!
+if [ -n "$AWESOME_UID" ]; then
+  USER=${USER:-awesome}
+  echo "Creating user ${USER} with UID $AWESOME_UID.."
+  adduser -D -s /bin/bash -u "$AWESOME_UID" "${USER}"
+
+  chown "$AWESOME_UID" /src/awesome/build
+
+  if [ -n "$CCACHE_DIR" ] && [ -d "$CCACHE_DIR" ]; then
+    chown "$AWESOME_UID" "$CCACHE_DIR"
+  fi
+
+  # Re-execute this script without the user management.
+  unset AWESOME_UID
+  exec su "$USER" -c "$0 $*"
+fi
+
+make
+build/awesome --version
+# TODO: "make check-integration"?!
+exec /src/awesome/tests/run.sh "$@"
