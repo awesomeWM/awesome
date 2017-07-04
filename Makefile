@@ -13,14 +13,14 @@ all: check-unit $(TARGETS) ;
 $(TARGETS): cmake-build
 	ln -s -f $(BUILDDIR)/$@ $@
 
-$(BUILDDIR)/CMakeCache.txt:
+$(BUILDDIR)/Makefile:
 	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
 	$(ECHO)
 	mkdir -p $(BUILDDIR)
 	$(ECHO) "Running cmake…"
 	cd $(BUILDDIR) && cmake $(CMAKE_ARGS) "$(@D)" ..
 
-cmake-build: $(BUILDDIR)/CMakeCache.txt
+cmake-build: $(BUILDDIR)/Makefile
 	$(ECHO) "Building…"
 	$(MAKE) -C $(BUILDDIR)
 
@@ -36,8 +36,8 @@ distclean:
 	$(RM) -r $(BUILDDIR) $(TARGETS)
 	$(ECHO) " done"
 
-%: $(BUILDDIR)/CMakeCache.txt
-	$(ECHO) "Running make $@…"
+%: $(BUILDDIR)/Makefile
+	$(ECHO) "Running make $@ in $(BUILDDIR)…"
 	$(MAKE) -C $(BUILDDIR) $@
 
 .PHONY: cmake-build install distclean tags
