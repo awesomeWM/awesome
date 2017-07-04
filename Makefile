@@ -11,7 +11,6 @@ BUILDDIR=build
 all: check-unit $(TARGETS) ;
 
 $(TARGETS): cmake-build
-	ln -s -f $(BUILDDIR)/$@ $@
 
 $(BUILDDIR)/Makefile:
 	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
