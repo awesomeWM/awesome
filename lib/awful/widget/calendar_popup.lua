@@ -344,7 +344,7 @@ end
 -- @tparam table args.style_normal Cell style for the normal day cells (see `cell_properties`)
 -- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
--- @function awful.calendar.month
+-- @function awful.widget.calendar.month
 function calendar_popup.month(args)
     return get_cal_wibox("month", args)
 end
@@ -380,7 +380,7 @@ end
 -- @tparam table args.style_normal Cell style for the normal day cells (see `cell_properties`)
 -- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
--- @function awful.calendar.year
+-- @function awful.widget.calendar.year
 function calendar_popup.year(args)
     return get_cal_wibox("year", args)
 end
