@@ -275,14 +275,14 @@ end
 -- @tparam boolean args.week_numbers Show weeknumbers
 -- @tparam boolean args.start_sunday Start week on Sunday
 -- @tparam boolean args.long_weekdays Format the weekdays with three characters instead of two
--- @tparam table args.year_style Container style for the year calendar (see `cell_properties`)
--- @tparam table args.month_style Container style for the month calendar (see `cell_properties`)
--- @tparam table args.yearheader_style Cell style for the year calendar header (see `cell_properties`)
--- @tparam table args.header_style Cell style for the month calendar header (see `cell_properties`)
--- @tparam table args.weekday_style Cell style for the weekday cells (see `cell_properties`)
--- @tparam table args.weeknumber_style Cell style for the weeknumber cells (see `cell_properties`)
--- @tparam table args.normal_style Cell style for the normal day cells (see `cell_properties`)
--- @tparam table args.focus_style Cell style for the current day cell (see `cell_properties`)
+-- @tparam table args.style_year Container style for the year calendar (see `cell_properties`)
+-- @tparam table args.style_month Container style for the month calendar (see `cell_properties`)
+-- @tparam table args.style_yearheader Cell style for the year calendar header (see `cell_properties`)
+-- @tparam table args.style_header Cell style for the month calendar header (see `cell_properties`)
+-- @tparam table args.style_weekday Cell style for the weekday cells (see `cell_properties`)
+-- @tparam table args.style_weeknumber Cell style for the weeknumber cells (see `cell_properties`)
+-- @tparam table args.style_normal Cell style for the normal day cells (see `cell_properties`)
+-- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
 local function get_cal_wibox(caltype, args)
     args = args or {}
@@ -337,12 +337,12 @@ end
 -- @tparam boolean args.week_numbers Show weeknumbers
 -- @tparam boolean args.start_sunday Start week on Sunday
 -- @tparam boolean args.long_weekdays Format the weekdays with three characters instead of two
--- @tparam table args.month_style Container style for the month calendar (see `cell_properties`)
--- @tparam table args.header_style Cell style for the month calendar header (see `cell_properties`)
--- @tparam table args.weekday_style Cell style for the weekday cells (see `cell_properties`)
--- @tparam table args.weeknumber_style Cell style for the weeknumber cells (see `cell_properties`)
--- @tparam table args.normal_style Cell style for the normal day cells (see `cell_properties`)
--- @tparam table args.focus_style Cell style for the current day cell (see `cell_properties`)
+-- @tparam table args.style_month Container style for the month calendar (see `cell_properties`)
+-- @tparam table args.style_header Cell style for the month calendar header (see `cell_properties`)
+-- @tparam table args.style_weekday Cell style for the weekday cells (see `cell_properties`)
+-- @tparam table args.style_weeknumber Cell style for the weeknumber cells (see `cell_properties`)
+-- @tparam table args.style_normal Cell style for the normal day cells (see `cell_properties`)
+-- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
 -- @function awful.calendar.month
 function calendar_popup.month(args)
@@ -370,15 +370,15 @@ end
 -- @tparam boolean args.week_numbers Show weeknumbers
 -- @tparam boolean args.start_sunday Start week on Sunday
 -- @tparam boolean args.long_weekdays Format the weekdays with three characters instead of two
--- @tparam table args.year_style Container style for the year calendar (see `cell_properties`)
--- @tparam table args.month_style Container style for the month calendar (see `cell_properties`).
--- This field can also be called `monthheader_style`.
--- @tparam table args.yearheader_style Cell style for the year calendar header (see `cell_properties`)
--- @tparam table args.header_style Cell style for the month calendar header (see `cell_properties`)
--- @tparam table args.weekday_style Cell style for the weekday cells (see `cell_properties`)
--- @tparam table args.weeknumber_style Cell style for the weeknumber cells (see `cell_properties`)
--- @tparam table args.normal_style Cell style for the normal day cells (see `cell_properties`)
--- @tparam table args.focus_style Cell style for the current day cell (see `cell_properties`)
+-- @tparam table args.style_year Container style for the year calendar (see `cell_properties`)
+-- @tparam table args.style_month Container style for the month calendar (see `cell_properties`).
+-- This field can also be called `style_monthheader`.
+-- @tparam table args.style_yearheader Cell style for the year calendar header (see `cell_properties`)
+-- @tparam table args.style_header Cell style for the month calendar header (see `cell_properties`)
+-- @tparam table args.style_weekday Cell style for the weekday cells (see `cell_properties`)
+-- @tparam table args.style_weeknumber Cell style for the weeknumber cells (see `cell_properties`)
+-- @tparam table args.style_normal Cell style for the normal day cells (see `cell_properties`)
+-- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
 -- @function awful.calendar.year
 function calendar_popup.year(args)
