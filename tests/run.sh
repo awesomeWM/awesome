@@ -91,9 +91,6 @@ cleanup() {
     for p in $awesome_pid $xserver_pid; do
         kill -TERM "$p" 2>/dev/null || true
     done
-    if [ -n "$DO_COVERAGE" ] && [ "$DO_COVERAGE" != 0 ]; then
-        mv "$RC_FILE.coverage.bak" "$RC_FILE"
-    fi
     rm -rf "$tmp_files" || true
 }
 trap "cleanup" 0 2 3 15
@@ -168,10 +165,15 @@ RC_FILE=${source_dir}/awesomerc.lua
 export AWESOME_THEMES_PATH="$source_dir/themes"
 export AWESOME_ICON_PATH="$source_dir/icons"
 
-# Inject coverage runner to RC file, which will be restored on exit/cleanup.
+# Inject coverage runner via temporary RC file.
 if [ -n "$DO_COVERAGE" ] && [ "$DO_COVERAGE" != 0 ]; then
-    cp -a "$RC_FILE" "$RC_FILE.coverage.bak"
-    sed -i "1 s~^~require('luacov.runner')('$source_dir/.luacov'); \0~" "$RC_FILE"
+    # Handle old filename of config files (useful for git-bisect).
+    if [ -f "${RC_FILE}.in" ]; then
+        RC_FILE="${RC_FILE}.in"
+    fi
+    sed "1 s~^~require('luacov.runner')('$source_dir/.luacov'); \0~" \
+        "$RC_FILE" > "$tmp_files/awesomerc.lua"
+    RC_FILE=$tmp_files/awesomerc.lua
 fi
 
 # Start awesome.
