@@ -82,7 +82,8 @@ else
 fi
 
 # Add test dir (for _runner.lua).
-awesome_options=($AWESOME_OPTIONS --search lib --search $this_dir)
+# shellcheck disable=SC2206
+awesome_options=($AWESOME_OPTIONS --search lib --search "$this_dir")
 export XDG_CONFIG_HOME="$build_dir"
 
 # Cleanup on errors / aborting.
@@ -187,13 +188,22 @@ start_awesome() {
     wait_until_success "wait for awesome startup via awesome-client" "dbus-send --reply-timeout=100 --dest=org.awesomewm.awful --print-reply / org.awesomewm.awful.Remote.Eval 'string:return 1' 2>&1"
 }
 
-# Count errors.
-errors=0
+if command -v tput >/dev/null; then
+    color_red() { tput setaf 1; }
+    color_reset() { tput sgr0; }
+else
+    color_red() { :; }
+    color_reset() { :; }
+fi
+
+count_tests=0
+errors=()
 # Seconds after when awesome gets killed.
 timeout_stale=180 # FIXME This should be no more than 60s
 
 for f in $tests; do
     echo "== Running $f =="
+    (( ++count_tests ))
 
     start_awesome
 
@@ -202,7 +212,7 @@ for f in $tests; do
             f=${f#tests/}
         else
             echo "===> ERROR $f is not readable! <==="
-            ((errors++))
+            errors+=("$f is not readable.")
             continue
         fi
     fi
@@ -211,7 +221,9 @@ for f in $tests; do
     DISPLAY=$D "$AWESOME_CLIENT" 2>&1 < "$f"
 
     # Tail the log and quit, when awesome quits.
-    tail -n 100000 -s 0.1 -f --pid "$awesome_pid" "$awesome_log"
+    # Use a single `grep`, otherwise `--line-buffered` would be required.
+    tail -n 100000 -s 0.1 -f --pid "$awesome_pid" "$awesome_log" \
+        | grep -vE '^(.{19} W: awesome: a_dbus_connect:[0-9]+: Could not connect to D-Bus system bus:|Test finished successfully\.$)' || true
 
     set +e
     wait $awesome_pid
@@ -223,20 +235,37 @@ for f in $tests; do
         *) echo "Awesome exited with status code $code" ;;
     esac
 
-    if ! grep -q -E '^Test finished successfully$' "$awesome_log" ||
-            grep -q -E '[Ee]rror|assertion failed' "$awesome_log"; then
+    # Parse any error from the log.
+    error="$(grep --color -o --binary-files=text -E \
+        '.*[Ee]rror.*|.*assertion failed.*|^Step .* failed:' "$awesome_log" ||
+        true)"
+    if [[ -n "$error" ]]; then
+        color_red
         echo "===> ERROR running $f <==="
-        grep --color -o --binary-files=text -E '.*[Ee]rror.*|.*assertion failed.*' "$awesome_log" || true
-        ((++errors))
+        echo "$error"
+        color_reset
+        errors+=("$f: $error")
+    elif ! grep -q -E '^Test finished successfully\.$' "$awesome_log"; then
+        color_red
+        echo "===> ERROR running $f <==="
+        color_reset
+        errors+=("$f: test did not indicate success. See the output above.")
     fi
 done
 
-if ((errors)); then
+echo "$count_tests tests finished."
+
+if (( "${#errors[@]}" )); then
     if [ "$TEST_PAUSE_ON_ERRORS" = 1 ]; then
         echo "Pausing... press Enter to continue."
         read -r
     fi
-    echo "There were $errors errors!"
+    color_red
+    echo "There were ${#errors[@]} errors:"
+    for error in "${errors[@]}"; do
+        echo " - $error"
+    done
+    color_reset
     exit 1
 fi
 exit 0

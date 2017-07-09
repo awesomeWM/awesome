@@ -6,6 +6,8 @@ local runner = {
     quit_awesome_on_error = os.getenv('TEST_PAUSE_ON_ERRORS') ~= '1',
 }
 
+local verbose = os.getenv('VERBOSE') == '1'
+
 -- Helpers.
 
 --- Add some rules to awful.rules.rules, after the defaults.
@@ -21,7 +23,7 @@ local running = false
 -- This is used if a test causes errors before starting the runner
 timer.start_new(1, function()
     if not running then
-        io.stderr:write("Error: run_steps() was never called\n")
+        io.stderr:write("Error: run_steps() was never called.\n")
         if not runner.quit_awesome_on_error then
             io.stderr:write("Keeping awesome open...\n")
             return  -- keep awesome open on error.
@@ -30,19 +32,42 @@ timer.start_new(1, function()
     end
 end)
 
-runner.run_steps = function(steps)
+runner.step_kill_clients = function(step)
+    if step == 1 then
+        for _,c in ipairs(client.get()) do
+            c:kill()
+        end
+    end
+    if #client.get() == 0 then
+        return true
+    end
+end
+
+runner.run_steps = function(steps, options)
     -- Setup timer/timeout to limit waiting for signal and quitting awesome.
-    -- This would be common for all tests.
     local t = timer({timeout=0})
     local wait=20
     local step=1
     local step_count=0
+    options = options or {
+        kill_clients=true,
+    }
     assert(not running, "run_steps() was called twice")
     running = true
+
+    if options.kill_clients then
+        -- Add a final step to kill all clients and wait for them to finish.
+        -- Ref: https://github.com/awesomeWM/awesome/pull/1904#issuecomment-312793006
+        steps[#steps + 1] = runner.step_kill_clients
+    end
+
     t:connect_signal("timeout", function() timer.delayed_call(function()
         io.flush()  -- for "tail -f".
         step_count = step_count + 1
         local step_as_string = step..'/'..#steps..' (@'..step_count..')'
+        if verbose then
+            print(string.format('Running step %s..', step_as_string))
+        end
 
         -- Call the current step's function.
         local success, result = xpcall(function()
@@ -78,6 +103,7 @@ runner.run_steps = function(steps)
             end
 
         else
+            -- No result yet, run this step again.
             wait = wait-1
             if wait > 0 then
                 t.timeout = 0.1
@@ -89,12 +115,20 @@ runner.run_steps = function(steps)
             end
             return
         end
-        -- Remove any clients.
-        for _,c in ipairs(client.get()) do
-            c:kill()
+
+        local client_count = #client.get()
+        if client_count > 0 then
+            io.stderr:write(string.format(
+                "NOTE: there were %d clients left after the test.\n", client_count))
+
+            -- Remove any clients.
+            for _,c in ipairs(client.get()) do
+                c:kill()
+            end
         end
+
         if success and result then
-            io.stderr:write("Test finished successfully\n")
+            io.stderr:write("Test finished successfully.\n")
         end
         awesome.quit()
     end) end)
