@@ -16,8 +16,9 @@ endif()
 
 cmake_minimum_required(VERSION 3.0.0)
 
-# Get and update the LUA_PATH so the scripts can be executed without Awesome.
-execute_process(COMMAND lua -e print\(package.path\) OUTPUT_VARIABLE "LUA_PATH_")
+# Get and update the LUA_PATH so the scripts can be executed without awesome.
+execute_process(COMMAND lua -e "p = package.path:gsub(';', '\\\\;'); io.stdout:write(p)"
+    OUTPUT_VARIABLE "LUA_PATH_")
 
 # Make sure the system can be called from the test directory
 if(NOT SOURCE_DIR AND ${CMAKE_CURRENT_SOURCE_DIR} MATCHES "/tests/examples")
@@ -45,28 +46,22 @@ else()
 endif()
 
 # Add the main awesome lua libraries.
-set(LUA_PATH2_ "\
-${TOP_SOURCE_DIR}/lib/?.lua;\
-${TOP_SOURCE_DIR}/lib/?/init.lua;\
-${TOP_SOURCE_DIR}/lib/?;\
-${TOP_SOURCE_DIR}/themes/?.lua;\
-${TOP_SOURCE_DIR}/themes/?;"
-)
+set(LUA_PATH_ "\
+${TOP_SOURCE_DIR}/lib/?.lua\\;\
+${TOP_SOURCE_DIR}/lib/?/init.lua\\;\
+${TOP_SOURCE_DIR}/lib/?\\;\
+${TOP_SOURCE_DIR}/themes/?.lua\\;\
+${TOP_SOURCE_DIR}/themes/?\\;\
+${LUA_PATH_}")
 
 # Add the C API shims.
-set(LUA_PATH3_ "\
-${TOP_SOURCE_DIR}/tests/examples/shims/?.lua;\
-${TOP_SOURCE_DIR}/tests/examples/shims/?/init.lua;\
-${TOP_SOURCE_DIR}/tests/examples/shims/?;"
-)
+set(LUA_PATH_ "\
+${TOP_SOURCE_DIR}/tests/examples/shims/?.lua\\;\
+${TOP_SOURCE_DIR}/tests/examples/shims/?/init.lua\\;\
+${TOP_SOURCE_DIR}/tests/examples/shims/?\\;\
+${LUA_PATH_}")
 
-# Done in 3 variables to avoid CMake from implicitly converting into a list.
-set(ENV{LUA_PATH} "${LUA_PATH3_}${LUA_PATH2_}${LUA_PATH_}")
-
-# Unset environment variables that would get in the way of evaluating LUA_PATH.
-unset(ENV{LUA_PATH_5_1})
-unset(ENV{LUA_PATH_5_2})
-unset(ENV{LUA_PATH_5_3})
+set(LUA_COV_RUNNER env -u LUA_PATH_5_1 -u LUA_PATH_5_2 -u LUA_PATH_5_3 "LUA_PATH=${LUA_PATH_}" ${LUA_COV_RUNNER})
 
 # The documentation images directory.
 set(IMAGE_DIR "${CMAKE_BINARY_DIR}/doc/images")
@@ -194,6 +189,9 @@ function(run_test test_path namespace escaped_content)
     # Execute the script, leave the image extension decision to the test.
     # SVG is preferred, but PNG is better suited for some tests, like bitmap
     # patterns.
+    file(RELATIVE_PATH rel_test_path "${TOP_SOURCE_DIR}" "${test_path}")
+    message(STATUS "Running ${rel_test_path}…")
+
     execute_process(
         COMMAND ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
         RESULT_VARIABLE TEST_RESULT
@@ -221,15 +219,19 @@ function(run_test test_path namespace escaped_content)
 
     # If the image has been created, then add it.
     if(EXISTS "${IMAGE_PATH}.svg")
+        set(OUTPUT_IMAGE_PATH "${IMAGE_PATH}.svg")
         escape_string(
             "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.svg)\n"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
     elseif(EXISTS "${IMAGE_PATH}.png")
+        set(OUTPUT_IMAGE_PATH "${IMAGE_PATH}.png")
         escape_string(
             "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.png)\n"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
+    else()
+        set(OUTPUT_IMAGE_PATH "")
     endif()
 
     # If there is an output, assume it is relevant and add it to the
@@ -256,44 +258,63 @@ function(run_test test_path namespace escaped_content)
             " ${DOC_BLOCK_PREFIX}"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
-
         set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}${TEST_CODE}")
+    endif()
+
+    if(NOT ${OUTPUT_IMAGE_PATH} STREQUAL "")
+        file(RELATIVE_PATH rel_template "${TOP_SOURCE_DIR}" "${template}")
+        file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
+        add_custom_command(
+            COMMAND ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
+            COMMENT "Generating ${rel_output} (via ${rel_test_path} (${rel_template}))"
+            DEPENDS ${template} ${test_path}
+            OUTPUT  ${OUTPUT_IMAGE_PATH}
+            VERBATIM)
+        set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUT_IMAGE_PATH} ${EXAMPLE_DOC_GENERATED_FILES}
+            PARENT_SCOPE)
     endif()
 
     # Export the outout to the parent scope.
     set(${escaped_content} "${TEST_DOC_CONTENT}" PARENT_SCOPE)
-
 endfunction()
 
-# Find and run all test files.
+# Find all test files, and run them (generating custom commands for updating them).
 file(GLOB_RECURSE test_files LIST_DIRECTORIES false
     "${TOP_SOURCE_DIR}/tests/examples/*.lua")
-foreach(file ${test_files})
-    if ((NOT "${file}" MATCHES ".*/shims/.*")
-        AND (NOT "${file}" MATCHES ".*/template.lua"))
 
-        file(RELATIVE_PATH relative_file "${TOP_SOURCE_DIR}" "${file}")
-        message(STATUS "Running ${relative_file}...")
+# TODO: check for changed files (timestamp)?!
+if(NOT "${test_files}" STREQUAL "${EXAMPLE_DOC_SOURCE_FILES}")
+    set(EXAMPLE_DOC_SOURCE_FILES "${test_files}" CACHE INTERNAL "Source files used to generate doc files.")
 
-        # Get the file name without the extension.
-        get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
+    # Find and run all test files.
+    foreach(file ${test_files})
+        if ((NOT "${file}" MATCHES ".*/shims/.*")
+            AND (NOT "${file}" MATCHES ".*/template.lua"))
 
-        get_namespace(namespace "${file}")
+            # Get the file name without the extension.
+            get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
 
-        run_test("${file}" "${namespace}" ESCAPED_CODE_EXAMPLE)
+            get_namespace(namespace "${file}")
 
-        # Set the test name.
-        set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
+            run_test("${file}" "${namespace}" ESCAPED_CODE_EXAMPLE)
 
-        # Anything called @DOC_`namespace`_EXAMPLE@
-        # in the Lua or C sources will be replaced by the content of that
-        # variable during the pre-processing.
-        # While at it, replace \" created by CMake by ',
-        # &quot; wont work in <code>.
-        string(REPLACE "\"" "'" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
-    endif()
-endforeach()
+            # Set the test name.
+            set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
 
-message(STATUS "Example tests passed.")
+            # Anything called @DOC_`namespace`_EXAMPLE@
+            # in the Lua or C sources will be replaced by the content of that
+            # variable during the pre-processing.
+            # While at it, replace \" created by CMake by ',
+            # &quot; wont work in <code>.
+            string(REPLACE "\"" "'" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
+        endif()
+    endforeach()
+
+    set(EXAMPLE_DOC_GENERATED_FILES ${EXAMPLE_DOC_GENERATED_FILES}
+        CACHE INTERNAL "List of generated files for example docs.")
+endif()
+
+add_custom_target(generate-examples ALL
+    DEPENDS ${EXAMPLE_DOC_GENERATED_FILES})
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
