@@ -294,10 +294,14 @@ if(GENERATE_DOC)
     file(COPY ${SOURCE_DIR}/docs/aliases DESTINATION ${BUILD_DIR}/docs)
 
     add_custom_target(ldoc ALL
+        DEPENDS ${BUILD_DIR}/doc/index.html)
+    add_custom_command(
         COMMAND ${LDOC_EXECUTABLE} .
+        OUTPUT  ${BUILD_DIR}/doc/index.html
         WORKING_DIRECTORY ${AWE_DOC_DIR}
-        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES}
-    )
+        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld
+        COMMENT "Generating API documentation"
+        VERBATIM)
 
     # Run ldoc and make it fail if any warnings are generated. The
     # redirection-magic swaps stdout and stderr and awk exits with a non-zero
