@@ -6,8 +6,6 @@ set(VERSION devel)
 
 set(CODENAME "Technologic")
 
-project(${PROJECT_AWE_NAME} C)
-
 option(WITH_DBUS "build with D-BUS" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
 option(COMPRESS_MANPAGES "compress manpages" ON)
