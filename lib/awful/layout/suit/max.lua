@@ -47,11 +47,15 @@ max.name = "max"
 function max.arrange(p)
     return fmax(p, false)
 end
+function max.skip_gap(nclients, t) -- luacheck: no unused args
+    return true
+end
 
 --- Fullscreen layout.
 -- @clientlayout awful.layout.suit.max.fullscreen
 max.fullscreen = {}
 max.fullscreen.name = "fullscreen"
+max.fullscreen.skip_gap = max.skip_gap
 function max.fullscreen.arrange(p)
     return fmax(p, true)
 end
