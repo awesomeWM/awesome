@@ -183,6 +183,17 @@ describe("awful.completion.shell", function()
     end)
 
     if has_bash then
+        it("does not complete local directory not starting with ./ (bash)", function()
+            assert.same(shell('just_a', 7, 1, 'bash'), {'just_a', 7})
+        end)
+    end
+    if has_zsh then
+        it("does not complete local directory not starting with ./ (zsh)", function()
+            assert.same(shell('just_a', 7, 1, 'zsh'), {'just_a', 7})
+        end)
+    end
+
+    if has_bash then
         it("completes local directories starting with ./ (bash)", function()
             assert.same(shell('./just', 7, 1, 'bash'), {'./just_a_directory/', 20, {'./just_a_directory/'}})
             assert.same(shell('./t', 4, 1, 'bash'), {'./true/', 8, {'./true/'}})
