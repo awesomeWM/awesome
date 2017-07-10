@@ -160,7 +160,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
         while true do
             local line = c:read("*line")
             if not line then break end
-            if gfs.is_dir(line) then
+            if str_starts(line, "./") and gfs.is_dir(line) then
                 line = line .. "/"
             end
             table.insert(output, bash_escape(line))
