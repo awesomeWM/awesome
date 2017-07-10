@@ -7,6 +7,7 @@
 ----------------------------------------------------------------------------
 
 local cairo = require("lgi").cairo
+local surface = require("gears.surface")
 local gears_color = require("gears.color")
 local recolor_image = gears_color.recolor_image
 local screen = screen
@@ -207,48 +208,57 @@ function theme_assets.wallpaper(bg, fg, alt_fg, s)
     return img
 end
 
---- Recolor unfocused titlebar icons.
--- @tparam table theme Beautiful theme table
+--- Recolor titlebar icons.
+-- @tparam table theme Beautiful theme table.
 -- @tparam color color Icons' color.
+-- @tparam string state `"normal"` or `"focus"`.
+-- @tparam string postfix `nil`, `"hover"` or `"press"`.
 -- @treturn table Beautiful theme table with the images recolored.
-function theme_assets.recolor_titlebar_normal(theme, color)
-    for _, titlebar_icon in ipairs({
-        'titlebar_close_button_normal',
-        'titlebar_minimize_button_normal',
-        'titlebar_ontop_button_normal_inactive',
-        'titlebar_ontop_button_normal_active',
-        'titlebar_sticky_button_normal_inactive',
-        'titlebar_sticky_button_normal_active',
-        'titlebar_floating_button_normal_inactive',
-        'titlebar_floating_button_normal_active',
-        'titlebar_maximized_button_normal_inactive',
-        'titlebar_maximized_button_normal_active',
+function theme_assets.recolor_titlebar(theme, color, state, postfix)
+    if postfix then postfix='_'..postfix end
+    for _, titlebar_icon_name in ipairs({
+        'titlebar_close_button_'..state..'',
+        'titlebar_minimize_button_'..state..'',
+        'titlebar_ontop_button_'..state..'_inactive',
+        'titlebar_ontop_button_'..state..'_active',
+        'titlebar_sticky_button_'..state..'_inactive',
+        'titlebar_sticky_button_'..state..'_active',
+        'titlebar_floating_button_'..state..'_inactive',
+        'titlebar_floating_button_'..state..'_active',
+        'titlebar_maximized_button_'..state..'_inactive',
+        'titlebar_maximized_button_'..state..'_active',
     }) do
-        theme[titlebar_icon] = recolor_image(theme[titlebar_icon], color)
+        local full_name = postfix and (
+            titlebar_icon_name .. postfix
+        ) or titlebar_icon_name
+        local image = theme[full_name] or theme[titlebar_icon_name]
+        if image then
+            image = surface.duplicate_surface(image)
+            theme[full_name] = recolor_image(image, color)
+        end
     end
     return theme
 end
 
---- Recolor focused titlebar icons.
+
+--- Recolor unfocused titlebar icons.
+-- This method is deprecated.  Use a `beautiful.theme_assets.recolor_titlebar`.
 -- @tparam table theme Beautiful theme table
 -- @tparam color color Icons' color.
 -- @treturn table Beautiful theme table with the images recolored.
+-- @deprecated recolor_titlebar_normal
+function theme_assets.recolor_titlebar_normal(theme, color)
+    return theme_assets.recolor_titlebar(theme, color, "normal")
+end
+
+--- Recolor focused titlebar icons.
+-- This method is deprecated.  Use a `beautiful.theme_assets.recolor_titlebar`.
+-- @tparam table theme Beautiful theme table
+-- @tparam color color Icons' color.
+-- @treturn table Beautiful theme table with the images recolored.
+-- @deprecated recolor_titlebar_focus
 function theme_assets.recolor_titlebar_focus(theme, color)
-    for _, titlebar_icon in ipairs({
-        'titlebar_close_button_focus',
-        'titlebar_minimize_button_focus',
-        'titlebar_ontop_button_focus_inactive',
-        'titlebar_ontop_button_focus_active',
-        'titlebar_sticky_button_focus_inactive',
-        'titlebar_sticky_button_focus_active',
-        'titlebar_floating_button_focus_inactive',
-        'titlebar_floating_button_focus_active',
-        'titlebar_maximized_button_focus_inactive',
-        'titlebar_maximized_button_focus_active',
-    }) do
-        theme[titlebar_icon] = recolor_image(theme[titlebar_icon], color)
-    end
-    return theme
+    return theme_assets.recolor_titlebar(theme, color, "focus")
 end
 
 --- Recolor layout icons.

@@ -59,10 +59,39 @@ theme.menu_width  = dpi(100)
 -- beautiful.variable in your rc.lua
 --theme.bg_widget = "#cc0000"
 
--- Recolor titlebar icons:
-theme = theme_assets.recolor_titlebar_normal(theme, theme.fg_normal)
-theme = theme_assets.recolor_titlebar_focus(theme, theme.fg_focus)
+-- Recolor Layout icons:
 theme = theme_assets.recolor_layout(theme, theme.fg_normal)
+
+-- Recolor titlebar icons:
+--
+local function darker(color_value, darker_n)
+    local result = "#"
+    for s in color_value:gmatch("[a-fA-F0-9][a-fA-F0-9]") do
+        local bg_numeric_value = tonumber("0x"..s) - darker_n
+        if bg_numeric_value < 0 then bg_numeric_value = 0 end
+        if bg_numeric_value > 255 then bg_numeric_value = 255 end
+        result = result .. string.format("%2.2x", bg_numeric_value)
+    end
+    return result
+end
+theme = theme_assets.recolor_titlebar(
+    theme, theme.fg_normal, "normal"
+)
+theme = theme_assets.recolor_titlebar(
+    theme, darker(theme.fg_normal, -60), "normal", "hover"
+)
+theme = theme_assets.recolor_titlebar(
+    theme, xrdb.color1, "normal", "press"
+)
+theme = theme_assets.recolor_titlebar(
+    theme, theme.fg_focus, "focus"
+)
+theme = theme_assets.recolor_titlebar(
+    theme, darker(theme.fg_focus, -60), "focus", "hover"
+)
+theme = theme_assets.recolor_titlebar(
+    theme, xrdb.color1, "focus", "press"
+)
 
 -- Define the icon theme for application icons. If not set then the icons
 -- from /usr/share/icons and /usr/share/icons/hicolor will be used.
