@@ -123,13 +123,12 @@ local properties = { "date", "font", "spacing", "week_numbers", "start_sunday", 
 -- @tparam boolean center Center the text horizontally
 -- @treturn wibox.widget.textbox
 local function make_cell(text, font, center)
-    return base.make_widget_declarative {
-        markup = text,
-        align  = center and "center" or "right",
-        valign = 'center',
-        font   = font,
-        widget = textbox
-    }
+    local w = textbox()
+    w:set_markup(text)
+    w:set_align(center and "center" or "right")
+    w:set_valign("center")
+    w:set_font(font)
+    return w
 end
 
 --- Create a grid layout with the month calendar
@@ -144,14 +143,13 @@ local function create_month(props, date)
     local num_columns = props.week_numbers and 8 or 7
 
     -- Create grid layout
-    local layout = base.make_widget_declarative{
-        layout      = grid,
-        expand      = true,
-        homogeneous = true,
-        spacing     = props.spacing,
-        forced_num_rows = num_rows,
-        forced_num_cols = num_columns,
-    }
+    local layout = grid()
+    layout:set_expand(true)
+    layout:set_expand(true)
+    layout:set_homogeneous(true)
+    layout:set_spacing(props.spacing)
+    layout:set_forced_num_rows(num_rows)
+    layout:set_forced_num_cols(num_columns)
 
     local start_row    = 3
     local start_column = num_columns - 6
@@ -229,14 +227,12 @@ end
 -- @treturn widget Grid layout
 local function create_year(props, date)
     -- Create a grid widget with the 12 months
-    local in_layout = base.make_widget_declarative{
-        layout      = grid,
-        expand      = true,
-        homogeneous = true,
-        spacing     = 2*props.spacing,
-        forced_num_cols = 4,
-        forced_num_rows = 3,
-    }
+    local in_layout = grid()
+    in_layout:set_expand(true)
+    in_layout:set_homogeneous(true)
+    in_layout:set_spacing(2*props.spacing)
+    in_layout:set_forced_num_cols(4)
+    in_layout:set_forced_num_rows(3)
 
     local month_date
     local current_date = os.date("*t")
@@ -253,12 +249,10 @@ local function create_year(props, date)
     -- Create a vertical layout
     local flag, text = "yearheader", string.format("%s", date.year)
     local year_header = props.fn_embed(make_cell(text, props.font, true), flag, date)
-    local out_layout = base.make_widget_declarative{
-        year_header,
-        in_layout,
-        spacing = 2*props.spacing, -- separate header from calendar grid
-        layout  = vertical
-    }
+    local out_layout = vertical()
+    out_layout:set_spacing(2*props.spacing) -- separate header from calendar grid
+    out_layout:add(year_header)
+    out_layout:add(in_layout)
     return props.fn_embed(out_layout, "year", date)
 end
 
