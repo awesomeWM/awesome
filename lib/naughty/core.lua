@@ -41,7 +41,7 @@ Naughty configuration - a table containing common popup settings.
 @tfield[opt=apply_dpi(4)] int padding Space between popups and edge of the
   workarea.
 @tfield[opt=apply_dpi(1)] int spacing Spacing between popups.
-@tfield[opt={"/usr/share/pixmaps/"}] table icon_dirs List of directories
+@tfield[opt={"/usr/share/icons/hicolor/", "/usr/share/icons/", "/usr/share/pixmaps/"}] table icon_dirs List of directories
   that will be checked by `getIcon()`.
 @tfield[opt={ "png", "gif" }] table icon_formats List of formats that will be
   checked by `getIcon()`.
@@ -66,7 +66,7 @@ notifications, e.g.
 naughty.config = {
     padding = dpi(4),
     spacing = dpi(1),
-    icon_dirs = { "/usr/share/pixmaps/", },
+    icon_dirs = { "/usr/share/icons/hicolor/", "/usr/share/icons/", "/usr/share/pixmaps/", },
     icon_formats = { "png", "gif" },
     notify_callback = nil,
 }
