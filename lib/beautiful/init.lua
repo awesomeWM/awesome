@@ -207,6 +207,14 @@ function beautiful.init(config)
             end
 
             if theme.font then set_font(theme.font) end
+
+            if theme.icon_theme then
+                local theme_dir = "/usr/share/icons/" .. theme.icon_theme .. "/"
+                local naughty = require("naughty")
+                table.insert(naughty.config.icon_dirs, 1, theme_dir)
+                table.insert(naughty.config.icon_dirs, 1, theme_dir .. "base/")
+                table.insert(naughty.config.icon_dirs, 1, theme_dir .. "symbolic/")
+            end
         else
             theme = {}
             return gears_debug.print_error("beautiful: error loading theme file " .. config)
