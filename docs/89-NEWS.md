@@ -24,7 +24,7 @@ have been resolved or decided to be obsolete.
 
 ## New features
 
- * The hotkey popup has been extended to support Firefox and TMUX
+ * The hotkey popup has been extended to support Firefox, Qutebrowser and TMUX
  * Naughty (the notification system) has a new `ignore_suspend` flag
  * The `textclock` widget now supports timezones
  * New utility functions have been added:
@@ -41,6 +41,8 @@ have been resolved or decided to be obsolete.
  * Two new `calendar` widgets have been added, a widget and a popup (see below)
  * The `ratio` layout now supports various strategies to redistribute space
  * The `stack` layout now supports offsets
+ * The notifications now have a `naughty.destroy_all_notifications()` function
+ * The `xresources` theme now supports the titlebar `hover` and `press` states
 
 The stack layout offsets:
 
