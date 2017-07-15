@@ -95,7 +95,18 @@ describe("awful.completion.shell", function()
     setup(function()
         test_dir = get_test_dir()
         gfs.make_directories(test_dir .. '/true')
+        Gio.File.new_for_path(test_dir .. '/true/with_file'):create(Gio.FileCreateFlags.NONE);
         gfs.make_directories(test_dir .. '/just_a_directory')
+        Gio.File.new_for_path(test_dir .. '/just_a_directory/with_file'):create(Gio.FileCreateFlags.NONE);
+        -- Chaotic order is intended!
+        gfs.make_directories(test_dir .. '/ambiguous_dir_a')
+        gfs.make_directories(test_dir .. '/ambiguous_dir_e')
+        Gio.File.new_for_path(test_dir .. '/ambiguous_dir_e/with_file'):create(Gio.FileCreateFlags.NONE);
+        gfs.make_directories(test_dir .. '/ambiguous_dir_c')
+        Gio.File.new_for_path(test_dir .. '/ambiguous_dir_c/with_file'):create(Gio.FileCreateFlags.NONE);
+        gfs.make_directories(test_dir .. '/ambiguous_dir_d')
+        gfs.make_directories(test_dir .. '/ambiguous_dir_b')
+        gfs.make_directories(test_dir .. '/ambiguous_dir_f')
         os.execute(string.format(
             'cd %s && touch localcommand && chmod +x localcommand', test_dir))
         lfs.chdir(test_dir)
@@ -103,8 +114,18 @@ describe("awful.completion.shell", function()
     end)
 
     teardown(function()
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_a'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_b'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_c/with_file'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_c'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_d'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_e/with_file'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_e'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_f'))
+        assert.True(os.remove(test_dir .. '/just_a_directory/with_file'))
         assert.True(os.remove(test_dir .. '/just_a_directory'))
         assert.True(os.remove(test_dir .. '/localcommand'))
+        assert.True(os.remove(test_dir .. '/true/with_file'))
         assert.True(os.remove(test_dir .. '/true'))
         assert.True(os.remove(test_dir))
         remove_test_path_dir(test_path)
