@@ -5,16 +5,16 @@
 
 <center> <img src="../images/AUTOGEN_wibox_logo_logo_and_name.svg" /> </center>
 
-Awesome v4.2 is the second release of the 4.x API. It mostly fix the bugs
-reported over the last 3 months and add a couple widgets. Almost 150 issues
+Awesome v4.2 is the second release of the 4.x API. It mostly fixes the bugs
+reported over the last 3 months and adds a couple widgets. Almost 150 issues
 have been resolved or decided to be obsolete.
 
 ## Noteworthy fixes
 
- * The annoying maximization regression from v4.1 have been fixed
+ * The annoying maximization regression from v4.1 has been fixed
  * Fixes broken drag&drop with some applications like FlowBlade
  * Changing the keyboard layout using `xmodmap` is now much faster
- * Fixes a regression that prevents Awesome to start with the wallpaper is invalid
+ * Fixes a regression that prevents Awesome to start when the wallpaper is invalid
  * The client history is now more reliable
  * Another instance where clients ended up in the wrong screen has been fixed
  * Awesome will no longer generate zombie processes when restarted
@@ -52,7 +52,7 @@ The ratio layout new full strategies:
 
 [![The ratio strategies](../images/AUTOGEN_wibox_layout_ratio_strategy.svg)](../classes/wibox.layout.ratio.html)
 
-The `manual` layout fix a capability gap where hierarchical elements need to be
+The `manual` layout fixes a capability gap where hierarchical elements need to be
 placed manually. It has multiple modes including an `awful.placement` integration.
 
 [![The manual layout](../images/AUTOGEN_wibox_layout_manual_add_at.svg)](../classes/wibox.layout.manual.html)
@@ -65,7 +65,7 @@ The new calendar widgets are very flexible and can be themed down to the very sm
 
 ## Behavior changes
 
- * The client `property::floating` is now also emitted when when the floating
+ * The client `property::floating` is now also emitted when the floating
    state changes implicitly, e.g. because the client gets maximized or
    fullscreened.
  * Building Awesome from its root source directory is no longer supported and
