@@ -206,6 +206,20 @@ describe("awful.completion.shell", function()
         end)
     end
     --]]
+
+    if has_bash then
+        it("correctly sorts completed items (bash)", function()
+            assert.same(shell('./ambi', 7, 1, 'bash'), {'./ambiguous_dir_a/', 19,
+            {'./ambiguous_dir_a/', './ambiguous_dir_b/', './ambiguous_dir_c/',
+            './ambiguous_dir_d/', './ambiguous_dir_e/', './ambiguous_dir_f/'}})
+        end)
+    end
+    if has_zsh then
+        it("correctly sorts completed items (zsh)", function()
+            assert.same(shell('./ambi', 7, 1, 'zsh'), {'./ambiguous_dir_c/', 19,
+            {'./ambiguous_dir_c/', './ambiguous_dir_e/'}})
+        end)
+    end
 end)
 
 describe("awful.completion.shell handles $SHELL", function()
