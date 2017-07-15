@@ -164,13 +164,6 @@ endforeach()
 # Do it again, but this time with the CFLAGS/LDFLAGS
 pkg_check_modules(AWESOME_REQUIRED REQUIRED ${AWESOME_DEPENDENCIES})
 
-macro(a_find_library variable library)
-    find_library(${variable} ${library})
-    if(NOT ${variable})
-        message(FATAL_ERROR ${library} " library not found.")
-    endif()
-endmacro()
-
 # Check for backtrace_symbols()
 include(CheckFunctionExists)
 check_function_exists(backtrace_symbols HAS_EXECINFO)
