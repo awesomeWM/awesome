@@ -75,28 +75,37 @@ if [ -n "$DO_COVERAGE" ]; then
     if [ "$DO_COVERAGE" = "codecov" ]; then
       test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
       luacov || return 1
-      travis_retry bash /tmp/codecov-bash -X coveragepy -F "$1" || return 1
+      travis_retry bash /tmp/codecov-bash -X coveragepy -f ./build/luacov.report.out -F "$1" || return 1
       rm build/luacov.stats.out
+    fi
+    return 0
+  }
+  do_codecov_gcov() {
+    echo "== do_codecov_gcov in $PWD: $*: =="
+    if [ "$DO_COVERAGE" = "codecov" ]; then
+      travis_retry bash /tmp/codecov-bash -X coveragepy -F "$1" || return 1
     fi
     return 0
   }
 
   # travis_fold_start "DO_COVERAGE"
 
-  # # Run tests/examples explicitly.
-  # (mkdir -p build/examples \
-  #   && cd build/examples \
-  #   && cmake $CMAKE_ARGS ../../tests/examples)
-  # do_codecov samples
+  # Run tests/examples explicitly.
+  # shellcheck disable=SC2086
+  (mkdir -p build/examples \
+    && cd build/examples \
+    && cmake $CMAKE_ARGS ../../tests/examples)
+  do_codecov samples
 
-  # make check-unit-coverage
-  # do_codecov unittests
+  make check-unit-coverage
+  do_codecov unittests
   # TODO: "make check-integration"?!
   # shellcheck disable=SC2086
   tests/run.sh $TEST_RUN_ARGS
   do_codecov functionaltests
-  # gcov $(find -name '*.o')
-  # do_codecov_gcov c_code
+  # shellcheck disable=SC2046
+  gcov $(find build -name '*.o')
+  do_codecov_gcov c_code
 
   # travis_fold_end
 else
