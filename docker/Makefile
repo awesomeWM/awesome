@@ -13,10 +13,9 @@ DOCKER_RUN_ARGS:=-e AWESOME_UID=$(AWESOME_UID)
 DOCKER_VOLUME_CCACHE=awesome-ccache
 DOCKER_VOLUME_BUILD:=awesome-build-$(LUA_PKG)
 
-LUA_LIB_PREFIX:=$(if $(filter luajit,$(LUA_PKG)),lua5.1,$(LUA_PKG))
-
 # Args for docker-build.
 LUA_PKG:=lua5.3
+LUA_LIB_PREFIX:=$(if $(filter luajit,$(LUA_PKG)),lua5.1,$(LUA_PKG))
 DOCKER_FLAVOR:=
 
 $(BUILDDIR):
