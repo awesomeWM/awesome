@@ -91,8 +91,9 @@ if [ -n "$DO_COVERAGE" ]; then
 
   # make check-unit-coverage
   # do_codecov unittests
-# TODO: "make check-integration"?!
-  tests/run.sh "$TEST_RUN_ARGS"
+  # TODO: "make check-integration"?!
+  # shellcheck disable=SC2086
+  tests/run.sh $TEST_RUN_ARGS
   do_codecov functionaltests
   # gcov $(find -name '*.o')
   # do_codecov_gcov c_code

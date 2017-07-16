@@ -4,6 +4,7 @@
 #  - DOCKER_FLAVOR: "test" or empty
 #  - LUA_PKG: the Lua package to install
 #  - LUA_LIB_PREFIX: typically the same as LUA_PKG, but different for luajit
+#  - DO_COVERAGE (optional, default: empty): codecov, coveralls
 
 FROM alpine:3.6
 
@@ -66,5 +67,19 @@ ENV LUA_DIR /usr/lib/${LUA_PKG}
 RUN apk --no-cache add gcc make musl-dev
 
 RUN echo "Built deps image for LUA_PKG=$LUA_PKG"
+
+ARG DO_COVERAGE=
+RUN if [ -n "$DO_COVERAGE" ]; then \
+    set -ex; \
+    apk --no-cache add libressl curl; \
+    apk --no-cache add "luarocks${LUA_LIB_PREFIX#lua}"; \
+    ln -s /usr/bin/luarocks-${LUA_LIB_PREFIX#lua} /usr/bin/luarocks; \
+    luarocks --local install cluacov; \
+    if [ "$DO_COVERAGE" = codecov ]; then \
+      wget -O /tmp/codecov-bash https://codecov.io/bash; \
+    elif [ "$DO_COVERAGE" = coveralls ]; then \
+      luarocks --local install luacov-coveralls; \
+    fi; \
+  fi
 
 ENTRYPOINT ["/src/awesome/docker/build-and-test"]
