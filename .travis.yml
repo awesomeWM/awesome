@@ -12,7 +12,7 @@ branches:
 
 env:
   matrix:
-    - MAKE_ARGS="LUA_PKG=lua5.3"
+    - MAKE_ARGS="LUA_PKG=lua5.3 DO_COVERAGE=codecov"
 
 before_install:
   - if [ "$BUILD_APIDOC" = true ] && [ -n "$DO_COVERAGE" ]; then echo "BUILD_APIDOC and DO_COVERAGE are not meant to be used together." >&2; exit 1; fi

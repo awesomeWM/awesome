@@ -1,14 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 # A wrapper script used as entrypoint to (re)build and then run the tests.
 
 set -e
-
-echo "Running build-and-test: LUA_PKG=$LUA_PKG"
-
-# XXX: should get moved into building (as ARG (and ENV)?!)
-if [ "$LUA_PKG" = luajit ]; then
-  export CMAKE_ARGS='-DLUA_INCLUDE_DIR=/usr/include/luajit-2.1 -DLUA_LIBRARY=/usr/lib/libluajit-5.1.so'
-fi
 
 # DEBUG
 # find /usr/include -type d | grep lua
@@ -33,7 +26,82 @@ if [ -n "$AWESOME_UID" ]; then
   exec su "$USER" -c "$0 $*"
 fi
 
+TEST_RUN_ARGS="$*"
+
+set -e
+echo "Running build-and-test: LUA_PKG=$LUA_PKG DO_COVERAGE=$DO_COVERAGE"
+
+# XXX: should get moved into building (as ARG (and ENV)?!)
+if [ "$LUA_PKG" = luajit ]; then
+  export CMAKE_ARGS='-DLUA_INCLUDE_DIR=/usr/include/luajit-2.1 -DLUA_LIBRARY=/usr/lib/libluajit-5.1.so'
+fi
+
 make
 build/awesome --version
+
+set -x
+
+if [ -n "$DO_COVERAGE" ]; then
+  eval "$(luarocks path --bin)"
+
+  # Source: https://github.com/travis-ci/travis-build/blob/ba5abcec10e5a3c7d31d3e1afd0dc7f48a6162ab/lib/travis/build/templates/header.sh
+  travis_retry() {
+    ANSI_RED="\033[31;1m"
+    # ANSI_GREEN="\033[32;1m"
+    # ANSI_YELLOW="\033[33;1m"
+    ANSI_RESET="\033[0m"
+    # ANSI_CLEAR="\033[0K"
+
+    local result=0
+    local count=1
+    while [ $count -le 3 ]; do
+      [ $result -ne 0 ] && {
+        echo -e "\n${ANSI_RED}The command \"$@\" failed. Retrying, $count of 3.${ANSI_RESET}\n" >&2
+      }
+      "$@"
+      result=$?
+      [ $result -eq 0 ] && break
+      count=$(($count + 1))
+      sleep 1
+    done
+    [ $count -gt 3 ] && {
+      echo -e "\n${ANSI_RED}The command \"$@\" failed 3 times.${ANSI_RESET}\n" >&2
+    }
+    return $result
+  }
+
+  do_codecov() {
+    echo "== do_codecov in $PWD: $*: build/luacov.stats.out: =="
+    if [ "$DO_COVERAGE" = "codecov" ]; then
+      test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
+      luacov || return 1
+      travis_retry bash /tmp/codecov-bash -X coveragepy -F "$1" || return 1
+      rm build/luacov.stats.out
+    fi
+    return 0
+  }
+
+  # travis_fold_start "DO_COVERAGE"
+
+  # # Run tests/examples explicitly.
+  # (mkdir -p build/examples \
+  #   && cd build/examples \
+  #   && cmake $CMAKE_ARGS ../../tests/examples)
+  # do_codecov samples
+
+  # make check-unit-coverage
+  # do_codecov unittests
 # TODO: "make check-integration"?!
-exec /src/awesome/tests/run.sh "$@"
+  tests/run.sh "$TEST_RUN_ARGS"
+  do_codecov functionaltests
+  # gcov $(find -name '*.o')
+  # do_codecov_gcov c_code
+
+  # travis_fold_end
+else
+  # travis_run_in_fold "make.check-unit" make check-unit
+  # travis_run_in_fold "make.check-integration" make check-integration
+  make check-unit
+  # TODO: respect TEST_RUN_ARGS
+  make check-integration
+fi
