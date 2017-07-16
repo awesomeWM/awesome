@@ -239,6 +239,51 @@ function naughty.suspend()
     suspended = true
 end
 
+local conns = {}
+
+--- Connect a global signal on the notification engine.
+--
+-- Functions connected to this signal source will be executed when any
+-- notification object emits the signal.
+--
+-- It is also used for some generic notification signals such as
+-- `request::display`.
+--
+-- @tparam string name The name of the signal
+-- @tparam function func The function to attach
+-- @usage naughty.connect_signal("added", function(notif)
+--    -- do something
+-- end)
+function naughty.connect_signal(name, func)
+    assert(name)
+    conns[name] = conns[name] or {}
+    table.insert(conns[name], func)
+end
+
+--- Emit a notification signal.
+-- @tparam string name The signal name.
+-- @param ... The signal callback arguments
+function naughty.emit_signal(name, ...)
+    assert(name)
+    for _, func in pairs(conns[name] or {}) do
+        func(...)
+    end
+end
+
+--- Disconnect a signal from a source.
+-- @tparam string name The name of the signal
+-- @tparam function func The attached function
+-- @treturn boolean If the disconnection was successful
+function naughty.disconnect_signal(name, func)
+    for k, v in ipairs(conns[name] or {}) do
+        if v == func then
+            table.remove(conns[name], k)
+            return true
+        end
+    end
+    return false
+end
+
 --- Resume notifications
 function naughty.resume()
     suspended = false
