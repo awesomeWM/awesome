@@ -127,6 +127,7 @@ pkg_check_modules(AWESOME_COMMON_REQUIRED REQUIRED
     xcb>=1.6)
 
 set(AWESOME_DEPENDENCIES
+    glib-2.0
     glib-2.0>=2.40
     gdk-pixbuf-2.0
     cairo
@@ -136,8 +137,11 @@ set(AWESOME_DEPENDENCIES
     xcb-xtest
     xcb-xinerama
     xcb-shape
+    xcb-util
     xcb-util>=0.3.8
+    xcb-keysyms
     xcb-keysyms>=0.3.4
+    xcb-icccm
     xcb-icccm>=0.3.8
     # NOTE: it's not clear what version is required, but 1.10 works at least.
     # See https://github.com/awesomeWM/awesome/pull/149#issuecomment-94208356.
@@ -145,23 +149,14 @@ set(AWESOME_DEPENDENCIES
     xkbcommon
     xkbcommon-x11
     cairo-xcb
+    libstartup-notification-1.0
     libstartup-notification-1.0>=0.10
+    xproto
     xproto>=7.0.15
+    libxdg-basedir
     libxdg-basedir>=1.0.0
     xcb-xrm
 )
-
-# Check the deps one by one
-foreach(dependency ${AWESOME_DEPENDENCIES})
-    unset(TMP_DEP_FOUND CACHE)
-    pkg_check_modules(TMP_DEP REQUIRED ${dependency})
-
-    if(NOT TMP_DEP_FOUND)
-        message(FATAL_ERROR)
-    endif()
-endforeach()
-
-# Do it again, but this time with the CFLAGS/LDFLAGS
 pkg_check_modules(AWESOME_REQUIRED REQUIRED ${AWESOME_DEPENDENCIES})
 
 macro(a_find_library variable library)
