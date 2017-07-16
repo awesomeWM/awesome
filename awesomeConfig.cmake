@@ -210,13 +210,15 @@ set(AWESOME_REQUIRED_INCLUDE_DIRS
 # AWESOME_OPTIONAL_INCLUDE_DIRS
 
 if(WITH_DBUS)
-    pkg_check_modules(DBUS dbus-1)
+    if(NOT DBUS_FOUND)
+        pkg_check_modules(DBUS dbus-1)
+    endif()
     if(DBUS_FOUND)
         set(AWESOME_OPTIONAL_LDFLAGS ${AWESOME_OPTIONAL_LDFLAGS} ${DBUS_LDFLAGS})
         set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
     else()
         set(WITH_DBUS OFF)
-        message(STATUS "DBUS not found. Disabled.")
+        message(STATUS "D-Bus not found. Disabled.")
     endif()
 endif()
 # }}}
