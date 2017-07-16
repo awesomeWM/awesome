@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- An extendable mouse resizing handler.
+--- An extensible mouse resizing handler.
 --
 -- This module offers a resizing and moving mechanism for drawables such as
 -- clients and wiboxes.
