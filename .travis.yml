@@ -31,5 +31,5 @@ install:
 script:
   - make -C docker docker_test $MAKE_ARGS
 
-after_success:
+before_cache:
   - mkdir -p /tmp/docker; docker save awesomewm/awesome-base-current > "${DOCKER_IMAGE_CACHE}"
