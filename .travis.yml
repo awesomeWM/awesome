@@ -4,6 +4,10 @@ language: none
 services:
   - docker
 
+cache:
+  directories:
+  - /tmp/docker
+
 # Build only master and stable branches.  Other branches go through PRs.
 branches:
   only:
@@ -21,10 +25,11 @@ before_install:
   - cmake --version
 
 install:
-  # TODO: docker-pull base image
+  - DOCKER_IMAGE_CACHE="/tmp/docker/image-${TRAVIS_BUILD_NUMBER}.tar"
+  - if [ -e "$DOCKER_IMAGE_CACHE" ]; then docker load -i "${DOCKER_IMAGE_CACHE}"; fi
 
 script:
   - make -C docker docker_test $MAKE_ARGS
 
 after_success:
-  # TODO: push bash image
+  - mkdir -p /tmp/docker; docker save awesomewm/awesome-base-current > "${DOCKER_IMAGE_CACHE}"

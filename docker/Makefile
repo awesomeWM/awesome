@@ -47,7 +47,7 @@ $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX):
 	  --build-arg LUA_PKG=$(LUA_PKG) \
 	  --build-arg LUA_LIB_PREFIX=$(LUA_LIB_PREFIX) \
 	  --build-arg DO_COVERAGE=$(DO_COVERAGE) \
-	  -f docker/Dockerfile -t awesomewm/awesome-base-$(DOCKER_SUFFIX) .
+	  -f docker/Dockerfile -t awesomewm/awesome-base-current -t awesomewm/awesome-base-$(DOCKER_SUFFIX) .
 	touch $@
 
 ifeq ($(CI), true)
