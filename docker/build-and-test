@@ -2,6 +2,7 @@
 # A wrapper script used as entrypoint to (re)build and then run the tests.
 
 set -e
+set -x
 
 # DEBUG
 # find /usr/include -type d | grep lua
@@ -28,7 +29,6 @@ fi
 
 TEST_RUN_ARGS="$*"
 
-set -e
 echo "Running build-and-test: LUA_PKG=$LUA_PKG DO_COVERAGE=$DO_COVERAGE"
 
 # XXX: should get moved into building (as ARG (and ENV)?!)
@@ -36,13 +36,19 @@ if [ "$LUA_PKG" = luajit ]; then
   export CMAKE_ARGS='-DLUA_INCLUDE_DIR=/usr/include/luajit-2.1 -DLUA_LIBRARY=/usr/lib/libluajit-5.1.so'
 fi
 
+if [ "$DO_COVERAGE" = "codecov" ]; then
+  # export CXXFLAGS="-fprofile-arcs -ftest-coverage"
+  export CFLAGS="-fprofile-arcs -ftest-coverage"
+  export LDFLAFS="-fprofile-arcs -ftest-coverage"
+fi
+
 make
 build/awesome --version
 
-set -x
-
 if [ -n "$DO_COVERAGE" ]; then
-  eval "$(luarocks path --bin)"
+  # Use separate assignment, so that "set -e" exits when luarocks is not found.
+  luarocks_paths="$(luarocks path --bin)"
+  eval "$luarocks_paths"
 
   # Source: https://github.com/travis-ci/travis-build/blob/ba5abcec10e5a3c7d31d3e1afd0dc7f48a6162ab/lib/travis/build/templates/header.sh
   travis_retry() {
