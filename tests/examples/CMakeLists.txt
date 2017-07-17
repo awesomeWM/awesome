@@ -9,6 +9,11 @@
 # where relevant. Those images are used by the documentation and help the
 # developers track user interface regressions and glitches. Finally, it also
 # helps to find broken code.
+
+if(NOT DEFINED PROJECT_NAME)
+    project(awesome-tests-examples NONE)
+endif()
+
 cmake_minimum_required(VERSION 3.0.0)
 
 # Get and update the LUA_PATH so the scripts can be executed without Awesome.
