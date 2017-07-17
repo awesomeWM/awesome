@@ -8,7 +8,7 @@
 BUILDDIR=../build
 
 AWESOME_UID=$(shell id -u)
-DOCKER_RUN_ARGS:=-e AWESOME_UID=$(AWESOME_UID)
+DOCKER_RUN_ARGS+=-e AWESOME_UID=$(AWESOME_UID)
 
 DOCKER_VOLUME_CCACHE=awesome-ccache
 DOCKER_VOLUME_BUILD:=awesome-build-$(LUA_PKG)$(if $(DO_COVERAGE),-coverage)
@@ -50,10 +50,6 @@ $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX):
 	  -f docker/Dockerfile -t awesomewm/awesome-base-current -t awesomewm/awesome-base-$(DOCKER_SUFFIX) .
 	touch $@
 
-ifeq ($(CI), true)
-DOCKER_RUN_ARGS+=-e CI -e TRAVIS -e SHIPPABLE -e TRAVIS_BRANCH -e TRAVIS_COMMIT -e TRAVIS_JOB_NUMBER -e TRAVIS_PULL_REQUEST -e TRAVIS_JOB_ID -e TRAVIS_REPO_SLUG -e TRAVIS_TAG -e TRAVIS_OS_NAME
-endif
-
 docker_test: TEST_RUN_ARGS:=
 docker_test: DOCKER_FLAVOR:=test
 docker_test: $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX)
@@ -66,8 +62,8 @@ docker_test: $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX)
 	  awesomewm/awesome-base-$(DOCKER_SUFFIX) \
 	  $(TEST_RUN_ARGS)
 
-docker_test_sh: DOCKER_RUN_ARGS:=--entrypoint=sh
+docker_test_sh: DOCKER_RUN_ARGS+=--entrypoint=sh
 docker_test_sh: docker_test
 
-docker_test_make: DOCKER_RUN_ARGS:=--entrypoint=make
+docker_test_make: DOCKER_RUN_ARGS+=--entrypoint=make
 docker_test_make: docker_test
