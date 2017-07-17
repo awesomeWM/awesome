@@ -104,7 +104,7 @@ if [ -n "$DO_COVERAGE" ]; then
   tests/run.sh $TEST_RUN_ARGS
   do_codecov functionaltests
   # shellcheck disable=SC2046
-  gcov $(find build -name '*.o')
+  gcov $(find . -name '*.o')
   do_codecov_gcov c_code
 
   # travis_fold_end
