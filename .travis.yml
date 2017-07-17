@@ -6,7 +6,7 @@ services:
 
 cache:
   directories:
-  - /tmp/docker
+  - /tmp/dockerimgs
 
 # Build only master and stable branches.  Other branches go through PRs.
 branches:
@@ -26,12 +26,5 @@ before_install:
   - if [ -z $LUALIBRARY ]; then LUALIBRARY=/usr/lib/x86_64-linux-gnu/lib${LUANAME}.so; fi
   - cmake --version
 
-install:
-  - DOCKER_IMAGE_CACHE="/tmp/docker/image-${TRAVIS_JOB_NUMBER#*.}.tar"
-  - if [ -e "$DOCKER_IMAGE_CACHE" ]; then docker load -i "${DOCKER_IMAGE_CACHE}"; fi
-
 script:
-  - make -C docker docker_test $MAKE_ARGS
-
-before_cache:
-  - mkdir -p /tmp/docker; docker save awesomewm/awesome-base-current > "${DOCKER_IMAGE_CACHE}"
+  - make -C docker docker_test $MAKE_ARGS DOCKER_IMG_DIR=/tmp/dockerimgs

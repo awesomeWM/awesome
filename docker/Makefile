@@ -39,15 +39,25 @@ docker_clean:
 
 DOCKER_SUFFIX=$(LUA_PKG)$(if $(DOCKER_FLAVOR),-$(DOCKER_FLAVOR))$(if $(DO_COVERAGE),-$(DO_COVERAGE))
 
+DOCKER_IMAGE_DIR?=
+
 $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX): Makefile Dockerfile | $(BUILDDIR_VOLUME)
 $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX):
 	$(if $(LUA_PKG),,$(error LUA_PKG is missing, use e.g. lua5.3 or luajit.))
-	cd .. && docker build \
-	  --build-arg DOCKER_FLAVOR=$(DOCKER_FLAVOR) \
-	  --build-arg LUA_PKG=$(LUA_PKG) \
-	  --build-arg LUA_LIB_PREFIX=$(LUA_LIB_PREFIX) \
-	  --build-arg DO_COVERAGE=$(DO_COVERAGE) \
-	  -f docker/Dockerfile -t awesomewm/awesome-base-current -t awesomewm/awesome-base-$(DOCKER_SUFFIX) .
+	set -x; if [ -n "${DOCKER_IMAGE_DIR}" ] && [ -e "${DOCKER_IMAGE_DIR}/base-${DOCKER_SUFFIX}" ]; then \
+	  docker load -i "${DOCKER_IMAGE_DIR}/base-${DOCKER_SUFFIX}"; \
+	else \
+	  cd .. && docker build \
+	    --build-arg DOCKER_FLAVOR=$(DOCKER_FLAVOR) \
+	    --build-arg LUA_PKG=$(LUA_PKG) \
+	    --build-arg LUA_LIB_PREFIX=$(LUA_LIB_PREFIX) \
+	    --build-arg DO_COVERAGE=$(DO_COVERAGE) \
+	    -f docker/Dockerfile -t awesomewm/awesome-base-$(DOCKER_SUFFIX) . ; \
+	  if [ -n "${DOCKER_IMAGE_DIR}" ]; then \
+	    mkdir -p ${DOCKER_IMAGE_DIR}; \
+	    docker save awesomewm/awesome-base-$(DOCKER_SUFFIX) > "${DOCKER_IMAGE_DIR}/base-${DOCKER_SUFFIX}"; \
+		fi; \
+	fi
 	touch $@
 
 docker_test: TEST_RUN_ARGS:=
