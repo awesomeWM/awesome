@@ -31,20 +31,6 @@ RUN apk --no-cache add --virtual awesome-runtime \
 RUN apk --no-cache add ccache
 ENV PATH /usr/lib/ccache/bin/:$PATH
 
-ARG DO_COVERAGE=
-RUN if [ -n "$DO_COVERAGE" ]; then \
-    set -ex; \
-    apk --no-cache add libressl curl; \
-    apk --no-cache add "luarocks${LUA_LIB_PREFIX#lua}"; \
-    ln -s /usr/bin/luarocks-${LUA_LIB_PREFIX#lua} /usr/bin/luarocks; \
-    luarocks --local install cluacov; \
-    if [ "$DO_COVERAGE" = codecov ]; then \
-      wget -O /tmp/codecov-bash https://codecov.io/bash; \
-    elif [ "$DO_COVERAGE" = coveralls ]; then \
-      luarocks --local install luacov-coveralls; \
-    fi; \
-  fi
-
 ARG DOCKER_FLAVOR
 RUN if [ "$DOCKER_FLAVOR" = test ]; then \
     apk --no-cache add \
@@ -67,6 +53,20 @@ RUN apk --no-cache add --virtual awesome-runtime ${LUA_LIB_PREFIX}-lgi
 RUN if [ "$DOCKER_FLAVOR" = test ]; then \
     apk --no-cache add "${LUA_LIB_PREFIX}-busted"; \
     ln -s /usr/bin/busted-* /usr/bin/busted; \
+  fi
+
+ARG DO_COVERAGE=
+RUN if [ -n "$DO_COVERAGE" ]; then \
+    set -ex; \
+    apk --no-cache add libressl curl; \
+    apk --no-cache add "luarocks${LUA_LIB_PREFIX#lua}"; \
+    ln -s /usr/bin/luarocks-${LUA_LIB_PREFIX#lua} /usr/bin/luarocks; \
+    luarocks --local install cluacov; \
+    if [ "$DO_COVERAGE" = codecov ]; then \
+      wget -O /tmp/codecov-bash https://codecov.io/bash; \
+    elif [ "$DO_COVERAGE" = coveralls ]; then \
+      luarocks --local install luacov-coveralls; \
+    fi; \
   fi
 
 # Cleanup, needs to happen after build only, and get chained in a single RUN.
