@@ -26,7 +26,7 @@ before_install:
   - cmake --version
 
 install:
-  - DOCKER_IMAGE_CACHE="/tmp/docker/image-${TRAVIS_BUILD_NUMBER}.tar"
+  - DOCKER_IMAGE_CACHE="/tmp/docker/image-${TRAVIS_JOB_NUMBER#*.}.tar"
   - if [ -e "$DOCKER_IMAGE_CACHE" ]; then docker load -i "${DOCKER_IMAGE_CACHE}"; fi
 
 script:
