@@ -27,8 +27,6 @@ if [ -n "$AWESOME_UID" ]; then
   exec su "$USER" -c "$0 $*"
 fi
 
-TEST_RUN_ARGS="$*"
-
 echo "Running build-and-test: LUA_PKG=$LUA_PKG DO_COVERAGE=$DO_COVERAGE"
 
 # XXX: should get moved into building (as ARG (and ENV)?!)
@@ -107,7 +105,7 @@ if [ -n "$DO_COVERAGE" ]; then
   do_codecov unittests
   # TODO: "make check-integration"?!
   # shellcheck disable=SC2086
-  tests/run.sh $TEST_RUN_ARGS
+  tests/run.sh "$@"
   do_codecov functionaltests
   # shellcheck disable=SC2046
   gcov $(find . -name '*.o')
