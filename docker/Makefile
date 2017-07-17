@@ -11,7 +11,7 @@ AWESOME_UID=$(shell id -u)
 DOCKER_RUN_ARGS:=-e AWESOME_UID=$(AWESOME_UID)
 
 DOCKER_VOLUME_CCACHE=awesome-ccache
-DOCKER_VOLUME_BUILD:=awesome-build-$(LUA_PKG)
+DOCKER_VOLUME_BUILD:=awesome-build-$(LUA_PKG)$(if $(DO_COVERAGE),-coverage)
 
 # Args for docker-build.
 LUA_PKG:=lua5.3
@@ -37,7 +37,7 @@ docker_clean:
 	    done; \
 	  fi
 
-DOCKER_SUFFIX=$(LUA_PKG)$(if $(DOCKER_FLAVOR),-$(DOCKER_FLAVOR))
+DOCKER_SUFFIX=$(LUA_PKG)$(if $(DOCKER_FLAVOR),-$(DOCKER_FLAVOR))$(if $(DO_COVERAGE),-$(DO_COVERAGE))
 
 $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX): Makefile Dockerfile | $(BUILDDIR_VOLUME)
 $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX):
