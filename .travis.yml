@@ -30,4 +30,4 @@ before_install:
   - cmake --version
 
 script:
-  - make -C docker docker_test $MAKE_ARGS DOCKER_IMG_DIR=/tmp/dockerimgs
+  - make -C docker docker_test $MAKE_ARGS DOCKER_IMGS_DIR=/tmp/dockerimgs
