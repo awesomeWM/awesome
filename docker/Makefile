@@ -44,7 +44,7 @@ DOCKER_IMGS_DIR?=
 $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX): Makefile Dockerfile | $(BUILDDIR_VOLUME)
 $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX):
 	$(if $(LUA_PKG),,$(error LUA_PKG is missing, use e.g. lua5.3 or luajit.))
-	set -x; if [ -n "${DOCKER_IMGS_DIR}" ] && [ -e "${DOCKER_IMGS_DIR}/base-${DOCKER_SUFFIX}" ]; then \
+	set -ex; if [ -n "${DOCKER_IMGS_DIR}" ] && [ -e "${DOCKER_IMGS_DIR}/base-${DOCKER_SUFFIX}" ]; then \
 	  docker load -i "${DOCKER_IMGS_DIR}/base-${DOCKER_SUFFIX}"; \
 	else \
 	  cd .. && docker build \
