@@ -37,7 +37,7 @@ docker_clean:
 	    done; \
 	  fi
 
-DOCKER_SUFFIX=$(LUA_PKG)$(if $(DOCKER_FLAVOR),-$(DOCKER_FLAVOR))$(if $(DO_COVERAGE),-$(DO_COVERAGE))
+DOCKER_SUFFIX=$(LUA_PKG)$(if $(DOCKER_FLAVOR),-$(DOCKER_FLAVOR))$(if $(DO_COVERAGE),-cov_$(DO_COVERAGE))
 
 DOCKER_IMGS_DIR?=
 

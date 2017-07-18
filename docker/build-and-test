@@ -34,8 +34,7 @@ if [ "$LUA_PKG" = luajit ]; then
   export CMAKE_ARGS='-DLUA_INCLUDE_DIR=/usr/include/luajit-2.1 -DLUA_LIBRARY=/usr/lib/libluajit-5.1.so'
 fi
 
-if [ "$DO_COVERAGE" = "codecov" ]; then
-  # export CXXFLAGS="-fprofile-arcs -ftest-coverage"
+if [ -n "$DO_COVERAGE" ]; then
   export CFLAGS="-fprofile-arcs -ftest-coverage"
   export LDFLAFS="-fprofile-arcs -ftest-coverage"
 fi
@@ -76,7 +75,7 @@ if [ -n "$DO_COVERAGE" ]; then
 
   do_codecov() {
     echo "== do_codecov in $PWD: $*: build/luacov.stats.out: =="
-    if [ "$DO_COVERAGE" = "codecov" ]; then
+    if [ "$DO_COVERAGE" = "codecov" ] || [ "$DO_COVERAGE" = all ]; then
       test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
       luacov || return 1
       travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -f ./build/luacov.report.out -F "$1" || return 1
@@ -86,7 +85,7 @@ if [ -n "$DO_COVERAGE" ]; then
   }
   do_codecov_gcov() {
     echo "== do_codecov_gcov in $PWD: $*: =="
-    if [ "$DO_COVERAGE" = "codecov" ]; then
+    if [ "$DO_COVERAGE" = codecov ] || [ "$DO_COVERAGE" = all ]; then
       (cd build \
         && travis_retry bash /tmp/codecov-bash -X coveragepy -F "$1") || return 1
     fi
@@ -114,7 +113,7 @@ if [ -n "$DO_COVERAGE" ]; then
   # travis_fold_end
 
   # Push code coverage information for coveralls.
-  if [ "$DO_COVERAGE" = "coveralls" ]; then
+  if [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then
     test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
     luacov-coveralls --verbose --merge
     # cpp-coveralls

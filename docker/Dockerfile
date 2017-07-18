@@ -4,7 +4,7 @@
 #  - DOCKER_FLAVOR: "test" or empty
 #  - LUA_PKG: the Lua package to install
 #  - LUA_LIB_PREFIX: typically the same as LUA_PKG, but different for luajit
-#  - DO_COVERAGE (optional, default: empty): codecov, coveralls
+#  - DO_COVERAGE (optional, default: empty): codecov, coveralls, or all
 
 FROM alpine:3.6
 
@@ -62,9 +62,9 @@ RUN if [ -n "$DO_COVERAGE" ]; then \
     apk --no-cache add "luarocks${LUA_LIB_PREFIX#lua}"; \
     ln -s /usr/bin/luarocks-${LUA_LIB_PREFIX#lua} /usr/bin/luarocks; \
     luarocks --local install cluacov; \
-    if [ "$DO_COVERAGE" = codecov ]; then \
+    if [ "$DO_COVERAGE" = codecov ] || [ "$DO_COVERAGE" = all ]; then \
       wget -O /tmp/codecov-bash https://codecov.io/bash; \
-    elif [ "$DO_COVERAGE" = coveralls ]; then \
+    elif [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then \
       luarocks --local install luacov-coveralls; \
       python -m ensurepip; \
       pip --no-cache-dir install cpp-coveralls; \
