@@ -123,7 +123,7 @@ if [ -n "$DO_COVERAGE" ]; then
     # cpp-coveralls
     # Workaround for https://github.com/eddyxu/cpp-coveralls/issues/113#issuecomment-316191149.
     rm -f build/CMakeCCompilerId.c.gcov
-    coveralls
+    coveralls --build-root build
   fi
 else
   # travis_run_in_fold "make.check-unit" make check-unit
