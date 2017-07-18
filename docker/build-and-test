@@ -112,6 +112,12 @@ if [ -n "$DO_COVERAGE" ]; then
   do_codecov_gcov c_code
 
   # travis_fold_end
+
+  # Push code coverage information for coveralls.
+  if [ "$DO_COVERAGE" = "coveralls" ]; then
+    test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
+    luacov-coveralls --verbose --merge
+  fi
 else
   # travis_run_in_fold "make.check-unit" make check-unit
   # travis_run_in_fold "make.check-integration" make check-integration
