@@ -121,6 +121,8 @@ if [ -n "$DO_COVERAGE" ]; then
     mv build/luacov.stats.all.out build/luacov.stats.out
     luacov-coveralls --verbose --merge
     # cpp-coveralls
+    # Workaround for https://github.com/eddyxu/cpp-coveralls/issues/113#issuecomment-316191149.
+    rm -f build/CMakeCCompilerId.c.gcov
     coveralls
   fi
 else
