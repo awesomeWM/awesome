@@ -135,7 +135,7 @@ if [ -n "$DO_COVERAGE" ]; then
     luacov-coveralls --verbose --merge
     # cpp-coveralls
     # -x: Workaround for https://github.com/eddyxu/cpp-coveralls/issues/113#issuecomment-316191149.
-    coveralls -x "$BUILD_DIR/CMakeCCompilerId.c.gcov" --build-root "$BUILD_DIR"
+    coveralls -x "$SOURCE_DIRECTORY/CMakeCCompilerId.c" --build-root "$BUILD_DIR"
   fi
 else
   # travis_run_in_fold "make.check-unit" make check-unit
