@@ -56,6 +56,8 @@ RUN if [ "$DOCKER_FLAVOR" = test ]; then \
   fi
 
 ARG DO_COVERAGE=
+# NOTE: the lua*-filesystem package gets not picked up by luarocks as a
+#       dependency for luacov-coveralls?!
 RUN if [ -n "$DO_COVERAGE" ]; then \
     set -ex; \
     apk --no-cache add libressl curl; \
