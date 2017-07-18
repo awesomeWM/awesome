@@ -66,6 +66,9 @@ RUN if [ -n "$DO_COVERAGE" ]; then \
       wget -O /tmp/codecov-bash https://codecov.io/bash; \
     elif [ "$DO_COVERAGE" = coveralls ]; then \
       luarocks --local install luacov-coveralls; \
+      python -m ensurepip; \
+      pip --no-cache-dir install cpp-coveralls; \
+      pip uninstall --yes pip; \
     fi; \
   fi
 
