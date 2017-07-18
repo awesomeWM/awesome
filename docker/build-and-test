@@ -79,6 +79,9 @@ if [ -n "$DO_COVERAGE" ]; then
       test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
       luacov || return 1
       travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -f ./build/luacov.report.out -F "$1" || return 1
+      if [ "$DO_COVERAGE" = all ]; then
+        cat build/luacov.stats.out >> build/luacov.stats.all.out
+      fi
       rm build/luacov.stats.out
     fi
     return 0
@@ -114,7 +117,8 @@ if [ -n "$DO_COVERAGE" ]; then
 
   # Push code coverage information for coveralls.
   if [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then
-    test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
+    test -f build/luacov.stats.all.out || { echo 'build/luacov.stats.all.out does not exist.'; return 1; }
+    mv build/luacov.stats.all.out build/luacov.stats.out
     luacov-coveralls --verbose --merge
     # cpp-coveralls
     coveralls

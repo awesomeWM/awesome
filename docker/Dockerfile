@@ -64,7 +64,8 @@ RUN if [ -n "$DO_COVERAGE" ]; then \
     luarocks --local install cluacov; \
     if [ "$DO_COVERAGE" = codecov ] || [ "$DO_COVERAGE" = all ]; then \
       wget -O /tmp/codecov-bash https://codecov.io/bash; \
-    elif [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then \
+    fi; \
+    if [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then \
       luarocks --local install luacov-coveralls; \
       python -m ensurepip; \
       pip --no-cache-dir install cpp-coveralls; \
