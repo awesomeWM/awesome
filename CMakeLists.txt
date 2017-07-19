@@ -118,7 +118,7 @@ set(AWESOME_C_FLAGS
     -Wno-format-zero-length -Wmissing-format-attribute -Wmissing-prototypes
     -Wstrict-prototypes
     CACHE STRING "CFLAGS used to compile ${PROJECT_AWE_NAME}")
-if(DO_COVERAGE)
+if (DEFINED ENV{DO_COVERAGE} AND NOT $ENV{DO_COVERAGE} STREQUAL "")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
 endif()
