@@ -34,11 +34,6 @@ if [ "$LUA_PKG" = luajit ]; then
   export CMAKE_ARGS='-DLUA_INCLUDE_DIR=/usr/include/luajit-2.1 -DLUA_LIBRARY=/usr/lib/libluajit-5.1.so'
 fi
 
-if [ -n "$DO_COVERAGE" ]; then
-  export CFLAGS="-fprofile-arcs -ftest-coverage"
-  export LDFLAFS="-fprofile-arcs -ftest-coverage"
-fi
-
 if [ -n "$BUILD_IN_DIR" ]; then
   echo "BUILD_IN_DIR=$BUILD_IN_DIR"
   SOURCE_DIRECTORY="$PWD"
@@ -130,13 +125,14 @@ if [ -n "$DO_COVERAGE" ]; then
 
   # Push code coverage information for coveralls.
   if [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then
-    test -f "$BUILD_DIR/luacov.stats.all.out" || { echo "$BUILD_DIR/luacov.stats.all.out does not exist."; return 1; }
-    mv "$BUILD_DIR/luacov.stats.all.out" "$BUILD_DIR/luacov.stats.out"
+    if [ ! -f "$BUILD_DIR/luacov.stats.out" ]; then
+      mv "$BUILD_DIR/luacov.stats.all.out" "$BUILD_DIR/luacov.stats.out"
+    elif [ -f "$BUILD_DIR/luacov.stats.all.out" ]; then
+      echo "$BUILD_DIR/luacov.stats.all.out does not exist."
+      exit 1
+    fi
     luacov-coveralls --verbose --merge
     # cpp-coveralls
-    # Workaround for https://github.com/eddyxu/cpp-coveralls/issues/113#issuecomment-316191149.
-    gcov "$(find "$BUILD_DIR" -name '*.o')"
-    rm -f "$BUILD_DIR/CMakeCCompilerId.c.gcov"
     coveralls --build-root "$BUILD_DIR"
   fi
 else
