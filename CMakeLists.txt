@@ -121,6 +121,7 @@ set(AWESOME_C_FLAGS
 if (DEFINED ENV{DO_COVERAGE} AND NOT $ENV{DO_COVERAGE} STREQUAL "")
     SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fprofile-arcs -ftest-coverage")
     SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage -lgcov")
+    set(AWESOME_C_FLAGS "${AWESOME_C_FLAGS}" -fprofile-arcs -ftest-coverage)
 endif()
 mark_as_advanced(AWESOME_C_FLAGS)
 target_compile_options(${PROJECT_AWE_NAME} PRIVATE ${AWESOME_C_FLAGS})
