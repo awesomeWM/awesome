@@ -5,6 +5,7 @@
 #  - LUA_PKG: the Lua package to install
 #  - LUA_LIB_PREFIX: typically the same as LUA_PKG, but different for luajit
 #  - DO_COVERAGE (optional, default: empty): codecov, coveralls, or all
+#  - CMAKE_ARGS (optional, default: empty)
 
 FROM alpine:3.6
 
@@ -84,6 +85,9 @@ RUN if [ -n "$DO_COVERAGE" ]; then \
 ENV LUA_PKG=${LUA_PKG:-lua5.3}
 # For CMake's FindLua.
 ENV LUA_DIR /usr/lib/${LUA_PKG}
+
+ARG CMAKE_ARGS=
+ENV CMAKE_ARGS=${CMAKE_ARGS}
 
 RUN echo "Built deps image for LUA_PKG=$LUA_PKG"
 

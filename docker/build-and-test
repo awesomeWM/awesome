@@ -29,11 +29,6 @@ fi
 
 echo "Running build-and-test: LUA_PKG=$LUA_PKG DO_COVERAGE=$DO_COVERAGE"
 
-# XXX: should get moved into building (as ARG (and ENV)?!)
-if [ "$LUA_PKG" = luajit ]; then
-  export CMAKE_ARGS='-DLUA_INCLUDE_DIR=/usr/include/luajit-2.1 -DLUA_LIBRARY=/usr/lib/libluajit-5.1.so'
-fi
-
 if [ -n "$BUILD_IN_DIR" ]; then
   echo "BUILD_IN_DIR=$BUILD_IN_DIR"
   SOURCE_DIRECTORY="$PWD"

@@ -16,6 +16,7 @@ DOCKER_VOLUME_BUILD:=awesome-build-$(LUA_PKG)$(if $(DO_COVERAGE),-coverage)
 # Args for docker-build.
 LUA_PKG:=lua5.3
 LUA_LIB_PREFIX:=$(if $(filter luajit,$(LUA_PKG)),lua5.1,$(LUA_PKG))
+CMAKE_ARGS+=$(if $(filter luajit,$(LUA_PKG)),-DLUA_INCLUDE_DIR=/usr/include/luajit-2.1 -DLUA_LIBRARY=/usr/lib/libluajit-5.1.so)
 DOCKER_FLAVOR:=
 
 $(BUILDDIR):
@@ -52,6 +53,7 @@ $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX):
 	    --build-arg LUA_PKG=$(LUA_PKG) \
 	    --build-arg LUA_LIB_PREFIX=$(LUA_LIB_PREFIX) \
 	    --build-arg DO_COVERAGE=$(DO_COVERAGE) \
+	    --build-arg CMAKE_ARGS="$(CMAKE_ARGS)" \
 	    -f docker/Dockerfile -t awesomewm/awesome-base-$(DOCKER_SUFFIX) . ; \
 	  if [ -n "${DOCKER_IMGS_DIR}" ]; then \
 	    mkdir -p ${DOCKER_IMGS_DIR}; \
