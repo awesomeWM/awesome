@@ -29,8 +29,8 @@ RUN apk --no-cache add --virtual awesome-runtime \
   font-misc-misc \
   libexecinfo
 
-# Set up ccache, to be used via:
-# TODO: make this optional.
+# Install and setup ccache.
+# TODO: make this optional; not useful / should not get used/configured on Travis.
 RUN apk --no-cache add ccache
 ENV PATH /usr/lib/ccache/bin/:$PATH
 
@@ -45,8 +45,8 @@ RUN if [ "$DOCKER_FLAVOR" = test ]; then \
 ARG LUA_PKG
 
 RUN apk --no-cache add --virtual awesome-build ${LUA_PKG}-dev
-RUN ln -s /usr/bin/${LUA_PKG} /usr/bin/lua
 RUN apk --no-cache add --virtual awesome-runtime ${LUA_PKG}
+RUN ln -s /usr/bin/${LUA_PKG} /usr/bin/lua
 
 # lua-lgi, special name with luajit.
 ARG LUA_LIB_PREFIX
