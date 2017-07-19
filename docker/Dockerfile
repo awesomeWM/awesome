@@ -17,7 +17,8 @@ RUN apk --no-cache add --virtual awesome-build \
   libxcb-dev libxdg-basedir-dev libxkbcommon-dev \
   startup-notification-dev xcb-util-cursor-dev xcb-util-keysyms-dev \
   xcb-util-xrm-dev xcb-util-wm-dev \
-  gcc make musl-dev
+  gcc make musl-dev \
+  libexecinfo-dev
 
 # Also installs some font.
 # Not doing so could be used to test https://github.com/awesomeWM/awesome/pull/1782.
@@ -25,7 +26,8 @@ RUN apk --no-cache add --virtual awesome-runtime \
   cairo-gobject dbus gdk-pixbuf glib libxcb libxdg-basedir libxkbcommon \
   pango startup-notification xcb-util xcb-util-cursor xcb-util-keysyms \
   xcb-util-wm xcb-util-xrm \
-  font-misc-misc
+  font-misc-misc \
+  libexecinfo
 
 # Set up ccache, to be used via:
 # TODO: make this optional.
