@@ -36,8 +36,8 @@ list(GET version_num_split 2 CPACK_PACKAGE_VERSION_PATCH)
 set(version_num "${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
 
 if(NOT DEFINED CPACK_GENERATOR)
+    set(CPACK_GENERATOR)
     message(STATUS "Checking if 'package' target should be generated.")
-    set(CPACK_GENERATOR CACHE STRING "Include CPack if non-empty (DEB and/or RPM).")
     a_find_program(rpmbuild_path "rpmbuild" FALSE)
     if(rpmbuild_path)
         message(STATUS "rpmbuild found, enabling RPM for the 'package' target.")
@@ -58,6 +58,8 @@ if(NOT DEFINED CPACK_GENERATOR)
         message(STATUS "Skipping generation of 'package' target.")
     endif()
 endif(NOT DEFINED CPACK_GENERATOR)
+set(CPACK_GENERATOR ${CPACK_GENERATOR}
+    CACHE STRING "Include CPack if non-empty (DEB and/or RPM).")
 
 if(CPACK_GENERATOR)
     message(STATUS "Package version will be set to ${version_num}${version_gitsuffix}.")
