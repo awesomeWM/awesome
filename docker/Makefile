@@ -73,6 +73,7 @@ docker_test: $(BUILDDIR)/stamp.docker_image_deps.$(DOCKER_SUFFIX)
 	  awesomewm/awesome-base-$(DOCKER_SUFFIX) \
 	  $(TEST_RUN_ARGS)
 
+docker_test_sh: override TEST_RUN_ARGS:=
 docker_test_sh: DOCKER_RUN_ARGS+=--entrypoint=sh
 docker_test_sh: docker_test
 
