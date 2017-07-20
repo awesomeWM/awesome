@@ -163,13 +163,18 @@ end
 local corner = {}
 corner.row_privileged = false
 
+function corner.skip_gap(nclients, t)
+    return nclients == 1 and t.master_fill_policy == "expand"
+end
+
 --- Corner layout.
 -- Display master client in a corner of the screen, and slaves in one
 -- column and one row around the master.
 -- @clientlayout awful.layout.suit.corner.nw
 corner.nw = {
         name = "cornernw",
-        arrange = function (p) return do_corner(p, "NW") end
+        arrange = function (p) return do_corner(p, "NW") end,
+        skip_gap = corner.skip_gap
     }
 
 --- Corner layout.
@@ -178,7 +183,8 @@ corner.nw = {
 -- @clientlayout awful.layout.suit.corner.ne
 corner.ne = {
         name = "cornerne",
-        arrange = function (p) return do_corner(p, "NE") end
+        arrange = function (p) return do_corner(p, "NE") end,
+        skip_gap = corner.skip_gap
     }
 
 --- Corner layout.
@@ -187,7 +193,8 @@ corner.ne = {
 -- @clientlayout awful.layout.suit.corner.sw
 corner.sw = {
         name = "cornersw",
-        arrange = function (p) return do_corner(p, "SW") end
+        arrange = function (p) return do_corner(p, "SW") end,
+        skip_gap = corner.skip_gap
     }
 
 --- Corner layout.
@@ -196,7 +203,8 @@ corner.sw = {
 -- @clientlayout awful.layout.suit.corner.se
 corner.se = {
         name = "cornerse",
-        arrange = function (p) return do_corner(p, "SE") end
+        arrange = function (p) return do_corner(p, "SE") end,
+        skip_gap = corner.skip_gap
     }
 
 return corner

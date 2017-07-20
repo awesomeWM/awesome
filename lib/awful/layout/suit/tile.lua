@@ -296,12 +296,17 @@ local function do_tile(param, orientation)
 
 end
 
+function tile.skip_gap(nclients, t)
+    return nclients == 1 and t.master_fill_policy == "expand"
+end
+
 --- The main tile algo, on the right.
 -- @param screen The screen number to tile.
 -- @clientlayout awful.layout.suit.tile.right
 tile.right = {}
 tile.right.name = "tile"
 tile.right.arrange = do_tile
+tile.right.skip_gap = tile.skip_gap
 function tile.right.mouse_resize_handler(c, corner, x, y)
     return mouse_resize_handler(c, corner, x, y)
 end
@@ -311,6 +316,7 @@ end
 -- @clientlayout awful.layout.suit.tile.left
 tile.left = {}
 tile.left.name = "tileleft"
+tile.left.skip_gap = tile.skip_gap
 function tile.left.arrange(p)
     return do_tile(p, "left")
 end
@@ -323,6 +329,7 @@ end
 -- @clientlayout awful.layout.suit.tile.bottom
 tile.bottom = {}
 tile.bottom.name = "tilebottom"
+tile.bottom.skip_gap = tile.skip_gap
 function tile.bottom.arrange(p)
     return do_tile(p, "bottom")
 end
@@ -335,6 +342,7 @@ end
 -- @clientlayout awful.layout.suit.tile.top
 tile.top = {}
 tile.top.name = "tiletop"
+tile.top.skip_gap = tile.skip_gap
 function tile.top.arrange(p)
     return do_tile(p, "top")
 end
