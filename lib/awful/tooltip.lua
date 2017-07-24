@@ -580,6 +580,7 @@ function tooltip.new(args)
         fg = fg,
         bg = color.transparent,
         opacity = beautiful.tooltip_opacity or 1,
+        type = "tooltip",
     }
 
     self.textbox = textbox()
