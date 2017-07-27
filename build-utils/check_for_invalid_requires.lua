@@ -39,6 +39,7 @@ local allowed_deps = {
         gears = true,
         lgi = true,
         wibox = true,
+	menubar = true,
     },
     menubar = {
         awful = true,
