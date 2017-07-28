@@ -111,7 +111,9 @@
  * Create a new tag at the end of the list
  *
  *    local function add_tag()
- *        awful.tag.add("NewTag",{screen= awful.screen.focused() }):view_only()
+ *        awful.tag.add("NewTag", {
+ *            screen = awful.screen.focused(),
+ *            layout = awful.layout.suit.floating }):view_only()
  *    end
  *
  * Rename the current tag
