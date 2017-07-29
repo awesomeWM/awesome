@@ -189,6 +189,10 @@ naughty.notificationClosedReason = {
 -- @beautiful beautiful.notification_height
 -- @tparam int notification_height
 
+--- Notifications icon size.
+-- @beautiful beautiful.notification_icon_size
+-- @tparam int notification_icon_size
+
 
 -- Counter for the notifications
 -- Required for later access via DBUS
@@ -600,7 +604,8 @@ function naughty.notify(args)
         args.preset or naughty.config.presets.normal or {})
     local timeout = args.timeout or preset.timeout
     local icon = args.icon or preset.icon
-    local icon_size = args.icon_size or preset.icon_size
+    local icon_size = args.icon_size or preset.icon_size or
+        beautiful.notification_icon_size
     local text = args.text or preset.text
     local title = args.title or preset.title
     local s = get_screen(args.screen or preset.screen or screen.focused())
