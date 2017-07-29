@@ -745,6 +745,10 @@ function tag.object.set_layout(t, layout)
     return layout
 end
 
+function tag.object.get_layout(t)
+    return tag.getproperty(t, "layout") or require("awful.layout.suit.floating")
+end
+
 --- Set layout.
 -- @deprecated awful.tag.setlayout
 -- @see layout

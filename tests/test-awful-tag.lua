@@ -69,6 +69,7 @@ local steps = {
             assert(beautiful.awesome_icon)
 
             local t = awful.tag.add("Test", {clients={c}, icon = beautiful.awesome_icon})
+            assert(t.layout == awful.layout.suit.floating)
 
             check_order()
 
