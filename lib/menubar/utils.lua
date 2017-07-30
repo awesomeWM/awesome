@@ -17,7 +17,7 @@ local theme = require("beautiful")
 local lgi = require("lgi")
 local gio = lgi.Gio
 local glib = lgi.GLib
-local wibox = require("wibox")
+local w_textbox = require("wibox.widget.textbox")
 local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 local gstring = require("gears.string")
@@ -343,7 +343,7 @@ end
 -- @tparam number|screen s Screen
 -- @treturn int Text width.
 function utils.compute_text_width(text, s)
-    local w, _ = wibox.widget.textbox(gstring.xml_escape(text)):get_preferred_size(s)
+    local w, _ = w_textbox(gstring.xml_escape(text)):get_preferred_size(s)
     return w
 end
 
