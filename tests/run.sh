@@ -93,7 +93,6 @@ cleanup() {
         kill -TERM "$p" 2>/dev/null || true
     done
     rm -rf "$tmp_files" || true
-    rm -rf 
 }
 trap "cleanup" 0 2 3 15
 

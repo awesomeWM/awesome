@@ -24,8 +24,8 @@ end
 -- it should not gets collected too early.
 -- This test also sporadically errors on LuaJIT ("attempt to call a number
 -- value"). This might be a different issue, but still, disable the test.
--- 
--- 
+--
+--
 --[[
 if _VERSION == "Lua 5.3" or debug.gethook() or jit then --luacheck: globals jit
 print("Skipping this test since it would just fail.")
@@ -87,9 +87,10 @@ runner.run_steps {
         -- which is only set by `commmon.list_update`
         local w = mbar_guts.common_args.w
         assert(w._private.dir == "x")
-        -- It was 11 the last time I checked it.
-        -- im coder
-        assert(#w:get_children() == 11)
+        -- It was 12 the last time I checked it, you might need to update this
+        -- if you touch menubar code
+        gears_debug.dump(w, "common_args.w", 4)
+        assert(#w:get_children() == 12)
         return true
     end,
 
@@ -165,7 +166,7 @@ runner.run_steps {
         assert(tnil == nil)
         assert(ticon == "4321.png")
         return true
-    end, 
+    end,
 
     -- Test `menulist_update` function
     function()
