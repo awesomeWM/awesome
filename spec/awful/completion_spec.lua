@@ -46,6 +46,7 @@ local function remove_test_path_dir(test_path)
 end
 
 local test_dir
+local test_path
 
 --- Get and create a temporary test dir based on `pat`, where %d gets replaced by
 -- the current PID.
@@ -65,11 +66,13 @@ describe("awful.completion.shell in empty directory", function()
         io.popen = function(...)  --luacheck: ignore
             return orig_popen(string.format('cd %s && ', test_dir) .. ...)
         end
+        test_path = get_test_path_dir()
     end)
 
     teardown(function()
         assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
+        remove_test_path_dir(test_path)
     end)
 
     if has_bash then
@@ -97,12 +100,14 @@ describe("awful.completion.shell", function()
         io.popen = function(...)  --luacheck: ignore
             return orig_popen(string.format('cd %s && ', test_dir) .. ...)
         end
+        test_path = get_test_path_dir()
     end)
 
     teardown(function()
         assert.True(os.remove(test_dir .. '/localcommand'))
         assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
+        remove_test_path_dir(test_path)
     end)
 
     if has_bash then
@@ -159,11 +164,14 @@ describe("awful.completion.shell handles $SHELL", function()
         gdebug.print_warning = function(message)
             print_warning_message = message
         end
+
+        test_path = get_test_path_dir()
     end)
 
     teardown(function()
         os.getenv = orig_getenv  --luacheck: ignore
         gdebug.print_warning = orig_print_warning
+        remove_test_path_dir(test_path)
     end)
 
     before_each(function()
