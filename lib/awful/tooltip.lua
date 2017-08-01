@@ -146,8 +146,7 @@ local function apply_shape(self)
 
     -- Draw the border (multiply by 2, then mask the inner part to save a path)
     local bw = (self._private.border_width
-        or beautiful.tooltip_border_width
-        or beautiful.border_width or 0) * 2
+        or beautiful.tooltip_border_width or 0) * 2
 
     -- Fix anti-aliasing
     if bw > 2 and awesome.composite_manager_running then
