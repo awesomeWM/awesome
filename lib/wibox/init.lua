@@ -272,7 +272,7 @@ local function new(args)
         __newindex = function(self, k,v)
             if rawget(self, "set_"..k) then
                 self["set_"..k](self, v)
-            elseif w[k] ~= nil or force_forward[k] then
+            elseif force_forward[k] or w[k] ~= nil then
                 w[k] = v
             else
                 rawset(self, k, v)
