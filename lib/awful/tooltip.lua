@@ -137,6 +137,7 @@ local function apply_shape(self)
     s(cr, w, h, unpack(self._private.shape_args or {}))
     cr:fill()
     wb.shape_bounding = img._native
+    img:finish()
 
     -- The wibox background uses ARGB32 border so tooltip anti-aliasing works
     -- when an external compositor is used. This will look better than
