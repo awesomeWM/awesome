@@ -204,6 +204,7 @@ function surface.apply_shape_bounding(draw, shape, ...)
   cr:fill()
 
   draw.shape_bounding = img._native
+  img:finish()
 end
 
 local function no_op() end
