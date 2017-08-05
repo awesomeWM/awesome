@@ -51,6 +51,11 @@ end
 --- The icon used for sub-menus.
 -- @beautiful beautiful.menu_submenu_icon
 
+--- The menu text font.
+-- @beautiful beautiful.menu_font
+-- @param string
+-- @see string
+
 --- The item height.
 -- @beautiful beautiful.menu_height
 -- @tparam[opt=16] number menu_height
@@ -133,7 +138,7 @@ local function load_theme(a, b)
                  fallback.menu_height or dpi(16)
     ret.width = a.width or b.menu_width or b.width or
                 fallback.menu_width or dpi(100)
-    ret.font = a.font or b.font or fallback.font
+    ret.font = a.font or b.font or fallback.menu_font or fallback.font
     for _, prop in ipairs({"width", "height", "menu_width"}) do
         if type(ret[prop]) ~= "number" then ret[prop] = tonumber(ret[prop]) end
     end
