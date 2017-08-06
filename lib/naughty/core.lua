@@ -1,5 +1,9 @@
 ----------------------------------------------------------------------------
---- Notification library
+--- Notification library.
+--
+-- For more details on how to create notifications, see `naughty.notification`.
+--
+-- To send notifications from the terminal, use `notify-send`.
 --
 -- @author koniu &lt;gkusnierz@gmail.com&gt;
 -- @copyright 2008 koniu
