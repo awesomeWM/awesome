@@ -15,7 +15,38 @@ if not has_bash and not has_zsh then
     return
 end
 
+local orig_path_env = GLib.getenv("PATH")
+local required_commands = {"bash", "zsh", "sort"}
+
+-- Change PATH
+local function get_test_path_dir()
+    local test_path = Gio.File.new_tmp("awesome-tests-path-XXXXXX")
+    test_path:delete()
+    test_path:make_directory()
+
+    for _, cmd in ipairs(required_commands) do
+        local target = GLib.find_program_in_path(cmd)
+        if target then
+            test_path:get_child(cmd):make_symbolic_link(target)
+        end
+    end
+
+    test_path = test_path:get_path()
+    GLib.setenv("PATH", test_path, true)
+    return test_path
+end
+
+-- Reset PATH
+local function remove_test_path_dir(test_path)
+    GLib.setenv("PATH", orig_path_env, true)
+    for _, cmd in ipairs(required_commands) do
+        os.remove(test_path .. "/" .. cmd)
+    end
+    os.remove(test_path)
+end
+
 local test_dir
+local test_path
 
 --- Get and create a temporary test dir based on `pat`, where %d gets replaced by
 -- the current PID.
@@ -35,11 +66,13 @@ describe("awful.completion.shell in empty directory", function()
         io.popen = function(...)  --luacheck: ignore
             return orig_popen(string.format('cd %s && ', test_dir) .. ...)
         end
+        test_path = get_test_path_dir()
     end)
 
     teardown(function()
         assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
+        remove_test_path_dir(test_path)
     end)
 
     if has_bash then
@@ -67,12 +100,14 @@ describe("awful.completion.shell", function()
         io.popen = function(...)  --luacheck: ignore
             return orig_popen(string.format('cd %s && ', test_dir) .. ...)
         end
+        test_path = get_test_path_dir()
     end)
 
     teardown(function()
         assert.True(os.remove(test_dir .. '/localcommand'))
         assert.True(os.remove(test_dir))
         io.popen = orig_popen  --luacheck: ignore
+        remove_test_path_dir(test_path)
     end)
 
     if has_bash then
@@ -129,11 +164,14 @@ describe("awful.completion.shell handles $SHELL", function()
         gdebug.print_warning = function(message)
             print_warning_message = message
         end
+
+        test_path = get_test_path_dir()
     end)
 
     teardown(function()
         os.getenv = orig_getenv  --luacheck: ignore
         gdebug.print_warning = orig_print_warning
+        remove_test_path_dir(test_path)
     end)
 
     before_each(function()
