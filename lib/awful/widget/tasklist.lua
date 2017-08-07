@@ -42,6 +42,8 @@ local flex = require("wibox.layout.flex")
 local timer = require("gears.timer")
 local gcolor = require("gears.color")
 local gstring = require("gears.string")
+local gdebug = require("gears.debug")
+local base = require("wibox.widget.base")
 
 local function get_screen(s)
     return s and screen[s]
@@ -363,62 +365,98 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
     update_function(w, buttons, label, data, clients)
 end
 
---- Create a new tasklist widget. The last two arguments (update_function
--- and base_widget) serve to customize the layout of the tasklist (eg. to
+--- Create a new tasklist widget.
+-- The last two arguments (update_function
+-- and layout) serve to customize the layout of the tasklist (eg. to
 -- make it vertical). For that, you will need to copy the
 -- awful.widget.common.list_update function, make your changes to it
--- and pass it as update_function here. Also change the base_widget if the
+-- and pass it as update_function here. Also change the layout if the
 -- default is not what you want.
--- @param screen The screen to draw tasklist for.
--- @param filter Filter function to define what clients will be listed.
--- @param buttons A table with buttons binding to set.
--- @tparam[opt={}] table style The style overrides default theme.
--- @tparam[opt=nil] string|pattern style.fg_normal
--- @tparam[opt=nil] string|pattern style.bg_normal
--- @tparam[opt=nil] string|pattern style.fg_focus
--- @tparam[opt=nil] string|pattern style.bg_focus
--- @tparam[opt=nil] string|pattern style.fg_urgent
--- @tparam[opt=nil] string|pattern style.bg_urgent
--- @tparam[opt=nil] string|pattern style.fg_minimize
--- @tparam[opt=nil] string|pattern style.bg_minimize
--- @tparam[opt=nil] string style.bg_image_normal
--- @tparam[opt=nil] string style.bg_image_focus
--- @tparam[opt=nil] string style.bg_image_urgent
--- @tparam[opt=nil] string style.bg_image_minimize
--- @tparam[opt=nil] boolean style.tasklist_disable_icon
--- @tparam[opt=false] boolean style.disable_task_name
--- @tparam[opt=nil] string style.font
--- @tparam[opt=left] string style.align *left*, *right* or *center*
--- @tparam[opt=nil] string style.font_focus
--- @tparam[opt=nil] string style.font_minimized
--- @tparam[opt=nil] string style.font_urgent
--- @tparam[opt=nil] number style.spacing The spacing between tags.
--- @tparam[opt=nil] gears.shape style.shape
--- @tparam[opt=nil] number style.shape_border_width
--- @tparam[opt=nil] string|color style.shape_border_color
--- @tparam[opt=nil] gears.shape style.shape_focus
--- @tparam[opt=nil] number style.shape_border_width_focus
--- @tparam[opt=nil] string|color style.shape_border_color_focus
--- @tparam[opt=nil] gears.shape style.shape_minimized
--- @tparam[opt=nil] number style.shape_border_width_minimized
--- @tparam[opt=nil] string|color style.shape_border_color_minimized
--- @tparam[opt=nil] gears.shape style.shape_urgent
--- @tparam[opt=nil] number style.shape_border_width_urgent
--- @tparam[opt=nil] string|color style.shape_border_color_urgent
--- @param[opt] update_function Function to create a tag widget on each
+--
+-- @tparam table args
+-- @tparam screen args.screen The screen to draw tasklist for.
+-- @tparam function args.filter Filter function to define what clients will be listed.
+-- @tparam table args.buttons A table with buttons binding to set.
+-- @tparam[opt] function args.update_function Function to create a tag widget on each
 --   update. See `awful.widget.common.list_update`.
--- @tparam[opt] table base_widget Container widget for tag widgets. Default
+-- @tparam[opt] table args.layout Container widget for tag widgets. Default
 --   is `wibox.layout.flex.horizontal`.
+-- @tparam[opt={}] table args.style The style overrides default theme.
+-- @tparam[opt=nil] string|pattern args.style.fg_normal
+-- @tparam[opt=nil] string|pattern args.style.bg_normal
+-- @tparam[opt=nil] string|pattern args.style.fg_focus
+-- @tparam[opt=nil] string|pattern args.style.bg_focus
+-- @tparam[opt=nil] string|pattern args.style.fg_urgent
+-- @tparam[opt=nil] string|pattern args.style.bg_urgent
+-- @tparam[opt=nil] string|pattern args.style.fg_minimize
+-- @tparam[opt=nil] string|pattern args.style.bg_minimize
+-- @tparam[opt=nil] string args.style.bg_image_normal
+-- @tparam[opt=nil] string args.style.bg_image_focus
+-- @tparam[opt=nil] string args.style.bg_image_urgent
+-- @tparam[opt=nil] string args.style.bg_image_minimize
+-- @tparam[opt=nil] boolean args.style.tasklist_disable_icon
+-- @tparam[opt=false] boolean args.style.disable_task_name
+-- @tparam[opt=nil] string args.style.font
+-- @tparam[opt=left] string args.style.align *left*, *right* or *center*
+-- @tparam[opt=nil] string args.style.font_focus
+-- @tparam[opt=nil] string args.style.font_minimized
+-- @tparam[opt=nil] string args.style.font_urgent
+-- @tparam[opt=nil] number args.style.spacing The spacing between tags.
+-- @tparam[opt=nil] gears.shape args.style.shape
+-- @tparam[opt=nil] number args.style.shape_border_width
+-- @tparam[opt=nil] string|color args.style.shape_border_color
+-- @tparam[opt=nil] gears.shape args.style.shape_focus
+-- @tparam[opt=nil] number args.style.shape_border_width_focus
+-- @tparam[opt=nil] string|color args.style.shape_border_color_focus
+-- @tparam[opt=nil] gears.shape args.style.shape_minimized
+-- @tparam[opt=nil] number args.style.shape_border_width_minimized
+-- @tparam[opt=nil] string|color args.style.shape_border_color_minimized
+-- @tparam[opt=nil] gears.shape args.style.shape_urgent
+-- @tparam[opt=nil] number args.style.shape_border_width_urgent
+-- @tparam[opt=nil] string|color args.style.shape_border_color_urgent
+-- @param filter **DEPRECATED** use args.filter
+-- @param buttons **DEPRECATED** use args.buttons
+-- @param style **DEPRECATED** use args.style
+-- @param update_function **DEPRECATED** use args.update_function
+-- @param base_widget **DEPRECATED** use args.base_widget
 -- @function awful.tasklist
-function tasklist.new(screen, filter, buttons, style, update_function, base_widget)
-    screen = get_screen(screen)
-    local uf = update_function or common.list_update
-    local w = base_widget or flex.horizontal()
+function tasklist.new(args, filter, buttons, style, update_function, base_widget)
+    local screen = nil
+
+    local argstype = type(args)
+
+    -- Detect the old function signature
+    if argstype == "number" or argstype == "screen" or
+      (argstype == "table" and args.index and args == capi.screen[args.index]) then
+        gdebug.deprecate("The `screen` paramater is deprecated, use `args.screen`.",
+            {deprecated_in=5})
+
+        screen = get_screen(args)
+        args = {}
+    end
+
+    assert(type(args) == "table")
+
+    for k, v in pairs { filter          = filter,
+                        buttons         = buttons,
+                        style           = style,
+                        update_function = update_function,
+                        layout          = base_widget
+    } do
+        gdebug.deprecate("The `awful.widget.tasklist()` `"..k
+            .."` paramater is deprecated, use `args."..k.."`.",
+        {deprecated_in=5})
+        args[k] = v
+    end
+
+    screen = screen or get_screen(args.screen)
+    local uf = args.update_function or common.list_update
+    local w = base.make_widget_from_value(args.layout or flex.horizontal)
 
     local data = setmetatable({}, { __mode = 'k' })
 
-    if w.set_spacing and (style and style.spacing or beautiful.tasklist_spacing) then
-        w:set_spacing(style and style.spacing or beautiful.tasklist_spacing)
+    if w.set_spacing and (args.style and args.style.spacing or beautiful.tasklist_spacing) then
+        w:set_spacing(args.style and args.style.spacing or beautiful.tasklist_spacing)
     end
 
     local queued_update = false
@@ -428,7 +466,7 @@ function tasklist.new(screen, filter, buttons, style, update_function, base_widg
             timer.delayed_call(function()
                 queued_update = false
                 if screen.valid then
-                    tasklist_update(screen, w, buttons, filter, data, style, uf)
+                    tasklist_update(screen, w, args.buttons, args.filter, data, args.style, uf)
                 end
             end)
             queued_update = true
