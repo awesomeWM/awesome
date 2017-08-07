@@ -22,6 +22,8 @@ local surface = require("gears.surface")
 local timer = require("gears.timer")
 local gcolor = require("gears.color")
 local gstring = require("gears.string")
+local gdebug = require("gears.debug")
+local base = require("wibox.widget.base")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -365,55 +367,91 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
 end
 
 --- Create a new taglist widget. The last two arguments (update_function
--- and base_widget) serve to customize the layout of the taglist (eg. to
+-- and layout) serve to customize the layout of the taglist (eg. to
 -- make it vertical). For that, you will need to copy the
 -- awful.widget.common.list_update function, make your changes to it
--- and pass it as update_function here. Also change the base_widget if the
+-- and pass it as update_function here. Also change the layout if the
 -- default is not what you want.
--- @param screen The screen to draw taglist for.
--- @param filter Filter function to define what clients will be listed.
--- @param buttons A table with buttons binding to set.
--- @tparam[opt={}] table style The style overrides default theme.
--- @tparam[opt=nil] string|pattern style.fg_focus
--- @tparam[opt=nil] string|pattern style.bg_focus
--- @tparam[opt=nil] string|pattern style.fg_urgent
--- @tparam[opt=nil] string|pattern style.bg_urgent
--- @tparam[opt=nil] string|pattern style.bg_occupied
--- @tparam[opt=nil] string|pattern style.fg_occupied
--- @tparam[opt=nil] string|pattern style.bg_empty
--- @tparam[opt=nil] string|pattern style.fg_empty
--- @tparam[opt=nil] string|pattern style.bg_volatile
--- @tparam[opt=nil] string|pattern style.fg_volatile
--- @tparam[opt=nil] string style.squares_sel
--- @tparam[opt=nil] string style.squares_unsel
--- @tparam[opt=nil] string style.squares_sel_empty
--- @tparam[opt=nil] string style.squares_unsel_empty
--- @tparam[opt=nil] string style.squares_resize
--- @tparam[opt=nil] string style.disable_icon
--- @tparam[opt=nil] string style.font
--- @tparam[opt=nil] number style.spacing The spacing between tags.
--- @param[opt] update_function Function to create a tag widget on each
+-- @tparam table args
+-- @tparam screen args.screen The screen to draw taglist for.
+-- @tparam function[opt=nil] args.filter Filter function to define what clients will be listed.
+-- @tparam table args.buttons A table with buttons binding to set.
+-- @tparam[opt] function args.update_function Function to create a tag widget on each
 --   update. See `awful.widget.common`.
--- @param[opt] base_widget Optional container widget for tag widgets. Default
+-- @tparam[opt] widget args.layout Optional layout widget for tag widgets. Default
 --   is wibox.layout.fixed.horizontal().
--- @param base_widget.bg_focus The background color for focused client.
--- @param base_widget.fg_focus The foreground color for focused client.
--- @param base_widget.bg_urgent The background color for urgent clients.
--- @param base_widget.fg_urgent The foreground color for urgent clients.
--- @param[opt] base_widget.squares_sel A user provided image for selected squares.
--- @param[opt] base_widget.squares_unsel A user provided image for unselected squares.
--- @param[opt] base_widget.squares_sel_empty A user provided image for selected squares for empty tags.
--- @param[opt] base_widget.squares_unsel_empty A user provided image for unselected squares for empty tags.
--- @param[opt] base_widget.squares_resize True or false to resize squares.
--- @param base_widget.font The font.
+-- @tparam[opt={}] table args.style The style overrides default theme.
+-- @tparam[opt=nil] string|pattern args.style.fg_focus
+-- @tparam[opt=nil] string|pattern args.style.bg_focus
+-- @tparam[opt=nil] string|pattern args.style.fg_urgent
+-- @tparam[opt=nil] string|pattern args.style.bg_urgent
+-- @tparam[opt=nil] string|pattern args.style.bg_occupied
+-- @tparam[opt=nil] string|pattern args.style.fg_occupied
+-- @tparam[opt=nil] string|pattern args.style.bg_empty
+-- @tparam[opt=nil] string|pattern args.style.fg_empty
+-- @tparam[opt=nil] string|pattern args.style.bg_volatile
+-- @tparam[opt=nil] string|pattern args.style.fg_volatile
+-- @tparam[opt=nil] string args.style.squares_sel
+-- @tparam[opt=nil] string args.style.squares_unsel
+-- @tparam[opt=nil] string args.style.squares_sel_empty
+-- @tparam[opt=nil] string args.style.squares_unsel_empty
+-- @tparam[opt=nil] string args.style.squares_resize
+-- @tparam[opt=nil] string args.style.disable_icon
+-- @tparam[opt=nil] string args.style.font
+-- @tparam[opt=nil] number args.style.spacing The spacing between tags.
+-- @tparam[opt] string args.style.squares_sel A user provided image for selected squares.
+-- @tparam[opt] string args.style.squares_unsel A user provided image for unselected squares.
+-- @tparam[opt] string args.style.squares_sel_empty A user provided image for selected squares for empty tags.
+-- @tparam[opt] string args.style.squares_unsel_empty A user provided image for unselected squares for empty tags.
+-- @tparam[opt] boolean args.style.squares_resize True or false to resize squares.
+-- @tparam string|pattern args.style.bg_focus The background color for focused client.
+-- @tparam string|pattern args.style.fg_focus The foreground color for focused client.
+-- @tparam string|pattern args.style.bg_urgent The background color for urgent clients.
+-- @tparam string|pattern args.style.fg_urgent The foreground color for urgent clients.
+-- @tparam string args.style.font The font.
+-- @param filter **DEPRECATED** use args.filter
+-- @param buttons **DEPRECATED** use args.buttons
+-- @param style **DEPRECATED** use args.style
+-- @param update_function **DEPRECATED** use args.update_function
+-- @param base_widget **DEPRECATED** use args.base_widget
 -- @function awful.taglist
-function taglist.new(screen, filter, buttons, style, update_function, base_widget)
-    screen = get_screen(screen)
-    local uf = update_function or common.list_update
-    local w = base_widget or fixed.horizontal()
+function taglist.new(args, filter, buttons, style, update_function, base_widget)
 
-    if w.set_spacing and (style and style.spacing or beautiful.taglist_spacing) then
-        w:set_spacing(style and style.spacing or beautiful.taglist_spacing)
+    local screen = nil
+
+    local argstype = type(args)
+
+    -- Detect the old function signature
+    if argstype == "number" or argstype == "screen" or
+      (argstype == "table" and args.index and args == capi.screen[args.index]) then
+        gdebug.deprecate("The `screen` paramater is deprecated, use `args.screen`.",
+            {deprecated_in=5})
+
+        screen = get_screen(args)
+        args = {}
+    end
+
+    assert(type(args) == "table")
+
+    for k, v in pairs { filter          = filter,
+                        buttons         = buttons,
+                        style           = style,
+                        update_function = update_function,
+                        layout          = base_widget
+    } do
+        gdebug.deprecate("The `awful.widget.taglist()` `"..k
+            .."` paramater is deprecated, use `args."..k.."`.",
+        {deprecated_in=5})
+        args[k] = v
+    end
+
+    screen = screen or get_screen(args.screen)
+
+    local uf = args.update_function or common.list_update
+    local w = base.make_widget_from_value(args.layout or fixed.horizontal)
+
+    if w.set_spacing and (args.style and args.style.spacing or beautiful.taglist_spacing) then
+        w:set_spacing(args.style and args.style.spacing or beautiful.taglist_spacing)
     end
 
     local data = setmetatable({}, { __mode = 'k' })
@@ -424,7 +462,7 @@ function taglist.new(screen, filter, buttons, style, update_function, base_widge
         if not queued_update[screen] then
             timer.delayed_call(function()
                 if screen.valid then
-                    taglist_update(screen, w, buttons, filter, data, style, uf)
+                    taglist_update(screen, w, args.buttons, args.filter, data, args.style, uf)
                 end
                 queued_update[screen] = false
             end)
