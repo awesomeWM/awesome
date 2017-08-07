@@ -51,6 +51,8 @@ function shape.get_transformed(c, shape_name)
         cr:set_source_surface(shape_img, border + l, border + t)
         cr:rectangle(border + l, border + t, geom.width - l - r, geom.height - t - b)
         cr:fill()
+
+        shape_img:finish()
     end
 
     if _shape then

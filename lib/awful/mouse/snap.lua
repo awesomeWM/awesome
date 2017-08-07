@@ -66,6 +66,7 @@ local function show_placeholder(geo)
     cr:stroke()
 
     placeholder_w.shape_bounding = img._native
+    img:finish()
 
     placeholder_w.visible = true
 end
