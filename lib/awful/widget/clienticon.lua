@@ -31,7 +31,7 @@ end
 
 function clienticon:draw(_, cr, width, height)
     local c = self._private.client
-    if not c.valid then
+    if not c or not c.valid then
         return
     end
 
@@ -52,7 +52,7 @@ end
 
 function clienticon:fit(_, width, height)
     local c = self._private.client
-    if not c.valid then
+    if not c or not c.valid then
         return 0, 0
     end
 
@@ -78,6 +78,21 @@ function clienticon:fit(_, width, height)
 
     local aspect = math.min(width / w, height / h)
     return w * aspect, h * aspect
+end
+
+--- The widget client.
+--
+-- @property client
+-- @param client
+
+function clienticon:get_client()
+    return self._private.client
+end
+
+function clienticon:set_client(c)
+    self._private.client = c
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
 end
 
 --- Returns a new clienticon.
