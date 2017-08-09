@@ -2419,7 +2419,7 @@ out:
 }
 
 
-/** Kill a @{clientt}.
+/** Kill a client.
  *
  * @function kill
  */
