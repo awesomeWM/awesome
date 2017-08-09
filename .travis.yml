@@ -97,7 +97,7 @@ install:
 
   # Install dependencies for code coverage testing.
   - if [ "$DO_COVERAGE" = "" ]; then export DO_COVERAGE=0; fi
-  - if [ "$DO_COVERAGE" != "0" ]; then sudo luarocks install luacov 0.12.0-1; fi
+  - if [ "$DO_COVERAGE" != "0" ]; then sudo luarocks install cluacov; fi
   - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
 
   # Determine custom version.
