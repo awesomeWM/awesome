@@ -97,8 +97,15 @@ install:
 
   # Install dependencies for code coverage testing.
   - if [ "$DO_COVERAGE" = "" ]; then export DO_COVERAGE=0; fi
-  - if [ "$DO_COVERAGE" != "0" ]; then sudo luarocks install cluacov; fi
-  - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
+  - |
+    if [ "$DO_COVERAGE" != "0" ]; then
+      sudo luarocks install cluacov
+      if [ "$DO_COVERAGE" = "coveralls" ]; then
+        sudo luarocks install luacov-coveralls
+      fi
+      # Patch AWESOME_SPAWN_TIMEOUT to be shorter, for coverage of spawn_monitor_timeout.
+      sed -iE 's/\(#define AWESOME_SPAWN_TIMEOUT \)20.0/\12.0/' spawn.c
+    fi
 
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
