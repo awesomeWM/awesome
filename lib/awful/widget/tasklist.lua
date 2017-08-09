@@ -460,15 +460,19 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
     end
 
     local queued_update = false
+
+    -- For the tests
+    function w._do_tasklist_update_now()
+        queued_update = false
+        if screen.valid then
+            tasklist_update(screen, w, args.buttons, args.filter, data, args.style, uf)
+        end
+    end
+
     function w._do_tasklist_update()
         -- Add a delayed callback for the first update.
         if not queued_update then
-            timer.delayed_call(function()
-                queued_update = false
-                if screen.valid then
-                    tasklist_update(screen, w, args.buttons, args.filter, data, args.style, uf)
-                end
-            end)
+            timer.delayed_call(w._do_tasklist_update_now)
             queued_update = true
         end
     end
