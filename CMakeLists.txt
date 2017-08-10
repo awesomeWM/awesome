@@ -317,7 +317,7 @@ endif()
 # }}}
 
 # {{{ Theme icons
-file(GLOB icon_sources RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/themes/*/titlebar/*.png)
+file(GLOB_RECURSE icon_sources RELATIVE ${SOURCE_DIR} ${SOURCE_DIR}/themes/*.png)
 
 foreach(icon ${icon_sources})
     # Copy all icons to the build dir to simplify the following code.
