@@ -1,6 +1,37 @@
 ---------------------------------------------------------------------------
 --- Taglist widget module for awful
 --
+-- Here is a more advanced example of how to extent the `taglist`. It provides:
+--
+-- * mouse "hover" color
+-- * an extra index field
+-- * a powerline look and feel
+--
+--@DOC_wibox_awidget_taglist_indexed_EXAMPLE@
+--
+-- As demonstrated in the example above, there are a few "shortcuts" to avoid
+-- re-inventing the wheel. By setting the predefined roles as widget `id`s,
+-- `awful.widget.common` will do most of the work to update the values
+-- automatically. All of them are optional. The supported roles are:
+--
+-- * `icon_role`: A `wibox.widget.imagebox`
+-- * `text_role`: A `wibox.widget.textbox`
+-- * `background_role`: A `wibox.container.background`
+-- * `text_margin_role`: A `wibox.container.margin`
+-- * `icon_margin_role`: A `wibox.container.margin`
+--
+-- `awful.widget.common` also has 2 callbacks to give more control over the widget:
+--
+-- * `create_callback`: Called once after the widget instance is created
+-- * `update_callback`: Called everytime the data is refreshed
+--
+-- Both callback have the same parameters:
+--
+-- * `self`: The widget instance (*widget*).
+-- * `t`: The tag (*tag*)
+-- * `index`: The widget position in the list (*number*)
+-- * `tags`: The list of tag, in order (*table*)
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @classmod awful.widget.taglist
@@ -353,7 +384,7 @@ function taglist.taglist_label(t, args)
     return text, bg_color, bg_image, not taglist_disable_icon and icon or nil, other_args
 end
 
-local function taglist_update(s, w, buttons, filter, data, style, update_function)
+local function taglist_update(s, w, buttons, filter, data, style, update_function, args)
     local tags = {}
     for _, t in ipairs(s.tags) do
         if not tag.getproperty(t, "hide") and filter(t) then
@@ -363,7 +394,7 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
 
     local function label(c) return taglist.taglist_label(c, style) end
 
-    update_function(w, buttons, label, data, tags)
+    update_function(w, buttons, label, data, tags, args)
 end
 
 --- Create a new taglist widget. The last two arguments (update_function
@@ -380,6 +411,7 @@ end
 --   update. See `awful.widget.common`.
 -- @tparam[opt] widget args.layout Optional layout widget for tag widgets. Default
 --   is wibox.layout.fixed.horizontal().
+-- @tparam[opt] table widget_template A custom widget to be used for each tag
 -- @tparam[opt={}] table args.style The style overrides default theme.
 -- @tparam[opt=nil] string|pattern args.style.fg_focus
 -- @tparam[opt=nil] string|pattern args.style.bg_focus
@@ -457,15 +489,18 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
     local data = setmetatable({}, { __mode = 'k' })
 
     local queued_update = {}
+
+    function w._do_taglist_update_now()
+        if screen.valid then
+            taglist_update(screen, w, args.buttons, args.filter, data, args.style, uf, args)
+        end
+        queued_update[screen] = false
+    end
+
     function w._do_taglist_update()
         -- Add a delayed callback for the first update.
         if not queued_update[screen] then
-            timer.delayed_call(function()
-                if screen.valid then
-                    taglist_update(screen, w, args.buttons, args.filter, data, args.style, uf)
-                end
-                queued_update[screen] = false
-            end)
+            timer.delayed_call(w._do_taglist_update_now)
             queued_update[screen] = true
         end
     end
