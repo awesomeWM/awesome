@@ -33,6 +33,7 @@ local theme = require("beautiful")
 local wibox = require("wibox")
 local gcolor = require("gears.color")
 local gstring = require("gears.string")
+local gdebug = require("gears.debug")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -469,7 +470,7 @@ end
 -- @return menubar wibox.
 -- @deprecated get
 function menubar.get(scr)
-    awful.util.deprecate("Use menubar.show() instead", { deprecated_in = 5 })
+    gdebug.deprecate("Use menubar.show() instead", { deprecated_in = 5 })
     menubar.refresh(scr)
     -- Add to each category the name of its key in all_categories
     for k, v in pairs(menubar.menu_gen.all_categories) do

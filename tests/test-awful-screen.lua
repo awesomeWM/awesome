@@ -1,7 +1,5 @@
 local awful = require("awful")
 
-awful.util.deprecate = function() end
-
 local has_spawned = false
 local steps = {
     function(count)
