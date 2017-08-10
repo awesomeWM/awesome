@@ -174,6 +174,9 @@ if [ -n "$DO_COVERAGE" ] && [ "$DO_COVERAGE" != 0 ]; then
     sed "1 s~^~require('luacov.runner')('$source_dir/.luacov'); \0~" \
         "$RC_FILE" > "$tmp_files/awesomerc.lua"
     RC_FILE=$tmp_files/awesomerc.lua
+
+    # Use xresources theme for more coverage.
+    sed -i 's~default/theme~xresources/theme~' "$RC_FILE"
 fi
 
 # Start awesome.
