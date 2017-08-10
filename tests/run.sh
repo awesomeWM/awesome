@@ -15,6 +15,24 @@ set -e
 export SHELL=/bin/sh
 export HOME=/dev/null
 
+# Parse options.
+usage() {
+    cat >&2 <<EOF
+Usage: $0 [-W] [testfile]...
+  -W: warnings become errors
+  -h: show this help
+EOF
+    exit "$1"
+}
+while getopts Wh opt; do
+    case $opt in
+        W) fail_on_warning=1 ;;
+        h) usage 0 ;;
+        *) usage 64 ;;
+    esac
+done
+shift $((OPTIND-1))
+
 VERBOSE=${VERBOSE-0}
 if [ "$VERBOSE" = 1 ]; then
     set -x
@@ -242,9 +260,15 @@ for f in $tests; do
     esac
 
     # Parse any error from the log.
-    error="$(grep --color -o --binary-files=text -E \
-        '.*[Ee]rror.*|.*assertion failed.*|^Step .* failed:' "$awesome_log" ||
-        true)"
+    pattern='.*[Ee]rror.*|.*assertion failed.*|^Step .* failed:'
+    if [[ $fail_on_warning ]]; then
+        pattern+='|^.{19} W: awesome:.*'
+    fi
+    error="$(grep --color -o --binary-files=text -E "$pattern" "$awesome_log" || true)"
+    if [[ $fail_on_warning ]]; then
+        # Filter out ignored warnings.
+        error="$(echo "$error" | grep -vE '.{19} W: awesome: (a_glib_poll|Cannot reliably detect EOF)' || true)"
+    fi
     if [[ -n "$error" ]]; then
         color_red
         echo "===> ERROR running $f <==="
