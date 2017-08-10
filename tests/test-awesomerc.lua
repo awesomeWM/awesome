@@ -24,12 +24,7 @@ local function num_pairs(container_table)
   return number_of_items
 end
 
-
--- display deprecated warnings
---awful.util.deprecate = function() end
-
 local steps = {
-
     function(count)
         if count <= 5 then
             awful.spawn("xterm")

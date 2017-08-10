@@ -1,8 +1,6 @@
 local awful = require("awful")
 local beautiful = require("beautiful")
 
-awful.util.deprecate = function() end
-
 local function check_order()
     local tags = mouse.screen.tags
 

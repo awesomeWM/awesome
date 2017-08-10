@@ -1,13 +1,9 @@
 local awful = require("awful")
 local test_client = require("_client")
 
-awful.util.deprecate = function() end
-
 local has_spawned = false
 local steps = {
-
     function(count)
-
         if count <= 1 and not has_spawned and #client.get() < 2 then
             awful.spawn("xterm")
             awful.spawn("xterm")
