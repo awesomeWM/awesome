@@ -60,6 +60,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 local glib = require("lgi").GLib
 local object = require("gears.object")
 local protected_call = require("gears.protected_call")
+local gtable = require("gears.table")
 
 --- Timer objects. This type of object is useful when triggering events repeatedly.
 -- The timer will emit the "timeout" signal every N seconds, N being the timeout
@@ -227,10 +228,12 @@ end
 
 local delayed_calls = {}
 capi.awesome.connect_signal("refresh", function()
-    for _, callback in ipairs(delayed_calls) do
+    -- Copy delayed_calls before processing them, to allow for re-queueing.
+    local callbacks = gtable.clone(delayed_calls, false)
+    delayed_calls = {}
+    for _, callback in ipairs(callbacks) do
         protected_call(unpack(callback))
     end
-    delayed_calls = {}
 end)
 
 --- Call the given function at the end of the current main loop iteration
