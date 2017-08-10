@@ -24,6 +24,50 @@
 -- <tr><td>⬍</td><td><a href="./client.html#client.maximized_vertical">maximized_vertical</a></td></tr>
 -- </table>
 --
+-- **Customizing the tasklist:**
+--
+-- The `tasklist` created by `rc.lua` use the default values for almost
+-- everything. However, it is possible to override each aspects to create a
+-- very different widget. Here's an example that create a tasklist similar to
+-- the default one, but with an explicit layout and some spacing widgets:
+--
+--@DOC_wibox_awidget_tasklist_rounded_EXAMPLE@
+--
+-- As demonstrated in the example above, there are a few "shortcuts" to avoid
+-- re-inventing the wheel. By setting the predefined roles as widget `id`s,
+-- `awful.widget.common` will do most of the work to update the values
+-- automatically. All of them are optional. The supported roles are:
+--
+-- * `icon_role`: A `wibox.widget.imagebox`
+-- * `text_role`: A `wibox.widget.textbox`
+-- * `background_role`: A `wibox.container.background`
+-- * `text_margin_role`: A `wibox.container.margin`
+-- * `icon_margin_role`: A `wibox.container.margin`
+--
+-- `awful.widget.common` also has 2 callbacks to give more control over the widget:
+--
+-- * `create_callback`: Called once after the widget instance is created
+-- * `update_callback`: Called everytime the data is refreshed
+--
+-- Both callback have the same parameters:
+--
+-- * `self`: The widget instance (*widget*).
+-- * `c`: The client (*client*)
+-- * `index`: The widget position in the list (*number*)
+-- * `clients`: The list of client, in order (*table*)
+--
+-- It is also possible to omit some roles and create an icon only tasklist.
+-- Notice that this example use the `awful.widget.clienticon` widget instead
+-- of an `imagebox`. This allows higher resoluton icons to be loaded. This
+-- example reproduces the Windows 10 tasklist look and feel:
+--
+--@DOC_wibox_awidget_tasklist_windows10_EXAMPLE@
+--
+-- The tasklist can also be created in an `awful.popup` in case there is no
+-- permanent `awful.wibar`:
+--
+--@DOC_awful_popup_alttab_EXAMPLE@
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @classmod awful.widget.tasklist
@@ -246,7 +290,9 @@ local function tasklist_label(c, args, tb)
     local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
     local maximized_vertical = args.maximized_vertical or theme.tasklist_maximized_vertical or '⬍'
 
-    tb:set_align(align)
+    if tb then
+        tb:set_align(align)
+    end
 
     if not theme.tasklist_plain_task_name then
         if c.sticky then name = name .. sticky end
@@ -339,7 +385,10 @@ local function tasklist_label(c, args, tb)
         text = text .. "<span color='"..fg_normal.."'>"..name.."</span>"
         bg_image = bg_image_normal
     end
-    tb:set_font(font)
+
+    if tb then
+        tb:set_font(font)
+    end
 
     local other_args = {
         shape              = shape,
@@ -350,7 +399,7 @@ local function tasklist_label(c, args, tb)
     return text, bg, bg_image, not tasklist_disable_icon and c.icon or nil, other_args
 end
 
-local function tasklist_update(s, w, buttons, filter, data, style, update_function)
+local function tasklist_update(s, w, buttons, filter, data, style, update_function, args)
     local clients = {}
     for _, c in ipairs(capi.client.get()) do
         if not (c.skip_taskbar or c.hidden
@@ -362,7 +411,7 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
 
     local function label(c, tb) return tasklist_label(c, style, tb) end
 
-    update_function(w, buttons, label, data, clients)
+    update_function(w, buttons, label, data, clients, args)
 end
 
 --- Create a new tasklist widget.
@@ -381,6 +430,7 @@ end
 --   update. See `awful.widget.common.list_update`.
 -- @tparam[opt] table args.layout Container widget for tag widgets. Default
 --   is `wibox.layout.flex.horizontal`.
+-- @tparam[opt] table widget_template A custom widget to be used for each client
 -- @tparam[opt={}] table args.style The style overrides default theme.
 -- @tparam[opt=nil] string|pattern args.style.fg_normal
 -- @tparam[opt=nil] string|pattern args.style.bg_normal
@@ -465,7 +515,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
     function w._do_tasklist_update_now()
         queued_update = false
         if screen.valid then
-            tasklist_update(screen, w, args.buttons, args.filter, data, args.style, uf)
+            tasklist_update(screen, w, args.buttons, args.filter, data, args.style, uf, args)
         end
     end
 
