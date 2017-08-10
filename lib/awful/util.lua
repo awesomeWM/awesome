@@ -49,7 +49,6 @@ util.shell = os.getenv("SHELL") or "/bin/sh"
 -- @see gears.debug
 function util.deprecate(see, args)
     gdebug.deprecate("gears.debug.deprecate", {deprecated_in=5})
-
     return gdebug.deprecate(see, args)
 end
 
@@ -63,7 +62,6 @@ end
 -- @see gears.debug
 function util.deprecate_class(fallback, old_name, new_name)
     gdebug.deprecate("gears.debug.deprecate_class", {deprecated_in=5})
-
     return gdebug.deprecate_class(fallback, old_name, new_name)
 end
 
@@ -75,7 +73,6 @@ end
 -- @see gears.color
 function util.ensure_pango_color(color, fallback)
     gdebug.deprecate("gears.color.ensure_pango_color", {deprecated_in=5})
-
     return gcolor.ensure_pango_color(color, fallback)
 end
 
@@ -87,7 +84,6 @@ end
 -- @see gears.math
 function util.cycle(t, i)
     gdebug.deprecate("gears.math.cycle", {deprecated_in=5})
-
     return gmath.cycle(t, i)
 end
 
@@ -97,8 +93,7 @@ end
 -- @return mkdir return code
 -- @see gears.filesystem
 function util.mkdir(dir)
-    util.deprecate("gears.filesystem.make_directories", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.make_directories", {deprecated_in=5})
     return gfs.make_directories(dir)
 end
 
@@ -116,7 +111,6 @@ end
 -- @see gears.string
 function util.escape(text)
     gdebug.deprecate("gears.string.xml_escape", {deprecated_in=5})
-
     return gstring.xml_escape(text)
 end
 
@@ -127,7 +121,6 @@ end
 -- @see gears.string
 function util.unescape(text)
     gdebug.deprecate("gears.string.xml_unescape", {deprecated_in=5})
-
     return gstring.xml_unescape(text)
 end
 
@@ -162,8 +155,7 @@ end
 -- @return the config home (XDG_CONFIG_HOME) with a slash at the end.
 -- @see gears.filesystem
 function util.get_xdg_config_home()
-    util.deprecate("gears.filesystem.get_xdg_config_home", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.get_xdg_config_home", {deprecated_in=5})
     return gfs.get_xdg_config_home()
 end
 
@@ -172,8 +164,7 @@ end
 -- @return the cache home (XDG_CACHE_HOME) with a slash at the end.
 -- @see gears.filesystem
 function util.get_xdg_cache_home()
-    util.deprecate("gears.filesystem.get_xdg_cache_home", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.get_xdg_cache_home", {deprecated_in=5})
     return gfs.get_xdg_cache_home()
 end
 
@@ -183,8 +174,7 @@ end
 -- @return A string with the requested path with a slash at the end.
 -- @see gears.filesystem
 function util.get_configuration_dir()
-    util.deprecate("gears.filesystem.get_configuration_dir", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.get_configuration_dir", {deprecated_in=5})
     return gfs.get_configuration_dir()
 end
 
@@ -193,8 +183,7 @@ end
 -- @return A string with the requested path with a slash at the end.
 -- @see gears.filesystem
 function util.get_cache_dir()
-    util.deprecate("gears.filesystem.get_cache_dir", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.get_cache_dir", {deprecated_in=5})
     return gfs.get_cache_dir()
 end
 
@@ -203,8 +192,7 @@ end
 -- @return A string with the requested path with a slash at the end.
 -- @see gears.filesystem
 function util.get_themes_dir()
-    util.deprecate("gears.filesystem.get_themes_dir", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.get_themes_dir", {deprecated_in=5})
     return gfs.get_themes_dir()
 end
 
@@ -213,8 +201,7 @@ end
 -- @return A string with the requested path with a slash at the end.
 -- @see gears.filesystem
 function util.get_awesome_icon_dir()
-    util.deprecate("gears.filesystem.get_awesome_icon_dir", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.get_awesome_icon_dir", {deprecated_in=5})
     return gfs.get_awesome_icon_dir()
 end
 
@@ -226,8 +213,7 @@ end
 -- @return A string containing the requested path.
 -- @see gears.filesystem
 function util.getdir(d)
-    util.deprecate("gears.filesystem.get_dir", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.get_dir", {deprecated_in=5})
     return gfs.get_dir(d)
 end
 
@@ -269,8 +255,7 @@ end
 -- @return True if file exists and is readable.
 -- @see gears.filesystem
 function util.file_readable(filename)
-    util.deprecate("gears.filesystem.file_readable", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.file_readable", {deprecated_in=5})
     return gfs.file_readable(filename)
 end
 
@@ -280,8 +265,7 @@ end
 -- @treturn boolean True if dir exists and is readable.
 -- @see gears.filesystem
 function util.dir_readable(path)
-    util.deprecate("gears.filesystem.dir_readable", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.dir_readable", {deprecated_in=5})
     return gfs.dir_readable(path)
 end
 
@@ -291,8 +275,7 @@ end
 -- @treturn bool True if path exists and is a directory.
 -- @see gears.filesystem
 function util.is_dir(path)
-    util.deprecate("gears.filesystem.is_dir", {deprecated_in=5})
-
+    gdebug.deprecate("gears.filesystem.is_dir", {deprecated_in=5})
     return gfs.is_dir(path)
 end
 
@@ -307,7 +290,6 @@ end
 -- @see gears.math
 function util.subsets(set)
     gdebug.deprecate("gears.math.subsets", {deprecated_in=5})
-
     return gmath.subsets(set)
 end
 
@@ -321,7 +303,6 @@ end
 -- @see gears.geometry
 function util.get_rectangle_in_direction(dir, recttbl, cur)
     gdebug.deprecate("gears.geometry.rectangle.get_in_direction", {deprecated_in=4})
-
     return grect.get_in_direction(dir, recttbl, cur)
 end
 
@@ -333,7 +314,6 @@ end
 -- @see gears.table
 function util.table.join(...)
     gdebug.deprecate("gears.table.join", {deprecated_in=5})
-
     return gtable.join(...)
 end
 
@@ -348,7 +328,6 @@ end
 -- @see gears.table
 function util.table.crush(t, set, raw)
     gdebug.deprecate("gears.table.crush", {deprecated_in=5})
-
     return gtable.crush(t, set, raw)
 end
 
@@ -365,7 +344,6 @@ end
 -- @see gears.table
 function util.table.from_sparse(t)
     gdebug.deprecate("gears.table.from_sparse", {deprecated_in=5})
-
     return gtable.from_sparse(t)
 end
 
@@ -377,7 +355,6 @@ end
 -- @see gears.table
 function util.table.hasitem(t, item)
     gdebug.deprecate("gears.table.hasitem", {deprecated_in=5})
-
     return gtable.hasitem(t, item)
 end
 
@@ -390,7 +367,6 @@ end
 -- @see gears.string
 function util.linewrap(text, width, indent)
     gdebug.deprecate("gears.string.linewrap", {deprecated_in=5})
-
     return gstring.linewrap(text, width, indent)
 end
 
@@ -401,7 +377,6 @@ end
 -- @see gears.string
 function util.linecount(text)
     gdebug.deprecate("gears.string.linecount", {deprecated_in=5})
-
     return gstring.linecount(text)
 end
 
@@ -412,7 +387,6 @@ end
 -- @see gears.table
 function util.table.keys(t)
     gdebug.deprecate("gears.table.keys", {deprecated_in=5})
-
     return gtable.keys(t)
 end
 
@@ -424,7 +398,6 @@ end
 -- @see gears.table
 function util.table.keys_filter(t, ...)
     gdebug.deprecate("gears.table.keys_filter", {deprecated_in=5})
-
     return gtable.keys_filter(t, ...)
 end
 
@@ -435,7 +408,6 @@ end
 -- @see gears.table
 function util.table.reverse(t)
     gdebug.deprecate("gears.table.reverse", {deprecated_in=5})
-
     return gtable.reverse(t)
 end
 
@@ -447,7 +419,6 @@ end
 -- @see gears.table
 function util.table.clone(t, deep)
     gdebug.deprecate("gears.table.clone", {deprecated_in=5})
-
     return gtable.clone(t, deep)
 end
 
@@ -463,7 +434,6 @@ end
 -- @see gears.table
 function util.table.iterate(t, filter, start)
     gdebug.deprecate("gears.table.iterate", {deprecated_in=5})
-
     return gtable.iterate(t, filter, start)
 end
 
@@ -476,7 +446,6 @@ end
 -- @see gears.table
 function util.table.merge(t, set)
     gdebug.deprecate("gears.table.merge", {deprecated_in=5})
-
     return gtable.merge(t, set)
 end
 
@@ -488,7 +457,6 @@ end
 -- @see gears.string
 function util.quote_pattern(s)
     gdebug.deprecate("gears.string.quote_pattern", {deprecated_in=5})
-
     return gstring.quote_pattern(s)
 end
 
@@ -498,7 +466,6 @@ end
 -- @see gears.string
 function util.query_to_pattern(q)
     gdebug.deprecate("gears.string.query_to_pattern", {deprecated_in=5})
-
     return gstring.query_to_pattern(q)
 end
 
@@ -509,7 +476,6 @@ end
 -- @see gears.math
 function util.round(x)
     gdebug.deprecate("gears.math.round", {deprecated_in=5})
-
     return gmath.round(x)
 end
 
