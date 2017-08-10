@@ -64,13 +64,13 @@ end
 --- Print an warning message
 -- @tparam string message The warning message to print
 function debug.print_warning(message)
-    io.stderr:write(os.date("%Y-%m-%d %T W: ") .. tostring(message) .. "\n")
+    io.stderr:write(os.date("%Y-%m-%d %T W: awesome: ") .. tostring(message) .. "\n")
 end
 
 --- Print an error message
 -- @tparam string message The error message to print
 function debug.print_error(message)
-    io.stderr:write(os.date("%Y-%m-%d %T E: ") .. tostring(message) .. "\n")
+    io.stderr:write(os.date("%Y-%m-%d %T E: awesome: ") .. tostring(message) .. "\n")
 end
 
 local displayed_deprecations = {}
