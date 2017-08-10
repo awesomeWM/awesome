@@ -195,7 +195,7 @@ script:
 
         make check-unit-coverage || exit 1
         do_codecov unittests
-        tests/run.sh
+        make check-integration || exit 1
         do_codecov functionaltests
         do_codecov_gcov c_code
 
