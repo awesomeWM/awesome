@@ -405,6 +405,15 @@ add_custom_target(check-integration
     USES_TERMINAL
     VERBATIM)
 add_dependencies(check-integration test-gravity)
+add_custom_target(check-themes
+    ${CMAKE_SOURCE_DIR}/tests/themes/run.sh
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Testing themes"
+    USES_TERMINAL
+    DEPENDS generated_icons generate_awesomerc ${PROJECT_AWE_NAME}
+    VERBATIM)
+add_dependencies(check-integration check-themes)
+
 add_custom_target(check-requires
     lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
