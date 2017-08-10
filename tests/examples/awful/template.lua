@@ -2,25 +2,24 @@ local file_path, image_path = ...
 require("_common_template")(...)
 
 local cairo      = require("lgi").cairo
-local pango      = require("lgi").Pango
-local pangocairo = require("lgi").PangoCairo
 
 local color     = require( "gears.color"    )
 local shape     = require( "gears.shape"    )
 local beautiful = require( "beautiful"      )
 local wibox     = require( "wibox"          )
-local titlebar  = require( "awful.titlebar" )
 
 -- Run the test
 local args = loadfile(file_path)() or {}
+
+-- Emulate the event loop for 5 iterations
+for _ = 1, 5 do
+    awesome.emit_signal("refresh")
+end
 
 -- Draw the result
 local img = cairo.SvgSurface.create(image_path..".svg", screen._get_extents() )
 
 local cr  = cairo.Context(img)
-
-local pango_crx = pangocairo.font_map_get_default():create_context()
-local pl = pango.Layout.new(pango_crx)
 
 -- Draw a mouse cursor at [x,y]
 local function draw_mouse(x, y)
@@ -93,7 +92,7 @@ local function wrap_titlebar(tb, width, height)
     }
 end
 
-local function client_widget(c, color, label)
+local function client_widget(c, col, label)
     local geo = c:geometry()
     local bw = c.border_width or beautiful.border_width or 0
 
@@ -148,11 +147,11 @@ local function client_widget(c, color, label)
         shape_border_color = beautiful.border_color,
         shape_clip         = true,
         fg                 = beautiful.fg_normal or "#000000",
-        bg                 = color,
+        bg                 = col,
         forced_width       = geo.width  + 2*bw,
         forced_height      = geo.height + 2*bw,
-        shape              = function(cr, w, h)
-            return shape.rounded_rect(cr, w, h, args.radius or 5)
+        shape              = function(cr2, w, h)
+            return shape.rounded_rect(cr2, w, h, args.radius or 5)
         end,
 
         widget = wibox.container.background,
@@ -160,6 +159,24 @@ local function client_widget(c, color, label)
 end
 
 -- Add all wiboxes
+
+-- Fix the wibox geometries that have a dependency on their content
+for _, d in ipairs(drawin.get()) do
+    local w = d.get_wibox and d:get_wibox() or nil
+    if w then
+        -- Force a full layout first as widgets with as the awful.popup have
+        -- interdependencies between the content and the container
+        if w._apply_size_now then
+            w:_apply_size_now()
+        end
+    end
+end
+
+-- Emulate the event loop for another 5 iterations
+for _ = 1, 5 do
+    awesome.emit_signal("refresh")
+end
+
 for _, d in ipairs(drawin.get()) do
     local w = d.get_wibox and d:get_wibox() or nil
     if w then
@@ -170,43 +187,45 @@ end
 
 -- Loop each clients geometry history and paint it
 for _, c in ipairs(client.get()) do
-    local pgeo = nil
-    for _, geo in ipairs(c._old_geo) do
-        if not geo._hide then
-            total_area:add_at(
-                client_widget(c, c.color or geo._color or beautiful.bg_normal, geo._label),
-                {x=geo.x, y=geo.y}
-            )
+    if not c.minimized then
+        local pgeo = nil
+        for _, geo in ipairs(c._old_geo) do
+            if not geo._hide then
+                total_area:add_at(
+                    client_widget(c, c.color or geo._color or beautiful.bg_normal, geo._label),
+                    {x=geo.x, y=geo.y}
+                )
+            end
+
+            -- Draw lines between the old and new corners
+            if pgeo and not args.hide_lines then
+                cr:save()
+                cr:set_source_rgba(0,0,0,.1)
+
+                -- Top left
+                cr:move_to(pgeo.x, pgeo.y)
+                cr:line_to(geo.x, geo.y)
+                cr:stroke()
+
+                -- Top right
+                cr:move_to(pgeo.x+pgeo.width, pgeo.y)
+                cr:line_to(geo.x+pgeo.width, geo.y)
+
+                -- Bottom left
+                cr:move_to(pgeo.x, pgeo.y+pgeo.height)
+                cr:line_to(geo.x, geo.y+geo.height)
+                cr:stroke()
+
+                -- Bottom right
+                cr:move_to(pgeo.x+pgeo.width, pgeo.y+pgeo.height)
+                cr:line_to(geo.x+pgeo.width, geo.y+geo.height)
+                cr:stroke()
+
+                cr:restore()
+            end
+
+            pgeo = geo
         end
-
-        -- Draw lines between the old and new corners
-        if pgeo and not args.hide_lines then
-            cr:save()
-            cr:set_source_rgba(0,0,0,.1)
-
-            -- Top left
-            cr:move_to(pgeo.x, pgeo.y)
-            cr:line_to(geo.x, geo.y)
-            cr:stroke()
-
-            -- Top right
-            cr:move_to(pgeo.x+pgeo.width, pgeo.y)
-            cr:line_to(geo.x+pgeo.width, geo.y)
-
-            -- Bottom left
-            cr:move_to(pgeo.x, pgeo.y+pgeo.height)
-            cr:line_to(geo.x, geo.y+geo.height)
-            cr:stroke()
-
-            -- Bottom right
-            cr:move_to(pgeo.x+pgeo.width, pgeo.y+pgeo.height)
-            cr:line_to(geo.x+pgeo.width, geo.y+geo.height)
-            cr:stroke()
-
-            cr:restore()
-        end
-
-        pgeo = geo
     end
 end
 
