@@ -6,6 +6,7 @@ end
 local gfs = require("gears.filesystem")
 local Gio = require("lgi").Gio
 local GLib = require("lgi").GLib
+local lfs = require("lfs")
 
 local has_bash = GLib.find_program_in_path("bash")
 local has_zsh = GLib.find_program_in_path("zsh")
@@ -59,20 +60,18 @@ local function get_test_dir()
 end
 
 describe("awful.completion.shell in empty directory", function()
-    local orig_popen = io.popen
+    local orig_dir = lfs.currentdir()
 
     setup(function()
         test_dir = get_test_dir()
-        io.popen = function(...)  --luacheck: ignore
-            return orig_popen(string.format('cd %s && ', test_dir) .. ...)
-        end
+        lfs.chdir(test_dir)
         test_path = get_test_path_dir()
     end)
 
     teardown(function()
         assert.True(os.remove(test_dir))
-        io.popen = orig_popen  --luacheck: ignore
         remove_test_path_dir(test_path)
+        lfs.chdir(orig_dir)
     end)
 
     if has_bash then
@@ -91,23 +90,46 @@ describe("awful.completion.shell in empty directory", function()
 end)
 
 describe("awful.completion.shell", function()
-    local orig_popen = io.popen
+    local orig_dir = lfs.currentdir()
 
     setup(function()
         test_dir = get_test_dir()
+        gfs.make_directories(test_dir .. '/true')
+        Gio.File.new_for_path(test_dir .. '/true/with_file'):create(Gio.FileCreateFlags.NONE);
+        gfs.make_directories(test_dir .. '/just_a_directory')
+        Gio.File.new_for_path(test_dir .. '/just_a_directory/with_file'):create(Gio.FileCreateFlags.NONE);
+        -- Chaotic order is intended!
+        gfs.make_directories(test_dir .. '/ambiguous_dir_a')
+        gfs.make_directories(test_dir .. '/ambiguous_dir_e')
+        Gio.File.new_for_path(test_dir .. '/ambiguous_dir_e/with_file'):create(Gio.FileCreateFlags.NONE);
+        gfs.make_directories(test_dir .. '/ambiguous_dir_c')
+        Gio.File.new_for_path(test_dir .. '/ambiguous_dir_c/with_file'):create(Gio.FileCreateFlags.NONE);
+        gfs.make_directories(test_dir .. '/ambiguous_dir_d')
+        gfs.make_directories(test_dir .. '/ambiguous_dir_b')
+        gfs.make_directories(test_dir .. '/ambiguous_dir_f')
         os.execute(string.format(
             'cd %s && touch localcommand && chmod +x localcommand', test_dir))
-        io.popen = function(...)  --luacheck: ignore
-            return orig_popen(string.format('cd %s && ', test_dir) .. ...)
-        end
+        lfs.chdir(test_dir)
         test_path = get_test_path_dir()
     end)
 
     teardown(function()
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_a'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_b'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_c/with_file'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_c'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_d'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_e/with_file'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_e'))
+        assert.True(os.remove(test_dir .. '/ambiguous_dir_f'))
+        assert.True(os.remove(test_dir .. '/just_a_directory/with_file'))
+        assert.True(os.remove(test_dir .. '/just_a_directory'))
         assert.True(os.remove(test_dir .. '/localcommand'))
+        assert.True(os.remove(test_dir .. '/true/with_file'))
+        assert.True(os.remove(test_dir .. '/true'))
         assert.True(os.remove(test_dir))
-        io.popen = orig_popen  --luacheck: ignore
         remove_test_path_dir(test_path)
+        lfs.chdir(orig_dir)
     end)
 
     if has_bash then
@@ -137,12 +159,65 @@ describe("awful.completion.shell", function()
 
     if has_bash then
         it("completes local file (bash)", function()
-            assert.same(shell('ls ', 4, 1, 'bash'), {'ls localcommand', 16, {'localcommand'}})
+            assert.same(shell('ls l', 5, 1, 'bash'), {'ls localcommand', 16, {'localcommand'}})
         end)
     end
     if has_zsh then
         it("completes local file (zsh)", function()
-            assert.same(shell('ls ', 4, 1, 'zsh'), {'ls localcommand', 16, {'localcommand'}})
+            assert.same(shell('ls l', 5, 1, 'zsh'), {'ls localcommand', 16, {'localcommand'}})
+        end)
+    end
+
+    if has_bash then
+        it("completes command regardless of local directory (bash)", function()
+            assert.same(shell('true', 5, 1, 'bash'), {'true', 5, {'true'}})
+        end)
+    end
+    if has_zsh then
+        it("completes command regardless of local directory (zsh)", function()
+            assert.same(shell('true', 5, 1, 'zsh'), {'true', 5, {'true'}})
+        end)
+    end
+    it("completes command regardless of local directory (nil)", function()
+        assert.same(shell('true', 5, 1, nil), {'true', 5, {'true'}})
+    end)
+
+    if has_bash then
+        it("does not complete local directory not starting with ./ (bash)", function()
+            assert.same(shell('just_a', 7, 1, 'bash'), {'just_a', 7})
+        end)
+    end
+    if has_zsh then
+        it("does not complete local directory not starting with ./ (zsh)", function()
+            assert.same(shell('just_a', 7, 1, 'zsh'), {'just_a', 7})
+        end)
+    end
+
+    if has_bash then
+        it("completes local directories starting with ./ (bash)", function()
+            assert.same(shell('./just', 7, 1, 'bash'), {'./just_a_directory/', 20, {'./just_a_directory/'}})
+            assert.same(shell('./t', 4, 1, 'bash'), {'./true/', 8, {'./true/'}})
+        end)
+    end
+    if has_zsh then
+        it("completes local directories starting with ./ (zsh, non-empty)", function()
+            assert.same(shell('./just', 7, 1, 'zsh'), {'./just_a_directory/', 20, {'./just_a_directory/'}})
+            assert.same(shell('./t', 4, 1, 'zsh'), {'./true/', 8, {'./true/'}})
+        end)
+    end
+    --]]
+
+    if has_bash then
+        it("correctly sorts completed items (bash)", function()
+            assert.same(shell('./ambi', 7, 1, 'bash'), {'./ambiguous_dir_a/', 19,
+            {'./ambiguous_dir_a/', './ambiguous_dir_b/', './ambiguous_dir_c/',
+            './ambiguous_dir_d/', './ambiguous_dir_e/', './ambiguous_dir_f/'}})
+        end)
+    end
+    if has_zsh then
+        it("correctly sorts completed items (zsh)", function()
+            assert.same(shell('./ambi', 7, 1, 'zsh'), {'./ambiguous_dir_c/', 19,
+            {'./ambiguous_dir_c/', './ambiguous_dir_e/'}})
         end)
     end
 end)
