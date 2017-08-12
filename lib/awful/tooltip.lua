@@ -18,6 +18,16 @@
 --             end,
 --         })
 --
+--     -- alternatively, you can use mouse::enter signal
+--     myclock = wibox.widget.textclock("%T", 1)
+--     myclock_t = awful.tooltip({
+--         objects = { myclock }
+--         })
+--
+--     myclock:connect_signal("mouse::enter", function()
+--             myclock_t.text = os.date("Today is %A %B %d %Y\nThe time is %T")
+--     end)
+--
 -- How to add the same tooltip to multiple objects?
 -- ---
 --
