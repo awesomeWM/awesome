@@ -12,12 +12,6 @@ local color = nil
 local gdebug = require("gears.debug")
 local hierarchy = require("wibox.hierarchy")
 
--- Keep this in sync with build-utils/lgi-check.sh!
-local ver_major, ver_minor, ver_patch = string.match(require('lgi.version'), '(%d)%.(%d)%.(%d)')
-if tonumber(ver_major) <= 0 and (tonumber(ver_minor) < 8 or (tonumber(ver_minor) == 8 and tonumber(ver_patch) < 0)) then
-    error("lgi too old, need at least version 0.8.0")
-end
-
 local surface = { mt = {} }
 local surface_cache = setmetatable({}, { __mode = 'v' })
 
