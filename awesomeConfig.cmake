@@ -343,6 +343,16 @@ endif()
 
 #}}}
 
+# {{{ Check for LGI
+add_executable(lgi-check build-utils/lgi-check.c)
+target_link_libraries(lgi-check ${LUA_LIBRARIES})
+target_include_directories(lgi-check PRIVATE ${LUA_INCLUDE_DIR})
+add_custom_target(lgi-check-run ALL
+    COMMAND lgi-check
+    DEPENDS lgi-check
+    COMMENT "Checking for LGI...")
+# }}}
+
 # {{{ Generate some aggregated documentation from lua script
 
 file(MAKE_DIRECTORY ${BUILD_DIR}/script_files/)
@@ -351,7 +361,7 @@ add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/06-appearance.md
         COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
         ${BUILD_DIR}/docs/06-appearance.md
-        DEPENDS lgi-check
+        DEPENDS lgi-check-run
 )
 
 add_custom_command(

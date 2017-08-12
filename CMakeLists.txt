@@ -148,10 +148,6 @@ target_link_libraries(${PROJECT_AWE_NAME}
     ${AWESOME_REQUIRED_LDFLAGS}
     ${AWESOME_OPTIONAL_LDFLAGS})
 
-# check for lgi and the needed gobject introspection files
-add_custom_target(lgi-check ALL
-    COMMAND ${SOURCE_DIR}/build-utils/lgi-check.sh)
-
 # {{{ Generated sources
 # atoms
 file(MAKE_DIRECTORY ${BUILD_DIR}/common)
