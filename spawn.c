@@ -457,7 +457,7 @@ child_exit_callback(GPid pid, gint status, gpointer user_data)
  * @treturn[1] integer stdin, if `stdin` is true.
  * @treturn[1] integer stdout, if `stdout` is true.
  * @treturn[1] integer stderr, if `stderr` is true.
- * @treturn[2] string An error string if an error occured.
+ * @treturn[2] string An error string if an error occurred.
  * @function spawn
  */
 int
