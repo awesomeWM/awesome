@@ -475,6 +475,8 @@ child_exit_callback(GPid pid, gint status, gpointer user_data)
  * @tparam[opt=nil] function exit_callback Function to call on process exit. The
  * function arguments will be type of exit ("exit" or "signal") and the exit
  * code / the signal number causing process termination.
+ * @tparam[opt=nil] table cmd The environment to use for the spawned program.
+ * Without this, the spawned process inherits awesome's environment.
  * @treturn[1] integer Process ID if everything is OK.
  * @treturn[1] string Startup-notification ID, if `use_sn` is true.
  * @treturn[1] integer stdin, if `stdin` is true.
@@ -486,7 +488,7 @@ child_exit_callback(GPid pid, gint status, gpointer user_data)
 int
 luaA_spawn(lua_State *L)
 {
-    gchar **argv = NULL;
+    gchar **argv = NULL, **envp = NULL;
     bool use_sn = true, return_stdin = false, return_stdout = false, return_stderr = false;
     int stdin_fd = -1, stdout_fd = -1, stderr_fd = -1;
     int *stdin_ptr = NULL, *stdout_ptr = NULL, *stderr_ptr = NULL;
@@ -528,6 +530,17 @@ luaA_spawn(lua_State *L)
         return 1;
     }
 
+    if (!lua_isnoneornil(L, 7)) {
+        envp = parse_table_array(L, 7, &error);
+        if (error) {
+            g_strfreev(argv);
+            g_strfreev(envp);
+            lua_pushfstring(L, "spawn: environment parse error: %s", error->message);
+            g_error_free(error);
+            return 1;
+        }
+    }
+
     SnLauncherContext *context = NULL;
     if(use_sn)
     {
@@ -543,10 +556,11 @@ luaA_spawn(lua_State *L)
     }
 
     flags |= G_SPAWN_SEARCH_PATH | G_SPAWN_CLOEXEC_PIPES;
-    retval = g_spawn_async_with_pipes(NULL, argv, NULL, flags,
+    retval = g_spawn_async_with_pipes(NULL, argv, envp, flags,
                                       spawn_callback, context, &pid,
                                       stdin_ptr, stdout_ptr, stderr_ptr, &error);
     g_strfreev(argv);
+    g_strfreev(envp);
     if(!retval)
     {
         lua_pushstring(L, error->message);
