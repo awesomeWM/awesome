@@ -70,14 +70,15 @@ RUN if [ -n "$DO_COVERAGE" ]; then \
     if [ "$DO_COVERAGE" = codecov ] || [ "$DO_COVERAGE" = all ]; then \
       wget -O /tmp/codecov-bash https://codecov.io/bash; \
     fi; \
+    apk --no-cache add --virtual awesome-build python3; \
     if [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then \
       if [ "$LUA_PKG" = luajit ]; then \
         export C_INCLUDE_PATH=/usr/include/luajit-2.1; \
       fi; \
       luarocks install --local luacov-coveralls; \
-      python -m ensurepip; \
-      pip --no-cache-dir install cpp-coveralls; \
-      pip uninstall --yes pip; \
+      python3 -m ensurepip; \
+      pip3 --no-cache-dir install cpp-coveralls; \
+      pip3 uninstall --yes pip; \
     fi; \
   fi
 
