@@ -397,7 +397,11 @@ parse_command(lua_State *L, int idx, GError **error)
         {
             lua_rawgeti(L, idx, i+1);
             if (lua_type(L, -1) != LUA_TSTRING)
-                luaL_error(L, "Non-string argument at table index %d", i+1);
+            {
+                g_set_error(error, G_SPAWN_ERROR, 0,
+                        "Non-string argument at table index %zd", i+1);
+                return NULL;
+            }
         }
 
         /* From this point on nothing can go wrong and so we can safely allocate
@@ -412,7 +416,9 @@ parse_command(lua_State *L, int idx, GError **error)
     }
     else
     {
-        luaL_error(L, "Invalid argument to spawn(), expect string or table");
+        g_set_error_literal(error, G_SPAWN_ERROR, 0,
+                "Invalid argument to spawn(), expect string or table");
+        return NULL;
     }
 
     return argv;
