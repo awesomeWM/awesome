@@ -66,7 +66,7 @@ runner.run_steps = function(steps, options)
         step_count = step_count + 1
         local step_as_string = step..'/'..#steps..' (@'..step_count..')'
         if verbose then
-            print(string.format('Running step %s..', step_as_string))
+            io.stderr:write(string.format('Running step %s..\n', step_as_string))
         end
 
         -- Call the current step's function.

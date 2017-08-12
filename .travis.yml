@@ -12,7 +12,7 @@ env:
   matrix:
     - LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
     # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
-    - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov AWESOME_THEME=xresources
+    - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
     # luajit: installed from source.
     - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1
     # Note: luarocks does not work with Lua 5.0.
@@ -149,10 +149,6 @@ install:
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true"
   - |
-    if [ ! -z "$AWESOME_THEME" ]; then
-      sed awesomerc.lua -i -e "s/default\/theme/$AWESOME_THEME\/theme/g"
-    fi
-  - |
     if [ "$DO_COVERAGE" = "codecov" ]; then
       export CXXFLAGS="-fprofile-arcs -ftest-coverage"
       export CFLAGS="-fprofile-arcs -ftest-coverage"
@@ -195,7 +191,7 @@ script:
 
         make check-unit-coverage || exit 1
         do_codecov unittests
-        tests/run.sh
+        make check-integration || exit 1
         do_codecov functionaltests
         do_codecov_gcov c_code
 

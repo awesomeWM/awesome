@@ -161,9 +161,9 @@ wait_until_success "setup xrdb" "printf 'Xft.dpi: 96
 # Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
 eval "$(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)"
 
-RC_FILE=${source_dir}/awesomerc.lua
-export AWESOME_THEMES_PATH="$source_dir/themes"
-export AWESOME_ICON_PATH="$source_dir/icons"
+RC_FILE=${AWESOME_RC_FILE:-${source_dir}/awesomerc.lua}
+AWESOME_THEMES_PATH="${AWESOME_THEMES_PATH:-${source_dir}/themes}"
+AWESOME_ICON_PATH="${AWESOME_ICON_PATH:-${source_dir}/icons}"
 
 # Inject coverage runner via temporary RC file.
 if [ -n "$DO_COVERAGE" ] && [ "$DO_COVERAGE" != 0 ]; then
@@ -181,7 +181,10 @@ start_awesome() {
     cd "$build_dir"
     # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
     # SOURCE_DIRECTORY is used by .luacov.
-    DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
+    DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" \
+        AWESOME_THEMES_PATH="$AWESOME_THEMES_PATH" \
+        AWESOME_ICON_PATH="$AWESOME_ICON_PATH" \
+        timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
 
