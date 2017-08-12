@@ -10,7 +10,7 @@
 -- How to create a tooltip?
 -- ---
 --
---     myclock = wibox.widget.textclock({}, "%T", 1)
+--     myclock = wibox.widget.textclock("%T", 1)
 --     myclock_t = awful.tooltip({
 --         objects = { myclock },
 --         timer_function = function()
