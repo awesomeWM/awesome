@@ -171,7 +171,28 @@ A new window will appear and a new awesome instance runs inside of it.
 
 ## Add widgets
 
-TODO: Write this section.
+Before the following line:
+
+    mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
+
+Add this to create a new widget:
+
+    praisewidget = wibox.widget.textbox()
+    praisewidget.text = "You are great!"
+
+The widget still needs to be added to a wibar. For this, find the definition of
+your wibar and change it as follows:
+
+    { -- Left widgets
+        layout = wibox.layout.fixed.horizontal,
+        mylauncher,
+        praisewidget, -- This line is new
+        s.mytaglist,
+        s.mypromptbox,
+    },
+
+This gives you a basic idea on how to add a widget. For an overview of available
+widgets and how to arrange them, please read @{03-declarative-layout.md}.
 
 ## Further reading
 
