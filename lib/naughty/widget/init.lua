@@ -6,4 +6,5 @@
 
 return {
     title = require( "naughty.widget.title"     );
+    icon  = require( "naughty.widget.icon"      );
 }
