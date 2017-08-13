@@ -90,6 +90,7 @@ export XDG_CONFIG_HOME="$build_dir"
 cleanup() {
     for p in $awesome_pid $xserver_pid; do
         kill -TERM "$p" 2>/dev/null || true
+        wait "$p"
     done
     rm -rf "$tmp_files" || true
 }
