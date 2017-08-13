@@ -15,12 +15,12 @@ tests_dir="$(dirname -- "$0")/.."
 
 config_file="$build_dir/test-themes-awesomerc.lua"
 
-for theme in themes/*/theme.lua; do
-  echo "== Testing $theme =="
-  theme=${theme%/*}
-  theme=${theme##*/}
+for theme_file in themes/*/theme.lua; do
+  echo "==== Testing theme: $theme_file ===="
+  theme_name=${theme_file%/*}
+  theme_name=${theme_name##*/}
 
-  sed "s~default/theme~$theme/theme~g" "awesomerc.lua" > "$config_file"
+  sed "s~default/theme~$theme_name/theme~g" "awesomerc.lua" > "$config_file"
 
   # Set CMAKE_BINARY_DIR for out-of-tree builds.
   CMAKE_BINARY_DIR="$PWD" \
