@@ -369,9 +369,9 @@ spawn_callback(gpointer user_data)
         unsetenv("DESKTOP_STARTUP_ID");
 }
 
-/** Convert a Lua table of string to a char** array.
+/** Convert a Lua table of strings to a char** array.
  * \param L The Lua VM state.
- * \param idx The index of the table that we should parse
+ * \param idx The index of the table that we should parse.
  * \return The argv array.
  */
 static gchar **
@@ -413,7 +413,7 @@ parse_table_array(lua_State *L, int idx, GError **error)
 
 /** Parse a command line.
  * \param L The Lua VM state.
- * \param idx The index of the argument that we should parse
+ * \param idx The index of the argument that we should parse.
  * \return The argv array for the new process.
  */
 static gchar **
@@ -434,7 +434,7 @@ parse_command(lua_State *L, int idx, GError **error)
     else
     {
         g_set_error_literal(error, G_SPAWN_ERROR, 0,
-                "Invalid argument to spawn(), expect string or table");
+                "Invalid argument to spawn(), expected string or table");
         return NULL;
     }
 
@@ -473,10 +473,10 @@ child_exit_callback(GPid pid, gint status, gpointer user_data)
  * @tparam[opt=false] boolean stdout Return a fd for stdout?
  * @tparam[opt=false] boolean stderr Return a fd for stderr?
  * @tparam[opt=nil] function exit_callback Function to call on process exit. The
- * function arguments will be type of exit ("exit" or "signal") and the exit
- * code / the signal number causing process termination.
+ *   function arguments will be type of exit ("exit" or "signal") and the exit
+ *   code / the signal number causing process termination.
  * @tparam[opt=nil] table cmd The environment to use for the spawned program.
- * Without this, the spawned process inherits awesome's environment.
+ *   Without this the spawned process inherits awesome's environment.
  * @treturn[1] integer Process ID if everything is OK.
  * @treturn[1] string Startup-notification ID, if `use_sn` is true.
  * @treturn[1] integer stdin, if `stdin` is true.
