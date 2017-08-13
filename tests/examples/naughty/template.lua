@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE
 local file_path, image_path = ...
 require("_common_template")(...)
 local wibox = require("wibox")

@@ -1,4 +1,5 @@
 --DOC_HIDE_ALL
+--DOC_GEN_IMAGE
 -- local naughty = require("naughty")
 
 dbus.notify_send(

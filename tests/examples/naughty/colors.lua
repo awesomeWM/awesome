@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE
 
 local beautiful = require("beautiful") --DOC_HIDE
 
@@ -5,7 +6,9 @@ local text = [[An <b>important</b>
 <i>notification</i>
 ]]
 
-require("naughty").notify {
+--DOC_NEWLINE
+
+require("naughty").notification {
     title        = "Hello world!",
     text         = text,
     icon         = beautiful.icon,
