@@ -28,9 +28,9 @@ local gtable    = require( "gears.table"       )
 
 local separator = {}
 
---- The separator orientation.
+--- The separator's orientation.
 --
--- The valid values are:
+-- Valid values are:
 --
 -- * *vertical*: From top to bottom (default)
 -- * *horizontal*: From left to right
@@ -40,18 +40,19 @@ local separator = {}
 -- @property orientation
 -- @param string
 
---- The separator thickness.
+--- The separator's thickness.
 --
 -- This is used by the default line separator, but ignored when a shape is used.
 --
 -- @property thickness
 -- @param number
 
---- The separator reflection.
+--- The separator's reflection.
 --
--- When a shape or a custom drawing function is used, the default shape assume
--- left to right. When this property is set to anything else, the shape will be
--- rotated on one axis or another.
+-- When a shape or a custom drawing function is used, the default shape assumes
+-- this to go from left to right.
+-- When this property is set to anything else, the shape will be rotated on one
+-- axis or another.
 --
 -- This is the same as `wibox.container.mirror`, but need to exist on the widget
 -- level because it affects other properties such as the layout clipping.
@@ -61,7 +62,7 @@ local separator = {}
 -- @tparam[opt=false] boolean reflection.horizontal
 -- @tparam[opt=false] boolean reflection.vertical
 
---- The separator shape.
+--- The separator's shape.
 --
 --@DOC_wibox_widget_separator_shape_EXAMPLE@
 --
@@ -71,14 +72,14 @@ local separator = {}
 
 --- The relative percentage covered by the bar.
 -- @property span_ratio
--- @tparam[opt=1] number A number between 0 and 1
+-- @tparam[opt=1] number A number between 0 and 1.
 
---- The separator color.
+--- The separator's color.
 -- @property color
 -- @param string
 -- @see gears.color
 
---- The separator border color.
+--- The separator's border color.
 --
 --@DOC_wibox_widget_separator_border_color_EXAMPLE@
 --
@@ -86,14 +87,14 @@ local separator = {}
 -- @param string
 -- @see gears.color
 
---- The separator border width.
+--- The separator's border width.
 -- @property border_width
 -- @param number
 
 local function draw_shape(self, _, cr, width, height, shape)
     local bw = self._private.border_width or 0
 
-    cr:translate(bw/2,bw/2)
+    cr:translate(bw/2, bw/2)
 
     shape(cr, width-bw, height-bw)
 
@@ -128,7 +129,7 @@ local function draw_line(self, _, cr, width, height)
 end
 
 local function draw(self, _, cr, width, height)
-    -- In case there is a specialized
+    -- In case there is a specialized.
     local draw_custom = self._private.draw or beautiful.separator_draw
     if draw_custom then
         return draw_custom(self, _, cr, width, height)
@@ -169,18 +170,13 @@ for _, prop in ipairs {"orientation", "color", "thickness", "span_ratio",
 end
 
 local function new(args)
-
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,
     })
-
     gtable.crush(ret, separator, true)
-
     gtable.crush(ret, args or {})
-
     rawset(ret, "fit" , fit )
     rawset(ret, "draw", draw)
-
     return ret
 end
 
