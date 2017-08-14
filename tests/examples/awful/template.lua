@@ -3,10 +3,10 @@ require("_common_template")(...)
 
 local cairo      = require("lgi").cairo
 
-local color     = require( "gears.color"    )
-local shape     = require( "gears.shape"    )
-local beautiful = require( "beautiful"      )
-local wibox     = require( "wibox"          )
+local color     = require("gears.color")
+local shape     = require("gears.shape")
+local beautiful = require("beautiful")
+local wibox     = require("wibox")
 
 -- Run the test
 local args = loadfile(file_path)() or {}
