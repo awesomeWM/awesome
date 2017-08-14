@@ -57,10 +57,6 @@ screen.connect_for_each_screen(function(s)
     }
 end)
 
--- Counter for the notifications
--- Required for later access via DBUS
-local counter = 1
-
 --- Evaluate desired position of the notification by index - internal
 --
 -- @param s Screen to use
@@ -342,28 +338,6 @@ function naughty.default_notification_handler(notification, args)
     local opacity = args.opacity or preset.opacity or
         beautiful.notification_opacity
 
-    -- replace notification if needed
-    local reuse_box
-    if args.replaces_id then
-        local obj = naughty.get_by_id(args.replaces_id)
-        if obj then
-            -- destroy this and ...
-            naughty.destroy(obj, naughty.notification_closed_reason.silent, true)
-            reuse_box = obj.box
-        end
-        -- ... may use its ID
-        if args.replaces_id <= counter then
-            notification.id = args.replaces_id
-        else
-            counter = counter + 1
-            notification.id = counter
-        end
-    else
-        -- get a brand new ID
-        counter = counter + 1
-        notification.id = counter
-    end
-
     notification.position = position
 
     -- hook destroy
@@ -514,10 +488,6 @@ function naughty.default_notification_handler(notification, args)
                                shape_border_width = shape and border_width,
                                shape = shape,
                                type = "notification" })
-
-    if reuse_box then
-        notification.box = reuse_box
-    end
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
 
