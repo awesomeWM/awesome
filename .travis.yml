@@ -185,7 +185,7 @@ script:
       travis_run_in_fold "make.install" sudo env PATH=$PATH make install
       awesome --version
     fi
-  # Run check-unit{,-coverage} and check-integration.
+  # Run checks.
   - |
     set -ex
     if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
@@ -201,6 +201,7 @@ script:
         make check-unit-coverage || exit 1
         do_codecov unittests
         make check-integration || exit 1
+        make check-themes || exit 1
         do_codecov functionaltests
         do_codecov_gcov c_code
 
@@ -208,6 +209,7 @@ script:
       else
         travis_run_in_fold "make.check-unit" make check-unit
         travis_run_in_fold "make.check-integration" make check-integration
+        travis_run_in_fold "make.check-themes" make check-themes
       fi
     fi
   # Run check-qa.

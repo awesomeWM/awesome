@@ -408,7 +408,7 @@ add_custom_target(check-themes
     USES_TERMINAL
     DEPENDS generated_icons generate_awesomerc ${PROJECT_AWE_NAME}
     VERBATIM)
-add_dependencies(check-integration check-themes)
+list(APPEND CHECK_TARGETS check-themes)
 
 add_custom_target(check-requires
     lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
