@@ -247,7 +247,7 @@ end
 -- By default, the table has the following functions:
 --
 -- * geometry
--- * switchtotag
+-- * placement
 --
 -- @tfield table awful.rules.extra_properties
 rules.extra_properties = {}
@@ -275,6 +275,9 @@ rules.high_priority_properties = {}
 --- Delayed properties.
 -- Properties applied after all other categories.
 -- @tfield table awful.rules.delayed_properties
+-- By default, the table has the following functions:
+--
+-- * switchtotag
 rules.delayed_properties = {}
 
 local force_ignore = {

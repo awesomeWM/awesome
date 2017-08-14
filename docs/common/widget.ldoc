@@ -1,11 +1,11 @@
 
---- Get a widex index.
+--- Get a wibox index.
 -- @param widget The widget to look for
 -- @param[opt] recursive Also check sub-widgets
--- @param[opt] ... Aditional widgets to add at the end of the "path"
+-- @param[opt] ... Aditional widgets to add at the end of the path
 -- @return The index
 -- @return The parent layout
--- @return The path between "self" and "widget"
+-- @return The path between self and widget
 -- @function index
 
 --- Get all direct and indirect children widgets.
