@@ -55,11 +55,11 @@ function module.get_font_height()
     return 9
 end
 
---------------------------------------------------------------------
--- Import the titlebar and layouts asserts from the default theme --
---------------------------------------------------------------------
+------------------------------------------------------------------
+-- Import the titlebar and layout assets from the default theme --
+------------------------------------------------------------------
 
--- Its fine as long as gears doesn't depend on CAPI and $AWESOME_THEMES_PATH is set
+-- It's fine as long as gears doesn't depend on CAPI and $AWESOME_THEMES_PATH is set.
 local themes_path = require("gears.filesystem").get_themes_dir()
 
 -- Define the image to load
