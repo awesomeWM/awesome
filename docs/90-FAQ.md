@@ -92,9 +92,9 @@ Example key binding for your `globalkeys`:
 
 If you want to execute a shell command or need to execute a command that uses
 redirection, pipes and so on, do not use the `awful.spawn` function but
-`awful.util.spawn_with_shell`. Here is an example:
+`awful.spawn.with_shell`. Here is an example:
 
-    awful.key({ modkey }, "F10", function () awful.util.spawn_with_shell("cal -m | xmessage -timeout 10 -file -") end)
+    awful.key({ modkey }, "F10", function () awful.spawn.with_shell("cal -m | xmessage -timeout 10 -file -") end)
 
 On zsh, any changes to $PATH you do in `~/.zshrc` will not be picked up (because
 this is only run for interactive shells). Use `~/.zshenv` instead to make
