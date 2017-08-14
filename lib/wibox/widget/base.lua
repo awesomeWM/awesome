@@ -591,23 +591,20 @@ end
 -- * A constructor function
 -- * A metaobject
 --
--- If a widget cannot be deduced from the value, this function assert.
---
--- @param wdg A value
--- @param[opt=nil] ... Arguments passed to the contructor (if any)
--- @treturn A widget
+-- @param wdg The value.
+-- @param[opt=nil] ... Arguments passed to the contructor (if any).
+-- @treturn The new widget.
 function base.make_widget_from_value(wdg, ...)
     local is_table = type(wdg) == "table"
     local is_function = ((not is_table) and type(wdg) == "function")
         or (is_table and getmetatable(wdg) and getmetatable(wdg).__call)
 
-    -- Syntax sugar to allow the multiple ways to define a widget
     if is_function then
         wdg = wdg(...)
     elseif is_table and not wdg.is_widget then
         wdg = base.make_widget_declarative(wdg)
     else
-        assert(wdg.is_widget, "The argument is not a widget")
+        assert(wdg.is_widget, "The argument is not a function, table, or widget.")
     end
 
     return wdg
