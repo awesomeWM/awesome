@@ -1,5 +1,5 @@
 
---- Get a wibox index.
+--- Get a widget index.
 -- @param widget The widget to look for
 -- @param[opt] recursive Also check sub-widgets
 -- @param[opt] ... Aditional widgets to add at the end of the path
