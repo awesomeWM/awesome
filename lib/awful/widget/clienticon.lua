@@ -80,7 +80,7 @@ function clienticon:fit(_, width, height)
     return w * aspect, h * aspect
 end
 
---- The widget client.
+--- The widget's @{client}.
 --
 -- @property client
 -- @param client
