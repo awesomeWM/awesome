@@ -15,8 +15,29 @@ set -e
 export SHELL=/bin/sh
 export HOME=/dev/null
 
-VERBOSE=${VERBOSE-0}
-if [ "$VERBOSE" = 1 ]; then
+# Parse options.
+usage() {
+    cat >&2 <<EOF
+Usage: $0 [-W] [testfile]...
+  -v: verbose mode
+  -W: warnings become errors
+  -h: show this help
+EOF
+    exit "$1"
+}
+fail_on_warning=
+verbose=${VERBOSE:-0}
+while getopts vWh opt; do
+    case $opt in
+        v) verbose=1 ;;
+        W) fail_on_warning=1 ;;
+        h) usage 0 ;;
+        *) usage 64 ;;
+    esac
+done
+shift $((OPTIND-1))
+
+if [[ $verbose ]]; then
     set -x
 fi
 
@@ -101,9 +122,7 @@ awesome_log=$tmp_files/_awesome_test.log
 echo "awesome_log: $awesome_log"
 
 wait_until_success() {
-    if [ "$VERBOSE" = 1 ]; then
-        set +x
-    fi
+    if [[ $verbose ]]; then set +x; fi
     wait_count=60  # 60*0.05s => 3s.
     while true; do
         set +e
@@ -126,9 +145,7 @@ wait_until_success() {
         fi
         sleep 0.05
     done
-    if [ "$VERBOSE" = 1 ]; then
-        set -x
-    fi
+    if [[ $verbose ]]; then set -x; fi
 }
 
 # Wait for DISPLAY to be available, and setup xrdb,
@@ -242,9 +259,15 @@ for f in $tests; do
     esac
 
     # Parse any error from the log.
-    error="$(grep --color -o --binary-files=text -E \
-        '.*[Ee]rror.*|.*assertion failed.*|^Step .* failed:' "$awesome_log" ||
-        true)"
+    pattern='.*[Ee]rror.*|.*assertion failed.*|^Step .* failed:'
+    if [[ $fail_on_warning ]]; then
+        pattern+='|^.{19} W: awesome:.*'
+    fi
+    error="$(grep --color -o --binary-files=text -E "$pattern" "$awesome_log" || true)"
+    if [[ $fail_on_warning ]]; then
+        # Filter out ignored warnings.
+        error="$(echo "$error" | grep -vE '.{19} W: awesome: (a_glib_poll|Cannot reliably detect EOF)' || true)"
+    fi
     if [[ -n "$error" ]]; then
         color_red
         echo "===> ERROR running $f <==="
