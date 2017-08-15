@@ -10,8 +10,10 @@ option(WITH_DBUS "build with D-BUS" ON)
 option(GENERATE_MANPAGES "generate manpages" ON)
 option(COMPRESS_MANPAGES "compress manpages" ON)
 option(GENERATE_DOC "generate API documentation" ON)
-if (GENERATE_DOC AND ENV{DO_COVERAGE})
+option(DO_COVERAGE "build with coverage" OFF)
+if (GENERATE_DOC AND DO_COVERAGE)
     message(STATUS "Not generating API documentation with DO_COVERAGE")
+    set(GENERATE_DOC OFF)
 endif()
 
 # {{{ Endianness
@@ -332,6 +334,7 @@ if(DO_COVERAGE)
                     ${BUILD_DIR}/${file}
                     COPYONLY)
     endforeach()
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
 else()
     foreach(file ${AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES})
         configure_file(${SOURCE_DIR}/${file}

@@ -29,7 +29,7 @@ else()
     set(TOP_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 endif()
 
-if (DEFINED ENV{DO_COVERAGE} AND NOT $ENV{DO_COVERAGE} STREQUAL "0")
+if (DO_COVERAGE)
   execute_process(
     COMMAND lua -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
     RESULT_VARIABLE TEST_RESULT
