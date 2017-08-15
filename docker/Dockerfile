@@ -63,12 +63,12 @@ ARG DO_COVERAGE=
 #       dependency for luacov-coveralls?!
 RUN if [ -n "$DO_COVERAGE" ]; then \
     set -ex; \
-    apk --no-cache add libressl curl; \
+    apk --no-cache add curl; \
     apk --no-cache add "luarocks${LUA_LIB_PREFIX#lua}"; \
     ln -s /usr/bin/luarocks-${LUA_LIB_PREFIX#lua} /usr/bin/luarocks; \
     luarocks --local install cluacov; \
     if [ "$DO_COVERAGE" = codecov ] || [ "$DO_COVERAGE" = all ]; then \
-      wget -O /tmp/codecov-bash https://codecov.io/bash; \
+      curl https://codecov.io/bash > /tmp/codecov-bash; \
     fi; \
     apk --no-cache add --virtual awesome-build python3; \
     if [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then \
