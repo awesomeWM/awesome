@@ -109,11 +109,11 @@ if [ -n "$DO_COVERAGE" ]; then
 
   make check-unit-coverage
   do_codecov unittests
-  # TODO: "make check-integration"?!
-  # shellcheck disable=SC2086
-  tests/run.sh "$@"
+
+  make check-integration
+  make check-themes
   do_codecov functionaltests
-  # shellcheck disable=SC2046
+
   do_codecov_gcov c_code
 
   # travis_fold_end
@@ -131,9 +131,7 @@ if [ -n "$DO_COVERAGE" ]; then
     coveralls --build-root "$BUILD_DIR"
   fi
 else
-  # travis_run_in_fold "make.check-unit" make check-unit
-  # travis_run_in_fold "make.check-integration" make check-integration
   make check-unit
-  # TODO: respect TEST_RUN_ARGS
   make check-integration
+  make check-themes
 fi
