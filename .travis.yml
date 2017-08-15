@@ -98,7 +98,11 @@ install:
 
   # Install dependencies for code coverage testing.
   - if [ -n "$DO_COVERAGE" ]; then sudo luarocks install cluacov; fi
-  - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
+  - |
+    if [ "$DO_COVERAGE" = "coveralls" ]; then
+      sudo luarocks install luacov-coveralls
+      pip3 install cpp-coveralls
+    fi
 
   # Determine custom version.
   - export AWESOME_VERSION="${TRAVIS_BRANCH}-g$(git rev-parse --short HEAD)"
@@ -118,14 +122,6 @@ install:
         luacov || return 1
         travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F "$1,${LUANAME//./}" || return 1
         rm build/luacov.report.out build/luacov.stats.out
-      fi
-      return 0
-    }
-  - |
-    do_codecov_gcov() {
-      echo "== do_codecov_gcov in $PWD: $*: =="
-      if [ "$DO_COVERAGE" = "codecov" ]; then
-        travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
       fi
       return 0
     }
@@ -160,9 +156,13 @@ script:
       # Explicitly remove the Makefile to not build from the src dir accidentally.
       rm Makefile
       SOURCE_DIRECTORY="$PWD"
-      mkdir "$BUILD_IN_DIR"
+      mkdir -p "$BUILD_IN_DIR"
       cd "$BUILD_IN_DIR"
+      BUILD_DIR="$PWD"
       travis_run_in_fold "build_in_dir" cmake $CMAKE_ARGS "$SOURCE_DIRECTORY"
+    else
+      SOURCE_DIRECTORY="$PWD"
+      BUILD_DIR="$PWD/build"
     fi
   - travis_run_in_fold "make" make
   - |
@@ -189,7 +189,19 @@ script:
         make check-integration || exit 1
         make check-themes || exit 1
         do_codecov functionaltests
-        do_codecov_gcov c_code
+
+        # Run gcov.  Upload for codecov directly, gets done later for coveralls.
+        # NOTE: files for the main target have the build dir as prefix, but
+        #       otherwise it is the source directory?!
+        (cd $BUILD_DIR/CMakeFiles/awesome.dir || exit;
+         find . -type f -name '*.gcno' -exec gcov -pbuc -s "$BUILD_DIR" {} +;
+         for d in lgi-check.dir test-gravity.dir; do
+           cd "$BUILD_DIR/CMakeFiles/$d" || exit;
+           find . -type f -name '*.gcno' -exec gcov -pbuc -s "$SOURCE_DIRECTORY" {} +;
+         done)
+        if [ "$DO_COVERAGE" = "codecov" ]; then
+          travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -c -F c_code || exit 1
+        fi
 
         travis_fold_end
       else
@@ -243,10 +255,14 @@ script:
 after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
   - if [ "$BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
-  # Push code coverage information
+  # Push code coverage information for coveralls.
   - |
-    set -e
+    set -ex
     if [ "$DO_COVERAGE" = "coveralls" ]; then
-      test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
-      luacov-coveralls --verbose --merge
+      test -f "$BUILD_DIR/luacov.stats.out"
+      # cpp-coveralls
+      coveralls --verbose --no-gcov -r "$SOURCE_DIRECTORY" -b "$SOURCE_DIRECTORY" \
+        -x "$BUILD_DIR" --dump /tmp/c.report.json
+      luacov-coveralls --verbose --merge --json /tmp/c.report.json
     fi
+    set +x
