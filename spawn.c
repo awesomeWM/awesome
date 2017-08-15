@@ -91,7 +91,7 @@ DO_BARRAY(running_child_t, running_child, DO_NOTHING, compare_pids)
 static running_child_array_t running_children;
 
 /** Remove a SnStartupSequence pointer from an array and forget about it.
- * \param s The startup sequence to found, remove and unref.
+ * \param s The startup sequence to find, remove and unref.
  * \return True if found and removed.
  */
 static inline bool
