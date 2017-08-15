@@ -126,9 +126,9 @@ if [ -n "$DO_COVERAGE" ]; then
       echo "$BUILD_DIR/luacov.stats.all.out does not exist."
       exit 1
     fi
-    luacov-coveralls --verbose --merge
     # cpp-coveralls
-    coveralls --build-root "$BUILD_DIR"
+    coveralls --build-root "$BUILD_DIR" --dump /tmp/c.report.json
+    luacov-coveralls --verbose --merge --json /tmp/c.report.json
   fi
 else
   make check-unit
