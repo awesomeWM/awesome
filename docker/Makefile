@@ -29,13 +29,19 @@ $(BUILDDIR_VOLUME):
 docker_clean:
 	$(RM) $(BUILDDIR)/stamp.docker_*
 	$(RM) -rf $(BUILDDIR)/docker
-
 	volumes="$$(docker volume ls -q | grep -E '^awesome-(build-|ccache)')"; \
 	  if [ -n "$$volumes" ]; then \
 	    echo "Removing Docker volumes: $$volumes"; \
 	    for v in $$volumes; do \
 	      docker volume rm $$v >/dev/null; \
 	    done; \
+	  fi
+
+docker_distclean: docker_clean
+	images="$$(docker images 'awesomewm/awesome-base-*' -q)"; \
+	  if [ -n "$$images" ]; then \
+	    echo "Removing Docker images: $$images"; \
+	    docker rmi $$images; \
 	  fi
 
 DOCKER_SUFFIX=$(LUA_PKG)$(if $(DOCKER_FLAVOR),-$(DOCKER_FLAVOR))$(if $(DO_COVERAGE),-cov_$(DO_COVERAGE))
