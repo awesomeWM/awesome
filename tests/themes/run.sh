@@ -11,7 +11,7 @@ if ! [ -f CMakeCache.txt ]; then
   exit 64
 fi
 build_dir="$PWD"
-tests_dir="$(dirname -- "$0")/.."
+src_dir="$(dirname -- "$0")/../.."
 
 config_file="$build_dir/test-themes-awesomerc.lua"
 
@@ -25,7 +25,7 @@ for theme_file in themes/*/theme.lua; do
   # Set CMAKE_BINARY_DIR for out-of-tree builds.
   CMAKE_BINARY_DIR="$PWD" \
   AWESOME_RC_FILE="$config_file" \
-    AWESOME_THEMES_PATH="$PWD/themes" \
+    AWESOME_THEMES_PATH="$src_dir/themes" \
     AWESOME_ICON_PATH="$PWD/icons" \
-    "$tests_dir/run.sh" themes/tests.lua
+    "$src_dir/tests/run.sh" themes/tests.lua
 done
