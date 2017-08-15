@@ -64,8 +64,17 @@ ARG DO_COVERAGE=
 RUN if [ -n "$DO_COVERAGE" ]; then \
     set -ex; \
     apk --no-cache add curl; \
-    apk --no-cache add "luarocks${LUA_LIB_PREFIX#lua}"; \
-    ln -s /usr/bin/luarocks-${LUA_LIB_PREFIX#lua} /usr/bin/luarocks; \
+    if [ "$LUA_PKG" = luajit ]; then \
+      curl https://keplerproject.github.io/luarocks/releases/luarocks-2.4.1.tar.gz | tar xzf -; \
+      (cd luarocks-* \
+        && sed -i 's~LUADIR ?= $(PREFIX)/share/lua/$(LUA_VERSION)/~LUADIR ?= $(PREFIX)/share/lua/$(LUA_VERSION)~' Makefile.setup.inc \
+        && ./configure --with-lua-include=/usr/include/luajit-2.1 --lua-suffix=jit \
+        && make build \
+        && make install); \
+    else \
+      apk --no-cache add "luarocks${LUA_LIB_PREFIX#lua}"; \
+      ln -s /usr/bin/luarocks-${LUA_LIB_PREFIX#lua} /usr/bin/luarocks; \
+    fi; \
     luarocks --local install cluacov; \
     if [ "$DO_COVERAGE" = codecov ] || [ "$DO_COVERAGE" = all ]; then \
       curl https://codecov.io/bash > /tmp/codecov-bash; \
