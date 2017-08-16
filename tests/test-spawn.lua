@@ -71,6 +71,28 @@ local steps = {
                                      end
                                  })
 
+            -- Test that setting env vars works and that the env is cleared
+            local read_line = false
+            local pid, _, _, stdout = awesome.spawn({ "sh", "-c", "echo $AWESOME_SPAWN_TEST_VAR $HOME $USER" },
+                    false, false, true, false, nil, { "AWESOME_SPAWN_TEST_VAR=42" })
+            assert(type(pid) ~= "string", pid)
+            spawn.read_lines(require("lgi").Gio.UnixInputStream.new(stdout, true),
+                    function(line)
+                        assert(not read_line)
+                        read_line = true
+                        assert(line == "42", line)
+                        spawns_done = spawns_done + 1
+                    end, nil, true)
+
+            -- Test error in parse_table_array.
+            pid = awesome.spawn({"true"}, false, false, true, false, nil, { 0 })
+            assert(pid == 'spawn: environment parse error: Non-string argument at table index 1', pid)
+
+            -- Test error in parse_command.
+            pid = awesome.spawn({0}, false, false, true, false, nil, {})
+            assert(pid == 'spawn: parse error: Non-string argument at table index 1', pid)
+
+
             local steps_count = 0
             local err_count = 0
             spawn.with_line_callback({ "sh", "-c", "printf line1\\\\nline2\\\\nline3 ; echo err >&2 ; exit 42" }, {
@@ -98,7 +120,7 @@ local steps = {
                                      end
                                  })
         end
-        if spawns_done == 2 then
+        if spawns_done == 3 then
             assert(exit_yay == 0)
             assert(exit_snd == 42)
             assert(async_spawns_done == 2)
