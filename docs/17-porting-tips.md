@@ -27,12 +27,12 @@ Here is a diff of the 3.5.9 `rc.lua` with the 4.0 one. All changes due to
 new features and new syntaxes have been removed. A `-` in front of the line
 correspond to content of the 3.5 `rc.lua` and `+` its replacement in 4.0.
 
-This document does not cover the new features added in the Awesome 4 `rc.lua`,
+This document does not cover the new features added in the Awesome v4 `rc.lua`,
 it only covers the minimal required changes to have a properly behaving config.
 
 To test during the port, we recommend the `Xephyr` X11 server.
 
-If Awesome4 **is not installed yet**, we recommand to install it in its own
+If Awesome v4 **is not installed yet**, we recommend to install it in its own
 prefix to avoid conflicts in case you wish to stay on 3.5 for a little
 longer:
 
@@ -56,7 +56,7 @@ longer:
         -c $HOME/.config/awesome4/rc.lua \
         --search $HOME/awesome4_test/share/awesome/lib
 
-If Awesome 4 is **already installed**, then backup your old `rc.lua` and overwrite
+If Awesome v4 is **already installed**, then backup your old `rc.lua` and overwrite
 `~/.config/awesome/rc.lua` (replace this by another path if you use a custom
 XDH config local directory). And only execute:
 
@@ -102,7 +102,7 @@ work. Remove this section.
     --- }}}
 
 The `quit` menu command must be wrapped in a function, otherwise an error
-occurs due to mismatched argument types from the v4.0 `awful.menu` library.
+occurs due to mismatched argument types from the v4 `awful.menu` library.
 
      -- {{{ Menu
      -- Create a laucher widget and a main menu

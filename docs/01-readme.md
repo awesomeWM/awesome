@@ -1,8 +1,8 @@
 # Readme
 
-## About awesome
+## About Awesome
 
-awesome is a highly configurable, next generation framework window manager for X.
+Awesome is a highly configurable, next generation framework window manager for X.
 
 ## Building and installation
 
@@ -10,7 +10,7 @@ After extracting the dist tarball, run:
 
     make
 
-This will create a build directory, run cmake in it and build awesome.
+This will create a build directory, run cmake in it and build Awesome.
 
 After building is finished, you can either install via `make install`:
 
@@ -24,7 +24,7 @@ or by auto-generating a .deb or .rpm package, for easy removal later on:
     # or
     sudo rpm -Uvh awesome-x.y.z.rpm
 
-NOTE: awesome uses [`cmake`](https://cmake.org) to build. In case you want to
+NOTE: Awesome uses [`cmake`](https://cmake.org) to build. In case you want to
 pass arguments to cmake, please use the `CMAKE_ARGS` environment variable. For
 instance:
 
@@ -78,34 +78,34 @@ Additionally, the following optional dependencies exist:
   generate slightly better backtraces on crashes
 - `Xephyr` or `Xvfb` for running integration tests
 
-## Running awesome
+## Running Awesome
 
-You can directly select awesome from your display manager. If not, you can
-add the following line to your .xinitrc to start awesome using startx
-or to `.xsession` to start awesome using your display manager:
+You can directly select Awesome from your display manager. If not, you can
+add the following line to your .xinitrc to start Awesome using startx
+or to `.xsession` to start Awesome using your display manager:
 
     exec awesome
 
-In order to connect awesome to a specific display, make sure that
+In order to connect Awesome to a specific display, make sure that
 the `DISPLAY` environment variable is set correctly, e.g.:
 
     DISPLAY=foo.bar:1 exec awesome
 
-(This will start awesome on display `:1` of the host foo.bar.)
+(This will start Awesome on display `:1` of the host foo.bar.)
 
 ## Configuration
 
-The configuration of awesome is done by creating a
+The configuration of Awesome is done by creating a
 `$XDG_CONFIG_HOME/awesome/rc.lua` file, typically `~/.config/awesome/rc.lua`.
 
 An example configuration named `awesomerc.lua` is provided in the source.
 
 ## Troubleshooting
 
-On most systems any message printed by awesome (including warnings and errors)
+On most systems any message printed by Awesome (including warnings and errors)
 is written to `~/.xsession-errors`.
 
-If awesome does not start or the configuration file is not producing the
+If Awesome does not start or the configuration file is not producing the
 desired results the user should examine this file to gain insight into the
 problem.
 

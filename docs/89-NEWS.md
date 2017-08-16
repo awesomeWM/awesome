@@ -107,7 +107,7 @@ Various documentation improvements. Thanks for the feedbacks.
 
 The `awful.widget.taglist` now has `volatile` theme variables.
 
-There is now extra enviroment variables such as `AWESOME_ICON_PATH` and
+There is now extra environment variables such as `AWESOME_ICON_PATH` and
 `AWESOME_THEMES_PATH` for those who prefer not installing Awesome.
 
 Dynamic "C" Lua libraries are now detected like pure Lua ones.

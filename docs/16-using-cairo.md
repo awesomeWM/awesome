@@ -1,6 +1,6 @@
 # Using Cairo and LGI
 
-These days, Awesome's interface is mostly based on a library called LGI. It provides
+The interface of Awesome is mostly based on a library called LGI. It provides
 access to C libraries such as GTK, GLib, Cairo, Pango, PangoCairo and RSVG using
 Lua code without having to write actual "glue" C code.
 
@@ -75,8 +75,8 @@ of surfaces including:
  * Monochrome image surfaces with transparency (`A8`) or without (`A1`)
  * SVG vectorial surfaces
  * Native (XCB) surfaces
- * Framebuffers and other less interesting ones (from an Awesome's point of
-   view)
+ * Framebuffers and other less interesting ones (from the point of
+   view of Awesome)
 
 For more details see [Surfaces](https://cairographics.org/manual/cairo-Image-Surfaces.html).
 
@@ -129,9 +129,9 @@ applying operations.
 
 ### Cairo in Awesome
 
-All of Awesome's `wibox`es, `awful.wibar`s, `gears.wallpaper`s and
-`awful.titlebar`s contain Cairo surfaces, which can be accessed through the
-`drawin` API.  This allows widgets to use the Cairo context directly.
+The `wibox`es, `awful.wibar`s, `gears.wallpaper`s and
+`awful.titlebar`s in Awesome contain Cairo surfaces, which can be accessed through
+the `drawin` API.  This allows widgets to use the Cairo context directly.
 See the
 [declarative layout system](../documentation/03-declarative-layout.md.html)
 and [new widgets](../documentation/04-new-widgets.md.html) articles for more

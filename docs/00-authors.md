@@ -1,6 +1,6 @@
 # Authors
 
-## awesome - awesome window manager
+## Awesome - awesome window manager
 
 **Maintainer**:
 

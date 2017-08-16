@@ -12,7 +12,7 @@
 -- and the index.
 -- @param widget The widget to replace
 -- @param widget2 The widget to replace `widget` with
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
+-- @tparam[opt=false] boolean recursive Dig in all compatible layouts to find the widget.
 -- @treturn boolean If the operation is successful
 -- @name replace_widget
 -- @class function
@@ -31,7 +31,7 @@
 -- if the layouts not the same, then only `widget::replaced` will be emitted.
 -- @param widget1 The first widget
 -- @param widget2 The second widget
--- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
+-- @tparam[opt=false] boolean recursive Dig in all compatible layouts to find the widget.
 -- @treturn boolean If the operation is successful
 -- @name swap_widgets
 -- @class function
