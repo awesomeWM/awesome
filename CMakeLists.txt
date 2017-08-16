@@ -292,23 +292,12 @@ if(GENERATE_DOC)
     add_custom_target(ldoc ALL
         DEPENDS ${BUILD_DIR}/doc/index.html)
     add_custom_command(
-        COMMAND ${LDOC_EXECUTABLE} .
+        COMMAND ${LDOC_EXECUTABLE} --fatalwarnings .
         OUTPUT  ${BUILD_DIR}/doc/index.html
         WORKING_DIRECTORY ${AWE_DOC_DIR}
-        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld
+        DEPENDS ${AWE_SRCS} ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld
         COMMENT "Generating API documentation"
         VERBATIM)
-
-    # Run ldoc and make it fail if any warnings are generated. The
-    # redirection-magic swaps stdout and stderr and awk exits with a non-zero
-    # status if it sees at least one line of input.
-    # All together, this fails as soon as ldoc prints on stderr.
-    add_custom_target(check-ldoc-warnings
-        COMMAND ${LDOC_EXECUTABLE} . 3>&1 1>&2 2>&3 | awk "{ fail=1 \; print } END { exit fail }"
-        WORKING_DIRECTORY ${AWE_DOC_DIR}
-        DEPENDS ${AWE_LUA_FILES} ${AWE_MD_FILES}
-    )
-    list(APPEND CHECK_QA_TARGETS check-ldoc-warnings)
 endif()
 # }}}
 
