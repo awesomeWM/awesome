@@ -14,6 +14,12 @@ source_dir="$PWD"
 
 config_file="$(mktemp)"
 
+# Cleanup on errors / aborting.
+cleanup() {
+    rm "$config_file" || true
+}
+trap "cleanup" 0 2 3 15
+
 for theme_file in themes/*/theme.lua; do
   echo "==== Testing theme: $theme_file ===="
   theme_name=${theme_file%/*}
