@@ -18,7 +18,9 @@ export HOME=/dev/null
 # Parse options.
 usage() {
     cat >&2 <<EOF
-Usage: $0 [-W] [testfile]...
+Usage: $0 [OPTION]... [FILE]...
+
+Options:
   -v: verbose mode
   -W: warnings become errors
   -h: show this help
@@ -37,7 +39,7 @@ while getopts vWh opt; do
 done
 shift $((OPTIND-1))
 
-if [[ $verbose ]]; then
+if (( verbose )); then
     set -x
 fi
 
@@ -122,7 +124,7 @@ awesome_log=$tmp_files/_awesome_test.log
 echo "awesome_log: $awesome_log"
 
 wait_until_success() {
-    if [[ $verbose ]]; then set +x; fi
+    if (( verbose )); then set +x; fi
     wait_count=60  # 60*0.05s => 3s.
     while true; do
         set +e
@@ -145,7 +147,7 @@ wait_until_success() {
         fi
         sleep 0.05
     done
-    if [[ $verbose ]]; then set -x; fi
+    if (( verbose )); then set -x; fi
 }
 
 # Wait for DISPLAY to be available, and setup xrdb,
