@@ -127,7 +127,7 @@ if [ -n "$DO_COVERAGE" ]; then
       exit 1
     fi
     # cpp-coveralls
-    coveralls --gcov-options \\-pb --root "$BUILD_DIR" --dump /tmp/c.report.json
+    coveralls --verbose --gcov-options \\-pbcu\ \\-s\ "$BUILD_DIR" -b "$PWD" --exclude CMakeCCompilerId.c --dump /tmp/c.report.json
     luacov-coveralls --verbose --merge --json /tmp/c.report.json
   fi
 else
