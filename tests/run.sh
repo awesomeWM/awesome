@@ -18,7 +18,9 @@ export HOME=/dev/null
 # Parse options.
 usage() {
     cat >&2 <<EOF
-Usage: $0 [-W] [testfile]...
+Usage: $0 [OPTION]... [FILE]...
+
+Options:
   -v: verbose mode
   -W: warnings become errors
   -h: show this help
