@@ -138,7 +138,7 @@ sections.DOC_GLOBAL_KEYBINDINGS = [[
 
  Note that both `Mod2` and `Lock` are ignored by default. If you wish to
  use them, add `awful.key.ignore_modifiers = {}` to your `rc.lua`. `Mod3`,
- `Mod5` are usually not bound in most leyboard layouts. There is an X11 utility
+ `Mod5` are usually not bound in most keyboard layouts. There is an X11 utility
  called `xmodmap` to bind them. See
  [the ARCH Linux Wiki](https://wiki.archlinux.org/index.php/xmodmap) for more
  information.

@@ -2,9 +2,9 @@
 
 ## General
 
-### Why call it awesome?
+### Why call it Awesome?
 
-The name *awesome* comes from the English word *awesome* often used by the
+The name *Awesome* comes from the English word *awesome* often used by the
 character [Barney Stinson](http://en.wikipedia.org/wiki/Barney_Stinson)
 from the TV series HIMYM.
 
@@ -98,7 +98,7 @@ redirection, pipes and so on, do not use the `awful.spawn` function but
 
 On zsh, any changes to $PATH you do in `~/.zshrc` will not be picked up (because
 this is only run for interactive shells). Use `~/.zshenv` instead to make
-additions to the path you want to use in awesome.
+additions to the path you want to use in Awesome.
 
 ### How to remove gaps between windows?
 
@@ -197,10 +197,10 @@ You can use the `awful.tag.incmwfact` function to resize master clients and
     awful.key({ modkey, "Shift" }, "l", function () awful.client.incwfact(-0.05) end),
     awful.key({ modkey, "Shift" }, "h", function () awful.client.incwfact( 0.05) end),
 
-### How to change awesome configuration while it's running?
+### How to change Awesome configuration while it's running?
 
-You can modify `rc.lua`, but you have to restart awesome for changes to take
-effect. The default keybinding for restarting awesome is "Mod4 + Control + r".
+You can modify `rc.lua`, but you have to restart Awesome for changes to take
+effect. The default keybinding for restarting Awesome is "Mod4 + Control + r".
 
 ### How to find window's class and other identifiers?
 
@@ -210,7 +210,7 @@ from its output:
   $ xprop WM_CLASS WM_NAME
 
 When the cursor changes to "+" click on the client of interest. From the
-terminal output you can use the following to match clients in awesome:
+terminal output you can use the following to match clients in Awesome:
 
     WM_CLASS(STRING) = "smplayer", "Smplayer"
                         |           |
@@ -289,7 +289,7 @@ you don't want new clients to be urgent by default put this in your rc.lua:
 
 Default binding to open a terminal is "Mod4 + Enter" (where Mod4 is usually the
 "Windows" key). You can also click on the desktop background with the right
-button, to open the awesome menu.
+button, to open the Awesome menu.
 
 From there you can proceed to open `man awesome` which has a good guide,
 including the list of default keybindings.
@@ -300,7 +300,7 @@ With the default config, you can cycle through window layouts by pressing
 "mod4+space" ("mod4+shift+space" to go back) or clicking the layout button in
 the upper right corner of the screen.
 
-### How to restart or quit awesome?
+### How to restart or quit Awesome?
 
 You can use the keybinding "Mod4+Ctrl+r" or by selecting restart in the menu.
 You could call `awesome.restart` either from the Lua prompt widget, or via
@@ -308,47 +308,47 @@ You could call `awesome.restart` either from the Lua prompt widget, or via
 
     $ awesome-client 'awesome.restart()'
 
-You can also send the `SIGHUP` signal to the awesome process. Find the PID using
+You can also send the `SIGHUP` signal to the Awesome process. Find the PID using
 `ps`, `pgrep` or use `pkill`:
 
   $ pkill -HUP awesome
 
-You can quit awesome by using "Mod4+Shift+q" keybinding or by selecting quit in
+You can quit Awesome by using "Mod4+Shift+q" keybinding or by selecting quit in
 the menu. You could call `awesome.quit` either from the Lua prompt widget,
 or by passing it to `awesome-client`.
 
     $ echo 'awesome.quit()' | awesome-client
 
-You can also send the `SIGINT` signal to the awesome process. Find the PID using `ps`, `pgrep` or use `pkill`:
+You can also send the `SIGINT` signal to the Awesome process. Find the PID using `ps`, `pgrep` or use `pkill`:
 
     $ pkill -INT awesome
 
-### Why awesome doesn't use my own brand new config?
+### Why Awesome doesn't use my own brand new config?
 
-If awesome cannot find `$XDG_CONFIG_HOME/awesome/rc.lua`, or fails to load it,
+If Awesome cannot find `$XDG_CONFIG_HOME/awesome/rc.lua`, or fails to load it,
 it falls back to using `/etc/xdg/awesome/rc.lua` (you haven't edited it, I hope,
 have you?). Even if `awesome --check` hasn't reported any error, it only means
 that your `rc.lua` is syntactically correct, but absence of runtime errors is
-not guaranteed. Moreover, awesome could apply half of your config then encounter
-an error and load stock one, and that could lead to bizzare result, like two
+not guaranteed. Moreover, Awesome could apply half of your config then encounter
+an error and load stock one, and that could lead to bizarre result, like two
 sets of tags. See the next entry on how to find out where the problem lurks.
 
 ### Where are logs, error messages or something?
 
 When hacking your own configuration, something inevitably would go wrong.
-awesome prints error messages to its `stderr` stream. When run with usual `$
+Awesome prints error messages to its `stderr` stream. When run with usual `$
 startx`, it'd be printed right in tty. If you use something more complicated
 (some kind of DM, like kdm or gdm), stderr is usually redirected somewhere else.
 To see where, run the following command:
 
     $ ls -l /proc/$(pidof awesome)/fd/2
 
-There's handy way to run awesome and redirect both its standard output and error streams to files:
+There's handy way to run Awesome and redirect both its standard output and error streams to files:
 
     exec /usr/bin/awesome >> ~/.cache/awesome/stdout 2>> ~/.cache/awesome/stderr
 
 If you put it into `.xinitrc` (for `startx`) or `~/.xsession`, you'll be able to
-watch (with `tail -f`) everything right from awesome.
+watch (with `tail -f`) everything right from Awesome.
 
 ### Why does Mod4 "swallow" succeeding key presses?
 

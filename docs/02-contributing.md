@@ -6,7 +6,7 @@ Please look at [Github Issues](https://github.com/awesomeWM/awesome/issues).
 
 ## Style
 
-If you intend to patch and contribute to awesome, please respect the
+If you intend to patch and contribute to Awesome, please respect the
 following guidelines.
 
 Imitate the existing code style. For concrete rules:

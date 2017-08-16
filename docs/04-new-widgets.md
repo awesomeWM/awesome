@@ -27,11 +27,11 @@ different sizes than the one requested.
 
 The next callback is `:draw`. As the name suggests, this function is called to
 draw the widget. The arguments to this widget are the context that the widget is
-drawn in, the cairo context on which it should be drawn and the widget's size.
-The cairo context is set up in such a way that the widget as its top-left corner
+drawn in, the Cairo context on which it should be drawn and the widget's size.
+The Cairo context is set up in such a way that the widget as its top-left corner
 at (0, 0) and its bottom-right corner at (width, height). In other words, no
 special transformation needs to be done. Note that during this callback a
-suitable clip will already be applied to the cairo context so that this callback
+suitable clip will already be applied to the Cairo context so that this callback
 will not be able to draw outside of the area that was registered for the widget
 by the layout that placed this widget. You should not call `cr:reset_clip()`, as
 redraws will not be handled correctly in this case.
