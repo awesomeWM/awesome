@@ -11,7 +11,6 @@ local os = os
 local assert = assert
 local load = loadstring or load -- luacheck: globals loadstring (compatibility with Lua 5.1)
 local loadfile = loadfile
-local pairs = pairs
 local type = type
 local gtable = require("gears.table")
 local string = string
@@ -26,6 +25,7 @@ local capi =
 }
 local gdebug = require("gears.debug")
 local gmath = require("gears.math")
+local icon_theme = require("menubar.icon_theme")
 
 local util = {}
 util.table = {}
@@ -226,27 +226,9 @@ end
 -- @tparam[opt] string size The size. If this is specified, subdirectories `x`
 --   of the dirs are searched first.
 function util.geticonpath(iconname, exts, dirs, size)
-    exts = exts or { 'png', 'gif' }
-    dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }
-    local icontypes = { 'apps', 'actions',  'categories',  'emblems',
-        'mimetypes',  'status', 'devices', 'extras', 'places', 'stock' }
-    for _, d in pairs(dirs) do
-        local icon
-        for _, e in pairs(exts) do
-            icon = d .. iconname .. '.' .. e
-            if gfs.file_readable(icon) then
-                return icon
-            end
-            if size then
-                for _, t in pairs(icontypes) do
-                    icon = string.format("%s%ux%u/%s/%s.%s", d, size, size, t, iconname, e)
-                    if gfs.file_readable(icon) then
-                        return icon
-                    end
-                end
-            end
-        end
-    end
+    theme_name = theme_name or "hicolor"
+    dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/' }
+    icon_theme(theme_name, dirs):find_icon_path(iconname, size)
 end
 
 --- Check if a file exists, is readable and not a directory.
