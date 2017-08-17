@@ -46,6 +46,7 @@ keyboardlayout.xkeyboard_country_code = {
     ["epo"] = true,   -- Esperanto
     ["es"] = true,    -- Spain
     ["et"] = true,    -- Ethiopia
+    ["eu"] = true,    -- EurKey
     ["fi"] = true,    -- Finland
     ["fo"] = true,    -- Faroe Islands
     ["fr"] = true,    -- France
