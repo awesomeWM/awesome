@@ -20,6 +20,7 @@ local widget = {
     piechart = require("wibox.widget.piechart");
     slider = require("wibox.widget.slider");
     calendar = require("wibox.widget.calendar");
+    separator = require("wibox.widget.separator");
 }
 
 setmetatable(widget, {

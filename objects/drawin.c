@@ -238,6 +238,25 @@ drawin_refresh(void)
     }
 }
 
+/** Get all drawins into a table.
+ * @treturn table A table with drawins.
+ * @function get
+ */
+static int
+luaA_drawin_get(lua_State *L)
+{
+    int i = 1;
+
+    lua_newtable(L);
+
+    foreach(c, globalconf.drawins) {
+        luaA_object_push(L, *c);
+        lua_rawseti(L, -2, i++);
+    }
+
+    return 1;
+}
+
 /** Move and/or resize a drawin
  * \param L The Lua VM state.
  * \param udx The index of the drawin.
@@ -746,6 +765,7 @@ drawin_class_setup(lua_State *L)
     static const struct luaL_Reg drawin_methods[] =
     {
         LUA_CLASS_METHODS(drawin)
+        { "get", luaA_drawin_get },
         { "__call", luaA_drawin_new },
         { NULL, NULL }
     };

@@ -63,6 +63,8 @@ ${TOP_SOURCE_DIR}/tests/examples/shims/?;"
 # Done in 3 variables to avoid CMake from implicitly converting into a list.
 set(ENV{LUA_PATH} "${LUA_PATH3_}${LUA_PATH2_}${LUA_PATH_}")
 
+set(ENV{AWESOME_THEMES_PATH} "${TOP_SOURCE_DIR}/themes/")
+
 # Unset environment variables that would get in the way of evaluating LUA_PATH.
 unset(ENV{LUA_PATH_5_1})
 unset(ENV{LUA_PATH_5_2})
