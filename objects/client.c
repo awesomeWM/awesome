@@ -125,7 +125,7 @@
  * @signal .swapped
  */
 
-/**
+/** When a new client appears and gets managed by Awesome.
  * @signal .manage
  */
 
