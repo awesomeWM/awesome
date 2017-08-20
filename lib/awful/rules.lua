@@ -1,5 +1,8 @@
 ---------------------------------------------------------------------------
---- Apply rules to clients at startup.
+--- Rules for clients.
+--
+-- This module applies @{rules} to clients during startup (via @{client.manage},
+-- but its functions can be used for client matching in general.
 --
 -- All existing `client` properties can be used in rules. It is also possible
 -- to add random properties that will be later accessible as `c.property_name`
