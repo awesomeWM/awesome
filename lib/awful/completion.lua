@@ -21,6 +21,7 @@ local pairs = pairs
 local string = string
 
 local gears_debug = require("gears.debug")
+local gstring = require("gears.string")
 
 local completion = {}
 
@@ -78,10 +79,6 @@ function completion.shell(command, cur_pos, ncomp, shell)
     local cword_end = 0
     local i = 1
     local comptype = "file"
-
-    local function str_starts(str, start)
-        return string.sub(str, 1, string.len(start)) == start
-    end
 
     -- do nothing if we are on a letter, i.e. not at len + 1 or on a space
     if cur_pos ~= #command + 1 and command:sub(cur_pos, cur_pos) ~= " " then
@@ -160,7 +157,7 @@ function completion.shell(command, cur_pos, ncomp, shell)
         while true do
             local line = c:read("*line")
             if not line then break end
-            if str_starts(line, "./") and gfs.is_dir(line) then
+            if gstring.startswith(line, "./") and gfs.is_dir(line) then
                 line = line .. "/"
             end
             table.insert(output, bash_escape(line))

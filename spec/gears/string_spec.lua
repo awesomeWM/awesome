@@ -29,4 +29,18 @@ describe("gears.string", function()
             assert.is.equal(string.match("DownLow", gstring.query_to_pattern("ownl")), "ownL")
         end)
     end)
+
+    describe("startswith", function()
+        assert.is_true(gstring.startswith("something", ""))
+        assert.is_true(gstring.startswith("something", "some"))
+        assert.is_false(gstring.startswith("something", "none"))
+    end)
+
+    describe("endswith", function()
+        assert.is_true(gstring.endswith("something", ""))
+        assert.is_true(gstring.endswith("something", "thing"))
+        assert.is_false(gstring.endswith("something", "that"))
+    end)
 end)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

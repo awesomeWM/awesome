@@ -106,4 +106,22 @@ function gstring.split(str, delimiter)
     return result
 end
 
+--- Check if a string starts with another string
+-- @class function
+-- @name startswith
+-- @tparam string str String to search
+-- @tparam string sub String to check for
+function gstring.startswith(str, sub)
+	return string.sub(str, 1, string.len(sub)) == sub
+end
+
+--- Check if a string ends with another string
+-- @class function
+-- @name endswith
+-- @tparam string str String to search
+-- @tparam string sub String to check for
+function gstring.endswith(str, sub)
+	return sub == "" or string.sub(str,-string.len(sub)) == sub
+end
+
 return gstring
