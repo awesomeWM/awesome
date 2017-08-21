@@ -900,10 +900,14 @@ end
 -- @tparam number|nil forced_num_rows Forced number of rows (`nil` for automatic).
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @function wibox.layout.grid.horizontal
-function grid.horizontal(forced_num_rows, ...)
+function grid.horizontal(forced_num_rows, widget, ...)
     local ret = new("horizontal")
     ret:set_forced_num_rows(forced_num_rows)
-    ret:add(...)
+
+    if widget then
+        ret:add(widget, ...)
+    end
+
     return ret
 end
 
@@ -914,10 +918,14 @@ end
 -- @tparam number|nil forced_num_cols Forced number of columns (`nil` for automatic).
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @function wibox.layout.grid.vertical
-function grid.vertical(forced_num_cols, ...)
+function grid.vertical(forced_num_cols, widget, ...)
     local ret = new("vertical")
     ret:set_forced_num_cols(forced_num_cols)
-    ret:add(...)
+
+    if widget then
+        ret:add(widget, ...)
+    end
+
     return ret
 end
 
