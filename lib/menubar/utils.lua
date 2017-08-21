@@ -285,19 +285,23 @@ end
 -- @tparam table callback.programs Paths of found .desktop files.
 function utils.parse_dir(dir_path, callback)
 
+    local function get_readable_path(file)
+        return file:get_path() or file:get_uri()
+    end
+
     local function parser(file, programs)
         -- Except for "NONE" there is also NOFOLLOW_SYMLINKS
         local query = gio.FILE_ATTRIBUTE_STANDARD_NAME .. "," .. gio.FILE_ATTRIBUTE_STANDARD_TYPE
         local enum, err = file:async_enumerate_children(query, gio.FileQueryInfoFlags.NONE)
         if not enum then
-            gdebug.print_warning(dir_path .. ": " .. tostring(err))
+            gdebug.print_warning(get_readable_path(file) .. ": " .. tostring(err))
             return
         end
         local files_per_call = 100 -- Actual value is not that important
         while true do
             local list, enum_err = enum:async_next_files(files_per_call)
             if enum_err then
-                gdebug.print_warning(dir_path .. ": " .. tostring(enum_err))
+                gdebug.print_error(get_readable_path(file) .. ": " .. tostring(enum_err))
                 return
             end
             for _, info in ipairs(list) do
