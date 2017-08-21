@@ -53,7 +53,9 @@ menu_gen.all_categories = {
     tools = { app_type = "System", name = "System Tools",
                icon_name = "applications-system", use = true },
     utility = { app_type = "Utility", name = "Accessories",
-                icon_name = "applications-accessories", use = true }
+                icon_name = "applications-accessories", use = true },
+    other = { app_type = "Other", name = "Other",
+                icon_name = "applications", use = true }
 }
 
 --- Find icons for category entries.
@@ -107,6 +109,9 @@ function menu_gen.generate(callback)
                                     break
                                 end
                             end
+                        else
+                            -- Has no categories - stick in "other"
+                            target_category = "other"
                         end
                         if target_category then
                             local name = utils.rtrim(entry.Name) or ""

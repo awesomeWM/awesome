@@ -331,10 +331,10 @@ function utils.parse_dir(dir_path, callback)
     end)
 end
 
-function utils.compute_textbox_width(textbox, s)
-    gdebug.deprecate("Use 'width, _ = textbox:get_preferred_size(s)' directly.", {deprecated_in=4})
+function utils.compute_textbox_width(tb, s)
+    gdebug.deprecate("Use 'width, _ = tb:get_preferred_size(s)' directly.", {deprecated_in=4})
     s = screen[s or mouse.screen]
-    local w, _ = textbox:get_preferred_size(s)
+    local w, _ = tb:get_preferred_size(s)
     return w
 end
 

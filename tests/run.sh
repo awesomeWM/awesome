@@ -46,6 +46,7 @@ fi
 # Change to file's dir (POSIXly).
 cd -P -- "$(dirname -- "$0")"
 this_dir="$PWD"
+export TEST_ASSETS="${this_dir}/assets"
 source_dir="${this_dir%/*}"
 
 # Either the build dir is passed in $CMAKE_BINARY_DIR or we guess based on $PWD
@@ -120,6 +121,7 @@ cleanup() {
 trap "cleanup" 0 2 3 15
 
 tmp_files=$(mktemp -d)
+export XDG_CACHE_HOME="$tmp_files"
 awesome_log=$tmp_files/_awesome_test.log
 echo "awesome_log: $awesome_log"
 

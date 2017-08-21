@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=Example
+Comment=Demonstration program
+# Not sure what example operation these files should have
+Exec=ls
+# I have no idea what to do for a default icon that users would have
+Icon=nonexistent
+Terminal=false
+Type=Application
+Categories=Game;Graphics;Network

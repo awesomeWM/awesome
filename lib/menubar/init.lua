@@ -146,13 +146,14 @@ end
 
 local function write_count_table(count_table)
     count_table = count_table or instance.count_table
-    local count_file_name = gfs.get_dir("cache") .. "/menu_count_file"
+    local count_file_name = gfs.get_dir("cache") .. "menu_count_file"
     local count_file = assert(io.open(count_file_name, "w"))
     for name, count in pairs(count_table) do
         local str = string.format("%s;%d\n", name, count)
         count_file:write(str)
     end
     count_file:close()
+    -- Not sure if silently hiding a failure is a good idea though
 end
 
 --- Perform an action for the given menu item.
@@ -162,16 +163,16 @@ local function perform_action(o)
     if not o then return end
     if o.key then
         current_category = o.key
-        local new_prompt = shownitems[current_item].name .. ": "
+        local new_prompt = o.name .. ": "
         previous_item = current_item
         current_item = 1
         return true, "", new_prompt
-    elseif shownitems[current_item].cmdline then
-        awful.spawn(shownitems[current_item].cmdline)
+    elseif o.cmdline then
+        awful.spawn(o.cmdline)
         -- load count_table from cache file
         local count_table = load_count_table()
         -- increase count
-        local curname = shownitems[current_item].name
+        local curname = o.name
         count_table[curname] = (count_table[curname] or 0) + 1
         -- write updated count table to cache file
         write_count_table(count_table)
@@ -477,6 +478,25 @@ function menubar.get(scr)
         v.key = k
     end
     return common_args.w
+end
+
+-- Returns the guts of the menubar system
+-- Used to test that the menubar is working as expected
+function menubar.__testing_internals()
+    local res = {}
+    -- Internal Variables/Tables
+    res.common_args = common_args
+    res.instance = instance
+    
+    -- Internal Functions
+    res.get_screen = get_screen
+    res.get_current_page = get_current_page
+    res.load_count_table = load_count_table
+    res.write_count_table = write_count_table
+    res.perform_action = perform_action
+    res.label = label
+    res.menulist_update = menulist_update
+    return res
 end
 
 local mt = {}
