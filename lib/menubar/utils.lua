@@ -290,14 +290,14 @@ function utils.parse_dir(dir_path, callback)
         local query = gio.FILE_ATTRIBUTE_STANDARD_NAME .. "," .. gio.FILE_ATTRIBUTE_STANDARD_TYPE
         local enum, err = file:async_enumerate_children(query, gio.FileQueryInfoFlags.NONE)
         if not enum then
-            gdebug.print_error(err)
+            gdebug.print_warning(dir_path .. ": " .. tostring(err))
             return
         end
         local files_per_call = 100 -- Actual value is not that important
         while true do
             local list, enum_err = enum:async_next_files(files_per_call)
             if enum_err then
-                gdebug.print_error(enum_err)
+                gdebug.print_warning(dir_path .. ": " .. tostring(enum_err))
                 return
             end
             for _, info in ipairs(list) do
