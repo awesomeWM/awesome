@@ -247,26 +247,34 @@ end
 -- @param widget Widget to attach the calendar
 -- @tparam[opt="tr"] string position Two characters string defining the position on the screen
 -- @tparam[opt={}] table args Additional options
--- @tparam[opt=false] bool args.on_hover Show popup while mouse hover
+-- @tparam[opt=true] bool args.on_hover Show popup during mouse hover
 -- @treturn wibox The wibox calendar
 function calendar_popup:attach(widget, position, args)
     position = position or "tr"
     args = args or {}
+    if args.on_hover == nil then args.on_hover=true end
     widget:buttons(gears.table.join(
         abutton({ }, 1, function ()
-                              self:call_calendar(0, position)
-                              self.visible = not self.visible
+                              if not self.visible or self._calendar_clicked then
+                                  self:call_calendar(0, position)
+                                  self.visible = not self.visible
+                              end
+                              self._calendar_clicked = self.visible
                         end),
         abutton({ }, 4, function () self:call_calendar(-1) end),
         abutton({ }, 5, function () self:call_calendar( 1) end)
     ))
     if args.on_hover then
         widget:connect_signal("mouse::enter", function ()
-            self:call_calendar(0, position)
-            self.visible = true
+            if not self._calendar_clicked then
+                self:call_calendar(0, position)
+                self.visible = true
+            end
         end)
         widget:connect_signal("mouse::leave", function ()
-            self.visible = false
+            if not self._calendar_clicked then
+                self.visible = false
+            end
         end)
     end
     return self
