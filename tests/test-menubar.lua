@@ -27,12 +27,12 @@ end
 -- word "error" appears in our output, the test is considered to have failed.
 do
     local gdebug = require("gears.debug")
-    local orig_error = gdebug.print_error
-    function gdebug.print_error(msg)
+    local orig_warning = gdebug.print_warning
+    function gdebug.print_warning(msg)
         msg = tostring(msg)
-        if (msg ~= "Error opening directory '/dev/null/.local/share/applications': Not a directory") and
+        if (not msg:match("/dev/null/.local/share/applications")) and
                 (not msg:match("No such file or directory")) then
-            orig_error(msg)
+            orig_warning(msg)
         end
     end
 end

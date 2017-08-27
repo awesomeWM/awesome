@@ -261,7 +261,7 @@ for f in $tests; do
     esac
 
     # Parse any error from the log.
-    pattern='.*[Ee]rror.*|.*assertion failed.*|^Step .* failed:'
+    pattern='.*[Ee]rror.*|.*assertion failed.*|^Step .* failed:|^.{19} E: awesome: .*|.*luaA_panic.*'
     if [[ $fail_on_warning ]]; then
         pattern+='|^.{19} W: awesome:.*'
     fi
