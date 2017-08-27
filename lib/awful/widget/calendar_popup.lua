@@ -171,6 +171,7 @@ end
 -- @treturn number,number,number,number Geometry of the calendar, list of x, y, width, height
 local function get_geometry(widget, screen, position)
     local pos, s = position or "cc", screen or ascreen.focused()
+    local margin = widget._calendar_margin or 0
     local wa = s.workarea
     local width, height = widget:fit({screen=s, dpi=beautiful.xresources.get_dpi(s)}, wa.width, wa.height)
 
@@ -183,16 +184,16 @@ local function get_geometry(widget, screen, position)
     --                        bl, bc, br
     local x,y
     if pos:sub(1,1) == "t" then
-        y = wa.y
+        y = wa.y + margin
     elseif pos:sub(1,1) == "b" then
-        y = wa.y + wa.height - height
+        y = wa.y + wa.height - (height + margin)
     else  --if pos:sub(1,1) == "c" then
         y = wa.y + math.floor((wa.height - height) / 2)
     end
     if pos:sub(2,2) == "l" then
-        x = wa.x
+        x = wa.x + margin
     elseif pos:sub(2,2) == "r" then
-        x = wa.x + wa.width - width
+        x = wa.x + wa.width - (width + margin)
     else  --if pos:sub(2,2) == "c" then
         x = wa.x + math.floor((wa.width - width) / 2)
     end
@@ -272,6 +273,7 @@ end
 -- @tparam string args.bg Wibox background color
 -- @tparam string args.font Calendar font
 -- @tparam number args.spacing Calendar spacing
+-- @tparam number args.margin Margin around calendar widget
 -- @tparam boolean args.week_numbers Show weeknumbers
 -- @tparam boolean args.start_sunday Start week on Sunday
 -- @tparam boolean args.long_weekdays Format the weekdays with three characters instead of two
@@ -304,6 +306,7 @@ local function get_cal_wibox(caltype, args)
         start_sunday  = args.start_sunday,
         long_weekdays = args.long_weekdays,
         fn_embed      = embed(parse_all_options(args)),
+        _calendar_margin = args.margin,
         widget = caltype == "year" and wibox.widget.calendar.year or wibox.widget.calendar.month
     }
     ret:set_widget(widget)
@@ -335,6 +338,7 @@ end
 -- @tparam string args.bg Wibox background color
 -- @tparam string args.font Calendar font
 -- @tparam number args.spacing Calendar spacing
+-- @tparam number args.margin Margin around calendar widget
 -- @tparam boolean args.week_numbers Show weeknumbers
 -- @tparam boolean args.start_sunday Start week on Sunday
 -- @tparam boolean args.long_weekdays Format the weekdays with three characters instead of two
@@ -368,6 +372,7 @@ end
 -- @tparam string args.bg Wibox background color
 -- @tparam string args.font Calendar font
 -- @tparam number args.spacing Calendar spacing
+-- @tparam number args.margin Margin around calendar widget
 -- @tparam boolean args.week_numbers Show weeknumbers
 -- @tparam boolean args.start_sunday Start week on Sunday
 -- @tparam boolean args.long_weekdays Format the weekdays with three characters instead of two
