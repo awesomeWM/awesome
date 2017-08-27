@@ -334,6 +334,7 @@ if(DO_COVERAGE)
                     ${BUILD_DIR}/${file}
                     COPYONLY)
     endforeach()
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fprofile-arcs -ftest-coverage")
     set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
 else()
     foreach(file ${AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES})
