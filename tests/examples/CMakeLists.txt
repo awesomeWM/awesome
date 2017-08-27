@@ -317,4 +317,9 @@ endif()
 add_custom_target(generate-examples ALL
     DEPENDS ${EXAMPLE_DOC_GENERATED_FILES})
 
+add_custom_target(check-examples
+    ${CMAKE_COMMAND} -D EXAMPLE_DOC_SOURCE_FILES= ${CMAKE_SOURCE_DIR}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
+list(APPEND CHECK_TARGETS check-examples)
+
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
