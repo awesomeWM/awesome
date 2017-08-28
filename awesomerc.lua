@@ -482,15 +482,16 @@ awful.rules.rules = {
         instance = {
           "DTA",  -- Firefox addon DownThemAll.
           "copyq",  -- Includes session name in class.
+          "pinentry",
         },
         class = {
           "Arandr",
+          "Blueman-manager",
           "Gpick",
           "Kruler",
           "MessageWin",  -- kalarm.
           "Sxiv",
           "Wpa_gui",
-          "pinentry",
           "veromix",
           "xtightvncviewer"},
 
@@ -499,6 +500,7 @@ awful.rules.rules = {
         },
         role = {
           "AlarmWindow",  -- Thunderbird's calendar.
+          "ConfigManager",  -- Thunderbird's about:config.
           "pop-up",       -- e.g. Google Chrome's (detached) Developer Tools.
         }
       }, properties = { floating = true }},
