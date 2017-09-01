@@ -332,8 +332,14 @@ local function get_cal_wibox(caltype, args)
     ret:set_widget(widget)
 
     ret:buttons(gears.table.join(
-            abutton({ }, 1, function () ret.visible=false end),
-            abutton({ }, 3, function () ret.visible=false end),
+            abutton({ }, 1, function ()
+                ret.visible=false
+                ret._calendar_clicked=false
+            end),
+            abutton({ }, 3, function ()
+                ret.visible=false
+                ret._calendar_clicked=false
+            end),
             abutton({ }, 4, function () ret:call_calendar(-1) end),
             abutton({ }, 5, function () ret:call_calendar( 1) end)
     ))
