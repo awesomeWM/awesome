@@ -216,9 +216,9 @@ function calendar_popup:call_calendar(offset, position, screen)
     local raw_date = os.date("*t")
     local date = {day=raw_date.day, month=raw_date.month, year=raw_date.year}
     if widget._private.type == "month" and self.offset ~= 0 then
-        raw_date.month = raw_date.month + self.offset
-        raw_date = os.date("*t", os.time(raw_date))
-        date = {month=raw_date.month, year=raw_date.year}
+        local month_offset = (raw_date.month + self.offset - 1) % 12 + 1
+        local year_offset = raw_date.year + math.floor((raw_date.month + self.offset - 1) / 12)
+        date = {month=month_offset, year=year_offset }
     elseif widget._private.type == "year" then
         date = {year=raw_date.year + self.offset}
     end
