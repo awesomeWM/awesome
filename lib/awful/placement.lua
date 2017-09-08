@@ -863,10 +863,12 @@ end
 --- Place the client where there's place available with minimum overlap.
 --@DOC_awful_placement_no_overlap_EXAMPLE@
 -- @param c The client.
+-- @tparam[opt={}] table args Other arguments
 -- @treturn table The new geometry
-function placement.no_overlap(c)
+function placement.no_overlap(c, args)
     c = c or capi.client.focus
-    local geometry = area_common(c)
+    args = add_context(args, "no_overlap")
+    local geometry = geometry_common(c, args)
     local screen   = get_screen(c.screen or a_screen.getbycoord(geometry.x, geometry.y))
     local cls = client.visible(screen)
     local curlay = layout.get()
@@ -917,7 +919,8 @@ function placement.no_overlap(c)
     new.width = geometry.width
     new.height = geometry.height
 
-    return c:geometry({ x = new.x, y = new.y })
+    geometry_common(c, args, new)
+    return fix_new_geometry(new, args, true)
 end
 
 --- Place the client under the mouse.
