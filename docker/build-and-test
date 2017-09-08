@@ -29,6 +29,10 @@ fi
 
 echo "Running build-and-test: LUA_PKG=$LUA_PKG DO_COVERAGE=$DO_COVERAGE"
 
+if [ -n "$DO_COVERAGE" ]; then
+  CMAKE_ARGS="$CMAKE_ARGS -D DO_COVERAGE=$DO_COVERAGE"
+fi
+
 if [ -n "$BUILD_IN_DIR" ]; then
   echo "BUILD_IN_DIR=$BUILD_IN_DIR"
   SOURCE_DIRECTORY="$PWD"
