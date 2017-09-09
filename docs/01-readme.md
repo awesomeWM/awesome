@@ -69,7 +69,8 @@ Additionally, the following optional dependencies exist:
 - [asciidoc](http://www.methods.co.nz/asciidoc/) and
   [xmlto](https://fedorahosted.org/xmlto/) for generating man pages
 - [gzip](http://www.gzip.org/) for compressing man pages
-- [ldoc](https://stevedonovan.github.io/ldoc/) for generating the documentation
+- [ldoc >= 1.4.5](https://stevedonovan.github.io/ldoc/) for generating the
+  documentation
 - [busted](https://olivinelabs.com/busted/) for running unit tests
 - [luacheck](https://github.com/mpeterv/luacheck) for static code analysis
 - [LuaCov](https://keplerproject.github.io/luacov/) for collecting code coverage
