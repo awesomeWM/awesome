@@ -774,6 +774,13 @@ local function fit_in_bounding(obj, geo, args)
     return geo2.width == geo.width and geo2.height == geo.height
 end
 
+-- Remove border from drawable geometry
+local function remove_border(drawable, args, geo)
+    local bw    = (not args.ignore_border_width) and drawable.border_width or 0
+    geo.width  = geo.width  - 2*bw
+    geo.height = geo.height - 2*bw
+end
+
 --- Move a drawable to the closest corner of the parent geometry (such as the
 -- screen).
 --
@@ -827,17 +834,19 @@ end
 --- Place the client so no part of it will be outside the screen (workarea).
 --@DOC_awful_placement_no_offscreen_EXAMPLE@
 -- @client c The client.
--- @tparam[opt=client's screen] integer screen The screen.
+-- @tparam[opt={}] table args The arguments
+-- @tparam[opt=client's screen] integer args.screen The screen.
 -- @treturn table The new client geometry.
-function placement.no_offscreen(c, screen)
+function placement.no_offscreen(c, args)
     --HACK necessary for composition to work. The API will be changed soon
-    if type(screen) == "table" then
-        screen = nil
+    if type(args) == "number" or type(args) == "screen" then
+        args = { screen = args }
     end
 
     c = c or capi.client.focus
+    args = add_context(args, "no_offscreen")
     local geometry = area_common(c)
-    screen = get_screen(screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y))
+    local screen = get_screen(args.screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y))
     local screen_geometry = screen.workarea
 
     if geometry.x + geometry.width > screen_geometry.x + screen_geometry.width then
@@ -854,10 +863,9 @@ function placement.no_offscreen(c, screen)
         geometry.y = screen_geometry.y
     end
 
-    return c:geometry {
-        x = geometry.x,
-        y = geometry.y
-    }
+    remove_border(c, args, geometry)
+    geometry_common(c, args, geometry)
+    return fix_new_geometry(geometry, args, true)
 end
 
 --- Place the client where there's place available with minimum overlap.
@@ -946,10 +954,7 @@ function placement.under_mouse(d, args)
     ngeo.x = math.floor(m_coords.x - ngeo.width  / 2)
     ngeo.y = math.floor(m_coords.y - ngeo.height / 2)
 
-    local bw    = (not args.ignore_border_width) and d.border_width or 0
-    ngeo.width  = ngeo.width  - 2*bw
-    ngeo.height = ngeo.height - 2*bw
-
+    remove_border(d, args, ngeo)
     geometry_common(d, args, ngeo)
 
     return fix_new_geometry(ngeo, args, true)
@@ -1051,11 +1056,7 @@ function placement.resize_to_mouse(d, args)
         pts.x_only and ngeo.y + ngeo.height or math.max(p2.y, p1.y)
     )
 
-    local bw = (not args.ignore_border_width) and d.border_width or 0
-
-    for _, a in ipairs {"width", "height"} do
-        ngeo[a] = ngeo[a] - 2*bw
-    end
+    remove_border(d, args, ngeo)
 
     -- Now, correct the geometry by the given size_hints offset
     if d.apply_size_hints then
@@ -1101,7 +1102,6 @@ function placement.align(d, args)
 
     local sgeo = get_parent_geometry(d, args)
     local dgeo = geometry_common(d, args)
-    local bw   = (not args.ignore_border_width) and d.border_width or 0
 
     local pos  = align_map[args.position](
         sgeo.width ,
@@ -1113,10 +1113,10 @@ function placement.align(d, args)
     local ngeo = {
         x      = (pos.x and math.ceil(sgeo.x + pos.x) or dgeo.x)       ,
         y      = (pos.y and math.ceil(sgeo.y + pos.y) or dgeo.y)       ,
-        width  =            math.ceil(dgeo.width    )            - 2*bw,
-        height =            math.ceil(dgeo.height   )            - 2*bw,
+        width  =            math.ceil(dgeo.width    )                  ,
+        height =            math.ceil(dgeo.height   )                  ,
     }
-
+    remove_border(d, args, ngeo)
     geometry_common(d, args, ngeo)
 
     attach(d, placement[args.position], args)
@@ -1325,10 +1325,7 @@ function placement.scale(d, args)
         end
     end
 
-    local bw = (not args.ignore_border_width) and d.border_width or 0
-    ngeo.width  = ngeo.width  - 2*bw
-    ngeo.height = ngeo.height - 2*bw
-
+    remove_border(d, args, ngeo)
     geometry_common(d, args, ngeo)
 
     attach(d, placement.maximize, args)
@@ -1342,7 +1339,7 @@ end
 --
 --    {"top", "right", "left", "bottom"}
 --
--- In that case, if there is room on the top of the geomtry, then it will have
+-- In that case, if there is room on the top of the geometry, then it will have
 -- priority, followed by all the others, in order.
 --
 -- @tparam drawable d A wibox or client
