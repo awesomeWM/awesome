@@ -268,7 +268,6 @@ endif()
 
 # {{{ Lua API Documentation
 if(GENERATE_DOC)
-
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
         file(MAKE_DIRECTORY ${BUILD_DIR}/doc)
@@ -291,13 +290,18 @@ if(GENERATE_DOC)
 
     add_custom_target(ldoc ALL
         DEPENDS ${BUILD_DIR}/doc/index.html)
+    if (STRICT_TESTS)
+        set(ldoc_args --fatalwarnings .)
+        set(ldoc_desc_suffix " (fatal warnings)")
+    else()
+        set(ldoc_args .)
+    endif()
     add_custom_command(
-        COMMAND ${LDOC_EXECUTABLE} --fatalwarnings .
         OUTPUT  ${BUILD_DIR}/doc/index.html
+        COMMAND ${LDOC_EXECUTABLE} ${ldoc_args}
         WORKING_DIRECTORY ${AWE_DOC_DIR}
         DEPENDS ${AWE_SRCS} ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld
-        COMMENT "Generating API documentation"
-        VERBATIM)
+        COMMENT "Generating API documentation${ldoc_desc_suffix}")
 endif()
 # }}}
 
