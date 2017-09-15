@@ -41,6 +41,16 @@ local default_icon = nil
 --- Name of the WM for the OnlyShownIn entry in the .desktop file.
 utils.wm_name = "awesome"
 
+--- Possible escape characters (not including the preceding backslash) in
+--.desktop files and their equates.
+local escape_chars = {
+    [ [[\]] ] = [[\]],
+    [ 'n' ]   = '\n',
+    [ 'r' ]   = '\r',
+    [ 's' ]   = ' ',
+    [ 't' ]   = '\t',
+}
+
 -- Private section
 
 local do_protected_call, call_callback
@@ -151,6 +161,29 @@ function utils.rtrim(s)
     return s
 end
 
+--- Unescape strings read from desktop files.
+-- Possible sequences are \n, \r, \s, \t, and \\, which have the usual meanings.
+-- @param s string to unescape
+function utils.unescape(s)
+    if not s then return end
+    -- We can't just use string.gsub because something like [[\\s]] would become
+    -- either [[ ]] or [[\ ]] (depending on the order) while the correct result
+    -- is [[\s]].
+    local i = 0
+    while true do
+        i = string.find(s, [[\]], i+1)
+        if not i then break end
+
+        local c = string.sub(s, i+1, i+1) -- Get the escape character
+        c = escape_chars[c]
+        if c then
+            s = string.sub(s, 1, i-1) .. c .. string.sub(s, i+2)
+        end
+    end
+
+    return s
+end
+
 --- Lookup an icon in different folders of the filesystem.
 -- @tparam string icon_file Short or full name of the icon.
 -- @treturn string|boolean Full name of the icon, or false on failure.
@@ -219,7 +252,7 @@ function utils.parse_desktop_file(file)
 
             -- Grab the values
             for key, value in line:gmatch("(%w+)%s*=%s*(.+)") do
-                program[key] = value
+                program[key] = utils.unescape(value)
             end
         end
     end
