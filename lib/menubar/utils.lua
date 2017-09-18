@@ -41,6 +41,23 @@ local default_icon = nil
 --- Name of the WM for the OnlyShownIn entry in the .desktop file.
 utils.wm_name = "awesome"
 
+--- Possible escape characters (not including the preceding backslash) in
+--.desktop files and their equates.
+local escape_chars = {
+    [ [[\]] ] = [[\]],
+    [ 'n' ]   = '\n',
+    [ 'r' ]   = '\r',
+    [ 's' ]   = ' ',
+    [ 't' ]   = '\t',
+}
+
+--- The keys in desktop entries whose values are lists of strings.
+local list_keys = {
+    Categories = true,
+    OnlyShownIn = true,
+    NotShowIn = true,
+}
+
 -- Private section
 
 local do_protected_call, call_callback
@@ -151,6 +168,68 @@ function utils.rtrim(s)
     return s
 end
 
+--- Unescape strings read from desktop files.
+-- Possible sequences are \n, \r, \s, \t, \\, and \; (only for lists) which have
+-- the usual meanings.
+-- @tparam string s String to unescape
+-- @tparam boolean list Whether the string should be escaped as a list
+-- @treturn string|table The unescaped string or a table of unescaped strings if
+-- list is true.
+function utils.unescape(s, list)
+    if not s then return end
+    -- We can't just use string.gsub because something like [[\\s]] would become
+    -- either [[ ]] or [[\ ]] (depending on the order) while the correct result
+    -- is [[\s]].
+
+    if list then
+        -- Strip optional terminating semicolon
+        if string.sub(s, -1) == ';' then
+            s = string.sub(s, 1, -2)
+        end
+
+        local segments = {}
+        local i, j = 0, 0
+        while true do
+            i, j = string.find(s, '\\*;', j+1)
+            if not i then
+                -- Insert last segment if there are no remaining semicolons
+                table.insert(segments, utils.unescape(s))
+                break
+            end
+
+            if (j - i) % 2 == 0 then
+                -- Separate the string here and insert it if there is an even
+                -- number of backslashes
+                table.insert(segments, utils.unescape(string.sub(s, 1, j-1)))
+                s = string.sub(s, j+1) -- Remove segment from the string
+                j = 0
+            else
+                -- Unescape the semi-colon and continue the loop
+                s = string.sub(s, 1, j-2) .. string.sub(s, j)
+                -- Move back the index since the string was changed
+                j = j-1
+            end
+        end
+
+        return segments
+    else
+        local i = 0
+        while true do
+            i = string.find(s, [[\]], i+1)
+            if not i then break end
+
+            i = i+1 -- Move to the escape character
+            local c = escape_chars[string.sub(s, i, i)]
+            if c then
+                s = string.sub(s, 1, i-2) .. c .. string.sub(s, i+1)
+                i = i-1 -- Adjust because the string has been shortened
+            end
+        end
+
+        return s
+    end
+end
+
 --- Lookup an icon in different folders of the filesystem.
 -- @tparam string icon_file Short or full name of the icon.
 -- @treturn string|boolean Full name of the icon, or false on failure.
@@ -219,7 +298,7 @@ function utils.parse_desktop_file(file)
 
             -- Grab the values
             for key, value in line:gmatch("(%w+)%s*=%s*(.+)") do
-                program[key] = value
+                program[key] = utils.unescape(value, list_keys[key])
             end
         end
     end
@@ -233,12 +312,32 @@ function utils.parse_desktop_file(file)
     -- Don't show program if NoDisplay attribute is false
     if program.NoDisplay and string.lower(program.NoDisplay) == "true" then
         program.show = false
-    end
+    else
+        -- Only check these values is NoDisplay is true (or non-existent)
 
-    -- Only show the program if there is no OnlyShowIn attribute
-    -- or if it's equal to utils.wm_name
-    if program.OnlyShowIn ~= nil and not program.OnlyShowIn:match(utils.wm_name) then
-        program.show = false
+        -- Only show the program if there is no OnlyShowIn attribute
+        -- or if it contains wm_name
+        if program.OnlyShowIn then
+            program.show = false -- Assume false until found
+            for _, wm in ipairs(program.OnlyShowIn) do
+                if wm == utils.wm_name then
+                    program.show = true
+                    break
+                end
+            end
+        else
+            program.show = true
+        end
+
+        -- Only need to check NotShowIn if the program is being shown
+        if program.show and program.NotShowIn then
+            for _, wm in ipairs(program.NotShowIn) do
+                if wm == utils.wm_name then
+                    program.show = false
+                    break
+                end
+            end
+        end
     end
 
     -- Look up for a icon.
@@ -246,13 +345,9 @@ function utils.parse_desktop_file(file)
         program.icon_path = utils.lookup_icon(program.Icon)
     end
 
-    -- Split categories into a table. Categories are written in one
-    -- line separated by semicolon.
+    -- Make the variable lower-case like the rest of them
     if program.Categories then
-        program.categories = {}
-        for category in program.Categories:gmatch('[^;]+') do
-            table.insert(program.categories, category)
-        end
+        program.categories = program.Categories
     end
 
     if program.Exec then
