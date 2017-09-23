@@ -188,7 +188,10 @@ function utils.unescape(s, list)
         end
 
         local segments = {}
-        local i, j = 0, 0
+        -- Starting and ending indices of the match (optional backslashes before
+        -- a semicolon)
+        local i
+        local j = 0
         while true do
             i, j = string.find(s, '\\*;', j+1)
             if not i then
