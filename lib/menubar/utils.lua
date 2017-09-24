@@ -175,11 +175,10 @@ end
 function utils.unescape(s)
     if not s then return end
 
-    -- Only return the string, not the count
-    s, _ = string.gsub(s, "\\.", function(sequence)
+    -- Ignore the second return value of string.gsub() (number replaced)
+    s = string.gsub(s, "\\.", function(sequence)
         return escape_sequences[sequence] or sequence
     end)
-
     return s
 end
 
