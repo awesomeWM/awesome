@@ -55,56 +55,6 @@ runner.run_steps {
         end
     end,
 
-    -- Test menubar.utils.unescape()
-    function()
-        -- Single strings
-        local single_strings = {
-            [ [[\n:\r:\s:\t:\\]] ] = "\n:\r: :\t:\\",
-            -- Make sure escapes are not read recursively
-            [ [[\\s]] ] = [[\s]],
-            -- Make sure ';' is not escaped for non-list strings and other
-            -- characters are not escaped
-            [ [[ab\c\;1\23]] ] = [[ab\c\;1\23]],
-        }
-
-        for escaped, unescaped in pairs(single_strings) do
-            if menubar.utils.unescape(escaped, false) ~= unescaped then
-                return false
-            end
-        end
-
-        -- Semicolon-separated lists of strings
-        local list_strings = {
-            -- Normal list
-            [ [[abc;123;xyz]] ] = { "abc", "123", "xyz" },
-            -- Optional terminating semicolon
-            [ [[abc;123;xyz;]] ] = { "abc", "123", "xyz" },
-            -- Blank item
-            [ [[abc;;123]] ] = { "abc", "", "123" },
-            -- Escape semicolon
-            [ [[abc\;;12\;3;\;xyz]] ] = { "abc;", "12;3", ";xyz" },
-            -- Normal escapes are parsed like normal
-            [ [[ab\c;1\s23;x\\yz]] ] = { "ab\\c", "1 23", "x\\yz" },
-            -- Escaped backslashes before semicolon
-            [ [[abc;12\\;3;xyz]] ] = { "abc", "12\\", "3", "xyz" },
-        }
-
-        for escaped, unescaped in pairs(list_strings) do
-            local returned = menubar.utils.unescape(escaped, true)
-            if #returned ~= #unescaped then
-                return false
-            end
-
-            for i = 1, #returned do
-                if returned[i] ~= unescaped[i] then
-                    return false
-                end
-            end
-        end
-
-        return true
-    end,
-
     function()
         return true
     end
