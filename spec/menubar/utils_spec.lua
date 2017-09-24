@@ -17,7 +17,7 @@ describe("menubar.utils unescape", function()
 
     for escaped, unescaped in pairs(single_strings) do
         it(escaped, function()
-            assert.is.equal(unescaped, utils.unescape(escaped, false))
+            assert.is.equal(unescaped, utils.unescape(escaped))
         end)
     end
 
@@ -38,7 +38,7 @@ describe("menubar.utils unescape", function()
 
     for escaped, unescaped in pairs(list_strings) do
         it(escaped, function()
-            local returned = utils.unescape(escaped, true)
+            local returned = utils.parse_list(escaped)
             assert.is.equal(#unescaped, #returned)
 
             for i = 1, #unescaped do

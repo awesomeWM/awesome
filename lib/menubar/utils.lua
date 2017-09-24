@@ -43,12 +43,12 @@ utils.wm_name = "awesome"
 
 --- Possible escape characters (not including the preceding backslash) in
 --.desktop files and their equates.
-local escape_chars = {
-    [ [[\]] ] = [[\]],
-    [ 'n' ]   = '\n',
-    [ 'r' ]   = '\r',
-    [ 's' ]   = ' ',
-    [ 't' ]   = '\t',
+local escape_sequences = {
+    [ [[\\]] ]  = [[\]],
+    [ [[\n]] ]  = '\n',
+    [ [[\r]] ]  = '\r',
+    [ [[\s]] ]  = ' ',
+    [ [[\t]] ]  = '\t',
 }
 
 --- The keys in desktop entries whose values are lists of strings.
@@ -169,68 +169,48 @@ function utils.rtrim(s)
 end
 
 --- Unescape strings read from desktop files.
--- Possible sequences are \n, \r, \s, \t, \\, and \; (only for lists) which have
--- the usual meanings.
+-- Possible sequences are \n, \r, \s, \t, \\, which have the usual meanings.
 -- @tparam string s String to unescape
--- @tparam boolean list Whether the string should be escaped as a list
--- @treturn string|table The unescaped string or a table of unescaped strings if
--- list is true.
-function utils.unescape(s, list)
+-- @treturn string The unescaped string
+function utils.unescape(s)
     if not s then return end
-    -- We can't just use string.gsub because something like [[\\s]] would become
-    -- either [[ ]] or [[\ ]] (depending on the order) while the correct result
-    -- is [[\s]].
 
-    if list then
-        -- Strip optional terminating semicolon
-        if string.sub(s, -1) == ';' then
-            s = string.sub(s, 1, -2)
-        end
+    -- Only return the string, not the count
+    s, _ = string.gsub(s, "\\.", function(sequence)
+        return escape_sequences[sequence] or sequence
+    end)
 
-        local segments = {}
-        -- Starting and ending indices of the match (optional backslashes before
-        -- a semicolon)
-        local i
-        local j = 0
-        while true do
-            i, j = string.find(s, '\\*;', j+1)
-            if not i then
-                -- Insert last segment if there are no remaining semicolons
-                table.insert(segments, utils.unescape(s))
-                break
-            end
+    return s
+end
 
-            if (j - i) % 2 == 0 then
-                -- Separate the string here and insert it if there is an even
-                -- number of backslashes
-                table.insert(segments, utils.unescape(string.sub(s, 1, j-1)))
-                s = string.sub(s, j+1) -- Remove segment from the string
-                j = 0
-            else
-                -- Unescape the semi-colon and continue the loop
-                s = string.sub(s, 1, j-2) .. string.sub(s, j)
-                -- Move back the index since the string was changed
-                j = j-1
-            end
-        end
+--- Separate semi-colon separated lists.
+-- Semi-colons in lists are escaped as '\;'.
+-- @tparam string s String to parse
+-- @treturn table A table containing the separated strings. Each element is
+-- unescaped by utils.unescape().
+function utils.parse_list(s)
+    if not s then return end
 
-        return segments
-    else
-        local i = 0
-        while true do
-            i = string.find(s, [[\]], i+1)
-            if not i then break end
-
-            i = i+1 -- Move to the escape character
-            local c = escape_chars[string.sub(s, i, i)]
-            if c then
-                s = string.sub(s, 1, i-2) .. c .. string.sub(s, i+1)
-                i = i-1 -- Adjust because the string has been shortened
-            end
-        end
-
-        return s
+    -- Append terminating semi-colon if not already there. Ignore whitespace
+    -- at the end
+    if not string.match(s, ';%s*$') then
+        s = s .. ';'
     end
+
+    local segments = {}
+    local part = ""
+    -- Iterate over sub-strings between semicolons
+    for word, backslashes in string.gmatch(s, "([^;]-(\\*));") do
+        if #backslashes % 2 ~= 0 then
+            -- The semicolon was escaped, remember this part for later
+            part = part .. word:sub(1, -2) .. ";"
+        else
+            table.insert(segments, utils.unescape(part .. word))
+            part = ""
+        end
+    end
+
+    return segments
 end
 
 --- Lookup an icon in different folders of the filesystem.
@@ -301,7 +281,11 @@ function utils.parse_desktop_file(file)
 
             -- Grab the values
             for key, value in line:gmatch("(%w+)%s*=%s*(.+)") do
-                program[key] = utils.unescape(value, list_keys[key])
+                if list_keys[key] then
+                    program[key] = utils.parse_list(value)
+                else
+                    program[key] = utils.unescape(value)
+                end
             end
         end
     end
