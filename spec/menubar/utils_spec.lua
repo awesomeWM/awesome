@@ -28,6 +28,8 @@ describe("menubar.utils unescape", function()
         [ [[abc;123;xyz;]] ] = { "abc", "123", "xyz" },
         -- Blank item
         [ [[abc;;123]] ] = { "abc", "", "123" },
+        -- Trailing whitespace
+        [ [[abc;123;   ]] ] = { "abc", "123", "   " },
         -- Escape semicolon
         [ [[abc\;;12\;3;\;xyz]] ] = { "abc;", "12;3", ";xyz" },
         -- Normal escapes are parsed like normal

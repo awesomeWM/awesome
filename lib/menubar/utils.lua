@@ -190,9 +190,8 @@ end
 function utils.parse_list(s)
     if not s then return end
 
-    -- Append terminating semi-colon if not already there. Ignore whitespace
-    -- at the end
-    if not string.match(s, ';%s*$') then
+    -- Append terminating semi-colon if not already there.
+    if string.sub(s, -1) ~= ';' then
         s = s .. ';'
     end
 
