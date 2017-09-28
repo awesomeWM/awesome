@@ -41,6 +41,23 @@ local default_icon = nil
 --- Name of the WM for the OnlyShownIn entry in the .desktop file.
 utils.wm_name = "awesome"
 
+--- Possible escape characters (not including the preceding backslash) in
+--.desktop files and their equates.
+local escape_sequences = {
+    [ [[\\]] ]  = [[\]],
+    [ [[\n]] ]  = '\n',
+    [ [[\r]] ]  = '\r',
+    [ [[\s]] ]  = ' ',
+    [ [[\t]] ]  = '\t',
+}
+
+--- The keys in desktop entries whose values are lists of strings.
+local list_keys = {
+    Categories = true,
+    OnlyShownIn = true,
+    NotShowIn = true,
+}
+
 -- Private section
 
 local do_protected_call, call_callback
@@ -151,6 +168,49 @@ function utils.rtrim(s)
     return s
 end
 
+--- Unescape strings read from desktop files.
+-- Possible sequences are \n, \r, \s, \t, \\, which have the usual meanings.
+-- @tparam string s String to unescape
+-- @treturn string The unescaped string
+function utils.unescape(s)
+    if not s then return end
+
+    -- Ignore the second return value of string.gsub() (number replaced)
+    s = string.gsub(s, "\\.", function(sequence)
+        return escape_sequences[sequence] or sequence
+    end)
+    return s
+end
+
+--- Separate semi-colon separated lists.
+-- Semi-colons in lists are escaped as '\;'.
+-- @tparam string s String to parse
+-- @treturn table A table containing the separated strings. Each element is
+-- unescaped by utils.unescape().
+function utils.parse_list(s)
+    if not s then return end
+
+    -- Append terminating semi-colon if not already there.
+    if string.sub(s, -1) ~= ';' then
+        s = s .. ';'
+    end
+
+    local segments = {}
+    local part = ""
+    -- Iterate over sub-strings between semicolons
+    for word, backslashes in string.gmatch(s, "([^;]-(\\*));") do
+        if #backslashes % 2 ~= 0 then
+            -- The semicolon was escaped, remember this part for later
+            part = part .. word:sub(1, -2) .. ";"
+        else
+            table.insert(segments, utils.unescape(part .. word))
+            part = ""
+        end
+    end
+
+    return segments
+end
+
 --- Lookup an icon in different folders of the filesystem.
 -- @tparam string icon_file Short or full name of the icon.
 -- @treturn string|boolean Full name of the icon, or false on failure.
@@ -219,7 +279,11 @@ function utils.parse_desktop_file(file)
 
             -- Grab the values
             for key, value in line:gmatch("(%w+)%s*=%s*(.+)") do
-                program[key] = value
+                if list_keys[key] then
+                    program[key] = utils.parse_list(value)
+                else
+                    program[key] = utils.unescape(value)
+                end
             end
         end
     end
@@ -233,12 +297,32 @@ function utils.parse_desktop_file(file)
     -- Don't show program if NoDisplay attribute is false
     if program.NoDisplay and string.lower(program.NoDisplay) == "true" then
         program.show = false
-    end
+    else
+        -- Only check these values is NoDisplay is true (or non-existent)
 
-    -- Only show the program if there is no OnlyShowIn attribute
-    -- or if it's equal to utils.wm_name
-    if program.OnlyShowIn ~= nil and not program.OnlyShowIn:match(utils.wm_name) then
-        program.show = false
+        -- Only show the program if there is no OnlyShowIn attribute
+        -- or if it contains wm_name
+        if program.OnlyShowIn then
+            program.show = false -- Assume false until found
+            for _, wm in ipairs(program.OnlyShowIn) do
+                if wm == utils.wm_name then
+                    program.show = true
+                    break
+                end
+            end
+        else
+            program.show = true
+        end
+
+        -- Only need to check NotShowIn if the program is being shown
+        if program.show and program.NotShowIn then
+            for _, wm in ipairs(program.NotShowIn) do
+                if wm == utils.wm_name then
+                    program.show = false
+                    break
+                end
+            end
+        end
     end
 
     -- Look up for a icon.
@@ -246,13 +330,9 @@ function utils.parse_desktop_file(file)
         program.icon_path = utils.lookup_icon(program.Icon)
     end
 
-    -- Split categories into a table. Categories are written in one
-    -- line separated by semicolon.
+    -- Make the variable lower-case like the rest of them
     if program.Categories then
-        program.categories = {}
-        for category in program.Categories:gmatch('[^;]+') do
-            table.insert(program.categories, category)
-        end
+        program.categories = program.Categories
     end
 
     if program.Exec then
