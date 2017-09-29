@@ -38,7 +38,7 @@ alpha channel to `aa' and will blend the green with the color under it.
 TEXT FORMAT
 -----------
 You can use Pango markup in a text string.
-This allows formating the text rendered inside widgets.
+This allows formatting the text rendered inside widgets.
 Pango markup documentation can be found in the Pango documentation at
 http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
 
