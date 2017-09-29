@@ -95,6 +95,7 @@ local function get_link(file, element)
 end
 
 local all_files = get_all_files("./lib/", "lua")
+table.sort(all_files)
 
 local beautiful_vars = {}
 
