@@ -2,6 +2,7 @@ local parent    = ... --DOC_HIDE
 local wibox     = require("wibox") --DOC_HIDE
 local beautiful = require( "beautiful" ) --DOC_HIDE
 local Pango     = require("lgi").Pango --DOC_HIDE
+require("_date") --DOC_HIDE
 
 -- Beautiful fake get_font --DOC_HIDE
 local f = Pango.FontDescription.from_string("monospace 10") --DOC_HIDE
