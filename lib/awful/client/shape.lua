@@ -80,6 +80,10 @@ function shape.get_transformed(c, shape_name)
         cr:pop_group_to_source()
         cr:set_operator(cairo.Operator.IN)
         cr:paint()
+
+        -- 'cr' is kept alive until Lua's GC frees it. Make sure it does not
+        -- keep the group alive since that's a large image surface.
+        cr:set_source_rgba(0, 0, 0, 0)
     end
 
     return result
