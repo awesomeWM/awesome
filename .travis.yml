@@ -12,7 +12,7 @@ env:
   matrix:
     - LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
     # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
-    - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
+    - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov EXPORT_SDE=true
     # luajit: installed from source.
     - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1
     # Note: luarocks does not work with Lua 5.0.
@@ -156,6 +156,7 @@ install:
     }
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true -D DO_COVERAGE=$DO_COVERAGE"
+  - if [ "$EXPORT_SDE" = "true" ]; then export SOURCE_DATE_EPOCH=$(date -u -r docs/89-NEWS.md +%s); fi
   - |
     if [ "$EMPTY_THEME_WHILE_LOADING" = 1 ]; then
       # Break beautiful so that trying to access the theme before beautiful.init() causes an error
