@@ -133,6 +133,21 @@ function beautiful.set_font_dpi(dpi)
     return beautiful.get_font_dpi()
 end
 
+--- Get the font DPI for a specific screen
+--
+-- The screen font DPI is computed from the global font DPI, prorated to the
+-- ratio of the screen pixel density to the pixel density of the primary screen.
+-- On uniform DPI environments, this is a no-op, but on mixed-DPI environments
+-- it ensures that font scaling is uniform across different DPIs.
+-- (This approach follows the one used in Qt.)
+--
+-- @tparam[opt] screen scr The screen to get font DPI information about.
+--     Defaults to the primary screen
+function beautiful.screen_font_dpi(scr)
+    scr = scr and screen[scr] or screen.primary
+    return beautiful.get_font_dpi()*scr.dpi/screen.primary.dpi
+end
+
 --- @section end
 
 --- Load a font from a string or a font description.
