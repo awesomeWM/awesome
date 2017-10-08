@@ -17,6 +17,7 @@ local lgi = require("lgi")
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local gears_debug = require("gears.debug")
+local gears_dpi = require("gears.dpi")
 local Gio = require("lgi").Gio
 local protected_call = require("gears.protected_call")
 
@@ -34,6 +35,7 @@ local theme = {}
 local descs = setmetatable({}, { __mode = 'k' })
 local fonts = setmetatable({}, { __mode = 'v' })
 local active_font
+local font_dpi
 
 --- The default font.
 -- @beautiful beautiful.font
@@ -97,6 +99,41 @@ local active_font
 
 --- The current theme path (if any)
 -- @tfield string beautiful.theme_path
+
+--- Font DPI API
+-- @section font_dpi
+
+--- Get the global font DPI
+--
+-- @return user set value, or Xft.dpi, or the core DPI reported by the server
+-- @see beautiful.set_font_dpi
+function beautiful.get_font_dpi()
+    if not font_dpi then
+        -- Might not be present when run under unit tests
+        if awesome and awesome.xrdb_get_value then
+            font_dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi"))
+        end
+    end
+    -- Following Keith Packard's whitepaper on Xft,
+    -- https://keithp.com/~keithp/talks/xtc2001/paper/xft.html#sec-editing
+    -- the proper fallback for Xft.dpi is the vertical DPI reported by
+    -- the X server. Note that this can change, so we don't store it
+    return font_dpi or gears_dpi.core_dpi()
+end
+
+--- Set the global font DPI
+--
+-- @tparam[opt] number|nil dpi The DPI to set the font DPI to,
+--   or nil to autocompute
+-- @return the new global font DPI
+-- @see beautiful.get_font_dpi
+function beautiful.set_font_dpi(dpi)
+    font_dpi = dpi
+    -- TODO signal
+    return beautiful.get_font_dpi()
+end
+
+--- @section end
 
 --- Load a font from a string or a font description.
 --
