@@ -155,11 +155,12 @@ end
 -- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string
 -- @tparam string|lgi.Pango.FontDescription name Font, which can be a
 --   string or a lgi.Pango.FontDescription.
--- @tparam[opt] number dpi The DPI to compute the height at (defaults to 96)
+-- @tparam[opt] number dpi The DPI to compute the height at (defaults to the
+--   global font DPI)
 -- @treturn table A table with `name`, `description` and `height`.
 local function load_font(name, dpi)
     name = name or active_font
-    dpi = dpi or 96
+    dpi = dpi or beautiful.get_font_dpi()
     if name and type(name) ~= "string" then
         if descs[name] then
             name = descs[name]
@@ -255,7 +256,7 @@ end
 -- @tparam[opt] screen scr Screen to get the DPI information from.
 --   If unspecified, the global font DPI setting will be used.
 function beautiful.get_font_height(name, scr)
-    return load_font(name, beautiful.xresources.get_dpi(scr)).height
+    return load_font(name, beautiful.screen_font_dpi(scr)).height
 end
 
 --- Init function, should be runned at the beginning of configuration file.
