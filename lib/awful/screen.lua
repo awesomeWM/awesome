@@ -525,6 +525,18 @@ function screen.object.get_dpi(s)
         return xft_dpi
     end
 
+    -- Try to compute DPI based on outputs (use the minimum)
+    local dpi = nil
+    local geo = s.geometry
+    for _, o in pairs(s.outputs) do
+        local dpix = geo.width * mm_per_inch / o.mm_width
+        local dpiy = geo.height * mm_per_inch / o.mm_height
+        dpi = math.min(dpix, dpiy, dpi or dpix)
+    end
+    if dpi then
+        return dpi
+    end
+
     -- We have no outputs, so guess based on the size of the root window.
     if root and not fallback_dpi then
         local _, h = root.size()
