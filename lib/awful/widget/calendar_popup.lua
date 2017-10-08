@@ -173,7 +173,7 @@ local function get_geometry(widget, screen, position)
     local pos, s = position or "cc", screen or ascreen.focused()
     local margin = widget._calendar_margin or 0
     local wa = s.workarea
-    local width, height = widget:fit({screen=s, dpi=beautiful.xresources.get_dpi(s)}, wa.width, wa.height)
+    local width, height = widget:fit({screen=s, dpi=s.dpi}, wa.width, wa.height)
 
     width  = width  < wa.width  and width  or wa.width
     height = height < wa.height and height or wa.height

@@ -73,7 +73,7 @@ end
 -- @treturn number The preferred width.
 -- @treturn number The preferred height.
 function textbox:get_preferred_size(s)
-    return self:get_preferred_size_at_dpi(beautiful.xresources.get_dpi(s))
+    return self:get_preferred_size_at_dpi(screen[s].dpi)
 end
 
 --- Get the preferred height of a textbox at a given width.
@@ -83,7 +83,7 @@ end
 -- @tparam integer|screen s The screen on which the textbox will be displayed.
 -- @treturn number The needed height.
 function textbox:get_height_for_width(width, s)
-    return self:get_height_for_width_at_dpi(width, beautiful.xresources.get_dpi(s))
+    return self:get_height_for_width_at_dpi(width, screen[s].dpi)
 end
 
 --- Get the preferred size of a textbox.
