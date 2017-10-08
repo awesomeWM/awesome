@@ -15,6 +15,7 @@ local capi =
     awesome = awesome,
 }
 local gdebug = require("gears.debug")
+local gears_dpi = require("gears.dpi")
 local gmath = require("gears.math")
 local object = require("gears.object")
 local grect =  require("gears.geometry").rectangle
@@ -504,25 +505,18 @@ function screen.object.get_selected_tag(s)
     return screen.object.get_selected_tags(s)[1]
 end
 
+--- Screen DPI API
+-- @section screen_dpi
+
 --- The number of pixels per inch of the screen.
 -- @property dpi
 -- @treturn number the DPI value.
-
-local xft_dpi, fallback_dpi
 
 function screen.object.get_dpi(s)
     local mm_per_inch = 25.4
 
     if s.data.dpi then
         return s.data.dpi
-    end
-
-    -- Xft.dpi is explicit user configuration, so honor it
-    if not xft_dpi and awesome and awesome.xrdb_get_value then
-        xft_dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi")) or false
-    end
-    if xft_dpi then
-        return xft_dpi
     end
 
     -- Try to compute DPI based on outputs (use the minimum)
@@ -536,23 +530,15 @@ function screen.object.get_dpi(s)
             dpi = math.min(dpix, dpiy, dpi or dpix)
         end
     end
-    if dpi then
-        return dpi
-    end
 
-    -- We have no outputs, so guess based on the size of the root window.
-    if root and not fallback_dpi then
-        local _, h = root.size()
-        local _, hmm = root.size_mm()
-        fallback_dpi = hmm ~= 0 and h * mm_per_inch / hmm
-    end
-    return fallback_dpi or 96
+    return dpi or gears_dpi.core_dpi()
 end
 
 function screen.object.set_dpi(s, dpi)
     s.data.dpi = dpi
 end
 
+--- @section end
 
 --- When the tag history changed.
 -- @signal tag::history::update
