@@ -103,9 +103,11 @@ local active_font
 -- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string
 -- @tparam string|lgi.Pango.FontDescription name Font, which can be a
 --   string or a lgi.Pango.FontDescription.
+-- @tparam[opt] number dpi The DPI to compute the height at (defaults to 96)
 -- @treturn table A table with `name`, `description` and `height`.
-local function load_font(name)
+local function load_font(name, dpi)
     name = name or active_font
+    dpi = dpi or 96
     if name and type(name) ~= "string" then
         if descs[name] then
             name = descs[name]
@@ -113,32 +115,48 @@ local function load_font(name)
             name = name:to_string()
         end
     end
-    if fonts[name] then
-        return fonts[name]
+
+    -- TODO if there's a lot of reloading due to queries with different DPIs
+    -- in the mixed-DPI case, consider building the cache based on a combination
+    -- of name and DPI
+    local font = fonts[name]
+
+    if not font then
+        -- Load new font
+        local ctx = PangoCairo.font_map_get_default():create_context()
+
+        local desc = Pango.FontDescription.from_string(name)
+        -- Apply default values from the context (e.g. a default font size)
+        desc:merge(ctx:get_font_description(), false)
+
+        font = { name = name, context = ctx, description = desc,
+            height = nil, dpi = nil }
+
+        descs[desc] = name
     end
 
-    -- Load new font
-    local desc = Pango.FontDescription.from_string(name)
-    local ctx = PangoCairo.font_map_get_default():create_context()
-    ctx:set_resolution(beautiful.xresources.get_dpi())
+    local ctx = font.context
+    local desc = font.description
+    local height = font.height
 
-    -- Apply default values from the context (e.g. a default font size)
-    desc:merge(ctx:get_font_description(), false)
+    if font.dpi ~= dpi or not height then
+        ctx:set_resolution(dpi)
 
-    -- Calculate font height.
-    local metrics = ctx:get_metrics(desc, nil)
-    local height = math.ceil((metrics:get_ascent() + metrics:get_descent()) / Pango.SCALE)
-    if height == 0 then
-        height = desc:get_size() / Pango.SCALE
-        gears_debug.print_warning(string.format(
+        -- Calculate font height.
+        local metrics = ctx:get_metrics(desc, nil)
+        height = math.ceil((metrics:get_ascent() + metrics:get_descent()) / Pango.SCALE)
+        if height == 0 then
+            height = desc:get_size() / Pango.SCALE
+            gears_debug.print_warning(string.format(
             "beautiful.load_font: could not get height for '%s' (likely missing font), using %d.",
             name, height))
+        end
+        font.height = height
+        font.dpi = dpi
     end
 
-    local font = { name = name, description = desc, height = height }
     fonts[name] = font
-    descs[desc] = name
-    return font
+    return { name = font.name, description = desc, height = height }
 end
 
 --- Set an active font
@@ -171,11 +189,21 @@ function beautiful.get_merged_font(name, merge)
     return beautiful.get_font(merged:to_string())
 end
 
---- Get the height of a font.
+--- Get the height of a font in device pixels at the given DPI.
 --
 -- @param name Name of the font
-function beautiful.get_font_height(name)
-    return load_font(name).height
+-- @tparam number dpi The DPI to load the font at
+function beautiful.get_font_height_at_dpi(name, dpi)
+    return load_font(name, dpi).height
+end
+
+--- Get the height of a font in device pixels for the given screen.
+--
+-- @param name Name of the font
+-- @tparam[opt] screen scr Screen to get the DPI information from.
+--   If unspecified, the global font DPI setting will be used.
+function beautiful.get_font_height(name, scr)
+    return load_font(name, beautiful.xresources.get_dpi(scr)).height
 end
 
 --- Init function, should be runned at the beginning of configuration file.
