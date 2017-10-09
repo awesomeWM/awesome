@@ -380,7 +380,7 @@ function awfulwibar.new(arg)
     -- Set default size
     if position == "left" or position == "right" then
         arg.width = arg.width or beautiful["wibar_width"]
-            or math.ceil(beautiful.get_font_height(arg.font) * 1.5)
+            or math.ceil(beautiful.get_font_height(arg.font, screen) * 1.5)
         if arg.height then
             has_to_stretch = false
             if arg.screen then
@@ -392,7 +392,7 @@ function awfulwibar.new(arg)
         end
     else
         arg.height = arg.height or beautiful["wibar_height"]
-            or math.ceil(beautiful.get_font_height(arg.font) * 1.5)
+            or math.ceil(beautiful.get_font_height(arg.font, screen) * 1.5)
         if arg.width then
             has_to_stretch = false
             if arg.screen then
