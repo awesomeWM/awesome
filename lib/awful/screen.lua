@@ -19,6 +19,7 @@ local gears_dpi = require("gears.dpi")
 local gmath = require("gears.math")
 local object = require("gears.object")
 local grect =  require("gears.geometry").rectangle
+local round = require("gears.math").round
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -536,6 +537,18 @@ end
 
 function screen.object.set_dpi(s, dpi)
     s.data.dpi = dpi
+end
+
+--- Scale length according to the screen DPI
+--
+-- nil values are passed through, to allow things such as
+-- s.dpi_scale(optional.length1 or optional.length2)
+-- @tparam screen s The screen
+-- @tparam number|nil length Length to be scaled (in reference pixels at 96 DPI)
+-- @treturn integer Number of (device) pixels best approximating the given
+--   length
+function screen.object.dpi_scale(s, length)
+    return length and round(length * s.dpi / 96)
 end
 
 --- @section end
