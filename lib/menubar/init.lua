@@ -395,6 +395,9 @@ end
 --- Show the menubar on the given screen.
 -- @param scr Screen.
 function menubar.show(scr)
+    scr = scr or awful.screen.focused() or 1
+    scr = get_screen(scr)
+
     if not instance then
         -- Add to each category the name of its key in all_categories
         for k, v in pairs(menubar.menu_gen.all_categories) do
@@ -425,8 +428,6 @@ function menubar.show(scr)
     end
 
     -- Set position and size
-    scr = scr or awful.screen.focused() or 1
-    scr = get_screen(scr)
     local scrgeom = scr.workarea
     local geometry = menubar.geometry
     instance.geometry = {x = geometry.x or scrgeom.x,
