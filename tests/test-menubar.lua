@@ -10,14 +10,22 @@ function menubar.refresh(...)
     orig_refresh(...)
 end
 
+local have_atleast_lgi_092
+do
+    local ver_major, ver_minor, ver_patch = string.match(require('lgi.version'), '(%d)%.(%d)%.(%d)')
+    have_atleast_lgi_092 = tonumber(ver_major) > 0
+        or tonumber(ver_minor) > 9
+        or tonumber(ver_patch) > 1
+end
+
 -- XXX We are building Lua 5.3 with -DLUA_USE_APICHECK=1 and this catches some
--- bugs in lgi. Thus, do not run this test with Lua 5.3 until lgi is fixed.
+-- bugs in lgi. Thus, do not run this test with Lua 5.3 before lgi 0.9.2.
 -- We run into the same bug when doing code-coverage analysis, supposedly
 -- because the additional GC activity means that something which is GC-able when
 -- it should not gets collected too early.
 -- This test also sporadically errors on LuaJIT ("attempt to call a number
 -- value"). This might be a different issue, but still, disable the test.
-if _VERSION == "Lua 5.3" or debug.gethook() or jit then --luacheck: globals jit
+if (_VERSION == "Lua 5.3" or debug.gethook() or jit) and not have_atleast_lgi_092 then --luacheck: globals jit
     print("Skipping this test since it would just fail.")
     runner.run_steps { function() return true end }
     return
