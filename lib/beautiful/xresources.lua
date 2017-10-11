@@ -103,7 +103,11 @@ end
 -- @tparam[opt] integer|screen s The screen.
 -- @treturn integer Resulting size (rounded to integer).
 function xresources.apply_dpi(size, s)
-    return round(size / 96 * xresources.get_dpi(s))
+    if s then
+        return s:dpi_scale(size)
+    else
+        return round(size * require("beautiful").screen_font_dpi()/96)
+    end
 end
 
 return xresources
