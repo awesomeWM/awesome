@@ -532,7 +532,7 @@ function screen.object.get_dpi(s)
         end
     end
 
-    return dpi or gears_dpi.core_dpi()
+    return dpi and gears_dpi.round(dpi) or gears_dpi.core_dpi()
 end
 
 function screen.object.set_dpi(s, dpi)
