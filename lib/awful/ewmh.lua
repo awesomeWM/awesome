@@ -374,6 +374,16 @@ end
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.client_geometry_requests(c, context, hints)
     if context == "ewmh" and hints then
+        if c.immobilized_horizontal then
+            hints = gtable.clone(hints)
+            hints.x = nil
+            hints.width = nil
+        end
+        if c.immobilized_vertical then
+            hints = gtable.clone(hints)
+            hints.y = nil
+            hints.height = nil
+        end
         c:geometry(hints)
     end
 end

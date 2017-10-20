@@ -38,8 +38,12 @@ for _, gravity in ipairs { "NORTH_WEST", "NORTH", "NORTH_EAST", "WEST",
         assert(not c.maximized_vertical  )
         assert(not c.maximized           )
         assert(not c.fullscreen          )
+        assert(not c.immobilized_horizontal)
+        assert(not c.immobilized_vertical)
 
         c.maximized_horizontal = true
+        assert(c.immobilized_horizontal)
+        assert(not c.immobilized_vertical)
         return true
     end,
     function()
@@ -53,6 +57,7 @@ for _, gravity in ipairs { "NORTH_WEST", "NORTH", "NORTH_EAST", "WEST",
         --assert(new_geo.width+2*c.border_width==sgeo.width) --FIXME off by 4px
 
         c.maximized_horizontal = false
+        assert(not c.immobilized_horizontal)
         return true
     end,
 
@@ -102,6 +107,8 @@ for _, gravity in ipairs { "NORTH_WEST", "NORTH", "NORTH_EAST", "WEST",
         local bw      = c.border_width
 
         assert(c.fullscreen)
+        assert(c.immobilized_horizontal)
+        assert(c.immobilized_vertical)
 
         assert(new_geo.x==sgeo.x)
         assert(new_geo.y==sgeo.y)
@@ -140,6 +147,8 @@ for _, gravity in ipairs { "NORTH_WEST", "NORTH", "NORTH_EAST", "WEST",
         assert(c.floating)
         assert(new_geo.x==sgeo.x)
         assert(new_geo.y==sgeo.y)
+        assert(c.immobilized_horizontal)
+        assert(c.immobilized_vertical)
 
         c.maximized = false
 
@@ -191,6 +200,8 @@ gears.table.merge(steps, {
         assert(not c.maximized_horizontal)
         assert(not c.maximized_vertical)
         assert(c.maximized)
+        assert(c.immobilized_horizontal)
+        assert(c.immobilized_vertical)
 
         c:kill()
 
@@ -213,6 +224,9 @@ gears.table.merge(steps, {
 
         -- It might happen in the second try
         if not c.maximized then return end
+
+        assert(c.immobilized_horizontal)
+        assert(c.immobilized_vertical)
 
         c:kill()
 
