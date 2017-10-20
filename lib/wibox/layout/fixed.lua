@@ -14,8 +14,6 @@ local gtable = require("gears.table")
 
 local fixed = {}
 
---@DOC_fixed_COMMON@
-
 -- Layout a fixed layout. Each widget gets just the space it asks for.
 -- @param context The context in which we are drawn.
 -- @param width The available width.
@@ -352,6 +350,8 @@ end
 function fixed:get_spacing()
     return self._private.spacing or 0
 end
+
+--@DOC_fixed_COMMON@
 
 --@DOC_widget_COMMON@
 
