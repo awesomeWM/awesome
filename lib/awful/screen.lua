@@ -529,9 +529,12 @@ function screen.object.get_dpi(s)
     local dpi = nil
     local geo = s.geometry
     for _, o in pairs(s.outputs) do
-        local dpix = geo.width * mm_per_inch / o.mm_width
-        local dpiy = geo.height * mm_per_inch / o.mm_height
-        dpi = math.min(dpix, dpiy, dpi or dpix)
+        -- Ignore outputs with width/height 0
+        if o.mm_width ~= 0 and o.mm_height ~= 0 then
+            local dpix = geo.width * mm_per_inch / o.mm_width
+            local dpiy = geo.height * mm_per_inch / o.mm_height
+            dpi = math.min(dpix, dpiy, dpi or dpix)
+        end
     end
     if dpi then
         return dpi
