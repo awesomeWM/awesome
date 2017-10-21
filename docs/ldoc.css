@@ -157,7 +157,7 @@ table.index td { text-align: left; vertical-align: top; }
 #navigation li {
     text-indent: -1em;
     display: block;
-    margin: 3px 0px 0px 22px;
+    margin: 3px 0px 0px 0;
 }
 
 #navigation li li a {
