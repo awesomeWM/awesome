@@ -288,3 +288,11 @@ pre .global { color: #c040c0; }
 pre .user-keyword { color: #800080; }
 pre .prompt { color: #558817; }
 pre .url { color: #272fc2; text-decoration: underline; }
+
+#navigation h1 {
+  background-image: url(images/AUTOGEN_wibox_logo_logo_and_name.svg);
+  height:160px;
+  background-position: 10px 10px;
+  background-repeat:no-repeat;
+  color:transparent;
+}
