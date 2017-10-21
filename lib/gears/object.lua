@@ -56,6 +56,11 @@ function object:connect_signal(name, func)
     sig.strong[func] = true
 end
 
+-- Register a global signal receiver.
+function object:_connect_everything(callback)
+    table.insert(self._global_receivers, callback)
+end
+
 local function make_the_gc_obey(func)
     if _VERSION <= "Lua 5.1" then
         -- Lua 5.1 only has the behaviour we want if a userdata is used as the
@@ -119,6 +124,9 @@ function object:emit_signal(name, ...)
     end
     for func in pairs(sig.weak) do
         func(self, ...)
+    end
+    for _, func in ipairs(self._global_receivers) do
+        func(name, self, ...)
     end
 end
 
@@ -187,6 +195,8 @@ local function new(args)
     end
 
     ret._signals = {}
+
+    ret._global_receivers = {}
 
     local mt = {}
 
