@@ -63,6 +63,37 @@ function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
 end
 
+--- Create a widget that reflects the current state of this wibox.
+-- @treturn widget A new widget.
+function wibox:to_widget()
+    local bw = self.border_width or beautiful.border_width or 0
+    return wibox.widget {
+        {
+            self:get_widget(),
+            margins = bw,
+            widget  = wibox.container.margin
+        },
+        bg                 = self.bg or beautiful.bg_normal or "#ffffff",
+        fg                 = self.fg or beautiful.fg_normal or "#000000",
+        shape_border_color = self.border_color or beautiful.border_color or "#000000",
+        shape_border_width = bw*2,
+        shape_clip         = true,
+        shape              = self._shape,
+        forced_width       = self:geometry().width  + 2*bw,
+        forced_height      = self:geometry().height + 2*bw,
+        widget             = wibox.container.background
+    }
+end
+
+--- Save a screenshot of the wibox to `path`.
+-- @tparam string path The path.
+-- @tparam[opt=nil] table context A widget context.
+function wibox:save_to_svg(path, context)
+    wibox.widget.draw_to_svg_file(
+        self:to_widget(), path, self:geometry().width, self:geometry().height, context
+    )
+end
+
 function wibox:_apply_shape()
     local shape = self._shape
 
