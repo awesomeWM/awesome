@@ -1,0 +1,9 @@
+return {
+    default = {
+        verbose = true,
+        helper = "spec/preload.lua",
+        lpath = "lib/?.lua;lib/?/init.lua;spec/?.lua",
+    },
+}
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
