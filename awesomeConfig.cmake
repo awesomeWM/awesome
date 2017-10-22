@@ -6,10 +6,16 @@ set(VERSION devel)
 
 set(CODENAME "Human after all")
 
+string(TOUPPER "${CMAKE_BUILD_TYPE}" build_type)
+
 option(WITH_DBUS "build with D-BUS" ON)
-option(GENERATE_MANPAGES "generate manpages" ON)
+if("${build_type}" STREQUAL "RELEASE")
+    option(GENERATE_MANPAGES "generate manpages" ON)
+else()
+    option(GENERATE_MANPAGES "generate manpages" OFF)
+endif()
 option(COMPRESS_MANPAGES "compress manpages" ON)
-option(GENERATE_DOC "generate API documentation" ON)
+option(GENERATE_DOC "generate API documentation" OFF)
 option(DO_COVERAGE "build with coverage" OFF)
 if (GENERATE_DOC AND DO_COVERAGE)
     message(STATUS "Not generating API documentation with DO_COVERAGE")

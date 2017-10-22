@@ -263,6 +263,10 @@ if(GENERATE_MANPAGES)
     endforeach()
 
     add_custom_target(man ALL DEPENDS ${MAN_FILES})
+else()
+    add_custom_target(man false
+        COMMENT "man target not generated. Use GENERATE_MANPAGES=1 to enable it, e.g. via `cmake -D GENERATE_MANPAGES=1 build/` or `make distclean man`."
+        VERBATIM)
 endif()
 # }}}
 
@@ -302,6 +306,10 @@ if(GENERATE_DOC)
         WORKING_DIRECTORY ${AWE_DOC_DIR}
         DEPENDS ${AWE_SRCS} ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld
         COMMENT "Generating API documentation${ldoc_desc_suffix}")
+else()
+    add_custom_target(ldoc false
+        COMMENT "ldoc target not generated. Use GENERATE_DOC=1 to enable it, e.g. via `cmake -D GENERATE_DOC=1 build/` or `make distclean ldoc`."
+        VERBATIM)
 endif()
 # }}}
 
