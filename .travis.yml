@@ -171,9 +171,13 @@ script:
       SOURCE_DIRECTORY="$PWD"
       mkdir "$BUILD_IN_DIR"
       cd "$BUILD_IN_DIR"
+      BUILD_DIR="$PWD"
       travis_run_in_fold "build_in_dir" cmake $CMAKE_ARGS "$SOURCE_DIRECTORY"
+    else
+      BUILD_DIR="$PWD/build"
     fi
   - travis_run_in_fold "make" make
+  - if [ "$BUILD_APIDOC" = "true" ]; then test -f "$BUILD_DIR/doc/index.html"; fi
   - |
     if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
       travis_run_in_fold "make.install" sudo env PATH=$PATH make install
