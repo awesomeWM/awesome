@@ -9,7 +9,7 @@ if [ -z "$1" ]; then
     exit 64
 fi
 
-GIT_TAG="$1"
+GIT_TAG="${1%-dirty}"
 SVERSION=$(echo "$GIT_TAG" | sed 's/^v//')
 
 date=$(git log -1 --format=%cI "$GIT_TAG")
