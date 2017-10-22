@@ -17,7 +17,7 @@ $(BUILDDIR)/Makefile:
 	$(ECHO)
 	mkdir -p $(BUILDDIR)
 	$(ECHO) "Running cmake…"
-	cd $(BUILDDIR) && cmake $(CMAKE_ARGS) "$(@D)" ..
+	cd $(BUILDDIR) && cmake $(CMAKE_ARGS) "$(CURDIR)"
 
 cmake-build: $(BUILDDIR)/Makefile
 	$(ECHO) "Building…"
