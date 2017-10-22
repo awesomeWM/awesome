@@ -35,6 +35,9 @@ distclean:
 	$(RM) -r $(BUILDDIR) $(TARGETS)
 	$(ECHO) " done"
 
+# Use an explicit rule to not "update" the Makefile via the implicit rule below.
+Makefile: ;
+
 %: $(BUILDDIR)/Makefile
 	$(ECHO) "Running make $@ in $(BUILDDIR)…"
 	$(MAKE) -C $(BUILDDIR) $@
