@@ -388,14 +388,14 @@ add_executable(test-gravity tests/test-gravity.c)
 target_link_libraries(test-gravity
     ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
 add_custom_target(check-integration
-    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' DO_COVERAGE=${DO_COVERAGE} ./tests/run.sh \$\${TEST_RUN_ARGS:--W}
+    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ./tests/run.sh \$\${TEST_RUN_ARGS:--W}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running integration tests"
     DEPENDS ${PROJECT_AWE_NAME}
     USES_TERMINAL)
 add_dependencies(check-integration test-gravity)
 add_custom_target(check-themes
-    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' DO_COVERAGE=${DO_COVERAGE} ./tests/themes/run.sh
+    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ./tests/themes/run.sh
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Testing themes"
     USES_TERMINAL
