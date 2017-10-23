@@ -181,8 +181,8 @@ script:
     fi
   # Run checks.
   - |
-    set -ex
     if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
+      set -ex
       if [ -n "$DO_COVERAGE" ]; then
         travis_fold_start "DO_COVERAGE"
 
@@ -205,6 +205,7 @@ script:
         travis_run_in_fold "make.check-integration" make check-integration
         travis_run_in_fold "make.check-themes" make check-themes
       fi
+      set +x
     fi
   # Run check-qa.
   - |
