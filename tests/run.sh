@@ -191,7 +191,8 @@ if [ -n "$DO_COVERAGE" ] && [ "$DO_COVERAGE" != 0 ]; then
     if [ -f "${RC_FILE}.in" ]; then
         RC_FILE="${RC_FILE}.in"
     fi
-    sed "1 s~^~require('luacov.runner')(); \0~" "$RC_FILE" > "$tmp_files/awesomerc.lua"
+    sed "1 s~^~require('luacov.runner')('$source_dir/.luacov'); \0~" \
+        "$RC_FILE" > "$tmp_files/awesomerc.lua"
     RC_FILE=$tmp_files/awesomerc.lua
 fi
 
