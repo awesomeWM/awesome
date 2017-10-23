@@ -340,6 +340,7 @@ end
 --- Refresh menubar's cache by reloading .desktop files.
 -- @tparam[opt] screen scr Screen.
 function menubar.refresh(scr)
+    scr = get_screen(scr or awful.screen.focused() or 1)
     menubar.menu_gen.generate(function(entries)
         menubar.menu_entries = entries
         if instance then
@@ -393,8 +394,9 @@ local function prompt_keypressed_callback(mod, key, comm)
 end
 
 --- Show the menubar on the given screen.
--- @param scr Screen.
+-- @param[opt] scr Screen.
 function menubar.show(scr)
+    scr = get_screen(scr or awful.screen.focused() or 1)
     if not instance then
         -- Add to each category the name of its key in all_categories
         for k, v in pairs(menubar.menu_gen.all_categories) do
@@ -425,8 +427,6 @@ function menubar.show(scr)
     end
 
     -- Set position and size
-    scr = scr or awful.screen.focused() or 1
-    scr = get_screen(scr)
     local scrgeom = scr.workarea
     local geometry = menubar.geometry
     instance.geometry = {x = geometry.x or scrgeom.x,

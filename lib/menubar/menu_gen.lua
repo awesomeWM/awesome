@@ -108,16 +108,15 @@ function menu_gen.generate(callback)
                                 end
                             end
                         end
-                        if target_category then
-                            local name = utils.rtrim(entry.Name) or ""
-                            local cmdline = utils.rtrim(entry.cmdline) or ""
-                            local icon = entry.icon_path or nil
-                            table.insert(result, { name = name,
-                                         cmdline = cmdline,
-                                         icon = icon,
-                                         category = target_category })
-                            unique_entries[unique_key] = true
-                        end
+
+                        local name = utils.rtrim(entry.Name) or ""
+                        local cmdline = utils.rtrim(entry.cmdline) or ""
+                        local icon = entry.icon_path or nil
+                        table.insert(result, { name = name,
+                                     cmdline = cmdline,
+                                     icon = icon,
+                                     category = target_category })
+                        unique_entries[unique_key] = true
                     end
                 end
             end

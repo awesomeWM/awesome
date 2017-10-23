@@ -61,7 +61,7 @@ ${TOP_SOURCE_DIR}/tests/examples/shims/?/init.lua\\;\
 ${TOP_SOURCE_DIR}/tests/examples/shims/?\\;\
 ${LUA_PATH_}")
 
-set(LUA_COV_RUNNER env -u LUA_PATH_5_1 -u LUA_PATH_5_2 -u LUA_PATH_5_3 "LUA_PATH=${LUA_PATH_}" ${LUA_COV_RUNNER})
+set(LUA_COV_RUNNER env -u LUA_PATH_5_1 -u LUA_PATH_5_2 -u LUA_PATH_5_3 "LUA_PATH=${LUA_PATH_}" "AWESOME_THEMES_PATH=${TOP_SOURCE_DIR}/themes/" ${LUA_COV_RUNNER})
 
 # The documentation images directory.
 set(IMAGE_DIR "${CMAKE_BINARY_DIR}/doc/images")

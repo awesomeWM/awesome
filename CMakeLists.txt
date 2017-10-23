@@ -273,7 +273,6 @@ endif()
 
 # {{{ Lua API Documentation
 if(GENERATE_DOC)
-
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
         file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
         file(MAKE_DIRECTORY ${BUILD_DIR}/doc)
@@ -296,13 +295,18 @@ if(GENERATE_DOC)
 
     add_custom_target(ldoc ALL
         DEPENDS ${BUILD_DIR}/doc/index.html)
+    if (STRICT_TESTS)
+        set(ldoc_args --fatalwarnings .)
+        set(ldoc_desc_suffix " (fatal warnings)")
+    else()
+        set(ldoc_args .)
+    endif()
     add_custom_command(
-        COMMAND ${LDOC_EXECUTABLE} --fatalwarnings .
         OUTPUT  ${BUILD_DIR}/doc/index.html
+        COMMAND ${LDOC_EXECUTABLE} ${ldoc_args}
         WORKING_DIRECTORY ${AWE_DOC_DIR}
         DEPENDS ${AWE_SRCS} ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld
-        COMMENT "Generating API documentation"
-        VERBATIM)
+        COMMENT "Generating API documentation${ldoc_desc_suffix}")
 endif()
 # }}}
 
@@ -413,8 +417,7 @@ a_find_program(BUSTED_EXECUTABLE busted FALSE)
 if(BUSTED_EXECUTABLE)
     # Keep the arguments in sync with the version below!
     add_custom_target(check-unit
-        ${BUSTED_EXECUTABLE} "--helper=${CMAKE_SOURCE_DIR}/spec/preload.lua"
-        "--lpath=lib/?.lua;lib/?/init.lua;spec/?.lua"
+        ${BUSTED_EXECUTABLE}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
@@ -422,9 +425,7 @@ if(BUSTED_EXECUTABLE)
 
     # Same as above, but with --coverage argument
     add_custom_target(check-unit-coverage
-        ${BUSTED_EXECUTABLE} "--helper=${CMAKE_SOURCE_DIR}/spec/preload.lua"
-        "--lpath=lib/?.lua;lib/?/init.lua;spec/?.lua"
-        "--coverage"
+        ${BUSTED_EXECUTABLE} "--coverage"
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests under LuaCov"
         VERBATIM)

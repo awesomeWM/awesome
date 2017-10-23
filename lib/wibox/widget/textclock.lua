@@ -16,6 +16,11 @@ local TimeZone = glib.TimeZone
 
 local textclock = { mt = {} }
 
+--- Force a textclock to update now.
+function textclock:force_update()
+    self._timer:emit_signal("timeout")
+end
+
 --- This lowers the timeout so that it occurs "correctly". For example, a timeout
 -- of 60 is rounded so that it occurs the next time the clock reads ":00 seconds".
 local function calc_timeout(real_timeout)
@@ -37,15 +42,15 @@ function textclock.new(format, timeout, timezone)
     timezone = timezone and TimeZone.new(timezone) or TimeZone.new_local()
 
     local w = textbox()
-    local t
+    w.force_update = textclock.force_update
     function w._private.textclock_update_cb()
         w:set_markup(DateTime.new_now(timezone):format(format))
-        t.timeout = calc_timeout(timeout)
-        t:again()
+        w._timer.timeout = calc_timeout(timeout)
+        w._timer:again()
         return true -- Continue the timer
     end
-    t = timer.weak_start_new(timeout, w._private.textclock_update_cb)
-    t:emit_signal("timeout")
+    w._timer = timer.weak_start_new(timeout, w._private.textclock_update_cb)
+    w:force_update()
     return w
 end
 

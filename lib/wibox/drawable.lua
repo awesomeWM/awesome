@@ -44,7 +44,7 @@ local function get_widget_context(self)
     end
 
     local context = self._widget_context
-    local dpi = beautiful.xresources.get_dpi(s)
+    local dpi = s.dpi
     if (not context) or context.screen ~= s or context.dpi ~= dpi then
         context = {
             screen = s,

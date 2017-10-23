@@ -22,7 +22,7 @@ env:
     - secure: "KDxXpepUky8agvfzG73f8EOkufTvVJA5fdE/+GAQ51OIn6NRLIYgvX3FuPw3PQxEOru7Bhiw/3+mfZrlYmjv8HeJx7/hfcVbYrnOK3ivBdNQSDXJo4DE6fTyT3gW1tsS09mw6r5zoBX46lIU+M1toPQPmVtt/cHQ8pCiC+I7mUs="
   matrix:
     - MAKE_ARGS="LUA_PKG=lua5.3 DO_COVERAGE=all"
-    - MAKE_ARGS="LUA_PKG=lua5.2 DO_COVERAGE=all"
+    - MAKE_ARGS="LUA_PKG=lua5.2 DO_COVERAGE=all" SOURCE_DATE_EPOCH=1893456000
     - MAKE_ARGS="LUA_PKG=luajit DO_COVERAGE=all"
     - MAKE_ARGS="LUA_PKG=lua5.1" DOCKER_RUN_ARGS="$DOCKER_RUN_ARGS -e BUILD_IN_DIR=/tmp/awesome-build"
 

@@ -64,8 +64,6 @@ function xresources.get_current_theme()
 end
 
 
-local dpi_per_screen = {}
-
 local function get_screen(s)
     return s and screen[s]
 end
@@ -75,8 +73,8 @@ end
 -- @treturn number DPI value.
 function xresources.get_dpi(s)
     s = get_screen(s)
-    if dpi_per_screen[s] then
-        return dpi_per_screen[s]
+    if s then
+        return s.dpi
     end
     if not xresources.dpi then
         -- Might not be present when run under unit tests
@@ -115,7 +113,7 @@ function xresources.set_dpi(dpi, s)
     if not s then
         xresources.dpi = dpi
     else
-        dpi_per_screen[s] = dpi
+        s.dpi = dpi
     end
 end
 

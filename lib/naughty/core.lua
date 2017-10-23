@@ -775,18 +775,18 @@ function naughty.notify(args)
     notification.iconbox = iconbox
 
     -- create container wibox
-    notification.box = wibox({ fg = fg,
-                               bg = bg,
-                               border_color = border_color,
-                               border_width = border_width,
-                               shape_border_color = shape and border_color,
-                               shape_border_width = shape and border_width,
-                               shape = shape,
-                               type = "notification" })
-
-    if reuse_box then
+    if not reuse_box then
+        notification.box = wibox({ type = "notification" })
+    else
         notification.box = reuse_box
     end
+    notification.box.fg = fg
+    notification.box.bg = bg
+    notification.box.border_color = border_color
+    notification.box.border_width = border_width
+    notification.box.shape_border_color = shape and border_color
+    notification.box.shape_border_width = shape and border_width
+    notification.box.shape = shape
 
     if hover_timeout then notification.box:connect_signal("mouse::enter", hover_destroy) end
 

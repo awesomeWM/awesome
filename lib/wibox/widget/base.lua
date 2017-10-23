@@ -584,6 +584,34 @@ function base.make_widget_declarative(args)
     return setmetatable(w, mt)
 end
 
+--- Create a widget from an undetermined value.
+--
+-- The value can be:
+--
+-- * A widget (in which case nothing new is created)
+-- * A declarative construct
+-- * A constructor function
+-- * A metaobject
+--
+-- @param wdg The value.
+-- @param[opt=nil] ... Arguments passed to the contructor (if any).
+-- @treturn The new widget.
+function base.make_widget_from_value(wdg, ...)
+    local is_table = type(wdg) == "table"
+    local is_function = ((not is_table) and type(wdg) == "function")
+        or (is_table and getmetatable(wdg) and getmetatable(wdg).__call)
+
+    if is_function then
+        wdg = wdg(...)
+    elseif is_table and not wdg.is_widget then
+        wdg = base.make_widget_declarative(wdg)
+    else
+        assert(wdg.is_widget, "The argument is not a function, table, or widget.")
+    end
+
+    return wdg
+end
+
 --- Create an empty widget skeleton.
 --
 -- See [Creating new widgets](../documentation/04-new-widget.md.html).
