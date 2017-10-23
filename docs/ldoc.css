@@ -1,7 +1,7 @@
 body { 
     color: #47555c;
     font-size: 16px;
-    font-family: "Open Sans", sans-serif;
+    font-family: sans-serif;
     margin: 0;
     background: #eff4ff;
 }
@@ -44,7 +44,7 @@ span.types:after {
 }
 
 p.name {
-    font-family: "Andale Mono", monospace;
+    font-family: monospace;
 }
 
 #navigation {
@@ -135,7 +135,7 @@ pre {
     /* border: 1px solid #C0C0C0; /* silver */
     padding: 15px;
     overflow: auto;
-    font-family: "Andale Mono", monospace;
+    font-family: monospace;
 }
 
 #content ul pre.example {
