@@ -224,7 +224,7 @@ fi
 count_tests=0
 errors=()
 # Seconds after when awesome gets killed.
-timeout_stale=180 # FIXME This should be no more than 60s
+timeout_stale=30
 
 for f in $tests; do
     echo "== Running $f =="
