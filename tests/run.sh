@@ -198,6 +198,7 @@ fi
 
 # Start awesome.
 start_awesome() {
+    cd "$build_dir"
     # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
     # SOURCE_DIRECTORY is used by .luacov.
     DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" \
@@ -225,7 +226,6 @@ errors=()
 # Seconds after when awesome gets killed.
 timeout_stale=30
 
-cd "$build_dir"
 for f in $tests; do
     echo "== Running $f =="
     (( ++count_tests ))
@@ -233,15 +233,17 @@ for f in $tests; do
     start_awesome
 
     if [ ! -r "$f" ]; then
-        if [ -r "$source_dir/$f" ]; then
-            f="$source_dir/$f"
-        elif [ -r "$source_dir/${f#tests/}" ]; then
-            f="$source_dir/${f#tests/}"
+        if [ -r "${f#tests/}" ]; then
+            f=${f#tests/}
         else
             echo "===> ERROR $f is not readable! <==="
             errors+=("$f is not readable.")
             continue
         fi
+    fi
+    # Make the filename absolute if it is not.
+    if [ "$f#/" = "$f" ]; then
+        f="$source_dir/$f"
     fi
 
     # Execute the test file in awesome.
