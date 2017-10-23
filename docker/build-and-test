@@ -1,0 +1,141 @@
+#!/bin/bash
+# A wrapper script used as entrypoint to (re)build and then run the tests.
+
+set -e
+set -x
+
+# DEBUG
+# find /usr/include -type d | grep lua
+# find /usr/lib -type d | grep lua
+# env | grep -i lua
+
+# Create a user based on AWESOME_UID, which is supposed to be the user's id.
+# This might get drooped after having moved to named volumed already?!
+if [ -n "$AWESOME_UID" ]; then
+  USER=${USER:-awesome}
+  echo "Creating user ${USER} with UID $AWESOME_UID.."
+  adduser -D -s /bin/bash -u "$AWESOME_UID" "${USER}"
+
+  chown "$AWESOME_UID" /src/awesome/build
+
+  if [ -n "$CCACHE_DIR" ] && [ -d "$CCACHE_DIR" ]; then
+    chown "$AWESOME_UID" "$CCACHE_DIR"
+  fi
+
+  # Re-execute this script without the user management.
+  unset AWESOME_UID
+  exec su "$USER" -c "$0 $*"
+fi
+
+echo "Running build-and-test: LUA_PKG=$LUA_PKG DO_COVERAGE=$DO_COVERAGE"
+
+if [ -n "$DO_COVERAGE" ]; then
+  CMAKE_ARGS="$CMAKE_ARGS -D DO_COVERAGE=$DO_COVERAGE"
+fi
+
+if [ -n "$BUILD_IN_DIR" ]; then
+  echo "BUILD_IN_DIR=$BUILD_IN_DIR"
+  SOURCE_DIRECTORY="$PWD"
+  mkdir "$BUILD_IN_DIR"
+  cd "$BUILD_IN_DIR"
+  # shellcheck disable=SC2086
+  cmake $CMAKE_ARGS "$SOURCE_DIRECTORY"
+  BUILD_DIR="$BUILD_IN_DIR"
+else
+  SOURCE_DIRECTORY="$PWD"
+  BUILD_DIR="$PWD/build"
+fi
+
+make
+"$BUILD_DIR/awesome" --version
+
+if [ -n "$DO_COVERAGE" ]; then
+  # Use separate assignment, so that "set -e" exits when luarocks is not found.
+  luarocks_paths="$(luarocks path --bin)"
+  eval "$luarocks_paths"
+
+  # Source: https://github.com/travis-ci/travis-build/blob/ba5abcec10e5a3c7d31d3e1afd0dc7f48a6162ab/lib/travis/build/templates/header.sh
+  travis_retry() {
+    ANSI_RED="\033[31;1m"
+    # ANSI_GREEN="\033[32;1m"
+    # ANSI_YELLOW="\033[33;1m"
+    ANSI_RESET="\033[0m"
+    # ANSI_CLEAR="\033[0K"
+
+    local result=0
+    local count=1
+    while [ $count -le 3 ]; do
+      [ $result -ne 0 ] && {
+        echo -e "\n${ANSI_RED}The command \"$@\" failed. Retrying, $count of 3.${ANSI_RESET}\n" >&2
+      }
+      "$@"
+      result=$?
+      [ $result -eq 0 ] && break
+      count=$(($count + 1))
+      sleep 1
+    done
+    [ $count -gt 3 ] && {
+      echo -e "\n${ANSI_RED}The command \"$@\" failed 3 times.${ANSI_RESET}\n" >&2
+    }
+    return $result
+  }
+
+  do_codecov() {
+    echo "== do_codecov in $PWD: $*: $BUILD_DIR/luacov.stats.out: =="
+    if [ "$DO_COVERAGE" = "codecov" ] || [ "$DO_COVERAGE" = all ]; then
+      test -f "$BUILD_DIR/luacov.stats.out" || { echo "$BUILD_DIR/luacov.stats.out does not exist."; return 1; }
+      luacov || return 1
+      travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -f "$BUILD_DIR/luacov.report.out" -F "$1" || return 1
+      if [ "$DO_COVERAGE" = all ]; then
+        cat "$BUILD_DIR/luacov.stats.out" >> "$BUILD_DIR/luacov.stats.all.out"
+      fi
+      rm "$BUILD_DIR/luacov.stats.out"
+    fi
+    return 0
+  }
+  do_codecov_gcov() {
+    echo "== do_codecov_gcov in $PWD: $*: =="
+    if [ "$DO_COVERAGE" = codecov ] || [ "$DO_COVERAGE" = all ]; then
+      (cd "$BUILD_DIR" \
+        && travis_retry bash /tmp/codecov-bash -X coveragepy -F "$1") || return 1
+    fi
+    return 0
+  }
+
+  # travis_fold_start "DO_COVERAGE"
+
+  # Run tests/examples explicitly.
+  # shellcheck disable=SC2086
+  (mkdir -p "$BUILD_DIR/examples" \
+    && cd "$BUILD_DIR/examples" \
+    && BUILD_DIRECTORY=$BUILD_DIR cmake $CMAKE_ARGS "$SOURCE_DIRECTORY/tests/examples")
+  do_codecov samples
+
+  make check-unit-coverage
+  do_codecov unittests
+
+  make check-integration
+  make check-themes
+  do_codecov functionaltests
+
+  do_codecov_gcov c_code
+
+  # travis_fold_end
+
+  # Push code coverage information for coveralls.
+  if [ "$DO_COVERAGE" = coveralls ] || [ "$DO_COVERAGE" = all ]; then
+    if [ ! -f "$BUILD_DIR/luacov.stats.out" ]; then
+      mv "$BUILD_DIR/luacov.stats.all.out" "$BUILD_DIR/luacov.stats.out"
+    elif [ -f "$BUILD_DIR/luacov.stats.all.out" ]; then
+      echo "$BUILD_DIR/luacov.stats.all.out does not exist."
+      exit 1
+    fi
+    # cpp-coveralls
+    coveralls --verbose --gcov-options \\-pbcu\ \\-s\ "$BUILD_DIR" -b "$PWD" --exclude CMakeCCompilerId.c --dump /tmp/c.report.json
+    luacov-coveralls --verbose --merge --json /tmp/c.report.json
+  fi
+else
+  make check-unit
+  make check-integration
+  make check-themes
+fi

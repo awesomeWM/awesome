@@ -247,8 +247,9 @@ for f in $tests; do
 
     # Tail the log and quit, when awesome quits.
     # Use a single `grep`, otherwise `--line-buffered` would be required.
+    pattern_ignore_dbus='.{19} W: awesome: a_dbus_connect:[0-9]+: Could not connect to D-Bus system bus:'
     tail -n 100000 -s 0.1 -f --pid "$awesome_pid" "$awesome_log" \
-        | grep -vE '^(.{19} W: awesome: a_dbus_connect:[0-9]+: Could not connect to D-Bus system bus:|Test finished successfully\.$)' || true
+        | grep -vE "^($pattern_ignore_dbus|Test finished successfully\.$)" || true
 
     set +e
     wait $awesome_pid
@@ -268,7 +269,7 @@ for f in $tests; do
     error="$(grep --color -o --binary-files=text -E "$pattern" "$awesome_log" || true)"
     if [[ $fail_on_warning ]]; then
         # Filter out ignored warnings.
-        error="$(echo "$error" | grep -vE '.{19} W: awesome: (a_glib_poll|Cannot reliably detect EOF)' || true)"
+        error="$(echo "$error" | grep -vE "^$pattern_ignore_dbus|.{19} W: awesome: (a_glib_poll|Cannot reliably detect EOF)" || true)"
     fi
     if [[ -n "$error" ]]; then
         color_red
