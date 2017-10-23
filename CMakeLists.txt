@@ -391,6 +391,7 @@ add_custom_target(check-integration
     ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ./tests/run.sh \$\${TEST_RUN_ARGS:--W}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running integration tests"
+    DEPENDS ${PROJECT_AWE_NAME}
     USES_TERMINAL)
 add_dependencies(check-integration test-gravity)
 add_custom_target(check-themes
