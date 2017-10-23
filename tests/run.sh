@@ -191,14 +191,12 @@ if [ -n "$DO_COVERAGE" ] && [ "$DO_COVERAGE" != 0 ]; then
     if [ -f "${RC_FILE}.in" ]; then
         RC_FILE="${RC_FILE}.in"
     fi
-    sed "1 s~^~require('luacov.runner')('$source_dir/.luacov'); \0~" \
-        "$RC_FILE" > "$tmp_files/awesomerc.lua"
+    sed "1 s~^~require('luacov.runner')(); \0~" "$RC_FILE" > "$tmp_files/awesomerc.lua"
     RC_FILE=$tmp_files/awesomerc.lua
 fi
 
 # Start awesome.
 start_awesome() {
-    cd "$build_dir"
     # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
     # SOURCE_DIRECTORY is used by .luacov.
     DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" \
@@ -226,6 +224,7 @@ errors=()
 # Seconds after when awesome gets killed.
 timeout_stale=30
 
+cd "$build_dir"
 for f in $tests; do
     echo "== Running $f =="
     (( ++count_tests ))
@@ -233,8 +232,10 @@ for f in $tests; do
     start_awesome
 
     if [ ! -r "$f" ]; then
-        if [ -r "${f#tests/}" ]; then
-            f=${f#tests/}
+        if [ -r "$source_dir/$f" ]; then
+            f="$source_dir/$f"
+        elif [ -r "$source_dir/${f#tests/}" ]; then
+            f="$source_dir/${f#tests/}"
         else
             echo "===> ERROR $f is not readable! <==="
             errors+=("$f is not readable.")
@@ -242,8 +243,8 @@ for f in $tests; do
         fi
     fi
 
-    # Send the test file to awesome.
-    DISPLAY=$D "$AWESOME_CLIENT" 2>&1 < "$f"
+    # Execute the test file in awesome.
+    DISPLAY=$D "$AWESOME_CLIENT" 2>&1 "dofile('$f')"
 
     # Tail the log and quit, when awesome quits.
     # Use a single `grep`, otherwise `--line-buffered` would be required.

@@ -41,5 +41,5 @@ for theme_file in themes/*/theme.lua; do
     AWESOME_RC_FILE="$config_file" \
         AWESOME_THEMES_PATH="$build_dir/themes" \
         AWESOME_ICON_PATH="$PWD/icons" \
-        "$source_dir/tests/run.sh" themes/tests.lua
+        "$source_dir/tests/run.sh" "$source_dir/tests/themes/tests.lua"
 done
