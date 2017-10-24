@@ -213,8 +213,8 @@ script:
       travis_run_in_fold "make.check-qa" make check-qa
     fi
   - |
-    set -e
     if [ "$TEST_PREV_COMMITS" = 1 ] && ! [ "$TRAVIS_PULL_REQUEST" = false ]; then
+      set -e
       # Check each commit separately (to make git-bisect less annoying).
       # Fix Travis' commit range (https://github.com/travis-ci/travis-ci/issues/4596).
       commit_range="${TRAVIS_COMMIT_RANGE/.../..}"
