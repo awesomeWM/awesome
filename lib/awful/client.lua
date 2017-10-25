@@ -634,6 +634,40 @@ function client.object.is_fixed(c)
     return false
 end
 
+--- Is the client immobilized horizontally?
+--
+-- Does the client have a fixed horizontal position and width, i.e. is it
+-- fullscreen, maximized, or horizontally maximized?
+--
+-- This property is read only.
+-- @property immobilized
+-- @param boolean The immobilized state
+-- @see maximized
+-- @see maximized_horizontal
+-- @see maximized_vertical
+-- @see fullscreen
+
+function client.object.is_immobilized_horizontal(c)
+    return c.fullscreen or c.maximized or c.maximized_horizontal
+end
+
+--- Is the client immobilized vertically?
+--
+-- Does the client have a fixed vertical position and width, i.e. is it
+-- fullscreen, maximized, or vertically maximized?
+--
+-- This property is read only.
+-- @property immobilized
+-- @param boolean The immobilized state
+-- @see maximized
+-- @see maximized_horizontal
+-- @see maximized_vertical
+-- @see fullscreen
+
+function client.object.is_immobilized_vertical(c)
+    return c.fullscreen or c.maximized or c.maximized_vertical
+end
+
 --- Get a client floating state.
 -- @client c A client.
 -- @see floating
