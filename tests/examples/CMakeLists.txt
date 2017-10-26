@@ -282,43 +282,34 @@ endfunction()
 file(GLOB_RECURSE test_files LIST_DIRECTORIES false
     "${TOP_SOURCE_DIR}/tests/examples/*.lua")
 
-# TODO: check for changed files (timestamp)?!
-if(NOT "${test_files}" STREQUAL "${EXAMPLE_DOC_SOURCE_FILES}")
-    set(EXAMPLE_DOC_SOURCE_FILES "${test_files}" CACHE INTERNAL "Source files used to generate doc files.")
+# Find and run all test files.
+foreach(file ${test_files})
+    if ((NOT "${file}" MATCHES ".*/shims/.*")
+        AND (NOT "${file}" MATCHES ".*/template.lua"))
 
-    # Find and run all test files.
-    foreach(file ${test_files})
-        if ((NOT "${file}" MATCHES ".*/shims/.*")
-            AND (NOT "${file}" MATCHES ".*/template.lua"))
+        # Get the file name without the extension.
+        get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
 
-            # Get the file name without the extension.
-            get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
+        get_namespace(namespace "${file}")
 
-            get_namespace(namespace "${file}")
+        run_test("${file}" "${namespace}" ESCAPED_CODE_EXAMPLE)
 
-            run_test("${file}" "${namespace}" ESCAPED_CODE_EXAMPLE)
+        # Set the test name.
+        set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
 
-            # Set the test name.
-            set(TEST_NAME DOC${namespace}_${TEST_FILE_NAME}_EXAMPLE)
+        # Anything called @DOC_`namespace`_EXAMPLE@
+        # in the Lua or C sources will be replaced by the content of that
+        # variable during the pre-processing.
+        # While at it, replace \" created by CMake by ',
+        # &quot; wont work in <code>.
+        string(REPLACE "\"" "'" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
+    endif()
+endforeach()
 
-            # Anything called @DOC_`namespace`_EXAMPLE@
-            # in the Lua or C sources will be replaced by the content of that
-            # variable during the pre-processing.
-            # While at it, replace \" created by CMake by ',
-            # &quot; wont work in <code>.
-            string(REPLACE "\"" "'" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
-        endif()
-    endforeach()
-
-    set(EXAMPLE_DOC_GENERATED_FILES ${EXAMPLE_DOC_GENERATED_FILES}
-        CACHE INTERNAL "List of generated files for example docs.")
-endif()
-
-add_custom_target(generate-examples ALL
-    DEPENDS ${EXAMPLE_DOC_GENERATED_FILES})
+add_custom_target(generate-examples DEPENDS ${EXAMPLE_DOC_GENERATED_FILES})
 
 add_custom_target(check-examples
-    ${CMAKE_COMMAND} -D EXAMPLE_DOC_SOURCE_FILES= ${CMAKE_SOURCE_DIR}
+    ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}
     WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
 list(APPEND CHECK_TARGETS check-examples)
 

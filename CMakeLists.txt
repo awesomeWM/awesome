@@ -288,8 +288,7 @@ if(GENERATE_DOC)
     # Copy the aliases to the build directory
     file(COPY ${SOURCE_DIR}/docs/aliases DESTINATION ${BUILD_DIR}/docs)
 
-    add_custom_target(ldoc ALL
-        DEPENDS ${BUILD_DIR}/doc/index.html)
+    add_custom_target(ldoc ALL DEPENDS ${BUILD_DIR}/doc/index.html)
     if (STRICT_TESTS)
         set(ldoc_args --fatalwarnings .)
         set(ldoc_desc_suffix " (fatal warnings)")
@@ -300,7 +299,7 @@ if(GENERATE_DOC)
         OUTPUT  ${BUILD_DIR}/doc/index.html
         COMMAND ${LDOC_EXECUTABLE} ${ldoc_args}
         WORKING_DIRECTORY ${AWE_DOC_DIR}
-        DEPENDS ${AWE_SRCS} ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld
+        DEPENDS ${AWE_SRCS} ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld generate-examples
         COMMENT "Generating API documentation${ldoc_desc_suffix}")
 endif()
 # }}}
