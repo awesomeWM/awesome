@@ -30,6 +30,7 @@
 --
 --    gears.timer {
 --        timeout   = 10,
+--        call_now  = true,
 --        autostart = true,
 --        callback  = function()
 --            -- You should read it from `/sys/class/power_supply/` (on Linux)
@@ -147,6 +148,7 @@ local timer_instance_mt = {
 -- @tparam table args Arguments.
 -- @tparam number args.timeout Timeout in seconds (e.g. 1.5).
 -- @tparam[opt=false] boolean args.autostart Automatically start the timer.
+-- @tparam[opt=false] boolean args.call_now Call the callback at timer creation.
 -- @tparam[opt=nil] function args.callback Callback function to connect to the
 --  "timeout" signal.
 -- @tparam[opt=false] boolean args.single_shot Run only once then stop.
@@ -168,6 +170,9 @@ function timer.new(args)
     end
 
     if args.callback then
+        if args.call_now then
+            args.callback()
+        end
         ret:connect_signal("timeout", args.callback)
     end
 
