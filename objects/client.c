@@ -305,7 +305,7 @@
  *
  * If the client has multiple classes, the first one is used.
  *
- * To get a client class from the command line, use te `xprop` command.
+ * To get a client class from the command line, use the `xprop` command.
  *
  * **Signal:**
  *
@@ -700,7 +700,7 @@
  *
  *  * *property::shape\_client\_bounding*
  *
- * @property shape_client_bounding
+ * @property client_shape_bounding
  * @param surface
  */
 
@@ -711,7 +711,7 @@
  *
  *  * *property::shape\_client\_clip*
  *
- * @property shape_client_clip
+ * @property client_shape_clip
  * @param surface
  */
 
