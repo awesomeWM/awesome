@@ -5,6 +5,7 @@ local test_client = require("_client")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local callback_called = false
+local message_printed = false
 
 -- Magic table to store tests
 local tests = {}
@@ -46,9 +47,16 @@ local function get_client_by_class(class)
     end
 end
 
+local orig_error = gears.debug.print_error
+function gears.debug.print_error(msg)
+    assert(not message_printed, msg)
+    assert(msg:find("specified tag = 'does_not_exist', but no such tag exists"), msg)
+    message_printed = true
+end
+
 -- Test callback and floating
 test_rule {
-    properties = { floating = true },
+    properties = { floating = true, tag = "does_not_exist" },
     callback   = function(c)
         assert(type(c) == "client")
         callback_called = true
@@ -56,6 +64,10 @@ test_rule {
     test = function(class)
         -- Test if callbacks works
         assert(callback_called)
+
+        -- Test that the "does_not_exist"-tag caused an error
+        assert(message_printed)
+        gears.debug.print_error = orig_error
 
         -- Make sure "smart" dynamic properties are applied
         assert(get_client_by_class(class).floating)

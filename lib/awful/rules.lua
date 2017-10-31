@@ -292,7 +292,13 @@ local force_ignore = {
 function rules.high_priority_properties.tag(c, value, props)
     if value then
         if type(value) == "string" then
+            local name = value
             value = atag.find_by_name(c.screen, value)
+            if not value then
+                require("gears.debug").print_error("awful.rules-rule specified "
+                    .. "tag = '" .. name .. "', but no such tag exists")
+                return
+            end
         end
 
         -- In case the tag has been forced to another screen, move the client
