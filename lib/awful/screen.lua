@@ -341,7 +341,7 @@ end
 --
 -- This is used by `screen.clients` internally (with `stacked=true`).
 --
--- @function client:get_clients
+-- @function screen:get_clients
 -- @tparam[opt=true] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table The clients list.
 function screen.object.get_clients(s, stacked)
@@ -388,7 +388,7 @@ end
 --
 -- This is used by `all_clients` internally (with `stacked=true`).
 --
--- @function client:get_all_clients
+-- @function screen:get_all_clients
 -- @tparam[opt=true] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table The clients list.
 function screen.object.get_all_clients(s, stacked)
@@ -410,7 +410,7 @@ end
 --
 -- This is used by `tiles_clients` internally (with `stacked=true`).
 --
--- @function client:get_tiled_clients
+-- @function screen:get_tiled_clients
 -- @tparam[opt=true] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table The clients list.
 function screen.object.get_tiled_clients(s, stacked)
