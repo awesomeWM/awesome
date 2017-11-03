@@ -38,7 +38,7 @@ utils.terminal = 'xterm'
 -- their .desktop files.
 local default_icon = nil
 
---- Name of the WM for the OnlyShownIn entry in the .desktop file.
+--- Name of the WM for the OnlyShowIn entry in the .desktop file.
 utils.wm_name = "awesome"
 
 --- Possible escape characters (not including the preceding backslash) in
@@ -54,7 +54,7 @@ local escape_sequences = {
 --- The keys in desktop entries whose values are lists of strings.
 local list_keys = {
     Categories = true,
-    OnlyShownIn = true,
+    OnlyShowIn = true,
     NotShowIn = true,
 }
 
