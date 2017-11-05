@@ -103,7 +103,7 @@ table.insert(steps, function()
     return true
 end)
 
--- Shirnk the client by 100px from the top right
+-- Shrink the client by 100px from the top right
 table.insert(steps, function()
 
     local c = client.get()[1]
@@ -113,6 +113,51 @@ table.insert(steps, function()
     --     assert(c:geometry().width == 200-2*c.border_width) --FIXME off by border width...
     --     assert(c:geometry().height == 200-2*c.border_width) --FIXME off by border width...
 
+
+    -- Now do a couple check with the "after" mode to make sure it doesn't
+    -- regress.
+    root.fake_input("button_release",1)
+
+    mousegrabber.stop()
+
+    amouse.resize.set_mode("after")
+    c.border_width = 0
+    c:geometry {
+        x      = 100,
+        y      = 200,
+        width  = 300,
+        height = 200,
+    }
+    assert(c:geometry().x      == 100)
+    assert(c:geometry().y      == 200)
+    assert(c:geometry().width  == 300)
+    assert(c:geometry().height == 200)
+
+    root.fake_input("button_press",1)
+    amouse.client.resize(c)
+
+    mouse.coords {x = 500, y= 500}
+
+    return true
+end)
+
+-- Grow the client by 100px from the top left ("after" mode)
+table.insert(steps, function()
+
+    -- local c = client.get()[1]
+
+    --     if not mousegrabber.isrunning then --FIXME it should work, but doesn't
+    --         return true
+    --     end
+
+    --FIXME, the mousegrabber callback says the mouse buttons are not pressed,
+    -- theirfor the test is broken
+    -- Nothing should have changed until button_release is done
+    --assert(c:geometry().x      == 100)
+    --assert(c:geometry().y      == 200)
+    --assert(c:geometry().width  == 300)
+    --assert(c:geometry().height == 200)
+
     mouse.coords {x = 300, y= 200}
 
     return true
@@ -120,11 +165,17 @@ end)
 
 -- Stop the resize
 table.insert(steps, function()
+
+    local c = client.get()[1]
+
     root.fake_input("button_release",1)
 
-    --     if not mousegrabber.isrunning then --FIXME it should work, but doesn't
-    --         return true
-    --     end
+    assert(c:geometry().x      == 100)
+    assert(c:geometry().y      == 200)
+    assert(c:geometry().width  == 400)
+    assert(c:geometry().height == 300)
+
+    amouse.resize.set_mode("live")
 
     mousegrabber.stop()
 
