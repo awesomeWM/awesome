@@ -12,6 +12,7 @@ local keys = {
   firefox = require("awful.hotkeys_popup.keys.firefox"),
   tmux = require("awful.hotkeys_popup.keys.tmux"),
   qutebrowser = require("awful.hotkeys_popup.keys.qutebrowser"),
+  termite = require("awful.hotkeys_popup.keys.termite"),
 }
 return keys
 
