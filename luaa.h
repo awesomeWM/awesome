@@ -67,6 +67,7 @@ luaA_warn(lua_State *L, const char *fmt, ...)
 #if LUA_VERSION_NUM >= 502
     luaL_traceback(L, L, NULL, 2);
     fprintf(stderr, "%s\n", lua_tostring(L, -1));
+    lua_pop(L, 1);
 #endif
 }
 
