@@ -469,7 +469,8 @@ screen_scan_randr(lua_State *L, screen_array_t *screens)
     /* We want to know when something changes */
     xcb_randr_select_input(globalconf.connection,
                            globalconf.screen->root,
-                           XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE);
+                           XCB_RANDR_NOTIFY_MASK_OUTPUT_CHANGE |
+                           XCB_RANDR_NOTIFY_MASK_SCREEN_CHANGE);
 
     if (globalconf.have_randr_15)
         screen_scan_randr_monitors(L, screens);

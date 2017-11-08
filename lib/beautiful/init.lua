@@ -17,6 +17,7 @@ local lgi = require("lgi")
 local Pango = lgi.Pango
 local PangoCairo = lgi.PangoCairo
 local gears_debug = require("gears.debug")
+local gears_dpi = require("gears.dpi")
 local Gio = require("lgi").Gio
 local protected_call = require("gears.protected_call")
 
@@ -34,6 +35,7 @@ local theme = {}
 local descs = setmetatable({}, { __mode = 'k' })
 local fonts = setmetatable({}, { __mode = 'v' })
 local active_font
+local font_dpi
 
 --- The default font.
 -- @beautiful beautiful.font
@@ -98,14 +100,67 @@ local active_font
 --- The current theme path (if any)
 -- @tfield string beautiful.theme_path
 
+--- Font DPI API
+-- @section font_dpi
+
+--- Get the global font DPI
+--
+-- @return user set value, or Xft.dpi, or the core DPI reported by the server
+-- @see beautiful.set_font_dpi
+function beautiful.get_font_dpi()
+    if not font_dpi then
+        -- Might not be present when run under unit tests
+        if awesome and awesome.xrdb_get_value then
+            font_dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi"))
+        end
+    end
+    -- Following Keith Packard's whitepaper on Xft,
+    -- https://keithp.com/~keithp/talks/xtc2001/paper/xft.html#sec-editing
+    -- the proper fallback for Xft.dpi is the vertical DPI reported by
+    -- the X server. Note that this can change, so we don't store it
+    return font_dpi or gears_dpi.core_dpi()
+end
+
+--- Set the global font DPI
+--
+-- @tparam[opt] number|nil dpi The DPI to set the font DPI to,
+--   or nil to autocompute
+-- @return the new global font DPI
+-- @see beautiful.get_font_dpi
+function beautiful.set_font_dpi(dpi)
+    font_dpi = dpi
+    -- TODO signal
+    return beautiful.get_font_dpi()
+end
+
+--- Get the font DPI for a specific screen
+--
+-- The screen font DPI is computed from the global font DPI, prorated to the
+-- ratio of the screen pixel density to the pixel density of the primary screen.
+-- On uniform DPI environments, this is a no-op, but on mixed-DPI environments
+-- it ensures that font scaling is uniform across different DPIs.
+-- (This approach follows the one used in Qt.)
+--
+-- @tparam[opt] screen scr The screen to get font DPI information about.
+--     Defaults to the primary screen
+function beautiful.screen_font_dpi(scr)
+    scr = scr and screen[scr] or screen.primary
+    return beautiful.get_font_dpi()*scr.dpi/screen.primary.dpi
+end
+
+--- @section end
+
 --- Load a font from a string or a font description.
 --
 -- @see https://developer.gnome.org/pango/stable/pango-Fonts.html#pango-font-description-from-string
 -- @tparam string|lgi.Pango.FontDescription name Font, which can be a
 --   string or a lgi.Pango.FontDescription.
+-- @tparam[opt] number dpi The DPI to compute the height at (defaults to the
+--   global font DPI)
 -- @treturn table A table with `name`, `description` and `height`.
-local function load_font(name)
+local function load_font(name, dpi)
     name = name or active_font
+    dpi = dpi or beautiful.get_font_dpi()
     if name and type(name) ~= "string" then
         if descs[name] then
             name = descs[name]
@@ -113,32 +168,48 @@ local function load_font(name)
             name = name:to_string()
         end
     end
-    if fonts[name] then
-        return fonts[name]
+
+    -- TODO if there's a lot of reloading due to queries with different DPIs
+    -- in the mixed-DPI case, consider building the cache based on a combination
+    -- of name and DPI
+    local font = fonts[name]
+
+    if not font then
+        -- Load new font
+        local ctx = PangoCairo.font_map_get_default():create_context()
+
+        local desc = Pango.FontDescription.from_string(name)
+        -- Apply default values from the context (e.g. a default font size)
+        desc:merge(ctx:get_font_description(), false)
+
+        font = { name = name, context = ctx, description = desc,
+            height = nil, dpi = nil }
+
+        descs[desc] = name
     end
 
-    -- Load new font
-    local desc = Pango.FontDescription.from_string(name)
-    local ctx = PangoCairo.font_map_get_default():create_context()
-    ctx:set_resolution(beautiful.xresources.get_dpi())
+    local ctx = font.context
+    local desc = font.description
+    local height = font.height
 
-    -- Apply default values from the context (e.g. a default font size)
-    desc:merge(ctx:get_font_description(), false)
+    if font.dpi ~= dpi or not height then
+        ctx:set_resolution(dpi)
 
-    -- Calculate font height.
-    local metrics = ctx:get_metrics(desc, nil)
-    local height = math.ceil((metrics:get_ascent() + metrics:get_descent()) / Pango.SCALE)
-    if height == 0 then
-        height = desc:get_size() / Pango.SCALE
-        gears_debug.print_warning(string.format(
+        -- Calculate font height.
+        local metrics = ctx:get_metrics(desc, nil)
+        height = math.ceil((metrics:get_ascent() + metrics:get_descent()) / Pango.SCALE)
+        if height == 0 then
+            height = desc:get_size() / Pango.SCALE
+            gears_debug.print_warning(string.format(
             "beautiful.load_font: could not get height for '%s' (likely missing font), using %d.",
             name, height))
+        end
+        font.height = height
+        font.dpi = dpi
     end
 
-    local font = { name = name, description = desc, height = height }
     fonts[name] = font
-    descs[desc] = name
-    return font
+    return { name = font.name, description = desc, height = height }
 end
 
 --- Set an active font
@@ -171,11 +242,21 @@ function beautiful.get_merged_font(name, merge)
     return beautiful.get_font(merged:to_string())
 end
 
---- Get the height of a font.
+--- Get the height of a font in device pixels at the given DPI.
 --
 -- @param name Name of the font
-function beautiful.get_font_height(name)
-    return load_font(name).height
+-- @tparam number dpi The DPI to load the font at
+function beautiful.get_font_height_at_dpi(name, dpi)
+    return load_font(name, dpi).height
+end
+
+--- Get the height of a font in device pixels for the given screen.
+--
+-- @param name Name of the font
+-- @tparam[opt] screen scr Screen to get the DPI information from.
+--   If unspecified, the global font DPI setting will be used.
+function beautiful.get_font_height(name, scr)
+    return load_font(name, beautiful.screen_font_dpi(scr)).height
 end
 
 --- Init function, should be runned at the beginning of configuration file.

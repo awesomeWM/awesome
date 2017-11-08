@@ -74,34 +74,12 @@ end
 function xresources.get_dpi(s)
     s = get_screen(s)
     if s then
+        gears_debug.deprecate("use s.dpi", {deprecated_in=5})
         return s.dpi
+    else
+        gears_debug.deprecate("use beautiful.get_font_dpi()", {deprecated_in=5})
+        return require("beautiful").get_font_dpi()
     end
-    if not xresources.dpi then
-        -- Might not be present when run under unit tests
-        if awesome and awesome.xrdb_get_value then
-            xresources.dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi"))
-        end
-        -- Following Keith Packard's whitepaper on Xft,
-        -- https://keithp.com/~keithp/talks/xtc2001/paper/xft.html#sec-editing
-        -- the proper fallback for Xft.dpi is the vertical DPI reported by
-        -- the X server. This will generally be 96 on Xorg, unless the user
-        -- has configured it differently
-        if not xresources.dpi then
-            if root then
-                local mm_to_inch = 25.4
-                local _, h = root.size()
-                local _, hmm = root.size_mm()
-                if hmm ~= 0 then
-                    xresources.dpi = round(h*mm_to_inch/hmm)
-                end
-            end
-        end
-        -- ultimate fallback
-        if not xresources.dpi then
-            xresources.dpi = 96
-        end
-    end
-    return xresources.dpi
 end
 
 
@@ -110,10 +88,12 @@ end
 -- @tparam[opt] integer s Screen.
 function xresources.set_dpi(dpi, s)
     s = get_screen(s)
-    if not s then
-        xresources.dpi = dpi
-    else
+    if s then
+        gears_debug.deprecate("use s.dpi=", {deprecated_in=5})
         s.dpi = dpi
+    else
+        gears_debug.deprecate("use beautiful.set_font_dpi()", {deprecated_in=5})
+        require("beautiful").set_font_dpi(dpi)
     end
 end
 
@@ -123,7 +103,11 @@ end
 -- @tparam[opt] integer|screen s The screen.
 -- @treturn integer Resulting size (rounded to integer).
 function xresources.apply_dpi(size, s)
-    return round(size / 96 * xresources.get_dpi(s))
+    if s then
+        return s:dpi_scale(size)
+    else
+        return round(size * require("beautiful").screen_font_dpi()/96)
+    end
 end
 
 return xresources

@@ -54,7 +54,7 @@ local function show_placeholder(geo)
     cr:set_source_rgba(1,1,1,1)
 
     local line_width = beautiful.snap_border_width or 5
-    cr:set_line_width(beautiful.xresources.apply_dpi(line_width))
+    cr:set_line_width(capi.mouse.screen:dpi_scale(line_width))
 
     local f = beautiful.snap_shape or function()
         cr:translate(line_width,line_width)

@@ -16,7 +16,6 @@ local gtable = require("gears.table")
 local gstring = require("gears.string")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
-local dpi = beautiful.xresources.apply_dpi
 
 
 -- Stripped copy of this module https://github.com/copycat-killer/lain/blob/master/util/markup.lua:
@@ -188,8 +187,8 @@ function widget.new(args)
 
     function widget_instance:_load_widget_settings()
         if self._widget_settings_loaded then return end
-        self.width = args.width or dpi(1200)
-        self.height = args.height or dpi(800)
+        self.width = args.width or 1200
+        self.height = args.height or 800
         self.bg = args.bg or
             beautiful.hotkeys_bg or beautiful.bg_normal
         self.fg = args.fg or
@@ -212,7 +211,7 @@ function widget.new(args)
         self.description_font = args.description_font or
             beautiful.hotkeys_description_font or "Monospace 8"
         self.group_margin = args.group_margin or
-            beautiful.hotkeys_group_margin or dpi(6)
+            beautiful.hotkeys_group_margin or 6
         self.label_colors = beautiful.xresources.get_current_theme()
         self._widget_settings_loaded = true
     end
@@ -312,14 +311,24 @@ function widget.new(args)
     function widget_instance:_create_wibox(s, available_groups)
         s = get_screen(s)
         local wa = s.workarea
-        local height = (self.height < wa.height) and self.height or
-            (wa.height - self.border_width * 2)
-        local width = (self.width < wa.width) and self.width or
-            (wa.width - self.border_width * 2)
+
+        local border_width = s:dpi_scale(self.border_width)
+        local group_margin = s:dpi_scale(self.group_margin)
+
+        local height = s:dpi_scale(self.height)
+        if height >= wa.height then
+            height = wa.height - border_width * 2
+        end
+
+        local width = s:dpi_scale(self.width)
+        if width >= wa.width then
+            width = wa.width - border_width * 2
+        end
 
         -- arrange hotkey groups into columns
-        local line_height = beautiful.get_font_height(self.font)
-        local group_label_height = line_height + self.group_margin
+        local line_height = beautiful.get_font_height(self.font, s)
+
+        local group_label_height = line_height + group_margin
         -- -1 for possible pagination:
         local max_height_px = height - group_label_height
         local column_layouts = {}
@@ -387,7 +396,7 @@ function widget.new(args)
                     end
                 current_column.layout:add(wibox.widget.textbox(joined_labels))
                 local max_width, _ = wibox.widget.textbox(max_label_content):get_preferred_size(s)
-                max_width = max_width + self.group_margin
+                max_width = max_width + group_margin
                 if not current_column.max_width or max_width > current_column.max_width then
                     current_column.max_width = max_width
                 end
@@ -427,7 +436,7 @@ function widget.new(args)
             end
             local column_margin = wibox.container.margin()
             column_margin:set_widget(item.layout)
-            column_margin:set_left(self.group_margin)
+            column_margin:set_left(group_margin)
             columns:add(column_margin)
             previous_page_last_layout = item.layout
         end
@@ -438,13 +447,13 @@ function widget.new(args)
             bg=self.bg,
             fg=self.fg,
             opacity = self.opacity,
-            border_width = self.border_width,
+            border_width = border_width,
             border_color = self.border_color,
             shape = self.shape,
         })
         mywibox:geometry({
-            x = wa.x + math.floor((wa.width - width - self.border_width*2) / 2),
-            y = wa.y + math.floor((wa.height - height - self.border_width*2) / 2),
+            x = wa.x + math.floor((wa.width - width - border_width*2) / 2),
+            y = wa.y + math.floor((wa.height - height - border_width*2) / 2),
             width = width,
             height = height,
         })

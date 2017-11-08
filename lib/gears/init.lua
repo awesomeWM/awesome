@@ -22,6 +22,7 @@ return
     table = require("gears.table");
     string = require("gears.string");
     filesystem = require("gears.filesystem");
+    dpi = require("gears.dpi");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
