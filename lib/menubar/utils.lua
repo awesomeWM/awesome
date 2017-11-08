@@ -261,6 +261,7 @@ end
 function utils.parse_desktop_file(file)
     local program = { show = true, file = file }
     local desktop_entry = false
+    local locale = string.sub(os.setlocale(nil), 1, 2) or "en"
 
     -- Parse the .desktop file.
     -- We are interested in [Desktop Entry] group only.
@@ -278,9 +279,12 @@ function utils.parse_desktop_file(file)
             end
 
             -- Grab the values
-            for key, value in line:gmatch("(%w+)%s*=%s*(.+)") do
+            for key, value in line:gmatch("([%w%[%]]+)%s*=%s*(.+)") do
                 if list_keys[key] then
                     program[key] = utils.parse_list(value)
+                elseif key == "Name[" .. locale .. "]" then
+                    -- Overwrite Name with a translation of the current locale.
+                    program["Name"] = utils.unescape(value)
                 else
                     program[key] = utils.unescape(value)
                 end
