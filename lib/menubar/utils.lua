@@ -7,7 +7,6 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment
-local io = io
 local table = table
 local ipairs = ipairs
 local string = string
@@ -260,36 +259,26 @@ end
 -- @return A table with file entries.
 function utils.parse_desktop_file(file)
     local program = { show = true, file = file }
-    local desktop_entry = false
 
     -- Parse the .desktop file.
     -- We are interested in [Desktop Entry] group only.
-    for line in io.lines(file) do
-        line = utils.rtrim(line)
-        if line:find("^%s*#") then
-            -- Skip comments.
-            (function() end)() -- I haven't found a nice way to silence luacheck here
-        elseif not desktop_entry and line == "[Desktop Entry]" then
-            desktop_entry = true
-        else
-            if line:sub(1, 1) == "[" and line:sub(-1) == "]" then
-                -- A declaration of new group - stop parsing
-                break
-            end
-
-            -- Grab the values
-            for key, value in line:gmatch("(%w+)%s*=%s*(.+)") do
-                if list_keys[key] then
-                    program[key] = utils.parse_list(value)
-                else
-                    program[key] = utils.unescape(value)
-                end
-            end
-        end
+    local keyfile = glib.KeyFile()
+    if not keyfile:load_from_file(file, glib.KeyFileFlags.NONE) then
+        return nil
     end
 
     -- In case [Desktop Entry] was not found
-    if not desktop_entry then return nil end
+    if not keyfile:has_group("Desktop Entry") then
+        return nil
+    end
+
+    for _, key in pairs(keyfile:get_keys("Desktop Entry")) do
+        if list_keys[key] then
+            program[key] = keyfile:get_string_list("Desktop Entry", key)
+        else
+            program[key] = keyfile:get_string("Desktop Entry", key)
+        end
+    end
 
     -- In case the (required) 'Name' entry was not found
     if not program.Name or program.Name == '' then return nil end
