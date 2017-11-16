@@ -10,13 +10,25 @@ _G.os.time = function()
 end
 
 local dir_cache = require("gears.filesystem.subdirectory_cache")
-local protected_call = require("gears.protected_call")
 local gio = require("lgi").Gio
+
+local do_protected_call = require("gears.protected_call").call
+do
+    local _, has_yieldable_pcall = coroutine.resume(coroutine.create(function()
+        return pcall(coroutine.yield, true)
+    end))
+    if not has_yieldable_pcall then
+        -- No yieldable pcall, no protected call
+        do_protected_call = function(f, ...)
+            return f(...)
+        end
+    end
+end
 
 describe("gears.filesystem.subdirectory_cache", function()
     describe("finds files", function()
         -- This assumes that we are run from awesome's source directory
-        gio.Async.call(protected_call)(function()
+        gio.Async.call(do_protected_call)(function()
             local cache = dir_cache.async_new("spec/gears")
             assert.is_true(cache:async_check_exists("filesystem/subdirectory_cache_spec.lua"))
             assert.is_true(cache:async_check_exists("cache_spec.lua"))
@@ -26,7 +38,7 @@ describe("gears.filesystem.subdirectory_cache", function()
     end)
 
     describe("non-existing directory", function()
-        gio.Async.call(protected_call)(function()
+        gio.Async.call(do_protected_call)(function()
             local gdebug = require("gears.debug")
             local print_warning = gdebug.print_warning
             local called
@@ -54,7 +66,7 @@ describe("gears.filesystem.subdirectory_cache", function()
         test_path:delete()
         assert(test_path:make_directory())
 
-        assert(gio.Async.call(protected_call)(function()
+        assert(gio.Async.call(do_protected_call)(function()
             -- At this point the directory is empty
             local cache = dir_cache.async_new(test_path:get_path())
             assert.is.same({}, cache.known_paths)
