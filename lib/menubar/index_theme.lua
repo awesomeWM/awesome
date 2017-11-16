@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Class module for parsing an index.theme file
+--- (Deprecated) class module for parsing an index.theme file
 --
 -- @author Kazunobu Kuriyama
 -- @copyright 2015 Kazunobu Kuriyama
@@ -31,6 +31,7 @@ local THRESHOLD = "Threshold"
 local index_theme = { mt = {} }
 
 --- Class constructor of `index_theme`
+-- @deprecated menubar.index_theme.new
 -- @tparam table cls Metatable that will be used. Should always be `index_theme.mt`.
 -- @tparam string icon_theme_name Internal name of icon theme
 -- @tparam table base_directories Paths used for lookup
@@ -132,18 +133,21 @@ index_theme.new = function(cls, icon_theme_name, base_directories)
 end
 
 --- Table of the values of the `Directories` key
+-- @deprecated menubar.index_theme:get_subdirectories
 -- @treturn table Values of the `Directories` key
 index_theme.get_subdirectories = function(self)
     return self[DIRECTORIES]
 end
 
 --- Table of the values of the `Inherits` key
+-- @deprecated menubar.index_theme:get_inherits
 -- @treturn table Values of the `Inherits` key
 index_theme.get_inherits = function(self)
     return self[INHERITS]
 end
 
 --- Query (part of) per-directory keys of a given subdirectory name.
+-- @deprecated menubar.index_theme:get_per_directory_keys
 -- @tparam table subdirectory Icon theme's subdirectory
 -- @treturn[1] string Value of the `Type` key
 -- @treturn[2] number Value of the `Size` key
