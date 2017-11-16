@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Class module for icon lookup for menubar
+--- (Deprecated) class module for icon lookup for menubar
 --
 -- @author Kazunobu Kuriyama
 -- @copyright 2015 Kazunobu Kuriyama
@@ -78,6 +78,7 @@ local icon_theme = { mt = {} }
 local index_theme_cache = {}
 
 --- Class constructor of `icon_theme`
+-- @deprecated menubar.icon_theme.new
 -- @tparam string icon_theme_name Internal name of icon theme
 -- @tparam table base_directories Paths used for lookup
 -- @treturn table An instance of the class `icon_theme`
@@ -218,6 +219,7 @@ local lookup_fallback_icon = function(self, icon_name)
 end
 
 ---  Look up an image file based on a given icon name and/or a preferable size.
+-- @deprecated menubar.icon_theme:find_icon_path
 -- @tparam string icon_name Icon name to be looked up
 -- @tparam number icon_size Prefereable icon size
 -- @treturn string Absolute path to the icon file, or nil if not found

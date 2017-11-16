@@ -10,7 +10,6 @@
 local gtable = require("gears.table")
 local gfilesystem = require("gears.filesystem")
 local utils = require("menubar.utils")
-local icon_theme = require("menubar.icon_theme")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
@@ -59,7 +58,7 @@ menu_gen.all_categories = {
 --- Find icons for category entries.
 function menu_gen.lookup_category_icons()
     for _, v in pairs(menu_gen.all_categories) do
-        v.icon = icon_theme():find_icon_path(v.icon_name)
+        v.icon = utils.lookup_icon(v.icon_name)
     end
 end
 
