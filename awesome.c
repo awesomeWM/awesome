@@ -158,7 +158,6 @@ scan(xcb_query_tree_cookie_t tree_c)
     xcb_get_window_attributes_reply_t *attr_r;
     xcb_get_geometry_reply_t *geom_r;
     xcb_get_property_cookie_t prop_cookie;
-    long state;
 
     tree_r = xcb_query_tree_reply(globalconf.connection,
                                   tree_c,
@@ -197,7 +196,7 @@ scan(xcb_query_tree_cookie_t tree_c)
                                                  NULL);
         geom_r = xcb_get_geometry_reply(globalconf.connection, geom_wins[i], NULL);
 
-        state = xwindow_get_state_reply(state_wins[i]);
+        long state = xwindow_get_state_reply(state_wins[i]);
 
         if(!geom_r || !attr_r || attr_r->override_redirect
            || attr_r->map_state == XCB_MAP_STATE_UNMAPPED

@@ -356,7 +356,6 @@ window_set_xproperty(lua_State *L, xcb_window_t window, int prop_idx, int value_
 {
     xproperty_t *prop = luaA_find_xproperty(L, prop_idx);
     xcb_atom_t type;
-    uint8_t format;
     size_t len;
     uint32_t number;
     const void *data;
@@ -365,6 +364,7 @@ window_set_xproperty(lua_State *L, xcb_window_t window, int prop_idx, int value_
     {
         xcb_delete_property(globalconf.connection, window, prop->atom);
     } else {
+        uint8_t format;
         if(prop->type == PROP_STRING)
         {
             data = luaL_checklstring(L, value_idx, &len);
