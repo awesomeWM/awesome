@@ -81,7 +81,10 @@ buffer_addvf(buffer_t *buf, const char *fmt, va_list args)
 
     len = vsnprintf(buf->s + buf->len, buf->size - buf->len, fmt, args);
     if (unlikely(len < 0))
+    {
+        va_end(ap);
         return;
+    }
     if (len >= buf->size - buf->len)
     {
         buffer_ensure(buf, len);
@@ -89,6 +92,7 @@ buffer_addvf(buffer_t *buf, const char *fmt, va_list args)
     }
     buf->len += len;
     buf->s[buf->len] = '\0';
+    va_end(ap);
 }
 
 void
