@@ -864,7 +864,7 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
         xcb_randr_output_t output = ev->u.oc.output;
         uint8_t connection = ev->u.oc.connection;
         const char *connection_str = NULL;
-        xcb_randr_get_output_info_reply_t *info = NULL;
+        xcb_randr_get_output_info_reply_t *info;
         lua_State *L = globalconf_get_lua_State();
 
         /* The following explicitly uses XCB_CURRENT_TIME since we want to know
