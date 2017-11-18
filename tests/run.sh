@@ -241,9 +241,13 @@ for f in $tests; do
             continue
         fi
     fi
+    # Make the filename absolute if it is not.
+    if [ "$f#/" = "$f" ]; then
+        f="$source_dir/$f"
+    fi
 
-    # Send the test file to awesome.
-    DISPLAY=$D "$AWESOME_CLIENT" 2>&1 < "$f"
+    # Execute the test file in awesome.
+    DISPLAY=$D "$AWESOME_CLIENT" 2>&1 "dofile('$f')"
 
     # Tail the log and quit, when awesome quits.
     # Use a single `grep`, otherwise `--line-buffered` would be required.
