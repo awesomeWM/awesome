@@ -7,7 +7,6 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment
-local io = io
 local table = table
 local ipairs = ipairs
 local string = string
@@ -51,12 +50,53 @@ local escape_sequences = {
     [ [[\t]] ]  = '\t',
 }
 
---- The keys in desktop entries whose values are lists of strings.
-local list_keys = {
-    Categories = true,
-    OnlyShowIn = true,
-    NotShowIn = true,
-}
+-- Maps keys in desktop entries to suitable getter function.
+-- The order of entries is as in the spec.
+-- https://standards.freedesktop.org/desktop-entry-spec/latest/ar01s05.html
+local keys_getters
+do
+    local function get_string(kf, key)
+        return kf:get_string("Desktop Entry", key)
+    end
+    local function get_strings(kf, key)
+        return kf:get_string_list("Desktop Entry", key, nil)
+    end
+    local function get_localestring(kf, key)
+        return kf:get_locale_string("Desktop Entry", key, nil)
+    end
+    local function get_localestrings(kf, key)
+        return kf:get_locale_string_list("Desktop Entry", key, nil, nil)
+    end
+    local function get_boolean(kf, key)
+        return kf:get_boolean("Desktop Entry", key)
+    end
+
+    keys_getters = {
+        Type = get_string,
+        Version = get_string,
+        Name = get_localestring,
+        GenericName = get_localestring,
+        NoDisplay = get_boolean,
+        Comment = get_localestring,
+        Icon = get_localestring,
+        Hidden = get_boolean,
+        OnlyShowIn = get_strings,
+        NotShowIn = get_strings,
+        DBusActivatable = get_boolean,
+        TryExec = get_string,
+        Exec = get_string,
+        Path = get_string,
+        Terminal = get_boolean,
+        Actions = get_strings,
+        MimeType = get_strings,
+        Categories = get_strings,
+        Implements = get_strings,
+        Keywords = get_localestrings,
+        StartupNotify = get_boolean,
+        StartupWMClass = get_string,
+        URL = get_string,
+    }
+end
 
 -- Private section
 
@@ -260,42 +300,31 @@ end
 -- @return A table with file entries.
 function utils.parse_desktop_file(file)
     local program = { show = true, file = file }
-    local desktop_entry = false
 
     -- Parse the .desktop file.
     -- We are interested in [Desktop Entry] group only.
-    for line in io.lines(file) do
-        line = utils.rtrim(line)
-        if line:find("^%s*#") then
-            -- Skip comments.
-            (function() end)() -- I haven't found a nice way to silence luacheck here
-        elseif not desktop_entry and line == "[Desktop Entry]" then
-            desktop_entry = true
-        else
-            if line:sub(1, 1) == "[" and line:sub(-1) == "]" then
-                -- A declaration of new group - stop parsing
-                break
-            end
-
-            -- Grab the values
-            for key, value in line:gmatch("(%w+)%s*=%s*(.+)") do
-                if list_keys[key] then
-                    program[key] = utils.parse_list(value)
-                else
-                    program[key] = utils.unescape(value)
-                end
-            end
-        end
+    local keyfile = glib.KeyFile()
+    if not keyfile:load_from_file(file, glib.KeyFileFlags.NONE) then
+        return nil
     end
 
     -- In case [Desktop Entry] was not found
-    if not desktop_entry then return nil end
+    if not keyfile:has_group("Desktop Entry") then
+        return nil
+    end
+
+    for _, key in pairs(keyfile:get_keys("Desktop Entry")) do
+        local getter = keys_getters[key] or function(kf, k)
+            return kf:get_string("Desktop Entry", k)
+        end
+        program[key] = getter(keyfile, key)
+    end
 
     -- In case the (required) 'Name' entry was not found
     if not program.Name or program.Name == '' then return nil end
 
-    -- Don't show program if NoDisplay attribute is false
-    if program.NoDisplay and string.lower(program.NoDisplay) == "true" then
+    -- Don't show program if NoDisplay attribute is true
+    if program.NoDisplay then
         program.show = false
     else
         -- Only check these values is NoDisplay is true (or non-existent)
