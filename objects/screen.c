@@ -640,6 +640,7 @@ screen_refresh(void)
     globalconf.screen_need_refresh = false;
 
     screen_array_t new_screens;
+    screen_array_t removed_screens;
     lua_State *L = globalconf_get_lua_State();
     bool list_changed = false;
 
@@ -669,6 +670,7 @@ screen_refresh(void)
     }
 
     /* Remove screens which are gone */
+    screen_array_init(&removed_screens);
     for(int i = 0; i < globalconf.screens.len; i++) {
         screen_t *old_screen = globalconf.screens.tab[i];
         bool found = false;
@@ -678,15 +680,18 @@ screen_refresh(void)
             screen_array_take(&globalconf.screens, i);
             i--;
 
-            luaA_object_push(L, old_screen);
-            screen_removed(L, -1);
-            lua_pop(L, 1);
-            luaA_object_unref(L, old_screen);
-            old_screen->valid = false;
-
+            screen_array_append(&removed_screens, old_screen);
             list_changed = true;
         }
     }
+    foreach(old_screen, removed_screens) {
+        luaA_object_push(L, *old_screen);
+        screen_removed(L, -1);
+        lua_pop(L, 1);
+        (*old_screen)->valid = false;
+        luaA_object_unref(L, *old_screen);
+    }
+    screen_array_wipe(&removed_screens);
 
     /* Update changed screens */
     foreach(existing_screen, globalconf.screens)
