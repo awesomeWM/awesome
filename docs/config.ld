@@ -116,6 +116,17 @@ file = {
 
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',
+
+        -- Deprecated classes for one years or more don't deserve entries
+        -- in the index
+        '../lib/awful/widget/graph.lua',
+        '../lib/awful/widget/progressbar.lua',
+        '../lib/wibox/layout/constraint.lua',
+        '../lib/wibox/layout/margin.lua',
+        '../lib/wibox/layout/mirror.lua',
+        '../lib/wibox/layout/rotate.lua',
+        '../lib/wibox/layout/scroll.lua',
+        '../lib/wibox/widget/background.lua',
     }
 }
 
