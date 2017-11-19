@@ -23,6 +23,7 @@ local textbox = { mt = {} }
 
 --- Set the DPI of a Pango layout
 local function setup_dpi(box, dpi)
+    assert(dpi, "No DPI provided")
     if box._private.dpi ~= dpi then
         box._private.dpi = dpi
         box._private.ctx:set_resolution(dpi)
@@ -80,6 +81,7 @@ function textbox:get_preferred_size(s)
         gdebug.deprecate("textbox:get_preferred_size() requires a screen argument", {deprecated_in=5, raw=true})
         dpi = beautiful.xresources.get_dpi()
     end
+
     return self:get_preferred_size_at_dpi(dpi)
 end
 
