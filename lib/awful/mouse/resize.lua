@@ -156,11 +156,12 @@ local function handler(_, client, context, args) --luacheck: no unused_args
     capi.mousegrabber.run(function (_mouse)
         if not client.valid then return end
 
-        -- Resize everytime the mouse moves (default behavior).
-        if args.mode == "live" then
-            -- Get the new geometry
-            geo = setmetatable(args.placement(client, args), {__index=args})
-        end
+        -- Resize everytime the mouse moves (default behavior) in live mode,
+        -- otherwise keep the current geometry
+        geo = setmetatable(
+            args.mode == "live" and args.placement(client, args) or client:geometry(),
+            {__index=args}
+        )
 
         -- Execute the move callbacks. This can be used to add features such as
         -- snap or adding fancy graphical effects.
@@ -182,7 +183,9 @@ local function handler(_, client, context, args) --luacheck: no unused_args
         end
 
         -- In case it was modified
-        setmetatable(geo,{__index=args})
+        if geo then
+            setmetatable(geo, {__index=args})
+        end
 
         if args.mode == "live" then
             -- Ask the resizing handler to resize the client
