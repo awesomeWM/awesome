@@ -1222,6 +1222,9 @@ luaA_screen_swap(lua_State *L)
             if(ref_s && ref_swap)
                 break;
         }
+        if(!ref_s || !ref_swap)
+            return luaL_error(L, "Invalid call to screen:swap()");
+
         /* swap ! */
         *ref_s = swap;
         *ref_swap = s;
