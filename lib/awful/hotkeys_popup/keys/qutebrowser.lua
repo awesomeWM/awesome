@@ -3,7 +3,7 @@
 --
 -- @author Simon Désaulniers sim.desaulniers@gmail.com
 -- @copyright 2017 Simon Désaulniers
--- @module awful.hotkeys_popup.keys.qutebrowser
+-- @submodule awful.hotkeys_popup
 ---------------------------------------------------------------------------
 
 local hotkeys_popup = require("awful.hotkeys_popup.widget")

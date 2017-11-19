@@ -85,7 +85,14 @@ file = {
     '../spawn.c',
     '../xkb.c',
     '../common/luaobject.c',
-    '../objects/',
+    '../objects/button.c',
+    '../objects/client.c',
+    '../objects/drawable.c',
+    '../objects/key.c',
+    '../objects/screen.c',
+    '../objects/tag.c',
+    '../objects/window.c',
+
     -- LUA libraries
     '../lib/',
     -- Auto generated scripts
@@ -110,8 +117,16 @@ file = {
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',
 
-        -- Ignore the drawing window, users should only care about wiboxes
-        '../objects/drawin.c',
+        -- Deprecated classes for one years or more don't deserve entries
+        -- in the index
+        '../lib/awful/widget/graph.lua',
+        '../lib/awful/widget/progressbar.lua',
+        '../lib/wibox/layout/constraint.lua',
+        '../lib/wibox/layout/margin.lua',
+        '../lib/wibox/layout/mirror.lua',
+        '../lib/wibox/layout/rotate.lua',
+        '../lib/wibox/layout/scroll.lua',
+        '../lib/wibox/widget/background.lua',
     }
 }
 
