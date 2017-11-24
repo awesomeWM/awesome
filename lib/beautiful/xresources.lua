@@ -69,8 +69,14 @@ local function get_screen(s)
 end
 
 --- Get global or per-screen DPI value falling back to xrdb.
+--
+-- This function is deprecated. Use `s.dpi` and avoid getting the DPI without
+-- a screen.
+--
+-- @deprecated xresources.get_dpi
 -- @tparam[opt] integer|screen s The screen.
 -- @treturn number DPI value.
+
 function xresources.get_dpi(s)
     s = get_screen(s)
     if s then
