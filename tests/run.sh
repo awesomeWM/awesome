@@ -150,33 +150,8 @@ wait_until_success() {
     if (( verbose )); then set -x; fi
 }
 
-# Wait for DISPLAY to be available, and setup xrdb,
-# for awesome's xresources backend / queries.
-wait_until_success "setup xrdb" "printf 'Xft.dpi: 96
-    *.background: #002b36
-    *.foreground: #93a1a1
-    *.color0:     #002b36
-    *.color1:     #dc322f
-    *.color10:    #859900
-    *.color11:    #b58900
-    *.color12:    #268bd2
-    *.color13:    #6c71c4
-    *.color14:    #2aa198
-    *.color15:    #fdf6e3
-    *.color16:    #cb4b16
-    *.color17:    #d33682
-    *.color18:    #073642
-    *.color19:    #586e75
-    *.color2:     #859900
-    *.color20:    #839496
-    *.color21:    #eee8d5
-    *.color3:     #b58900
-    *.color4:     #268bd2
-    *.color5:     #6c71c4
-    *.color6:     #2aa198
-    *.color7:     #93a1a1
-    *.color8:     #657b83
-    *.color9:     #dc322f' | DISPLAY='$D' xrdb 2>&1"
+# Wait for DISPLAY to be available, i.e. the X server is running.
+wait_until_success "X resources are ready" "DISPLAY='$D' xrdb -q >/dev/null 2>&1"
 
 # Use a separate D-Bus session; sets $DBUS_SESSION_BUS_PID.
 eval "$(DISPLAY="$D" dbus-launch --sh-syntax --exit-with-session)"
@@ -272,7 +247,7 @@ for f in $tests; do
     error="$(grep --color -o --binary-files=text -E "$pattern" "$awesome_log" || true)"
     if [[ $fail_on_warning ]]; then
         # Filter out ignored warnings.
-        error="$(echo "$error" | grep -vE '.{19} W: awesome: (a_glib_poll|Cannot reliably detect EOF)' || true)"
+        error="$(echo "$error" | grep -vE ".{19} W: awesome: (a_glib_poll|Cannot reliably detect EOF|beautiful: can't get colorscheme from xrdb)" || true)"
     fi
     if [[ -n "$error" ]]; then
         color_red
