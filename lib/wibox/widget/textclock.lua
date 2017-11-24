@@ -44,7 +44,13 @@ function textclock.new(format, timeout, timezone)
     local w = textbox()
     w.force_update = textclock.force_update
     function w._private.textclock_update_cb()
-        w:set_markup(DateTime.new_now(timezone):format(format))
+        local str = DateTime.new_now(timezone):format(format)
+        if str == nil then
+            require("gears.debug").print_warning("textclock: "
+                    .. "g_date_time_format() failed for format "
+                    .. "'" .. format .. "'")
+        end
+        w:set_markup(str)
         w._timer.timeout = calc_timeout(timeout)
         w._timer:again()
         return true -- Continue the timer
