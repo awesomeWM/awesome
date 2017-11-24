@@ -137,11 +137,6 @@ function wibox:_apply_shape()
     img:finish()
 end
 
---- Set the wibox shape.
--- @property shape
--- @tparam gears.shape A gears.shape compatible function.
--- @see gears.shape
-
 function wibox:set_shape(shape)
     self._shape = shape
     self:_apply_shape()
@@ -149,6 +144,24 @@ end
 
 function wibox:get_shape()
     return self._shape
+end
+
+function wibox:set_input_passthrough(value)
+    rawset(self, "_input_passthrough", value)
+
+    if not value then
+        self.shape_input = nil
+    else
+        local img = cairo.ImageSurface(cairo.Format.A1, 0, 0)
+        self.shape_input = img._native
+        img:finish()
+    end
+
+    self:emit_signal("property::input_passthrough", value)
+end
+
+function wibox:get_input_passthrough()
+    return self._input_passthrough
 end
 
 function wibox:get_screen()
@@ -324,7 +337,13 @@ local function new(args)
         ret:set_screen ( args.screen  )
     end
 
-    ret.shape = args.shape
+    if args.shape then
+        ret.shape = args.shape
+    end
+
+    if args.screen then
+        ret.input_passthrough = args.input_passthrough
+    end
 
     return ret
 end
