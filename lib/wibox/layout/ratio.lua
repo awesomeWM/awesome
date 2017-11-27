@@ -22,6 +22,22 @@ local ratio = {}
 
 --@DOC_fixed_COMMON@
 
+--- The widget used to fill the spacing between the layout elements.
+--
+-- By default, no widget is used.
+--
+--@DOC_wibox_layout_ratio_spacing_widget_EXAMPLE@
+--
+-- @property spacing_widget
+-- @param widget
+
+--- Add spacing between each layout widgets.
+--
+--@DOC_wibox_layout_ratio_spacing_EXAMPLE@
+--
+-- @property spacing
+-- @tparam number spacing Spacing between widgets.
+
 -- Compute the sum of all ratio (ideally, it should be 1)
 local function gen_sum(self, i_s, i_e)
     local sum, new_w = 0,0
@@ -86,6 +102,11 @@ function ratio:layout(context, width, height)
     local has_stragety = strategy ~= "default"
     local to_redistribute, void_count = 0, 0
     local dir = self._private.dir or "x"
+    local spacing_widget = self._private.spacing_widget
+    local abspace = math.abs(spacing)
+    local spoffset = spacing < 0 and 0 or spacing
+    local is_y = self._private.dir == "y"
+    local is_x = not is_y
 
     for k, v in ipairs(self._private.widgets) do
         local space, is_void
@@ -150,7 +171,7 @@ function ratio:layout(context, width, height)
     -- Only the `justify` strategy changes the original widget size.
     to_redistribute = (strategy == "justify") and to_redistribute or 0
 
-    for _, entry in ipairs(preliminary_results) do
+    for k, entry in ipairs(preliminary_results) do
         local v, x, y, w, h, is_void = unpack(entry)
 
         -- Redistribute the space or move the widgets
@@ -165,6 +186,13 @@ function ratio:layout(context, width, height)
                 x = space_front + real_pos
                 real_pos = real_pos + w + (is_void and 0 or spacing)
             end
+        end
+
+        if k > 1 and abspace > 0 and spacing_widget then
+            table.insert(result, base.place_widget_at(
+                spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
+                is_x and abspace or w, is_y and abspace or h
+            ))
         end
 
         table.insert(result, base.place_widget_at(v, x, y, w, h))

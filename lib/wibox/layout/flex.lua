@@ -50,14 +50,35 @@ local flex = {}
 -- @name insert
 -- @class function
 
+--- The widget used to fill the spacing between the layout elements.
+--
+-- By default, no widget is used.
+--
+--@DOC_wibox_layout_flex_spacing_widget_EXAMPLE@
+--
+-- @property spacing_widget
+-- @param widget
+
+--- Add spacing between each layout widgets.
+--
+--@DOC_wibox_layout_flex_spacing_EXAMPLE@
+--
+-- @property spacing
+-- @tparam number spacing Spacing between widgets.
+
 function flex:layout(_, width, height)
     local result = {}
     local pos,spacing = 0, self._private.spacing
     local num = #self._private.widgets
     local total_spacing = (spacing*(num-1))
+    local spacing_widget = self._private.spacing_widget
+    local abspace = math.abs(spacing)
+    local spoffset = spacing < 0 and 0 or spacing
+    local is_y = self._private.dir == "y"
+    local is_x = not is_y
 
     local space_per_item
-    if self._private.dir == "y" then
+    if is_y then
         space_per_item = height / num - total_spacing/num
     else
         space_per_item = width / num - total_spacing/num
@@ -67,9 +88,9 @@ function flex:layout(_, width, height)
         space_per_item = math.min(space_per_item, self._private.max_widget_size)
     end
 
-    for _, v in pairs(self._private.widgets) do
+    for k, v in pairs(self._private.widgets) do
         local x, y, w, h
-        if self._private.dir == "y" then
+        if is_y then
             x, y = 0, gmath.round(pos)
             w, h = width, floor(space_per_item)
         else
@@ -81,9 +102,16 @@ function flex:layout(_, width, height)
 
         pos = pos + space_per_item + spacing
 
-        if (self._private.dir == "y" and pos-spacing >= height) or
-            (self._private.dir ~= "y" and pos-spacing >= width) then
+        if (is_y and pos-spacing >= height) or
+            (is_x and pos-spacing >= width) then
             break
+        end
+
+        if k > 1 and spacing ~= 0 and spacing_widget then
+            table.insert(result, base.place_widget_at(
+                spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
+                is_x and abspace or w, is_y and abspace or h
+            ))
         end
     end
 

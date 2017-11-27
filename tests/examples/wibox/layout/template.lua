@@ -7,7 +7,7 @@ local beautiful = require( "beautiful"     )
 local unpack    = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 -- Create a generic rectangle widget to show layout disposition
-local function generic_widget(text, col)
+local function generic_widget(text, col, margins)
     return wibox.widget {
         {
             {
@@ -30,7 +30,7 @@ local function generic_widget(text, col)
             } or nil,
             widget = wibox.layout.stack
         },
-        margins = 5,
+        margins = margins or 5,
         set_text = function(self, text2)
             self:get_children_by_id("text")[1]:set_text(text2)
         end,
