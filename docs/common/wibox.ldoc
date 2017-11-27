@@ -180,6 +180,22 @@
 -- @property shape
 -- @tparam gears.shape shape
 
+--- Forward the inputs to the client below the wibox.
+--
+-- This replace the `shape_input` mask with an empty area. All mouse and
+-- keyboard events are sent to the object (such as a client) positioned below
+-- this wibox. When used alongside compositing, it allows, for example, to have
+-- a subtle transparent wibox on top a fullscreen client to display important
+-- data such as a low battery warning.
+--
+-- **Signal:**
+--
+--  * *property::input_passthrough*
+--
+-- @property input_passthrough
+-- @param[opt=false] boolean
+-- @see shape_input
+
 --- Get or set mouse buttons bindings to a wibox.
 --
 -- @param buttons_table A table of buttons objects, or nothing.

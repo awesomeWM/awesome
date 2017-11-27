@@ -137,11 +137,6 @@ function wibox:_apply_shape()
     img:finish()
 end
 
---- Set the wibox shape.
--- @property shape
--- @tparam gears.shape A gears.shape compatible function.
--- @see gears.shape
-
 function wibox:set_shape(shape)
     self._shape = shape
     self:_apply_shape()
@@ -149,6 +144,24 @@ end
 
 function wibox:get_shape()
     return self._shape
+end
+
+function wibox:set_input_passthrough(value)
+    rawset(self, "_input_passthrough", value)
+
+    if not value then
+        self.shape_input = nil
+    else
+        local img = cairo.ImageSurface(cairo.Format.A1, 0, 0)
+        self.shape_input = img._native
+        img:finish()
+    end
+
+    self:emit_signal("property::input_passthrough", value)
+end
+
+function wibox:get_input_passthrough()
+    return self._input_passthrough
 end
 
 function wibox:get_screen()
@@ -223,25 +236,7 @@ end
 
 --- Create a wibox.
 -- @tparam[opt=nil] table args
--- @tparam integer args.border_width Border width.
--- @tparam string args.border_color Border color.
--- @tparam boolean args.ontop On top of other windows.
--- @tparam string args.cursor The mouse cursor.
--- @tparam boolean args.visible Visibility.
--- @tparam number args.opacity The opacity of the wibox, between 0 and 1.
--- @tparam string args.type The window type (desktop, normal, dock, …).
--- @tparam integer args.x The x coordinates.
--- @tparam integer args.y The y coordinates.
--- @tparam integer args.width The width of the wibox.
--- @tparam integer args.height The height of the wibox.
--- @tparam screen args.screen The wibox screen.
--- @tparam wibox.widget args.widget The widget that the wibox displays.
--- @param args.shape_bounding The wibox’s bounding shape as a (native) cairo surface.
--- @param args.shape_clip The wibox’s clip shape as a (native) cairo surface.
--- @param args.shape_input The wibox’s input shape as a (native) cairo surface.
--- @tparam color args.bg The background of the wibox.
--- @tparam surface args.bgimage The background image of the drawable.
--- @tparam color args.fg The foreground (text) of the wibox.
+--@DOC_wibox_constructor_COMMON@
 -- @treturn wibox The new wibox
 -- @function .wibox
 
@@ -324,7 +319,13 @@ local function new(args)
         ret:set_screen ( args.screen  )
     end
 
-    ret.shape = args.shape
+    if args.shape then
+        ret.shape = args.shape
+    end
+
+    if args.screen then
+        ret.input_passthrough = args.input_passthrough
+    end
 
     return ret
 end

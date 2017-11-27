@@ -13,8 +13,11 @@ foreach(doc_file_name ${doc_files})
     # Remove the file extension
     string(REGEX REPLACE "\\.ldoc" "" DOC_FILE_NAME ${doc_file_name})
 
+    # There is a trailing \n, remove it or it cannot be included in existing blocks
+    string(REGEX REPLACE "\n$" "" doc_file_content "${doc_file_content}")
+
     # Create a new variable usable from lua files
-    set(DOC_${DOC_FILE_NAME}_COMMON "Imported documentation\n\n${doc_file_content}")
+    set(DOC_${DOC_FILE_NAME}_COMMON "${doc_file_content}")
 endforeach()
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

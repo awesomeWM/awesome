@@ -339,37 +339,19 @@ end
 -- You can also set the screen key with a screen number to attach the wibox.
 -- If not specified, the primary screen is assumed.
 -- @see wibox
--- @tparam[opt=nil] table arg
--- @tparam string arg.position The position.
--- @tparam string arg.stretch If the wibar need to be stretched to fill the screen.
--- @tparam integer arg.border_width Border width.
--- @tparam string arg.border_color Border color.
--- @tparam boolean arg.ontop On top of other windows.
--- @tparam string arg.cursor The mouse cursor.
--- @tparam boolean arg.visible Visibility.
--- @tparam number arg.opacity The wibar's opacity, between 0 and 1.
--- @tparam string arg.type The window type (desktop, normal, dock, …).
--- @tparam integer arg.x The x coordinates.
--- @tparam integer arg.y The y coordinates.
--- @tparam integer arg.width The wibar's width.
--- @tparam integer arg.height The wibar's height.
--- @tparam screen arg.screen The wibox screen.
--- @tparam wibox.widget arg.widget The widget that the wibox displays.
--- @param arg.shape_bounding The wibox’s bounding shape as a (native) cairo surface.
--- @param arg.shape_clip The wibox’s clip shape as a (native) cairo surface.
--- @param arg.shape_input The wibox’s input shape as a (native) cairo surface.
--- @tparam color arg.bg The wibar's background.
--- @tparam surface arg.bgimage The background image of the drawable.
--- @tparam color arg.fg The wibar's foreground (text) color.
+-- @tparam[opt=nil] table args
+-- @tparam string args.position The position.
+-- @tparam string args.stretch If the wibar need to be stretched to fill the screen.
+--@DOC_wibox_constructor_COMMON@
 -- @return The new wibar
 -- @function awful.wibar
-function awfulwibar.new(arg)
-    arg = arg or {}
-    local position = arg.position or "top"
+function awfulwibar.new(args)
+    args = args or {}
+    local position = args.position or "top"
     local has_to_stretch = true
-    local screen = get_screen(arg.screen or 1)
+    local screen = get_screen(args.screen or 1)
 
-    arg.type = arg.type or "dock"
+    args.type = args.type or "dock"
 
     if position ~= "top" and position ~="bottom"
             and position ~= "left" and position ~= "right" then
@@ -379,48 +361,48 @@ function awfulwibar.new(arg)
 
     -- Set default size
     if position == "left" or position == "right" then
-        arg.width = arg.width or beautiful["wibar_width"]
-            or math.ceil(beautiful.get_font_height(arg.font) * 1.5)
-        if arg.height then
+        args.width = args.width or beautiful["wibar_width"]
+            or math.ceil(beautiful.get_font_height(args.font) * 1.5)
+        if args.height then
             has_to_stretch = false
-            if arg.screen then
-                local hp = tostring(arg.height):match("(%d+)%%")
+            if args.screen then
+                local hp = tostring(args.height):match("(%d+)%%")
                 if hp then
-                    arg.height = math.ceil(screen.geometry.height * hp / 100)
+                    args.height = math.ceil(screen.geometry.height * hp / 100)
                 end
             end
         end
     else
-        arg.height = arg.height or beautiful["wibar_height"]
-            or math.ceil(beautiful.get_font_height(arg.font) * 1.5)
-        if arg.width then
+        args.height = args.height or beautiful["wibar_height"]
+            or math.ceil(beautiful.get_font_height(args.font) * 1.5)
+        if args.width then
             has_to_stretch = false
-            if arg.screen then
-                local wp = tostring(arg.width):match("(%d+)%%")
+            if args.screen then
+                local wp = tostring(args.width):match("(%d+)%%")
                 if wp then
-                    arg.width = math.ceil(screen.geometry.width * wp / 100)
+                    args.width = math.ceil(screen.geometry.width * wp / 100)
                 end
             end
         end
     end
 
-    arg.screen = nil
+    args.screen = nil
 
     -- The C code scans the table directly, so metatable magic cannot be used.
     for _, prop in ipairs {
         "border_width", "border_color", "font", "opacity", "ontop", "cursor",
         "bgimage", "bg", "fg", "type", "stretch", "shape"
     } do
-        if (arg[prop] == nil) and beautiful["wibar_"..prop] ~= nil then
-            arg[prop] = beautiful["wibar_"..prop]
+        if (args[prop] == nil) and beautiful["wibar_"..prop] ~= nil then
+            args[prop] = beautiful["wibar_"..prop]
         end
     end
 
-    local w = wibox(arg)
+    local w = wibox(args)
 
     w.screen   = screen
     w._screen  = screen --HACK When a screen is removed, then getbycoords wont work
-    w._stretch = arg.stretch == nil and has_to_stretch or arg.stretch
+    w._stretch = args.stretch == nil and has_to_stretch or args.stretch
 
     w.get_position = get_position
     w.set_position = set_position
@@ -429,7 +411,7 @@ function awfulwibar.new(arg)
     w.set_stretch = set_stretch
     w.remove      = remove
 
-    if arg.visible == nil then w.visible = true end
+    if args.visible == nil then w.visible = true end
 
     -- `w` needs to be inserted in `wiboxes` before reattach or its own offset
     -- will not be taken into account by the "older" wibars when `reattach` is
