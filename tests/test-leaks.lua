@@ -73,10 +73,10 @@ prepare_for_collect = emit_refresh
 collectable(tooltip_now())
 
 prepare_for_collect = emit_refresh
-collectable(awful.widget.taglist(1, awful.widget.taglist.filter.all))
+collectable(awful.widget.taglist{screen=1, filter=awful.widget.taglist.filter.all})
 
 prepare_for_collect = emit_refresh
-collectable(awful.widget.tasklist(1, awful.widget.tasklist.filter.currenttags))
+collectable(awful.widget.tasklist{screen=1, filter=awful.widget.tasklist.filter.currenttags})
 
 prepare_for_collect = emit_refresh
 collectable(create_wibox())

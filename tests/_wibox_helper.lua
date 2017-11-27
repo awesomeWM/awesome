@@ -8,7 +8,10 @@ return { create_wibox = function()
     -- Widgets that are aligned to the left
     local left_layout = wibox.layout.fixed.horizontal()
     left_layout:add(awful.widget.launcher({ image = img, command = "bash" }))
-    left_layout:add(awful.widget.taglist(1, awful.widget.taglist.filter.all))
+    left_layout:add(awful.widget.taglist {
+        screen = 1,
+        filter = awful.widget.taglist.filter.all
+    })
     left_layout:add(awful.widget.prompt())
 
     -- Widgets that are aligned to the right
@@ -20,7 +23,10 @@ return { create_wibox = function()
     -- Now bring it all together (with the tasklist in the middle)
     local layout = wibox.layout.align.horizontal()
     layout:set_left(left_layout)
-    layout:set_middle(awful.widget.tasklist(1, awful.widget.tasklist.filter.currenttags))
+    layout:set_middle(awful.widget.tasklist {
+        screen = 1,
+        filter = awful.widget.tasklist.filter.currenttags
+    })
     layout:set_right(right_layout)
 
     -- Create wibox
