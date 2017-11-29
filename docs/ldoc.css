@@ -191,10 +191,6 @@ table th, table td {
     padding: 2px;
 }
 
-#content p, #content table, #content ol, #content ul, #content dl {
-    max-width: 900px;
-}
-
 #about {
     padding: 15px;
     padding-left: 16em;

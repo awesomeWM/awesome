@@ -77,6 +77,7 @@ Additionally, the following optional dependencies exist:
 - libexecinfo on systems where libc does not provide `backtrace_symbols()` to
   generate slightly better backtraces on crashes
 - `Xephyr` or `Xvfb` for running integration tests
+- [GTK+ >= 3.10](https://www.gtk.org/) for `./themes/gtk/`
 
 ## Running Awesome
 
