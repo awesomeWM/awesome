@@ -1351,10 +1351,8 @@ function placement.next_to(d, args)
 
     local preferred_positions = {}
 
-    if #(args.preferred_positions or {}) then
-        for k, v in ipairs(args.preferred_positions) do
-            preferred_positions[v] = k
-        end
+    for k, v in ipairs(args.preferred_positions or {}) do
+        preferred_positions[v] = k
     end
 
     local dgeo = geometry_common(d, args)
