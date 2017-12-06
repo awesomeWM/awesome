@@ -154,7 +154,7 @@ function common.list_update(w, buttons, label, data, objects, args)
             cache.ibm:set_margins(0)
         end
 
-        w:add(cache.primary)
+        w:add(cache.bgb)
    end
 end
 
