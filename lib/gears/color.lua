@@ -338,6 +338,11 @@ end
 -- @treturn string color if it is valid, else fallback.
 function color.ensure_pango_color(check_color, fallback)
     check_color = tostring(check_color)
+    -- Pango markup supports alpha, PangoColor does not. Thus, check for this.
+    local len = #check_color
+    if string.match(check_color, "^#%x+$") and (len == 5 or len == 9 or len == 17) then
+        return check_color
+    end
     return Pango.Color.parse(Pango.Color(), check_color) and check_color or fallback or "black"
 end
 

@@ -271,7 +271,7 @@ describe("gears.color", function()
     describe("ensure_pango_color", function()
         -- Successful cases
         for _, value in ipairs{ "red", "cyan", "black", "#f00", "#014578",
-                    "#01ef01ef01ef"
+                    "#01ef01ef01ef", "#f00f", "#014578ab", "#01ef01ef01ef01ef"
                 } do
             it(value, function()
                 assert.is.same(value, color.ensure_pango_color(value))
@@ -280,6 +280,11 @@ describe("gears.color", function()
 
         it("#abz", function()
             assert.is.same("black", color.ensure_pango_color("#abz"))
+        end)
+
+        it("#fedcba98765432", function()
+            -- Only one, two or four characters per channel are supported
+            assert.is.same("black", color.ensure_pango_color("#fedcba98765432"))
         end)
 
         it("fallback", function()
