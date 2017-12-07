@@ -267,6 +267,25 @@ describe("gears.color", function()
             assert.is_not.equal(color.create_pattern_uncached("#00ff00"), color.create_pattern_uncached("#00ff00"))
         end)
     end)
+
+    describe("ensure_pango_color", function()
+        -- Successful cases
+        for _, value in ipairs{ "red", "cyan", "black", "#f00", "#014578",
+                    "#01ef01ef01ef"
+                } do
+            it(value, function()
+                assert.is.same(value, color.ensure_pango_color(value))
+            end)
+        end
+
+        it("#abz", function()
+            assert.is.same("black", color.ensure_pango_color("#abz"))
+        end)
+
+        it("fallback", function()
+            assert.is.same("zzz", color.ensure_pango_color("#abz", "zzz"))
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
