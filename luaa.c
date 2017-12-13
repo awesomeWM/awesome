@@ -118,10 +118,10 @@ extern const struct luaL_Reg awesome_mouse_meta[];
  * @signal systray::update
  */
 
-/** The wallpaper has just been changed. This signal is used for
+/** The wallpaper has changed.
  *
- * pseudo-transparency in `wibox.drawable` if no composite manager is
- * running.
+ * This signal is used for pseudo-transparency in `wibox.drawable` if no
+ * composite manager is running.
  * @signal wallpaper_changed
  */
 
@@ -621,15 +621,15 @@ setup_awesome_signals(lua_State *L)
     lua_pushstring(L, "unix_signal");
     lua_newtable(L);
 
-#define SETUP_SIGNAL(sig)                         \
-    do {                                          \
-        /* Set awesome.signals["SIGSTOP"] = 42 */ \
-        lua_pushinteger(L, sig);                  \
-        lua_setfield(L, -2, #sig);                \
-        /* Set awesome.signals[42] = "SIGSTOP" */ \
-        lua_pushinteger(L, sig);                  \
-        lua_pushstring(L, #sig);                  \
-        lua_settable(L, -3);                      \
+#define SETUP_SIGNAL(sig)                             \
+    do {                                              \
+        /* Set awesome.unix_signal["SIGSTOP"] = 42 */ \
+        lua_pushinteger(L, sig);                      \
+        lua_setfield(L, -2, #sig);                    \
+        /* Set awesome.unix_signal[42] = "SIGSTOP" */ \
+        lua_pushinteger(L, sig);                      \
+        lua_pushstring(L, #sig);                      \
+        lua_settable(L, -3);                          \
     } while (0)
 
     /* Non-standard signals. These are first so that e.g. (on my system)
