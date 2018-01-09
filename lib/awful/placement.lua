@@ -1377,6 +1377,8 @@ end
 -- In that case, if there is room on the top of the geometry, then it will have
 -- priority, followed by all the others, in order.
 --
+--@DOC_awful_placement_next_to_EXAMPLE@
+--
 -- @tparam drawable d A wibox or client
 -- @tparam table args
 -- @tparam string args.mode The mode
