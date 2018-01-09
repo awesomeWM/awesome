@@ -644,7 +644,6 @@ local function get_cross_sections(abs_geo, mode)
         }
     elseif mode == "geometry" then
         -- The widget geometry extended to reach the end of the drawable
-
         return {
             h = {
                 x      = abs_geo.drawable_geo.x     ,
@@ -702,23 +701,35 @@ local function get_relative_regions(geo, mode, is_absolute)
         end
     end
 
-    -- Get the drawable geometry
-    local dpos = geo.drawable and (
-        geo.drawable.drawable and
-            geo.drawable.drawable:geometry()
-            or geo.drawable:geometry()
-    ) or {x=0, y=0}
+    -- Get the parent geometry using one way or another depending on the object
+    -- Type
+    local bw, dgeo = 0, {x=0, y=0, width=1, height=1}
+
+    -- Detect various types of geometry table and (try) to get rid of the
+    -- differences so the code below don't have to care anymore.
+    if geo.drawin then
+        bw, dgeo = geo.drawin.border_width, geo.drawin:geometry()
+    elseif geo.drawable and geo.drawable.get_wibox then
+        bw   = geo.drawable.get_wibox().border_width
+        dgeo = geo.drawable.get_wibox():geometry()
+    elseif geo.drawable and geo.drawable.drawable then
+        bw, dgeo = 0, geo.drawable.drawable:geometry()
+    end
+
+    -- Add the infamous border size
+    dgeo.width  = dgeo.width  + 2*bw
+    dgeo.height = dgeo.height + 2*bw
 
     -- Compute the absolute widget geometry
-    local abs_widget_geo = is_absolute and geo or {
-        x            = dpos.x + geo.x              ,
-        y            = dpos.y + geo.y              ,
-        width        = geo.width                   ,
-        height       = geo.height                  ,
-        drawable     = geo.drawable                ,
+    local abs_widget_geo = is_absolute and dgeo or {
+        x            = dgeo.x + geo.x + bw,
+        y            = dgeo.y + geo.y + bw,
+        width        = geo.width          ,
+        height       = geo.height         ,
+        drawable     = geo.drawable       ,
     }
 
-    abs_widget_geo.drawable_geo = geo.drawable and dpos or geo
+    abs_widget_geo.drawable_geo = geo.drawable and dgeo or geo
 
     -- Get the point for comparison.
     local center_point = mode:match("cursor") and capi.mouse.coords() or {
