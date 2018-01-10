@@ -253,6 +253,10 @@ local function new(args)
     ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")
 
+    function ret._drawable.get_wibox()
+        return ret
+    end
+
     ret._drawable:_inform_visible(w.visible)
     w:connect_signal("property::visible", function()
         ret._drawable:_inform_visible(w.visible)
