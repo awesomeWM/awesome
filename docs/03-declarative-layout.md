@@ -1,7 +1,6 @@
-# The declarative layout system
+# The AwesomeWM widget system
 
-The declarative layout system provides an alternative to the imperative system.
-It is inspired by the one used by Awesome 3.2-3.4 and the Qt QML style.
+This document explains how to define, place and manage widgets.
 
 ## The default widgets
 
@@ -29,7 +28,127 @@ configurable rules.
 
 @DOC_layout_WIDGET_LIST@
 
-## Placing widgets
+### The different type of widget boxes (Wibox)
+
+The Awesome API uses the word "wibox" (widget box) to describe an area of the
+screen filled with widgets. There are many subvariants of wiboxes with
+specialized role such as widget bars or tooltips. All variants mostly share the
+same characteristics, but add some extra features to make those specialized
+widget boxes easier to work with.
+
+@DOC_awful_popup_wiboxtypes_EXAMPLE@
+
+The normal `wibox` is the base class for each of these type. It is extremely
+flexible and allows to place just about anything on the screen. However it
+requires a lot of repetitive boiler plate code to use directly. For example,
+the user need to compute the optimal size by hand or use `awful.placement`.
+
+The `awful.wibar` specialization allows to attach a `wibox` to a screen edge
+and prevent clients from using this area when tiled.
+
+The `awful.popup` allows to easily place widgets on the screen. It automatically
+resize itself to fit the optimal widget size. It also has helper properties
+and methods to make it easy to place it on the screen. It both supports absolute
+positioning, relative positioning and manual positioning.
+
+The `awful.tooltip` is a very simple `wibox` that allows to display text next
+to an object such as the mouse.
+
+Finally, the `awful.titlebar`, while not technically a real `wibox`, acts
+exactly the same way and allows to attach widgets on each side of clients.
+
+## The different syntaxes to initiate widgets
+
+Awesome provides 2 totally different API access styles to manage widgets. Both
+suit different use case are are equivalent. Under the hood, both produces the
+exact same code. Consider the declarative API to be compiled into the
+imperative syntax when loaded. Also note that in contract to technologies such
+as QML, it is interpreted only once and isn't automatically updated when
+value changes.
+
+The **imperative** widget initialization is similar to QtWidgets, GTK and Win32.
+You create the object, then set the property and add the widget as a child to
+another already declared widget. It is quite simple to use but very verbose
+and full of boilerplate code. The imperative API also offers properties both
+with accessors or directly. It is useful when creating highly dynamic layouts
+where widgets are added and removed over the course of their lifecycle.
+
+The **declarative** syntax resembles HTML style code
+written in JSON or YAML. The widgets instances are created automatically and
+the hierarchy is related to the table nesting (indentation). It is preferred
+when creating static layouts that won't change over the course of their
+lifecycle.
+
+Here is the same code written in both the imperative and declarative style
+
+**Imperative with accessors**
+
+Code:
+
+    local bg = wibox.container.background()
+    bg:set_bg("#ff0000")
+
+    local tb1 = wibox.widget.textbox()
+    local tb2 = wibox.widget.textbox("bar")
+
+    tb1:set_text("foo")
+    tb2:set_text("bar")
+
+    local l = wibox.layout.fixed.vertical()
+    l:add(tb1)
+    l:add(tb2)
+
+    bg:set_widget(l)
+
+**Imperative with properties**
+
+Code:
+
+    local bg = wibox.container.background()
+    bg.bg = "#ff0000"
+
+    local tb1 = wibox.widget.textbox("foo")
+    local tb2 = wibox.widget.textbox("bar")
+
+    tb1.text = "foo"
+    tb2.text = "bar"
+
+    local l = wibox.layout.fixed.vertical()
+    l:add(tb1)
+    l:add(tb2)
+
+    bg.widget = l
+
+**Declarative**
+
+Code:
+
+    local bg = wibox.widget {
+        {
+            {
+                text = "foo",
+                widget = wibox.widget.textbox
+            },
+            {
+                text = "bar",
+                widget = wibox.widget.textbox
+            },
+            layout = wibox.layout.fixed.vertical
+        },
+        bg = "#ff0000",
+        widget = wibox.container.background
+    }
+
+
+The Awesome documentation mostly uses the declarative style for consistency,
+but both are **always** available. Note that each style can be mixed with other
+styles, but this creates very confusing code and should be avoided.
+
+## Creating and placing widgets using the declarative style
+
+The examples below explain in details how to use the declarative layout system.
+The imperative system is quite self explanatory and the respective widget API
+documentation should be enough for most.
 
 ### A simple layout
 
