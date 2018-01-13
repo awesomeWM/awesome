@@ -60,7 +60,7 @@ local function default_template()
         bgb     = bgb,
         tbm     = tbm,
         ibm     = ibm,
-        primary = l,
+        primary = bgb,
     }
 end
 
@@ -154,7 +154,7 @@ function common.list_update(w, buttons, label, data, objects, args)
             cache.ibm:set_margins(0)
         end
 
-        w:add(cache.bgb)
+        w:add(cache.primary)
    end
 end
 
