@@ -55,9 +55,8 @@ wb:setup {
 -- The popup
 awful.popup {
     widget = wibox.widget {
-        --TODO use the layoutlist for this example
-        awful.widget.taglist {
-            filter      = awful.widget.taglist.filter.all,
+        awful.widget.layoutlist {
+            filter      = awful.widget.layoutlist.source.for_screen,
             screen      = 1,
             base_layout = wibox.widget {
                 spacing         = 5,
@@ -66,18 +65,11 @@ awful.popup {
             },
             widget_template = {
                 {
---TODO use the layoutlist for this example
---                     {
---                         id            = 'icon_role',
---                         forced_height = 22,
---                         forced_width  = 22,
---                         widget        = wibox.widget.imagebox,
---                     },
                     {
-                        id = "text_role",
+                        id            = 'icon_role',
                         forced_height = 22,
                         forced_width  = 22,
-                        widget = wibox.widget.textbox
+                        widget        = wibox.widget.imagebox,
                     },
                     margins = 4,
                     widget  = wibox.container.margin,
