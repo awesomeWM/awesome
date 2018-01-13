@@ -585,7 +585,8 @@ main(int argc, char **argv)
         }
 
     /* Get XDG basedir data */
-    xdgInitHandle(&xdg);
+    if(!xdgInitHandle(&xdg))
+        fatal("Function xdgInitHandle() failed, is $HOME unset?");
 
     /* add XDG_CONFIG_DIR as include path */
     const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(&xdg);
