@@ -10,6 +10,7 @@ return
 {
     taglist = require("awful.widget.taglist");
     tasklist = require("awful.widget.tasklist");
+    layoutlist = require("awful.widget.layoutlist");
     button = require("awful.widget.button");
     launcher = require("awful.widget.launcher");
     prompt = require("awful.widget.prompt");
