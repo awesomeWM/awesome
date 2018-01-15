@@ -20,6 +20,7 @@ local w_textbox = require("wibox.widget.textbox")
 local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 local gstring = require("gears.string")
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local utils = {}
 
@@ -123,7 +124,8 @@ do
 end
 
 local all_icon_sizes = {
-    '128x128' ,
+    'scalable',
+    '128x128',
     '96x96',
     '72x72',
     '64x64',
@@ -154,48 +156,63 @@ local icon_lookup_path = nil
 --- Get a list of icon lookup paths.
 -- @treturn table A list of directories, without trailing slash.
 local function get_icon_lookup_path()
-    if not icon_lookup_path then
-        local add_if_readable = function(t, path)
+    if icon_lookup_path then return icon_lookup_path end
+
+    local function ensure_args(t, paths)
+        if type(paths) == 'string' then paths = { paths } end
+        return t or {}, paths
+    end
+
+    local function add_if_readable(t, paths)
+        t, paths = ensure_args(t, paths)
+
+        for _, path in ipairs(paths) do
             if gfs.dir_readable(path) then
                 table.insert(t, path)
             end
         end
-        icon_lookup_path = {}
-        local icon_theme_paths = {}
-        local icon_theme = theme.icon_theme
-        local paths = glib.get_system_data_dirs()
-        table.insert(paths, 1, glib.get_user_data_dir())
-        table.insert(paths, 1, glib.build_filenamev({glib.get_home_dir(),
-                                                     '.icons'}))
-        for _,dir in ipairs(paths) do
-            local icons_dir = glib.build_filenamev({dir, 'icons'})
-            if gfs.dir_readable(icons_dir) then
-                if icon_theme then
-                    add_if_readable(icon_theme_paths,
-                                    glib.build_filenamev({icons_dir,
-                                                         icon_theme}))
-                end
-                -- Fallback theme.
-                add_if_readable(icon_theme_paths,
-                                glib.build_filenamev({icons_dir, 'hicolor'}))
-            end
+        return t
+    end
+
+    local function add_with_dir(t, paths, dir)
+        t, paths = ensure_args(t, paths)
+        dir = { nil, dir }
+
+        for _, path in ipairs(paths) do
+            dir[1] = path
+            table.insert(t, glib.build_filenamev(dir))
         end
-        for _, icon_theme_directory in ipairs(icon_theme_paths) do
-            for _, size in ipairs(all_icon_sizes) do
-                add_if_readable(icon_lookup_path,
-                                glib.build_filenamev({icon_theme_directory,
-                                                      size, 'apps'}))
-            end
-        end
-        for _,dir in ipairs(paths)do
-            -- lowest priority fallbacks
-            add_if_readable(icon_lookup_path,
-                            glib.build_filenamev({dir, 'pixmaps'}))
-            add_if_readable(icon_lookup_path,
-                            glib.build_filenamev({dir, 'icons'}))
+        return t
+    end
+
+    icon_lookup_path = {}
+    local theme_priority = { 'hicolor' }
+    if theme.icon_theme then table.insert(theme_priority, 1, theme.icon_theme) end
+
+    local paths = add_with_dir({}, glib.get_home_dir(), '.icons')
+    add_with_dir(paths, {
+        glib.get_user_data_dir(),           -- $XDG_DATA_HOME, typically $HOME/.local/share
+        unpack(glib.get_system_data_dirs()) -- $XDG_DATA_DIRS, typically /usr/{,local/}share
+    }, 'icons')
+    add_with_dir(paths, glib.get_system_data_dirs(), 'pixmaps')
+
+    local icon_theme_paths = {}
+    for _, theme_dir in ipairs(theme_priority) do
+        add_if_readable(icon_theme_paths,
+                        add_with_dir({}, paths, theme_dir))
+    end
+
+    local app_in_theme_paths = {}
+    for _, icon_theme_directory in ipairs(icon_theme_paths) do
+        for _, size in ipairs(all_icon_sizes) do
+            table.insert(app_in_theme_paths,
+                         glib.build_filenamev({ icon_theme_directory,
+                                                size, 'apps' }))
         end
     end
-    return icon_lookup_path
+    add_if_readable(icon_lookup_path, app_in_theme_paths)
+
+    return add_if_readable(icon_lookup_path, paths)
 end
 
 --- Remove CR newline from the end of the string.
