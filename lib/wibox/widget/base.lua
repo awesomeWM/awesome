@@ -614,7 +614,7 @@ end
 
 --- Create an empty widget skeleton.
 --
--- See [Creating new widgets](../documentation/04-new-widget.md.html).
+-- See [Creating new widgets](../documentation/04-new-widgets.md.html).
 -- @tparam[opt] widget proxy If this is set, the returned widget will be a
 --   proxy for this widget. It will be equivalent to this widget.
 --   This means it looks the same on the screen.
