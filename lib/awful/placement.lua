@@ -1432,39 +1432,65 @@ function placement.next_to(d, args)
 
     local regions = get_relative_regions(wgeo, mode, is_absolute)
 
+    -- Order the regions with the preferred_positions, then the defaults
+    local sorted_regions, default_positions = {}, {"left", "right", "bottom", "top"}
+
+    for _, pos in ipairs(original_pos or {}) do
+        for idx, def in ipairs(default_positions) do
+            if def == pos then
+                table.remove(default_positions, idx)
+                break
+            end
+        end
+
+        table.insert(sorted_regions, {name = pos, region = regions[pos]})
+    end
+
+    for _, pos in ipairs(default_positions) do
+        table.insert(sorted_regions, {name = pos, region = regions[pos]})
+    end
+
     -- Check each possible slot around the drawable (8 total), see what fits
     -- and order them by preferred_positions
     local does_fit = {}
-    for k,v in pairs(regions) do
+    for _, pos in ipairs(sorted_regions) do
         local geo, dir, fit
 
         -- Try each anchor until one that fits is found
         for _, anchor in ipairs(preferred_anchors) do
-            geo, dir = outer_positions[k.."_"..anchor](v, dgeo.width, dgeo.height)
+            geo, dir = outer_positions[pos.name.."_"..anchor](pos.region, dgeo.width, dgeo.height)
+
             geo.width, geo.height = dgeo.width, dgeo.height
-            fit = fit_in_bounding(v.screen, geo, args)
+
+            fit = fit_in_bounding(pos.region.screen, geo, args)
+
             if fit then break end
         end
 
-        does_fit[k] = fit and {geo, dir} or nil
+        does_fit[pos.name] = fit and {geo, dir} or nil
 
-        if fit and preferred_positions[k] and preferred_positions[k] < pref_idx then
-            pref_idx  = preferred_positions[k]
-            pref_name = k
+        if fit and preferred_positions[pos.name] and preferred_positions[pos.name] < pref_idx then
+            pref_idx  = preferred_positions[pos.name]
+            pref_name = pos.name
         end
 
         -- No need to continue
-        if fit and preferred_positions[k] == 1 then break end
+        if fit then break end
     end
 
-    local pos_name = pref_name or next(does_fit)
-    local ngeo, dir = unpack(does_fit[pos_name] or {}) --FIXME why does this happen
+    local ngeo, dir = unpack(does_fit[pref_name] or {}) --FIXME why does this happen
+
+    -- The requested placement isn't possible due to the lack of space, better
+    -- do nothing an try random things
+    if not ngeo then return end
+
+    remove_border(d, args, ngeo)
 
     geometry_common(d, args, ngeo)
 
     attach(d, placement.next_to, args)
 
-    return fix_new_geometry(ngeo, args, true), pos_name, dir
+    return fix_new_geometry(ngeo, args, true), pref_name, dir
 end
 
 --- Restore the geometry.
