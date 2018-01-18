@@ -281,6 +281,23 @@ luaA_sync(lua_State *L)
     return 0;
 }
 
+/** Translate a GdkPixbuf to a cairo image surface..
+ *
+ * @param pixbuf The pixbuf as a light user datum.
+ * @return A cairo surface as light user datum.
+ * @function pixbuf_to_surface
+ */
+static int
+luaA_pixbuf_to_surface(lua_State *L)
+{
+    GdkPixbuf *pixbuf = (GdkPixbuf *) lua_touserdata(L, 1);
+    cairo_surface_t *surface = draw_surface_from_pixbuf(pixbuf);
+
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surface);
+    return 1;
+}
+
 /** Load an image from a given path.
  *
  * @param name The file name.
@@ -292,6 +309,10 @@ luaA_sync(lua_State *L)
 static int
 luaA_load_image(lua_State *L)
 {
+    /* TODO: Deprecate this function, Lua can use GdkPixbuf directly plus
+     * awesome.pixbuf_to_surface
+     */
+
     GError *error = NULL;
     const char *filename = luaL_checkstring(L, 1);
     cairo_surface_t *surface = draw_load_image(L, filename, &error);
@@ -776,6 +797,7 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
         { "emit_signal", luaA_awesome_emit_signal },
         { "systray", luaA_systray },
         { "load_image", luaA_load_image },
+        { "pixbuf_to_surface", luaA_pixbuf_to_surface },
         { "set_preferred_icon_size", luaA_set_preferred_icon_size },
         { "register_xproperty", luaA_register_xproperty },
         { "set_xproperty", luaA_set_xproperty },
