@@ -51,14 +51,18 @@ function xresources.get_current_theme()
     for i=0,15 do table.insert(keys, "color"..i) end
     local colors = {}
     for _, key in ipairs(keys) do
-        colors[key] = awesome.xrdb_get_value("", key)
-        if not colors[key] then
-            gears_debug.print_warning("beautiful: can't get colorscheme from xrdb (using fallback).")
-            return fallback
+        local color = awesome.xrdb_get_value("", key)
+        if color then
+            if color:find("rgb:") then
+                color = "#"..color:gsub("[a]?rgb:", ""):gsub("/", "")
+            end
+        else
+            gears_debug.print_warning(
+                "beautiful: can't get colorscheme from xrdb for value '"..key.."' (using fallback)."
+            )
+            color = fallback[key]
         end
-        if colors[key]:find("rgb:") then
-            colors[key] = "#"..colors[key]:gsub("[a]?rgb:", ""):gsub("/", "")
-        end
+        colors[key] = color
     end
     return colors
 end
