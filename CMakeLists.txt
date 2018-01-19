@@ -234,8 +234,13 @@ if(GENERATE_MANPAGES)
             set(gzfile  ${BUILD_DIR}/${relpath2}/${basename}.gz)
             set(manfile ${BUILD_DIR}/${relpath2}/${basename})
 
+            if (lang STREQUAL default)
+                set(asciilang en)
+            else()
+                set(asciilang ${lang})
+            endif()
             add_custom_command(
-                COMMAND ${ASCIIDOC_EXECUTABLE} -d manpage -b docbook -o ${xmlfile} - < ${txtfile}
+                COMMAND ${ASCIIDOC_EXECUTABLE} -a lang=${asciilang} -d manpage -b docbook -o ${xmlfile} - < ${txtfile}
                 WORKING_DIRECTORY ${BUILD_DIR}/${relpath2}
                 OUTPUT  ${xmlfile}
                 DEPENDS ${txtfile}
