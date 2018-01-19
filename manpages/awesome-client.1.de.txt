@@ -9,7 +9,7 @@ awesome-client - awesome Fenstermanager externe Befehlsschnittstelle
 SYNTAX
 -------
 
-awesome-client
+awesome-client [-h|--help] [command [command...]]
 
 BESCHREIBUNG
 ------------
@@ -23,6 +23,34 @@ awesome-client liest Befehle von der Standard-Eingabe und sendet diese über D-B
 Wenn 'rlwrap' installiert ist wird es benutzt, um eine readline-Kommandozeileneingabe zu ermöglichen.
 
 Das Modul 'awful.remote' muss geladen sein, um diesen Befehl zu benutzen.
+
+EXAMPLES
+-------
+....
+$ awesome-client 'return 1+1, "Hello, world"\
+   double 2
+   string "Hello, world"
+
+# The following does not return anything on the command line,
+# but will show a notification.
+$ awesome-client '
+> naughty = require("naughty")
+> naughty.notify({
+> title="CLI Notification",
+> text="This is a notification sent from the command line!"})
+> '
+
+# Entering read-eval-print-loop mode
+# This mode will send every line to awesome, exactly the same as passing
+# multiple commands on the command line.
+$ awesome-client
+awesome# return 1+1
+   double 2
+awesome# return 1+1, "Hello, world"
+   double 2
+   string "Hello, world"
+awesome#
+....
 
 SIEHE AUCH
 ----------
