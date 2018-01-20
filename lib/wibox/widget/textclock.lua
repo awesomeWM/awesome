@@ -40,15 +40,15 @@ function textclock:get_timezone()
     return self._private.tzid
 end
 
---- Set the clock's timeout
+--- Set the clock's refresh rate
 -- @tparam number How often the clock is updated
-function textclock:set_timeout(timeout)
-    self._private.timeout = timeout or self._private.timeout
+function textclock:set_refresh(refresh)
+    self._private.refresh = refresh or self._private.refresh
     self:force_update()
 end
 
-function textclock:get_timeout()
-    return self._private.timeout
+function textclock:get_refresh()
+    return self._private.refresh
 end
 
 --- Force a textclock to update now.
@@ -65,18 +65,18 @@ end
 --- Create a textclock widget. It draws the time it is in a textbox.
 --
 -- @tparam[opt=" %a %b %d, %H:%M "] string format The time format.
--- @tparam[opt=60] number timeout How often to update the time (in seconds).
+-- @tparam[opt=60] number refresh How often to update the time (in seconds).
 -- @tparam[opt=local timezone] string timezone The timezone to use,
 --   e.g. "Z" for UTC, "±hh:mm" or "Europe/Amsterdam". See
 --   https://developer.gnome.org/glib/stable/glib-GTimeZone.html#g-time-zone-new.
 -- @treturn table A textbox widget.
 -- @function wibox.widget.textclock
-function textclock.new(format, timeout, tzid)
+function textclock.new(format, refresh, tzid)
     local w = textbox()
     xtable.crush(w, textclock, true)
 
     w._private.format = format or " %a %b %d, %H:%M "
-    w._private.timeout = timeout or 60
+    w._private.refresh = refresh or 60
     w._private.tzid = tzid
     w._private.timezone = tzid and TimeZone.new(tzid) or TimeZone.new_local()
 
@@ -88,12 +88,12 @@ function textclock.new(format, timeout, tzid)
                     .. "'" .. w._private.format .. "'")
         end
         w:set_markup(str)
-        w._timer.timeout = calc_timeout(w._private.timeout)
+        w._timer.timeout = calc_timeout(w._private.refresh)
         w._timer:again()
         return true -- Continue the timer
     end
 
-    w._timer = timer.weak_start_new(timeout, w._private.textclock_update_cb)
+    w._timer = timer.weak_start_new(refresh, w._private.textclock_update_cb)
     w:force_update()
     return w
 end
