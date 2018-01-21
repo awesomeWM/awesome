@@ -10,7 +10,7 @@ local setmetatable = setmetatable
 local os = os
 local textbox = require("wibox.widget.textbox")
 local timer = require("gears.timer")
-local xtable = require("gears.table")
+local gtable = require("gears.table")
 local glib = require("lgi").GLib
 local DateTime = glib.DateTime
 local TimeZone = glib.TimeZone
@@ -18,7 +18,9 @@ local TimeZone = glib.TimeZone
 local textclock = { mt = {} }
 
 --- Set the clock's format
+-- @property format
 -- @tparam string format The new time format.  This can contain pango markup
+
 function textclock:set_format(format)
     self._private.format = format
     self:force_update()
@@ -29,7 +31,9 @@ function textclock:get_format()
 end
 
 --- Set the clock's timezone
+-- @property timezone
 -- @tparam string timezone
+
 function textclock:set_timezone(tzid)
     self._private.tzid = tzid
     self._private.timezone = tzid and TimeZone.new(tzid) or TimeZone.new_local()
@@ -41,7 +45,9 @@ function textclock:get_timezone()
 end
 
 --- Set the clock's refresh rate
--- @tparam number How often the clock is updated
+-- @property refresh
+-- @tparam number How often the clock is updated, in seconds
+
 function textclock:set_refresh(refresh)
     self._private.refresh = refresh or self._private.refresh
     self:force_update()
@@ -71,9 +77,9 @@ end
 --   https://developer.gnome.org/glib/stable/glib-GTimeZone.html#g-time-zone-new.
 -- @treturn table A textbox widget.
 -- @function wibox.widget.textclock
-function textclock.new(format, refresh, tzid)
+local function new(format, refresh, tzid)
     local w = textbox()
-    xtable.crush(w, textclock, true)
+    gtable.crush(w, textclock, true)
 
     w._private.format = format or " %a %b %d, %H:%M "
     w._private.refresh = refresh or 60
@@ -99,7 +105,7 @@ function textclock.new(format, refresh, tzid)
 end
 
 function textclock.mt:__call(...)
-    return textclock.new(...)
+    return new(...)
 end
 
 --@DOC_widget_COMMON@
