@@ -51,9 +51,32 @@ a_dbus_send()
     fi
 }
 
+print_help()
+{
+    echo "Usage: awesome-client [-h|--help] [command [command...]]
+awesome window manager remote execution
+
+awesome-client is a remote command line interface to awesome.
+It communicates with awesome via D-Bus, allowing remote execution of Lua code.
+
+Run without a command to enter REPL (read-eval-print-loop) mode.
+For examples see \`man awesome-client\`."
+}
+
 if [ $# -ne 0 ]
 then
-    for arg in "$@" ; do
+    # check for command-line arguments
+    ARGS=()
+    for arg in "$@"; do
+        if [ "$arg" = "-h" ] || [ "$arg" = "--help" ]; then
+            print_help
+            exit 0
+        else
+            ARGS+=("$arg")
+        fi
+    done
+    # run arguments
+    for arg in "$ARGS" ; do
         a_dbus_send "$arg"
     done
 elif [ -t 0 ]

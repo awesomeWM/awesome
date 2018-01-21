@@ -9,7 +9,7 @@ awesome-client - exécution à distance du gestionnaire de fenêtres awesome
 SYNOPSIS
 --------
 
-awesome-client
+awesome-client [-h|--help] [command [command...]]
 
 DESCRIPTION
 ------------
@@ -25,24 +25,48 @@ Si 'rlwrap' est installé, il sera utilisé pour fournir une interface en ligne 
 
 Le module 'awful.remote' doit être chargé pour que cette commande fonctionne.
 
+EXAMPLES
+-------
+....
+$ awesome-client 'return 1+1, "Hello, world"\
+   double 2
+   string "Hello, world"
+
+# The following does not return anything on the command line,
+# but will show a notification.
+$ awesome-client '
+> naughty = require("naughty")
+> naughty.notify({
+> title="CLI Notification",
+> text="This is a notification sent from the command line!"})
+> '
+
+# Entering read-eval-print-loop mode
+# This mode will send every line to awesome, exactly the same as passing
+# multiple commands on the command line.
+$ awesome-client
+awesome# return 1+1
+   double 2
+awesome# return 1+1, "Hello, world"
+   double 2
+   string "Hello, world"
+awesome#
+....
+
 VOIR AUSSI
 ----------
-
 awesome(1) awesomerc(5)
 
 AUTEURS
 -------
-
 Julien Danjou <julien@danjou.info>
 
 WWW
 ---
-
 https://awesomewm.org
 
 TRADUCTION
 ----------
-
 Ce document est une traduction, réalisée par Jean-Luc Duflot <jl POING
 duflot CHEZ laposte POING net> le 20 février 2012.
 
