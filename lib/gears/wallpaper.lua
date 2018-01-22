@@ -1,4 +1,23 @@
 ---------------------------------------------------------------------------
+-- Functions for setting the wallpaper.
+--
+-- There are two levels of functionality provided by this module:
+--
+-- The low-level functionality consists of two functions.
+-- @{set} an already-prepared wallpaper on all screens and @{prepare_context}
+-- prepares things to draw a new wallpaper.
+--
+-- The low-level API can for example be used to set solid red as a wallpaper
+-- (see @{gears.color} for details on the supported syntax):
+--
+--     gears.wallpaper.set("#ff0000")
+--
+-- Ontop of these low-level functions, the remaining functions implement more
+-- useful functionality. For example, given a screen object `s`, an image can be
+-- set as the wallpaper as follows:
+--
+--     gears.wallpaper.maximized("path/to/image.png", s)
+--
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
 -- @module gears.wallpaper
