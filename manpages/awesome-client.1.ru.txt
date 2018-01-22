@@ -27,25 +27,26 @@ awesome через D-Bus. Если установлен «rlwrap», то он б
 В awesome должен быть загружен модуль «awful.remote», чтобы позволить удалённое
 выполнение кода.
 
-EXAMPLES
+ПРИМЕРЫ
 -------
 ....
 $ awesome-client 'return 1+1, "Hello, world"\
    double 2
    string "Hello, world"
 
-# The following does not return anything on the command line,
-# but will show a notification.
+# Следующий пример не возвращает ничего в командную строку,
+# но показывает уведомление.
 $ awesome-client '
 > naughty = require("naughty")
 > naughty.notify({
 > title="CLI Notification",
-> text="This is a notification sent from the command line!"})
+> text="Это уведомление было отправлено из командной строки!"})
 > '
 
-# Entering read-eval-print-loop mode
-# This mode will send every line to awesome, exactly the same as passing
-# multiple commands on the command line.
+# Интерактивный режим (REPL)
+# В данном режиме каждая строка введенная пользователем
+# будет отправлена в awesome wm, точно так же, как если бы несколько команд
+# были бы переданы как аргументы командной строки.
 $ awesome-client
 awesome# return 1+1
    double 2
