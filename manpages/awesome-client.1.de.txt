@@ -24,25 +24,25 @@ Wenn 'rlwrap' installiert ist wird es benutzt, um eine readline-Kommandozeilenei
 
 Das Modul 'awful.remote' muss geladen sein, um diesen Befehl zu benutzen.
 
-EXAMPLES
--------
+BEISPIELE
+---------
 ....
 $ awesome-client 'return 1+1, "Hello, world"\
    double 2
    string "Hello, world"
 
-# The following does not return anything on the command line,
-# but will show a notification.
+# Das folgende Beispiel erzeugt keine Ausgabe auf der Kommandozeile,
+# sondern zeigt eine Benachrichtigung an.
 $ awesome-client '
 > naughty = require("naughty")
 > naughty.notify({
-> title="CLI Notification",
-> text="This is a notification sent from the command line!"})
+> title="CLI-Benachrichtigung",
+> text="Dies ist eine Benachrichtigung von der Kommandozeile!"})
 > '
 
-# Entering read-eval-print-loop mode
-# This mode will send every line to awesome, exactly the same as passing
-# multiple commands on the command line.
+# Starte eine lesen-ausführen-ausgeben-Schleife (REPL).
+# In diesem Modus wird jede Zeile zu awesome geschickt; auf die selbe Art
+# wie mehrere Kommandos auf der Kommandozeile.
 $ awesome-client
 awesome# return 1+1
    double 2
