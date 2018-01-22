@@ -86,6 +86,11 @@ Modifica dello schema
 
 DEFAULT SCORCIATOIE DA TASTIERA
 -------------------------------
+Help
+~~~~
+*Mod4 + s*::
+    Show currently assigned key bindings.
+
 Controllo del gestore di finestre
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 *Mod4 + Control + r*::

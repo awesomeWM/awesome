@@ -69,6 +69,11 @@ Veränderung der Anordnung
 
 TASTENKÜRZEL
 ------------
+Help
+~~~~
+*Mod4 + s*::
+    Show currently assigned key bindings.
+
 Fenstermanager kontrollieren
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 *Mod4 + Control + r*::

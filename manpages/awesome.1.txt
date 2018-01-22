@@ -78,6 +78,11 @@ Layout modification
 
 DEFAULT KEY BINDINGS
 --------------------
+Help
+~~~~
+*Mod4 + s*::
+    Show currently assigned key bindings.
+
 Window manager control
 ~~~~~~~~~~~~~~~~~~~~~~
 *Mod4 + Control + r*::
