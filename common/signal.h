@@ -91,8 +91,7 @@ signal_connect(signal_array_t *arr, const char *name, const void *ref)
 static inline bool
 signal_disconnect(signal_array_t *arr, const char *name, const void *ref)
 {
-    signal_t *sigfound = signal_array_getbyid(arr,
-                                              a_strhash((const unsigned char *) name));
+    signal_t *sigfound = signal_array_getbyname(arr, name);
     if(sigfound)
     {
         foreach(func, sigfound->sigfuncs)

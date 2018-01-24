@@ -107,8 +107,7 @@ spawn_monitor_timeout(gpointer sequence)
 {
     if(spawn_sequence_remove(sequence))
     {
-         signal_t *sig = signal_array_getbyid(&global_signals,
-                                              a_strhash((const unsigned char *) "spawn::timeout"));
+         signal_t *sig = signal_array_getbyname(&global_signals, "spawn::timeout");
          if(sig)
          {
              /* send a timeout signal */
@@ -215,8 +214,7 @@ spawn_monitor_event(SnMonitorEvent *event, void *data)
     }
 
     /* send the signal */
-    signal_t *sig = signal_array_getbyid(&global_signals,
-                                         a_strhash((const unsigned char *) event_type_str));
+    signal_t *sig = signal_array_getbyname(&global_signals, event_type_str);
 
     if(sig)
     {

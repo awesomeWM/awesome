@@ -230,8 +230,7 @@ luaA_object_disconnect_signal_from_stack(lua_State *L, int oud,
 void
 signal_object_emit(lua_State *L, signal_array_t *arr, const char *name, int nargs)
 {
-    signal_t *sigfound = signal_array_getbyid(arr,
-                                              a_strhash((const unsigned char *) name));
+    signal_t *sigfound = signal_array_getbyname(arr, name);
 
     if(sigfound)
     {
@@ -279,8 +278,7 @@ luaA_object_emit_signal(lua_State *L, int oud,
         luaA_warn(L, "Trying to emit signal '%s' on invalid object", name);
         return;
     }
-    signal_t *sigfound = signal_array_getbyid(&obj->signals,
-                                              a_strhash((const unsigned char *) name));
+    signal_t *sigfound = signal_array_getbyname(&obj->signals, name);
     if(sigfound)
     {
         int nbfunc = sigfound->sigfuncs.len;
