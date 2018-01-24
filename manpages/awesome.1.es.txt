@@ -86,6 +86,11 @@ Modificación del esquema
 
 ATAJOS DE TECLADO POR OMISIÓN
 -----------------------------
+Help
+~~~~
+*Mod4 + s*::
+    Show currently assigned key bindings.
+
 Control del gestor de ventanas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 *Mod4 + Control + r*::

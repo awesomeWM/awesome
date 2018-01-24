@@ -80,6 +80,11 @@ Changement dans la mise en page
 
 ASSOCIATIONS AVEC LES TOUCHES DU CLAVIER (PAR DÉFAUT)
 -----------------------------------------------------
+Help
+~~~~
+*Mod4 + s*::
+    Show currently assigned key bindings.
+
 Contrôle du gestionnaire de fenêtres
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 *Mod4 + Contrôle + r*::
