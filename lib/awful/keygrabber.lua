@@ -67,7 +67,8 @@ end
 -- -- client using the keyboard.
 --
 -- function resize(c)
---   local grabber = awful.keygrabber.run(function(mod, key, event)
+--   local grabber
+--   grabber = awful.keygrabber.run(function(mod, key, event)
 --     if event == "release" then return end
 --
 --     if     key == 'Up'    then c:relative_move(0, 0, 0, 5)
