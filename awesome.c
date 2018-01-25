@@ -65,7 +65,7 @@ static char **awesome_argv;
 static struct timespec last_wakeup;
 
 /** current limit for the main loop's runtime */
-static float main_loop_iteration_limit = 0.1;
+static float main_loop_iteration_limit = 0.1*1e9;
 
 /** Call before exiting.
  */
@@ -425,10 +425,10 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
     /* Check how long this main loop iteration took */
     clock_gettime(CLOCK_MONOTONIC, &now);
     length = (now.tv_nsec - last_wakeup.tv_nsec) ;
-    if (length > (main_loop_iteration_limit * 1e9) ) {
-        main_loop_iteration_limit = length/1e9;
+    if (length > (main_loop_iteration_limit) ) {
+        main_loop_iteration_limit = length;
         warn("Last main loop iteration took %.6f seconds! Increasing limit for "
-                "this warning to that value.", main_loop_iteration_limit);
+                "this warning to that value.", main_loop_iteration_limit/1e9);
     }
 
     /* Actually do the polling, record time of wakeup and check for new xcb events */
