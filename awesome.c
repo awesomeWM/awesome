@@ -43,7 +43,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <signal.h>
-#include <sys/time.h>
+#include <time.h>
 
 #include <xcb/bigreq.h>
 #include <xcb/randr.h>
@@ -62,7 +62,7 @@ awesome_t globalconf;
 static char **awesome_argv;
 
 /** time of last main loop wakeup */
-static struct timeval last_wakeup;
+static struct timespec last_wakeup;
 
 /** current limit for the main loop's runtime */
 static float main_loop_iteration_limit = 0.1;
@@ -402,8 +402,8 @@ static gint
 a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
 {
     guint res;
-    struct timeval now, length_time;
-    float length;
+    struct timespec now;
+    long length;
     lua_State *L = globalconf_get_lua_State();
 
     /* Do all deferred work now */
@@ -423,18 +423,17 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
         timeout = 0;
 
     /* Check how long this main loop iteration took */
-    gettimeofday(&now, NULL);
-    timersub(&now, &last_wakeup, &length_time);
-    length = length_time.tv_sec + length_time.tv_usec * 1.0f / 1e6;
-    if (length > main_loop_iteration_limit) {
+    clock_gettime(CLOCK_MONOTONIC, &now);
+    length = (now.tv_nsec - last_wakeup.tv_nsec) ;
+    if (length > (main_loop_iteration_limit * 1e9) ) {
+        main_loop_iteration_limit = length/1e9;
         warn("Last main loop iteration took %.6f seconds! Increasing limit for "
-                "this warning to that value.", length);
-        main_loop_iteration_limit = length;
+                "this warning to that value.", main_loop_iteration_limit);
     }
 
     /* Actually do the polling, record time of wakeup and check for new xcb events */
     res = g_poll(ufds, nfsd, timeout);
-    gettimeofday(&last_wakeup, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &last_wakeup);
     a_xcb_check();
 
     return res;
@@ -824,7 +823,7 @@ main(int argc, char **argv)
 
     /* Setup the main context */
     g_main_context_set_poll_func(g_main_context_default(), &a_glib_poll);
-    gettimeofday(&last_wakeup, NULL);
+    clock_gettime(CLOCK_MONOTONIC, &last_wakeup);
 
     /* main event loop (if not NULL, awesome.quit() was already called) */
     if (globalconf.loop == NULL)
