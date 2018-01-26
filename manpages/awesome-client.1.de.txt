@@ -14,8 +14,9 @@ awesome-client [-h|--help] [command [command...]]
 BESCHREIBUNG
 ------------
 
-awesome-client ist eine externe Befehlsschnittstelle für awesome.
-Es kommuniziert über D-Bus mit awesome um die Möglichkeit zu bieten, Lua-Anweisungen von extern auszuführen.
+awesome-client ist eine externe Befehlsschnittstelle für awesome, die die
+Möglichkeit bietet, Lua-Anweisungen an awesome zu senden. Die Kommunikation mit
+awesome erfolgt über D-Bus.
 
 BENUTZUNG
 ---------
