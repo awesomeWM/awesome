@@ -100,7 +100,9 @@ function arcchart:after_draw_children(_, cr, width, height)
 
 
     -- Get the min and max value
-    --local min_val = self:get_min_value() or 0 --TODO support min_values
+    local min_val = self:get_min_value() or 0 --TODO support min_values
+    min_val = math.max(min_val,0)
+
     local max_val = self:get_max_value()
     local sum = 0
 
@@ -112,6 +114,9 @@ function arcchart:after_draw_children(_, cr, width, height)
     end
 
     max_val = math.max(max_val, sum)
+    if min_val >= max_val then
+        max_val = max_val + 1
+    end
 
     local use_rounded_edges = sum ~= max_val and self:get_rounded_edge()
 
@@ -123,7 +128,7 @@ function arcchart:after_draw_children(_, cr, width, height)
     local start_angle, end_angle = offset_angle, offset_angle
 
     for k, v in ipairs(values) do
-        end_angle = start_angle + (v*2*math.pi) / max_val
+        end_angle = start_angle + (math.max(v-min_val,0)*2*math.pi) / (max_val-min_val)
 
         if colors[k] then
             cr:set_source(color(colors[k]))
