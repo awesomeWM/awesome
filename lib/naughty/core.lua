@@ -22,6 +22,7 @@ local screen = require("awful.screen")
 local util = require("awful.util")
 local gtable = require("gears.table")
 local gfs = require("gears.filesystem")
+local gmath = require("gears.math")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local surface = require("gears.surface")
@@ -759,9 +760,14 @@ function naughty.notify(args)
             iconbox = wibox.widget.imagebox()
             iconmargin = wibox.container.margin(iconbox, margin, margin, margin, margin)
             if icon_size then
-                local scaled = cairo.ImageSurface(cairo.Format.ARGB32, icon_size, icon_size)
+                local scale_factor = icon_size / math.max(icon:get_height(),
+                                                          icon:get_width())
+                local scaled =
+                    cairo.ImageSurface(cairo.Format.ARGB32,
+                                       gmath.round(icon:get_width() * scale_factor),
+                                       gmath.round(icon:get_height() * scale_factor))
                 local cr = cairo.Context(scaled)
-                cr:scale(icon_size / icon:get_height(), icon_size / icon:get_width())
+                cr:scale(scale_factor, scale_factor)
                 cr:set_source_surface(icon, 0, 0)
                 cr:paint()
                 icon = scaled
