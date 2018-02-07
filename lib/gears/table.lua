@@ -202,6 +202,20 @@ function gtable.iterate(t, filter, start)
     end
 end
 
+--- Slice a table.
+--
+-- @tparam table t The table to slice.
+-- @tparam[opt=1] int start The start index.
+-- @tparam[opt=last entry] int end_ The end index.
+-- @tparam[opt=1] int step The stepping.
+-- @treturn table
+function gtable.slice(t, start, end_, step)
+  local sliced = {}
+  for i = start or 1, end_ or #t, step or 1 do
+    sliced[#sliced+1] = t[i]
+  end
+  return sliced
+end
 
 --- Merge items from the one table to another one
 -- @class function
