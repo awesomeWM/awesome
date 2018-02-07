@@ -179,10 +179,13 @@ end
 --
 -- @class function
 -- @name iterate
--- @param t      the table to iterate
--- @param filter a function that returns true to indicate a positive match
--- @param start  what index to start iterating from.  Default is 1 (=> start of
--- the table)
+-- @tparam table t The table to iterate.
+-- @tparam func  filter A function that returns true to indicate a positive
+--   match.
+-- @param func.item The item to filter.
+-- @tparam[opt=1] int start Index to start iterating from.
+--   Default is 1 (=> start of the table).
+-- @treturn func
 function gtable.iterate(t, filter, start)
     local count  = 0
     local index  = start or 1
