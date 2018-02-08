@@ -420,6 +420,12 @@ function naughty.getById(id)
     end
 end
 
+--- Increase notification ID by one
+function get_next_notification_id()
+  counter = counter + 1
+  return counter
+end
+
 --- Install expiration timer for notification object.
 -- @tparam notification notification Notification object.
 -- @tparam number timeout Time in seconds to be set as expiration timeout.

@@ -184,7 +184,7 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                 args.freedesktop_hints = hints
                 notification = naughty.notify(args)
                 if notification ~= nil then
-                    return "u", notification.id
+                    return "u", core.get_next_notification_id()
                 end
             end
             return "u", "0"
