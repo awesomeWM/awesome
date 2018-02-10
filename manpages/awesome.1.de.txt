@@ -69,10 +69,10 @@ Veränderung der Anordnung
 
 TASTENKÜRZEL
 ------------
-Help
-~~~~
+Hilfe
+~~~~~
 *Mod4 + s*::
-    Show currently assigned key bindings.
+    Zeige aktuell konfigurierte Tastenkürzel an.
 
 Fenstermanager kontrollieren
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
