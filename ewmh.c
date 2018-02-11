@@ -172,7 +172,8 @@ ewmh_init(void)
         _NET_WM_STATE_BELOW,
         _NET_WM_STATE_MODAL,
         _NET_WM_STATE_HIDDEN,
-        _NET_WM_STATE_DEMANDS_ATTENTION
+        _NET_WM_STATE_DEMANDS_ATTENTION,
+        _NET_WM_FULLSCREEN_MONITORS
     };
     int i;
 
