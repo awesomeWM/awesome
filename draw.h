@@ -30,6 +30,9 @@
 #include "common/array.h"
 #include "common/util.h"
 
+/* Forward definition */
+typedef struct _GdkPixbuf GdkPixbuf;
+
 typedef struct area_t area_t;
 struct area_t
 {
@@ -57,6 +60,7 @@ DO_ARRAY(cairo_surface_t *, cairo_surface, cairo_surface_array_destroy_surface)
 cairo_surface_t *draw_surface_from_data(int width, int height, uint32_t *data);
 cairo_surface_t *draw_dup_image_surface(cairo_surface_t *surface);
 cairo_surface_t *draw_load_image(lua_State *L, const char *path, GError **error);
+cairo_surface_t *draw_surface_from_pixbuf(GdkPixbuf *buf);
 
 xcb_visualtype_t *draw_find_visual(const xcb_screen_t *s, xcb_visualid_t visual);
 xcb_visualtype_t *draw_default_visual(const xcb_screen_t *s);

@@ -81,7 +81,7 @@ draw_surface_from_data(int width, int height, uint32_t *data)
  * \param buf The pixbuf
  * \return Number of items pushed on the lua stack.
  */
-static cairo_surface_t *
+cairo_surface_t *
 draw_surface_from_pixbuf(GdkPixbuf *buf)
 {
     int width = gdk_pixbuf_get_width(buf);
