@@ -37,7 +37,7 @@ fast enough and won't impact the main event loop iteration time, you are wrong.
 *Every* calls to `io.open` are impacted by the system `iowait` queue and can
 spend hundreds of milliseconds blocked *before* being executed. Note that
 some common widget or probe libraries such as
-[Vicious](https://wiki.archlinux.org/index.php/xrandr) do not follow this
+[Vicious](https://github.com/Mic92/vicious) do not follow this
 advice currently and are know to cause input lag on some systems (but not all).
 
 In both case, a warning like:
