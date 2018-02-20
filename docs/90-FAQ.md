@@ -19,25 +19,26 @@ information, refer to the
 
 ### There is a noticeable delay with inputs
 
-There is 2 common causes for this:
+There are two common causes for this:
 
 The first is a display driver issue where painting on the screen takes long
 time. All input events (keyboard and mouse) are processed in the main thread.
-The drawing is also locking the main thread of avoid artifacts and race
+The drawing is also locking the main thread to avoid artifacts and race
 contiditions. If there is a delay with the painting, it will delay the inputs.
 The solution to this problem is using a compositing manager such as 
 [compton](https://github.com/chjj/compton) or the older `xcompmgr`. This will
-move the painting input another process and fully mitigate the issue.
+move painting to another process and fully mitigate the issue.
 
-The second one is when using `io.popen` or other blocking functions in `rc.lua`.
+The second one is when using `io.popen` or other blocking functions in `rc.lua`
+and most commonly manifests itself as occasional freezes instead of a generic delay.
 Do **not** use such functions and prefer `awful.spawn.easy_async`,
 `awful.widget.watch` or the GIO async API. Even if you *think* a command is
-fast enough and wont impact the main event loop iteration time, you are wrong.
-*Every* calls to `io.open` is impacted by the system `iowait` queue and can
+fast enough and won't impact the main event loop iteration time, you are wrong.
+*Every* calls to `io.open` are impacted by the system `iowait` queue and can
 spend hundreds of milliseconds blocked *before* being executed. Note that
 some common widget or probe libraries such as
 [Vicious](https://wiki.archlinux.org/index.php/xrandr) do not follow this
-advice and are know to cause input lag on some systems (but not all).
+advice currently and are know to cause input lag on some systems (but not all).
 
 In both case, a warning like:
 
