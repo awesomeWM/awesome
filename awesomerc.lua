@@ -52,16 +52,16 @@ beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
 -- @DOC_DEFAULT_APPLICATIONS@
 -- This is used later as the default terminal and editor to run.
-terminal = "xterm"
-editor = os.getenv("EDITOR") or "nano"
-editor_cmd = terminal .. " -e " .. editor
+local terminal = "xterm"
+local editor = os.getenv("EDITOR") or "nano"
+local editor_cmd = terminal .. " -e " .. editor
 
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
 -- I suggest you to remap Mod4 to another key using xmodmap or other tools.
 -- However, you can use another modifier like Mod1, but it may interact with others.
-modkey = "Mod4"
+local modkey = "Mod4"
 
 -- @DOC_LAYOUT@
 -- Table of layouts to cover with awful.layout.inc, order matters.
@@ -103,7 +103,7 @@ end
 -- {{{ Menu
 -- @DOC_MENU@
 -- Create a launcher widget and a main menu
-myawesomemenu = {
+local myawesomemenu = {
    { "hotkeys", function() return false, hotkeys_popup.show_help end},
    { "manual", terminal .. " -e man awesome" },
    { "edit config", editor_cmd .. " " .. awesome.conffile },
@@ -111,12 +111,12 @@ myawesomemenu = {
    { "quit", function() awesome.quit() end}
 }
 
-mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
+local mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
                                     { "open terminal", terminal }
                                   }
                         })
 
-mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
+local mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                      menu = mymainmenu })
 
 -- Menubar configuration
@@ -124,11 +124,11 @@ menubar.utils.terminal = terminal -- Set the terminal for applications that requ
 -- }}}
 
 -- Keyboard map indicator and switcher
-mykeyboardlayout = awful.widget.keyboardlayout()
+local mykeyboardlayout = awful.widget.keyboardlayout()
 
 -- {{{ Wibar
 -- Create a textclock widget
-mytextclock = wibox.widget.textclock()
+local mytextclock = wibox.widget.textclock()
 
 -- Create a wibox for each screen and add it
 -- @TAGLIST_BUTTON@
@@ -260,7 +260,7 @@ root.buttons(gears.table.join(
 
 -- {{{ Key bindings
 -- @DOC_GLOBAL_KEYBINDINGS@
-globalkeys = gears.table.join(
+local globalkeys = gears.table.join(
     awful.key({ modkey,           }, "s",      hotkeys_popup.show_help,
               {description="show help", group="awesome"}),
     awful.key({ modkey,           }, "Left",   awful.tag.viewprev,
@@ -361,7 +361,7 @@ globalkeys = gears.table.join(
 )
 
 -- @DOC_CLIENT_KEYBINDINGS@
-clientkeys = gears.table.join(
+local clientkeys = gears.table.join(
     awful.key({ modkey,           }, "f",
         function (c)
             c.fullscreen = not c.fullscreen
@@ -457,7 +457,7 @@ for i = 1, 9 do
 end
 
 -- @DOC_CLIENT_BUTTONS@
-clientbuttons = gears.table.join(
+local clientbuttons = gears.table.join(
     awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
     awful.button({ modkey }, 1, awful.mouse.client.move),
     awful.button({ modkey }, 3, awful.mouse.client.resize))
