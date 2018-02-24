@@ -57,6 +57,11 @@
 #include <xcb/xinerama.h>
 #include <xcb/randr.h>
 
+/* The XID that is used on fake screens. X11 guarantees that the top three bits
+ * of a valid XID are zero, so this will not clash with anything.
+ */
+#define FAKE_SCREEN_XID ((uint32_t) 0xffffffff)
+
 /** Screen is a table where indexes are screen numbers. You can use `screen[1]`
  * to get access to the first screen, etc. Alternatively, if RANDR information
  * is available, you can use output names for finding screen objects.
@@ -673,7 +678,7 @@ screen_refresh(void)
     screen_array_init(&removed_screens);
     for(int i = 0; i < globalconf.screens.len; i++) {
         screen_t *old_screen = globalconf.screens.tab[i];
-        bool found = false;
+        bool found = old_screen->xid == FAKE_SCREEN_XID;
         foreach(new_screen, new_screens)
             found |= (*new_screen)->xid == old_screen->xid;
         if(!found) {
@@ -1144,6 +1149,7 @@ luaA_screen_fake_add(lua_State *L)
     s->geometry.y = y;
     s->geometry.width = width;
     s->geometry.height = height;
+    s->xid = FAKE_SCREEN_XID;
 
     screen_added(L, s);
     luaA_class_emit_signal(L, &screen_class, "list", 0);
