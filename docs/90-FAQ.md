@@ -13,7 +13,7 @@ from the TV series HIMYM.
 ### My screens are not configured correctly
 
 Awesome is a window manager, not a desktop environment. To configure your
-screens, the `xrandr` tool or various GUI application exists. For more
+screens, the `xrandr` tool or various GUI applications exist. For more
 information, refer to the
 [Arch Linux wiki](https://wiki.archlinux.org/index.php/xrandr).
 
@@ -24,7 +24,7 @@ There are two common causes for this:
 The first is a display driver issue where painting on the screen takes long
 time. All input events (keyboard and mouse) are processed in the main thread.
 The drawing is also locking the main thread to avoid artifacts and race
-contiditions. If there is a delay with the painting, it will delay the inputs.
+ccontiditions. If there is a delay with the painting, it will delay the inputs.
 The solution to this problem is using a compositing manager such as 
 [compton](https://github.com/chjj/compton) or the older `xcompmgr`. This will
 move painting to another process and fully mitigate the issue.
@@ -38,7 +38,7 @@ fast enough and won't impact the main event loop iteration time, you are wrong.
 spend hundreds of milliseconds blocked *before* being executed. Note that
 some common widget or probe libraries such as
 [Vicious](https://github.com/Mic92/vicious) do not follow this
-advice currently and are know to cause input lag on some systems (but not all).
+advice currently and are known to cause input lag on some systems (but not all).
 
 In both case, a warning like:
 
