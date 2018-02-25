@@ -20,26 +20,28 @@ if dbus then
     dbus.connect_signal("org.awesomewm.awful.Remote", function(data, code)
         if data.member == "Eval" then
             local f, e = load(code)
-            if f then
-                local results = { f() }
-                local retvals = {}
-                for _, v in ipairs(results) do
-                    local t = type(v)
-                    if t == "boolean" then
-                        table.insert(retvals, "b")
-                        table.insert(retvals, v)
-                    elseif t == "number" then
-                        table.insert(retvals, "d")
-                        table.insert(retvals, v)
-                    else
-                        table.insert(retvals, "s")
-                        table.insert(retvals, tostring(v))
-                    end
-                end
-                return unpack(retvals)
-            elseif e then
+            if not f then
                 return "s", e
             end
+            local results = { pcall(f) }
+            if not table.remove(results, 1) then
+                return "s", "Error during execution: " .. results[1]
+            end
+            local retvals = {}
+            for _, v in ipairs(results) do
+                local t = type(v)
+                if t == "boolean" then
+                    table.insert(retvals, "b")
+                    table.insert(retvals, v)
+                elseif t == "number" then
+                    table.insert(retvals, "d")
+                    table.insert(retvals, v)
+                else
+                    table.insert(retvals, "s")
+                    table.insert(retvals, tostring(v))
+                end
+            end
+            return unpack(retvals)
         end
     end)
 end
