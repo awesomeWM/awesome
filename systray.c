@@ -355,7 +355,7 @@ luaA_systray(lua_State *L)
         color_t bg_color;
         bool force_redraw = false;
 
-        if(color_init_reply(color_init_unchecked(&bg_color, bg, bg_len))
+        if(color_init_reply(color_init_unchecked(&bg_color, bg, bg_len, globalconf.default_visual))
                 && globalconf.systray.background_pixel != bg_color.pixel)
         {
             uint32_t config_back[] = { bg_color.pixel };

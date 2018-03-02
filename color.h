@@ -44,7 +44,7 @@ typedef struct
     const char *colstr;
 } color_init_request_t;
 
-color_init_request_t color_init_unchecked(color_t *, const char *, ssize_t);
+color_init_request_t color_init_unchecked(color_t *, const char *, ssize_t, xcb_visualtype_t *visual);
 bool color_init_reply(color_init_request_t);
 
 int luaA_pushcolor(lua_State *, const color_t);
