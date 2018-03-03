@@ -12,6 +12,13 @@ client.connect_signal("focus", function(c)
     c.border_color = "#ff0000"
 end)
 
+local function assert_equals(a, b)
+    if a == b then
+        return
+    end
+    error(string.format("Assertion failed: %s == %s", a, b))
+end
+
 
 local steps = {
     -- border_color should get applied via focus signal for first client on tag.
@@ -21,7 +28,7 @@ local steps = {
         else
             local c = client.get()[1]
             if c then
-                assert(c.border_color == "#ff0000")
+                assert_equals(c.border_color, "#ff0000")
                 return true
             end
         end
@@ -34,9 +41,9 @@ local steps = {
         else
             if #client.get() == 2 then
                 local c = client.get()[1]
-                assert(c == client.focus)
+                assert_equals(c, client.focus)
                 if c then
-                    assert(c.border_color == "#ff0000")
+                    assert_equals(c.border_color, "#ff0000")
                     return true
                 end
 
