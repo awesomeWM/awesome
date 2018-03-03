@@ -49,6 +49,22 @@ local steps = {
 
             end
         end
+    end,
+
+    -- Test if alpha works as intended
+    function()
+        local c = client.get()[1]
+
+        local function test(set, expected)
+            expected = expected or set
+            c.border_color = set
+            assert_equals(c.border_color, expected)
+        end
+
+        test("#123456")
+        test("#12345678")
+        test("#123456ff", "#123456")
+        return true
     end
 }
 

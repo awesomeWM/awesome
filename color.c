@@ -156,6 +156,7 @@ color_init_unchecked(color_t *color, const char *colstr, ssize_t len, xcb_visual
         req.color->red   = RGB_8TO16(red);
         req.color->green = RGB_8TO16(green);
         req.color->blue  = RGB_8TO16(blue);
+        req.color->alpha = RGB_8TO16(alpha);
         req.color->initialized = true;
         return req;
     }
@@ -190,6 +191,7 @@ color_init_reply(color_init_request_t req)
         req.color->red   = hexa_color->red;
         req.color->green = hexa_color->green;
         req.color->blue  = hexa_color->blue;
+        req.color->alpha = 0xffff;
         req.color->initialized = true;
         p_delete(&hexa_color);
         return true;
@@ -210,9 +212,14 @@ luaA_pushcolor(lua_State *L, const color_t c)
     uint8_t r = RGB_16TO8(c.red);
     uint8_t g = RGB_16TO8(c.green);
     uint8_t b = RGB_16TO8(c.blue);
+    uint8_t a = RGB_16TO8(c.alpha);
 
-    char s[10];
-    int len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
+    char s[1 + 4*2 + 1];
+    int len;
+    if (a >= 0xff)
+        len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
+    else
+        len = snprintf(s, sizeof(s), "#%02x%02x%02x%02x", r, g, b, a);
     lua_pushlstring(L, s, len);
     return 1;
 }
