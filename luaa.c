@@ -284,6 +284,7 @@ luaA_sync(lua_State *L)
 /** Translate a GdkPixbuf to a cairo image surface..
  *
  * @param pixbuf The pixbuf as a light user datum.
+ * @param path The pixbuf origin path
  * @return A cairo surface as light user datum.
  * @function pixbuf_to_surface
  */

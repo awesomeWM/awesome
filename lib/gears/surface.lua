@@ -51,7 +51,13 @@ function surface.load_uncached_silently(_surface, default)
         if not pixbuf then
             return get_default(default), tostring(err)
         end
-        _surface = capi.awesome.pixbuf_to_surface(pixbuf._native)
+        _surface = capi.awesome.pixbuf_to_surface(pixbuf._native, _surface)
+
+        -- The shims implement load_image() to return a surface directly,
+        -- instead of a lightuserdatum.
+        if cairo.Surface:is_type_of(_surface) then
+            return _surface
+        end
     end
     -- Everything else gets forced into a surface
     return cairo.Surface(_surface, true)
