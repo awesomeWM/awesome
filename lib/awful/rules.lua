@@ -37,6 +37,10 @@ local atag = require("awful.tag")
 local gtable = require("gears.table")
 local a_place = require("awful.placement")
 local protected_call = require("gears.protected_call")
+local aspawn = require("awful.spawn")
+local gsort = require("gears.sort")
+local gdebug = require("gears.debug")
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local rules = {}
 
@@ -207,22 +211,175 @@ function rules.matches_list(c, _rules)
     return false
 end
 
---- Apply awful.rules.rules to a client.
--- @client c The client.
-function rules.apply(c)
 
-    local props = {}
+-- Contains the sources.
+-- The elements are ordered "first in, first executed". Thus, the higher the
+-- index, the higher the priority. Each entry is a table with a `name` and a
+-- `callback` field. This table is exposed for debugging purpose. The API
+-- is private and should be modified using the public accessors.
+local rule_sources = {}
+local rule_source_sort = gsort.topological()
+
+--- Add a new rule source.
+--
+-- A rule source is a provider called when a client is managed (started). It
+-- allows to configure the client by providing properties that should be applied.
+-- By default, Awesome provides 2 sources:
+--
+-- * `awful.rules`: A declarative matcher
+-- * `awful.spawn`: Launch clients with pre-defined properties
+--
+-- It is possible to register new callbacks to modify the properties table
+-- before it is applied. Each provider is executed sequentially and modifies the
+-- same table. If the first provider set a property, then the second can
+-- override it, then the third, etc. Once the providers are exhausted, the
+-- properties are applied on the client.
+--
+-- It is important to note that properties themselves have their own
+-- dependencies. For example, a `tag` property implies a `screen`. Therefor, if
+-- a `screen` is already specified, then it will be ignored when the rule is
+-- executed. Properties also have their own priorities. For example, the
+-- `titlebar` and `border_width` need to be applied before the `x` and `y`
+-- positions are set. Otherwise, it will be off or the client will shift
+-- upward everytime Awesome is restarted. A rule source *cannot* change this.
+-- It is up to the callback to be aware of the dependencies and avoid to
+-- introduce issues. For example, if the source wants to set a `screen`, it has
+-- to check if the `tag`, `tags` or `new_tag` are on that `screen` or remove
+-- those properties. Otherwise, they will be ignored once the rule is applied.
+--
+-- @tparam string name The provider name. It must be unique.
+-- @tparam function callback The callback that is called to produce properties.
+-- @tparam client callback.c The client
+-- @tparam table callback.properties The current properties. The callback should
+--  add to and overwrite properties in this table
+-- @tparam table callback.callbacks A table of all callbacks scheduled to be
+--  executed after the main properties are applied.
+-- @tparam[opt={}] table depends_on A list of names of sources this source depends on
+--  (sources that must be executed *before* `name`.
+-- @tparam[opt={}] table precede A list of names of sources this source have a
+--  priority over.
+-- @treturn boolean Returns false if a dependency conflict was found.
+function rules.add_rule_source(name, callback, depends_on, precede)
+    depends_on = depends_on  or {}
+    precede    = precede or {}
+    assert(type( depends_on ) == "table")
+    assert(type( precede    ) == "table")
+
+    for _, v in ipairs(rule_sources) do
+        -- Names must be unique
+        assert(
+            v.name ~= name,
+            "Name must be unique, but '" .. name .. "' was already registered."
+        )
+    end
+
+    local new_sources = rule_source_sort:clone()
+
+    new_sources:prepend(name, precede    )
+    new_sources:append (name, depends_on )
+
+    local res, err = new_sources:sort()
+
+    if err then
+        gdebug.print_warning("Failed to add the rule source: "..err)
+        return false
+    end
+
+    -- Only replace the source once the additions have been proven safe
+    rule_source_sort = new_sources
+
     local callbacks = {}
 
-    for _, entry in ipairs(rules.matching_rules(c, rules.rules)) do
-        if entry.properties then
-            for property, value in pairs(entry.properties) do
-                props[property] = value
-            end
+    -- Get all callbacks for *existing* sources.
+    -- It is important to remember that names can be used in the sorting even
+    -- if the source itself doesn't (yet) exists.
+    for _, v in ipairs(rule_sources) do
+        callbacks[v.name] = v.callback
+    end
+
+    rule_sources = {}
+    callbacks[name]    = callback
+
+    for _, v in ipairs(res) do
+        if callbacks[v] then
+            table.insert(rule_sources, 1, {
+                callback = callbacks[v],
+                name     = v
+            })
         end
+    end
+
+    return true
+end
+
+--- Remove a source.
+-- @tparam string name The source name.
+-- @treturn boolean If the source was removed
+function rules.remove_rule_source(name)
+    rule_source_sort:remove(name)
+
+    for k, v in ipairs(rule_sources) do
+        if v.name == name then
+            table.remove(rule_sources, k)
+            return true
+        end
+    end
+
+    return false
+end
+
+-- Add the rules properties
+local function apply_awful_rules(c, props, callbacks)
+    for _, entry in ipairs(rules.matching_rules(c, rules.rules)) do
+        gtable.crush(props,entry.properties or {})
+
         if entry.callback then
             table.insert(callbacks, entry.callback)
         end
+    end
+end
+
+--- The default `awful.rules` source.
+--
+-- **Has priority over:**
+--
+-- *nothing*
+--
+-- @rulesources awful.rules
+
+rules.add_rule_source("awful.rules", apply_awful_rules, {"awful.spawn"}, {})
+
+-- Add startup_id overridden properties
+local function apply_spawn_rules(c, props, callbacks)
+    if c.startup_id and aspawn.snid_buffer[c.startup_id] then
+        local snprops, sncb = unpack(aspawn.snid_buffer[c.startup_id])
+
+        -- The SNID tag(s) always have precedence over the rules one(s)
+        if snprops.tag or snprops.tags or snprops.new_tag then
+            props.tag, props.tags, props.new_tag = nil, nil, nil
+        end
+
+        gtable.crush(props, snprops)
+        gtable.merge(callbacks, sncb)
+    end
+end
+
+--- The rule source for clients spawned by `awful.spawn`.
+--
+-- **Has priority over:**
+--
+-- * `awful.rules`
+--
+-- @rulesources awful.spawn
+
+rules.add_rule_source("awful.spawn", apply_spawn_rules, {}, {"awful.rules"})
+
+--- Apply awful.rules.rules to a client.
+-- @client c The client.
+function rules.apply(c)
+    local callbacks, props = {}, {}
+    for _, v in ipairs(rule_sources) do
+        v.callback(c, props, callbacks)
     end
 
     rules.execute(c, props, callbacks)
@@ -531,11 +688,10 @@ function rules.execute(c, props, callbacks)
     end
 end
 
+-- TODO v5 deprecate this
 function rules.completed_with_payload_callback(c, props, callbacks)
     rules.execute(c, props, callbacks)
 end
-
-client.connect_signal("spawn::completed_with_payload", rules.completed_with_payload_callback)
 
 client.connect_signal("manage", rules.apply)
 

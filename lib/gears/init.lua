@@ -21,6 +21,7 @@ return
     math = require("gears.math");
     table = require("gears.table");
     string = require("gears.string");
+    sort = require("gears.sort");
     filesystem = require("gears.filesystem");
 }
 

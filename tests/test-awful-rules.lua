@@ -264,6 +264,34 @@ test_rule {
     end
 }
 
+-- Test the custom sources
+assert(awful.rules.add_rule_source("high_priority", function(c, props, _)
+    assert(type(c) == "client")
+    assert(props.random2)
+
+    props.random1 = true
+end, {"awful.spawn"}, {"awful.rules", "low_priority"}))
+
+assert(awful.rules.add_rule_source("before2", function()
+    error("This function should not be called")
+end, {"awful.spawn"}, {"awful.rules"}))
+
+assert(awful.rules.remove_rule_source("before2"))
+
+assert(awful.rules.add_rule_source("low_priority", function(c, props, _)
+    assert(type(c) == "client")
+    assert(not props.random1)
+
+    props.random2 = true
+end, {"awful.spawn", "high_priority"}, {"void", "awful.rules"}))
+
+local temp = gears.debug.print_warning
+gears.debug.print_warning = function() end
+assert(not awful.rules.add_rule_source("invalid_source", function()
+    assert(false, "This cannot happen")
+end, {"awful.rules"}, {"awful.spawn"}))
+gears.debug.print_warning = temp
+
 -- Test tag and switchtotag
 test_rule {
     properties = {
@@ -295,9 +323,16 @@ test_rule {
 
         assert(c.screen.selected_tag.name ~= "8")
 
+        -- Test the custom sources
+        assert(c.random1)
+        assert(c.random2)
+        assert(not c.random3)
+
         return true
     end
 }
+
+
 
 -- Wait until all the auto-generated clients are ready
 local function spawn_clients()

@@ -296,6 +296,12 @@ table.insert(multi_screen_steps, function()
                 screen = screen[1],
             })
 
+    -- Same as previous, but switched
+    test_client("test_tag2", nil, {
+                tag    = screen[1].tags[5],
+                screen = screen[2],
+            })
+
     -- Add a client with multiple tags on the same screen, but not c.screen
     test_client("test_tags1", nil, {
                 tags   = { screen[1].tags[3], screen[1].tags[4] },
@@ -326,7 +332,7 @@ end)
 
 table.insert(multi_screen_steps, function()
     if screen.count() < 2 then return true end
-    if #client.get() ~= 5 then return end
+    if #client.get() ~= 6 then return end
 
     local c_by_class = {}
 
@@ -336,6 +342,11 @@ table.insert(multi_screen_steps, function()
 
     assert(c_by_class["test_tag1"].screen == screen[2])
     assert(#c_by_class["test_tag1"]:tags() == 1)
+    assert(c_by_class["test_tag1"]:tags()[1] == screen[2].tags[2])
+
+    assert(c_by_class["test_tag2"].screen == screen[1])
+    assert(#c_by_class["test_tag2"]:tags() == 1)
+    assert(c_by_class["test_tag2"]:tags()[1] == screen[1].tags[5])
 
     assert(c_by_class["test_tags1"].screen == screen[1])
     assert(#c_by_class["test_tags1"]:tags() == 2)

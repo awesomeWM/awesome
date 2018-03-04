@@ -165,6 +165,7 @@ local lgi = require("lgi")
 local Gio = lgi.Gio
 local GLib = lgi.GLib
 local util   = require("awful.util")
+local timer  = require("gears.timer")
 local protected_call = require("gears.protected_call")
 
 local spawn = {}
@@ -216,8 +217,12 @@ function spawn.on_snid_callback(c)
     if entry then
         local props = entry[1]
         local callback = entry[2]
+        --TODO v5: Remove this signal
         c:emit_signal("spawn::completed_with_payload", props, callback)
-        spawn.snid_buffer[c.startup_id] = nil
+
+        timer.delayed_call(function()
+            spawn.snid_buffer[c.startup_id] = nil
+        end)
     end
 end
 
