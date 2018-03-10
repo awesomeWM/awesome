@@ -100,6 +100,12 @@ function filesystem.get_xdg_data_home()
     return (os.getenv("XDG_DATA_HOME") or os.getenv("HOME") .. "/.local/share") .. "/"
 end
 
+--- Get the runtime directory according to the XDG basedir specification.
+-- @treturn string the data home (XDG_RUNTIME_DIR) with a slash at the end.
+function filesystem.get_xdg_runtime_dir()
+    return (os.getenv("XDG_RUNTIME_DIR") or '/run/user/' .. os.getenv("UID")) .. "/"
+end
+
 --- Get the data dirs according to the XDG basedir specification.
 -- @treturn table the data dirs (XDG_DATA_DIRS) with a slash at the end of each entry.
 function filesystem.get_xdg_data_dirs()
