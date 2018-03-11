@@ -25,6 +25,7 @@
 #include "ewmh.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
+#include "objects/selection.h"
 #include "xwindow.h"
 
 #include <xcb/xcb_atom.h>
@@ -387,6 +388,36 @@ property_handle_xrootpmap_id(uint8_t state,
     return 0;
 }
 
+static int
+property_handle_some_random_atom(uint8_t state,
+                                 xcb_window_t window)
+{
+    if (state != XCB_PROPERTY_NEW_VALUE)
+        return 0;
+
+    lua_State *L = globalconf_get_lua_State();
+    foreach(reference, globalconf.active_selections)
+    {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *reference);
+        selection_t *selection = (void *) lua_topointer(L, -1);
+
+        if(window == selection->window)
+        {
+            if (selection_handle_property(L, -1))
+            {
+                luaL_unref(L, LUA_REGISTRYINDEX, *reference);
+                int_array_remove(&globalconf.active_selections, reference);
+            }
+
+            lua_pop(L, 1);
+            break;
+        }
+        lua_pop(L, 1);
+    }
+    return 0;
+}
+
+
 /** The property notify event handler handling xproperties.
  * \param ev The event.
  */
@@ -475,6 +506,9 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
 
     /* background change */
     HANDLE(_XROOTPMAP_ID, property_handle_xrootpmap_id)
+
+    /* our own selection transfer magic */
+    HANDLE(SOME_RANDOM_ATOM, property_handle_some_random_atom)
 
     /* If nothing was found, return */
     END;

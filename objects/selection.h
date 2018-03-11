@@ -34,10 +34,13 @@ typedef struct selection_t
     xcb_window_t window;
     /** TODO */
     void *callback_function;
+    /** TODO */
+    bool incremental;
 } selection_t;
 
 void selection_class_setup(lua_State *);
 bool selection_handle_notify(lua_State *, int, xcb_selection_notify_event_t *);
+bool selection_handle_property(lua_State *, int);
 
 #endif
 

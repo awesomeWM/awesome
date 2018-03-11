@@ -169,11 +169,10 @@ selection_push_string(lua_State *L, xcb_get_property_reply_t *property)
 }
 
 static int
-selection_push_notify(lua_State *L, xcb_selection_notify_event_t *notify, xcb_get_property_reply_t *property)
+selection_push_notify(lua_State *L, xcb_get_property_reply_t *property)
 {
     if(property->type == XCB_ATOM_ATOM && property->format == 32)
         return selection_push_atom(L, property);
-    /* TODO: Handle INCR */
     return selection_push_string(L, property);
 }
 
@@ -192,12 +191,67 @@ selection_handle_notify(lua_State *L, int ud, xcb_selection_notify_event_t *noti
         if (!property)
             return false;
 
-        nargs = selection_push_notify(L, notify, property);
+        if (property->type == INCR)
+        {
+            /* The above GetProperty had delete=true. This indicates to the
+             * sender to begin the transfer. We just get an estimate of the size
+             * of the transfer right now. That's useless.
+             */
+            if (selection->incremental)
+                warn("Uhm... duplicate INCR transfer start?");
+            selection->incremental = true;
+            p_delete(&property);
+            return false;
+        }
+
+        nargs = selection_push_notify(L, property);
         p_delete(&property);
     }
 
+    /* Call function with the arguments */
     luaA_object_push_item(L, ud, selection->callback_function);
     luaA_dofunction(L, nargs, 0);
+
+    if (nargs != 0)
+    {
+        /* Call again to indicate end of transfer */
+        luaA_object_push_item(L, ud, selection->callback_function);
+        luaA_dofunction(L, 0, 0);
+    }
+
+    luaA_object_unref_item(L, ud, selection->callback_function);
+    selection->callback_function = NULL;
+
+    /* Signal to caller that transfer is done */
+    return true;
+}
+
+bool
+selection_handle_property(lua_State *L, int ud)
+{
+    ud = luaA_absindex(L, ud);
+    selection_t *selection = (void *) lua_topointer(L, ud);
+
+    if (!selection->incremental)
+        return false;
+
+    xcb_get_property_reply_t *property = xcb_get_property_reply(globalconf.connection,
+            xcb_get_property(globalconf.connection, 1, selection->window, SOME_RANDOM_ATOM,
+                XCB_GET_PROPERTY_TYPE_ANY, 0, UINT_MAX), NULL);
+    if (!property)
+        return false;
+
+    bool done = property->value_len == 0;
+    int nargs = 0;
+    if (!done)
+        nargs = selection_push_notify(L, property);
+    p_delete(&property);
+
+    luaA_object_push_item(L, ud, selection->callback_function);
+    luaA_dofunction(L, nargs, 0);
+
+    if (!done)
+        return false;
 
     luaA_object_unref_item(L, ud, selection->callback_function);
     selection->callback_function = NULL;
