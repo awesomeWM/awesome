@@ -19,7 +19,7 @@ require("sample_files")(
 --
 -- with
 --
---    beautiful.init(gears.filesystem.get_dir("config") .. "mytheme.lua")
+--    beautiful.init(gears.filesystem.get_configuration_dir() .. "mytheme.lua")
 --
 -- in your `rc.lua`.
 --
