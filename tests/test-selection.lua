@@ -70,10 +70,19 @@ local test_routine = coroutine.create(function()
     assert_empty_result(clip, "TARGETS")
     assert_empty_result(clip, "UTF8_STRING")
 
+    local saw_change = false
+    clip:connect_signal("selection_changed", function()
+        assert(not saw_change)
+        saw_change = true
+    end)
+    awesome.sync()
+
     -- Set the clipboard with some short test
     awful.spawn.with_line_callback({ "lua", "-e", set_clipboard_text },
         { stdout = function() continue = true end })
     coroutine.yield()
+
+    assert(saw_change)
 
     -- Now query the clipboard
     local clip = selection("CLIPBOARD")
@@ -85,9 +94,12 @@ local test_routine = coroutine.create(function()
     assert(data[1][1] == "This is an experiment", require("gears.debug").dump_return(data))
 
     -- Set the clipboard with a big picture
+    saw_change = false
     awful.spawn.with_line_callback({ "lua", "-e", set_clipboard_pixbuf },
         { stdout = function() continue = true end })
     coroutine.yield()
+
+    assert(saw_change)
 
     -- Now query the clipboard
     local clip = selection("CLIPBOARD")

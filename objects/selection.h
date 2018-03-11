@@ -41,6 +41,7 @@ typedef struct selection_t
 void selection_class_setup(lua_State *);
 bool selection_handle_notify(lua_State *, int, xcb_selection_notify_event_t *);
 bool selection_handle_property(lua_State *, int);
+void event_handle_xfixes_selection_notify(xcb_generic_event_t*);
 
 #endif
 

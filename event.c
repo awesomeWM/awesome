@@ -44,6 +44,7 @@
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_event.h>
 #include <xcb/xkb.h>
+#include <xcb/xfixes.h>
 
 #define DO_EVENT_HOOK_CALLBACK(type, xcbtype, xcbeventprefix, arraytype, match) \
     static void \
@@ -1093,6 +1094,7 @@ void event_handle(xcb_generic_event_t *event)
     EXTENSION_EVENT(randr, XCB_RANDR_NOTIFY, event_handle_randr_output_change_notify);
     EXTENSION_EVENT(shape, XCB_SHAPE_NOTIFY, event_handle_shape_notify);
     EXTENSION_EVENT(xkb, 0, event_handle_xkb_notify);
+    EXTENSION_EVENT(xfixes, XCB_XFIXES_SELECTION_NOTIFY, event_handle_xfixes_selection_notify);
 #undef EXTENSION_EVENT
 }
 
@@ -1111,6 +1113,10 @@ void event_init(void)
     reply = xcb_get_extension_data(globalconf.connection, &xcb_xkb_id);
     if (reply && reply->present)
         globalconf.event_base_xkb = reply->first_event;
+
+    reply = xcb_get_extension_data(globalconf.connection, &xcb_xfixes_id);
+    if (reply && reply->present)
+        globalconf.event_base_xfixes = reply->first_event;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

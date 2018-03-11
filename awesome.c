@@ -690,6 +690,13 @@ main(int argc, char **argv)
     query = xcb_get_extension_data(globalconf.connection, &xcb_test_id);
     globalconf.have_xtest = query && query->present;
 
+    /* check for xfixes extension */
+    query = xcb_get_extension_data(globalconf.connection, &xcb_xfixes_id);
+    globalconf.have_xfixes = query && query->present;
+    if (globalconf.have_xfixes)
+        xcb_discard_reply(globalconf.connection,
+                xcb_xfixes_query_version(globalconf.connection, 1, 0).sequence);
+
     /* check for shape extension */
     query = xcb_get_extension_data(globalconf.connection, &xcb_shape_id);
     globalconf.have_shape = query && query->present;

@@ -35,6 +35,7 @@
 #include "objects/selection.h"
 #include "globalconf.h"
 #include "common/atoms.h"
+#include "xcb/xfixes.h"
 
 /** Selection object.
  *
@@ -107,6 +108,23 @@ luaA_selection_new(lua_State *L)
             selection->window, globalconf.screen->root, -1, -1, 1, 1, 0,
             XCB_COPY_FROM_PARENT, globalconf.screen->root_visual,
             XCB_CW_EVENT_MASK, (uint32_t[]) { XCB_EVENT_MASK_PROPERTY_CHANGE });
+
+    /* Register the selection so that we can report when it changes.
+     * FIXME: This is by definition a memory leak. Dunno what to do about this
+     * API-wise.
+     */
+    if (globalconf.have_xfixes)
+    {
+        xcb_xfixes_select_selection_input(globalconf.connection, selection->window, selection->selection,
+                XCB_XFIXES_SELECTION_EVENT_MASK_SET_SELECTION_OWNER |
+                XCB_XFIXES_SELECTION_EVENT_MASK_SELECTION_WINDOW_DESTROY |
+                XCB_XFIXES_SELECTION_EVENT_MASK_SELECTION_CLIENT_CLOSE);
+
+        lua_pushvalue(L, -1);
+        int_array_append(&globalconf.all_selections, luaL_ref(L, LUA_REGISTRYINDEX));
+    } else {
+        luaA_warn(L, "The X11 server does not support watching for selection changes");
+    }
 
     return 1;
 }
@@ -265,6 +283,28 @@ luaA_selection_get_busy(lua_State *L, selection_t *selection)
 {
     lua_pushboolean(L, selection->callback_function != NULL);
     return 1;
+}
+
+void
+event_handle_xfixes_selection_notify(xcb_generic_event_t* generic_event)
+{
+    lua_State *L = globalconf_get_lua_State();
+    xcb_xfixes_selection_notify_event_t *event = (void *) generic_event;
+
+    foreach(reference, globalconf.all_selections)
+    {
+        lua_rawgeti(L, LUA_REGISTRYINDEX, *reference);
+        selection_t *selection = (void *) lua_topointer(L, -1);
+
+        if(event->window == selection->window)
+        {
+            luaA_object_emit_signal(L, -1, "selection_changed", 0);
+
+            lua_pop(L, 1);
+            break;
+        }
+        lua_pop(L, 1);
+    }
 }
 
 void
