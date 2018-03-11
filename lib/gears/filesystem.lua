@@ -145,8 +145,10 @@ function filesystem.get_dir(d)
     if d == "config" then
         -- No idea why this is what is returned, I recommend everyone to use
         -- get_configuration_dir() instead
+        require("gears.debug").deprecate("gears.filesystem.get_xdg_config_home() .. 'awesome/'", {deprecated_in=5})
         return filesystem.get_xdg_config_home() .. "awesome/"
     elseif d == "cache" then
+        require("gears.debug").deprecate("gears.filesystem.get_cache_dir", {deprecated_in=5})
         return filesystem.get_cache_dir()
     end
 end
