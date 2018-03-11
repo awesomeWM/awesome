@@ -53,6 +53,7 @@
 #include <xcb/xinerama.h>
 #include <xcb/xtest.h>
 #include <xcb/shape.h>
+#include <xcb/xfixes.h>
 
 #include <glib-unix.h>
 
@@ -641,6 +642,7 @@ main(int argc, char **argv)
     xcb_prefetch_extension_data(globalconf.connection, &xcb_randr_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_xinerama_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_shape_id);
+    xcb_prefetch_extension_data(globalconf.connection, &xcb_xfixes_id);
 
     if (xcb_cursor_context_new(globalconf.connection, globalconf.screen, &globalconf.cursor_ctx) < 0)
         fatal("Failed to initialize xcb-cursor");
