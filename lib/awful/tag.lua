@@ -500,7 +500,9 @@ function tag.object.set_screen(t, s)
 
     -- Change the screen
     tag.setproperty(t, "screen", s)
-    tag.setproperty(t, "index", #s:get_tags(true))
+    if s then
+        tag.setproperty(t, "index", #s:get_tags(true))
+    end
 
     -- Make sure the client's screen matches its tags
     for _,c in ipairs(t:clients()) do
@@ -508,14 +510,16 @@ function tag.object.set_screen(t, s)
         c:tags({t})
     end
 
-    -- Update all indexes
-    for i,t2 in ipairs(old_screen.tags) do
-        tag.setproperty(t2, "index", i)
-    end
+    if old_screen then
+        -- Update all indexes
+        for i,t2 in ipairs(old_screen.tags) do
+            tag.setproperty(t2, "index", i)
+        end
 
-    -- Restore the old screen history if the tag was selected
-    if sel then
-        tag.history.restore(old_screen, 1)
+        -- Restore the old screen history if the tag was selected
+        if sel then
+            tag.history.restore(old_screen, 1)
+        end
     end
 end
 
