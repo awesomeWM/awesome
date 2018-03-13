@@ -66,8 +66,6 @@ color_parse(const char *colstr, ssize_t len,
 }
 
 /** Send a request to initialize a X color.
- * If you are only interested in the rgba values and don't need the color's
- * pixel value, you should use color_init_unchecked() instead.
  * \param color color_t struct to store color into.
  * \param colstr Color specification.
  * \param len The length of colstr (which still MUST be NULL terminated).
