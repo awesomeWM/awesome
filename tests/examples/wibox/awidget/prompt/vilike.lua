@@ -44,7 +44,7 @@ local terminal  = "xterm"  --DOC_HIDE
             end},
         },
         textbox      = atextbox,
-        history_path = gfs.get_dir('cache') .. '/history',
+        history_path = gfs.get_cache_dir() .. '/history',
         exe_callback = function(cmd) awful.spawn(cmd) end
     }
 

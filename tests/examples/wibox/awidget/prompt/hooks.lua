@@ -54,7 +54,7 @@ local gfs       = require("gears.filesystem") --DOC_HIDE
         prompt        = "<b>Run: </b>",
         hooks         = hooks,
         textbox       = atextbox,
-        history_path  = gfs.get_dir("cache") .. "/history",
+        history_path  = gfs.get_cache_dir() .. "/history",
         done_callback = clear,
     }
 

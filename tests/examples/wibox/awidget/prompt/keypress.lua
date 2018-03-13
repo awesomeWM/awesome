@@ -24,7 +24,7 @@ local naughty   = {} --DOC_HIDE
             end
         end,
         textbox              = atextbox,
-        history_path         = gfs.get_dir("cache") .. "/history",
+        history_path         = gfs.get_cache_dir() .. "/history",
     }
 
 parent:add( wibox.widget {    --DOC_HIDE

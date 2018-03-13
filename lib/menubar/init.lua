@@ -130,7 +130,7 @@ local function load_count_table()
         return instance.count_table
     end
     instance.count_table = {}
-    local count_file_name = gfs.get_dir("cache") .. "/menu_count_file"
+    local count_file_name = gfs.get_cache_dir() .. "/menu_count_file"
     local count_file = io.open (count_file_name, "r")
     if count_file then
         for line in count_file:lines() do
@@ -146,7 +146,7 @@ end
 
 local function write_count_table(count_table)
     count_table = count_table or instance.count_table
-    local count_file_name = gfs.get_dir("cache") .. "/menu_count_file"
+    local count_file_name = gfs.get_cache_dir() .. "/menu_count_file"
     local count_file = assert(io.open(count_file_name, "w"))
     for name, count in pairs(count_table) do
         local str = string.format("%s;%d\n", name, count)
