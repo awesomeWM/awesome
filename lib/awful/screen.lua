@@ -114,8 +114,10 @@ function screen.focus(_screen)
     -- save pointer position of current screen
     s.mouse_per_screen = capi.mouse.coords()
 
-   -- move cursor without triggering signals mouse::enter and mouse::leave
+    -- move cursor without triggering signals mouse::enter and mouse::leave
     capi.mouse.coords(pos, true)
+
+    _screen:emit_signal('focused')
 
     local c = client.focus.history.get(_screen, 0)
     if c then
@@ -605,6 +607,9 @@ end
 
 --- When the tag history changed.
 -- @signal tag::history::update
+
+--- When the screen is focused.
+-- @signal focused
 
 -- Extend the luaobject
 object.properties(capi.screen, {
