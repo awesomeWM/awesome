@@ -208,6 +208,9 @@ local function get_icon_lookup_path()
             table.insert(app_in_theme_paths,
                          glib.build_filenamev({ icon_theme_directory,
                                                 size, 'apps' }))
+            table.insert(app_in_theme_paths,
+                         glib.build_filenamev({ icon_theme_directory,
+                                                size, 'categories' }))
         end
     end
     add_if_readable(icon_lookup_path, app_in_theme_paths)
