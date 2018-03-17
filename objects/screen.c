@@ -275,6 +275,7 @@ screen_add(lua_State *L, screen_array_t *screens)
     screen_t *new_screen = screen_new(L);
     luaA_object_ref(L, -1);
     screen_array_append(screens, new_screen);
+    new_screen->xid = XCB_NONE;
     return new_screen;
 }
 
