@@ -652,6 +652,10 @@ screen_refresh(void)
 
     screen_deduplicate(L, &new_screens);
 
+    /* Running without any screens at all is no fun. */
+    if (new_screens.len == 0)
+        screen_scan_x11(L, &new_screens);
+
     /* Add new screens */
     foreach(new_screen, new_screens) {
         bool found = false;
@@ -1163,6 +1167,11 @@ luaA_screen_fake_remove(lua_State *L)
     if (idx < 0)
         /* WTF? */
         return 0;
+
+    if (globalconf.screens.len == 1) {
+        luaA_warn(L, "Removing last screen through fake_remove(). "
+                "This is a very, very, very bad idea!");
+    }
 
     screen_array_take(&globalconf.screens, idx);
     luaA_object_push(L, s);
