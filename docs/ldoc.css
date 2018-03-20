@@ -263,7 +263,8 @@ dl.function dd {
 #content dl.function dd ul, #content dl.function dd ol {
     padding: 0px;
     padding-left: 15px;
-    list-style-type: none;
+    margin-left: 16px;
+    list-style-type: disc;
 }
 
 ul.nowrap {
