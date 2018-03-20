@@ -143,12 +143,15 @@ pre {
 }
 
 table.index {
-/* border: 1px #00007f; */
+    /* border: 1px #00007f; */
 }
-table.index td { text-align: left; vertical-align: top; }
 
-#navigation ul
-{
+table.index td {
+    text-align: left;
+    vertical-align: top;
+}
+
+#navigation ul {
     font-size:1em;
     list-style-type: none;
     margin: 1px 1px 10px 1px;
@@ -215,10 +218,14 @@ table.module_list td, table.function_list td {
     padding-bottom: 5px;
 }
 table.module_list td.name, table.function_list td.name {
-    background-color: white; min-width: 200px; border-right-width: 0px;
+    background-color: white;
+    min-width: 200px;
+    border-right-width: 0px;
 }
 table.module_list td.summary, table.function_list td.summary {
-    background-color: white; width: 100%; border-left-width: 0px;
+    background-color: white;
+    width: 100%;
+    border-left-width: 0px;
 }
 
 dl.function {
