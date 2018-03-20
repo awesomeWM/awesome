@@ -179,7 +179,7 @@ table.index td { text-align: left; vertical-align: top; }
 }
 
 #content table {
-    border-collapse:collapse;
+    border-collapse: collapse;
     border-spacing: 0;
     margin-left: 15px;
     margin-right: 15px;
