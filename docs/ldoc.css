@@ -173,21 +173,21 @@ table.index td { text-align: left; vertical-align: top; }
     padding-right: 15px;
 }
 
-#content table, #content table th, #content table td  {
-    border-style: solid;
-    border-color: #a3b0d1;
+table, table th, table td  {
+    border: solid 1px rgb(193, 204, 228);
 }
 
-#content table {
+table {
     border-collapse: collapse;
     border-spacing: 0;
     margin-left: 15px;
     margin-right: 15px;
 }
 
-#content table th, #content table td {
+table th, table td {
     padding: 2px;
 }
+
 
 #content p, #content table, #content ol, #content ul, #content dl {
     max-width: 900px;
@@ -214,7 +214,6 @@ table.module_list td, table.function_list td {
     padding-right: 10px;
     padding-top: 5px;
     padding-bottom: 5px;
-    border: solid 1px rgb(193, 204, 228);
 }
 table.module_list td.name, table.function_list td.name {
     background-color: white; min-width: 200px; border-right-width: 0px;
