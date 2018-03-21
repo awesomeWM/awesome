@@ -36,7 +36,7 @@ end
 
 function textclock:set_timezone(tzid)
     self._private.tzid = tzid
-    self._private.timezone = tzid and TimeZone.new(tzid) or TimeZone.new_local()
+    self._private.timezone = tzid and TimeZone.new(tzid)
     self:force_update()
 end
 
@@ -84,10 +84,10 @@ local function new(format, refresh, tzid)
     w._private.format = format or " %a %b %d, %H:%M "
     w._private.refresh = refresh or 60
     w._private.tzid = tzid
-    w._private.timezone = tzid and TimeZone.new(tzid) or TimeZone.new_local()
+    w._private.timezone = tzid and TimeZone.new(tzid)
 
     function w._private.textclock_update_cb()
-        local str = DateTime.new_now(w._private.timezone):format(w._private.format)
+        local str = DateTime.new_now(w._private.timezone or TimeZone.new_local()):format(w._private.format)
         if str == nil then
             require("gears.debug").print_warning("textclock: "
                     .. "g_date_time_format() failed for format "
