@@ -190,6 +190,14 @@ naughty.notificationClosedReason = {
 -- @beautiful beautiful.notification_height
 -- @tparam int notification_height
 
+--- Notifications maximum width.
+-- @beautiful beautiful.notification_max_width
+-- @tparam int notification_max_width
+
+--- Notifications maximum height.
+-- @beautiful beautiful.notification_max_height
+-- @tparam int notification_max_height
+
 --- Notifications icon size.
 -- @beautiful beautiful.notification_icon_size
 -- @tparam int notification_icon_size
@@ -495,6 +503,10 @@ local function update_size(notification)
         width = s.actions_max_width
     end
 
+    if s.max_width then
+        width = math.min(width, s.max_width)
+    end
+
     -- calculate the height
     if not height then
         local w = width - (n.iconbox and s.icon_w + 2 * margin or 0) - 2 * margin
@@ -507,6 +519,10 @@ local function update_size(notification)
     end
 
     height = height + s.actions_total_height
+
+    if s.max_height then
+        height = math.min(height, s.max_height)
+    end
 
     -- crop to workarea size if too big
     local workarea = n.screen.workarea
@@ -564,6 +580,8 @@ end
 -- @bool[opt=true] args.ontop Boolean forcing popups to display on top.
 -- @int[opt=`beautiful.notification_height` or auto] args.height Popup height.
 -- @int[opt=`beautiful.notification_width` or auto] args.width Popup width.
+-- @int[opt=`beautiful.notification_max_height` or auto] args.max_height Popup maximum height.
+-- @int[opt=`beautiful.notification_max_width` or auto] args.max_width Popup maximum width.
 -- @string[opt=`beautiful.notification_font` or `beautiful.font` or `awesome.font`] args.font Notification font.
 -- @string[opt] args.icon Path to icon.
 -- @int[opt] args.icon_size Desired icon size in px.
@@ -639,6 +657,10 @@ function naughty.notify(args)
         beautiful.notification_width
     local height = args.height or preset.height or
         beautiful.notification_height
+    local max_width = args.max_width or preset.max_width or
+        beautiful.notification_max_width
+    local max_height = args.max_height or preset.max_height or
+        beautiful.notification_max_height
     local margin = args.margin or preset.margin or
         beautiful.notification_margin
     local opacity = args.opacity or preset.opacity or
@@ -799,6 +821,8 @@ function naughty.notify(args)
     notification.size_info = {
         width = width,
         height = height,
+        max_width = max_width,
+        max_height = max_height,
         icon_w = icon_w,
         icon_h = icon_h,
         margin = margin,
