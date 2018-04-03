@@ -37,8 +37,7 @@ endmacro()
 
 a_find_program(GIT_EXECUTABLE git FALSE)
 # programs needed for man pages
-a_find_program(ASCIIDOC_EXECUTABLE asciidoc FALSE)
-a_find_program(XMLTO_EXECUTABLE xmlto FALSE)
+a_find_program(ASCIIDOCTOR_EXECUTABLE asciidoctor FALSE)
 a_find_program(GZIP_EXECUTABLE gzip FALSE)
 # Lua documentation
 if(GENERATE_DOC)
@@ -77,12 +76,9 @@ endif()
 
 # {{{ Check if documentation can be build
 if(GENERATE_MANPAGES)
-    if(NOT ASCIIDOC_EXECUTABLE OR NOT XMLTO_EXECUTABLE OR (COMPRESS_MANPAGES AND NOT GZIP_EXECUTABLE))
-        if(NOT ASCIIDOC_EXECUTABLE)
-            SET(missing "asciidoc")
-        endif()
-        if(NOT XMLTO_EXECUTABLE)
-            SET(missing ${missing} " xmlto")
+    if(NOT ASCIIDOCTOR_EXECUTABLE OR (COMPRESS_MANPAGES AND NOT GZIP_EXECUTABLE))
+        if(NOT ASCIIDOCTOR_EXECUTABLE)
+            SET(missing "asciidoctor")
         endif()
         if(COMPRESS_MANPAGES AND NOT GZIP_EXECUTABLE)
             SET(missing ${missing} " gzip")

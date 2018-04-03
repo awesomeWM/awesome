@@ -66,8 +66,7 @@ Additionally, the following optional dependencies exist:
 
 - [DBus](https://www.freedesktop.org/wiki/Software/dbus/) for DBus integration
   and the `awesome-client` utility
-- [asciidoc](http://www.methods.co.nz/asciidoc/) and
-  [xmlto](https://fedorahosted.org/xmlto/) for generating man pages
+- [asciidoctor](https://asciidoctor.org/) for generating man pages
 - [gzip](http://www.gzip.org/) for compressing man pages
 - [ldoc >= 1.4.5](https://stevedonovan.github.io/ldoc/) for generating the
   documentation
