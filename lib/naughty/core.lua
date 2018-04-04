@@ -421,7 +421,7 @@ function naughty.getById(id)
 end
 
 --- Increase notification ID by one
-function get_next_notification_id()
+function naughty.get_next_notification_id()
   counter = counter + 1
   return counter
 end
