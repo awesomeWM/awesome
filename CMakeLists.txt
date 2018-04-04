@@ -230,7 +230,6 @@ if(GENERATE_MANPAGES)
 
             # set the final filenames
             set(txtfile ${SOURCE_DIR}/${relpath}/${basename2}.txt)
-            set(xmlfile ${BUILD_DIR}/${relpath2}/${basename}.xml)
             set(gzfile  ${BUILD_DIR}/${relpath2}/${basename}.gz)
             set(manfile ${BUILD_DIR}/${relpath2}/${basename})
 
@@ -240,16 +239,11 @@ if(GENERATE_MANPAGES)
                 set(asciilang ${lang})
             endif()
             add_custom_command(
-                COMMAND ${ASCIIDOC_EXECUTABLE} -a lang=${asciilang} -d manpage -b docbook -o ${xmlfile} - < ${txtfile}
+                COMMAND ${ASCIIDOCTOR_EXECUTABLE} -a lang=${asciilang} -d manpage -b manpage -o ${manfile} - < ${txtfile}
                 WORKING_DIRECTORY ${BUILD_DIR}/${relpath2}
-                OUTPUT  ${xmlfile}
+                OUTPUT  ${manfile}
                 DEPENDS ${txtfile}
                 VERBATIM)
-            add_custom_command(
-                COMMAND ${XMLTO_EXECUTABLE} man ${xmlfile}
-                OUTPUT  ${manfile}
-                WORKING_DIRECTORY ${BUILD_DIR}/${relpath2}
-                DEPENDS ${xmlfile})
 
             if(COMPRESS_MANPAGES)
                 add_custom_command(
