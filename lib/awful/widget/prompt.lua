@@ -60,7 +60,7 @@ end
 -- @tparam[opt=`beautiful.prompt_bg` or `beautiful.bg_normal`] color args.bg Prompt background color.
 -- @tparam[opt=`beautiful.prompt_fg` or `beautiful.fg_normal`] color args.fg Prompt foreground color.
 -- @tparam[opt=`awful.completion.shell`] function args.completion_callback
---   The callback function to call to get completion.
+--   The callback function to call to get completion. See @{awful.prompt.run} for details.
 -- @return An instance of prompt widget, inherits from `wibox.container.background`.
 -- @function awful.widget.prompt
 function widgetprompt.new(args)
