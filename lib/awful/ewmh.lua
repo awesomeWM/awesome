@@ -30,16 +30,22 @@ local ewmh = {
 -- @tparam[opt=true] boolean fullscreen_hide_border
 
 --- The list of all registered generic request::activate (focus stealing)
--- filters. If a filter is added to only one context, it will be in
--- `ewmh.contextual_activate_filters`["context_name"].
+-- filters.
+--
+-- If a filter is added to a specific context, it gets added to
+-- `ewmh.contextual_activate_filters`["context_name"] instead.
+--
 -- @table[opt={}] generic_activate_filters
 -- @see ewmh.activate
 -- @see ewmh.add_activate_filter
 -- @see ewmh.remove_activate_filter
 
 --- The list of all registered contextual request::activate (focus stealing)
--- filters. If a filter is added to only one context, it will be in
--- `ewmh.generic_activate_filters`.
+-- filters.
+--
+-- If a filter is added without a specific context, it gets added to
+-- `ewmh.generic_activate_filters` instead.
+--
 -- @table[opt={}] contextual_activate_filters
 -- @see ewmh.activate
 -- @see ewmh.add_activate_filter
@@ -74,18 +80,22 @@ end
 -- It is the default signal handler for `request::activate` on a `client`.
 --
 -- @signalhandler awful.ewmh.activate
--- @client c A client to use
+-- @client c The client to activate.
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
 -- @tparam[opt=false] boolean hints.raise should the client be raised?
-function ewmh.activate(c, context, hints) -- luacheck: no unused args
+-- @tparam[opt=false] boolean hints.force TODO
+-- @see add_activate_filter
+-- @see generic_activate_filters
+-- @see contextual_activate_filters
+function ewmh.activate(c, context, hints)
     hints = hints or  {}
 
     if c.focusable == false and not hints.force then return end
 
     local found, ret = false
 
-    -- Execute the filters until something handle the request
+    -- Execute the filters until something handles the request.
     for _, tab in ipairs {
         ewmh.contextual_activate_filters[context] or {},
         ewmh.generic_activate_filters
@@ -114,12 +124,6 @@ end
 
 --- Add an activate (focus stealing) filter function.
 --
--- The callback takes the following parameters:
---
--- * **c** (*client*) The client requesting the activation
--- * **context** (*string*) The activation context.
--- * **hints** (*table*) Some additional hints (depending on the context)
---
 -- If the callback returns `true`, the client will be activated. If the callback
 -- returns `false`, the activation request is cancelled unless the `force` hint is
 -- set. If the callback returns `nil`, the previous callback will be executed.
@@ -133,7 +137,19 @@ end
 --        if c.class == "Firefox" then return false end
 --    end, "ewmh")
 --
+-- Or to activate the first tag of not visible clients (to not make the default
+-- handler mark them urgent only):
+--
+--    awful.ewmh.add_activate_filter(function(c, _context, hints)
+--        if hints.raise and not c:isvisible() then
+--            c.first_tag:view_only()
+--        end
+--    end, "ewmh")
+--
 -- @tparam function f The callback
+-- @tparam client f.c The client requesting the activation.
+-- @tparam string f.context The activation context.
+-- @tparam table f.hints Some additional hints (depending on the context).
 -- @tparam[opt] string context The `request::activate` context
 -- @see generic_activate_filters
 -- @see contextual_activate_filters
@@ -150,7 +166,7 @@ function ewmh.add_activate_filter(f, context)
 end
 
 --- Remove an activate (focus stealing) filter function.
--- This is an helper to avoid dealing with `ewmh.add_activate_filter` directly.
+--
 -- @tparam function f The callback
 -- @tparam[opt] string context The `request::activate` context
 -- @treturn boolean If the callback existed
@@ -165,7 +181,7 @@ function ewmh.remove_activate_filter(f, context)
         if v == f then
             table.remove(tab, k)
 
-            -- In case the callback is there multiple time.
+            -- In case the callback is there multiple times.
             ewmh.remove_activate_filter(f, context)
 
             return true
