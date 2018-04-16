@@ -1,7 +1,5 @@
 --DOC_HIDE_ALL
 local wibox     = require("wibox")
-local gears     = {shape = require("gears.shape")}
-local beautiful = require("beautiful")
 
 -- There is literally nothing to show, but the example must exist for the
 -- indexing.
