@@ -31,6 +31,7 @@ function client.gen_fake(args)
     ret.size_hints = {}
     ret.border_width = 1
     ret.icon_sizes = {{16,16}}
+    ret.name = "client"
 
     -- Apply all properties
     for k,v in pairs(args or {}) do
