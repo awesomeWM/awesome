@@ -89,6 +89,23 @@ function corner.add(self, widget)
     end
 end
 
+-- Preserve the columns
+function corner:reset()
+    self:get_children_by_id("column")[1].top_section:reset()
+    self:get_children_by_id("column")[2].bottom_section:reset()
+    self:get_children_by_id("column")[2].top_section:reset()
+    self:get_children_by_id("column")[1].bottom_section:reset()
+end
+
+-- Forbid adding elements directly
+function corner:set_children(value)
+    self:reset()
+
+    for _, child in ipairs(value) do
+        self:add(child)
+    end
+end
+
 --FIXME use the history and swap with the candidates
 function corner.remove_widgets(self, widget, ...)
     if not widget then return end
@@ -165,9 +182,12 @@ local function column(strategy)
 end
 
 local function ctr(t, mirror_v, mirror_h) --luacheck: no unused_args
-    t.master_width_factor = 0.66
+    local mwf = 0.66-- t and t.master_width_factor or 0.66
+--     t.master_width_factor = 0.66
 
-    local strategy = t.master_fill_policy == "master_width_factor" and
+    local mfp = t and t.master_fill_policy or "master_width_factor"
+
+    local strategy = mfp == "master_width_factor" and
         "center" or "justify"
 
     local main_layout = wibox.widget {
@@ -177,12 +197,14 @@ local function ctr(t, mirror_v, mirror_h) --luacheck: no unused_args
         layout = base_layout.horizontal
     }
 
+    main_layout.reset = function()assert(false) end
+
     register_columns(main_layout)
 
-    main_layout:ajust_ratio(1, 0, t.master_width_factor, 1-t.master_width_factor)
+    main_layout:ajust_ratio(1, 0, mwf, 1-mwf)
     locked_adjust(
         main_layout:get_children_by_id("column")[1], 1, 0,
-        t.master_width_factor, 1-t.master_width_factor
+        mwf, 1-mwf
     )
 
     -- Implement directions

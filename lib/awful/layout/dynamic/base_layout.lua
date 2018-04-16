@@ -103,24 +103,6 @@ function methods.raise_widget(self, widget)
     end
 end
 
--- Make sure all suspend functions are called
-function methods.suspend(self)
-    for _, v in ipairs(self.children) do
-        if v.suspend then
-            v:suspend()
-        end
-    end
-end
-
--- Make sure all wake_up functions are called
-function methods.wake_up(self)
-    for _, v in ipairs(self.children) do
-        if v.wake_up then
-            v:wake_up()
-        end
-    end
-end
-
 --- Destroy itself when all children elements are gone.
 -- @property volatile
 -- @param boolean

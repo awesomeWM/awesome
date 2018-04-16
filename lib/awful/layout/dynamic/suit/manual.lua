@@ -7,7 +7,9 @@
 ---------------------------------------------------------------------------
 
 local dynamic = require( "awful.layout.dynamic.base" )
+local gdebug  = require( "gears.debug"               )
 local wibox   = require( "wibox"                     )
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 --- The (soft) limit for the number of children.
 --
@@ -76,7 +78,16 @@ local wibox   = require( "wibox"                     )
 --
 --@DOC_awful_layout_dynamic_suit_manual_mirror_EXAMPLE@
 --
+-- **Use different layouts depending on the number of clients:**:
 --
+-- A basic use case with 2 type of layouts depending only on the number of
+-- client.
+--
+--@DOC_awful_layout_dynamic_suit_manual_conditional_EXAMPLE@
+--
+-- A more useful example using "real" layout suites:
+--
+--@DOC_awful_layout_dynamic_suit_manual_conditional2_EXAMPLE@
 --
 -- @clientlayout awful.layout.suit.dynamic.manual
 
@@ -107,6 +118,11 @@ local function extract_wrapper(self, below_priority)
 end
 
 local function max_elements(w, self)
+    -- Avoid using templates by accident
+    if not self.is_widget then
+        return nil
+    end
+
     return type(w.max_elements) == "function"
         and w.max_elements(self) or w.max_elements
 end
@@ -138,6 +154,8 @@ local function select_target(self)
     return p_best_w or r_best_w or self
 end
 
+--TODO implement SWAP_WIDGETS
+
 local function ctr(args)
     local function create()
         local main_layout = wibox.widget(args)
@@ -149,20 +167,40 @@ local function ctr(args)
             if not w then return end
 
             local t = select_target(self)
+
             local f = t == self and main_layout._private._add or t.add
-            f(t, w)
+
+            -- This is a pseudo-bug, but at least it wont burst the stack and
+            -- hopefully has no consequences.
+            if f ~= main_layout.add then
+                f(t, w)
+            else
+                gdebug.print_warning("A manual client layout was created without"..
+                    " an `:add()` method. The result is unpredictable. If you"..
+                    " think there is a valid use case, please report a bug"
+                )
+            end
+
             main_layout:add(...)
         end
 
+        -- Some layouts like the conditional can't know where to move the clients
+        -- once the layout changed, so they emit this signal.
+        main_layout:connect_signal("reparent::widgets", function(_,widgets)
+            main_layout:add(unpack(widgets))
+        end)
+
         -- Check if something has to be done afterward
         function main_layout:remove_widgets(w, ...)
-            if not w then return end
+            if not w then return false end
+            assert(type(w) ~= "boolean")
             local other = {...}
             local _, parent, _ = self:index(w, true)
+            local recurse = other[#other] == true
 
             -- Call the real function
             if main_layout._private._remove_widgets then
-                main_layout._private._remove_widgets(self, w, other[#other] == true)
+                main_layout._private._remove_widgets(self, w, recurse)
             end
 
             if parent.reflow then
@@ -174,7 +212,12 @@ local function ctr(args)
                 --TODO
             end
 
-            self:remove_widgets(...)
+            -- Do not call remove_widgets with a single boolean
+            if #other > 1 or not recurse then
+                self:remove_widgets(...)
+            end
+
+            return true
         end
 
         return main_layout

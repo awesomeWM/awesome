@@ -61,11 +61,11 @@ local function wake_up(self)
 
     self.is_woken_up = true
 
-    for _, v in ipairs(self.children) do
-        if v.wake_up then
-            v:wake_up()
-        end
-    end
+--     for _, v in ipairs(self.children) do
+--         if v.wake_up then
+--             v:wake_up()
+--         end
+--     end
 end
 
 local function suspend(self)
@@ -73,11 +73,11 @@ local function suspend(self)
 
     self.is_woken_up = false
 
-    for _, v in ipairs(self.children) do
-        if v.suspend then
-            v:suspend()
-        end
-    end
+--     for _, v in ipairs(self.children) do
+--         if v.suspend then
+--             v:suspend()
+--         end
+--     end
 end
 
 -- Not necessary for "dump" max layout, but if the user add some splitter
