@@ -1,35 +1,65 @@
 local a_tag = require("awful.tag") --DOC_HIDE --DOC_NO_USAGE
 local a_layout = require("awful.layout") --DOC_HIDE
 
-    local tile = require("awful.layout.dynamic.base_layout")
-    local stack = require("awful.layout.dynamic.tabbed")
+    local tile   = require("awful.layout.dynamic.base_layout")
+    local cond   = require("awful.layout.dynamic.base_conditional")
     local manual = require("awful.layout.dynamic.suit.manual")
+    local corner = require("awful.layout.dynamic.suit.corner")
+    local fair   = require("awful.layout.dynamic.suit.fair")
+    local margin = require("wibox.container.margin")
 
     local mycustomtilelayout = manual {
         {
-            reflow       = true,
-            max_elements = 2,
-            priority     = 1,
-            ratio        = 0.20,
-            layout       = tile.vertical
+            max_elements = 3,
+            {
+                {
+                    priority     = 2,
+                    max_elements = 1,
+                    ratio        = 0.33,
+                    layout       = tile.vertical
+                },
+                {
+                    max_elements = 1,
+                    priority     = 1,
+                    ratio        = 0.33,
+                    layout       = tile.vertical
+                },
+                {
+                    max_elements = 1,
+                    priority     = 3,
+                    ratio        = 0.33,
+                    layout       = tile.vertical
+                },
+                reflow              = true,
+                inner_fill_strategy = 'spacing',
+                layout              = tile.horizontal
+            },
+            margins = 3,
+            widget  = margin
         },
         {
-            priority = 1,
-            layout    = stack
+            reflow       = true,
+            max_elements = 4,
+            min_elements = 4,
+            layout       = fair
         },
-        inner_fill_strategy = "default",
-        layout     = tile.horizontal
+        {
+            reflow       = true,
+            min_elements = 5,
+            layout       = corner
+        },
+        reflow = true,
+        layout = cond
     }
 
--- screen._setup_grid(64, 48, {5}, {workarea_sides=3}) --DOC_HIDE
+screen._setup_grid(64, 48, {5}, {workarea_sides=3}) --DOC_HIDE
 
 local tags = {} --DOC_HIDE
 
 local function add_clients(s, count) --DOC_HIDE
     local x, y = s.geometry.x, s.geometry.y --DOC_HIDE
-    for i=1, count do --DOC_HIDE
+    for _=1, count do --DOC_HIDE
         local c1 = client.gen_fake {x = x+45, y = y+35, width=40, height=30, screen=s} --DOC_HIDE
-        c1.name = "Client "..i
         c1:_hide() --DOC_HIDE
     end --DOC_HIDE
 end --DOC_HIDE
@@ -74,9 +104,9 @@ local function show_layout(f, s) --DOC_HIDE
 
 end --DOC_HIDE
 
-for j=1, 1 do --DOC_HIDE
+for j=1, 5 do --DOC_HIDE
     tags[screen[j]] = a_tag.add("Test"..j, {screen=screen[j]}) --DOC_HIDE
-    add_clients(screen[j],5) --DOC_HIDE
+    add_clients(screen[j],j) --DOC_HIDE
     show_layout(mycustomtilelayout, screen[j]) --DOC_HIDE
 end --DOC_HIDE
 
