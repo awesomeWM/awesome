@@ -38,7 +38,7 @@ local function run(promptbox)
     return prompt.run {
         prompt              = promptbox.prompt,
         textbox             = promptbox.widget,
-        completion_callback = completion.shell,
+        completion_callback = promptbox.completion_callback,
         history_path        = gfs.get_cache_dir() .. "/history",
         exe_callback        = function (...)
             promptbox:spawn_and_handle_error(...)
@@ -59,6 +59,8 @@ end
 -- @tparam[opt="Run: "] string args.prompt Prompt text.
 -- @tparam[opt=`beautiful.prompt_bg` or `beautiful.bg_normal`] color args.bg Prompt background color.
 -- @tparam[opt=`beautiful.prompt_fg` or `beautiful.fg_normal`] color args.fg Prompt foreground color.
+-- @tparam[opt=`awful.completion.shell`] function args.completion_callback
+--   The callback function to call to get completion. See @{awful.prompt.run} for details.
 -- @return An instance of prompt widget, inherits from `wibox.container.background`.
 -- @function awful.widget.prompt
 function widgetprompt.new(args)
@@ -71,6 +73,7 @@ function widgetprompt.new(args)
     promptbox.prompt = args.prompt or "Run: "
     promptbox.fg = args.fg or beautiful.prompt_fg or beautiful.fg_normal
     promptbox.bg = args.bg or beautiful.prompt_bg or beautiful.bg_normal
+    promptbox.completion_callback = args.completion_callback or completion.shell
     return promptbox
 end
 
