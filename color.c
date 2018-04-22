@@ -39,15 +39,17 @@
  */
 static bool
 color_parse(const char *colstr, ssize_t len,
-            uint8_t *red, uint8_t *green, uint8_t *blue)
+            uint8_t *red, uint8_t *green, uint8_t *blue, uint8_t *alpha)
 {
     unsigned long colnum;
     char *p;
 
+    *alpha = 0xff;
+
     colnum = strtoul(colstr + 1, &p, 16);
     if(len == 9 && (p - colstr) == 9)
     {
-        /* We ignore the alpha component */
+        *alpha = colnum & 0xff;
         colnum >>= 8;
         len -= 2;
         p -= 2;
@@ -65,17 +67,56 @@ color_parse(const char *colstr, ssize_t len,
     return true;
 }
 
+/** Given a color component value in the range from 0x00 to 0xff and a mask that
+ * specifies where the component is, move the component into place. For example,
+ * component=0x12 and mask=0xff00 return 0x1200. Note that the mask can have a
+ * different width, for example component=0x12 and mask=0xf00 return 0x100.
+ * \param component The intensity of a color component.
+ * \param mask A mask containing a consecutive number of bits set to 1 defining
+ * where the component is.
+ * \return A pixel value containing the giving component in the given component.
+ */
+static uint32_t
+apply_mask(uint8_t component, uint32_t mask)
+{
+    unsigned int shift = 0;
+    unsigned int width = 0;
+
+    // Shift the mask right until the first set bit appears
+    while (mask != 0 && (mask & 0x1) == 0) {
+        shift++;
+        mask >>= 1;
+    }
+    // Shift the mask right until we saw all set bits
+    while ((mask & 0x1) == 1) {
+        width++;
+        mask >>= 1;
+    }
+
+    // The mask consists of [width] set bits followed by [shift] unset bits.
+    // Modify the component accordingly.
+    uint32_t result = component;
+
+    // Scale the result up to the desired width
+    if (width < 8)
+        result >>= (8 - width);
+    if (width > 8)
+        result <<= (width - 8);
+    return result << shift;
+}
+
 /** Send a request to initialize a X color.
  * \param color color_t struct to store color into.
  * \param colstr Color specification.
  * \param len The length of colstr (which still MUST be NULL terminated).
+ * \param visual The visual for which the color is to be allocated.
  * \return request informations.
  */
 color_init_request_t
-color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
+color_init_unchecked(color_t *color, const char *colstr, ssize_t len, xcb_visualtype_t *visual)
 {
     color_init_request_t req;
-    uint8_t red, green, blue;
+    uint8_t red, green, blue, alpha;
 
     p_clear(&req, 1);
 
@@ -88,21 +129,41 @@ color_init_unchecked(color_t *color, const char *colstr, ssize_t len)
     req.color = color;
 
     /* The color is given in RGB value */
-    if(!color_parse(colstr, len, &red, &green, &blue))
+    if(!color_parse(colstr, len, &red, &green, &blue, &alpha))
     {
         warn("awesome: error, invalid color '%s'", colstr);
         req.has_error = true;
         return req;
     }
 
+    req.colstr = colstr;
+    req.has_error = false;
+
+    if (visual->_class == XCB_VISUAL_CLASS_TRUE_COLOR || visual->_class == XCB_VISUAL_CLASS_DIRECT_COLOR) {
+        uint32_t pixel = 0;
+        pixel |= apply_mask(red, visual->red_mask);
+        pixel |= apply_mask(blue, visual->blue_mask);
+        pixel |= apply_mask(green, visual->green_mask);
+        if (draw_visual_depth(globalconf.screen, visual->visual_id) == 32) {
+            /* This is not actually in the X11 protocol, but we assume that this
+             * is an ARGB visual and everything unset in some mask is alpha.
+             */
+            pixel |= apply_mask(alpha, ~(visual->red_mask | visual->blue_mask | visual->green_mask));
+        }
+        req.color->pixel = pixel;
+        req.color->red   = RGB_8TO16(red);
+        req.color->green = RGB_8TO16(green);
+        req.color->blue  = RGB_8TO16(blue);
+        req.color->alpha = RGB_8TO16(alpha);
+        req.color->initialized = true;
+        return req;
+    }
     req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
                                                 globalconf.default_cmap,
                                                 RGB_8TO16(red),
                                                 RGB_8TO16(green),
                                                 RGB_8TO16(blue));
 
-    req.has_error = false;
-    req.colstr = colstr;
 
     return req;
 }
@@ -116,6 +177,8 @@ color_init_reply(color_init_request_t req)
 {
     if(req.has_error)
         return false;
+    if(req.color->initialized)
+        return true;
 
     xcb_alloc_color_reply_t *hexa_color;
 
@@ -126,6 +189,7 @@ color_init_reply(color_init_request_t req)
         req.color->red   = hexa_color->red;
         req.color->green = hexa_color->green;
         req.color->blue  = hexa_color->blue;
+        req.color->alpha = 0xffff;
         req.color->initialized = true;
         p_delete(&hexa_color);
         return true;
@@ -146,9 +210,14 @@ luaA_pushcolor(lua_State *L, const color_t c)
     uint8_t r = RGB_16TO8(c.red);
     uint8_t g = RGB_16TO8(c.green);
     uint8_t b = RGB_16TO8(c.blue);
+    uint8_t a = RGB_16TO8(c.alpha);
 
-    char s[10];
-    int len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
+    char s[1 + 4*2 + 1];
+    int len;
+    if (a >= 0xff)
+        len = snprintf(s, sizeof(s), "#%02x%02x%02x", r, g, b);
+    else
+        len = snprintf(s, sizeof(s), "#%02x%02x%02x%02x", r, g, b, a);
     lua_pushlstring(L, s, len);
     return 1;
 }
