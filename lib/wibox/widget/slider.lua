@@ -114,6 +114,8 @@ local slider = {mt={}}
 
 --- The slider value.
 --
+-- **Signal:** *property::value* notify the value is changed.
+--
 --@DOC_wibox_widget_slider_value_EXAMPLE@
 --
 -- @property value
