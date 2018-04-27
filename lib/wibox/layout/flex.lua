@@ -98,14 +98,9 @@ function flex:layout(_, width, height)
             w, h = floor(space_per_item), height
         end
 
-        table.insert(result, base.place_widget_at(v, x, y, w, h))
-
         pos = pos + space_per_item + spacing
 
-        if (is_y and pos-spacing >= height) or
-            (is_x and pos-spacing >= width) then
-            break
-        end
+        table.insert(result, base.place_widget_at(v, x, y, w, h))
 
         if k > 1 and spacing ~= 0 and spacing_widget then
             table.insert(result, base.place_widget_at(
