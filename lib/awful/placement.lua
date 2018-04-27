@@ -1434,8 +1434,9 @@ function placement.restore(d, args)
     -- Some people consider that once moved to another screen, then
     -- the memento needs to be upgraded. For now this is only true for
     -- maximization until someone complains.
-    if memento.sgeo and memento.screen and args.context == "maximize"
-      and d.screen and get_screen(memento.screen) ~= get_screen(d.screen) then
+    if memento.sgeo and memento.screen and memento.screen.valid
+      and args.context == "maximize" and d.screen
+      and get_screen(memento.screen) ~= get_screen(d.screen) then
         -- Use the absolute geometry as the memento also does
         local sgeo = get_screen(d.screen).geometry
 
