@@ -874,7 +874,10 @@ function placement.no_overlap(c, args)
     local curlay = layout.get()
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do
-        if cl ~= c and cl.type ~= "desktop" and (cl.floating or curlay == layout.suit.floating) then
+        if cl ~= c
+           and cl.type ~= "desktop"
+           and (cl.floating or curlay == layout.suit.floating)
+           and not (cl.maximized or cl.fullscreen) then
             areas = grect.area_remove(areas, area_common(cl))
         end
     end
