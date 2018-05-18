@@ -908,13 +908,18 @@ function placement.no_overlap(c, args)
     -- This makes sure to have the whole screen's area in case it has been
     -- removed.
     if not found then
-        if #areas == 0 then
-            areas = { screen.workarea }
-        end
-        for _, r in ipairs(areas) do
-            if r.width * r.height > new.width * new.height then
-                new = r
+        if #areas > 0 then
+            for _, r in ipairs(areas) do
+                if r.width * r.height > new.width * new.height then
+                    new = r
+                end
             end
+        elseif grect.area_intersect_area(geometry, screen.workarea) then
+            new.x = geometry.x
+            new.y = geometry.y
+        else
+            new.x = screen.workarea.x
+            new.y = screen.workarea.y
         end
     end
 
