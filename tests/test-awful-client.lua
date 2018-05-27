@@ -105,6 +105,25 @@ local steps = {
 
         return true
     end,
+
+    -- Ensure that window factor is ignored on maximized clients
+    function()
+        local c = client.get()[1]
+        assert(c ~= nil)
+
+        local signal_count = 0
+        c:connect_signal("property::windowfact", function()
+            signal_count = signal_count + 1
+        end)
+
+        c.maximized = true
+
+        awful.client.incwfact(0.1, c)
+        awful.client.setwfact(0.5, c)
+        assert(signal_count == 0)
+
+        return true
+    end,
 }
 
 local original_count, c1, c2 = 0
