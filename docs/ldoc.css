@@ -277,6 +277,11 @@ ul.nowrap {
     padding-right: 15px;
 }
 
+.deprecated_label {
+    color: #9db9f3;
+    font-weight: normal;
+}
+
 /* stop sublists from having initial vertical space */
 ul ul { margin-top: 0px; }
 ol ul { margin-top: 0px; }

@@ -140,6 +140,10 @@ custom_display_name_handler = function(item, default_handler)
         return name ~= "" and name or item.name
     end
 
+    if item.type == "deprecated" then
+        return default_handler(item) .. "</a> <i class=\"deprecated_label\">[deprecated]</i><a>"
+    end
+
     return default_handler(item)
 end
 
