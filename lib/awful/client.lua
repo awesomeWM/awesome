@@ -1236,7 +1236,7 @@ end
 -- @tparam[opt=nil] table hints Some hints.
 
 --- The client marked signal (deprecated).
--- @signal .marked
+-- @signal marked
 
 --- The client unmarked signal (deprecated).
 -- @signal unmarked

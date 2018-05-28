@@ -60,7 +60,7 @@
 
 /** When bound mouse button + modifiers are pressed.
  * @param ... One or more arguments are possible
- * @signal .press
+ * @signal press
  */
 
 /** When property changes.
@@ -73,7 +73,7 @@
 
 /** When bound mouse button + modifiers are pressed.
  * @param ... One or more arguments are possible
- * @signal .release
+ * @signal release
  */
 
 /** Create a new mouse button bindings.
