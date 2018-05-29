@@ -123,10 +123,7 @@ local function parse_cell_options(cell, args)
 
     for _, prop in ipairs(properties) do
         local default
-        if prop == 'markup' then
-            default = cell == "focus" and string.format('<span foreground="%s" background="%s"><b>%s</b></span>',
-                                                        beautiful.fg_focus, beautiful.bg_focus, "%s")
-        elseif prop == 'fg_color' then
+        if prop == 'fg_color' then
             default = cell == "focus" and beautiful.fg_focus or beautiful.fg_normal
         elseif prop == 'bg_color' then
             default = cell == "focus" and beautiful.bg_focus or beautiful.bg_normal
@@ -145,6 +142,11 @@ local function parse_cell_options(cell, args)
         -- Get default
         props[prop] = args[prop] or beautiful["calendar_" .. cell .. "_" .. prop] or bl_style[prop] or default
     end
+    props['markup'] = cell == "focus" and
+        (args['markup'] or beautiful["calendar_" .. cell .. "_markup"] or bl_style['markup'] or
+        string.format('<span foreground="%s" background="%s"><b>%s</b></span>',
+            props['fg_color'], props['bg_color'], "%s")
+        )
     return props
 end
 
@@ -170,7 +172,8 @@ end
 -- @tparam string position Two characters position of the calendar (default "cc")
 -- @treturn number,number,number,number Geometry of the calendar, list of x, y, width, height
 local function get_geometry(widget, screen, position)
-    local pos, s = position or "cc", screen or ascreen.focused()
+    local pos = position or "cc"
+    local s = screen or ascreen.focused()
     local margin = widget._calendar_margin or 0
     local wa = s.workarea
     local width, height = widget:fit({screen=s, dpi=s.dpi}, wa.width, wa.height)
@@ -207,7 +210,9 @@ end
 -- @tparam screen screen Screen where to display the calendar
 -- @treturn wibox The wibox calendar
 function calendar_popup:call_calendar(offset, position, screen)
-    local inc_offset, pos, s = offset or 0, position or self.position, screen or self.screen or ascreen.focused()
+    local inc_offset = offset or 0
+    local pos = position or self.position
+    local s = screen or self.screen or ascreen.focused()
     self.position = pos  -- remember last position when changing offset
 
     self.offset = inc_offset ~= 0 and self.offset + inc_offset or 0
@@ -311,7 +316,7 @@ local function get_cal_wibox(caltype, args)
 
     local ret = wibox{ ontop   = true,
                        opacity = args.opacity or 1,
-                       bg      = args.bg
+                       bg      = args.bg or gears.color.transparent
     }
     gears.table.crush(ret, calendar_popup, false)
 
@@ -320,7 +325,7 @@ local function get_cal_wibox(caltype, args)
     ret.screen   = args.screen
 
     local widget = wibox.widget {
-        font          = args.font,
+        font          = args.font or beautiful.font,
         spacing       = args.spacing,
         week_numbers  = args.week_numbers,
         start_sunday  = args.start_sunday,
