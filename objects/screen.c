@@ -71,12 +71,12 @@
  */
 
 /**
- * @signal .primary_changed
+ * @signal primary_changed
  */
 
 /**
  * This signal is emitted when a new screen is added to the current setup.
- * @signal .added
+ * @signal added
  */
 
 /**
@@ -85,13 +85,13 @@
  */
 
 /** This signal is emitted when the list of available screens changes.
- * @signal .list
+ * @signal list
  */
 
 /** When 2 screens are swapped
  * @tparam screen screen The other screen
  * @tparam boolean is_source If self is the source or the destination of the swap
- * @signal .swapped
+ * @signal swapped
  */
 
  /**

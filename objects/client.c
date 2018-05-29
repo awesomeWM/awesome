@@ -112,21 +112,21 @@
  */
 
 /** When a client gains focus.
- * @signal .focus
+ * @signal focus
  */
 
 /** Before manage, after unmanage, and when clients swap.
- * @signal .list
+ * @signal list
  */
 
 /** When 2 clients are swapped
  * @tparam client client The other client
  * @tparam boolean is_source If self is the source or the destination of the swap
- * @signal .swapped
+ * @signal swapped
  */
 
 /** When a new client appears and gets managed by Awesome.
- * @signal .manage
+ * @signal manage
  */
 
 /**
@@ -207,29 +207,29 @@
  */
 
 /** When a client gets tagged.
- * @signal .tagged
+ * @signal tagged
  * @tag t The tag object.
  */
 
 /** When a client gets unfocused.
- * @signal .unfocus
+ * @signal unfocus
  */
 
 /**
- * @signal .unmanage
+ * @signal unmanage
  */
 
 /** When a client gets untagged.
- * @signal .untagged
+ * @signal untagged
  * @tag t The tag object.
  */
 
 /**
- * @signal .raised
+ * @signal raised
  */
 
 /**
- * @signal .lowered
+ * @signal lowered
  */
 
 /**

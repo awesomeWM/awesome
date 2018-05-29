@@ -72,13 +72,13 @@ local protected_call = require("gears.protected_call")
 -- @table timer
 
 --- When the timer is started.
--- @signal .start
+-- @signal start
 
 --- When the timer is stopped.
--- @signal .stop
+-- @signal stop
 
 --- When the timer had a timeout event.
--- @signal .timeout
+-- @signal timeout
 
 local timer = { mt = {} }
 
