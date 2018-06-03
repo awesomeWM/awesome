@@ -1409,6 +1409,7 @@ pick_visual_for_depth (uint8_t depth)
 void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_attributes_reply_t *wattr)
 {
+    xcb_void_cookie_t reparent_cookie;
     lua_State *L = globalconf_get_lua_State();
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
@@ -1502,9 +1503,11 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                                  XCB_CW_EVENT_MASK,
                                  no_event);
     if (c->container_window != XCB_NONE)
-        xcb_reparent_window(globalconf.connection, w, c->container_window, 0, 0);
+        reparent_cookie =
+            xcb_reparent_window_checked(globalconf.connection, w, c->container_window, 0, 0);
     else
-        xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
+        reparent_cookie =
+            xcb_reparent_window_checked(globalconf.connection, w, c->frame_window, 0, 0);
     xcb_map_window(globalconf.connection, w);
     xcb_change_window_attributes(globalconf.connection,
                                  globalconf.screen->root,
@@ -1601,6 +1604,14 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
     luaA_object_emit_signal(L, -1, "manage", 0);
     /* pop client */
     lua_pop(L, 1);
+
+    xcb_generic_error_t *error = xcb_request_check(globalconf.connection, reparent_cookie);
+    if (error != NULL) {
+        warn("The following error happened while reparenting a window, window will not be managed properly!");
+        event_handle((xcb_generic_event_t *) error);
+        xcb_unmap_window(globalconf.connection, w);
+        p_delete(error);
+    }
 }
 
 static void
