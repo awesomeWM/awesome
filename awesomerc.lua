@@ -458,7 +458,10 @@ end
 
 -- @DOC_CLIENT_BUTTONS@
 clientbuttons = gears.table.join(
-    awful.button({ }, 1, function (c) client.focus = c; c:raise() end),
+    awful.button({ }, 1, function (c)
+        client.focus = c;
+        c:raise()
+    end),
     awful.button({ modkey }, 1, function (c)
         client.focus = c
         c:raise()
