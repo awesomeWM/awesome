@@ -174,12 +174,12 @@ fi
 # Start awesome.
 start_awesome() {
     cd "$build_dir"
-    # Kill awesome after $timeout_stale seconds (e.g. for errors during test setup).
+    # Kill awesome after $TEST_TIMEOUT seconds (e.g. for errors during test setup).
     # SOURCE_DIRECTORY is used by .luacov.
     DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" \
         AWESOME_THEMES_PATH="$AWESOME_THEMES_PATH" \
         AWESOME_ICON_PATH="$AWESOME_ICON_PATH" \
-        timeout "$timeout_stale" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
+        timeout "$TEST_TIMEOUT" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
 
@@ -199,7 +199,7 @@ fi
 count_tests=0
 errors=()
 # Seconds after when awesome gets killed.
-timeout_stale=30
+TEST_TIMEOUT=${TEST_TIMEOUT:-30}
 
 for f in $tests; do
     echo "== Running $f =="
@@ -235,7 +235,7 @@ for f in $tests; do
     set -e
     case $code in
         0) ;;
-        124) echo "Awesome was killed due to timeout after $timeout_stale seconds" ;;
+        124) echo "Awesome was killed due to timeout after $TEST_TIMEOUT seconds" ;;
         *) echo "Awesome exited with status code $code" ;;
     esac
 
