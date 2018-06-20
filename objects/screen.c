@@ -1040,7 +1040,9 @@ luaA_screen_module_index(lua_State *L)
             foreach(output, (*screen)->outputs)
                 if(A_STREQ(output->name, name))
                     return luaA_object_push(L, *screen);
-        luaL_error(L, "Unknown screen output name: %s", name);
+        luaA_warn(L, "Unknown screen output name: %s", name);
+        lua_pushnil(L);
+        return 1;
     }
 
     return luaA_object_push(L, luaA_checkscreen(L, 2));
