@@ -229,8 +229,13 @@ luaA_checkscreen(lua_State *L, int sidx)
     {
         int screen = lua_tointeger(L, sidx);
         if(screen < 1 || screen > globalconf.screens.len)
-            luaL_error(L, "invalid screen number: %d (of %d existing)",
-                    screen, globalconf.screens.len);
+        {
+            //luaL_error(L, "invalid screen number: %d (of %d existing)",
+            //        screen, globalconf.screens.len);
+            luaA_warn(L, "invalid screen number: %d (of %d existing)", screen, globalconf.screens.len);
+            lua_pushnil(L);
+            return NULL;
+        }
         return globalconf.screens.tab[screen - 1];
     } else
         return luaA_checkudata(L, sidx, &screen_class);
@@ -1040,7 +1045,9 @@ luaA_screen_module_index(lua_State *L)
             foreach(output, (*screen)->outputs)
                 if(A_STREQ(output->name, name))
                     return luaA_object_push(L, *screen);
-        luaL_error(L, "Unknown screen output name: %s", name);
+        luaA_warn(L, "Unknown screen output name: %s", name);
+        lua_pushnil(L);
+        return 1;
     }
 
     return luaA_object_push(L, luaA_checkscreen(L, 2));
