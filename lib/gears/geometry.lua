@@ -151,7 +151,7 @@ end
 -- @param a The area.
 -- @param b The other area.
 -- @return True if they intersect, false otherwise.
-local function area_intersect_area(a, b)
+function gears.geometry.rectangle.area_intersect_area(a, b)
     return (b.x < a.x + a.width
             and b.x + b.width > a.x
             and b.y < a.y + a.height
@@ -194,7 +194,7 @@ end
 function gears.geometry.rectangle.area_remove(areas, elem)
     for i = #areas, 1, -1 do
         -- Check if the 'elem' intersect
-        if area_intersect_area(areas[i], elem) then
+        if gears.geometry.rectangle.area_intersect_area(areas[i], elem) then
             -- It does? remove it
             local r = table.remove(areas, i)
             local inter = gears.geometry.rectangle.get_intersection(r, elem)

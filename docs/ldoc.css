@@ -191,10 +191,6 @@ table th, table td {
     padding: 2px;
 }
 
-#content p, #content table, #content ol, #content ul, #content dl {
-    max-width: 900px;
-}
-
 #about {
     padding: 15px;
     padding-left: 16em;
@@ -275,6 +271,11 @@ ul.nowrap {
 .section-description {
     padding-left: 15px;
     padding-right: 15px;
+}
+
+.deprecated_label {
+    color: #9db9f3;
+    font-weight: normal;
 }
 
 /* stop sublists from having initial vertical space */

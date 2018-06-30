@@ -197,11 +197,12 @@ function module.snap(c, snap, x, y, fixed_x, fixed_y)
     c = c or capi.client.focus
     local cur_geom = c:geometry()
     local geom = c:geometry()
-    geom.width = geom.width + (2 * c.border_width)
-    geom.height = geom.height + (2 * c.border_width)
+    local snapper_gap = beautiful.snapper_gap or 0
     local edge
-    geom.x = x or geom.x
-    geom.y = y or geom.y
+    geom.x = (x or geom.x) - snapper_gap
+    geom.y = (y or geom.y) - snapper_gap
+    geom.width = geom.width + (2 * c.border_width) + (2 * snapper_gap)
+    geom.height = geom.height + (2 * c.border_width) + (2 * snapper_gap)
 
     geom, edge = snap_inside(geom, c.screen.geometry, snap)
     geom = snap_inside(geom, c.screen.workarea, snap)
@@ -227,14 +228,18 @@ function module.snap(c, snap, x, y, fixed_x, fixed_y)
     for _, snapper in ipairs(aclient.visible(c.screen)) do
         if snapper ~= c then
             local snapper_geom = snapper:geometry()
-            snapper_geom.width = snapper_geom.width + (2 * snapper.border_width)
-            snapper_geom.height = snapper_geom.height + (2 * snapper.border_width)
+            snapper_geom.x = snapper_geom.x - snapper_gap
+            snapper_geom.y = snapper_geom.y - snapper_gap
+            snapper_geom.width = snapper_geom.width + (2 * snapper.border_width) + (2 * snapper_gap)
+            snapper_geom.height = snapper_geom.height + (2 * snapper.border_width) + (2 * snapper_gap)
             geom = snap_outside(geom, snapper_geom, snap)
         end
     end
 
-    geom.width = geom.width - (2 * c.border_width)
-    geom.height = geom.height - (2 * c.border_width)
+    geom.x = geom.x + snapper_gap
+    geom.y = geom.y + snapper_gap
+    geom.width = geom.width - (2 * c.border_width) - (2 * snapper_gap)
+    geom.height = geom.height - (2 * c.border_width) - (2 * snapper_gap)
 
     -- It's easiest to undo changes afterwards if they're not allowed
     if fixed_x then geom.x = cur_geom.x end

@@ -56,7 +56,7 @@
  */
 
 /**
- * @signal .press
+ * @signal press
  */
 
 /**
@@ -68,7 +68,7 @@
  */
 
 /**
- * @signal .release
+ * @signal release
  */
 
 /** Get the number of instances.

@@ -57,6 +57,11 @@
 #include <xcb/xinerama.h>
 #include <xcb/randr.h>
 
+/* The XID that is used on fake screens. X11 guarantees that the top three bits
+ * of a valid XID are zero, so this will not clash with anything.
+ */
+#define FAKE_SCREEN_XID ((uint32_t) 0xffffffff)
+
 /** Screen is a table where indexes are screen numbers. You can use `screen[1]`
  * to get access to the first screen, etc. Alternatively, if RANDR information
  * is available, you can use output names for finding screen objects.
@@ -66,12 +71,12 @@
  */
 
 /**
- * @signal .primary_changed
+ * @signal primary_changed
  */
 
 /**
  * This signal is emitted when a new screen is added to the current setup.
- * @signal .added
+ * @signal added
  */
 
 /**
@@ -80,13 +85,13 @@
  */
 
 /** This signal is emitted when the list of available screens changes.
- * @signal .list
+ * @signal list
  */
 
 /** When 2 screens are swapped
  * @tparam screen screen The other screen
  * @tparam boolean is_source If self is the source or the destination of the swap
- * @signal .swapped
+ * @signal swapped
  */
 
  /**
@@ -224,8 +229,11 @@ luaA_checkscreen(lua_State *L, int sidx)
     {
         int screen = lua_tointeger(L, sidx);
         if(screen < 1 || screen > globalconf.screens.len)
-            luaL_error(L, "invalid screen number: %d (of %d existing)",
-                    screen, globalconf.screens.len);
+        {
+            luaA_warn(L, "invalid screen number: %d (of %d existing)", screen, globalconf.screens.len);
+            lua_pushnil(L);
+            return NULL;
+        }
         return globalconf.screens.tab[screen - 1];
     } else
         return luaA_checkudata(L, sidx, &screen_class);
@@ -270,6 +278,7 @@ screen_add(lua_State *L, screen_array_t *screens)
     screen_t *new_screen = screen_new(L);
     luaA_object_ref(L, -1);
     screen_array_append(screens, new_screen);
+    new_screen->xid = XCB_NONE;
     return new_screen;
 }
 
@@ -652,6 +661,10 @@ screen_refresh(void)
 
     screen_deduplicate(L, &new_screens);
 
+    /* Running without any screens at all is no fun. */
+    if (new_screens.len == 0)
+        screen_scan_x11(L, &new_screens);
+
     /* Add new screens */
     foreach(new_screen, new_screens) {
         bool found = false;
@@ -673,7 +686,7 @@ screen_refresh(void)
     screen_array_init(&removed_screens);
     for(int i = 0; i < globalconf.screens.len; i++) {
         screen_t *old_screen = globalconf.screens.tab[i];
-        bool found = false;
+        bool found = old_screen->xid == FAKE_SCREEN_XID;
         foreach(new_screen, new_screens)
             found |= (*new_screen)->xid == old_screen->xid;
         if(!found) {
@@ -1034,7 +1047,9 @@ luaA_screen_module_index(lua_State *L)
             foreach(output, (*screen)->outputs)
                 if(A_STREQ(output->name, name))
                     return luaA_object_push(L, *screen);
-        luaL_error(L, "Unknown screen output name: %s", name);
+        luaA_warn(L, "Unknown screen output name: %s", name);
+        lua_pushnil(L);
+        return 1;
     }
 
     return luaA_object_push(L, luaA_checkscreen(L, 2));
@@ -1144,6 +1159,7 @@ luaA_screen_fake_add(lua_State *L)
     s->geometry.y = y;
     s->geometry.width = width;
     s->geometry.height = height;
+    s->xid = FAKE_SCREEN_XID;
 
     screen_added(L, s);
     luaA_class_emit_signal(L, &screen_class, "list", 0);
@@ -1163,6 +1179,11 @@ luaA_screen_fake_remove(lua_State *L)
     if (idx < 0)
         /* WTF? */
         return 0;
+
+    if (globalconf.screens.len == 1) {
+        luaA_warn(L, "Removing last screen through fake_remove(). "
+                "This is a very, very, very bad idea!");
+    }
 
     screen_array_take(&globalconf.screens, idx);
     luaA_object_push(L, s);

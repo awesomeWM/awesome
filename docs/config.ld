@@ -132,4 +132,19 @@ file = {
     }
 }
 
+custom_display_name_handler = function(item, default_handler)
+
+    -- Remove the "namespace" from the signals and properties
+    if item.type == "property" or item.type == "signal" then
+        local name = item.name:match("%.([^.]+)$")
+        return name ~= "" and name or item.name
+    end
+
+    if item.type == "deprecated" then
+        return default_handler(item) .. "</a> <i class=\"deprecated_label\">[deprecated]</i><a>"
+    end
+
+    return default_handler(item)
+end
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

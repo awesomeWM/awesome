@@ -208,6 +208,9 @@ local function get_icon_lookup_path()
             table.insert(app_in_theme_paths,
                          glib.build_filenamev({ icon_theme_directory,
                                                 size, 'apps' }))
+            table.insert(app_in_theme_paths,
+                         glib.build_filenamev({ icon_theme_directory,
+                                                size, 'categories' }))
         end
     end
     add_if_readable(icon_lookup_path, app_in_theme_paths)
@@ -395,7 +398,7 @@ function utils.parse_desktop_file(file)
         else
             cmdline = cmdline:gsub('%%i', '')
         end
-        if program.Terminal == "true" then
+        if program.Terminal == true then
             cmdline = utils.terminal .. ' -e ' .. cmdline
         end
         program.cmdline = cmdline

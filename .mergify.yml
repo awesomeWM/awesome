@@ -1,0 +1,12 @@
+rules:
+  default:
+    protection:
+      required_status_checks:
+        strict: True
+        contexts:
+          - continuous-integration/travis-ci
+          - Codacy/PR Quality Review
+          - codecov/patch
+          - coverage/coveralls
+      required_pull_request_reviews:
+        required_approving_review_count: 2

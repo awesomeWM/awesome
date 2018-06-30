@@ -33,6 +33,7 @@ typedef struct
     uint16_t red;
     uint16_t green;
     uint16_t blue;
+    uint16_t alpha;
     bool initialized;
 } color_t;
 
@@ -44,7 +45,7 @@ typedef struct
     const char *colstr;
 } color_init_request_t;
 
-color_init_request_t color_init_unchecked(color_t *, const char *, ssize_t);
+color_init_request_t color_init_unchecked(color_t *, const char *, ssize_t, xcb_visualtype_t *visual);
 bool color_init_reply(color_init_request_t);
 
 int luaA_pushcolor(lua_State *, const color_t);

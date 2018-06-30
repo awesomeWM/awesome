@@ -974,6 +974,8 @@ function client.incwfact(add, c)
 
     local t = c.screen.selected_tag
     local w = client.idx(c)
+    if not w then return end
+
     local data = t.windowfact or {}
     local colfact = data[w.col] or {}
     local curr = colfact[w.idx] or 1
@@ -1236,7 +1238,7 @@ end
 -- @tparam[opt=nil] table hints Some hints.
 
 --- The client marked signal (deprecated).
--- @signal .marked
+-- @signal marked
 
 --- The client unmarked signal (deprecated).
 -- @signal unmarked

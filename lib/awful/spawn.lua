@@ -404,6 +404,7 @@ function spawn.read_lines(input_stream, line_callback, done_callback, close)
         if close then
             stream:close()
         end
+        stream:set_buffer_size(0)
         if done_callback then
             protected_call(done_callback)
         end

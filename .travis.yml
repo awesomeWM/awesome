@@ -242,7 +242,7 @@ script:
       git checkout -qf FETCH_HEAD
       if [ -n "$failed" ]; then
         echo "Checks failed for these commits:"
-        for c in $commits; do
+        for c in $failed; do
           git log -1 --pretty="%h %s (%an, %ad)" "$c"
         done
         false

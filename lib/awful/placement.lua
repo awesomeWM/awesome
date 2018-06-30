@@ -874,7 +874,10 @@ function placement.no_overlap(c, args)
     local curlay = layout.get()
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do
-        if cl ~= c and cl.type ~= "desktop" and (cl.floating or curlay == layout.suit.floating) then
+        if cl ~= c
+           and cl.type ~= "desktop"
+           and (cl.floating or curlay == layout.suit.floating)
+           and not (cl.maximized or cl.fullscreen) then
             areas = grect.area_remove(areas, area_common(cl))
         end
     end
@@ -905,13 +908,18 @@ function placement.no_overlap(c, args)
     -- This makes sure to have the whole screen's area in case it has been
     -- removed.
     if not found then
-        if #areas == 0 then
-            areas = { screen.workarea }
-        end
-        for _, r in ipairs(areas) do
-            if r.width * r.height > new.width * new.height then
-                new = r
+        if #areas > 0 then
+            for _, r in ipairs(areas) do
+                if r.width * r.height > new.width * new.height then
+                    new = r
+                end
             end
+        elseif grect.area_intersect_area(geometry, screen.workarea) then
+            new.x = geometry.x
+            new.y = geometry.y
+        else
+            new.x = screen.workarea.x
+            new.y = screen.workarea.y
         end
     end
 
@@ -1434,8 +1442,9 @@ function placement.restore(d, args)
     -- Some people consider that once moved to another screen, then
     -- the memento needs to be upgraded. For now this is only true for
     -- maximization until someone complains.
-    if memento.sgeo and memento.screen and args.context == "maximize"
-      and d.screen and get_screen(memento.screen) ~= get_screen(d.screen) then
+    if memento.sgeo and memento.screen and memento.screen.valid
+      and args.context == "maximize" and d.screen
+      and get_screen(memento.screen) ~= get_screen(d.screen) then
         -- Use the absolute geometry as the memento also does
         local sgeo = get_screen(d.screen).geometry
 

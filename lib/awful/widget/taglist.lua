@@ -411,7 +411,7 @@ end
 --   update. See `awful.widget.common`.
 -- @tparam[opt] widget args.layout Optional layout widget for tag widgets. Default
 --   is wibox.layout.fixed.horizontal().
--- @tparam[opt] table widget_template A custom widget to be used for each tag
+-- @tparam[opt] table args.widget_template A custom widget to be used for each tag
 -- @tparam[opt={}] table args.style The style overrides default theme.
 -- @tparam[opt=nil] string|pattern args.style.fg_focus
 -- @tparam[opt=nil] string|pattern args.style.bg_focus

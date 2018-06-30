@@ -430,7 +430,7 @@ end
 --   update. See `awful.widget.common.list_update`.
 -- @tparam[opt] table args.layout Container widget for tag widgets. Default
 --   is `wibox.layout.flex.horizontal`.
--- @tparam[opt] table widget_template A custom widget to be used for each client
+-- @tparam[opt] table args.widget_template A custom widget to be used for each client
 -- @tparam[opt={}] table args.style The style overrides default theme.
 -- @tparam[opt=nil] string|pattern args.style.fg_normal
 -- @tparam[opt=nil] string|pattern args.style.bg_normal
@@ -505,8 +505,10 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
 
     local data = setmetatable({}, { __mode = 'k' })
 
-    if w.set_spacing and (args.style and args.style.spacing or beautiful.tasklist_spacing) then
-        w:set_spacing(args.style and args.style.spacing or beautiful.tasklist_spacing)
+    local spacing = args.style and args.style.spacing or args.layout and args.layout.spacing
+                    or beautiful.tasklist_spacing
+    if w.set_spacing and spacing then
+        w:set_spacing(spacing)
     end
 
     local queued_update = false
