@@ -10,3 +10,5 @@ rules:
           - coverage/coveralls
       required_pull_request_reviews:
         required_approving_review_count: 2
+    merge_strategy:
+      method: rebase
