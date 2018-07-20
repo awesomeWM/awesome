@@ -25,10 +25,12 @@ local function should_display_on(self, s)
     if not self._private.widget then
         return false
     end
-    local success, own_s = pcall(function()
-        return capi.screen[self._private.screen]
-    end)
-    return success and own_s == s
+    local own_s = self._private.screen
+    if type(own_s) == "number" and (own_s < 1 or own_s > capi.screen.count()) then
+        -- Invalid screen number
+        return false
+    end
+    return capi.screen[self._private.screen] == s
 end
 
 -- Layout this layout
