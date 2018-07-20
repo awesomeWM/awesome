@@ -254,7 +254,8 @@ luaA_restart(lua_State *L)
 
 /** Send a signal to a process identified by its process id. See
  * `awesome.unix_signal` for a list of signals.
- * @tparam integer pid Process identifier
+ * @tparam integer pid Process identifier.  0 and negative values have special
+ *   meaning.  See `man 3 kill`.
  * @tparam integer sig Signal number
  * @treturn boolean true if the signal was successfully sent, else false
  * @function kill
@@ -262,7 +263,7 @@ luaA_restart(lua_State *L)
 static int
 luaA_kill(lua_State *L)
 {
-    int pid = luaA_checknumber_range(L, 1, 1, INT_MAX);
+    int pid = lua_tonumber(L, 1);
     int sig = luaA_checknumber_range(L, 2, 0, INT_MAX);
 
     int result = kill(pid, sig);
