@@ -158,7 +158,14 @@ local function mouse_resize_handler(c, _, _, _, orientation)
                           end, cursor)
 end
 
-local function tile_group(gs, cls, wa, orientation, fact, group)
+local function apply_size_hints(c, width, height, useless_gap)
+    local bw = c.border_width
+    width, height = width - 2 * bw - useless_gap, height - 2 * bw - useless_gap
+    width, height = c:apply_size_hints(math.max(1, width), math.max(1, height))
+    return width + 2 * bw + useless_gap, height + 2 * bw + useless_gap
+end
+
+local function tile_group(gs, cls, wa, orientation, fact, group, useless_gap)
     -- get our orientation right
     local height = "height"
     local width = "width"
@@ -207,7 +214,7 @@ local function tile_group(gs, cls, wa, orientation, fact, group)
         geom[x] = group.coord
         geom[y] = coord
         gs[cls[c]] = geom
-        hints.width, hints.height = cls[c]:apply_size_hints(geom.width, geom.height)
+        hints.width, hints.height = apply_size_hints(cls[c], geom.width, geom.height, useless_gap)
         coord = coord + hints[height]
         unused = unused - hints[height]
         total_fact = total_fact - fact[i]
@@ -231,6 +238,7 @@ local function do_tile(param, orientation)
 
     local gs = param.geometries
     local cls = param.clients
+    local useless_gap = param.useless_gap
     local nmaster = math.min(t.master_count, #cls)
     local nother = math.max(#cls - nmaster,0)
 
@@ -267,7 +275,7 @@ local function do_tile(param, orientation)
                 data[0] = {}
             end
             coord = coord + tile_group(gs, cls, wa, orientation, data[0],
-                                       {first=1, last=nmaster, coord = coord, size = size})
+                                       {first=1, last=nmaster, coord = coord, size = size}, useless_gap)
         end
 
         if not place_master and nother > 0 then
@@ -288,7 +296,7 @@ local function do_tile(param, orientation)
                     data[i] = {}
                 end
                 coord = coord + tile_group(gs, cls, wa, orientation, data[i],
-                                           { first = first, last = last, coord = coord, size = size })
+                                           { first = first, last = last, coord = coord, size = size }, useless_gap)
             end
         end
         place_master = not place_master
