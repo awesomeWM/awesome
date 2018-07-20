@@ -156,7 +156,6 @@ drawin_systray_kickout(drawin_t *w)
         /* Who! Check that we're not deleting a drawin with a systray, because it
          * may be its parent. If so, we reparent to root before, otherwise it will
          * hurt very much. */
-        systray_cleanup();
         xcb_reparent_window(globalconf.connection,
                             globalconf.systray.window,
                             globalconf.screen->root,
