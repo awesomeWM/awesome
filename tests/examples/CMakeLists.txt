@@ -171,9 +171,11 @@ function(run_test test_path namespace escaped_content)
 
     file(READ ${test_path} tmp_content)
 
-    # Add "--" in front of each line. This is required for method doc, but not
-    # for documentation pages
-    if(NOT tmp_content MATCHES "--DOC_NO_DASH")
+    # Add "--" or " * " in front of each line. This is required for method doc,
+    #but not for documentation pages
+    if(tmp_content MATCHES "--DOC_ASTERISK")
+        set(DOC_LINE_PREFIX " * ")
+    elseif(NOT tmp_content MATCHES "--DOC_NO_DASH")
         set(DOC_LINE_PREFIX "--")
     endif()
 
@@ -279,7 +281,7 @@ function(run_test test_path namespace escaped_content)
 endfunction()
 
 # Find all test files, and run them (generating custom commands for updating them).
-file(GLOB_RECURSE test_files LIST_DIRECTORIES false
+file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false
     "${TOP_SOURCE_DIR}/tests/examples/*.lua")
 
 # Find and run all test files.
