@@ -1270,9 +1270,19 @@ client_geometry_refresh(void)
         xcb_configure_window(globalconf.connection, c->frame_window,
                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
-        xcb_configure_window(globalconf.connection, c->window,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
+        if (c->container_window != XCB_NONE)
+        {
+            xcb_configure_window(globalconf.connection, c->container_window,
+                    XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                    (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
+            xcb_configure_window(globalconf.connection, c->window,
+                    XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                    (uint32_t[]) { real_geometry.width, real_geometry.height });
+        } else {
+            xcb_configure_window(globalconf.connection, c->window,
+                    XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
+                    (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
+        }
 
         c->x11_frame_geometry = geometry;
         c->x11_client_geometry = real_geometry;
@@ -1371,6 +1381,26 @@ client_update_properties(lua_State *L, int cidx, client_t *c)
     window_set_opacity(L, cidx, xwindow_get_opacity_from_cookie(opacity));
 }
 
+static xcb_visualid_t
+pick_visual_for_depth (uint8_t depth)
+{
+    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(globalconf.screen);
+
+    if (depth == globalconf.default_depth)
+        return globalconf.visual->visual_id;
+    if (depth == globalconf.screen->root_depth)
+        return globalconf.screen->root_visual;
+
+    /* Just pick the first visual of that depth */
+    for(; depth_iter.rem; xcb_depth_next (&depth_iter))
+        if (depth_iter.data->depth == depth)
+            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+                visual_iter.rem; xcb_visualtype_next (&visual_iter))
+                return visual_iter.data->visual_id;
+
+    return XCB_COPY_FROM_PARENT;
+}
+
 /** Manage a new client.
  * \param w The window.
  * \param wgeom Window geometry.
@@ -1379,6 +1409,7 @@ client_update_properties(lua_State *L, int cidx, client_t *c)
 void
 client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_attributes_reply_t *wattr)
 {
+    xcb_void_cookie_t reparent_cookie;
     lua_State *L = globalconf_get_lua_State();
     const uint32_t select_input_val[] = { CLIENT_SELECT_INPUT_EVENT_MASK };
 
@@ -1424,6 +1455,41 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                           globalconf.default_cmap
                       });
 
+    /* is a container window needed? */
+    c->container_window = XCB_NONE;
+    if (wgeom->depth != globalconf.default_depth) {
+        /* The window has a different depth than the window that we would put it
+         * in. If it also has a ParentRelative background, ReparentWindow would
+         * fail. We cannot check for that, so assume the worst.
+         */
+        xcb_colormap_t colormap;
+        xcb_visualid_t visual = pick_visual_for_depth(wgeom->depth);
+
+        if (wgeom->depth == globalconf.screen->root_depth)
+            colormap = globalconf.screen->default_colormap;
+        else
+        {
+            colormap = xcb_generate_id(globalconf.connection);
+            xcb_create_colormap(globalconf.connection, XCB_COLORMAP_ALLOC_NONE,
+                    colormap, globalconf.screen->root, visual);
+        }
+
+        c->container_window = xcb_generate_id(globalconf.connection);
+        xcb_create_window(globalconf.connection, wgeom->depth, c->container_window, c->frame_window,
+                0, 0, wgeom->width, wgeom->height, 0, XCB_COPY_FROM_PARENT,
+                visual, XCB_CW_BACK_PIXMAP | XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
+                (const uint32_t[]) {
+                    XCB_BACK_PIXMAP_NONE,
+                    globalconf.screen->black_pixel,
+                    XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT,
+                    colormap
+                });
+        xcb_map_window(globalconf.connection, c->container_window);
+
+        if (colormap != globalconf.screen->default_colormap)
+            xcb_free_colormap(globalconf.connection, colormap);
+    }
+
     /* The client may already be mapped, thus we must be sure that we don't send
      * ourselves an UnmapNotify due to the xcb_reparent_window().
      *
@@ -1436,7 +1502,12 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                                  globalconf.screen->root,
                                  XCB_CW_EVENT_MASK,
                                  no_event);
-    xcb_reparent_window(globalconf.connection, w, c->frame_window, 0, 0);
+    if (c->container_window != XCB_NONE)
+        reparent_cookie =
+            xcb_reparent_window_checked(globalconf.connection, w, c->container_window, 0, 0);
+    else
+        reparent_cookie =
+            xcb_reparent_window_checked(globalconf.connection, w, c->frame_window, 0, 0);
     xcb_map_window(globalconf.connection, w);
     xcb_change_window_attributes(globalconf.connection,
                                  globalconf.screen->root,
@@ -1533,6 +1604,14 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
     luaA_object_emit_signal(L, -1, "manage", 0);
     /* pop client */
     lua_pop(L, 1);
+
+    xcb_generic_error_t *error = xcb_request_check(globalconf.connection, reparent_cookie);
+    if (error != NULL) {
+        warn("The following error happened while reparenting a window, window will not be managed properly!");
+        event_handle((xcb_generic_event_t *) error);
+        xcb_unmap_window(globalconf.connection, w);
+        p_delete(error);
+    }
 }
 
 static void
@@ -2215,6 +2294,7 @@ client_unmanage(client_t *c, bool window_valid)
 
     if (c->nofocus_window != XCB_NONE)
         window_array_append(&globalconf.destroy_later_windows, c->nofocus_window);
+    /* container_window is automatically destroyed when its parent is destroyed */
     window_array_append(&globalconf.destroy_later_windows, c->frame_window);
 
     if(window_valid)

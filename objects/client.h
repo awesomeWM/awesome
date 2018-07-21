@@ -51,6 +51,8 @@ typedef enum {
 struct client_t
 {
     WINDOW_OBJECT_HEADER
+    /** Window we use as a container for windows with non-default depth */
+    xcb_window_t container_window;
     /** Window we use for input focus and no-input clients */
     xcb_window_t nofocus_window;
     /** Client logical screen */
