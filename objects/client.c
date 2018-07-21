@@ -2549,10 +2549,8 @@ luaA_client_tags(lua_State *L)
 /** Get the first tag of a client.
  */
 static int
-luaA_client_get_first_tag(lua_State *L)
+luaA_client_get_first_tag(lua_State *L, client_t *c)
 {
-    client_t *c = luaA_checkudata(L, 1, &client_class);
-
     foreach(tag, globalconf.tags)
         if(is_client_tagged(c, *tag))
         {
@@ -3441,10 +3439,9 @@ luaA_client_keys(lua_State *L)
 }
 
 static int
-luaA_client_get_icon_sizes(lua_State *L)
+luaA_client_get_icon_sizes(lua_State *L, client_t *c)
 {
     int index = 1;
-    client_t *c = luaA_checkudata(L, 1, &client_class);
 
     lua_newtable(L);
     foreach (s, c->icons) {
