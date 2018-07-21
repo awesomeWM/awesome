@@ -211,10 +211,56 @@ _string_to_key_code(const char *s)
     }
 }
 
-/** Send fake events. Usually the currently focused client will get it.
+/** Send fake keyboard or mouse events.
  *
- * @param event_type The event type: key_press, key_release, button_press,
- *  button_release or motion_notify.
+ * Usually the currently focused client or the keybindings will receive those
+ * events. If a `keygrabber` or `mousegrabber` is running, then it will get them.
+ *
+ * Some keys have different names compared to the ones generally used in
+ * Awesome. For example, Awesome uses "modifier keys" for keybindings using
+ * their X11 names such as "Control" or "Mod1" (for "Alt"). These are not the
+ * name of the key but is only the name of the modifier they represent. Some
+ * modifiers are even present twice on some keyboard like the left and right
+ * "Shift". Here is a list of the "real" key names matching the modifiers in
+ * `fake_input`:
+ *
+ * <table>
+ *  <tr style='font-weight: bold;'>
+ *   <th align='center'>Modifier name </th>
+ *   <th align='center'>Key name</th>
+ *   <th align='center'>Other key name</th>
+ *  </tr>
+ *  <tr><td> Mod4</td><td align='center'> Super_L </td><td align='center'> Super_R </td></tr>
+ *  <tr><td> Control </td><td align='center'> Control_L </td><td align='center'> Control_R </td></tr>
+ *  <tr><td> Shift </td><td align='center'> Shift_L </td><td align='center'> Shift_R </td></tr>
+ *  <tr><td> Mod1</td><td align='center'> Alt_L </td><td align='center'> Alt_R </td></tr>
+ * </table>
+ *
+ * Note that this is valid for most of the modern "western" keyboard layouts.
+ * Some older, custom or foreign layouts may break this convention.
+ *
+ * This function is very low level, to be more useful, it can be wrapped into
+ * higher level constructs such as:
+ *
+ * **Sending strings:**
+ *
+ * @DOC_text_root_fake_string_EXAMPLE@
+ *
+ * Note that this example works for most ASCII inputs but may fail depending on
+ * how the string is encoded. Some multi-byte characters may not represent
+ * keys and some UTF-8 encoding format create characters by combining multiple
+ * elements such as accent + base character or various escape sequences. If you
+ * wish to use this example for "real world" i18n use cases, learning about
+ * XKB event and UTF-8 encoding is a prerequisites.
+ *
+ * **Clicking:**
+ *
+ * ![Client geometry](../images/mouse.svg)
+ *
+ * @DOC_text_root_fake_click_EXAMPLE@
+ *
+ * @param event_type The event type: key\_press, key\_release, button\_press,
+ *  button\_release or motion\_notify.
  * @param detail The detail: in case of a key event, this is the keycode
  *  to send, in case of a button event this is the number of the button. In
  *  case of a motion event, this is a boolean value which if true makes the
