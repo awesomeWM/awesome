@@ -71,7 +71,7 @@ file(MAKE_DIRECTORY "${IMAGE_DIR}")
 #  * add "--" in front of each lines
 #  * add a custom prefix in front of each lines
 #  * drop empty lines
-#  * convert " " lines into empty lines
+#  * convert --DOC_NEWLINE lines into empty lines
 #  * drop lines ending with "--DOC_SOMETHING", they are handled elsewhere
 function(escape_string variable content escaped_content line_prefix)
     # If DOC_HIDE_ALL is present, do nothing.
@@ -82,6 +82,10 @@ function(escape_string variable content escaped_content line_prefix)
 
     set(tmp_output ${content})
     foreach (LINE ${var_lines})
+
+        # ;; will drop the line, but " ;" will create an empty line
+        string(REGEX REPLACE "--DOC_NEWLINE" " " LINE "${LINE}")
+
         if(NOT LINE MATCHES "^.*--DOC_[A-Z]+")
             set(tmp_output ${tmp_output}\n${DOC_LINE_PREFIX}${line_prefix}${LINE})
         endif()
