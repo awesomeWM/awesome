@@ -2,7 +2,9 @@ local gears_obj = require("gears.object")
 
 local screen, meta = awesome._shim_fake_class()
 
-screen.count = 1
+function screen.count()
+    return 1
+end
 
 local function create_screen(args)
     local s = gears_obj()
