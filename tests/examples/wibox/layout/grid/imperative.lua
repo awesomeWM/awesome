@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE
 local generic_widget = ... --DOC_NO_USAGE --DOC_HIDE
 local wibox     = require("wibox") --DOC_HIDE
 

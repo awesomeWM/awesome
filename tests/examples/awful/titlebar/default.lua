@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 --DOC_NO_USAGE
 local place = require("awful.placement") --DOC_HIDE
 local awful = { titlebar = require("awful.titlebar"), --DOC_HIDE

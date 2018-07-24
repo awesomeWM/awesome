@@ -1,3 +1,4 @@
+--DOC_GEN_OUTPUT --DOC_HIDE
 local gears = {sort={topological = require("gears.sort.topological")}} --DOC_HIDE
 
 local tsort = gears.sort.topological()

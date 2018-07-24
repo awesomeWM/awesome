@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local shape,cr,show = ... --DOC_HIDE
 
 shape.isosceles_triangle(cr, 70, 70)

@@ -1,4 +1,5 @@
 --DOC_HIDE_ALL
+--DOC_GEN_IMAGE
 local awful = {placement = require("awful.placement")}
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 

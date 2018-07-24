@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local shape,cr,show = ... --DOC_HIDE
 
 shape.rectangle(cr, 70, 70)

@@ -186,9 +186,7 @@ function(run_test test_path namespace escaped_content)
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
 
-    # Execute the script, leave the image extension decision to the test.
-    # SVG is preferred, but PNG is better suited for some tests, like bitmap
-    # patterns.
+    # Execute the script.
     file(RELATIVE_PATH rel_test_path "${TOP_SOURCE_DIR}" "${test_path}")
     message(STATUS "Running ${rel_test_path}…")
 
@@ -217,17 +215,11 @@ function(run_test test_path namespace escaped_content)
     # Build the documentation.
     set(TEST_DOC_CONTENT "${TEST_PRE_HEADER}")
 
-    # If the image has been created, then add it.
-    if(EXISTS "${IMAGE_PATH}.svg")
+    # Does the test generate an output image?
+    if(tmp_content MATCHES "--DOC_GEN_IMAGE")
         set(OUTPUT_IMAGE_PATH "${IMAGE_PATH}.svg")
         escape_string(
             "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.svg)\n"
-            "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
-        )
-    elseif(EXISTS "${IMAGE_PATH}.png")
-        set(OUTPUT_IMAGE_PATH "${IMAGE_PATH}.png")
-        escape_string(
-            "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.png)\n"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
     else()
@@ -237,6 +229,9 @@ function(run_test test_path namespace escaped_content)
     # If there is an output, assume it is relevant and add it to the
     # documentation under the image.
     if(NOT ${TEST_OUTPUT} STREQUAL "")
+        if(NOT tmp_content MATCHES "--DOC_GEN_OUTPUT")
+            message(FATAL_ERROR "Unexpected output from ${test_path}: ${TEST_OUTPUT}")
+        endif()
         set(TEST_DOC_CONTENT
             "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}\n${DOC_LINE_PREFIX}**Usage example output**:\n${DOC_LINE_PREFIX}"
         )

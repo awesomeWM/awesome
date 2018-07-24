@@ -1,4 +1,5 @@
 --DOC_HIDE_ALL
+--DOC_GEN_IMAGE
 local parent    = ...
 local wibox     = require("wibox")
 

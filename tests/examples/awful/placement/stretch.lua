@@ -1,4 +1,5 @@
 --DOC_HIDE_ALL
+--DOC_GEN_IMAGE
 screen[1]._resize {width = 128, height = 96}
 screen._add_screen {x = 140, y = 0  , width = 128, height = 96}
 screen._add_screen {x = 0  , y = 110, width = 128, height = 96}

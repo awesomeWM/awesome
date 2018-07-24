@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local parent    = ... --DOC_HIDE
 local wibox     = require( "wibox" ) --DOC_HIDE
 local assets    = require( "beautiful.theme_assets" ) --DOC_HIDE

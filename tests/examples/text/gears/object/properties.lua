@@ -1,3 +1,4 @@
+--DOC_GEN_OUTPUT --DOC_HIDE
 local gears = require("gears") --DOC_HIDE
 
 -- Create a class for this object. It will be used as a backup source for

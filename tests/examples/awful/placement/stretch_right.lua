@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 -- Stretch the drawable to the right of the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments --DOC_HEADER

@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 -- Align a client to the bottom of the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments") --DOC_HEADER

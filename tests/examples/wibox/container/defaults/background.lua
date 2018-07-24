@@ -1,4 +1,5 @@
 --DOC_HIDE_ALL
+--DOC_GEN_IMAGE
 local wibox     = require("wibox")
 local gears     = {shape = require("gears.shape")}
 local beautiful = require("beautiful")

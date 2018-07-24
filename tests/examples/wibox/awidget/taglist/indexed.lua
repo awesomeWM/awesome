@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local parent = ... --DOC_NO_USAGE --DOC_HIDE
 local awful = { --DOC_HIDE
     tag = require("awful.tag"), --DOC_HIDE

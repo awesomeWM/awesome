@@ -1,3 +1,4 @@
+--DOC_GEN_OUTPUT --DOC_GEN_IMAGE
 local generic_widget, generic_before_after = ... --DOC_HIDE_ALL
 local wibox = require("wibox") --DOC_HIDE
 local beautiful = require("beautiful") --DOC_HIDE

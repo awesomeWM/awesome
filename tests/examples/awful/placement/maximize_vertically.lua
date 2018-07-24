@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 -- Vetically maximize the drawable in the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments") --DOC_HEADER
