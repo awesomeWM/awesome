@@ -1,10 +1,19 @@
+-- Needed for root.fake_inputs
+local keygrabber = {_current_grabber = nil}
 
-local keygrabber = {
-    run = function() end,
-    stop = function() end,
-    is_running = function() return false end,
+local function stop()
+    keygrabber._current_grabber = nil
+end
+
+local function run(grabber)
+    keygrabber._current_grabber = grabber
+end
+
+keygrabber = {
+    run       = run,
+    stop      = stop,
+    isrunning = function() return keygrabber._current_grabber ~= nil end,
 }
-
 
 return keygrabber
 
