@@ -29,9 +29,12 @@ end
 local module = {
     fg_normal    = "#000000"  ,
     bg_normal    = "#6181FF7D",
+    bg_focus     = "#AA00FF7D",
     bg_highlight = "#AA00FF7D",
     border_color = "#6181FF"  ,
     border_width = 1.5        ,
+
+    prompt_bg_cursor = "#00FF7D",
 
     -- Fake resources handling
     xresources = require("beautiful.xresources"),
