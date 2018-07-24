@@ -46,6 +46,14 @@ awesome.startup = true
 function awesome.register_xproperty()
 end
 
+function awesome.xkb_get_group_names()
+    return "pc+us+inet(evdev)"
+end
+
+function awesome.xkb_get_layout_group()
+    return 0
+end
+
 awesome.load_image = lgi.cairo.ImageSurface.create_from_png
 
 function awesome.pixbuf_to_surface(_, path)
