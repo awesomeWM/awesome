@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local generic_widget = ... --DOC_HIDE
 local wibox     = require("wibox") --DOC_HIDE
 local awful = {placement = require("awful.placement")} --DOC_HIDE

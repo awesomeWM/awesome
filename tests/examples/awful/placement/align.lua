@@ -1,4 +1,5 @@
 --DOC_HIDE_ALL
+--DOC_GEN_IMAGE
 local placement = require("awful.placement")
 screen[1]._resize {x= 50}
 for _, pos in ipairs{

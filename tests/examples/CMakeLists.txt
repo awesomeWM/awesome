@@ -215,8 +215,8 @@ function(run_test test_path namespace escaped_content)
     # Build the documentation.
     set(TEST_DOC_CONTENT "${TEST_PRE_HEADER}")
 
-    # If the image has been created, then add it.
-    if(EXISTS "${IMAGE_PATH}.svg")
+    # Does the test generate an output image?
+    if(tmp_content MATCHES "--DOC_GEN_IMAGE")
         set(OUTPUT_IMAGE_PATH "${IMAGE_PATH}.svg")
         escape_string(
             "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.svg)\n"

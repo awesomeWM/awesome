@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local awful = {placement = require("awful.placement")} --DOC_HIDE
 
 local c = client.gen_fake {x = 20, y = 20, width= 280, height=200, screen =screen[1]} --DOC_HIDE

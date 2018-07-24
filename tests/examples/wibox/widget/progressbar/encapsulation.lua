@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local parent = ... --DOC_NO_USAGE --DOC_NO_DASH --DOC_HIDE
 local wibox  = require("wibox") --DOC_HIDE
 local color  = require("gears.color") --DOC_HIDE

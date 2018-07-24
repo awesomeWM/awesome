@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local parent    = ... --DOC_NO_USAGE --DOC_HIDE
 local wibox     = require( "wibox"     ) --DOC_HIDE
 local awful     = { prompt = require("awful.prompt"),--DOC_HIDE

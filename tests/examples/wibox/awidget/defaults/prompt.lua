@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local parent    = ... --DOC_NO_USAGE --DOC_HIDE
 local awful     = { widget = {  --DOC_HIDE
                     prompt = require("awful.widget.prompt")}}--DOC_HIDE

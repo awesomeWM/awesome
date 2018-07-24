@@ -1,3 +1,4 @@
+--DOC_GEN_IMAGE --DOC_HIDE
 local generic_widget = ... --DOC_HIDE
 local wibox     = require("wibox") --DOC_HIDE
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1) --DOC_HIDE

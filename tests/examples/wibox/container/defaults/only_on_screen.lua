@@ -1,4 +1,5 @@
 --DOC_HIDE_ALL
+--DOC_GEN_IMAGE
 local wibox = require("wibox")
 local awful = { widget = { only_on_screen = require("awful.widget.only_on_screen") } }
 
