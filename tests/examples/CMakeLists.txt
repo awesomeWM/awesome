@@ -229,6 +229,9 @@ function(run_test test_path namespace escaped_content)
     # If there is an output, assume it is relevant and add it to the
     # documentation under the image.
     if(NOT ${TEST_OUTPUT} STREQUAL "")
+        if(NOT tmp_content MATCHES "--DOC_GEN_OUTPUT")
+            message(FATAL_ERROR "Unexpected output from ${test_path}: ${TEST_OUTPUT}")
+        endif()
         set(TEST_DOC_CONTENT
             "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}\n${DOC_LINE_PREFIX}**Usage example output**:\n${DOC_LINE_PREFIX}"
         )

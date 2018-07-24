@@ -1,3 +1,4 @@
+--DOC_GEN_OUTPUT --DOC_HIDE
 local gears = require("gears") --DOC_HIDE
 
 local o = gears.object{}

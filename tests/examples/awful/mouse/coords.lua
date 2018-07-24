@@ -1,4 +1,4 @@
---DOC_GEN_IMAGE --DOC_HIDE
+--DOC_GEN_OUTPUT --DOC_GEN_IMAGE --DOC_HIDE
 screen[1]._resize {x = 175, width = 128, height = 96} --DOC_HIDE
 mouse.coords {x=175+60,y=60} --DOC_HIDE
 

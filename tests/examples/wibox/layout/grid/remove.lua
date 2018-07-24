@@ -1,4 +1,4 @@
---DOC_GEN_IMAGE
+--DOC_GEN_OUTPUT --DOC_GEN_IMAGE
 local _, generic_before_after = ... --DOC_HIDE_ALL
 local wibox = require("wibox") --DOC_HIDE
 
