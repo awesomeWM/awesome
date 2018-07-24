@@ -184,6 +184,7 @@ void client_set_class_instance(lua_State *, int, const char *, const char *);
 void client_set_type(lua_State *L, int, window_type_t);
 void client_set_transient_for(lua_State *L, int, client_t *);
 void client_set_name(lua_State *L, int, char *);
+void client_set_startup_id(lua_State *L, int, char *);
 void client_set_alt_name(lua_State *L, int, char *);
 void client_set_group_window(lua_State *, int, xcb_window_t);
 void client_set_icons(client_t *, cairo_surface_array_t);
