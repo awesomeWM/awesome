@@ -838,8 +838,14 @@ end
 -- @tparam[opt=client's screen] integer args.screen The screen.
 -- @treturn table The new client geometry.
 function placement.no_offscreen(c, args)
-    --HACK necessary for composition to work. The API will be changed soon
+
+    --compatibility with the old API
     if type(args) == "number" or type(args) == "screen" then
+        gdebug.deprecate(
+            "awful.placement.no_offscreen screen argument is deprecated"..
+            " use awful.placement.no_offscreen(c, {screen=...})",
+            {deprecated_in=5}
+        )
         args = { screen = args }
     end
 
