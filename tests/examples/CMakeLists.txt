@@ -71,7 +71,7 @@ file(MAKE_DIRECTORY "${IMAGE_DIR}")
 #  * add "--" in front of each lines
 #  * add a custom prefix in front of each lines
 #  * drop empty lines
-#  * convert " " lines into empty lines
+#  * convert --DOC_NEWLINE lines into empty lines
 #  * drop lines ending with "--DOC_SOMETHING", they are handled elsewhere
 function(escape_string variable content escaped_content line_prefix)
     # If DOC_HIDE_ALL is present, do nothing.
@@ -82,6 +82,10 @@ function(escape_string variable content escaped_content line_prefix)
 
     set(tmp_output ${content})
     foreach (LINE ${var_lines})
+
+        # ;; will drop the line, but " ;" will create an empty line
+        string(REGEX REPLACE "--DOC_NEWLINE" " " LINE "${LINE}")
+
         if(NOT LINE MATCHES "^.*--DOC_[A-Z]+")
             set(tmp_output ${tmp_output}\n${DOC_LINE_PREFIX}${line_prefix}${LINE})
         endif()
@@ -171,9 +175,11 @@ function(run_test test_path namespace escaped_content)
 
     file(READ ${test_path} tmp_content)
 
-    # Add "--" in front of each line. This is required for method doc, but not
-    # for documentation pages
-    if(NOT tmp_content MATCHES "--DOC_NO_DASH")
+    # Add "--" or " * " in front of each line. This is required for method doc,
+    #but not for documentation pages
+    if(tmp_content MATCHES "--DOC_ASTERISK")
+        set(DOC_LINE_PREFIX " * ")
+    elseif(NOT tmp_content MATCHES "--DOC_NO_DASH")
         set(DOC_LINE_PREFIX "--")
     endif()
 
@@ -274,7 +280,7 @@ function(run_test test_path namespace escaped_content)
 endfunction()
 
 # Find all test files, and run them (generating custom commands for updating them).
-file(GLOB_RECURSE test_files LIST_DIRECTORIES false
+file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false
     "${TOP_SOURCE_DIR}/tests/examples/*.lua")
 
 # Find and run all test files.
