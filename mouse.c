@@ -142,39 +142,6 @@ mouse_warp_pointer(xcb_window_t window, int16_t x, int16_t y)
                      0, 0, 0, 0, x, y);
 }
 
-/**
- * Allow the a Lua handler to be implemented for custom properties and
- * functions.
- * \param L A lua state
- * \param handler A function on the LUA_REGISTRYINDEX
- */
-static int
-luaA_mouse_call_handler(lua_State *L, int handler)
-{
-    int nargs = lua_gettop(L);
-
-    /* Push error handling function and move it before args */
-    lua_pushcfunction(L, luaA_dofunction_error);
-    lua_insert(L, - nargs - 1);
-    int error_func_pos = 1;
-
-    /* push function and move it before args */
-    lua_rawgeti(L, LUA_REGISTRYINDEX, handler);
-    lua_insert(L, - nargs - 1);
-
-    if(lua_pcall(L, nargs, LUA_MULTRET, error_func_pos))
-    {
-        warn("%s", lua_tostring(L, -1));
-        /* Remove error function and error string */
-        lua_pop(L, 2);
-        return 0;
-    }
-    /* Remove error function */
-    lua_remove(L, error_func_pos);
-
-    return lua_gettop(L);
-}
-
 /** Mouse library.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -191,7 +158,7 @@ luaA_mouse_index(lua_State *L)
     /* attr is not "screen"?! */
     if (A_STRNEQ(attr, "screen")) {
         if (miss_index_handler != LUA_REFNIL) {
-            return luaA_mouse_call_handler(L, miss_index_handler);
+            return luaA_call_handler(L, miss_index_handler);
         }
         else
             return luaA_default_index(L);
@@ -226,7 +193,7 @@ luaA_mouse_newindex(lua_State *L)
     if (A_STRNEQ(attr, "screen")) {
         /* Call the lua mouse property handler */
         if (miss_newindex_handler != LUA_REFNIL) {
-            return luaA_mouse_call_handler(L, miss_newindex_handler);
+            return luaA_call_handler(L, miss_newindex_handler);
         }
         else
             return luaA_default_newindex(L);
