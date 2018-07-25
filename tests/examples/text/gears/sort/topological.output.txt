@@ -1,0 +1,6 @@
+The position #1 is: a
+The position #2 is: b
+The position #3 is: c
+The position #4 is: d
+The position #5 is: e
+The position #6 is: f

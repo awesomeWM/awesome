@@ -10,8 +10,7 @@ print([[l = wibox.layout {
     layout = wibox.layout.grid
 }
 l:set_orientation("vertical") -- change to "horizontal"
-l:add(...)
-]]) --DOC_HIDE
+l:add(...)]]) --DOC_HIDE
 
 return --DOC_HIDE
 wibox.widget {

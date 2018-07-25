@@ -1,0 +1,1 @@
+l:remove_column(2)

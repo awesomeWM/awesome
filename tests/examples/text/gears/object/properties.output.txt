@@ -1,0 +1,9 @@
+In get foo	bar
+bar
+In set foo	42
+In get foo	42
+42
+In a method	1	2	3
+nil
+In the connection handler!	a cow
+a cow

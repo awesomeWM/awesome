@@ -232,12 +232,17 @@ function(run_test test_path namespace escaped_content)
         set(OUTPUT_IMAGE_PATH "")
     endif()
 
+    # Does the text generate text output?
     # If there is an output, assume it is relevant and add it to the
     # documentation under the image.
-    if(NOT ${TEST_OUTPUT} STREQUAL "")
-        if(NOT tmp_content MATCHES "--DOC_GEN_OUTPUT")
-            message(FATAL_ERROR "Unexpected output from ${test_path}: ${TEST_OUTPUT}")
+    if(tmp_content MATCHES "--DOC_GEN_OUTPUT")
+        # The expected output is next to the .lua file in a .output.txt file
+        string(REPLACE ".lua" ".output.txt" expected_output_path ${test_path})
+        file(READ "${expected_output_path}" expected_output)
+        if(NOT "${TEST_OUTPUT}" STREQUAL "${expected_output}")
+            message(SEND_ERROR "Wrong output from ${test_path}:\nExpected:\n${expected_output}\nGot:\n${TEST_OUTPUT}")
         endif()
+
         set(TEST_DOC_CONTENT
             "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}\n${DOC_LINE_PREFIX}**Usage example output**:\n${DOC_LINE_PREFIX}"
         )
@@ -248,6 +253,10 @@ function(run_test test_path namespace escaped_content)
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT "    "
         )
         set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}")
+    else()
+        if(NOT ${TEST_OUTPUT} STREQUAL "")
+            message(FATAL_ERROR "Unexpected output from ${test_path}: ${TEST_OUTPUT}")
+        endif()
     endif()
 
     # If there is some @* content, append it.
