@@ -46,6 +46,11 @@
  * - Move the window.
  * [Wait for synthetic configure notify]
  * - Check that the window moves to the expected position.
+ * - Unmap the window
+ * [Wait for WM_STATE property notify]
+ * - Map the window
+ * [Wait for expose event]
+ * - Check that the window is mapped in the correct place.
  *
  * This needs a WM that supports _NET_FRAME_EXTENTS.
  * Also, this assumes that the WM allows and applies window moves and resizes by
@@ -56,6 +61,8 @@ enum test_state {
     TEST_STATE_RESIZED1,
     TEST_STATE_RESIZED2,
     TEST_STATE_MOVED,
+    TEST_STATE_UNMAPPED,
+    TEST_STATE_MAPPED,
     TEST_STATE_DONE,
     TEST_STATE_DONE_GOT_CONFIGURE,
 };
@@ -72,6 +79,8 @@ enum test_state {
 
 static int32_t state_difference[][2] = {
     [TEST_STATE_CREATED] = { 0, 0 },
+    [TEST_STATE_UNMAPPED] = { 0, 0 },
+    [TEST_STATE_MAPPED] = { 0, 0 },
     [TEST_STATE_RESIZED1] = { WIN_WIDTH1 - WIN_WIDTH2, WIN_HEIGHT1 - WIN_HEIGHT2 },
     [TEST_STATE_RESIZED2] = { 0, 0 },
     [TEST_STATE_MOVED] = { 0, 0 },
@@ -89,7 +98,9 @@ struct window_state {
 static xcb_connection_t *c = NULL;
 static xcb_screen_t *screen;
 static struct window_state window_state;
+static xcb_window_t last_window = XCB_NONE;
 static xcb_atom_t net_frame_extents;
+static xcb_atom_t wm_state;
 static bool done;
 static bool had_error = false;
 
@@ -229,6 +240,10 @@ static const char *state_to_string(enum test_state state)
     {
     case TEST_STATE_CREATED:
         return "CREATED";
+    case TEST_STATE_UNMAPPED:
+        return "UNMAPPED";
+    case TEST_STATE_MAPPED:
+        return "MAPPED";
     case TEST_STATE_RESIZED1:
         return "RESIZED1";
     case TEST_STATE_RESIZED2:
@@ -349,7 +364,7 @@ static void init(xcb_gravity_t gravity)
             XCB_WINDOW_CLASS_INPUT_OUTPUT, screen->root_visual,
             XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK, (uint32_t[]) {
                 screen->white_pixel,
-                XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_EXPOSURE
+                XCB_EVENT_MASK_STRUCTURE_NOTIFY | XCB_EVENT_MASK_EXPOSURE | XCB_EVENT_MASK_PROPERTY_CHANGE
             });
     xcb_change_property(c, XCB_PROP_MODE_REPLACE, window_state.window,
             XCB_ATOM_WM_NAME, XCB_ATOM_STRING, 8, strlen(name), name);
@@ -359,10 +374,11 @@ static void init(xcb_gravity_t gravity)
 
 static void handle_expose(xcb_expose_event_t *ev)
 {
-    if (window_state.window != ev->window || window_state.state != TEST_STATE_CREATED)
+    if (window_state.window != ev->window
+            || (window_state.state != TEST_STATE_CREATED && window_state.state != TEST_STATE_MAPPED))
         return;
 
-    do_log("Window in state CREATED was exposed, going to next state");
+    do_log("Window in state %s was exposed, going to next state", state_to_string(window_state.state));
     delayed_proceed_with_window();
 }
 
@@ -375,6 +391,8 @@ static void handle_configure_notify(xcb_configure_notify_event_t *ev)
     switch (window_state.state)
     {
     case TEST_STATE_CREATED:
+    case TEST_STATE_UNMAPPED:
+    case TEST_STATE_MAPPED:
         return;
     case TEST_STATE_RESIZED1:
         if (synthetic)
@@ -493,12 +511,34 @@ static void handle_client_message(xcb_client_message_event_t *event)
     case TEST_STATE_MOVED:
         check_geometry(WIN_POS_X2, WIN_POS_Y2, WIN_WIDTH1, WIN_HEIGHT1);
 
+        do_log("Unmapping window");
+        xcb_unmap_window(c, window_state.window);
+        window_state.state = TEST_STATE_UNMAPPED;
+        return;
+    case TEST_STATE_UNMAPPED:
+        do_log("Mapping window");
+        xcb_map_window(c, window_state.window);
+        window_state.state = TEST_STATE_MAPPED;
+        return;
+    case TEST_STATE_MAPPED:
+        check_geometry(WIN_POS_X2, WIN_POS_Y2, WIN_WIDTH1, WIN_HEIGHT1);
+
         xcb_destroy_window(c, window_state.window);
+        last_window = window_state.window;
         window_state.window = XCB_NONE;
         window_state.state = TEST_STATE_DONE;
         done = true;
         return;
     }
+}
+
+static void handle_property_notify(xcb_property_notify_event_t *event)
+{
+    check(event->window == window_state.window || event->window == last_window,
+            "Got property notify on unexpected window 0x%x, expected 0x%x or 0x%x?!",
+            event->window, window_state.window, last_window);
+    if (window_state.state == TEST_STATE_UNMAPPED && event->atom == wm_state)
+        delayed_proceed_with_window();
 }
 
 static void event_loop(void)
@@ -520,6 +560,8 @@ static void event_loop(void)
             break;
         case XCB_CLIENT_MESSAGE:
             handle_client_message((xcb_client_message_event_t *) ev);
+        case XCB_PROPERTY_NOTIFY:
+            handle_property_notify((xcb_property_notify_event_t *) ev);
         case XCB_REPARENT_NOTIFY:
         case XCB_MAP_NOTIFY:
         case XCB_UNMAP_NOTIFY:
@@ -566,6 +608,7 @@ int main()
     }
     screen = xcb_aux_get_screen(c, default_screen);
     net_frame_extents = intern_atom("_NET_FRAME_EXTENTS");
+    wm_state = intern_atom("WM_STATE");
 
     run_test(XCB_GRAVITY_NORTH_WEST);
     run_test(XCB_GRAVITY_NORTH);
