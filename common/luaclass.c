@@ -389,40 +389,6 @@ luaA_class_property_get(lua_State *L, lua_class_t *lua_class, int fieldidx)
     return NULL;
 }
 
-/** Call a registered function.
- * \param L The Lua VM state.
- * \param handler The function to call.
- * \return The number of elements pushed on stack.
- */
-static
-int luaA_class_call_handler(lua_State *L, int handler)
-{
-    /* This is based on luaA_dofunction, but allows multiple return values */
-    assert(handler != LUA_REFNIL);
-
-    int nargs = lua_gettop(L);
-
-    /* Push error handling function and move it before args */
-    lua_pushcfunction(L, luaA_dofunction_error);
-    lua_insert(L, - nargs - 1);
-    int error_func_pos = 1;
-
-    /* push function and move it before args */
-    lua_rawgeti(L, LUA_REGISTRYINDEX, handler);
-    lua_insert(L, - nargs - 1);
-
-    if(lua_pcall(L, nargs, LUA_MULTRET, error_func_pos))
-    {
-        warn("%s", lua_tostring(L, -1));
-        /* Remove error function and error string */
-        lua_pop(L, 2);
-        return 0;
-    }
-    /* Remove error function */
-    lua_remove(L, error_func_pos);
-    return lua_gettop(L);
-}
-
 /** Generic index meta function for objects.
  * \param L The Lua VM state.
  * \return The number of elements pushed on stack.
@@ -471,7 +437,7 @@ luaA_class_index(lua_State *L)
     else
     {
         if(class->index_miss_handler != LUA_REFNIL)
-            return luaA_class_call_handler(L, class->index_miss_handler);
+            return luaA_call_handler(L, class->index_miss_handler);
         if(class->index_miss_property)
             return class->index_miss_property(L, luaA_checkudata(L, 1, class));
     }
@@ -503,7 +469,7 @@ luaA_class_newindex(lua_State *L)
     else
     {
         if(class->newindex_miss_handler != LUA_REFNIL)
-            return luaA_class_call_handler(L, class->newindex_miss_handler);
+            return luaA_call_handler(L, class->newindex_miss_handler);
         if(class->newindex_miss_property)
             return class->newindex_miss_property(L, luaA_checkudata(L, 1, class));
     }
