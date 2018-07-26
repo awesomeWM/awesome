@@ -1,5 +1,7 @@
 ---------------------------------------------------------------------------
---- This module is deprecated and has been renamed `awful.wibar`
+--- This module is deprecated and has been renamed to `awful.wibar`
+--
+-- This only deprecates `awful.wibox`, but not @{wibox}.
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2016 Emmanuel Lepage Vallee

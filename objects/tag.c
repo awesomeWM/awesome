@@ -578,4 +578,6 @@ tag_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_tag_set_activated);
 }
 
+/* @DOC_cobject_COMMON@ */
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -309,6 +309,8 @@ function align.vertical(top, middle, bottom)
     return ret
 end
 
+--@DOC_fixed_COMMON@
+
 --@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@

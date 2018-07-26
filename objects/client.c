@@ -371,7 +371,26 @@
  */
 
 /**
- * The client icon.
+ * The client icon as a surface.
+ *
+ * This property holds the client icon closest to the size configured via
+ * @{awesome.set_preferred_icon_size}.
+ *
+ * It is not a path or an "real" file. Rather, it is already a bitmap surface.
+ *
+ * Typically you would want to use @{awful.widget.clienticon} to get this as a
+ * widget.
+ *
+ * Working with icons is tricky because their surfaces do not use reference
+ * counting correctly. If `gears.surface(c.icon)` is called multiple time on
+ * the same icon, it will cause a double-free error and Awesome will crash. To
+ * get a copy of the icon, you can use:
+ *
+ *     local s = gears.surface(c.icon)
+ *     local img = cairo.ImageSurface.create(cairo.Format.ARGB32, s:get_width(), s:get_height())
+ *     local cr  = cairo.Context(img)
+ *     cr:set_source_surface(s, 0, 0)
+ *     cr:paint()
  *
  * **Signal:**
  *
@@ -379,6 +398,7 @@
  *
  * @property icon
  * @param surface
+ * @usage local ib = wibox.widget.imagebox(c.icon)
  */
 
 /**
@@ -3786,5 +3806,7 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_get_first_tag,
                             NULL);
 }
+
+/* @DOC_cobject_COMMON@ */
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

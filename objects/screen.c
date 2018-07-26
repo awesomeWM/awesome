@@ -117,14 +117,34 @@
  */
 
 /**
- * The screen number.
+ * The internal screen number.
  *
- * An integer greater than 1 and smaller than `screen.count()`. Please note that
- * the screen order isn't always mirroring the screen logical position.
+ * * The indeces are a continuous sequence from 1 to `screen.count()`.
+ * * It is **NOT** related to the actual screen position relative to each
+ *   other.
+ * * 1 is **NOT** necessarily the primary screen.
+ * * When screens are added and removed indices **CAN** change.
+ *
+ * If you really want to keep an array of screens you should use something
+ * along:
+ *
+ *     local myscreens = setmetatable({}. {__mode="k"})
+ *     myscreens[ screen[1] ] = "mydata"
+ *
+ * But it might be a better option to simply store the data directly in the
+ * screen object as:
+ *
+ *     screen[1].mydata = "mydata"
+ *
+ * Remember that screens are also objects, so if you only want to store a simple
+ * property, you can do it directly:
+ *
+ *     screen[1].answer = 42
  *
  * **Immutable:** true
  * @property index
  * @param integer
+ * @see screen
  */
 
 /**
@@ -1317,5 +1337,7 @@ screen_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_screen_get_workarea,
                             NULL);
 }
+
+/* @DOC_cobject_COMMON@ */
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
