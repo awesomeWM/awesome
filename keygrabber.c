@@ -31,6 +31,75 @@
 
 #include "keygrabber.h"
 #include "globalconf.h"
+#include "common/luaclass.h"
+
+static int miss_index_handler    = LUA_REFNIL;
+static int miss_newindex_handler = LUA_REFNIL;
+static int miss_call_handler     = LUA_REFNIL;
+
+/**
+* Add a custom call handler.
+*/
+static int
+luaA_keygrabber_set_call_handler(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &miss_call_handler);
+}
+
+/**
+* Add a custom property handler (getter).
+*/
+static int
+luaA_keygrabber_set_index_miss_handler(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &miss_index_handler);
+}
+
+/**
+* Add a custom property handler (setter).
+*/
+static int
+luaA_keygrabber_set_newindex_miss_handler(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &miss_newindex_handler);
+}
+
+/** Keygrabber library.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ */
+static int
+luaA_keygrabber_index(lua_State *L)
+{
+    if (miss_index_handler != LUA_REFNIL)
+        return luaA_call_handler(L, miss_index_handler);
+
+    return luaA_default_index(L);
+}
+
+/** Newindex for keygrabber.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_keygrabber_newindex(lua_State *L)
+{
+    /* Call the lua keygrabber property handler */
+    if (miss_newindex_handler != LUA_REFNIL)
+        return luaA_call_handler(L, miss_newindex_handler);
+
+    return luaA_default_newindex(L);
+}
+
+static int
+luaA_keygrabber_new(lua_State *L)
+{
+    if (miss_call_handler != LUA_REFNIL)
+        return luaA_call_handler(L, miss_call_handler);
+
+    return 0;
+}
 
 /** Grab the keyboard.
  * \return True if keyboard was grabbed.
@@ -174,13 +243,23 @@ luaA_keygrabber_isrunning(lua_State *L)
     return 1;
 }
 
-const struct luaL_Reg awesome_keygrabber_lib[] =
+const struct luaL_Reg awesome_keygrabber_methods[] =
 {
     { "run", luaA_keygrabber_run },
     { "stop", luaA_keygrabber_stop },
     { "isrunning", luaA_keygrabber_isrunning },
-    { "__index", luaA_default_index },
-    { "__newindex", luaA_default_newindex },
+    { "__call", luaA_keygrabber_new },
+    { "__index", luaA_keygrabber_index },
+    { "__newindex", luaA_keygrabber_newindex },
+    { "set_index_miss_handler", luaA_keygrabber_set_index_miss_handler},
+    { "set_call_handler", luaA_keygrabber_set_call_handler},
+    { "set_newindex_miss_handler", luaA_keygrabber_set_newindex_miss_handler},
+
+    { NULL, NULL }
+};
+
+const struct luaL_Reg awesome_keygrabber_meta[] =
+{
     { NULL, NULL }
 };
 
