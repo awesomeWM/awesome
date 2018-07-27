@@ -28,6 +28,11 @@ local function create_screen(args)
 
     local wa = args.workarea_sides or 10
 
+    -- This will happen if `clear()` is called
+    if mouse and not mouse.screen then
+        mouse.screen = s
+    end
+
     return setmetatable(s,{ __index = function(_, key)
         if key == "geometry" then
             return {
@@ -84,6 +89,10 @@ function screen._clear()
         screen[i] = nil
     end
     screens = {}
+
+    if mouse then
+        mouse.screen = nil
+    end
 end
 
 function screen._setup_grid(w, h, rows, args)

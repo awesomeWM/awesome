@@ -204,18 +204,26 @@ end
 function tag.add(name, props)
     local properties = props or {}
 
+    local screen = get_screen(properties.screen or ascreen.focused())
+
+    -- This cause setscreen to be called twice, but this "fix" a race condition
+    -- between the screen property and `activated` signal
+    properties.screen = screen
+
+    local newtag = capi.tag{ name = name }
+
+    -- Index is also required
+    properties.index = properties.index or #raw_tags(properties.screen)+1
+
+
+    -- Start with a fresh property table to avoid collisions with unsupported data
+    newtag.data.awful_tag_properties = {screen=properties.screen, index=properties.index}
+
     -- Be sure to set the screen before the tag is activated to avoid function
     -- connected to property::activated to be called without a valid tag.
     -- set properties cannot be used as this has to be set before the first
     -- signal is sent
-    properties.screen = get_screen(properties.screen or ascreen.focused())
-    -- Index is also required
-    properties.index = properties.index or #raw_tags(properties.screen)+1
-
-    local newtag = capi.tag{ name = name }
-
-    -- Start with a fresh property table to avoid collisions with unsupported data
-    newtag.data.awful_tag_properties = {screen=properties.screen, index=properties.index}
+    tag.object.set_screen(newtag, screen)
 
     newtag.activated = true
 
@@ -489,6 +497,11 @@ end
 
 function tag.object.set_screen(t, s)
 
+    -- For API backward-compatibility, convert numbers to screen objects
+    if type(s) == "number" then
+        s = capi.screen[s]
+    end
+
     s = get_screen(s or ascreen.focused())
     local sel = t.selected
     local old_screen = get_screen(tag.getproperty(t, "screen"))
@@ -521,6 +534,38 @@ function tag.object.set_screen(t, s)
             tag.history.restore(old_screen, 1)
         end
     end
+
+    -- Track the source screen workarea change
+    local prev_tracker = tag.getproperty(t, "_wa_tracker")
+    if prev_tracker then
+        prev_tracker()
+    end
+
+    --TODO make global, then foreach the screen tags
+    --TODO set the "real" tag geometry, with padding and gaps
+    --TODO add getter
+    local function workarea_tracker() --FIXME called too often, see #756
+        local old_geo = tag.getproperty(t, "geometry")
+        local new_geo = s.workarea
+
+        -- Drop useless signals --FIXME remove once #756 is fixed
+        if old_geo and (
+            old_geo.width == new_geo.width and
+            old_geo.height == new_geo.height
+        ) then
+            return
+        end
+
+        tag.setproperty(t, "geometry", new_geo)
+    end
+
+    tag.setproperty(t, "_wa_tracker", function()
+        s:disconnect_signal("property::workarea", workarea_tracker)
+    end)
+
+    s:connect_signal("property::workarea", workarea_tracker)
+
+    workarea_tracker()
 end
 
 --- Set a tag's screen
@@ -594,6 +639,14 @@ end
 --
 -- See the layout suit documentation for information about how the master width
 -- factor is used.
+--
+-- Here is the property effect on the tiled layouts:
+--
+--@DOC_awful_layout_dynamic_suit_tile_mwfact_EXAMPLE@
+--
+-- Here is the property effect on the magnifier layout:
+--
+--@DOC_awful_layout_dynamic_suit_magnifier_mwfact_EXAMPLE@
 --
 -- **Signal:**
 --
@@ -709,6 +762,10 @@ end
 -- instance everytime the layout is set. If they do, the instance will be
 -- cached and re-used.
 --
+-- Here is a simple stateful layout example:
+--
+--@DOC_awful_tag_simple_layout_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::layout*
@@ -822,6 +879,11 @@ end
 -- This property allow to waste space on the screen in the name of style,
 -- unicorns and readability.
 --
+-- Note that pixels cannot be divided, the gap will be rounded to the closest
+-- multiplier of 2.
+--
+-- @DOC_awful_layout_dynamic_suit_tile_gap_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::useless_gap*
@@ -837,9 +899,20 @@ function tag.object.set_gap(t, useless_gap)
 end
 
 function tag.object.get_gap(t)
-    return tag.getproperty(t, "useless_gap")
+    local ret = tag.getproperty(t, "useless_gap")
         or beautiful.useless_gap
         or defaults.gap
+
+    --TODO v5 fix this mess
+    -- The cleanest way to apply the gap is to distribute it around each client.
+    -- The current layout system (stateless) has a bug where a gap of 2 will
+    -- result in 4 pixels between the clients. This is however not expected
+    -- and causes some confusion as the screen "gap padding" is also gap*2.
+    if ret % 2 ~= 0 then
+        ret = ret == 1 and 2 or (ret -1)
+    end
+
+    return ret
 end
 
 --- Set the spacing between clients
@@ -998,6 +1071,10 @@ end
 
 --- Set the number of master windows.
 --
+-- Here is the property effect on the tiled layouts:
+--
+--@DOC_awful_layout_dynamic_suit_tile_nmaster_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::nmaster* (deprecated)
@@ -1111,6 +1188,10 @@ end
 -- @see column_count
 
 --- Set the number of columns.
+--
+-- Here is the property effect on the tiled layouts:
+--
+--@DOC_awful_layout_dynamic_suit_tile_ncol_EXAMPLE@
 --
 -- **Signal:**
 --
