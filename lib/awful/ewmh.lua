@@ -98,6 +98,12 @@ function ewmh.activate(c, context, hints) -- luacheck: no unused args
         if found then break end
     end
 
+    -- Minimized clients can be requested to have focus by, for example, 3rd
+    -- party toolbars and they might not try to unminimize it first.
+    if ret ~= false and hints.raise then
+        c.minimized = false
+    end
+
     if ret ~= false and c:isvisible() then
         client.focus = c
     elseif ret == false and not hints.force then
