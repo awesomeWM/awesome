@@ -543,7 +543,9 @@ function base.widget:setup(args)
         rawset(self, "_by_id", ids)
     end
 
-    rawset(self, "get_children_by_id", get_children_by_id)
+    if not rawget(self, "get_children_by_id") then
+        rawset(self, "get_children_by_id", get_children_by_id)
+    end
 end
 
 --- Create a widget from a declarative description.
