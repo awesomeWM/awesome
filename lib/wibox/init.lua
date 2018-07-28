@@ -192,6 +192,19 @@ function wibox:set_screen(s)
     self._drawable:_force_screen(s)
 end
 
+function wibox:get_children_by_id(name)
+    --TODO v5: Move the ID management to the hierarchy.
+    if rawget(self, "_by_id") then
+        return rawget(self, "_by_id")[name]
+    elseif self._drawable.widget
+      and self._drawable.widget._private
+      and self._drawable.widget._private.by_id then
+          return self._drawable.widget._private.by_id[name]
+    end
+
+    return {}
+end
+
 for _, k in pairs{ "buttons", "struts", "geometry", "get_xproperty", "set_xproperty" } do
     wibox[k] = function(self, ...)
         return self.drawin[k](self.drawin, ...)
