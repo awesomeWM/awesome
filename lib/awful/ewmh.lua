@@ -15,6 +15,7 @@ local aclient = require("awful.client")
 local aplace = require("awful.placement")
 local asuit = require("awful.layout.suit")
 local beautiful = require("beautiful")
+local alayout = require("awful.layout")
 
 local ewmh = {
     generic_activate_filters    = {},
@@ -400,6 +401,15 @@ function ewmh.client_geometry_requests(c, context, hints)
     end
 end
 
+-- The magnifier layout doesn't work with focus follow mouse.
+ewmh.add_activate_filter(function(c)
+    if alayout.get(c.screen) ~= alayout.suit.magnifier
+      and aclient.focus.filter(c) then
+        return nil
+    else
+        return false
+    end
+end, "mouse_enter")
 
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
