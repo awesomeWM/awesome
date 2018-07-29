@@ -81,7 +81,13 @@ end
 function ewmh.activate(c, context, hints) -- luacheck: no unused args
     hints = hints or  {}
 
-    if c.focusable == false and not hints.force then return end
+    if c.focusable == false and not hints.force then
+        if hints.raise then
+            c:raise()
+        end
+
+        return
+    end
 
     local found, ret = false
 
