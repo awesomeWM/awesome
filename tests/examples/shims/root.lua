@@ -118,6 +118,52 @@ function root.fake_inputs(event_type, detail, x, y)
     fake_input_handlers[event_type](detail, x, y)
 end
 
+
+-- Send an artificial set of key events to trigger a key combination.
+-- It only works in the shims and should not be used with UTF-8 chars.
+function root._execute_keybinding(modifiers, key)
+    for _, mod in ipairs(modifiers) do
+        for real_key, mod_name in pairs(conversion) do
+            if mod == mod_name then
+                root.fake_inputs("key_press", real_key)
+                break
+            end
+        end
+    end
+
+    root.fake_inputs("key_press"  , key)
+    root.fake_inputs("key_release", key)
+
+    for _, mod in ipairs(modifiers) do
+        for real_key, mod_name in pairs(conversion) do
+            if mod == mod_name then
+                root.fake_inputs("key_release", real_key)
+                break
+            end
+        end
+    end
+end
+
+-- Send artificial key events to write a string.
+-- It only works in the shims and should not be used with UTF-8 strings.
+function root._write_string(string, c)
+    local old_c = client.focus
+
+    if c then
+        client.focus = c
+    end
+
+    for i=1, #string do
+        local char = string:sub(i,i)
+        root.fake_inputs("key_press"  , char)
+        root.fake_inputs("key_release", char)
+    end
+
+    if c then
+        client.focus = old_c
+    end
+end
+
 return root
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
