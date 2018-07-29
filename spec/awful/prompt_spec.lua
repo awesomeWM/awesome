@@ -46,6 +46,10 @@ insulate('main', function ()
     _G.awesome = {
         connect_signal = function() end
     }
+    _G.keygrabber = {
+        run                       = function() end,
+        stop                      = function() end,
+    }
     -- luacheck: globals string
     function string.wlen(self)
           return #self

@@ -31,6 +31,7 @@ function client.gen_fake(args)
     ret.size_hints = {}
     ret.border_width = 1
     ret.icon_sizes = {{16,16}}
+    ret.name = "Example Client"
 
     -- Apply all properties
     for k,v in pairs(args or {}) do
@@ -119,6 +120,20 @@ function client.gen_fake(args)
 
     -- Set the attributes
     ret.screen = args.screen or screen[1]
+
+    -- Good enough for the geometry and border
+    ret.drawin = ret
+    ret.drawable = ret
+
+    -- Make sure the layer properties are not `nil`
+    ret.ontop = false
+    ret.below = false
+    ret.above = false
+    ret.sticky = false
+    ret.maximized = false
+    ret.fullscreen = false
+    ret.maximized_vertical = false
+    ret.maximized_horizontal = false
 
     -- Add to the client list
     table.insert(clients, ret)

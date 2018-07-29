@@ -99,6 +99,8 @@ function key.new(mod, _key, press, release, data)
     data = data and gtable.clone(data) or {}
     data.mod = mod
     data.key = _key
+    data.press = press
+    data.release = release
     table.insert(key.hotkeys, data)
     data.execute = function(_) key.execute(mod, _key) end
 

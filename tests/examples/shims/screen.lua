@@ -1,10 +1,7 @@
 local gears_obj = require("gears.object")
 
 local screen, meta = awesome._shim_fake_class()
-
-function screen.count()
-    return 1
-end
+screen._count = 0
 
 local function create_screen(args)
     local s = gears_obj()
@@ -26,7 +23,17 @@ local function create_screen(args)
         geo.height = args2.height or geo.height
     end
 
+    s.outputs = { ["LVDS1"] = {
+        mm_width  = 0,
+        mm_height = 0,
+    }}
+
     local wa = args.workarea_sides or 10
+
+    -- This will happen if `clear()` is called
+    if mouse and not mouse.screen then
+        mouse.screen = s
+    end
 
     return setmetatable(s,{ __index = function(_, key)
         if key == "geometry" then
@@ -62,6 +69,7 @@ function screen._add_screen(args)
 
     screen[#screen+1] = s
     screen[s] = s
+    screen._count = screen._count + 1
 end
 
 function screen._get_extents()
@@ -84,6 +92,12 @@ function screen._clear()
         screen[i] = nil
     end
     screens = {}
+
+    if mouse then
+        mouse.screen = nil
+    end
+
+    screen._count = 0
 end
 
 function screen._setup_grid(w, h, rows, args)
@@ -91,8 +105,8 @@ function screen._setup_grid(w, h, rows, args)
     screen._clear()
     for i, row in ipairs(rows) do
         for j=1, row do
-            args.x      = (j-1)*w + (j-1)*10
-            args.y      = (i-1)*h + (i-1)*10
+            args.x      = (j-1)*w + (j-1)*screen._grid_horizontal_margin
+            args.y      = (i-1)*h + (i-1)*screen._grid_vertical_margin
             args.width  = w
             args.height = h
             screen._add_screen(args)
@@ -114,6 +128,14 @@ local function iter_scr(_, _, s)
 end
 
 screen._add_screen {width=320, height=240}
+
+screen._grid_vertical_margin = 10
+screen._grid_horizontal_margin = 10
+
+
+function screen.count()
+    return screen._count
+end
 
 return setmetatable(screen, {
     __call = iter_scr
