@@ -205,29 +205,6 @@ function(run_test test_path namespace escaped_content)
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
 
-    # Execute the script.
-    file(RELATIVE_PATH rel_test_path "${TOP_SOURCE_DIR}" "${test_path}")
-    message(STATUS "Running ${rel_test_path}…")
-
-    execute_process(
-        COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
-        RESULT_VARIABLE TEST_RESULT
-        OUTPUT_VARIABLE TEST_OUTPUT
-        ERROR_VARIABLE  TEST_ERROR
-    )
-    if (TEST_RESULT OR NOT TEST_OUTPUT STREQUAL "" OR NOT TEST_ERROR STREQUAL "")
-        message("Result: ${TEST_RESULT}")
-        if (NOT TEST_OUTPUT STREQUAL "")
-            message("Output: ${TEST_OUTPUT}")
-        endif()
-        if (NOT TEST_ERROR STREQUAL "")
-            message("Error:  ${TEST_ERROR}")
-        endif()
-        if (STRICT_TESTS)
-            message(FATAL_ERROR ${test_path} " An example test failed, aborting.")
-        endif()
-    endif()
-
     # Read the code and turn it into an usage example.
     escape_code(${test_path} TEST_CODE TEST_PRE_HEADER TEST_POST_HEADER)
 
@@ -277,16 +254,27 @@ function(run_test test_path namespace escaped_content)
         set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}${TEST_CODE}")
     endif()
 
+    file(RELATIVE_PATH rel_template "${TOP_SOURCE_DIR}" "${template}")
+    file(RELATIVE_PATH rel_test_path "${TOP_SOURCE_DIR}" "${test_path}")
     if(NOT ${OUTPUT_IMAGE_PATH} STREQUAL "")
-        file(RELATIVE_PATH rel_template "${TOP_SOURCE_DIR}" "${template}")
         file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
         add_custom_command(
-            COMMAND ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
-            COMMENT "Generating ${rel_output} (via ${rel_test_path} (${rel_template}))"
+            COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
+            COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
             DEPENDS ${template} ${test_path}
             OUTPUT  ${OUTPUT_IMAGE_PATH}
             VERBATIM)
         set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUT_IMAGE_PATH} ${EXAMPLE_DOC_GENERATED_FILES}
+            PARENT_SCOPE)
+    else()
+        set(TARGET_NAME "run-${rel_test_path}")
+        STRING(REPLACE "/" "-" TARGET_NAME ${TARGET_NAME})
+        add_custom_target(${TARGET_NAME}
+            COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
+            COMMENT "Running ${rel_test_path} (via ${rel_template})"
+            DEPENDS ${template} ${test_path}
+            VERBATIM)
+        set(EXAMPLE_DOC_EXTRA_TARGETS ${TARGET_NAME} ${EXAMPLE_DOC_EXTRA_TARGETS}
             PARENT_SCOPE)
     endif()
 
@@ -322,7 +310,7 @@ foreach(file ${test_files})
     endif()
 endforeach()
 
-add_custom_target(generate-examples DEPENDS ${EXAMPLE_DOC_GENERATED_FILES})
+add_custom_target(generate-examples ALL DEPENDS ${EXAMPLE_DOC_GENERATED_FILES} ${EXAMPLE_DOC_EXTRA_TARGETS})
 
 add_custom_target(check-examples
     ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}
