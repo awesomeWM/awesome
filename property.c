@@ -91,6 +91,7 @@ HANDLE_PROPERTY(wm_hints)
 HANDLE_PROPERTY(wm_class)
 HANDLE_PROPERTY(net_wm_icon)
 HANDLE_PROPERTY(net_wm_pid)
+HANDLE_PROPERTY(motif_wm_hints)
 
 #undef HANDLE_PROPERTY
 
@@ -305,6 +306,41 @@ property_update_net_wm_pid(client_t *c, xcb_get_property_cookie_t cookie)
 }
 
 xcb_get_property_cookie_t
+property_get_motif_wm_hints(client_t *c)
+{
+    return xcb_get_property_unchecked(globalconf.connection, false, c->window, _MOTIF_WM_HINTS, _MOTIF_WM_HINTS, 0L, 5L);
+}
+
+void
+property_update_motif_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
+{
+    motif_wm_hints_t hints;
+    xcb_get_property_reply_t *reply;
+    lua_State *L = globalconf_get_lua_State();
+
+    /* Clear the hints */
+    p_clear(&hints, 1);
+
+    reply = xcb_get_property_reply(globalconf.connection, cookie, NULL);
+
+    if(reply && reply->value_len == 5)
+    {
+        uint32_t *rdata = xcb_get_property_value(reply);
+        if(rdata)
+        {
+            memcpy(&hints, rdata, sizeof(hints));
+            hints.hints |= MWM_HINTS_AWESOME_SET;
+        }
+    }
+
+    p_delete(&reply);
+
+    luaA_object_push(L, c);
+    client_set_motif_wm_hints(L, -1, hints);
+    lua_pop(L, 1);
+}
+
+xcb_get_property_cookie_t
 property_get_wm_protocols(client_t *c)
 {
     return xcb_icccm_get_wm_protocols_unchecked(globalconf.connection,
@@ -477,6 +513,9 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
     HANDLE(_NET_WM_ICON, property_handle_net_wm_icon)
     HANDLE(_NET_WM_PID, property_handle_net_wm_pid)
     HANDLE(_NET_WM_WINDOW_OPACITY, property_handle_net_wm_opacity)
+
+    /* MOTIF hints */
+    HANDLE(_MOTIF_WM_HINTS, property_handle_motif_wm_hints)
 
     /* background change */
     HANDLE(_XROOTPMAP_ID, property_handle_xrootpmap_id)
