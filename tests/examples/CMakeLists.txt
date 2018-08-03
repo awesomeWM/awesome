@@ -24,15 +24,13 @@ execute_process(COMMAND lua -e "p = package.path:gsub(';', '\\\\;'); io.stdout:w
 if(NOT SOURCE_DIR AND ${CMAKE_CURRENT_SOURCE_DIR} MATCHES "/tests/examples")
     get_filename_component(TOP_SOURCE_DIR
                            "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
-    # Used by .luacov.
-    set(ENV{SOURCE_DIRECTORY} ${TOP_SOURCE_DIR})
 else()
     set(TOP_SOURCE_DIR ${CMAKE_SOURCE_DIR})
 endif()
 
 if (DO_COVERAGE)
   execute_process(
-    COMMAND lua -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
+    COMMAND env "SOURCE_DIRECTORY=${TOP_SOURCE_DIR}" lua -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
     RESULT_VARIABLE TEST_RESULT
     ERROR_VARIABLE  TEST_ERROR
     ERROR_STRIP_TRAILING_WHITESPACE)
@@ -67,7 +65,8 @@ ${TOP_SOURCE_DIR}/tests/examples/shims/?/init.lua\\;\
 ${TOP_SOURCE_DIR}/tests/examples/shims/?\\;\
 ${LUA_PATH_}")
 
-set(LUA_COV_RUNNER env -u LUA_PATH_5_1 -u LUA_PATH_5_2 -u LUA_PATH_5_3 "LUA_PATH=${LUA_PATH_}" "AWESOME_THEMES_PATH=${TOP_SOURCE_DIR}/themes/" ${LUA_COV_RUNNER})
+# $SOURCE_DIRECTORY is used by .luacov.
+set(LUA_COV_RUNNER env -u LUA_PATH_5_1 -u LUA_PATH_5_2 -u LUA_PATH_5_3 "LUA_PATH=${LUA_PATH_}" "AWESOME_THEMES_PATH=${TOP_SOURCE_DIR}/themes/" "SOURCE_DIRECTORY=${TOP_SOURCE_DIR}" ${LUA_COV_RUNNER})
 
 # The documentation images directory.
 set(IMAGE_DIR "${CMAKE_BINARY_DIR}/doc/images")
