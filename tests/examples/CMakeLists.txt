@@ -188,6 +188,14 @@ function(run_test test_path namespace escaped_content)
         set(DOC_BLOCK_PREFIX "@usage")
     endif()
 
+    # Does the text generate text output?
+    if(tmp_content MATCHES "--DOC_GEN_OUTPUT")
+        # The expected output is next to the .lua file in a .output.txt file
+        string(REPLACE ".lua" ".output.txt" expected_output_path ${test_path})
+    else()
+        set(expected_output_path "/dev/null")
+    endif()
+
     # Get the file name without the extension.
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
@@ -197,12 +205,12 @@ function(run_test test_path namespace escaped_content)
     message(STATUS "Running ${rel_test_path}…")
 
     execute_process(
-        COMMAND ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
+        COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
         RESULT_VARIABLE TEST_RESULT
         OUTPUT_VARIABLE TEST_OUTPUT
         ERROR_VARIABLE  TEST_ERROR
     )
-    if (TEST_RESULT OR NOT TEST_ERROR STREQUAL "")
+    if (TEST_RESULT OR NOT TEST_OUTPUT STREQUAL "" OR NOT TEST_ERROR STREQUAL "")
         message("Result: ${TEST_RESULT}")
         if (NOT TEST_OUTPUT STREQUAL "")
             message("Output: ${TEST_OUTPUT}")
@@ -232,19 +240,19 @@ function(run_test test_path namespace escaped_content)
         set(OUTPUT_IMAGE_PATH "")
     endif()
 
+    # Does the text generate text output?
     # If there is an output, assume it is relevant and add it to the
     # documentation under the image.
-    if(NOT ${TEST_OUTPUT} STREQUAL "")
-        if(NOT tmp_content MATCHES "--DOC_GEN_OUTPUT")
-            message(FATAL_ERROR "Unexpected output from ${test_path}: ${TEST_OUTPUT}")
-        endif()
+    if(tmp_content MATCHES "--DOC_GEN_OUTPUT")
+        file(READ "${expected_output_path}" expected_output)
+
         set(TEST_DOC_CONTENT
             "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}\n${DOC_LINE_PREFIX}**Usage example output**:\n${DOC_LINE_PREFIX}"
         )
 
         # Markdown requires an empty line before and after, and 4 spaces.
         escape_string(
-            "\n${TEST_OUTPUT}"
+            "\n${expected_output}"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT "    "
         )
         set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}")

@@ -23,7 +23,7 @@ function class:set_foo(value)
 end
 
 function class:method(a, b, c)
-    print("In a mathod", a, b, c)
+    print("In a method", a, b, c)
 end
 
 local o = gears.object {
