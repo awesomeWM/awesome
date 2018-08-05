@@ -112,7 +112,7 @@ local fake_input_handlers = {
     motion_notify  = function() --[[TODO]] end,
 }
 
-function root.fake_inputs(event_type, detail, x, y)
+function root.fake_input(event_type, detail, x, y)
     assert(fake_input_handlers[event_type], "Unknown event_type")
 
     fake_input_handlers[event_type](detail, x, y)
@@ -125,19 +125,19 @@ function root._execute_keybinding(modifiers, key)
     for _, mod in ipairs(modifiers) do
         for real_key, mod_name in pairs(conversion) do
             if mod == mod_name then
-                root.fake_inputs("key_press", real_key)
+                root.fake_input("key_press", real_key)
                 break
             end
         end
     end
 
-    root.fake_inputs("key_press"  , key)
-    root.fake_inputs("key_release", key)
+    root.fake_input("key_press"  , key)
+    root.fake_input("key_release", key)
 
     for _, mod in ipairs(modifiers) do
         for real_key, mod_name in pairs(conversion) do
             if mod == mod_name then
-                root.fake_inputs("key_release", real_key)
+                root.fake_input("key_release", real_key)
                 break
             end
         end
@@ -155,8 +155,8 @@ function root._write_string(string, c)
 
     for i=1, #string do
         local char = string:sub(i,i)
-        root.fake_inputs("key_press"  , char)
-        root.fake_inputs("key_release", char)
+        root.fake_input("key_press"  , char)
+        root.fake_input("key_release", char)
     end
 
     if c then
