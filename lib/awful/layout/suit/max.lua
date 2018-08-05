@@ -38,6 +38,11 @@ local function fmax(p, fs)
             height = area.height
         }
         p.geometries[c] = g
+        if fs then
+            c.fullscreen = true
+        else
+            c.maximized = true
+        end
     end
 end
 
