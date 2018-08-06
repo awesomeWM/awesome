@@ -38,6 +38,12 @@ then
     exit 1
 fi
 
+# Automatically add the output for new examples
+if [ ! -e "${expected_output}" ]
+then
+    cp "${file_stdout}" "${expected_output}"
+fi
+
 # Check if we got the output we wanted
 if ! cmp --silent "${file_stdout}" "${expected_output}"
 then
