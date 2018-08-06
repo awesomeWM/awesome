@@ -78,7 +78,6 @@ sort_modules=true
 file = {
     -- C parts of libraries
     '../dbus.c',
-    '../keygrabber.c',
     '../luaa.c',
     '../mouse.c',
     '../mousegrabber.c',
