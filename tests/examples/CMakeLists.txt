@@ -244,7 +244,9 @@ function(run_test test_path namespace escaped_content)
     # If there is an output, assume it is relevant and add it to the
     # documentation under the image.
     if(tmp_content MATCHES "--DOC_GEN_OUTPUT")
-        file(READ "${expected_output_path}" expected_output)
+        if(EXISTS "${expected_output_path}")
+            file(READ "${expected_output_path}" expected_output)
+        endif()
 
         set(TEST_DOC_CONTENT
             "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}\n${DOC_LINE_PREFIX}**Usage example output**:\n${DOC_LINE_PREFIX}"
