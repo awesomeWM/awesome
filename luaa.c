@@ -19,14 +19,17 @@
  *
  */
 
-/** awesome core API
+/** AwesomeWM lifecycle API.
  *
- * Additionally to the classes described here, one can also use X properties as
- * described in @{xproperties}.
+ * This module contains the functions and signal to manage the lifecycle of the
+ * AwesomeWM process. It allows to execute code at specific point from the early
+ * initialization all the way to the last events before exiting or restarting.
+ *
+ * Additionally it handles signals for spawn and keyboard related events.
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @module awesome
+ * @coreclassmod awesome
  */
 
 /** Register a new xproperty.
@@ -150,13 +153,13 @@ extern const struct luaL_Reg awesome_mouse_meta[];
  * @signal refresh
  */
 
-/** Awesome is about to enter the event loop.
+/** AwesomeWM is about to enter the event loop.
  *
  * This means all initialization has been done.
  * @signal startup
  */
 
-/** Awesome is exiting / about to restart.
+/** AwesomeWM is exiting / about to restart.
  *
  * This signal is emitted in the `atexit` handler as well when awesome
  * restarts.
@@ -167,8 +170,8 @@ extern const struct luaL_Reg awesome_mouse_meta[];
 
 /** The output status of a screen has changed.
  *
- * @param output String containing which output has changed.
- * @param connection_state String containing the connection status of
+ * @tparam string output String containing which output has changed.
+ * @tparam string connection_state String containing the connection status of
  * the output: It will be either "Connected", "Disconnected" or
  * "Unknown".
  * @signal screen::change

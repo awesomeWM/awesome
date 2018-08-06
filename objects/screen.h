@@ -57,6 +57,8 @@ void screen_update_primary(void);
 void screen_update_workarea(screen_t *);
 screen_t *screen_get_primary(void);
 void screen_schedule_refresh(void);
+void screen_emit_scanned(void);
+void screen_emit_scanning(void);
 
 screen_t *luaA_checkscreen(lua_State *, int);
 

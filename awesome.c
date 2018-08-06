@@ -559,13 +559,14 @@ exit_help(int exit_code)
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
     fprintf(outfile,
 "Usage: awesome [OPTION]\n\
-  -h, --help             show help\n\
-  -v, --version          show version\n\
-  -c, --config FILE      configuration file to use\n\
-      --search DIR       add a directory to the library search path\n\
-  -k, --check            check configuration file syntax\n\
-  -a, --no-argb          disable client transparency support\n\
-  -r, --replace          replace an existing window manager\n");
+  -h, --help           show help\n\
+  -v, --version        show version\n\
+  -c, --config FILE    configuration file to use\n\
+      --search DIR     add a directory to the library search path\n\
+  -k, --check          check configuration file syntax\n\
+  -a, --no-argb        disable client transparency support\n\
+  -m, --screen on|off  enable or disable automatic screen creation (default: on)\n\
+  -r, --replace        replace an existing window manager\n");
     exit(exit_code);
 }
 
@@ -594,6 +595,7 @@ main(int argc, char **argv)
         { "search",  1, NULL, 's' },
         { "no-argb", 0, NULL, 'a' },
         { "replace", 0, NULL, 'r' },
+        { "screen" , 1, NULL, 'm' },
         { "reap",    1, NULL, '\1' },
         { NULL,      0, NULL, 0 }
     };
@@ -634,6 +636,14 @@ main(int argc, char **argv)
             if (confpath != NULL)
                 fatal("--config may only be specified once");
             confpath = a_strdup(optarg);
+            break;
+          case 'm':
+            /* Validation */
+            if ((!optarg) || !(A_STREQ(optarg, "off") || A_STREQ(optarg, "on")))
+                fatal("The possible values of -m/--screen are \"on\" or \"off\"");
+
+            globalconf.no_auto_screen = A_STREQ(optarg, "off");
+
             break;
           case 's':
             string_array_append(&searchpath, a_strdup(optarg));
@@ -901,19 +911,37 @@ main(int argc, char **argv)
 
     ewmh_init_lua();
 
+    /* Parse and run configuration file before adding the screens */
+    if (globalconf.no_auto_screen && !luaA_parserc(&xdg, confpath))
+        fatal("couldn't find any rc file");
+
     /* init screens information */
     screen_scan();
 
-    /* Parse and run configuration file */
-    if (!luaA_parserc(&xdg, confpath))
+    /* Parse and run configuration file after adding the screens */
+    if (((!globalconf.no_auto_screen) && !luaA_parserc(&xdg, confpath)))
         fatal("couldn't find any rc file");
 
     p_delete(&confpath);
 
     xdgWipeHandle(&xdg);
 
+    /* Both screen scanning mode have this signal, it cannot be in screen_scan
+       since the automatic screen generation don't have executed rc.lua yet. */
+    screen_emit_scanned();
+
+    /* Exit if the user doesn't read the instructions properly */
+    if (globalconf.no_auto_screen && !globalconf.screens.len)
+        fatal("When -m/--screen is set to \"off\", you **must** create a "
+              "screen object before or inside the screen \"scanned\" "
+              " signal. Using AwesomeWM with no screen is **not supported**.");
+
+    client_emit_scanning();
+
     /* scan existing windows */
     scan(tree_c);
+
+    client_emit_scanned();
 
     luaA_emit_startup();
 

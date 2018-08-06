@@ -132,6 +132,21 @@
  * @table awful.object
  */
 
+/** AwesomeWM is about to scan for existing clients.
+ *
+ * Connect to this signal when code needs to be executed after screens are
+ * initialized, but before clients are added.
+ *
+ * @signal scanning
+ */
+
+/** AwesomeWM is done scanning for clients.
+ *
+ * This is emitted before the `startup` signal and after the `scanning` signal.
+ *
+ * @signal scanned
+ */
+
 /** When a client gains focus.
  * @signal focus
  */
@@ -1037,6 +1052,20 @@ DO_CLIENT_SET_STRING_PROPERTY(startup_id)
 DO_CLIENT_SET_STRING_PROPERTY(role)
 DO_CLIENT_SET_STRING_PROPERTY(machine)
 #undef DO_CLIENT_SET_STRING_PROPERTY
+
+void
+client_emit_scanned(void)
+{
+    lua_State *L = globalconf_get_lua_State();
+    luaA_class_emit_signal(L, &client_class, "scanned", 0);
+}
+
+void
+client_emit_scanning(void)
+{
+    lua_State *L = globalconf_get_lua_State();
+    luaA_class_emit_signal(L, &client_class, "scanning", 0);
+}
 
 void
 client_set_motif_wm_hints(lua_State *L, int cidx, motif_wm_hints_t hints)
