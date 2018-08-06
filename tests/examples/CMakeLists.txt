@@ -45,6 +45,12 @@ else()
   set(LUA_COV_RUNNER lua)
 endif()
 
+if (STRICT_TESTS)
+    set(IGNORE_ERRORS)
+else()
+    set(IGNORE_ERRORS "||" "true")
+endif()
+
 # Add the main awesome lua libraries.
 set(LUA_PATH_ "\
 ${TOP_SOURCE_DIR}/lib/?.lua\\;\
@@ -205,7 +211,7 @@ function(run_test test_path namespace escaped_content)
     message(STATUS "Running ${rel_test_path}…")
 
     execute_process(
-        COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
+        COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
         RESULT_VARIABLE TEST_RESULT
         OUTPUT_VARIABLE TEST_OUTPUT
         ERROR_VARIABLE  TEST_ERROR
@@ -276,7 +282,7 @@ function(run_test test_path namespace escaped_content)
         file(RELATIVE_PATH rel_template "${TOP_SOURCE_DIR}" "${template}")
         file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
         add_custom_command(
-            COMMAND ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
+            COMMAND ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
             COMMENT "Generating ${rel_output} (via ${rel_test_path} (${rel_template}))"
             DEPENDS ${template} ${test_path}
             OUTPUT  ${OUTPUT_IMAGE_PATH}
