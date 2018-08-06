@@ -222,7 +222,7 @@ for f in $tests; do
     fi
 
     # Execute the test file in awesome.
-    DISPLAY=$D "$AWESOME_CLIENT" 2>&1 "dofile('$f')"
+    DISPLAY=$D "$AWESOME_CLIENT" 2>&1 "dofile('$f')" || echo "Error: awesome-client failed" >> "$awesome_log"
 
     # Tail the log and quit, when awesome quits.
     # Use a single `grep`, otherwise `--line-buffered` would be required.
