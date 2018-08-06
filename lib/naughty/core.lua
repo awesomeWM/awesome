@@ -787,7 +787,7 @@ function naughty.notify(args)
         if icon then
             iconbox = wibox.widget.imagebox()
             iconmargin = wibox.container.margin(iconbox, margin, margin, margin, margin)
-            if icon_size and (icon:get_height() > icon_size or icon:get_width() > icon_size) then
+            if icon_size then
                 local scale_factor = icon_size / math.max(icon:get_height(),
                                                           icon:get_width())
                 local scaled =
