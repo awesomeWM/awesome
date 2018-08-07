@@ -1,4 +1,4 @@
--- Needed for root.fake_inputs
+-- Needed for root.fake_input
 local keygrabber = {_current_grabber = nil}
 
 local function stop()

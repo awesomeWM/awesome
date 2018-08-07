@@ -158,7 +158,7 @@ function timer.new(args)
     args = args or {}
     local ret = object()
 
-    ret.data = { timeout = 0 }
+    ret.data = { timeout = 0 } --TODO v5 rename to ._private
     setmetatable(ret, timer_instance_mt)
 
     for k, v in pairs(args) do

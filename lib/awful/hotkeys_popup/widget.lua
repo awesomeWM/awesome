@@ -9,7 +9,6 @@
 local capi = {
     screen = screen,
     client = client,
-    keygrabber = keygrabber,
 }
 local awful = require("awful")
 local gtable = require("gears.table")
@@ -519,7 +518,7 @@ function widget.new(args)
         local help_wibox = self._cached_wiboxes[s][joined_groups]
         help_wibox:show()
 
-        return capi.keygrabber.run(function(_, key, event)
+        return awful.keygrabber.run(function(_, key, event)
             if event == "release" then return end
             if key then
                 if key == "Next" then
@@ -527,7 +526,7 @@ function widget.new(args)
                 elseif key == "Prior" then
                     help_wibox:page_prev()
                 else
-                    capi.keygrabber.stop()
+                    awful.keygrabber.stop()
                     help_wibox:hide()
                 end
             end

@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome keygrabber API
+/*
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @module keygrabber
@@ -109,31 +109,12 @@ keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
     return true;
 }
 
-/** Grab keyboard input and read pressed keys, calling a callback function at
+/* Grab keyboard input and read pressed keys, calling a callback function at
  * each keypress, until `keygrabber.stop` is called.
  * The callback function receives three arguments:
  *
- * * a table containing modifiers keys
- * * a string with the pressed key
- * * a string with either "press" or "release" to indicate the event type.
- *
  * @param callback A callback function as described above.
- * @function run
- * @usage The following function can be bound to a key, and will be used to
- *        resize a client using keyboard.
- *
- *     function resize(c)
- *       keygrabber.run(function(mod, key, event)
- *         if event == "release" then return end
- *
- *         if     key == 'Up'   then c:relative_move(0, 0, 0, 5)
- *         elseif key == 'Down' then c:relative_move(0, 0, 0, -5)
- *         elseif key == 'Right' then c:relative_move(0, 0, 5, 0)
- *         elseif key == 'Left'  then c:relative_move(0, 0, -5, 0)
- *         else   keygrabber.stop()
- *         end
- *       end)
- *     end
+ * @deprecated keygrabber.run
  */
 static int
 luaA_keygrabber_run(lua_State *L)
@@ -153,7 +134,7 @@ luaA_keygrabber_run(lua_State *L)
 }
 
 /** Stop grabbing the keyboard.
- * @function stop
+ * @deprecated keygrabber.stop
  */
 int
 luaA_keygrabber_stop(lua_State *L)
@@ -164,8 +145,9 @@ luaA_keygrabber_stop(lua_State *L)
 }
 
 /** Check if keygrabber is running.
- * @function isrunning
+ * @deprecated keygrabber.isrunning
  * @treturn bool A boolean value, true if keygrabber is running, false otherwise.
+ * @see keygrabber.is_running
  */
 static int
 luaA_keygrabber_isrunning(lua_State *L)

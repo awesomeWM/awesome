@@ -1,0 +1,4 @@
+Is now active!	nil
+A key was pressed:	a	with	0	modifier!
+A key was pressed:	i	with	1	modifier!
+Called again!
