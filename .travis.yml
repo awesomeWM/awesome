@@ -190,7 +190,8 @@ script:
         # Run tests/examples explicitly.
         (mkdir -p tests/examples/build \
          && cd tests/examples/build \
-         && cmake $CMAKE_ARGS ..)
+         && cmake $CMAKE_ARGS .. \
+         && make)
         do_codecov samples
 
         make check-unit-coverage || exit 1
