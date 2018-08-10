@@ -983,7 +983,9 @@ client_find_transient_for(client_t *c)
 {
     int counter;
     client_t *tc, *tmp;
+    lua_State *L = globalconf_get_lua_State();
 
+    /* This might return NULL, in which case we unset transient_for */
     tmp = tc = client_getbywin(c->transient_for_window);
 
     /* Verify that there are no loops in the transient_for relation after we are done */
@@ -994,14 +996,16 @@ client_find_transient_for(client_t *c)
             counter = globalconf.stack.len+1;
         tmp = tmp->transient_for;
     }
-    if (counter <= globalconf.stack.len)
-    {
-        lua_State *L = globalconf_get_lua_State();
 
-        luaA_object_push(L, c);
-        client_set_transient_for(L, -1, tc);
-        lua_pop(L, 1);
+    if (counter > globalconf.stack.len)
+    {
+        /* There was a loop, so unset .transient_for */
+        tc = NULL;
     }
+
+    luaA_object_push(L, c);
+    client_set_transient_for(L, -1, tc);
+    lua_pop(L, 1);
 }
 
 void
