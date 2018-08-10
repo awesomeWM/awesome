@@ -46,10 +46,11 @@ local function run(promptbox)
     }
 end
 
-local function spawn_and_handle_error(self, ...)
+local function spawn_and_handle_error(_, ...)
     local result = spawn(...)
     if type(result) == "string" then
-        self.widget:set_text(result)
+        local naughty = require("naughty")
+        naughty.notify({ preset = naughty.config.presets.warn, text = result })
     end
 end
 
