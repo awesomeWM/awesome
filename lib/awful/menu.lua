@@ -450,7 +450,7 @@ function menu:add(args, index)
 
     item._mouse = function ()
         local num = gtable.hasitem(self.items, item)
-        self:item_enter(num, { hover = true, moue = true })
+        self:item_enter(num, { hover = true, mouse = true })
     end
     item.widget:connect_signal("mouse::enter", item._mouse)
 
