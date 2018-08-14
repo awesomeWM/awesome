@@ -180,7 +180,7 @@ function beautiful.get_font_height(name)
     return load_font(name).height
 end
 
---- Init function, should be runned at the beginning of configuration file.
+--- Init function, should be run at the beginning of configuration file.
 -- @tparam string|table config The theme to load. It can be either the path to
 --   the theme file (returning a table) or directly the table
 --   containing all the theme values.
