@@ -1242,7 +1242,6 @@ client_focus_refresh(void)
 
     if(!globalconf.focus.need_update)
         return;
-    globalconf.focus.need_update = false;
 
     if(c && client_on_selected_tags(c))
     {
@@ -1265,6 +1264,9 @@ client_focus_refresh(void)
      */
     xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
                         win, globalconf.timestamp);
+
+    /* Do this last, because client_unban() might set it to true */
+    globalconf.focus.need_update = false;
 }
 
 static void
