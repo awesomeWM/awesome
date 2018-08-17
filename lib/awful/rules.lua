@@ -451,6 +451,9 @@ function rules.high_priority_properties.tag(c, value, props)
         if type(value) == "string" then
             local name = value
             value = atag.find_by_name(c.screen, value)
+            if not value and not props.screen then
+                value = atag.find_by_name(nil, value)
+            end
             if not value then
                 require("gears.debug").print_error("awful.rules-rule specified "
                     .. "tag = '" .. name .. "', but no such tag exists")
