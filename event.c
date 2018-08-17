@@ -345,17 +345,13 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
 
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
         {
-            int16_t diff = 0;
             geometry.x = ev->x;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &diff, NULL);
-            geometry.x += diff;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &geometry.x, NULL);
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
         {
-            int16_t diff = 0;
             geometry.y = ev->y;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &diff);
-            geometry.y += diff;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &geometry.y);
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
         {

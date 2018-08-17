@@ -1387,12 +1387,9 @@ border_width_callback(client_t *c, uint16_t old_width, uint16_t new_width)
     {
         area_t geometry = c->geometry;
         int16_t diff = new_width - old_width;
-        int16_t diff_x = 0, diff_y = 0;
         xwindow_translate_for_gravity(c->size_hints.win_gravity,
                                       diff, diff, diff, diff,
-                                      &diff_x, &diff_y);
-        geometry.x += diff_x;
-        geometry.y += diff_y;
+                                      &geometry.x, &geometry.y);
         /* inform client about changes */
         client_resize_do(c, geometry);
     }
@@ -2870,13 +2867,10 @@ titlebar_resize(lua_State *L, int cidx, client_t *c, client_titlebar_t bar, int 
 
     if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
     {
-        int16_t diff_x = 0, diff_y = 0;
         xwindow_translate_for_gravity(c->size_hints.win_gravity,
                                       diff_left, diff_top,
                                       diff_right, diff_bottom,
-                                      &diff_x, &diff_y);
-        geometry.x += diff_x;
-        geometry.y += diff_y;
+                                      &geometry.x, &geometry.y);
     }
 
     c->titlebar[bar].size = size;

@@ -400,8 +400,8 @@ xwindow_set_shape(xcb_window_t win, int width, int height, enum xcb_shape_sk_t k
  * \param change_height_before The window height difference that will be applied.
  * \param change_width_after The window width difference that will be applied.
  * \param change_height_after The window height difference that will be applied.
- * \param dx On return, this will be set to the amount the pixel has to be moved.
- * \param dy On return, this will be set to the amount the pixel has to be moved.
+ * \param dx On return, this will be changed by the amount the pixel has to be moved.
+ * \param dy On return, this will be changed by the amount the pixel has to be moved.
  */
 void xwindow_translate_for_gravity(xcb_gravity_t gravity, int16_t change_width_before, int16_t change_height_before,
         int16_t change_width_after, int16_t change_height_after, int16_t *dx, int16_t *dy)
@@ -449,9 +449,9 @@ void xwindow_translate_for_gravity(xcb_gravity_t gravity, int16_t change_width_b
     }
 
     if (dx)
-        *dx = x;
+        *dx += x;
     if (dy)
-        *dy = y;
+        *dy += y;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
