@@ -550,6 +550,7 @@ end
 --- Filtering function to include all nonempty tags on the screen.
 -- @param t The tag.
 -- @return true if t is not empty, else false
+-- @filterfunction awful.taglist.filter.noempty
 function taglist.filter.noempty(t)
     return #t:clients() > 0 or t.selected
 end
@@ -557,12 +558,14 @@ end
 --- Filtering function to include selected tags on the screen.
 -- @param t The tag.
 -- @return true if t is not empty, else false
+-- @filterfunction awful.taglist.filter.selected
 function taglist.filter.selected(t)
     return t.selected
 end
 
 --- Filtering function to include all tags on the screen.
 -- @return true
+-- @filterfunction awful.taglist.filter.all
 function taglist.filter.all()
     return true
 end
