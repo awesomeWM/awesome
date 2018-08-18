@@ -244,6 +244,14 @@ static const char *state_to_string(enum test_state state)
     }
 }
 
+static int32_t div2(int32_t value, int32_t *rounding)
+{
+    /* If value is odd, we could round up or down */
+    if (value & 1)
+        *rounding = 1;
+    return value / 2;
+}
+
 static void check_geometry(int32_t expected_x, int32_t expected_y, uint32_t expected_width, uint32_t expected_height)
 {
     int32_t actual_x, actual_y;
@@ -252,6 +260,7 @@ static void check_geometry(int32_t expected_x, int32_t expected_y, uint32_t expe
             &left, &right, &top, &bottom);
 
     int32_t offset_x, offset_y;
+    int32_t extra_x = 0, extra_y = 0;
     int32_t diff_x = state_difference[window_state.state][0], diff_y = state_difference[window_state.state][1];
     switch (window_state.gravity)
     {
@@ -260,7 +269,7 @@ static void check_geometry(int32_t expected_x, int32_t expected_y, uint32_t expe
         offset_y = top;
         break;
     case XCB_GRAVITY_NORTH:
-        offset_x = (left - right + diff_x + 1) / 2;
+        offset_x = div2(left - right + diff_x, &extra_x);;
         offset_y = top;
         break;
     case XCB_GRAVITY_NORTH_EAST:
@@ -269,22 +278,22 @@ static void check_geometry(int32_t expected_x, int32_t expected_y, uint32_t expe
         break;
     case XCB_GRAVITY_WEST:
         offset_x = left;
-        offset_y = (top - bottom + diff_y + 1) / 2;
+        offset_y = div2(top - bottom + diff_y, &extra_y);
         break;
     case XCB_GRAVITY_CENTER:
-        offset_x = (left - right + diff_x + 1) / 2;
-        offset_y = (top - bottom + diff_y + 1) / 2;
+        offset_x = div2(left - right + diff_x, &extra_x);
+        offset_y = div2(top - bottom + diff_y, &extra_y);
         break;
     case XCB_GRAVITY_EAST:
         offset_x = -right + diff_x;
-        offset_y = (top - bottom + diff_y + 1) / 2;
+        offset_y = div2(top - bottom + diff_y, &extra_y);
         break;
     case XCB_GRAVITY_SOUTH_WEST:
         offset_x = left;
         offset_y = -bottom + diff_y;
         break;
     case XCB_GRAVITY_SOUTH:
-        offset_x = (left - right + diff_x + 1) / 2;
+        offset_x = div2(left - right + diff_x, &extra_x);
         offset_y = -bottom + diff_y;
         break;
     case XCB_GRAVITY_SOUTH_EAST:
@@ -312,12 +321,12 @@ static void check_geometry(int32_t expected_x, int32_t expected_y, uint32_t expe
     check(expected_height == actual_height,
             "For window with gravity %s in state %s, expected height = %d, but got %d",
             gravity_to_string(window_state.gravity), state_to_string(window_state.state), (int) expected_height, (int) actual_height);
-    check(expected_x + offset_x == actual_x,
-            "For window with gravity %s in state %s, expected x = %d+%d, but got %d",
-            gravity_to_string(window_state.gravity), state_to_string(window_state.state), (int) expected_x, (int) offset_x, (int) actual_x);
-    check(expected_y + offset_y == actual_y,
-            "For window with gravity %s in state %s, expected y = %d+%d, but got %d",
-            gravity_to_string(window_state.gravity), state_to_string(window_state.state), (int) expected_y, (int) offset_y, (int) actual_y);
+    check(expected_x + offset_x == actual_x || expected_x + offset_x + extra_x == actual_x,
+            "For window with gravity %s in state %s, expected x = %d+%d (+%d), but got %d",
+            gravity_to_string(window_state.gravity), state_to_string(window_state.state), (int) expected_x, (int) offset_x, (int) extra_x, (int) actual_x);
+    check(expected_y + offset_y == actual_y || expected_y + offset_y + extra_y == actual_y,
+            "For window with gravity %s in state %s, expected y = %d+%d (+%d), but got %d",
+            gravity_to_string(window_state.gravity), state_to_string(window_state.state), (int) expected_y, (int) offset_y, (int) extra_y, (int) actual_y);
 }
 
 static void init(xcb_gravity_t gravity)
