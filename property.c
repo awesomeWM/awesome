@@ -107,9 +107,13 @@ property_update_wm_transient_for(client_t *c, xcb_get_property_cookie_t cookie)
     xcb_window_t trans;
 
     if(!xcb_icccm_get_wm_transient_for_reply(globalconf.connection,
-					     cookie,
-					     &trans, NULL))
-            return;
+                                             cookie,
+                                             &trans, NULL))
+    {
+        c->transient_for_window = XCB_NONE;
+        client_find_transient_for(c);
+        return;
+    }
 
     c->transient_for_window = trans;
 
