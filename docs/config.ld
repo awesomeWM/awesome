@@ -68,6 +68,8 @@ new_type("clientlayout", "Client layouts", false, "param")
 new_type("callback", "Callback functions prototype", false, "Parameters")
 -- awful.rules sources
 new_type("rulesources", "Rule sources", false, "param")
+-- Filter functions for the taglist/tasklist/layoutlist
+new_type("filterfunction", "List filters", false)
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
