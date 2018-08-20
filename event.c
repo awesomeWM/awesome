@@ -343,16 +343,6 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
 
         lua_State *L = globalconf_get_lua_State();
 
-        if(ev->value_mask & XCB_CONFIG_WINDOW_X)
-        {
-            geometry.x = ev->x;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &geometry.x, NULL);
-        }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
-        {
-            geometry.y = ev->y;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &geometry.y);
-        }
         if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
         {
             uint16_t old_w = geometry.width;
@@ -383,12 +373,17 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         /* If the client resizes without moving itself, apply window gravity */
         if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
         {
-            int16_t diff_x = 0, diff_y = 0;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, diff_border, diff_border, diff_w, diff_h, &diff_x, &diff_y);
-            if(!(ev->value_mask & XCB_CONFIG_WINDOW_X))
-                geometry.x += diff_x;
-            if(!(ev->value_mask & XCB_CONFIG_WINDOW_Y))
-                geometry.y += diff_y;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, diff_border, diff_border, diff_w, diff_h, &geometry.x, &geometry.y);
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_X)
+        {
+            geometry.x = ev->x;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &geometry.x, NULL);
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
+        {
+            geometry.y = ev->y;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &geometry.y);
         }
 
         c->got_configure_request = true;
