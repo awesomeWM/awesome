@@ -374,12 +374,14 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         if(ev->value_mask & XCB_CONFIG_WINDOW_X)
         {
             geometry.x = ev->x;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &geometry.x, NULL);
+            if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+                xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &geometry.x, NULL);
         }
         if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
         {
             geometry.y = ev->y;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &geometry.y);
+            if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+                xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &geometry.y);
         }
 
         c->got_configure_request = true;
