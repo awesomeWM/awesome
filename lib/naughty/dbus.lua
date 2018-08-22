@@ -16,6 +16,7 @@ local string = string
 local capi = { awesome = awesome,
                dbus = dbus }
 local gtable = require("gears.table")
+local gsurface = require("gears.surface")
 local cairo = require("lgi").cairo
 
 local schar = string.char
@@ -102,7 +103,14 @@ local function convert_icon(w, h, rowstride, channels, data)
         offset = offset + rowstride
     end
 
-    return cairo.ImageSurface.create_for_data(tcat(rows), format, w, h, stride)
+    local pixels = tcat(rows)
+    local surf = cairo.ImageSurface.create_for_data(pixels, format, w, h, stride)
+
+    -- The surface refers to 'pixels', which can be freed by the GC. Thus,
+    -- duplicate the surface to create a copy of the data owned by cairo.
+    local res = gsurface.duplicate_surface(surf)
+    surf:finish()
+    return res
 end
 
 capi.dbus.connect_signal("org.freedesktop.Notifications",
