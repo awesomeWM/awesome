@@ -582,7 +582,8 @@ end
 -- @tab[opt] callbacks Callbacks to apply.
 function rules.execute(c, props, callbacks)
     -- This has to be done first, as it will impact geometry related props.
-    if props.titlebars_enabled then
+    if props.titlebars_enabled and (type(props.titlebars_enabled) ~= "function"
+            or props.titlebars_enabled(c,props)) then
         c:emit_signal("request::titlebars", "rules", {properties=props})
     end
 
