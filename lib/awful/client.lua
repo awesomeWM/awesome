@@ -226,7 +226,7 @@ function client.swap.global_bydirection(dir, sel)
             c:swap(sel)
 
         -- swapping to an empty screen
-        elseif get_screen(sel.screen) ~= get_screen(c.screen) and sel == c then
+        elseif sel == c then
             sel:move_to_screen(screen.focused())
 
         -- swapping to a nonempty screen
