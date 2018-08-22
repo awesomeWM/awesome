@@ -647,6 +647,43 @@
  */
 
 /**
+ * The motif WM hints of the client.
+ *
+ * This is nil if the client has no motif hints. Otherwise, this is a table that
+ * contains the present properties. Note that awesome provides these properties
+ * as-is and does not interpret them for you. For example, if the function table
+ * only has "resize" set to true, this means that the window requests to be only
+ * resizable, but asks for the other functions not to be able. If however both
+ * "resize" and "all" are set, this means that all but the resize function
+ * should be enabled.
+ *
+ * **Signal:**
+ *
+ *  * *property::motif\_wm\_hints*
+ *
+ * @property motif_wm_hints
+ * @param table
+ * @tfield[opt] table table.functions
+ * @tfield[opt] boolean table.functions.all
+ * @tfield[opt] boolean table.functions.resize
+ * @tfield[opt] boolean table.functions.move
+ * @tfield[opt] boolean table.functions.minimize
+ * @tfield[opt] boolean table.functions.maximize
+ * @tfield[opt] boolean table.functions.close
+ * @tfield[opt] table table.decorations
+ * @tfield[opt] boolean table.decorations.all
+ * @tfield[opt] boolean table.decorations.border
+ * @tfield[opt] boolean table.decorations.resizeh
+ * @tfield[opt] boolean table.decorations.title
+ * @tfield[opt] boolean table.decorations.menu
+ * @tfield[opt] boolean table.decorations.minimize
+ * @tfield[opt] boolean table.decorations.maximize
+ * @tfield[opt] string table.input_mode
+ * @tfield[opt] table table.status
+ * @tfield[opt] boolean table.status.tearoff_window
+ */
+
+/**
  * Set the client sticky, i.e. available on all tags.
  *
  * **Signal:**
@@ -977,6 +1014,17 @@ DO_CLIENT_SET_STRING_PROPERTY(startup_id)
 DO_CLIENT_SET_STRING_PROPERTY(role)
 DO_CLIENT_SET_STRING_PROPERTY(machine)
 #undef DO_CLIENT_SET_STRING_PROPERTY
+
+void
+client_set_motif_wm_hints(lua_State *L, int cidx, motif_wm_hints_t hints)
+{
+    client_t *c = luaA_checkudata(L, cidx, &client_class);
+    if (memcmp(&c->motif_wm_hints, &hints, sizeof(c->motif_wm_hints)) == 0)
+        return;
+
+    memcpy(&c->motif_wm_hints, &hints, sizeof(c->motif_wm_hints));
+    luaA_object_emit_signal(L, cidx, "property::motif_wm_hints", 0);
+}
 
 void
 client_find_transient_for(client_t *c)
@@ -1419,6 +1467,7 @@ client_update_properties(lua_State *L, int cidx, client_t *c)
     xcb_get_property_cookie_t net_wm_icon_name  = property_get_net_wm_icon_name(c);
     xcb_get_property_cookie_t wm_class          = property_get_wm_class(c);
     xcb_get_property_cookie_t wm_protocols      = property_get_wm_protocols(c);
+    xcb_get_property_cookie_t motif_wm_hints    = property_get_motif_wm_hints(c);
     xcb_get_property_cookie_t opacity           = xwindow_get_opacity_unchecked(c->window);
 
     /* update strut */
@@ -1439,6 +1488,7 @@ client_update_properties(lua_State *L, int cidx, client_t *c)
     property_update_net_wm_icon_name(c, net_wm_icon_name);
     property_update_wm_class(c, wm_class);
     property_update_wm_protocols(c, wm_protocols);
+    property_update_motif_wm_hints(c, motif_wm_hints);
     window_set_opacity(L, cidx, xwindow_get_opacity_from_cookie(opacity));
 }
 
@@ -3157,6 +3207,78 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, startup_id, lua_pushstring)
 
 static int
+luaA_client_get_motif_wm_hints(lua_State *L, client_t *c)
+{
+    if (!(c->motif_wm_hints.hints & MWM_HINTS_AWESOME_SET))
+        return 0;
+
+    lua_newtable(L);
+
+#define HANDLE_BIT(field, flag, name) do { \
+        lua_pushboolean(L, c->motif_wm_hints.field & flag); \
+        lua_setfield(L, -2, name); \
+    } while (0)
+
+    if (c->motif_wm_hints.hints & MWM_HINTS_FUNCTIONS)
+    {
+        lua_newtable(L);
+        HANDLE_BIT(functions, MWM_FUNC_ALL, "all");
+        HANDLE_BIT(functions, MWM_FUNC_RESIZE, "resize");
+        HANDLE_BIT(functions, MWM_FUNC_MOVE, "move");
+        HANDLE_BIT(functions, MWM_FUNC_MINIMIZE, "minimize");
+        HANDLE_BIT(functions, MWM_FUNC_MAXIMIZE, "maximize");
+        HANDLE_BIT(functions, MWM_FUNC_CLOSE, "close");
+        lua_setfield(L, -2, "functions");
+    }
+
+    if (c->motif_wm_hints.hints & MWM_HINTS_DECORATIONS)
+    {
+        lua_newtable(L);
+        HANDLE_BIT(decorations, MWM_DECOR_ALL, "all");
+        HANDLE_BIT(decorations, MWM_DECOR_BORDER, "border");
+        HANDLE_BIT(decorations, MWM_DECOR_RESIZEH, "resizeh");
+        HANDLE_BIT(decorations, MWM_DECOR_TITLE, "title");
+        HANDLE_BIT(decorations, MWM_DECOR_MENU, "menu");
+        HANDLE_BIT(decorations, MWM_DECOR_MINIMIZE, "minimize");
+        HANDLE_BIT(decorations, MWM_DECOR_MAXIMIZE, "maximize");
+        lua_setfield(L, -2, "decorations");
+    }
+
+    if (c->motif_wm_hints.hints & MWM_HINTS_INPUT_MODE)
+    {
+        switch (c->motif_wm_hints.input_mode) {
+        case MWM_INPUT_MODELESS:
+            lua_pushliteral(L, "modeless");
+            break;
+        case MWM_INPUT_PRIMARY_APPLICATION_MODAL:
+            lua_pushliteral(L, "primary_application_modal");
+            break;
+        case MWM_INPUT_SYSTEM_MODAL:
+            lua_pushliteral(L, "system_modal");
+            break;
+        case MWM_INPUT_FULL_APPLICATION_MODAL:
+            lua_pushliteral(L, "full_application_modal");
+            break;
+        default:
+            lua_pushfstring(L, "unknown (%d)", (int) c->motif_wm_hints.input_mode);
+            break;
+        }
+        lua_setfield(L, -2, "input_mode");
+    }
+
+    if (c->motif_wm_hints.hints & MWM_HINTS_STATUS)
+    {
+        lua_newtable(L);
+        HANDLE_BIT(status, MWM_TEAROFF_WINDOW, "tearoff_window");
+        lua_setfield(L, -2, "status");
+    }
+
+#undef HANDLE_BIT
+
+    return 1;
+}
+
+static int
 luaA_client_get_content(lua_State *L, client_t *c)
 {
     cairo_surface_t *surface;
@@ -3721,6 +3843,10 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_modal,
                             (lua_class_propfunc_t) luaA_client_get_modal,
                             (lua_class_propfunc_t) luaA_client_set_modal);
+    luaA_class_add_property(&client_class, "motif_wm_hints",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_motif_wm_hints,
+                            NULL);
     luaA_class_add_property(&client_class, "group_window",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_group_window,

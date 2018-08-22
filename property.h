@@ -42,6 +42,7 @@ PROPERTY(wm_class);
 PROPERTY(wm_protocols);
 PROPERTY(net_wm_pid);
 PROPERTY(net_wm_icon);
+PROPERTY(motif_wm_hints);
 
 #undef PROPERTY
 

@@ -47,6 +47,48 @@ typedef enum {
     CLIENT_TITLEBAR_COUNT = 4
 } client_titlebar_t;
 
+/* Special bit we invented to "fake" unset hints */
+#define MWM_HINTS_AWESOME_SET   (1L << 15)
+
+/* The following is taken from MwmUtil.h and slightly adapted, which is
+ * copyright (c) 1987-2012, The Open Group.
+ * It is licensed under GPLv2 or later.
+ */
+#define MWM_HINTS_FUNCTIONS     (1L << 0)
+#define MWM_HINTS_DECORATIONS   (1L << 1)
+#define MWM_HINTS_INPUT_MODE    (1L << 2)
+#define MWM_HINTS_STATUS        (1L << 3)
+
+#define MWM_FUNC_ALL            (1L << 0)
+#define MWM_FUNC_RESIZE         (1L << 1)
+#define MWM_FUNC_MOVE           (1L << 2)
+#define MWM_FUNC_MINIMIZE       (1L << 3)
+#define MWM_FUNC_MAXIMIZE       (1L << 4)
+#define MWM_FUNC_CLOSE          (1L << 5)
+
+#define MWM_DECOR_ALL           (1L << 0)
+#define MWM_DECOR_BORDER        (1L << 1)
+#define MWM_DECOR_RESIZEH       (1L << 2)
+#define MWM_DECOR_TITLE         (1L << 3)
+#define MWM_DECOR_MENU          (1L << 4)
+#define MWM_DECOR_MINIMIZE      (1L << 5)
+#define MWM_DECOR_MAXIMIZE      (1L << 6)
+
+#define MWM_INPUT_MODELESS 0
+#define MWM_INPUT_PRIMARY_APPLICATION_MODAL 1
+#define MWM_INPUT_SYSTEM_MODAL 2
+#define MWM_INPUT_FULL_APPLICATION_MODAL 3
+
+#define MWM_TEAROFF_WINDOW    (1L<<0)
+
+typedef struct {
+    uint32_t hints;
+    uint32_t functions;
+    uint32_t decorations;
+    int32_t input_mode;
+    uint32_t status;
+} motif_wm_hints_t;
+
 /** client_t type */
 struct client_t
 {
@@ -143,6 +185,8 @@ struct client_t
         /** The drawable for this bar. */
         drawable_t *drawable;
     } titlebar[CLIENT_TITLEBAR_COUNT];
+    /** Motif WM hints, with an additional MWM_HINTS_AWESOME_SET bit */
+    motif_wm_hints_t motif_wm_hints;
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
@@ -190,6 +234,7 @@ void client_set_group_window(lua_State *, int, xcb_window_t);
 void client_set_icons(client_t *, cairo_surface_array_t);
 void client_set_icon_from_pixmaps(client_t *, xcb_pixmap_t, xcb_pixmap_t);
 void client_set_skip_taskbar(lua_State *, int, bool);
+void client_set_motif_wm_hints(lua_State *, int, motif_wm_hints_t);
 void client_focus(client_t *);
 bool client_focus_update(client_t *);
 bool client_hasproto(client_t *, xcb_atom_t);
