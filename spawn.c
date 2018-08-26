@@ -62,12 +62,6 @@
 /** 20 seconds timeout */
 #define AWESOME_SPAWN_TIMEOUT 20.0
 
-static int
-compare_pids(const void *a, const void *b)
-{
-    return *(GPid *) a - *(GPid *)b;
-}
-
 /** Wrapper for unrefing startup sequence.
  */
 static inline void
@@ -81,9 +75,20 @@ DO_ARRAY(SnStartupSequence *, SnStartupSequence, a_sn_startup_sequence_unref)
 /** The array of startup sequence running */
 static SnStartupSequence_array_t sn_waits;
 
-DO_BARRAY(GPid, pid, DO_NOTHING, compare_pids)
+typedef struct {
+    GPid pid;
+    int exit_callback;
+} running_child_t;
 
-static pid_array_t running_children;
+static int
+compare_pids(const void *a, const void *b)
+{
+    return ((running_child_t *) a)->pid - ((running_child_t *) b)->pid;
+}
+
+DO_BARRAY(running_child_t, running_child, DO_NOTHING, compare_pids)
+
+static running_child_array_t running_children;
 
 /** Remove a SnStartupSequence pointer from an array and forget about it.
  * \param s The startup sequence to found, remove and unref.
@@ -264,20 +269,6 @@ spawn_start_notify(client_t *c, const char * startup_id)
     }
 }
 
-static void
-remove_running_child(GPid pid, gint status, gpointer user_data)
-{
-    (void) status;
-    (void) user_data;
-
-    GPid *pid_in_array = pid_array_lookup(&running_children, &pid);
-    if (pid_in_array != NULL) {
-        pid_array_remove(&running_children, pid_in_array);
-    } else {
-        warn("(Partially) unknown child %d exited?!", (int) pid);
-    }
-}
-
 /** Initialize program spawner.
  */
 void
@@ -289,61 +280,6 @@ spawn_init(void)
                                                   globalconf.default_screen,
                                                   spawn_monitor_event,
                                                   NULL, NULL);
-}
-
-void
-spawn_handle_reap(const char *arg)
-{
-    GPid pid = atoll(arg);
-    pid_array_insert(&running_children, pid);
-    g_child_watch_add((GPid) pid, remove_running_child, NULL);
-}
-
-/** Called right before exit, serialise state in case of a restart.
- */
-char * const *
-spawn_transform_commandline(char **argv)
-{
-    size_t offset = 0;
-    size_t length = 0;
-    while(argv[offset] != NULL)
-    {
-        if(A_STREQ(argv[offset], "--reap"))
-            offset += 2;
-        else {
-            length++;
-            offset++;
-        }
-    }
-
-    length += 2*running_children.len;
-
-    const char ** transformed = p_new(const char *, length+1);
-    size_t index = 0;
-    offset = 0;
-    while(argv[index + offset] != NULL)
-    {
-        if(A_STREQ(argv[index + offset], "--reap"))
-            offset += 2;
-        else {
-            transformed[index] = argv[index + offset];
-            index++;
-        }
-    }
-
-    foreach(pid, running_children)
-    {
-        buffer_t buffer;
-        buffer_init(&buffer);
-        buffer_addf(&buffer, "%d", (int) *pid);
-
-        transformed[index++] = "--reap";
-        transformed[index++] = buffer_detach(&buffer);
-        buffer_wipe(&buffer);
-    }
-    transformed[index++] = NULL;
-
-    return (char * const *) transformed;
 }
 
 static gboolean
@@ -440,12 +376,20 @@ parse_command(lua_State *L, int idx, GError **error)
 }
 
 /** Callback for when a spawned process exits. */
-static void
-child_exit_callback(GPid pid, gint status, gpointer user_data)
+void
+spawn_child_exited(pid_t pid, int status)
 {
+    int exit_callback;
+    running_child_t needle = { .pid = pid };
     lua_State *L = globalconf_get_lua_State();
-    int exit_callback = GPOINTER_TO_INT(user_data);
-    remove_running_child(pid, status, user_data);
+
+    running_child_t *child = running_child_array_lookup(&running_children, &needle);
+    if (child == NULL) {
+        warn("Unknown child %d exited with status %d", (int) pid, status);
+        return;
+    }
+    exit_callback = child->exit_callback;
+    running_child_array_remove(&running_children, child);
 
     /* 'Decode' the exit status */
     if (WIFEXITED(status)) {
@@ -570,11 +514,10 @@ luaA_spawn(lua_State *L)
 
     if(flags & G_SPAWN_DO_NOT_REAP_CHILD)
     {
-        int exit_callback = LUA_REFNIL;
         /* Only do this down here to avoid leaks in case of errors */
-        luaA_registerfct(L, 6, &exit_callback);
-        pid_array_insert(&running_children, pid);
-        g_child_watch_add(pid, child_exit_callback, GINT_TO_POINTER(exit_callback));
+        running_child_t child = { .pid = pid, .exit_callback = LUA_REFNIL };
+        luaA_registerfct(L, 6, &child.exit_callback);
+        running_child_array_insert(&running_children, child);
     }
 
     /* push pid on stack */

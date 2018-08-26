@@ -67,6 +67,9 @@ static struct timeval last_wakeup;
 /** current limit for the main loop's runtime */
 static float main_loop_iteration_limit = 0.1;
 
+/** A pipe that is used to asynchronously handle SIGCHLD */
+static int sigchld_pipe[2];
+
 /** Call before exiting.
  */
 void
@@ -115,6 +118,9 @@ awesome_atexit(bool restart)
     /* Disconnect *after* closing lua */
     xcb_cursor_context_free(globalconf.cursor_ctx);
     xcb_disconnect(globalconf.connection);
+
+    close(sigchld_pipe[0]);
+    close(sigchld_pipe[1]);
 }
 
 /** Restore the client order after a restart */
@@ -448,6 +454,34 @@ signal_fatal(int signum)
     fatal("signal %d, dumping backtrace\n%s", signum, buf.s);
 }
 
+/* Signal handler for SIGCHLD. Causes reap_children() to be called. */
+static void
+signal_child(int signum)
+{
+    assert(signum == SIGCHLD);
+    int res = write(sigchld_pipe[1], " ", 1);
+    assert(res == 1);
+}
+
+/* There was a SIGCHLD signal. Read from sigchld_pipe and reap children. */
+static gboolean
+reap_children(GIOChannel *channel, GIOCondition condition, gpointer user_data)
+{
+    pid_t child;
+    int status;
+    char buffer[1024];
+    ssize_t result = read(sigchld_pipe[0], &buffer[0], sizeof(buffer));
+    if (result < 0)
+        fatal("Error reading from signal pipe: %s", strerror(errno));
+
+    while ((child = waitpid(-1, &status, WNOHANG)) > 0) {
+        spawn_child_exited(child, status);
+    }
+    if (child < 0 && errno != ECHILD)
+        warn("waitpid(-1) failed: %s", strerror(errno));
+    return TRUE;
+}
+
 /** Function to exit on some signals.
  * \param data currently unused
  */
@@ -462,7 +496,7 @@ void
 awesome_restart(void)
 {
     awesome_atexit(true);
-    execvp(awesome_argv[0], spawn_transform_commandline(awesome_argv));
+    execvp(awesome_argv[0], awesome_argv);
     fatal("execv() failed: %s", strerror(errno));
 }
 
@@ -577,7 +611,7 @@ main(int argc, char **argv)
             replace_wm = true;
             break;
           case '\1':
-            spawn_handle_reap(optarg);
+            /* Silently ignore --reap and its argument */
             break;
           default:
             exit_help(EXIT_FAILURE);
@@ -630,6 +664,16 @@ main(int argc, char **argv)
         }
     }
 
+    /* Setup pipe for SIGCHLD processing */
+    {
+        if (!g_unix_open_pipe(sigchld_pipe, FD_CLOEXEC, NULL))
+            fatal("Failed to create pipe");
+
+        GIOChannel *channel = g_io_channel_unix_new(sigchld_pipe[0]);
+        g_io_add_watch(channel, G_IO_IN, reap_children, NULL);
+        g_io_channel_unref(channel);
+    }
+
     /* register function for signals */
     g_unix_signal_add(SIGINT, exit_on_signal, NULL);
     g_unix_signal_add(SIGTERM, exit_on_signal, NULL);
@@ -643,6 +687,10 @@ main(int argc, char **argv)
     sigaction(SIGILL, &sa, 0);
     sigaction(SIGSEGV, &sa, 0);
     signal(SIGPIPE, SIG_IGN);
+
+    sa.sa_handler = signal_child;
+    sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
+    sigaction(SIGCHLD, &sa, 0);
 
     /* We have no clue where the input focus is right now */
     globalconf.focus.need_update = true;
