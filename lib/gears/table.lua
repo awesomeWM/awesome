@@ -86,15 +86,30 @@ function gtable.from_sparse(t)
 end
 
 --- Check if a table has an item and return its key.
+--
+-- If the input table only has continuous integer keys, consider setting
+-- `ordered` to make your code more predictable and easier to test.
+--
 -- @class function
 -- @name hasitem
--- @param t The table.
+-- @tparam table t The table.
 -- @param item The item to look for in values of the table.
--- @return The key were the item is found, or nil if not found.
-function gtable.hasitem(t, item)
-    for k, v in pairs(t) do
-        if v == item then
-            return k
+-- @tparam[opt=false] boolean ordered For indexed table, iterate in a
+--  predictable order.
+-- @tparam[opt=1] number first_key Where to begin looking.
+-- @return The key were the item is found, or `nil` if not found.
+function gtable.hasitem(t, item, ordered, first_key)
+    if not ordered then
+        for k, v in pairs(t) do
+            if v == item then
+                return k
+            end
+        end
+    else
+        for k = first_key or 1, #t do
+            if t[k] == item then
+                return k
+            end
         end
     end
 end
