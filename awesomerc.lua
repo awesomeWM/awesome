@@ -521,10 +521,7 @@ awful.rules.rules = {
     -- @DOC_DIALOG_RULE@
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
-      -- If you want programs to be able to request no titlebars, use:
-      -- For client side decorations, clients might request no titlebars via
-      -- Motif WM hints. To honor these hints, use:
-      -- titlebars_enabled = function(c) return c.requests_no_titlebar end
+      -- @DOC_CSD_TITLEBARS@
       }, properties = { titlebars_enabled = true }
     },
 
