@@ -410,6 +410,7 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
     guint res;
     struct timeval now, length_time;
     float length;
+    int saved_errno;
     lua_State *L = globalconf_get_lua_State();
 
     /* Do all deferred work now */
@@ -440,8 +441,10 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
 
     /* Actually do the polling, record time of wakeup and check for new xcb events */
     res = g_poll(ufds, nfsd, timeout);
+    saved_errno = errno;
     gettimeofday(&last_wakeup, NULL);
     a_xcb_check();
+    errno = saved_errno;
 
     return res;
 }
