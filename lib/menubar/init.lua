@@ -115,14 +115,16 @@ end
 -- @param o The menu item.
 -- @return item name, item background color, background image, item icon.
 local function label(o)
+    local fg_color = theme.menu_fg_normal or theme.fg_normal
+    local bg_color = theme.menu_bg_normal or theme.bg_normal
     if o.focused then
-        return colortext(o.name, (theme.menu_fg_focus or theme.fg_focus)),
-               (theme.menu_bg_focus or theme.bg_focus),
-               nil,
-               o.icon
-    else
-        return o.name, (theme.menu_bg_normal or theme.bg_normal), nil, o.icon
+        fg_color = theme.menu_fg_focus or theme.fg_focus
+        bg_color = theme.menu_bg_focus or theme.bg_focus
     end
+    return colortext(o.name, fg_color),
+           bg_color,
+           nil,
+           o.icon
 end
 
 local function load_count_table()
@@ -407,8 +409,14 @@ function menubar.show(scr)
             menubar.refresh(scr)
         end
 
+        local fg_color = theme.menu_fg_normal or theme.fg_normal
+        local bg_color = theme.menu_bg_normal or theme.bg_normal
         instance = {
-            wibox = wibox({ ontop = true }),
+            wibox = wibox{
+                ontop = true,
+                bg = bg_color,
+                fg = fg_color,
+            },
             widget = common_args.w,
             prompt = awful.widget.prompt(),
             query = nil,
