@@ -64,6 +64,8 @@ new_type("deprecated", "Deprecated functions", false, "param")
 new_type("legacylayout", "Layout related functions", false, "param")
 -- Have a category for the client layouts
 new_type("clientlayout", "Client layouts", false, "param")
+-- Source functions for the taglist/tasklist/layoutlist
+new_type("sourcefunction", "List source functions", false)
 -- Document some callback prototypes
 new_type("callback", "Callback functions prototype", false, "Parameters")
 -- awful.rules sources
