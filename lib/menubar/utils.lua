@@ -354,7 +354,7 @@ function utils.parse_desktop_file(file)
         if program.OnlyShowIn then
             program.show = false -- Assume false until found
             for _, wm in ipairs(program.OnlyShowIn) do
-                if wm == utils.wm_name then
+                if wm:match(utils.wm_name) then
                     program.show = true
                     break
                 end
