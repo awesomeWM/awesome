@@ -350,17 +350,19 @@ function utils.parse_desktop_file(file)
         -- Only check these values is NoDisplay is true (or non-existent)
 
         -- Only show the program if there is no OnlyShowIn attribute
-        -- or if it contains wm_name
-        if program.OnlyShowIn then
-            program.show = false -- Assume false until found
-            for _, wm in ipairs(program.OnlyShowIn) do
-                if wm:match(utils.wm_name) then
-                    program.show = true
-                    break
+        -- or if it contains wm_name or wm_name is empty
+        if utils.wm_name ~= "" then
+            if program.OnlyShowIn then
+                program.show = false -- Assume false until found
+                for _, wm in ipairs(program.OnlyShowIn) do
+                    if wm == utils.wm_name then
+                        program.show = true
+                        break
+                    end
                 end
+            else
+                program.show = true
             end
-        else
-            program.show = true
         end
 
         -- Only need to check NotShowIn if the program is being shown
