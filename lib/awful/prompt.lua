@@ -115,7 +115,6 @@ local io = io
 local table = table
 local math = math
 local ipairs = ipairs
-local pcall = pcall
 local capi =
 {
     selection = selection
@@ -839,7 +838,12 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
             elseif key == "End" then
                 cur_pos = #command + 1
             elseif key == "BackSpace" then
-                if cur_pos > 1 then
+                local byte = 128
+                -- unicode continuation bytes begin with bits 1 and 0
+                -- so a continuation byte is one in range [128;192)
+                -- not a bitshift of any kind for max compatibility
+                while cur_pos > 1 and byte > 127 and byte < 192 do
+                    byte = command:sub(cur_pos - 1, cur_pos):byte()
                     command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
                     cur_pos = cur_pos - 1
                 end
@@ -885,21 +889,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
             selectall = nil
         end
 
-        local success = pcall(update)
-        while not success do
-            -- TODO UGLY HACK TODO
-            -- Setting the text failed. Most likely reason is that the user
-            -- entered a multibyte character and pressed backspace which only
-            -- removed the last byte. Let's remove another byte.
-            if cur_pos <= 1 then
-                -- No text left?!
-                break
-            end
-
-            command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
-            cur_pos = cur_pos - 1
-            success = pcall(update)
-        end
+        update()
 
         if changed_callback then
             changed_callback(command)
