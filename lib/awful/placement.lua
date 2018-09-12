@@ -851,7 +851,7 @@ function placement.no_offscreen(c, args)
 
     c = c or capi.client.focus
     args = add_context(args, "no_offscreen")
-    local geometry = area_common(c)
+    local geometry = geometry_common(c, args)
     local screen = get_screen(args.screen or c.screen or a_screen.getbycoord(geometry.x, geometry.y))
     local screen_geometry = screen.workarea
 
