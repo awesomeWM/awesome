@@ -941,6 +941,7 @@ function placement.no_overlap(c, args)
     new.width = geometry.width
     new.height = geometry.height
 
+    remove_border(c, args, new)
     geometry_common(c, args, new)
     return fix_new_geometry(new, args, true)
 end
