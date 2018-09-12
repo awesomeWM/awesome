@@ -12,8 +12,8 @@ Gtk.init()
 
 local function open_window(class, title, options)
     local window = Gtk.Window {
-        default_width  = 100,
-        default_height = 100,
+        default_width  = options.default_width  or 100,
+        default_height = options.default_height or 100,
         title          = title
     }
     if options.gravity then
@@ -140,6 +140,15 @@ return function(class, title, sn_rules, callback, resize_increment, args)
     end
     if args.maximize_after then
         options = options .. "maximize_after,"
+    end
+    if args.size then
+        options = table.concat {
+            options,
+            "default_width=",
+            args.size.width, ",",
+            "default_height=",
+            args.size.height, ","
+        }
     end
     if args.resize then
         options = table.concat {
