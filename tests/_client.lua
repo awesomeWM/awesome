@@ -145,9 +145,9 @@ return function(class, title, sn_rules, callback, resize_increment, args)
         options = table.concat {
             options,
             "resize_after_width=",
-            args.resize.height, ",",
+            args.resize.width, ",",
             "resize_after_height=",
-            args.resize.width, ","
+            args.resize.height, ","
         }
     end
     if args.gravity then
