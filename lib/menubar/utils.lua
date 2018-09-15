@@ -399,6 +399,7 @@ function utils.parse_desktop_file(file)
             cmdline = cmdline:gsub('%%i', '')
         end
         if program.Terminal == true then
+            cmdline = '"' .. cmdline:gsub('"', '\\"') .. '"'
             cmdline = utils.terminal .. ' -e ' .. cmdline
         end
         program.cmdline = cmdline
