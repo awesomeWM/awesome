@@ -399,13 +399,8 @@ function utils.parse_desktop_file(file)
             cmdline = cmdline:gsub('%%i', '')
         end
         if program.Terminal == true then
-            if string.find(utils.terminal, "xfce4%-terminal") or string.find(utils.terminal, "gnome%-terminal") or string.find(utils.terminal, "mate%-terminal") then
-                cmdline = utils.terminal .. ' -x ' .. cmdline
-            elseif string.find(utils.terminal, "termite") then
-                cmdline = utils.terminal .. ' -e \"' .. cmdline .. '\"'
-            else
-                cmdline = utils.terminal .. ' -e ' .. cmdline
-            end
+            cmdline = cmdline:gsub('"', '\"')
+            cmdline = utils.terminal .. ' -e "' .. cmdline .. '"'
         end
         program.cmdline = cmdline
     end
