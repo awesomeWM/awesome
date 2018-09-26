@@ -10,7 +10,7 @@ local xml_entity_names = { ["'"] = "&apos;", ["\""] = "&quot;", ["<"] = "&lt;", 
 --- Escape a string from XML char.
 -- Useful to set raw text in textbox.
 -- @class function
--- @name escape
+-- @name xml_escape
 -- @param text Text to escape.
 -- @return Escape text.
 function gstring.xml_escape(text)
@@ -21,7 +21,7 @@ local xml_entity_chars = { lt = "<", gt = ">", nbsp = " ", quot = "\"", apos = "
 						   amp = "&" };
 --- Unescape a string from entities.
 -- @class function
--- @name unescape
+-- @name xml_unescape
 -- @param text Text to unescape.
 -- @return Unescaped text.
 function gstring.xml_unescape(text)
