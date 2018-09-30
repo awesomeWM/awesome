@@ -2,6 +2,7 @@ local gears_obj = require("gears.object")
 
 local drawin, meta = awesome._shim_fake_class()
 local drawins = setmetatable({}, {__mode="v"})
+local cairo = require("lgi").cairo
 
 local function new_drawin(_, args)
     local ret = gears_obj()
@@ -29,6 +30,11 @@ local function new_drawin(_, args)
             height = ret.height
         }
     end
+
+    ret.data.drawable.valid    = true
+    ret.data.drawable.surface  = cairo.ImageSurface(cairo.Format.ARGB32, 0, 0)
+    ret.data.drawable.geometry = ret.geometry
+    ret.data.drawable.refresh  = function() end
 
     for _, k in pairs{ "buttons", "struts", "get_xproperty", "set_xproperty" } do
         ret[k] = function() end
