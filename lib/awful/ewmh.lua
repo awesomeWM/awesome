@@ -134,7 +134,7 @@ function ewmh.activate(c, context, hints) -- luacheck: no unused args
     end
 
     -- The rules use `switchtotag`. For consistency and code re-use, support it,
-    -- but keep undocumented.
+    -- but keep undocumented. --TODO v5 remove switchtotag
     if hints.switchtotag or hints.switch_to_tag or hints.switch_to_tags then
         atag.viewmore(c:tags(), c.screen, (not hints.switch_to_tags) and 0 or nil)
     end

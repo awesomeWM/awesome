@@ -15,7 +15,7 @@
 -- * honor_workarea
 -- * tag
 -- * new_tag
--- * switchtotag
+-- * switch_to_tags (also called switchtotag)
 -- * focus
 -- * titlebars_enabled
 -- * callback
@@ -83,7 +83,7 @@ If you want to put Emacs on a specific tag at startup, and immediately switch
 to that tag you can add:
 
     { rule = { class = "Emacs" },
-      properties = { tag = mytagobject, switchtotag = true } }
+      properties = { tag = mytagobject, switch_to_tags = true } }
 
 If you want to apply a custom callback to execute when a rule matched,
 for example to pause playing music from mpd when you start dosbox, you
@@ -477,7 +477,7 @@ rules.high_priority_properties = {}
 -- @tfield table awful.rules.delayed_properties
 -- By default, the table has the following functions:
 --
--- * switchtotag
+-- * switch_to_tags
 rules.delayed_properties = {}
 
 local force_ignore = {
@@ -511,9 +511,15 @@ function rules.high_priority_properties.tag(c, value, props)
     end
 end
 
-function rules.delayed_properties.switchtotag(c, value)
+function rules.delayed_properties.switch_to_tags(c, value)
     if not value then return end
     atag.viewmore(c:tags(), c.screen)
+end
+
+function rules.delayed_properties.switchtotag(c, value)
+    gdebug.deprecate("Use switch_to_tags instead of switchtotag", {deprecated_in=5})
+
+    rules.delayed_properties.switch_to_tags(c, value)
 end
 
 function rules.extra_properties.geometry(c, _, props)

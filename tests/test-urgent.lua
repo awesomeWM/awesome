@@ -72,7 +72,7 @@ local steps = {
             awful.screen.focused().tags[1]:view_only()
 
             runner.add_to_default_rules({ rule = { class = "XTerm" },
-                                        properties = { tag = "2", focus = true, switchtotag = true }})
+                                        properties = { tag = "2", focus = true, switch_to_tags = true }})
 
             awful.spawn("xterm")
 

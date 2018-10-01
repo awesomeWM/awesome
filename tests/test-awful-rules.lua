@@ -292,11 +292,11 @@ assert(not awful.rules.add_rule_source("invalid_source", function()
 end, {"awful.rules"}, {"awful.spawn"}))
 gears.debug.print_warning = temp
 
--- Test tag and switchtotag
+-- Test tag and switch_to_tags
 test_rule {
     properties = {
-        tag         = "9",
-        switchtotag = true
+        tag            = "9",
+        switch_to_tags = true
     },
     test = function(class)
         local c = get_client_by_class(class)
@@ -311,8 +311,8 @@ test_rule {
 }
 test_rule {
     properties = {
-        tag         = "8",
-        switchtotag = false
+        tag            = "8",
+        switch_to_tags = false
     },
     test = function(class)
         local c = get_client_by_class(class)
