@@ -165,7 +165,9 @@ local lgi = require("lgi")
 local Gio = lgi.Gio
 local GLib = lgi.GLib
 local util   = require("awful.util")
-local timer  = require("gears.timer")
+local gtable = require("gears.table")
+local gtimer = require("gears.timer")
+local aclient = require("awful.client")
 local protected_call = require("gears.protected_call")
 
 local spawn = {}
@@ -210,6 +212,39 @@ do
     end
 end
 
+local function hash_command(cmd, rules)
+    rules = rules or {}
+    cmd = type(cmd) == "string" and cmd or table.concat(cmd, ';')
+
+    -- Do its best at adding some entropy
+    local concat_rules = nil
+    concat_rules = function (r, depth)
+        if depth > 2 then return end
+
+        local keys = gtable.keys(rules)
+
+        for _, k in ipairs(keys) do
+            local v = r[k]
+            local t = type(v)
+
+            if t == "string" or t == "number" then
+                cmd = cmd..k..v
+            elseif t == "tag" then
+                cmd = cmd..k..v.name
+            elseif t == "table" and not t.connect_signal then
+                cmd = cmd .. k
+                concat_rules(v, depth + 1)
+            end
+        end
+    end
+
+    concat_rules(rules, 1)
+
+    local glibstr = GLib.String(cmd)
+
+    return string.format('%x', math.ceil(GLib.String.hash(glibstr)))
+end
+
 spawn.snid_buffer = {}
 
 function spawn.on_snid_callback(c)
@@ -220,7 +255,7 @@ function spawn.on_snid_callback(c)
         --TODO v5: Remove this signal
         c:emit_signal("spawn::completed_with_payload", props, callback)
 
-        timer.delayed_call(function()
+        gtimer.delayed_call(function()
             spawn.snid_buffer[c.startup_id] = nil
         end)
     end
@@ -433,6 +468,160 @@ function spawn.read_lines(input_stream, line_callback, done_callback, close)
         end
     end
     start_read()
+end
+
+-- When a command should only be executed once or only have a single instance,
+-- track the SNID set on them to prevent multiple execution.
+spawn.single_instance_manager = {
+    by_snid = {},
+    by_pid  = {},
+    by_uid  = {},
+}
+
+aclient.property.persist("single_instance_id", "string")
+
+-- Check if the client is running either using the rule source or the matcher.
+local function is_running(hash, matcher)
+    local status = spawn.single_instance_manager.by_uid[hash]
+    if not status then return false end
+
+    if #status.instances == 0 then return false end
+
+    for _, c in ipairs(status.instances) do
+        if c.valid then return true end
+    end
+
+    if matcher then
+        for _, c in ipairs(client.get()) do
+            if matcher(c) then return true end
+        end
+    end
+
+    return false
+end
+
+-- Keep the data related to this hash.
+local function register_common(hash, rules, matcher, callback)
+    local status = spawn.single_instance_manager.by_uid[hash]
+    if status then return status end
+
+    status = {
+        rules     = rules,
+        callback  = callback,
+        instances = setmetatable({}, {__mode = "v"}),
+        hash      = hash,
+        exec      = false,
+        matcher   = matcher,
+    }
+
+    spawn.single_instance_manager.by_uid[hash] = status
+
+    return status
+end
+
+local function run_once_common(hash, cmd, keep_pid)
+    local pid, snid = spawn.spawn(cmd)
+
+    if type(pid) == "string" or not snid then return pid, snid end
+
+    assert(spawn.single_instance_manager.by_uid[hash])
+
+    local status = spawn.single_instance_manager.by_uid[hash]
+    status.exec = true
+
+    spawn.single_instance_manager.by_snid[snid] = status
+
+    if keep_pid then
+        spawn.single_instance_manager.by_pid[pid] = status
+    end
+
+    -- Prevent issues related to PID being re-used and a memory leak
+    gtimer {
+        single_shot = true,
+        autostart   = true,
+        timeout     = 30,
+        callback    = function()
+            spawn.single_instance_manager.by_pid [pid ] = nil
+            spawn.single_instance_manager.by_snid[snid] = nil
+        end
+    }
+
+    return pid, snid
+end
+
+local function run_after_startup(f)
+    -- The clients are not yet managed during the first execution, so it will
+    -- miss existing instances.
+    if awesome.startup then
+        gtimer.delayed_call(f)
+    else
+        f()
+    end
+end
+
+--- Spawn a command if it has not been spawned before.
+--
+-- This function tries its best to preserve the state across `awesome.restart()`.
+--
+-- By default, when no `unique_id` is specified, this function will generate one by
+-- hashing the command and its rules. If you have multiple instance of the same
+-- command and rules, you need to specify an UID or only the first one will be
+-- executed.
+--
+-- The `rules` are standard `awful.rules`.
+--
+-- This function depends on the startup notification protocol to be correctly
+-- implemented by the command. See `client.startup_id` for more information.
+-- Note that this also wont work with shell or terminal commands.
+--
+-- @tparam string|table cmd The command.
+-- @tparam table rules The properties that need to be applied to the client.
+-- @tparam[opt] function matcher A matching function to find the instance
+--  among running clients.
+-- @tparam[opt] string unique_id A string to identify the client so it isn't executed
+--  multiple time.
+-- @tparam[opt] function callback A callback function when the client is created.
+-- @see awful.rules
+function spawn.once(cmd, rules, matcher, unique_id, callback)
+    local hash = unique_id or hash_command(cmd, rules)
+    local status = register_common(hash, rules, matcher, callback)
+    run_after_startup(function()
+        if not status.exec and not is_running(hash, matcher) then
+            run_once_common(hash, cmd, matcher ~= nil)
+        end
+    end)
+end
+
+--- Spawn a command if an instance is not already running.
+--
+-- This is like `awful.spawn.once`, but will spawn new instances if the previous
+-- has finished.
+--
+-- The `rules` are standard `awful.rules`.
+--
+-- This function depends on the startup notification protocol to be correctly
+-- implemented by the command. See `client.startup_id` for more information.
+-- Note that this also wont work with shell or terminal commands.
+--
+-- Note that multiple instances can still be spawned if the command is called
+-- faster than the client has time to start.
+--
+-- @tparam string|table cmd The command.
+-- @tparam table rules The properties that need to be applied to the client.
+-- @tparam[opt] function matcher A matching function to find the instance
+--  among running clients.
+-- @tparam[opt] string unique_id A string to identify the client so it isn't executed
+--  multiple time.
+-- @tparam[opt] function callback A callback function when the client is created.
+-- @see awful.rules
+function spawn.single_instance(cmd, rules, matcher, unique_id, callback)
+    local hash = unique_id or hash_command(cmd, rules)
+    register_common(hash, rules, matcher, callback)
+    run_after_startup(function()
+        if not is_running(hash, matcher) then
+            return run_once_common(hash, cmd, matcher ~= nil)
+        end
+    end)
 end
 
 capi.awesome.connect_signal("spawn::canceled" , spawn.on_snid_cancel   )

@@ -374,6 +374,46 @@ end
 
 rules.add_rule_source("awful.spawn", apply_spawn_rules, {}, {"awful.rules"})
 
+local function apply_singleton_rules(c, props, callbacks)
+    local persis_id, info = c.single_instance_id, nil
+
+    -- This is a persistent property set by `awful.spawn`
+    if awesome.startup and persis_id then
+        info = aspawn.single_instance_manager.by_uid[persis_id]
+    elseif c.startup_id then
+        info = aspawn.single_instance_manager.by_snid[c.startup_id]
+        aspawn.single_instance_manager.by_snid[c.startup_id] = nil
+    elseif aspawn.single_instance_manager.by_pid[c.pid] then
+        info = aspawn.single_instance_manager.by_pid[c.pid].matcher(c) and
+            aspawn.single_instance_manager.by_pid[c.pid] or nil
+    end
+
+    if info then
+        c.single_instance_id = info.hash
+        gtable.crush(props, info.rules)
+        table.insert(callbacks, info.callback)
+        table.insert(info.instances, c)
+
+        -- Prevent apps with multiple clients from re-using this too often in
+        -- the first 30 seconds before the PID is cleared.
+        aspawn.single_instance_manager.by_pid[c.pid] = nil
+    end
+end
+
+--- The rule source for clients spawned by `awful.spawn.once` and `single_instance`.
+--
+-- **Has priority over:**
+--
+-- * `awful.rules`
+--
+-- **Depends on:**
+--
+-- * `awful.spawn`
+--
+-- @rulesources awful.spawn_once
+
+rules.add_rule_source("awful.spawn_once", apply_singleton_rules, {"awful.spawn"}, {"awful.rules"})
+
 --- Apply awful.rules.rules to a client.
 -- @client c The client.
 function rules.apply(c)
