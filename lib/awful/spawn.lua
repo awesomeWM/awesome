@@ -624,6 +624,45 @@ function spawn.single_instance(cmd, rules, matcher, unique_id, callback)
     end)
 end
 
+local raise_rules = {focus = true, switch_to_tags = true, raise = true}
+
+--- Raise a client if it exists or spawn a new one then raise it.
+--
+-- This function depends on the startup notification protocol to be correctly
+-- implemented by the command. See `client.startup_id` for more information.
+-- Note that this also wont work with shell or terminal commands.
+--
+-- @tparam string|table cmd The command.
+-- @tparam table rules The properties that need to be applied to the client.
+-- @tparam[opt] function matcher A matching function to find the instance
+--  among running clients.
+-- @tparam[opt] string unique_id A string to identify the client so it isn't executed
+--  multiple time.
+-- @tparam[opt] function callback A callback function when the client is created.
+-- @see awful.rules
+-- @treturn client The client if it already exists.
+function spawn.raise_or_spawn(cmd, rules, matcher, unique_id, callback)
+    local hash = unique_id or hash_command(cmd, rules)
+
+    local status = spawn.single_instance_manager.by_uid[hash]
+    if status then
+        for _, c in ipairs(status.instances) do
+            if c.valid then
+                c:emit_signal("request::activate", "spawn.raise_or_spawn", raise_rules)
+                return c
+            end
+        end
+    end
+
+    -- Do not modify the original. It also can't be a metatable.__index due to
+    -- its "broken" `pairs()` support.
+    local props = gtable.join(rules, raise_rules)
+
+    spawn.single_instance(cmd, props, matcher, unique_id, callback)
+
+    return nil
+end
+
 capi.awesome.connect_signal("spawn::canceled" , spawn.on_snid_cancel   )
 capi.awesome.connect_signal("spawn::timeout"  , spawn.on_snid_cancel   )
 capi.client.connect_signal ("manage"          , spawn.on_snid_callback )

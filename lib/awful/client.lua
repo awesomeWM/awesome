@@ -1140,6 +1140,7 @@ end
 --   If it is a function, it will be called with the client as argument.
 -- @see awful.spawn.once
 -- @see awful.spawn.single_instance
+-- @see awful.spawn.raise_or_spawn
 --
 -- @deprecated awful.client.run_or_raise
 -- @usage -- run or raise urxvt (perhaps, with tabs) on modkey + semicolon
