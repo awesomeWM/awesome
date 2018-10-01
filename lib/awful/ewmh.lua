@@ -16,6 +16,7 @@ local aplace = require("awful.placement")
 local asuit = require("awful.layout.suit")
 local beautiful = require("beautiful")
 local alayout = require("awful.layout")
+local atag = require("awful.tag")
 
 local ewmh = {
     generic_activate_filters    = {},
@@ -83,6 +84,10 @@ end
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
 -- @tparam[opt=false] boolean hints.raise should the client be raised?
+-- @tparam[opt=false] boolean hints.switch_to_tag should the client's first tag
+--  be selected if none of the client's tags are selected?
+-- @tparam[opt=false] boolean hints.switch_to_tags Select all tags associated
+--  with the client.
 function ewmh.activate(c, context, hints) -- luacheck: no unused args
     hints = hints or  {}
 
@@ -121,11 +126,17 @@ function ewmh.activate(c, context, hints) -- luacheck: no unused args
         return
     end
 
-    if hints and hints.raise then
+    if hints.raise then
         c:raise()
         if not awesome.startup and not c:isvisible() then
             c.urgent = true
         end
+    end
+
+    -- The rules use `switchtotag`. For consistency and code re-use, support it,
+    -- but keep undocumented.
+    if hints.switchtotag or hints.switch_to_tag or hints.switch_to_tags then
+        atag.viewmore(c:tags(), c.screen, (not hints.switch_to_tags) and 0 or nil)
     end
 end
 
