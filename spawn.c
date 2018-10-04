@@ -385,7 +385,8 @@ spawn_child_exited(pid_t pid, int status)
 
     running_child_t *child = running_child_array_lookup(&running_children, &needle);
     if (child == NULL) {
-        warn("Unknown child %d exited with status %d", (int) pid, status);
+        warn("Unknown child %d exited with %s %d",
+                 (int)pid, WIFEXITED(status) ? "status" : "signal", status);
         return;
     }
     exit_callback = child->exit_callback;
