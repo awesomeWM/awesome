@@ -211,7 +211,10 @@ local function history_save(id)
     if data.history[id] then
         gfs.make_parent_directories(id)
         local f = io.open(id, "w")
-        if not f then return end
+        if not f then
+            gdebug.print_warning("Failed to write the history to "..id)
+            return
+        end
         for i = 1, math.min(#data.history[id].table, data.history[id].max) do
             f:write(data.history[id].table[i] .. "\n")
         end
