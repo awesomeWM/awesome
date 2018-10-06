@@ -463,6 +463,7 @@ signal_child(int signum)
 {
     assert(signum == SIGCHLD);
     int res = write(sigchld_pipe[1], " ", 1);
+    (void) res;
     assert(res == 1);
 }
 
