@@ -536,11 +536,6 @@ function rules.extra_properties.geometry(c, _, props)
     c:geometry(new_geo) --TODO use request::geometry
 end
 
---- Create a new tag based on a rule.
--- @tparam client c The client
--- @tparam boolean|function|string value The value.
--- @tparam table props The properties.
--- @treturn tag The new tag
 function rules.high_priority_properties.new_tag(c, value, props)
     local ty = type(value)
     local t = nil
