@@ -453,6 +453,32 @@ local function get_titlebar_function(c, position)
     end
 end
 
+--- Call `request::titlebars` to allow themes or rc.lua to create them even
+-- when `titlebars_enabled` is not set in the rules.
+-- @tparam client c The client.
+-- @tparam[opt=false] boolean hide_all Hide all titlebars except `keep`
+-- @tparam string keep Keep the titlebar at this position
+-- @treturn boolean If the titlebars were loaded
+local function load_titlebars(c, hide_all, keep)
+    if c._request_titlebars_called then return false end
+
+    c:emit_signal("request::titlebars", "awful.titlebar", {})
+
+    if hide_all then
+        -- Don't bother checking if it has been created, `.hide` don't works
+        -- anyway.
+        for _, tb in ipairs {"top", "bottom", "left", "right"} do
+            if tb ~= keep then
+                titlebar.hide(c, tb)
+            end
+        end
+    end
+
+    c._request_titlebars_called = true
+
+    return true
+end
+
 --- Get a client's titlebar.
 -- @tparam client c The client for which a titlebar is wanted.
 -- @tparam[opt={}] table args A table with extra arguments for the titlebar.
@@ -530,6 +556,7 @@ end
 --   "right", "top", "bottom". Default is "top".
 function titlebar.show(c, position)
     position = position or "top"
+    if load_titlebars(c, true, position) then return end
     local bars = all_titlebars[c]
     local data = bars and bars[position]
     local args = data and data.args
@@ -551,6 +578,7 @@ end
 --   "right", "top", "bottom". Default is "top".
 function titlebar.toggle(c, position)
     position = position or "top"
+    if load_titlebars(c, true, position) then return end
     local _, size = get_titlebar_function(c, position)(c)
     if size == 0 then
         titlebar.show(c, position)
