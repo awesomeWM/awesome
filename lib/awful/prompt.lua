@@ -110,7 +110,6 @@
 -- @see string
 
 -- Grab environment we need
-local assert = assert
 local io = io
 local table = table
 local math = math
@@ -210,8 +209,12 @@ end
 -- @param id The data.history identifier
 local function history_save(id)
     if data.history[id] then
-        assert(gfs.make_parent_directories(id))
-        local f = assert(io.open(id, "w"))
+        gfs.make_parent_directories(id)
+        local f = io.open(id, "w")
+        if not f then
+            gdebug.print_warning("Failed to write the history to "..id)
+            return
+        end
         for i = 1, math.min(#data.history[id].table, data.history[id].max) do
             f:write(data.history[id].table[i] .. "\n")
         end
