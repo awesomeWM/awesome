@@ -170,7 +170,7 @@ end
 local function runner(self, modifiers, key, event)
     -- Stop the keygrabber with the `stop_key`
     if key == self.stop_key
-        and event == self.release_event and self.stop_key then
+        and event == self.stop_event and self.stop_key then
         self:stop(key, modifiers)
         return false
     end
@@ -182,7 +182,7 @@ local function runner(self, modifiers, key, event)
     end
 
     -- Support multiple stop keys
-    if type(self.stop_key) == "table" and event == self.release_event then
+    if type(self.stop_key) == "table" and event == self.stop_event then
         for _, k in ipairs(self.stop_key) do
             if k == key then
                 self:stop(k, modifiers)
@@ -297,7 +297,7 @@ end
 
 --- The key on which the keygrabber listen to terminate itself.
 --
--- When this is set, the running keygrabber will quit when [one of] the release
+-- When this is set, the running keygrabber will quit when [one of] the stop
 -- key event occurs.
 --
 -- By default, the event is `press`. It is common for use case like the
@@ -317,7 +317,7 @@ end
 --
 -- @property stop_key
 -- @param[opt=nil] string|table stop_key
--- @see release_event
+-- @see stop_event
 
 --- The event on which the keygrabbing will be terminated.
 --
@@ -326,7 +326,7 @@ end
 -- * "press" (default)
 -- * "release"
 --
--- @property release_event
+-- @property stop_event
 -- @param string
 -- @see stop_key
 
@@ -493,12 +493,12 @@ end
 
 --- Stop the keygrabber.
 -- @function keygrabber:stop
-function keygrabber:stop(_stop_key, _release_mods) -- (at)function disables ldoc params
+function keygrabber:stop(_stop_key, _stop_mods) -- (at)function disables ldoc params
     keygrab.stop(self.grabber)
 
     if self.stop_callback then
         self.stop_callback(
-            self.current_instance, _stop_key, _release_mods, self.sequence
+            self.current_instance, _stop_key, _stop_mods, self.sequence
         )
     end
 
@@ -544,6 +544,21 @@ function keygrabber:set_allowed_keys(keys)
     end
 end
 
+--TODO v5 remove this
+function keygrabber:set_release_event(event)
+    gdebug.deprecate("release_event has been renamed to stop_event",
+        -- It has never been in a release, so it can be deprecated right away
+        {deprecated_in=4}
+    )
+
+    self.stop_event = event
+end
+
+--TODO v5 remove this
+function keygrabber:get_release_event()
+    return self.stop_event
+end
+
 --- When the keygrabber starts.
 -- @signal started
 
@@ -556,12 +571,12 @@ end
 
 --- The callback when the keygrabbing stops.
 --
--- @usage local function my_done_cb(self, stop_key, release_mods, sequence)
+-- @usage local function my_done_cb(self, stop_key, stop_mods, sequence)
 --    -- do something
 -- end
 -- @tparam table self The current transaction object.
 -- @tparam string stop_key The key(s) that stop the keygrabbing (if any)
--- @tparam table release_mods The release modifiers key (if any)
+-- @tparam table stop_mods The modifiers key (if any)
 -- @tparam sting sequence The recorded key sequence.
 -- @callback stop_callback
 -- @see sequence
@@ -604,11 +619,11 @@ end
 -- navigation.
 --
 -- Note that the object returned can be used as a client or global keybinding
--- callback without modification. Make sure to set `stop_key` and `release_event`
+-- callback without modification. Make sure to set `stop_key` and `stop_event`
 -- to proper values to avoid permanently locking the keyboard.
 --
 -- @tparam table args
--- @tparam[opt="press"] string args.release_event Release event ("press" or "release")
+-- @tparam[opt="press"] string args.stop_event Release event ("press" or "release")
 -- @tparam[opt=nil] string|table args.stop_key The key that has to be kept pressed.
 -- @tparam table args.keybindings All keybindings.
 -- @tparam[opt=-1] number args.timeout The maximum inactivity delay.
@@ -646,7 +661,7 @@ function keygrab.run_with_keybindings(args)
     gtable.crush(ret, args)
 
     ret._private.keybindings = {}
-    ret.release_event = args.release_event or "press"
+    ret.stop_event = args.stop_event or "press"
 
     -- Build the hook map
     for _,v in ipairs(args.keybindings or {}) do
