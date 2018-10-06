@@ -88,7 +88,21 @@ function timer:start()
         print(traceback("timer already started"))
         return
     end
-    self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
+    local func, timeout
+    if self.data.precise == nil then
+        self.data.precise = select(2, math.modf(self.data.timeout)) ~= 0
+    end
+    if self.data.precise then
+        func = glib.timeout_add
+        timeout = self.data.timeout * 1000
+    else
+        func = glib.timeout_add_second
+        if select(2, math.modf(self.data.timeout)) ~= 0 then
+            require("gears.debug").print_warning("using unprecise timer with non-integer")
+        end
+        timeout = math.ceil(self.data.timeout)
+    end
+    self.data.source_id = func(glib.PRIORITY_DEFAULT, timeout, function()
         protected_call(self.emit_signal, self, "timeout")
         return true
     end)
@@ -129,6 +143,8 @@ local timer_instance_mt = {
     __index = function(self, property)
         if property == "timeout" then
             return self.data.timeout
+        elseif property == "precise" then
+            return self.data.precise
         elseif property == "started" then
             return self.data.source_id ~= nil
         end
@@ -140,6 +156,8 @@ local timer_instance_mt = {
         if property == "timeout" then
             self.data.timeout = tonumber(value)
             self:emit_signal("property::timeout")
+        elseif property == "precise" then
+            self.data.precise = value and true or false
         end
     end
 }
@@ -152,6 +170,10 @@ local timer_instance_mt = {
 -- @tparam[opt=nil] function args.callback Callback function to connect to the
 --  "timeout" signal.
 -- @tparam[opt=false] boolean args.single_shot Run only once then stop.
+-- @tparam[opt] boolean args.precise Use a precise timer?
+--   A non-precise timer uses glib.timeout_add_second (i.e. only gets checked
+--   every second).  The default is to use a precise timer for non-integers
+--   (e.g. `0.1`, but also `1.0`).
 -- @treturn timer
 -- @function gears.timer
 function timer.new(args)
