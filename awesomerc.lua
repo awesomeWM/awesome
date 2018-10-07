@@ -521,6 +521,7 @@ awful.rules.rules = {
     -- @DOC_DIALOG_RULE@
     -- Add titlebars to normal clients and dialogs
     { rule_any = {type = { "normal", "dialog" }
+      -- @DOC_CSD_TITLEBARS@
       }, properties = { titlebars_enabled = true }
     },
 

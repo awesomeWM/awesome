@@ -218,6 +218,15 @@ sections.DOC_TITLEBARS = [[
 ]]
 
 
+sections.DOC_CSD_TITLEBARS = [[
+ For client side decorations, clients might request no titlebars via
+ Motif WM hints. To honor these hints, use:
+ `titlebars_enabled = function(c) return c.requests_no_titlebar end`
+
+ See `client.requests_no_titlebar` for more details.
+]]
+
+
 sections.DOC_BORDER = [[
  &nbsp;
 ]]

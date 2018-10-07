@@ -1040,6 +1040,38 @@ function client.dockable.set(c, value)
     client.property.set(c, "dockable", value)
 end
 
+--- If the client requests not to be decorated with a titlebar.
+--
+-- The motif wm hints allow a client to request not to be decorated by the WM in
+-- various ways. This property uses the motif MWM_DECOR_TITLE hint and
+-- interprets it as the client (not) wanting a titlebar.
+--
+-- **Signal:**
+--
+-- * *property::requests_no_titlebar*
+--
+-- @property requests_no_titlebar
+-- @param boolean Whether the client requests not to get a titlebar
+
+function client.object.get_requests_no_titlebar(c)
+    local hints = c.motif_wm_hints
+    if not hints then return false end
+
+    local decor = hints.deocrations
+    if not decor then return false end
+
+    local result = not decor.title
+    if decor.all then
+        -- The "all" bit inverts the meaning of the other bits
+        result = not result
+    end
+    return result
+end
+capi.client.connect_signal("property::motif_wm_hints", function(c)
+    -- We cannot be sure that the property actually changes, but whatever
+    c:emit_signal("property::requests_no_titlebar")
+end)
+
 --- Get a client property.
 --
 -- This method is deprecated. It is now possible to use `c.value` directly.
