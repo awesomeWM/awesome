@@ -191,9 +191,11 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                 end
                 args.freedesktop_hints = hints
                 notification = naughty.notify(args)
-                return "u", notification.id
+                if notification ~= nil then
+                    return "u", notification.id
+                end
             end
-            return "u", "0"
+            return "u", naughty.get_next_notification_id()
         elseif data.member == "CloseNotification" then
             local obj = naughty.getById(appname)
             if obj then
