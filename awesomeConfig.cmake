@@ -367,7 +367,26 @@ add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/06-appearance.md
         COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
         ${BUILD_DIR}/docs/06-appearance.md
-        DEPENDS lgi-check-run ${SOURCE_DIR}/docs/06-appearance.md.lua
+        DEPENDS
+            lgi-check-run
+            ${SOURCE_DIR}/docs/06-appearance.md.lua
+            ${SOURCE_DIR}/docs/_parser.lua
+)
+
+add_custom_command(
+        OUTPUT ${BUILD_DIR}/docs/common/rules_index.ldoc
+        COMMAND lua ${SOURCE_DIR}/docs/build_rules_index.lua
+            ${BUILD_DIR}/docs/common/rules_index.ldoc
+
+        # Cheap trick until the ldoc `configure_file` is ported to be a build
+        # step rather than part of cmake.
+        COMMAND ${CMAKE_COMMAND} -E copy ${BUILD_DIR}/docs/common/rules_index.ldoc
+            ${SOURCE_DIR}/docs/common/rules_index.ldoc
+
+        DEPENDS
+            lgi-check-run
+            ${SOURCE_DIR}/docs/build_rules_index.lua
+            ${SOURCE_DIR}/docs/_parser.lua
 )
 
 add_custom_command(
@@ -394,9 +413,13 @@ add_custom_target(generate_awesomerc DEPENDS
     ${SOURCE_DIR}/awesomerc.lua
     ${BUILD_DIR}/docs/06-appearance.md
     ${SOURCE_DIR}/docs/05-awesomerc.md.lua
+    ${SOURCE_DIR}/docs/build_rules_index.lua
+    ${BUILD_DIR}/docs/common/rules_index.ldoc
     ${SOURCE_DIR}/docs/sample_theme.lua
     ${SOURCE_DIR}/docs/sample_files.lua
     ${SOURCE_DIR}/awesomerc.lua
+    ${awesome_c_configure_files}
+    ${awesome_lua_configure_files}
 )
 
 

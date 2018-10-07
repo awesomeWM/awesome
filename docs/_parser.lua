@@ -88,29 +88,23 @@ function module.path_to_html(path)
     error("Cannot figure out if module or class: " .. tostring(path))
 end
 
-local function get_link(file, element)
+local function get_link(file, element, element_name)
     return table.concat {
         "<a href='",
         module.path_to_html(file),
         element,
         "'>",
-        element:match("[. ](.+)"),
+        element_name,
         "</a>"
     }
 end
 
-local function parse_files(property_name, matcher)
-    local exp1 = "--[ ]*@".. property_name .." ([^ \n]*)"
-    local exp2 = matcher or "--[ ]*".. property_name ..".(.+)"
+local function parse_files(paths, property_name, matcher, name_matcher)
+    local exp1 = "[-*]*[ ]*@".. property_name .." ([^ \n]*)"
+    local exp2 = matcher or "[-*]*[ ]*".. property_name ..".(.+)"
+    local exp3 = name_matcher or "[. ](.+)"
 
     local ret = {}
-
-    local paths = get_all_files("./lib/", "lua")
-    assert(paths)
-
-    for _, f in ipairs(get_all_files("./", "c")) do
-        table.insert(paths, f)
-    end
 
     table.sort(paths)
 
@@ -133,12 +127,11 @@ local function parse_files(property_name, matcher)
                 buffer = line
             end
 
-
             if var then
                 -- Get the @param, @see and @usage
                 local params = ""
                 for line in f:lines() do
-                    if line:sub(1,2) ~= "--" then
+                    if line:sub(1,2) ~= "--" and line:sub(1,2) ~= " *" then
                         break
                     else
                         params = params.."\n"..line
@@ -168,7 +161,8 @@ local function parse_files(property_name, matcher)
     return ret
 end
 
-local function create_table(entries, columns)
+local function create_table(entries, columns, prefix)
+    prefix = prefix or ""
     local lines = {}
 
     for _, entry in ipairs(entries) do
@@ -178,14 +172,15 @@ local function create_table(entries, columns)
             line = line.."<td>"..entry[column].."</td>"
         end
 
-        table.insert(lines, line.."</tr>\n")
+        table.insert(lines, prefix..line.."</tr>\n")
     end
 
-    return [[<br \><br \><table class='widget_list' border=1>
- <tr style='font-weight: bold;'>
-  <th align='center'>Name</th>
-  <th align='center'>Description</th>
- </tr>]] .. table.concat(lines) .. "</table>\n"
+    return [[--<table class='widget_list' border=1>
+]]..prefix..[[<tr style='font-weight: bold;'>
+]]..prefix..[[ <th align='center'>Name</th>
+]]..prefix..[[ <th align='center'>Description</th>
+]]..prefix..[[</tr>
+]] .. table.concat(lines) .. prefix .."</table>\n"
 end
 
 module.create_table  = create_table

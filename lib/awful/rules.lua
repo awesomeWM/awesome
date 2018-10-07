@@ -8,17 +8,15 @@
 -- to add random properties that will be later accessible as `c.property_name`
 -- (where `c` is a valid client object)
 --
--- In addition to the existing properties, the following are supported:
+-- Applicable client properties
+-- ===
 --
--- * placement
--- * honor_padding
--- * honor_workarea
--- * tag
--- * new_tag
--- * switch_to_tags (also called switchtotag)
--- * focus
--- * titlebars_enabled
--- * callback
+-- The table below holds the list of default client properties along with
+-- some extra properties that are specific to the rules. Note that any property
+-- can be set in the rules and interpreted by user provided code. This table
+-- only represent those offered by default.
+--
+--@DOC_rules_index_COMMON@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
