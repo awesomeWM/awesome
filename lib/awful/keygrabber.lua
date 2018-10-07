@@ -546,10 +546,8 @@ end
 
 --TODO v5 remove this
 function keygrabber:set_release_event(event)
-    gdebug.deprecate("release_event has been renamed to stop_event",
-        -- It has never been in a release, so it can be deprecated right away
-        {deprecated_in=4}
-    )
+    -- It has never been in a release, so it can be deprecated right away
+    gdebug.deprecate("release_event has been renamed to stop_event")
 
     self.stop_event = event
 end
