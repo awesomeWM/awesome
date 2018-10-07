@@ -329,6 +329,14 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
 
     if((c = client_getbywin(ev->window)))
     {
+        lua_State *L = globalconf_get_lua_State();
+        if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
+        {
+            luaA_object_push(L, c);
+            window_set_border_width(L, -1, ev->border_width);
+            lua_pop(L, 1);
+        }
+
         area_t geometry = c->geometry;
         uint16_t bw = c->border_width;
         uint16_t tb_left = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
@@ -339,20 +347,8 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
         uint16_t deco_right = bw + tb_right;
         uint16_t deco_top = bw + tb_top;
         uint16_t deco_bottom = bw + tb_bottom;
-        int16_t diff_w = 0, diff_h = 0, diff_border = 0;
+        int16_t diff_w = 0, diff_h = 0;
 
-        lua_State *L = globalconf_get_lua_State();
-
-        if(ev->value_mask & XCB_CONFIG_WINDOW_X)
-        {
-            geometry.x = ev->x;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &geometry.x, NULL);
-        }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
-        {
-            geometry.y = ev->y;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &geometry.y);
-        }
         if(ev->value_mask & XCB_CONFIG_WINDOW_WIDTH)
         {
             uint16_t old_w = geometry.width;
@@ -369,26 +365,23 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
             geometry.height += tb_top + tb_bottom;
             diff_h = geometry.height - old_h;
         }
-        if(ev->value_mask & XCB_CONFIG_WINDOW_BORDER_WIDTH)
-        {
-            diff_border = ev->border_width - bw;
-            diff_h += diff_border;
-            diff_w += diff_border;
-
-            luaA_object_push(L, c);
-            window_set_border_width(L, -1, ev->border_width);
-            lua_pop(L, 1);
-        }
 
         /* If the client resizes without moving itself, apply window gravity */
         if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
         {
-            int16_t diff_x = 0, diff_y = 0;
-            xwindow_translate_for_gravity(c->size_hints.win_gravity, diff_border, diff_border, diff_w, diff_h, &diff_x, &diff_y);
-            if(!(ev->value_mask & XCB_CONFIG_WINDOW_X))
-                geometry.x += diff_x;
-            if(!(ev->value_mask & XCB_CONFIG_WINDOW_Y))
-                geometry.y += diff_y;
+            xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, 0, diff_w, diff_h, &geometry.x, &geometry.y);
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_X)
+        {
+            geometry.x = ev->x;
+            if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+                xwindow_translate_for_gravity(c->size_hints.win_gravity, deco_left, 0, deco_right, 0, &geometry.x, NULL);
+        }
+        if(ev->value_mask & XCB_CONFIG_WINDOW_Y)
+        {
+            geometry.y = ev->y;
+            if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+                xwindow_translate_for_gravity(c->size_hints.win_gravity, 0, deco_top, 0, deco_bottom, NULL, &geometry.y);
         }
 
         c->got_configure_request = true;
