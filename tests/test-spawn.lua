@@ -10,6 +10,35 @@ local exit_yay, exit_snd = nil, nil
 -- * Using spawn with array is already covered by the test client.
 -- * spawn with startup notification is covered by test-spawn-snid.lua
 
+local tiny_client = function(class)
+    return {"lua", "-e", [[
+local lgi = require 'lgi'
+local Gtk = lgi.require('Gtk')
+local class = ']]..class..[['
+
+Gtk.init()
+
+window = Gtk.Window {
+    default_width  = 100,
+    default_height = 100,
+    title          = 'title',
+}
+
+window:set_wmclass(class, class)
+
+local app = Gtk.Application {}
+
+function app:on_activate()
+    window.application = self
+    window:show_all()
+end
+
+app:run {''}
+]]}
+end
+
+local matcher_called = false
+
 local steps = {
     function()
         -- Test various error conditions. There are quite a number of them...
@@ -119,6 +148,8 @@ local steps = {
                                          exit_snd = code
                                      end
                                  })
+
+            spawn.once(tiny_client("client1"), {tag=screen[1].tags[2]})
         end
         if spawns_done == 3 then
             assert(exit_yay == 0)
@@ -126,7 +157,174 @@ local steps = {
             assert(async_spawns_done == 2)
             return true
         end
-    end
+    end,
+    -- Test spawn_once
+    function()
+        if #client.get() ~= 1 then return end
+
+        assert(client.get()[1].class == "client1")
+        assert(client.get()[1]:tags()[1] == screen[1].tags[2])
+
+        spawn.once(tiny_client("client1"), {tag=screen[1].tags[2]})
+        spawn.once(tiny_client("client1"), {tag=screen[1].tags[2]})
+        return true
+    end,
+    function(count)
+        -- Limit the odds of a race condition
+        if count ~= 3 then return end
+
+        assert(#client.get() == 1)
+        assert(client.get()[1].class == "client1")
+        client.get()[1]:kill()
+        return true
+    end,
+    -- Test single_instance
+    function()
+        if #client.get() ~= 0 then return end
+
+        -- This should do nothing
+        spawn.once(tiny_client("client1"), {tag=screen[1].tags[2]})
+
+        spawn.single_instance(tiny_client("client2"), {tag=screen[1].tags[3]})
+
+        return true
+    end,
+    -- Test that no extra clients are created
+    function()
+        if #client.get() ~= 1 then return end
+
+        assert(client.get()[1].class == "client2")
+        assert(client.get()[1]:tags()[1] == screen[1].tags[3])
+
+        -- This should do nothing
+        spawn.single_instance(tiny_client("client2"), {tag=screen[1].tags[3]})
+        spawn.single_instance(tiny_client("client2"), {tag=screen[1].tags[3]})
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 then return end
+
+        assert(client.get()[1].class == "client2")
+        assert(client.get()[1]:tags()[1] == screen[1].tags[3])
+
+        client.get()[1]:kill()
+
+        return true
+    end,
+    -- Test that new instances can be spawned
+    function()
+        if #client.get() ~= 0 then return end
+
+        spawn.single_instance(tiny_client("client2"), {tag=screen[1].tags[3]})
+
+        return true
+    end,
+    -- Test raise_or_spawn
+    function()
+        if #client.get() ~= 1 then return end
+
+        assert(client.get()[1].class == "client2")
+        assert(client.get()[1]:tags()[1] == screen[1].tags[3])
+        client.get()[1]:kill()
+
+        spawn.raise_or_spawn(tiny_client("client3"), {tag=screen[1].tags[3]})
+
+        return true
+    end,
+    -- Add more clients to test the focus
+    function()
+        if #client.get() ~= 1 then return end
+
+        -- In another iteration to make sure client4 has no focus
+        spawn(tiny_client("client4"), {tag = screen[1].tags[4]})
+        spawn(tiny_client("client4"), {tag = screen[1].tags[4]})
+        spawn(tiny_client("client4"), {
+            tag = screen[1].tags[4], switch_to_tags= true, focus = true,
+        })
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 4 then return end
+
+        assert(screen[1].tags[3].selected == false)
+
+        for _, c in ipairs(client.get()) do
+            if c.class == "client4" then
+                assert(#c:tags() == 1)
+                assert(c:tags()[1] == screen[1].tags[4])
+            end
+        end
+
+        assert(screen[1].tags[4].selected == true)
+
+        spawn.raise_or_spawn(tiny_client("client3"), {tag=screen[1].tags[3]})
+
+        return true
+    end,
+    -- Test that the client can be raised
+    function()
+        if #client.get() ~= 4 then return false end
+
+        assert(client.focus.class == "client3")
+        assert(screen[1].tags[3].selected == true)
+        assert(screen[1].tags[4].selected == false)
+
+
+        for _, c in ipairs(client.get()) do
+            if c.class == "client4" then
+                c:tags()[1]:view_only()
+                client.focus = c
+                break
+            end
+        end
+
+        assert(screen[1].tags[3].selected == false)
+        assert(screen[1].tags[4].selected == true )
+
+        for _, c in ipairs(client.get()) do
+            if c.class == "client3" then
+                c:kill()
+            end
+        end
+
+        return true
+    end,
+    -- Test that a new instance can be spawned
+    function()
+        if #client.get() ~= 3 then return end
+
+        spawn.raise_or_spawn(tiny_client("client3"), {tag=screen[1].tags[3]})
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 4 then return end
+
+        -- Cleanup
+        for _, c in ipairs(client.get()) do
+            c:kill()
+        end
+
+        return true
+    end,
+    -- Test the matcher
+    function()
+        if #client.get() ~= 0 then return end
+
+        spawn.single_instance("xterm", {tag=screen[1].tags[5]}, function(c)
+            matcher_called = true
+            return c.class == "xterm"
+        end)
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 then return end
+        assert(matcher_called)
+        return true
+    end,
 }
 
 runner.run_steps(steps)

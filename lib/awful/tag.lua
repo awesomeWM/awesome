@@ -1281,19 +1281,39 @@ function tag.viewonly(t)
 end
 
 --- View only a set of tags.
+--
+-- If `maximum` is set, there will be a limit on the number of new tag being
+-- selected. The tags already selected do not count. To do nothing if one or
+-- more of the tags are already selected, set `maximum` to zero.
+--
 -- @function awful.tag.viewmore
 -- @param tags A table with tags to view only.
 -- @param[opt] screen The screen of the tags.
-function tag.viewmore(tags, screen)
+-- @tparam[opt=#tags] number maximum The maximum number of tags to select.
+function tag.viewmore(tags, screen, maximum)
+    maximum = maximum or #tags
+    local selected = 0
     screen = get_screen(screen or ascreen.focused())
     local screen_tags = screen.tags
     for _, _tag in ipairs(screen_tags) do
         if not gtable.hasitem(tags, _tag) then
             _tag.selected = false
+        elseif _tag.selected then
+            selected = selected + 1
         end
     end
     for _, _tag in ipairs(tags) do
-        _tag.selected = true
+        if selected == 0 and maximum == 0 then
+            _tag.selected = true
+            break
+        end
+
+        if selected >= maximum then break end
+
+        if not _tag.selected then
+            selected = selected + 1
+            _tag.selected = true
+        end
     end
     screen:emit_signal("tag::history::update")
 end

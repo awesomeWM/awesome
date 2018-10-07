@@ -8,7 +8,7 @@
 
 -- Grab environment we need
 local gdebug = require("gears.debug")
-local spawn = require("awful.spawn")
+local spawn = nil --TODO v5 deprecate
 local set_shape = require("awful.client.shape").update.all
 local object = require("gears.object")
 local grect = require("gears.geometry").rectangle
@@ -1170,8 +1170,11 @@ end
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client as argument.
+-- @see awful.spawn.once
+-- @see awful.spawn.single_instance
+-- @see awful.spawn.raise_or_spawn
 --
--- @function awful.client.run_or_raise
+-- @deprecated awful.client.run_or_raise
 -- @usage -- run or raise urxvt (perhaps, with tabs) on modkey + semicolon
 -- awful.key({ modkey, }, 'semicolon', function ()
 --     local matcher = function (c)
@@ -1180,6 +1183,10 @@ end
 --     awful.client.run_or_raise('urxvt', matcher)
 -- end);
 function client.run_or_raise(cmd, matcher, merge)
+    gdebug.deprecate("Use awful.spawn.single_instance instead of"..
+        "awful.client.run_or_raise", {deprecated_in=5})
+
+    spawn = spawn or require("awful.spawn")
     local clients = capi.client.get()
     local findex  = gtable.hasitem(clients, capi.client.focus) or 1
     local start   = gmath.cycle(#clients, findex + 1)
