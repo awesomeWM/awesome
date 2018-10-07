@@ -354,13 +354,20 @@ add_custom_target(lgi-check-run ALL
 
 # {{{ Generate some aggregated documentation from lua script
 
-file(MAKE_DIRECTORY ${BUILD_DIR}/script_files/)
+add_custom_target(setup_directories DEPENDS lgi-check-run)
+
+add_custom_command(TARGET setup_directories
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/script_files/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/docs/common/
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/doc/images/
+        COMMAND ${CMAKE_COMMAND} -E copy ${SOURCE_DIR}/docs/_parser.lua ${BUILD_DIR}/docs/
+)
 
 add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/06-appearance.md
         COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
         ${BUILD_DIR}/docs/06-appearance.md
-        DEPENDS lgi-check-run
+        DEPENDS lgi-check-run ${SOURCE_DIR}/docs/06-appearance.md.lua
 )
 
 add_custom_command(
@@ -370,6 +377,7 @@ add_custom_command(
         ${BUILD_DIR}/docs/05-awesomerc.md ${SOURCE_DIR}/awesomerc.lua
         ${BUILD_DIR}/awesomerc.lua
         ${BUILD_DIR}/script_files/rc.lua
+        DEPENDS ${SOURCE_DIR}/awesomerc.lua ${SOURCE_DIR}/docs/05-awesomerc.md.lua
 )
 
 add_custom_command(
@@ -379,6 +387,7 @@ add_custom_command(
 
 # Create a target for the auto-generated awesomerc.lua and other files
 add_custom_target(generate_awesomerc DEPENDS
+    setup_directories
     ${BUILD_DIR}/awesomerc.lua
     ${BUILD_DIR}/script_files/theme.lua
     ${BUILD_DIR}/script_files/rc.lua
