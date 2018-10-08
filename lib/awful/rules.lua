@@ -631,6 +631,7 @@ function rules.execute(c, props, callbacks)
     if props.titlebars_enabled and (type(props.titlebars_enabled) ~= "function"
             or props.titlebars_enabled(c,props)) then
         c:emit_signal("request::titlebars", "rules", {properties=props})
+        c._request_titlebars_called = true
     end
 
     -- Border width will also cause geometry related properties to fail
