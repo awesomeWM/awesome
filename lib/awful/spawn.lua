@@ -48,6 +48,57 @@
 -- *instance*, a *role*, and a *type*. See `client.class`, `client.instance`,
 -- `client.role` and `client.type` for more information about these properties.
 --
+-- **Understanding blocking versus asynchronous execution**:
+--
+-- Awesome is single threaded, it means only one thing is executed at any time.
+-- But Awesome isn't doomed to be slow. It may not have multiple threads, but
+-- it has something called coroutine and also has callbacks. This means things
+-- that take time to execute can still do so in the background (using C threads
+-- or external process + sockets). When they are done, they can notify the
+-- Awesome thread. This works perfectly and avoid blocking Awesome.
+--
+-- If you want to update the text of a `wibox.widget.textbox` with the output
+-- of a shell command, you should use the `awful.spawn.easy_async_with_shell`
+-- command. It is strongly recommanded not to use `io.popen` is explained in the
+-- "Getting a command's output" section. Asynchronous execution is at first a
+-- bit tricky to understand if you never used that before. The example below
+-- should demonstrate how it works.
+--
+-- If we do (but *really*, don't do that):
+--
+--     -- **NEVER, EVER, DO THIS**: your computer will freeze
+--     os.execute("sleep 1; echo foo > /tmp/foo.txt")
+--     mylabel.text = io.popen("cat /tmp/foo.txt"):read("*all")
+--
+-- The label will display `foo`. But If we do:
+--
+--     -- Don't do this, it wont work.
+--     -- Assumes /tmp/foo.txt does not exist
+--     awful.spawn.with_shell("sleep 1; echo foo > /tmp/foo.txt")
+--     mylabel.text = io.popen("cat /tmp/foo.txt"):read("*all")
+--
+-- Then the label will be **empty**. `awful.spawn` and `awful.spawn.with_shell`
+-- will **not** block and thus the `io.popen` will be executed before
+-- `sleep 1` finishes. This is why we have async functions to execute shell
+-- commands. There are many variants with difference characteristics and
+-- complexity. `awful.spawn.easy_async` is the most common as it is good enough
+-- for the general "I want to execute a command and do something with the
+-- output when it finishes".
+--
+--     -- This is the correct way
+--     local command = "sleep 1; echo foo > /tmp/foo.txt"
+--
+--     awful.spawn.easy_async_with_shell(command, function()
+--         awful.spawn.easy_async_with_shell("cat /tmp/foo.txt", function(out)
+--             mylabel.text = out
+--         end)
+--     end)
+--
+-- In this variant, Awesome will not block. Again, like other spawn, you
+-- cannot add code outside of the callback function to use the result of the
+-- command. The code will be executed before the command is finished so the
+-- result wont yet be available.
+--
 -- **Getting a command's output**:
 --
 -- First, do **not** use `io.popen` **ever**. It is synchronous. Synchronous
