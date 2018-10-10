@@ -176,7 +176,7 @@ local function create_table(entries, columns, prefix)
     end
 
     return [[--<table class='widget_list' border=1>
-]]..prefix..[[<tr style='font-weight: bold;'>
+]]..prefix..[[<tr>
 ]]..prefix..[[ <th align='center'>Name</th>
 ]]..prefix..[[ <th align='center'>Description</th>
 ]]..prefix..[[</tr>
