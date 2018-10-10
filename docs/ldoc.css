@@ -149,6 +149,7 @@ pre {
     padding: 15px;
     overflow: auto;
     font-family: monospace;
+    max-width: 720px;
 }
 
 #content ul pre.example {
