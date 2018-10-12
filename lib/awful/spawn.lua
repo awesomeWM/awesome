@@ -8,6 +8,9 @@
 -- program after it has been launched.  This requires currently that the
 -- applicaton supports them.
 --
+-- Frequently asked questions
+-- ===
+--
 -- **Rules of thumb when a shell is needed**:
 --
 -- * A shell is required when the commands contain `&&`, `;`, `||`, `&` or
@@ -44,45 +47,6 @@
 -- both a parent and one or many children. A *client* has a *class*, an
 -- *instance*, a *role*, and a *type*. See `client.class`, `client.instance`,
 -- `client.role` and `client.type` for more information about these properties.
---
--- **The startup notification protocol**:
---
--- The startup notification protocol is an optional specification implemented
--- by X11 applications to bridge the chain of knowledge between the moment a
--- program is launched to the moment its window (client) is shown. It can be
--- found [on the FreeDesktop.org website](https://www.freedesktop.org/wiki/Specifications/startup-notification-spec/).
---
--- Awesome has support for the various events that are part of the protocol, but
--- the most useful is the identifier, usually identified by its `SNID` acronym in
--- the documentation. It isn't usually necessary to even know it exists, as it
--- is all done automatically. However, if more control is required, the
--- identifier can be specified by an environment variable called
--- `DESKTOP_STARTUP_ID`. For example, let us consider execution of the following
--- command:
---
---    DESKTOP_STARTUP_ID="something_TIME$(date '+%s')" my_command
---
--- This should (if the program correctly implements the protocol) result in
--- `c.startup_id` to at least match `something`.
--- This identifier can then be used in `awful.rules` to configure the client.
---
--- Awesome can automatically set the `DESKTOP_STARTUP_ID` variable. This is used
--- by `awful.spawn` to specify additional rules for the startup. For example:
---
---    awful.spawn("urxvt -e maxima -name CALCULATOR", {
---        floating  = true,
---        tag       = mouse.screen.selected_tag,
---        placement = awful.placement.bottom_right,
---    })
---
--- This can also be used from the command line:
---
---    awesome-client 'awful=require("awful");
---      awful.spawn("urxvt -e maxima -name CALCULATOR", {
---        floating  = true,
---        tag       = mouse.screen.selected_tag,
---        placement = awful.placement.bottom_right,
---      })'
 --
 -- **Getting a command's output**:
 --
@@ -147,6 +111,53 @@
 -- If you wish to change how the default applications behave, then consult the
 -- [Desktop Entry](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html)
 -- specification.
+--
+-- Spawning applications with specific properties
+-- ===
+--
+-- **The startup notification protocol**:
+--
+-- The startup notification protocol is an optional specification implemented
+-- by X11 applications to bridge the chain of knowledge between the moment a
+-- program is launched to the moment its window (client) is shown. It can be
+-- found [on the FreeDesktop.org website](https://www.freedesktop.org/wiki/Specifications/startup-notification-spec/).
+--
+-- Awesome has support for the various events that are part of the protocol, but
+-- the most useful is the identifier, usually identified by its `SNID` acronym in
+-- the documentation. It isn't usually necessary to even know it exists, as it
+-- is all done automatically. However, if more control is required, the
+-- identifier can be specified by an environment variable called
+-- `DESKTOP_STARTUP_ID`. For example, let us consider execution of the following
+-- command:
+--
+--    DESKTOP_STARTUP_ID="something_TIME$(date '+%s')" my_command
+--
+-- This should (if the program correctly implements the protocol) result in
+-- `c.startup_id` to at least match `something`.
+-- This identifier can then be used in `awful.rules` to configure the client.
+--
+-- Awesome can automatically set the `DESKTOP_STARTUP_ID` variable. This is used
+-- by `awful.spawn` to specify additional rules for the startup. For example:
+--
+--    awful.spawn("urxvt -e maxima -name CALCULATOR", {
+--        floating  = true,
+--        tag       = mouse.screen.selected_tag,
+--        placement = awful.placement.bottom_right,
+--    })
+--
+-- This can also be used from the command line:
+--
+--    awesome-client 'awful=require("awful");
+--      awful.spawn("urxvt -e maxima -name CALCULATOR", {
+--        floating  = true,
+--        tag       = mouse.screen.selected_tag,
+--        placement = awful.placement.bottom_right,
+--      })'
+--
+-- This table contains the client properties that are valid when used the
+-- `sn_rules` or `prop` function argument. They are the same as in `awful.rules`.
+--
+--@DOC_rules_index_COMMON@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
