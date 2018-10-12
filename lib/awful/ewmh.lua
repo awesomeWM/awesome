@@ -322,6 +322,9 @@ function ewmh.merge_maximization(c, context, hints)
 
     if not is_accepted then return end
 
+    --TODO unset the X properties
+    if not c.maximize_requests_honor then return end
+
     if not c._delay_maximization then
         c._delay_maximization = function()
             -- Computes the actual X11 atoms before/after

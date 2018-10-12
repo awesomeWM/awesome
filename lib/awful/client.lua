@@ -236,6 +236,74 @@ function client.tiled(s, stacked)
     return tclients
 end
 
+--- Allow clients to move and resize themselves.
+--
+-- @property resize_requests_honor
+-- @param[opt=true] boolean
+-- @see request::geometry
+-- @see awful.ewmh.client_geometry_requests
+-- @see size_hints_honor
+-- @see maximize_requests_honor
+-- @see fullscreen_requests_honor
+
+--- Allow clients to make themselves maximized.
+--
+-- Some clients try to "save" their state and wont get tiled properly if
+-- they were left maximized when last closed. This property allows to ignore
+-- such client requests.
+--
+-- @property maximize_requests_honor
+-- @param[opt=true] boolean
+-- @see request::geometry
+-- @see awful.ewmh.client_geometry_requests
+-- @see fullscreen_requests_honor
+-- @see size_hints_honor
+-- @see maximized
+-- @see maximized_horizontal
+-- @see maximized_vertical
+
+--- Allow clients to make themselves fullscreen.
+--
+-- Prevent clients from making themselves fullscreen. This will unset the
+-- X11 fullscreen property and may cause mild flickering.
+--
+-- @property fullscreen_requests_honor
+-- @param[opt=true] boolean
+-- @see request::geometry
+-- @see awful.ewmh.client_geometry_requests
+-- @see size_hints_honor
+-- @see fullscreen
+-- @see maximize_requests_honor
+
+--- Tell to clients they are fullscreen even if they are not.
+--
+-- Some application have special fullscreen modes that are either superior,
+-- less bloated or better suited for tiling than their regular mode. For
+-- examples, web videos don't have ads for more content when played fullscreen.
+--
+-- When enabled, this will tell the client it is fullscreen when it really isn't.
+-- Some applications may be smart enough to figure this out, but the vast
+-- majority wont ever bother to double check.
+--
+-- @property fake_fullscreen
+-- @param[opt=false] boolean
+-- @see fullscreen
+-- @see fullscreen_requests_honor
+
+for _, prop in ipairs {"resize", "maximize", "fullscreen" } do
+    local name = prop.."_requests_honor"
+    client.object["get_"..name] = function(c)
+        if c["_"..name] == nil then return true end
+
+        return c["_"..name]
+    end
+
+    client.object["set_"..name] = function(c, value)
+        c["_"..name] = value
+        c:emit_signal("property::"..name, value)
+    end
+end
+
 --- Get a client by its relative index to another client.
 -- If no client is passed, the focused client will be used.
 --
