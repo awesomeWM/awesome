@@ -1,4 +1,5 @@
 local awful = require("awful")
+local gtable = require("gears.table")
 local beautiful = require("beautiful")
 
 local function check_order()
@@ -124,7 +125,77 @@ local steps = {
 
             return true
         end
-    end
+    end,
+
+    -- Test the custom layout list
+    function()
+        local t = mouse.screen.tags[9]
+        assert(t)
+
+        -- Test that the global_layouts is the default
+        local global_layouts = awful.layout.layouts
+
+        local t_layouts = t.layouts
+        local count = #t_layouts
+        local original = gtable.clone(t_layouts, false)
+        assert(t_layouts and global_layouts)
+
+        assert(#global_layouts == #t_layouts)
+        for idx, l in ipairs(global_layouts) do
+            assert(t_layouts[idx] == l)
+        end
+
+        -- Make sure the list isn't forked
+        t.layout = global_layouts[3]
+        assert(t_layouts == t.layouts)
+
+        -- Add a dummy layout
+        t.layout = {name = "fake1", arrange=function() end}
+        assert(#t.layouts == #global_layouts+1)
+
+        -- Make sure adding global layouts still work
+        table.insert(global_layouts, {name = "fake2", arrange=function() end})
+        assert(#t.layouts == count+2)
+
+        -- Test that the global list is forked when there is no other
+        -- options.
+        table.insert(global_layouts, function()
+            return {name = "fake2", arrange=function() end}
+        end)
+        assert(#t.layouts == count+3)
+        assert(#original == #global_layouts-2)
+        assert(not t._layouts)
+
+        t.layout = global_layouts[#global_layouts]
+
+        assert(t._layouts)
+        assert(#t._custom_layouts+#global_layouts == #t.layouts)
+        assert(#t.layouts == count+3, "Expected "..(count+3).." got "..#t.layouts)
+
+        -- Create a custom list of layouts
+        t.layouts = {
+            awful.layout.suit.fair,
+            awful.layout.suit.fair.horizontal,
+        }
+
+        -- 3 because the current layout was added
+        assert(#t.layouts == 3)
+
+        t.layout = {name = "fake3", arrange=function() end}
+        assert(#t.layouts == 4)
+
+        -- Test the layout template and stateful layouts
+        t.layouts = {
+            t.layout,
+            function() return {name = "fake4", arrange=function() end} end
+        }
+        assert(#t.layouts == 2)
+
+        t.layout = t.layouts[2]
+        assert(#t.layouts == 2)
+
+        return true
+    end,
 }
 
 local multi_screen_steps = {}
