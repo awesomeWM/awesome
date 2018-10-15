@@ -451,8 +451,8 @@ function widget.new(args)
         })
         mywibox:set_widget(pages[1])
         mywibox:buttons(gtable.join(
-                awful.button({ }, 1, function () mywibox.visible=false end),
-                awful.button({ }, 3, function () mywibox.visible=false end)
+                awful.button({ }, 1, function () mywibox.visible=false awful.keygrabber:stop() end),
+                awful.button({ }, 3, function () mywibox.visible=false awful.keygrabber:stop() end)
         ))
 
         local widget_obj = {}
