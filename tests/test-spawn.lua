@@ -228,19 +228,21 @@ local steps = {
         assert(client.get()[1]:tags()[1] == screen[1].tags[3])
         client.get()[1]:kill()
 
-        spawn.raise_or_spawn(tiny_client("client3"), {tag=screen[1].tags[3]})
+        assert(not spawn.raise_or_spawn(tiny_client("client3"), {
+            tag=screen[1].tags[3], foo = "baz"
+        }))
 
         return true
     end,
     -- Add more clients to test the focus
     function()
-        if #client.get() ~= 1 then return end
+        if #client.get() ~= 1 or client.get()[1].class ~= "client3" then return end
 
         -- In another iteration to make sure client4 has no focus
-        spawn(tiny_client("client4"), {tag = screen[1].tags[4]})
-        spawn(tiny_client("client4"), {tag = screen[1].tags[4]})
+        spawn(tiny_client("client4"), {tag = screen[1].tags[4], foo = "bar"})
+        spawn(tiny_client("client4"), {tag = screen[1].tags[4], foo = "bar"})
         spawn(tiny_client("client4"), {
-            tag = screen[1].tags[4], switch_to_tags= true, focus = true,
+            tag = screen[1].tags[4], switch_to_tags= true, focus = true, foo = "bar"
         })
 
         return true
@@ -248,18 +250,27 @@ local steps = {
     function()
         if #client.get() ~= 4 then return end
 
-        assert(screen[1].tags[3].selected == false)
-
+        local by_class = {}
         for _, c in ipairs(client.get()) do
+            by_class[c.class] = by_class[c.class] and (by_class[c.class] + 1) or 1
             if c.class == "client4" then
                 assert(#c:tags() == 1)
+                assert(c.foo == "bar")
                 assert(c:tags()[1] == screen[1].tags[4])
+            elseif c.class == "client3" then
+                assert(c.foo == "baz")
+                assert(c:tags()[1] == screen[1].tags[3])
             end
         end
 
+        assert(by_class.client3 == 1)
+        assert(by_class.client4 == 3)
+        assert(screen[1].tags[3].selected == false)
+        assert(screen[1].tags[4].selected == true )
+
         assert(screen[1].tags[4].selected == true)
 
-        spawn.raise_or_spawn(tiny_client("client3"), {tag=screen[1].tags[3]})
+        assert(spawn.raise_or_spawn(tiny_client("client3"), {tag=screen[1].tags[3], foo = "baz"}))
 
         return true
     end,
