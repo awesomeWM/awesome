@@ -18,7 +18,8 @@ local gtable = {}
 -- @return A new table containing all keys from the arguments.
 function gtable.join(...)
     local ret = {}
-    for _, t in ipairs({...}) do
+    for i = 1, select("#", ...) do
+        local t = select(i, ...)
         if t then
             for k, v in pairs(t) do
                 if type(k) == "number" then
