@@ -8,17 +8,98 @@
 -- to add random properties that will be later accessible as `c.property_name`
 -- (where `c` is a valid client object)
 --
--- In addition to the existing properties, the following are supported:
+-- Syntax
+-- ===
+-- You should fill this table with your rule and properties to apply.
+-- For example, if you want to set xterm maximized at startup, you can add:
 --
--- * placement
--- * honor_padding
--- * honor_workarea
--- * tag
--- * new_tag
--- * switch_to_tags (also called switchtotag)
--- * focus
--- * titlebars_enabled
--- * callback
+--     { rule = { class = "xterm" },
+--       properties = { maximized_vertical = true, maximized_horizontal = true } }
+--
+-- If you want to set mplayer floating at startup, you can add:
+--
+--     { rule = { name = "MPlayer" },
+--       properties = { floating = true } }
+--
+-- If you want to put Firefox on a specific tag at startup, you can add:
+--
+--     { rule = { instance = "firefox" },
+--       properties = { tag = mytagobject } }
+--
+-- Alternatively, you can specify the tag by name:
+--
+--     { rule = { instance = "firefox" },
+--       properties = { tag = "3" } }
+--
+-- If you want to put Thunderbird on a specific screen at startup, use:
+--
+--     { rule = { instance = "Thunderbird" },
+--       properties = { screen = 1 } }
+--
+-- Assuming that your X11 server supports the RandR extension, you can also specify
+-- the screen by name:
+--
+--     { rule = { instance = "Thunderbird" },
+--       properties = { screen = "VGA1" } }
+--
+-- If you want to put Emacs on a specific tag at startup, and immediately switch
+-- to that tag you can add:
+--
+--     { rule = { class = "Emacs" },
+--       properties = { tag = mytagobject, switchtotag = true } }
+--
+-- If you want to apply a custom callback to execute when a rule matched,
+-- for example to pause playing music from mpd when you start dosbox, you
+-- can add:
+--
+--     { rule = { class = "dosbox" },
+--       callback = function(c)
+--          awful.spawn('mpc pause')
+--       end }
+--
+-- Note that all "rule" entries need to match. If any of the entry does not
+-- match, the rule won't be applied.
+--
+-- If a client matches multiple rules, they are applied in the order they are
+-- put in this global rules table. If the value of a rule is a string, then the
+-- match function is used to determine if the client matches the rule.
+--
+-- If the value of a property is a function, that function gets called and
+-- function's return value is used for the property.
+--
+-- To match multiple clients to a rule one need to use slightly different
+-- syntax:
+--
+--     { rule_any = { class = { "MPlayer", "Nitrogen" }, instance = { "xterm" } },
+--       properties = { floating = true } }
+--
+-- To match multiple clients with an exception one can couple `rules.except` or
+-- `rules.except_any` with the rules:
+--
+--     { rule = { class = "Firefox" },
+--       except = { instance = "Navigator" },
+--       properties = {floating = true},
+--     },
+--
+--     { rule_any = { class = { "Pidgin", "Xchat" } },
+--       except_any = { role = { "conversation" } },
+--       properties = { tag = "1" }
+--     }
+--
+--     { rule = {},
+--       except_any = { class = { "Firefox", "Vim" } },
+--       properties = { floating = true }
+--     }
+--
+-- Applicable client properties
+-- ===
+--
+-- The table below holds the list of default client properties along with
+-- some extra properties that are specific to the rules. Note that any property
+-- can be set in the rules and interpreted by user provided code. This table
+-- only represent those offered by default.
+--
+--@DOC_rules_index_COMMON@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
@@ -44,90 +125,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 
 local rules = {}
 
---[[--
-This is the global rules table.
-
-You should fill this table with your rule and properties to apply.
-For example, if you want to set xterm maximized at startup, you can add:
-
-    { rule = { class = "xterm" },
-      properties = { maximized_vertical = true, maximized_horizontal = true } }
-
-If you want to set mplayer floating at startup, you can add:
-
-    { rule = { name = "MPlayer" },
-      properties = { floating = true } }
-
-If you want to put Firefox on a specific tag at startup, you can add:
-
-    { rule = { instance = "firefox" },
-      properties = { tag = mytagobject } }
-
-Alternatively, you can specify the tag by name:
-
-    { rule = { instance = "firefox" },
-      properties = { tag = "3" } }
-
-If you want to put Thunderbird on a specific screen at startup, use:
-
-    { rule = { instance = "Thunderbird" },
-      properties = { screen = 1 } }
-
-Assuming that your X11 server supports the RandR extension, you can also specify
-the screen by name:
-
-    { rule = { instance = "Thunderbird" },
-      properties = { screen = "VGA1" } }
-
-If you want to put Emacs on a specific tag at startup, and immediately switch
-to that tag you can add:
-
-    { rule = { class = "Emacs" },
-      properties = { tag = mytagobject, switch_to_tags = true } }
-
-If you want to apply a custom callback to execute when a rule matched,
-for example to pause playing music from mpd when you start dosbox, you
-can add:
-
-    { rule = { class = "dosbox" },
-      callback = function(c)
-         awful.spawn('mpc pause')
-      end }
-
-Note that all "rule" entries need to match. If any of the entry does not
-match, the rule won't be applied.
-
-If a client matches multiple rules, they are applied in the order they are
-put in this global rules table. If the value of a rule is a string, then the
-match function is used to determine if the client matches the rule.
-
-If the value of a property is a function, that function gets called and
-function's return value is used for the property.
-
-To match multiple clients to a rule one need to use slightly different
-syntax:
-
-    { rule_any = { class = { "MPlayer", "Nitrogen" }, instance = { "xterm" } },
-      properties = { floating = true } }
-
-To match multiple clients with an exception one can couple `rules.except` or
-`rules.except_any` with the rules:
-
-    { rule = { class = "Firefox" },
-      except = { instance = "Navigator" },
-      properties = {floating = true},
-    },
-
-    { rule_any = { class = { "Pidgin", "Xchat" } },
-      except_any = { role = { "conversation" } },
-      properties = { tag = "1" }
-    }
-
-    { rule = {},
-      except_any = { class = { "Firefox", "Vim" } },
-      properties = { floating = true }
-    }
-]]--
+--- This is the global rules table.
 rules.rules = {}
 
 --- Check if a client matches a rule.
@@ -536,11 +534,6 @@ function rules.extra_properties.geometry(c, _, props)
     c:geometry(new_geo) --TODO use request::geometry
 end
 
---- Create a new tag based on a rule.
--- @tparam client c The client
--- @tparam boolean|function|string value The value.
--- @tparam table props The properties.
--- @treturn tag The new tag
 function rules.high_priority_properties.new_tag(c, value, props)
     local ty = type(value)
     local t = nil

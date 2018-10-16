@@ -72,6 +72,8 @@ new_type("callback", "Callback functions prototype", false, "Parameters")
 new_type("rulesources", "Rule sources", false, "param")
 -- Filter functions for the taglist/tasklist/layoutlist
 new_type("filterfunction", "List filters", false)
+-- Extra client properties available only in awful.rules/spawn constructs
+new_type("clientruleproperty", "Extra properties available in awful.rules and awful.spawn", false, "Type")
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
@@ -135,10 +137,14 @@ file = {
     }
 }
 
+local no_prefix = {
+    property = true, signal = true, clientruleproperty = true
+}
+
 custom_display_name_handler = function(item, default_handler)
 
     -- Remove the "namespace" from the signals and properties
-    if item.type == "property" or item.type == "signal" then
+    if no_prefix[item.type] then
         local name = item.name:match("%.([^.]+)$")
         return name ~= "" and name or item.name
     end

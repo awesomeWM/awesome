@@ -8,6 +8,9 @@
 -- program after it has been launched.  This requires currently that the
 -- applicaton supports them.
 --
+-- Frequently asked questions
+-- ===
+--
 -- **Rules of thumb when a shell is needed**:
 --
 -- * A shell is required when the commands contain `&&`, `;`, `||`, `&` or
@@ -45,44 +48,56 @@
 -- *instance*, a *role*, and a *type*. See `client.class`, `client.instance`,
 -- `client.role` and `client.type` for more information about these properties.
 --
--- **The startup notification protocol**:
+-- **Understanding blocking versus asynchronous execution**:
 --
--- The startup notification protocol is an optional specification implemented
--- by X11 applications to bridge the chain of knowledge between the moment a
--- program is launched to the moment its window (client) is shown. It can be
--- found [on the FreeDesktop.org website](https://www.freedesktop.org/wiki/Specifications/startup-notification-spec/).
+-- Awesome is single threaded, it means only one thing is executed at any time.
+-- But Awesome isn't doomed to be slow. It may not have multiple threads, but
+-- it has something called coroutine and also has callbacks. This means things
+-- that take time to execute can still do so in the background (using C threads
+-- or external process + sockets). When they are done, they can notify the
+-- Awesome thread. This works perfectly and avoid blocking Awesome.
 --
--- Awesome has support for the various events that are part of the protocol, but
--- the most useful is the identifier, usually identified by its `SNID` acronym in
--- the documentation. It isn't usually necessary to even know it exists, as it
--- is all done automatically. However, if more control is required, the
--- identifier can be specified by an environment variable called
--- `DESKTOP_STARTUP_ID`. For example, let us consider execution of the following
--- command:
+-- If you want to update the text of a `wibox.widget.textbox` with the output
+-- of a shell command, you should use the `awful.spawn.easy_async_with_shell`
+-- command. It is strongly recommanded not to use `io.popen` is explained in the
+-- "Getting a command's output" section. Asynchronous execution is at first a
+-- bit tricky to understand if you never used that before. The example below
+-- should demonstrate how it works.
 --
---    DESKTOP_STARTUP_ID="something_TIME$(date '+%s')" my_command
+-- If we do (but *really*, don't do that):
 --
--- This should (if the program correctly implements the protocol) result in
--- `c.startup_id` to at least match `something`.
--- This identifier can then be used in `awful.rules` to configure the client.
+--     -- **NEVER, EVER, DO THIS**: your computer will freeze
+--     os.execute("sleep 1; echo foo > /tmp/foo.txt")
+--     mylabel.text = io.popen("cat /tmp/foo.txt"):read("*all")
 --
--- Awesome can automatically set the `DESKTOP_STARTUP_ID` variable. This is used
--- by `awful.spawn` to specify additional rules for the startup. For example:
+-- The label will display `foo`. But If we do:
 --
---    awful.spawn("urxvt -e maxima -name CALCULATOR", {
---        floating  = true,
---        tag       = mouse.screen.selected_tag,
---        placement = awful.placement.bottom_right,
---    })
+--     -- Don't do this, it wont work.
+--     -- Assumes /tmp/foo.txt does not exist
+--     awful.spawn.with_shell("sleep 1; echo foo > /tmp/foo.txt")
+--     mylabel.text = io.popen("cat /tmp/foo.txt"):read("*all")
 --
--- This can also be used from the command line:
+-- Then the label will be **empty**. `awful.spawn` and `awful.spawn.with_shell`
+-- will **not** block and thus the `io.popen` will be executed before
+-- `sleep 1` finishes. This is why we have async functions to execute shell
+-- commands. There are many variants with difference characteristics and
+-- complexity. `awful.spawn.easy_async` is the most common as it is good enough
+-- for the general "I want to execute a command and do something with the
+-- output when it finishes".
 --
---    awesome-client 'awful=require("awful");
---      awful.spawn("urxvt -e maxima -name CALCULATOR", {
---        floating  = true,
---        tag       = mouse.screen.selected_tag,
---        placement = awful.placement.bottom_right,
---      })'
+--     -- This is the correct way
+--     local command = "sleep 1; echo foo > /tmp/foo.txt"
+--
+--     awful.spawn.easy_async_with_shell(command, function()
+--         awful.spawn.easy_async_with_shell("cat /tmp/foo.txt", function(out)
+--             mylabel.text = out
+--         end)
+--     end)
+--
+-- In this variant, Awesome will not block. Again, like other spawn, you
+-- cannot add code outside of the callback function to use the result of the
+-- command. The code will be executed before the command is finished so the
+-- result wont yet be available.
 --
 -- **Getting a command's output**:
 --
@@ -147,6 +162,53 @@
 -- If you wish to change how the default applications behave, then consult the
 -- [Desktop Entry](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html)
 -- specification.
+--
+-- Spawning applications with specific properties
+-- ===
+--
+-- **The startup notification protocol**:
+--
+-- The startup notification protocol is an optional specification implemented
+-- by X11 applications to bridge the chain of knowledge between the moment a
+-- program is launched to the moment its window (client) is shown. It can be
+-- found [on the FreeDesktop.org website](https://www.freedesktop.org/wiki/Specifications/startup-notification-spec/).
+--
+-- Awesome has support for the various events that are part of the protocol, but
+-- the most useful is the identifier, usually identified by its `SNID` acronym in
+-- the documentation. It isn't usually necessary to even know it exists, as it
+-- is all done automatically. However, if more control is required, the
+-- identifier can be specified by an environment variable called
+-- `DESKTOP_STARTUP_ID`. For example, let us consider execution of the following
+-- command:
+--
+--    DESKTOP_STARTUP_ID="something_TIME$(date '+%s')" my_command
+--
+-- This should (if the program correctly implements the protocol) result in
+-- `c.startup_id` to at least match `something`.
+-- This identifier can then be used in `awful.rules` to configure the client.
+--
+-- Awesome can automatically set the `DESKTOP_STARTUP_ID` variable. This is used
+-- by `awful.spawn` to specify additional rules for the startup. For example:
+--
+--    awful.spawn("urxvt -e maxima -name CALCULATOR", {
+--        floating  = true,
+--        tag       = mouse.screen.selected_tag,
+--        placement = awful.placement.bottom_right,
+--    })
+--
+-- This can also be used from the command line:
+--
+--    awesome-client 'awful=require("awful");
+--      awful.spawn("urxvt -e maxima -name CALCULATOR", {
+--        floating  = true,
+--        tag       = mouse.screen.selected_tag,
+--        placement = awful.placement.bottom_right,
+--      })'
+--
+-- This table contains the client properties that are valid when used the
+-- `sn_rules` or `prop` function argument. They are the same as in `awful.rules`.
+--
+--@DOC_rules_index_COMMON@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;

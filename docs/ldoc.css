@@ -22,7 +22,7 @@ hr {
     margin: 15px 0;
 }
 
-code, tt {
+tt {
     font-family: monospace;
 }
 span.parameter {
@@ -45,6 +45,19 @@ span.types:after {
 
 p.name {
     font-family: monospace;
+}
+
+kbd, p code, ol code {
+    background-color: #eaedf587;
+    padding-left: 3px;
+    padding-right: 3px;
+    border-radius: 3px;
+    border-style: solid;
+    border-width: 1px;
+    border-color: #b7bac1;
+    font-family: monospace;
+    margin-left: 5px;
+    margin-right: 5px;
 }
 
 #navigation {
@@ -136,6 +149,7 @@ pre {
     padding: 15px;
     overflow: auto;
     font-family: monospace;
+    max-width: 720px;
 }
 
 #content ul pre.example {
@@ -189,6 +203,58 @@ table {
 
 table th, table td {
     padding: 2px;
+}
+
+.widget_list td {
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.widget_list tr td:first-child {
+    padding-left: 5px;
+}
+
+.widget_list tr td:last-child {
+    padding-right: 10px;
+}
+
+.widget_list {
+    border-collapse: unset;
+    overflow: hidden;
+    border-style: solid;
+    border-width: 0.5px;
+    border-top-left-radius: 7px;
+    border-top-right-radius: 7px;
+}
+
+.widget_list th {
+    background-color: #2c3e67;
+    font-weight: bold;
+    color: white;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.widget_list th:first-child {
+    border-top-left-radius: 7px;
+    border-bottom-width: 1px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.widget_list th:last-child {
+    border-top-right-radius: 7px;
+    border-width: 0px;
+    border-bottom-width: 1px;
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.widget_list td {
+    border-style: solid;
+    border-width: 0px;
+    border-right-width: 1px;;
+    border-bottom-width: 1px;
 }
 
 #about {

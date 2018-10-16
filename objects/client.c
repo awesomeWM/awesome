@@ -108,7 +108,28 @@
 
 /** Client class.
  *
- * @table object
+ * This table allow to add more dynamic properties to the clients. For example,
+ * doing:
+ *
+ *     function awful.client.object.set_my_cool_property(c, value)
+ *         -- Some logic code
+ *         c._my_secret_my_cool_property = value
+ *         c:emit_signal("property::my_cool_property)
+ *     end
+ *
+ *     function awful.client.object.get_my_cool_property()
+ *         return c._my_secret_my_cool_property
+ *     end
+ *
+ * Will add a new "my_cool_property" dyanmic property to all client. These
+ * methods will be called when an user does `c.my_cool_property = "something"`
+ * or set them in `awdul.rules`.
+ *
+ * Note that doing this isn't required to set random properties to the client,
+ * it is only useful when setting or getting these properties require code to
+ * executed.
+ *
+ * @table awful.object
  */
 
 /** When a client gains focus.

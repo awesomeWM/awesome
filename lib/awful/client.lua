@@ -59,6 +59,93 @@ client.property = {}
 client.shape = require("awful.client.shape")
 client.focus = require("awful.client.focus")
 
+--- The client default placement on the screen.
+--
+-- The default config uses:
+--
+--    awful.placement.no_overlap+awful.placement.no_offscreen
+--
+-- @clientruleproperty placement
+-- @see awful.placement
+
+--- When applying the placement, honor the screen padding.
+-- @clientruleproperty honor_padding
+-- @param[opt=true] boolean
+-- @see awful.placement
+
+--- When applying the placement, honor the screen work area.
+--
+-- The workarea is the part of the screen that excludes the bars and docks.
+--
+-- @clientruleproperty honor_workarea
+-- @param[opt=true] boolean
+-- @see awful.placement
+
+--- The client default tag.
+-- @clientruleproperty tag
+-- @param tag
+-- @see tag
+-- @see new_tag
+-- @see tags
+-- @see switch_to_tags
+
+--- The client default tags.
+--
+-- Avoid using the tag and tags properties at the same time, it will cause
+-- issues.
+--
+-- @clientruleproperty tags
+-- @param[opt={tag}] table
+-- @see tag
+-- @see new_tag
+-- @see tags
+-- @see switch_to_tags
+
+--- Create a new tag for this client.
+--
+-- If the value is `true`, the new tag will be named after the client `class`.
+-- If it is a string, it will be the tag name.
+--
+-- If a table is used, all of its properties will be passed to the tag
+-- constructor:
+--
+--    new_tag = {
+--        name     = "My new tag!", -- The tag name.
+--        layout   = awful.layout.suit.max, -- Set the tag layout.
+--        volatile = true, -- Remove the tag when the client is closed.
+--    }
+--
+-- @tparam[opt=false] table|string|boolean new_tag
+-- @clientruleproperty new_tag
+-- @see tag
+-- @see tags
+-- @see switch_to_tags
+
+--- Unselect the current tags and select this client tags.
+-- Note that this property was called `switchtotag` in previous Awesome versions.
+-- @clientruleproperty switch_to_tags
+-- @param[opt=false] boolean
+-- @see tag.selected
+
+--- Define if the client should grab focus by default.
+--
+-- The `request::activate` context for this call is `rules`.
+--
+-- @clientruleproperty focus
+-- @param[opt=false] boolean
+
+--- Should this client have a titlebar by default.
+-- @clientruleproperty titlebars_enabled
+-- @param[opt=false] boolean
+-- @see awful.titlebar
+
+--- A function to call when this client is ready.
+--
+-- It can be useful to set extra properties or perform actions.
+--
+-- @clientruleproperty callback
+-- @see awful.spawn
+
 --- Jump to the given client.
 -- Takes care of focussing the screen, the right tag, etc.
 --

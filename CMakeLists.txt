@@ -289,7 +289,12 @@ if(GENERATE_DOC)
     file(COPY ${SOURCE_DIR}/docs/ldoc.css DESTINATION ${BUILD_DIR}/docs)
 
     add_custom_target(ldoc ALL
-        DEPENDS ${BUILD_DIR}/doc/index.html ${BUILD_DIR}/docs/ldoc.css)
+        DEPENDS
+            ${BUILD_DIR}/doc/index.html
+            ${BUILD_DIR}/docs/ldoc.css
+            generate_awesomerc
+    )
+
     if (STRICT_TESTS)
         set(ldoc_args --fatalwarnings .)
         set(ldoc_desc_suffix " (fatal warnings)")
