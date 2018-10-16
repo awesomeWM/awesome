@@ -323,7 +323,8 @@ function widget.new(args)
         local max_height_px = height - group_label_height
         local column_layouts = {}
         for _, group in ipairs(available_groups) do
-            local keys = gtable.join(self._cached_awful_keys[group], self._additional_hotkeys[group])
+            local cached = self._cached_awful_keys or {}
+            local keys = gtable.join(cached[group], self._additional_hotkeys[group])
             local joined_descriptions = ""
             for i, key in ipairs(keys) do
                 joined_descriptions = joined_descriptions .. key.description .. (i~=#keys and "\n" or "")
