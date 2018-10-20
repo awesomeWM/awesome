@@ -1,11 +1,14 @@
-rules:
-  default:
-    protection:
-      required_status_checks:
-        contexts:
-          - continuous-integration/travis-ci
-          - Codacy/PR Quality Review
-          - codecov/patch
-          - coverage/coveralls
-      required_pull_request_reviews:
-        required_approving_review_count: 2
+pull_request_rules:
+  - name: automatic merge
+    conditions:
+      - label!=no-mergify
+      - '#approved-reviews-by>=2'
+      - status-success=continuous-integration/travis-ci
+      - status-success=Codacy/PR Quality Review
+      - status-success=codecov/patch
+      - status-success=coverage/coveralls
+    actions:
+      merge:
+        method: merge
+      delete_head_branch: {}
+      dismiss_reviews: {}
