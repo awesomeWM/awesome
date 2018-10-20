@@ -260,7 +260,7 @@ Code:
 
 
 In this example, the system is extended so that the popular
-[Vicious](https://github.com/Mic92/vicious) extension module can be
+[Vicious](https://github.com/vicious-widgets/vicious) extension module can be
 used directly in the layout declaration. This example will update the textbox
 every 3 seconds to show the CPU usage.
 
