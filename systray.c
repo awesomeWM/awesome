@@ -310,6 +310,13 @@ systray_update(int base_size, bool horizontal, bool reverse, int spacing, bool f
         xcb_configure_window(globalconf.connection, em->win,
                              XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                              config_vals);
+
+        /* Systray icons with transparent background need explicit color.
+         * Provide the one of default background color */
+        uint32_t config_back[] = { globalconf.systray.background_pixel };
+        xcb_change_window_attributes(globalconf.connection,
+                                     em->win,
+                                     XCB_CW_BACK_PIXEL, config_back);
         xcb_map_window(globalconf.connection, em->win);
         if (force_redraw)
             xcb_clear_area(globalconf.connection, 1, em->win, 0, 0, 0, 0);
