@@ -21,6 +21,7 @@ local client = require("awful.client")
 local ascreen = require("awful.screen")
 local timer = require("gears.timer")
 local gmath = require("gears.math")
+local gtable = require("gears.table")
 local protected_call = require("gears.protected_call")
 
 local function get_screen(s)
@@ -73,6 +74,16 @@ layout.layouts = {
 --
 -- @field layout.layouts
 
+--- Return the tag layout index (from `awful.layout.layouts`).
+--
+-- If the layout isn't part of `awful.layout.layouts`, this function returns
+-- nil.
+--
+-- @tparam tag t The tag.
+-- @treturn nil|number The layout index.
+function layout.get_tag_layout_index(t)
+    return gtable.hasitem(layout.layouts, t.layout)
+end
 
 -- This is a special lock used by the arrange function.
 -- This avoids recurring call by emitted signals.
