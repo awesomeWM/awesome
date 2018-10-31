@@ -5,6 +5,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
+-- @copyright 2018 Aire-One
 -- @classmod awful.widget.prompt
 ---------------------------------------------------------------------------
 
@@ -43,6 +44,7 @@ local function run(promptbox)
         exe_callback        = function (...)
             promptbox:spawn_and_handle_error(...)
         end,
+        done_callback = promptbox.done_callback
     }
 end
 
@@ -61,6 +63,9 @@ end
 -- @tparam[opt=`beautiful.prompt_fg` or `beautiful.fg_normal`] color args.fg Prompt foreground color.
 -- @tparam[opt=`awful.completion.shell`] function args.completion_callback
 --   The callback function to call to get completion. See @{awful.prompt.run} for details.
+-- @tparam[opt] function args.done_callback
+--  The callback function to always call without arguments, regardless of
+--  whether the prompt was cancelled. See @{awful.prompt.run} for details.
 -- @return An instance of prompt widget, inherits from `wibox.container.background`.
 -- @function awful.widget.prompt
 function widgetprompt.new(args)
@@ -74,6 +79,7 @@ function widgetprompt.new(args)
     promptbox.fg = args.fg or beautiful.prompt_fg or beautiful.fg_normal
     promptbox.bg = args.bg or beautiful.prompt_bg or beautiful.bg_normal
     promptbox.completion_callback = args.completion_callback or completion.shell
+    promptbox.done_callback = args.done_callback or nil
     return promptbox
 end
 
