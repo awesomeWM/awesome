@@ -425,6 +425,9 @@ local titlebar = {
 --- Show tooltips when hover on titlebar buttons (defaults to 'true')
 titlebar.enable_tooltip = true
 
+--- Title to display if client name is not set (defaults to '<unknown>')
+titlebar.fallback_name = '<unknown>'
+
 local all_titlebars = setmetatable({}, { __mode = 'k' })
 
 -- Get a color for a titlebar, this tests many values from the array and the theme
@@ -595,7 +598,7 @@ end
 function titlebar.widget.titlewidget(c)
     local ret = textbox()
     local function update()
-        ret:set_text(c.name or "<unknown>")
+        ret:set_text(c.name or titlebar.fallback_name)
     end
     c:connect_signal("property::name", update)
     update()
