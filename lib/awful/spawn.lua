@@ -36,7 +36,7 @@
 -- A *process* has a *PID* (process identifier). It can have 0, 1 or many
 -- *window*s.
 --
--- A *command* if what is used to start *process*(es). It has no direct relation
+-- A *command* is what is used to start *process*(es). It has no direct relation
 -- with *process*, *client* or *window*. When a command is executed, it will
 -- usually start a *process* which keeps running until it exits. This however is
 -- not always the case as some applications use scripts as command and others
