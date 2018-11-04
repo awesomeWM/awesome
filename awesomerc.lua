@@ -133,25 +133,25 @@ mytextclock = wibox.widget.textclock()
 -- Create a wibox for each screen and add it
 -- @TAGLIST_BUTTON@
 local taglist_buttons = gears.table.join(
-                    awful.button({ }, 1, function(t) t:view_only() end),
+                    awful.button({}, 1, function(t) t:view_only() end),
                     awful.button({ modkey }, 1, function(t)
                                               if client.focus then
                                                   client.focus:move_to_tag(t)
                                               end
                                           end),
-                    awful.button({ }, 3, awful.tag.viewtoggle),
+                    awful.button({}, 3, awful.tag.viewtoggle),
                     awful.button({ modkey }, 3, function(t)
                                               if client.focus then
                                                   client.focus:toggle_tag(t)
                                               end
                                           end),
-                    awful.button({ }, 4, function(t) awful.tag.viewnext(t.screen) end),
-                    awful.button({ }, 5, function(t) awful.tag.viewprev(t.screen) end)
+                    awful.button({}, 4, function(t) awful.tag.viewnext(t.screen) end),
+                    awful.button({}, 5, function(t) awful.tag.viewprev(t.screen) end)
                 )
 
 -- @TASKLIST_BUTTON@
 local tasklist_buttons = gears.table.join(
-                     awful.button({ }, 1, function (c)
+                     awful.button({}, 1, function (c)
                                               if c == client.focus then
                                                   c.minimized = true
                                               else
@@ -162,12 +162,12 @@ local tasklist_buttons = gears.table.join(
                                                   )
                                               end
                                           end),
-                     awful.button({ }, 2, function(c) c:kill() end),
-                     awful.button({ }, 3, client_menu_toggle_fn()),
-                     awful.button({ }, 4, function ()
+                     awful.button({}, 2, function(c) c:kill() end),
+                     awful.button({}, 3, client_menu_toggle_fn()),
+                     awful.button({}, 4, function ()
                                               awful.client.focus.byidx(1)
                                           end),
-                     awful.button({ }, 5, function ()
+                     awful.button({}, 5, function ()
                                               awful.client.focus.byidx(-1)
                                           end))
 
@@ -201,11 +201,11 @@ awful.screen.connect_for_each_screen(function(s)
     -- We need one layoutbox per screen.
     s.mylayoutbox = awful.widget.layoutbox(s)
     s.mylayoutbox:buttons(gears.table.join(
-                           awful.button({ }, 1, function () awful.layout.inc( 1) end),
-                           awful.button({ }, 2, function () awful.layout.set( awful.layout.layouts[1] ) end),
-                           awful.button({ }, 3, function () awful.layout.inc(-1) end),
-                           awful.button({ }, 4, function () awful.layout.inc( 1) end),
-                           awful.button({ }, 5, function () awful.layout.inc(-1) end)))
+                           awful.button({}, 1, function () awful.layout.inc( 1) end),
+                           awful.button({}, 2, function () awful.layout.set( awful.layout.layouts[1] ) end),
+                           awful.button({}, 3, function () awful.layout.inc(-1) end),
+                           awful.button({}, 4, function () awful.layout.inc( 1) end),
+                           awful.button({}, 5, function () awful.layout.inc(-1) end)))
     -- Create a taglist widget
     s.mytaglist = awful.widget.taglist {
         screen  = s,
