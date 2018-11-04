@@ -249,9 +249,9 @@ end)
 -- {{{ Mouse bindings
 -- @DOC_ROOT_BUTTONS@
 root.buttons(gears.table.join(
-    awful.button({ }, 3, function () mymainmenu:toggle() end),
-    awful.button({ }, 4, awful.tag.viewnext),
-    awful.button({ }, 5, awful.tag.viewprev)
+    awful.button({}, 3, function () mymainmenu:toggle() end),
+    awful.button({}, 4, awful.tag.viewnext),
+    awful.button({}, 5, awful.tag.viewprev)
 ))
 -- }}}
 
@@ -456,7 +456,7 @@ end
 
 -- @DOC_CLIENT_BUTTONS@
 clientbuttons = gears.table.join(
-    awful.button({ }, 1, function (c)
+    awful.button({}, 1, function (c)
         c:emit_signal("request::activate", "mouse_click", {raise = true})
     end),
     awful.button({ modkey }, 1, function (c)
@@ -479,7 +479,7 @@ root.keys(globalkeys)
 awful.rules.rules = {
     -- @DOC_GLOBAL_RULE@
     -- All clients will match this rule.
-    { rule = { },
+    { rule = {},
       properties = { border_width = beautiful.border_width,
                      border_color = beautiful.border_normal,
                      focus = awful.client.focus.filter,
@@ -554,12 +554,12 @@ end)
 client.connect_signal("request::titlebars", function(c)
     -- buttons for the titlebar
     local buttons = gears.table.join(
-        awful.button({ }, 1, function()
+        awful.button({}, 1, function()
             c:emit_signal("request::activate", "titlebar", {raise = true})
             awful.mouse.client.move(c)
         end),
-        awful.button({ }, 2, function() c:kill() end),
-        awful.button({ }, 3, function()
+        awful.button({}, 2, function() c:kill() end),
+        awful.button({}, 3, function()
             c:emit_signal("request::activate", "titlebar", {raise = true})
             awful.mouse.client.resize(c)
         end)
