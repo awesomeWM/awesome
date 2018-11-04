@@ -162,7 +162,7 @@ local tasklist_buttons = gears.table.join(
                                                   )
                                               end
                                           end),
-                     awful.button({ }, 2, function( c ) c:kill() end),
+                     awful.button({ }, 2, function(c) c:kill() end),
                      awful.button({ }, 3, client_menu_toggle_fn()),
                      awful.button({ }, 4, function ()
                                               awful.client.focus.byidx(1)
