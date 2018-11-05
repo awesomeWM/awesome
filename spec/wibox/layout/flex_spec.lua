@@ -47,7 +47,7 @@ describe("wibox.layout.flex", function()
             it("layout", function()
                 assert.widget_layout(layout, { 100, 100 }, {
                     p(first,  0,  0, 100, 33),
-                    p(second, 0, 33, 100, 33),
+                    p(second, 0, 33, 100, 34),
                     p(third,  0, 67, 100, 33),
                 })
             end)
@@ -61,7 +61,7 @@ describe("wibox.layout.flex", function()
             it("layout", function()
                 assert.widget_layout(layout, { 5, 100 }, {
                     p(first,  0,  0, 5, 33),
-                    p(second, 0, 33, 5, 33),
+                    p(second, 0, 33, 5, 34),
                     p(third,  0, 67, 5, 33),
                 })
             end)
@@ -74,9 +74,9 @@ describe("wibox.layout.flex", function()
 
             it("layout", function()
                 assert.widget_layout(layout, { 100, 20 }, {
-                    p(first,  0,  0, 100, 6),
+                    p(first,  0,  0, 100, 7),
                     p(second, 0,  7, 100, 6),
-                    p(third,  0, 13, 100, 6),
+                    p(third,  0, 13, 100, 7),
                 })
             end)
         end)
