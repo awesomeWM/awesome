@@ -60,9 +60,6 @@ function background:draw(context, cr, width, height)
 
 end
 
-function background:after_draw_children(_, cr)
-end
-
 -- Prepare drawing the children of this widget
 function background:before_draw_children(_, cr)
 
