@@ -10,7 +10,6 @@ local base = require("wibox.widget.base")
 local fixed = require("wibox.layout.fixed")
 local table = table
 local pairs = pairs
-local floor = math.floor
 local gmath = require("gears.math")
 local gtable = require("gears.table")
 
@@ -68,7 +67,7 @@ local flex = {}
 
 function flex:layout(_, width, height)
     local result = {}
-    local pos,spacing = 0, self._private.spacing
+    local spacing = self._private.spacing
     local num = #self._private.widgets
     local total_spacing = (spacing*(num-1))
     local spacing_widget = self._private.spacing_widget
@@ -88,17 +87,23 @@ function flex:layout(_, width, height)
         space_per_item = math.min(space_per_item, self._private.max_widget_size)
     end
 
+    local pos, pos_rounded = 0, 0
     for k, v in pairs(self._private.widgets) do
         local x, y, w, h
+
+        local next_pos = pos + space_per_item
+        local next_pos_rounded = gmath.round(next_pos)
+
         if is_y then
-            x, y = 0, gmath.round(pos)
-            w, h = width, floor(space_per_item)
+            x, y = 0, pos_rounded
+            w, h = width, next_pos_rounded - pos_rounded
         else
-            x, y = gmath.round(pos), 0
-            w, h = floor(space_per_item), height
+            x, y = pos_rounded, 0
+            w, h = next_pos_rounded - pos_rounded, height
         end
 
-        pos = pos + space_per_item + spacing
+        pos = next_pos + spacing
+        pos_rounded = next_pos_rounded + spacing
 
         table.insert(result, base.place_widget_at(v, x, y, w, h))
 
