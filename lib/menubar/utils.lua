@@ -138,19 +138,7 @@ local all_icon_sizes = {
 }
 
 --- List of supported icon formats.
-local icon_formats = { "png", "xpm", "svg" }
-
---- Check whether the icon format is supported.
--- @param icon_file Filename of the icon.
--- @return true if format is supported, false otherwise.
-local function is_format_supported(icon_file)
-    for _, f in ipairs(icon_formats) do
-        if icon_file:match('%.' .. f) then
-            return true
-        end
-    end
-    return false
-end
+local supported_icon_formats = { ["png"] = 1, ["xpm"] = 2, ["svg"] = 3 }
 
 local icon_lookup_path = nil
 --- Get a list of icon lookup paths.
@@ -279,20 +267,21 @@ function utils.lookup_icon_uncached(icon_file)
         return false
     end
 
-    if icon_file:sub(1, 1) == '/' and is_format_supported(icon_file) then
+    local icon_file_ext = icon_file:gsub(".*%.","")
+    if icon_file:sub(1, 1) == '/' and supported_icon_formats[icon_file_ext] then
         -- If the path to the icon is absolute and its format is
         -- supported, do not perform a lookup.
         return gfs.file_readable(icon_file) and icon_file or nil
     else
         for _, directory in ipairs(get_icon_lookup_path()) do
-            if is_format_supported(icon_file) and
+            if supported_icon_formats[icon_file_ext] and
                     gfs.file_readable(directory .. "/" .. icon_file) then
                 return directory .. "/" .. icon_file
             else
                 -- Icon is probably specified without path and format,
                 -- like 'firefox'. Try to add supported extensions to
                 -- it and see if such file exists.
-                for _, format in ipairs(icon_formats) do
+                for format, _ in pairs(supported_icon_formats) do
                     local possible_file = directory .. "/" .. icon_file .. "." .. format
                     if gfs.file_readable(possible_file) then
                         return possible_file
