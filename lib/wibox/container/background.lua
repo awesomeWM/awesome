@@ -38,7 +38,7 @@ function background:draw(context, cr, width, height)
         )/2)
 
         cr:translate(offset, offset)
-        self._private.shape(cr, width - offset * 2, height - offset * 2, unpack(self._private.shape_args or {}))
+        self._private.shape(cr, width - 2*offset, height - 2*offset, unpack(self._private.shape_args or {}))
         cr:translate(-offset, -offset)
         self._private.path = cr:copy_path()
         cr:clip()
