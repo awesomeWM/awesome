@@ -41,16 +41,6 @@ local default_icon = nil
 --- Name of the WM for the OnlyShowIn entry in the .desktop file.
 utils.wm_name = "awesome"
 
---- Possible escape characters (not including the preceding backslash) in
---.desktop files and their equates.
-local escape_sequences = {
-    [ [[\\]] ]  = [[\]],
-    [ [[\n]] ]  = '\n',
-    [ [[\r]] ]  = '\r',
-    [ [[\s]] ]  = ' ',
-    [ [[\t]] ]  = '\t',
-}
-
 -- Maps keys in desktop entries to suitable getter function.
 -- The order of entries is as in the spec.
 -- https://standards.freedesktop.org/desktop-entry-spec/latest/ar01s05.html
@@ -226,49 +216,6 @@ function utils.rtrim(s)
         return string.sub(s, 1, #s - 1)
     end
     return s
-end
-
---- Unescape strings read from desktop files.
--- Possible sequences are \n, \r, \s, \t, \\, which have the usual meanings.
--- @tparam string s String to unescape
--- @treturn string The unescaped string
-function utils.unescape(s)
-    if not s then return end
-
-    -- Ignore the second return value of string.gsub() (number replaced)
-    s = string.gsub(s, "\\.", function(sequence)
-        return escape_sequences[sequence] or sequence
-    end)
-    return s
-end
-
---- Separate semi-colon separated lists.
--- Semi-colons in lists are escaped as '\;'.
--- @tparam string s String to parse
--- @treturn table A table containing the separated strings. Each element is
--- unescaped by utils.unescape().
-function utils.parse_list(s)
-    if not s then return end
-
-    -- Append terminating semi-colon if not already there.
-    if string.sub(s, -1) ~= ';' then
-        s = s .. ';'
-    end
-
-    local segments = {}
-    local part = ""
-    -- Iterate over sub-strings between semicolons
-    for word, backslashes in string.gmatch(s, "([^;]-(\\*));") do
-        if #backslashes % 2 ~= 0 then
-            -- The semicolon was escaped, remember this part for later
-            part = part .. word:sub(1, -2) .. ";"
-        else
-            table.insert(segments, utils.unescape(part .. word))
-            part = ""
-        end
-    end
-
-    return segments
 end
 
 --- Lookup an icon in different folders of the filesystem.
