@@ -32,13 +32,14 @@ function background:draw(context, cr, width, height)
 
     if self._private.shape then
         -- Only add the offset if there is something to draw
-        local offset = gmath.round((
+        local double_offset = gmath.round((
             (self._private.shape_border_width and self._private.shape_border_color)
-                and self._private.shape_border_width or 0
-        )/2)
+                and (self._private.shape_border_width * (self._private.shape_clip and 2 or 1)) or 0
+        ))
+        local offset = gmath.round(double_offset/2)
 
         cr:translate(offset, offset)
-        self._private.shape(cr, width - 2*offset, height - 2*offset, unpack(self._private.shape_args or {}))
+        self._private.shape(cr, width - double_offset, height - double_offset, unpack(self._private.shape_args or {}))
         cr:translate(-offset, -offset)
         self._private.path = cr:copy_path()
         cr:clip()
@@ -68,7 +69,7 @@ function background:before_draw_children(_, cr)
         cr:append_path(self._private.path)
         cr:set_source(color(self._private.shape_border_color or self._private.foreground or beautiful.fg_normal))
 
-        cr:set_line_width(self._private.shape_border_width)
+        cr:set_line_width(self._private.shape_border_width * (self._private.shape_clip and 2 or 1))
         cr:stroke()
     end
 
