@@ -171,6 +171,7 @@ function textbox:set_markup(text)
     if not success then
         gdebug.print_error(message)
     end
+    return self
 end
 
 function textbox:get_markup()
@@ -191,6 +192,7 @@ function textbox:set_text(text)
     self._private.layout.attributes = nil
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
+    return self
 end
 
 function textbox:get_text()
@@ -211,6 +213,7 @@ function textbox:set_ellipsize(mode)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
     end
+    return self
 end
 
 --- Set a textbox' wrap mode.
@@ -227,6 +230,7 @@ function textbox:set_wrap(mode)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
     end
+    return self
 end
 
 --- The textbox' vertical alignment
@@ -243,6 +247,7 @@ function textbox:set_valign(mode)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
     end
+    return self
 end
 
 --- Set a textbox' horizontal alignment.
@@ -259,6 +264,7 @@ function textbox:set_align(mode)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
     end
+    return self
 end
 
 --- Set a textbox' font
@@ -269,6 +275,7 @@ function textbox:set_font(font)
     self._private.layout:set_font_description(beautiful.get_font(font))
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
+    return self
 end
 
 --- Create a new textbox.
