@@ -1144,7 +1144,7 @@ function client.object.get_requests_no_titlebar(c)
     local hints = c.motif_wm_hints
     if not hints then return false end
 
-    local decor = hints.deocrations
+    local decor = hints.decorations
     if not decor then return false end
 
     local result = not decor.title

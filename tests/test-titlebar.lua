@@ -3,10 +3,11 @@ local titlebar = require("awful.titlebar")
 local rules = require("awful.rules")
 local spawn = require("awful.spawn")
 
-local tiny_client = {"lua", "-e", [[
+local tiny_client_code_template = [[
 local Gtk, class = require('lgi').require('Gtk'), 'client'
 Gtk.init()
 window = Gtk.Window {default_width=100, default_height=100, title='title'}
+%s
 window:set_wmclass(class, class)
 local app = Gtk.Application {}
 function app:on_activate()
@@ -14,7 +15,13 @@ function app:on_activate()
     window:show_all()
 end
 app:run {''}
-]]}
+]]
+local tiny_client = {"lua", "-e", string.format(tiny_client_code_template, "")}
+local tiny_client_undecorated = {"lua", "-e",
+    string.format(tiny_client_code_template, [[
+window.decorated = false
+]])
+}
 
 -- Use the test client props
 rules.rules = {}
@@ -82,6 +89,67 @@ local steps = {
         titlebar.show(c, "top")
 
         assert(c.width == 100 and c.height == h)
+
+        c:kill()
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 0 then return end
+
+        spawn(tiny_client_undecorated, {titlebars_enabled=true})
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 then return end
+
+        local c = client.get()[1]
+
+        assert(c.width == 100 and c.height > 100)
+        assert(c._request_titlebars_called)
+
+        c:kill()
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 0 then return end
+
+        spawn(tiny_client, {titlebars_enabled=function(c)
+            return not c.requests_no_titlebar
+        end})
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 then return end
+
+        local c = client.get()[1]
+
+        assert(c.width == 100 and c.height > 100)
+        assert(c._request_titlebars_called)
+
+        c:kill()
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 0 then return end
+
+        spawn(tiny_client_undecorated, {titlebars_enabled=function(c)
+            return not c.requests_no_titlebar
+        end})
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 then return end
+
+        local c = client.get()[1]
+
+        assert(not c._request_titlebars_called)
+        assert(c.width == 100 and c.height == 100)
 
         c:kill()
 
