@@ -267,16 +267,17 @@ function utils.lookup_icon_uncached(icon_file)
         return false
     end
 
-    local icon_file_ext = icon_file:gsub(".*%.","")
+    local icon_file_ext = icon_file:match(".*%.(.-)$")
     if icon_file:sub(1, 1) == '/' and supported_icon_formats[icon_file_ext] then
         -- If the path to the icon is absolute and its format is
         -- supported, do not perform a lookup.
         return gfs.file_readable(icon_file) and icon_file or nil
     else
         for _, directory in ipairs(get_icon_lookup_path()) do
+            local possible_file = directory .. "/" .. icon_file
             if supported_icon_formats[icon_file_ext] and
-                    gfs.file_readable(directory .. "/" .. icon_file) then
-                return directory .. "/" .. icon_file
+                    gfs.file_readable(possible_file) then
+                return possible_file
             else
                 -- Icon is probably specified without path and format,
                 -- like 'firefox'. Try to add supported extensions to
