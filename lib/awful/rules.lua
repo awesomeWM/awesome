@@ -490,7 +490,7 @@ function rules.high_priority_properties.tag(c, value, props)
             local name = value
             value = atag.find_by_name(c.screen, value)
             if not value and not props.screen then
-                value = atag.find_by_name(nil, value)
+                value = atag.find_by_name(nil, name)
             end
             if not value then
                 require("gears.debug").print_error("awful.rules-rule specified "
