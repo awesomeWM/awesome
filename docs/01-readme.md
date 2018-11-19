@@ -120,20 +120,30 @@ Then in gdb set any args and run it:
 
     (gdb) set arg --replace
     (gdb) run
+    
+## Asking questions
+
+#### Stack Overflow
+You can ask questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/awesome-wm).
+
+#### Reddit
+We also have a [awesome subreddit](https://www.reddit.com/r/awesomewm/) where you can share your work and ask questions.
 
 ## Reporting issues
 
 Please report any issues you may find on [our bugtracker](https://github.com/awesomeWM/awesome/issues).
+
+## Contributing code
+
 You can submit pull requests on the [github repository](https://github.com/awesomeWM/awesome).
-Please read the [contributing guide](https://github.com/awesomeWM/awesome/blob/master/docs/02-contributing.md)
-for any coding, documentation or patch guidelines.
+Please read the [contributing guide](https://github.com/awesomeWM/awesome/blob/master/docs/02-contributing.md) for any coding, documentation or patch guidelines.
 
 ## Status
 [![Build Status](https://travis-ci.org/awesomeWM/awesome.svg?branch=master)](https://travis-ci.org/awesomeWM/awesome)
 
 ## Documentation
 
-Online documentation is available at https://awesomewm.org/apidoc/.
+Online documentation is available [here](https://awesomewm.org/apidoc/).
 
 ## License
 
