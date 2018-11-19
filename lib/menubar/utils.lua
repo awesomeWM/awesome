@@ -138,7 +138,7 @@ local all_icon_sizes = {
 }
 
 --- List of supported icon formats.
-local supported_icon_formats = { ["png"] = 1, ["xpm"] = 2, ["svg"] = 3 }
+local supported_icon_formats = { png = 1, xpm = 2, svg = 3 }
 
 local icon_lookup_path = nil
 --- Get a list of icon lookup paths.
