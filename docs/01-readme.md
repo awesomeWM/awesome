@@ -123,6 +123,12 @@ Then in gdb set any args and run it:
     
 ## Asking questions
 
+#### IRC
+
+You can join us in the `#awesome` channel on the [OFTC](http://www.oftc.net/) IRC network.
+
+[IRC Webchat](https://webchat.oftc.net/?channels=awesome)
+
 #### Stack Overflow
 You can ask questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/awesome-wm).
 
