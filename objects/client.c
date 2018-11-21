@@ -324,9 +324,8 @@
 /**
  * The client class.
  *
- * If the client has multiple classes, the first one is used.
- *
- * To get a client class from the command line, use the `xprop` command.
+ * To get a client class from the command line, use the command `xprop
+ * WM_CLASS`. The class will be the second string.
  *
  * **Signal:**
  *
@@ -338,6 +337,9 @@
 
 /**
  * The client instance.
+ *
+ * To get a client instance from the command line, use the command `xprop
+ * WM_CLASS`. The instance will be the first string.
  *
  * **Signal:**
  *
