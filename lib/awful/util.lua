@@ -33,9 +33,9 @@ util.table = {}
 --- The default shell used when spawing processes.
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
---- Execute a system command and road the output.
+--- Execute a system command and read the output.
 -- This function implementation **has been removed** and no longer
--- do anything. Use `awful.spawn.easy_async`.
+-- does anything. Use `awful.spawn.easy_async`.
 -- @deprecated awful.util.pread
 
 --- Display a deprecation notice, but only once per traceback.
@@ -228,6 +228,27 @@ end
 function util.geticonpath(iconname, exts, dirs, size)
     exts = exts or { 'png', 'gif' }
     dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }
+
+    local sizes
+    local size_strings = {}
+    if size then
+        -- TODO assuming size may be a non-standard size, consider looking into
+        -- nearby common sizes (e.g. check 48 and 32 if size = 40)
+        sizes = { size }
+    else
+        sizes = { 256, 128, 64, 48, 32, 24, 22, 16 }
+    end
+    for _, s in pairs(sizes) do
+        -- some themse use sizexsize, older one seem to use size only
+        table.insert(size_strings, string.format("%ux%u", s, s))
+        table.insert(size_strings, string.format("%u", s))
+    end
+
+    -- include 'scalable' among the size strings, at the beginning if no size
+    -- was specified, at the end otherwise
+    local scalable_pos = size and size_strings or 1
+    table.insert(size_strings, scalable_pos, 'scalable')
+
     local icontypes = { 'apps', 'actions',  'categories',  'emblems',
         'mimetypes',  'status', 'devices', 'extras', 'places', 'stock' }
     for _, d in pairs(dirs) do
@@ -237,9 +258,19 @@ function util.geticonpath(iconname, exts, dirs, size)
             if gfs.file_readable(icon) then
                 return icon
             end
-            if size then
+            for _, s in pairs(size_strings) do
+                icon = string.format("%s%s/%s.%s", d, s, iconname, e)
+                if gfs.file_readable(icon) then
+                    return icon
+                end
                 for _, t in pairs(icontypes) do
-                    icon = string.format("%s%ux%u/%s/%s.%s", d, size, size, t, iconname, e)
+                    icon = string.format("%s%s/%s/%s.%s", d, s, t, iconname, e)
+                    if gfs.file_readable(icon) then
+                        return icon
+                    end
+                    -- older themes seem to use the format type/size instead
+                    -- of size/type
+                    icon = string.format("%s%s/%s/%s.%s", d, t, s, iconname, e)
                     if gfs.file_readable(icon) then
                         return icon
                     end
