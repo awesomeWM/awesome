@@ -210,23 +210,23 @@ end
 -- @tparam[opt=1] int step The stepping.
 -- @treturn table
 function gtable.slice(t, start, end_, step)
-  local sliced = {}
-  if start == nil then
-    start = 1
-  elseif start < 0 then
-    start = #t + start + 1
-  end
-  if end_ == nil then
-    end_ = #t
-  elseif end_ < 0 then
-    end_ = #t + end_
-  else
-    end_ = end_ - 1
-  end
-  for i = start, end_, step or 1 do
-    sliced[#sliced + 1] = t[i]
-  end
-  return sliced
+    local sliced = {}
+    if start == nil then
+        start = 1
+    elseif start < 0 then
+        start = #t + start + 1
+    end
+    if end_ == nil then
+        end_ = #t
+    elseif end_ < 0 then
+        end_ = #t + end_
+    else
+        end_ = end_ - 1
+    end
+    for i = start, end_, step or 1 do
+        sliced[#sliced + 1] = t[i]
+    end
+    return sliced
 end
 
 --- Merge items from the one table to another one
