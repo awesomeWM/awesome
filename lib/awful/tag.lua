@@ -1213,6 +1213,17 @@ function tag.geticon(_tag)
     return tag.getproperty(_tag, "icon")
 end
 
+--- Show only tag icon.
+--
+-- **Signal:**
+--
+-- * *property::icon_only*
+--
+-- @property icon_only
+-- @param[opt=false] boolean
+
+-- accessors are implicit.
+
 --- The default number of columns.
 --
 -- @beautiful beautiful.column_count
