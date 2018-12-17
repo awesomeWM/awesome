@@ -27,8 +27,16 @@ local base = require("wibox.widget.base")
 local capi = {
     client = client
 }
+
+
+--- Titlebar defaults.
+-- @field enable_tooltip[opt=true] Show tooltips when hover on titlebar buttons
+-- @field fallback_name[opt='\<unknown\>'] Title to display if client name is not set
+-- @table awful.titlebar
 local titlebar = {
-    widget = {}
+    widget = {},
+    enable_tooltip = true,
+    fallback_name = '<unknown>'
 }
 
 --- The titlebar foreground (text) color.
@@ -422,11 +430,6 @@ local titlebar = {
 -- @name setup
 -- @class function
 
---- Show tooltips when hover on titlebar buttons (defaults to 'true')
-titlebar.enable_tooltip = true
-
---- Title to display if client name is not set (defaults to '<unknown>')
-titlebar.fallback_name = '<unknown>'
 
 local all_titlebars = setmetatable({}, { __mode = 'k' })
 
