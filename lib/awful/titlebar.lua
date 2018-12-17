@@ -29,15 +29,19 @@ local capi = {
 }
 
 
---- Titlebar defaults.
--- @field enable_tooltip[opt=true] Show tooltips when hover on titlebar buttons
--- @field fallback_name[opt='\<unknown\>'] Title to display if client name is not set
--- @table awful.titlebar
 local titlebar = {
     widget = {},
     enable_tooltip = true,
     fallback_name = '<unknown>'
 }
+
+
+--- Show tooltips when hover on titlebar buttons.
+-- @tfield[opt=true] boolean awful.titlebar.enable_tooltip
+
+--- Title to display if client name is not set.
+-- @field[opt='\<unknown\>'] awful.titlebar.fallback_name
+
 
 --- The titlebar foreground (text) color.
 -- @beautiful beautiful.titlebar_fg_normal
