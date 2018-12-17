@@ -443,6 +443,10 @@ function widget.new(args)
             border_color = self.border_color,
             shape = self.shape,
         })
+        local widget_obj = {
+            current_page = 1,
+            wibox = mywibox,
+        }
         mywibox:geometry({
             x = wa.x + math.floor((wa.width - width - self.border_width*2) / 2),
             y = wa.y + math.floor((wa.height - height - self.border_width*2) / 2),
@@ -451,13 +455,10 @@ function widget.new(args)
         })
         mywibox:set_widget(pages[1])
         mywibox:buttons(gtable.join(
-                awful.button({ }, 1, function () mywibox.visible=false awful.keygrabber.stop() end),
-                awful.button({ }, 3, function () mywibox.visible=false awful.keygrabber.stop() end)
+                awful.button({ }, 1, function () widget_obj:hide() end),
+                awful.button({ }, 3, function () widget_obj:hide() end)
         ))
 
-        local widget_obj = {}
-        widget_obj.current_page = 1
-        widget_obj.wibox = mywibox
         function widget_obj.page_next(_self)
             if _self.current_page == #pages then return end
             _self.current_page = _self.current_page + 1
@@ -473,6 +474,9 @@ function widget.new(args)
         end
         function widget_obj.hide(_self)
             _self.wibox.visible = false
+            if _self.keygrabber then
+                awful.keygrabber.stop(_self.keygrabber)
+            end
         end
 
         return widget_obj
@@ -526,7 +530,7 @@ function widget.new(args)
         local help_wibox = self._cached_wiboxes[s][joined_groups]
         help_wibox:show()
 
-        return awful.keygrabber.run(function(_, key, event)
+        help_wibox.keygrabber = awful.keygrabber.run(function(_, key, event)
             if event == "release" then return end
             if key then
                 if key == "Next" then
@@ -534,11 +538,11 @@ function widget.new(args)
                 elseif key == "Prior" then
                     help_wibox:page_prev()
                 else
-                    awful.keygrabber.stop()
                     help_wibox:hide()
                 end
             end
         end)
+        return help_wibox.keygrabber
     end
 
     --- Add hotkey descriptions for third-party applications.
