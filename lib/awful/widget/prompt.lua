@@ -58,11 +58,20 @@ local function run(promptbox)
 end
 
 local function spawn_and_handle_error(self, ...)
-    local result = spawn(...)
+    local f = self.with_shell and spawn.with_shell or spawn
+    local result = f(...)
     if type(result) == "string" then
         self.widget:set_text(result)
     end
 end
+
+--- Always spawn using a shell.
+--
+-- When using the default `exe_callback`, use `awful.spawn.with_shell` instead
+-- of `awful.spawn`. Depending on the ammount of customization to your shell
+-- environment, this can increase startup time.
+-- @property with_shell
+-- @param[opt=false] boolean
 
 --- Create a prompt widget which will launch a command.
 -- For additional documentation about `args` parameter, please refer to
@@ -83,6 +92,7 @@ end
 --   to the command.
 -- @tparam[opt] function args.exe_callback The callback function to call with
 --   command as argument when finished.
+-- @tparam[opt=false] boolean args.with_shell Use a (terminal) shell to execute this.
 -- @tparam[opt=`awful.completion.shell`] function args.completion_callback
 --   The callback function to call to get completion. See @{awful.prompt.run}
 --   for details.
