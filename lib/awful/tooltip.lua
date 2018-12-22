@@ -532,7 +532,7 @@ function tooltip.new(args)
         function self.show(other, geo)
             -- Auto detect clients and wiboxes
             if other.drawable or other.pid then
-                geo = other:geometry()
+                geo = other
             end
 
             -- Cache the geometry in case it is needed later
