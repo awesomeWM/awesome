@@ -398,8 +398,13 @@ end
 -- @tparam number New margins value
 
 function tooltip:set_margin_leftright(val)
-    self.marginbox.left = val
-    self.marginbox.right = val
+    self.marginbox:set_left(val)
+    self.marginbox:set_right(val)
+end
+
+--TODO v5 deprecate this
+function tooltip:set_margins_leftright(val)
+    self:set_margin_leftright(val)
 end
 
 --- Set the margins around the top and bottom of the tooltip textbox
@@ -409,8 +414,13 @@ end
 -- @tparam number New margins value
 
 function tooltip:set_margin_topbottom(val)
-    self.marginbox.top = val
-    self.marginbox.bottom = val
+    self.marginbox:set_top(val)
+    self.marginbox:set_bottom(val)
+end
+
+--TODO v5 deprecate this
+function tooltip:set_margins_topbottom(val)
+    self:set_margin_topbottom(val)
 end
 
 --- Add tooltip to an object.
