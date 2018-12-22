@@ -391,6 +391,16 @@ function tooltip:set_margins(val)
     self.marginbox:set_margins(val)
 end
 
+
+function tooltip:set_border_width(val)
+    self.widget.shape_border_width = val
+end
+
+
+function tooltip:set_border_color(val)
+    self.widget.shape_border_color = val
+end
+
 --- Set the margins around the left and right of the tooltip textbox
 --
 -- @property margins_leftright
