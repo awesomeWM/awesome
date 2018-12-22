@@ -48,4 +48,21 @@ describe("gears.table", function()
             assert.is.same(t, {"a", "b"})
         end)
     end)
+
+    it("table.slice", function()
+        local t = { "a", "b", c = "c", "d" }
+        assert.is.same(gtable.slice(t), { "a", "b", "d" })
+        assert.is.same(gtable.slice(t, 1, 1), {})
+        assert.is.same(gtable.slice(t, 1, 2), { "a" })
+        assert.is.same(gtable.slice(t, 2, 3), { "b" })
+        assert.is.same(gtable.slice(t, 0, 10), { "a", "b", "d" })
+
+        assert.is.same(gtable.slice(t, 0, -1), { "a", "b" })
+        assert.is.same(gtable.slice(t, -1, -1), { })
+        assert.is.same(gtable.slice(t, -2), { "b", "d" })
+        assert.is.same(gtable.slice(t, -2, -2), { })
+
+        assert.is.same(gtable.slice(t, 0, nil, 1), { "a", "b", "d" })
+        assert.is.same(gtable.slice(t, 0, -1, 2), { "b" })
+    end)
 end)
