@@ -19,7 +19,6 @@ local capi = { screen = screen,
 local timer = require("gears.timer")
 local button = require("awful.button")
 local screen = require("awful.screen")
-local util = require("awful.util")
 local gtable = require("gears.table")
 local gfs = require("gears.filesystem")
 local gmath = require("gears.math")
@@ -28,6 +27,7 @@ local wibox = require("wibox")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
 local dpi = beautiful.xresources.apply_dpi
+local icon_theme = require("menubar.icon_theme")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -42,10 +42,7 @@ Naughty configuration - a table containing common popup settings.
 @tfield[opt=apply_dpi(4)] int padding Space between popups and edge of the
   workarea.
 @tfield[opt=apply_dpi(1)] int spacing Spacing between popups.
-@tfield[opt={"/usr/share/pixmaps/"}] table icon_dirs List of directories
-  that will be checked by `getIcon()`.
-@tfield[opt={ "png", "gif" }] table icon_formats List of formats that will be
-  checked by `getIcon()`.
+@tfield[opt={"hicolor"}] table icon_theme Name of the theme to search for Icons against.
 @tfield[opt] function notify_callback Callback used to modify or reject
 notifications, e.g.
     naughty.config.notify_callback = function(args)
@@ -67,8 +64,7 @@ notifications, e.g.
 naughty.config = {
     padding = dpi(4),
     spacing = dpi(1),
-    icon_dirs = { "/usr/share/pixmaps/", },
-    icon_formats = { "png", "gif" },
+    icon_theme = "hicolor",
     notify_callback = nil,
 }
 
@@ -777,7 +773,7 @@ function naughty.notify(args)
         end
         -- try to guess icon if the provided one is non-existent/readable
         if type(icon) == "string" and not gfs.file_readable(icon) then
-            icon = util.geticonpath(icon, naughty.config.icon_formats, naughty.config.icon_dirs, icon_size) or icon
+	    icon = icon_theme(naughty.config.icon_theme):find_icon_path(icon,icon_size)
         end
 
         -- is the icon file readable?
