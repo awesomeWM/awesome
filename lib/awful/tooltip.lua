@@ -124,6 +124,7 @@ local function apply_outside_mode(self)
     local _, position = a_placement.next_to(w, {
         geometry            = self._private.widget_geometry,
         preferred_positions = self.preferred_positions,
+        preferred_anchors   = self.preferred_alignments,
         honor_workarea      = true,
     })
 
@@ -322,6 +323,18 @@ end
 
 function tooltip:set_preferred_positions(value)
     self._private.preferred_positions = value
+
+    set_geometry(self)
+end
+
+
+function tooltip:get_preferred_alignments()
+    return self._private.preferred_alignments or
+        {"front", "back", "middle"}
+end
+
+function tooltip:set_preferred_alignments(value)
+    self._private.preferred_alignments = value
 
     set_geometry(self)
 end
