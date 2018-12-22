@@ -717,6 +717,10 @@ local function get_relative_regions(geo, mode, is_absolute)
         dgeo = geo.drawable.get_wibox():geometry()
     elseif geo.drawable and geo.drawable.drawable then
         bw, dgeo = 0, geo.drawable.drawable:geometry()
+    else
+        -- The placement isn't done on an object at all, having no border is
+        -- normal.
+        assert(mode == "geometry")
     end
 
     -- Add the infamous border size
@@ -1392,6 +1396,7 @@ function placement.next_to(d, args)
     args = add_context(args, "next_to")
     d    = d or capi.client.focus
 
+    local osize = type(d.geometry) == "function"  and d:geometry() or nil
     local original_pos, original_anchors = args.preferred_positions, args.preferred_anchors
 
     if type(original_pos) == "string" then
@@ -1492,7 +1497,14 @@ function placement.next_to(d, args)
 
     attach(d, placement.next_to, args)
 
-    return fix_new_geometry(ngeo, args, true), pref_name, dir
+    local ret = fix_new_geometry(ngeo, args, true)
+
+    -- Make sure the geometry didn't change, it would indicate an
+    -- "off by border" issue.
+    assert((not osize.width) or ret.width == d.width)
+    assert((not osize.height) or ret.height == d.height)
+
+    return ret, pref_name, dir
 end
 
 --- Restore the geometry.
