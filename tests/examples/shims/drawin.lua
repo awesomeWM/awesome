@@ -11,6 +11,10 @@ local function new_drawin(_, args)
     ret.y=0
     ret.width=1
     ret.height=1
+    ret.border_width=0
+    ret.ontop = false
+    ret.below = false
+    ret.above = false
 
     ret.geometry = function(_, new)
         new = new or {}
