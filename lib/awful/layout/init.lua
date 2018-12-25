@@ -22,6 +22,7 @@ local ascreen = require("awful.screen")
 local timer = require("gears.timer")
 local gmath = require("gears.math")
 local gtable = require("gears.table")
+local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 
 local function get_screen(s)
@@ -108,6 +109,9 @@ function layout.inc(i, s, layouts)
     if type(i) == "table" then
         -- Older versions of this function had arguments (layouts, i, s), but
         -- this was changed so that 'layouts' can be an optional parameter
+        gdebug.deprecate("Use awful.layout.inc(increment, screen, layouts) instead"..
+            " of awful.layout.inc(layouts, increment, screen)", {deprecated_in=5})
+
         layouts, i, s = i, s, layouts
     end
     s = get_screen(s or ascreen.focused())
