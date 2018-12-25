@@ -862,7 +862,13 @@ function tag.object.set_layouts(self, layouts)
 end
 
 function tag.object.get_layout(t)
-    return tag.getproperty(t, "layout") or require("awful.layout.suit.floating")
+    local l = tag.getproperty(t, "layout")
+    if l then return l end
+
+    local layouts = tag.getproperty(t, "_layouts")
+
+    return layouts and layouts[1]
+        or require("awful.layout.suit.floating")
 end
 
 --- Set layout.
