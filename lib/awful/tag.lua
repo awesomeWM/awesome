@@ -854,7 +854,10 @@ end
 function tag.object.set_layouts(self, layouts)
     tag.setproperty(self, "_custom_layouts", {})
     tag.setproperty(self, "_layouts", gtable.clone(layouts, false))
-    update_layouts(self, self.layout, self.layout)
+
+    local cur = tag.getproperty(self, "layout")
+    update_layouts(self, cur, cur)
+
     self:emit_signal("property::layouts")
 end
 
