@@ -112,31 +112,35 @@ function layout.inc(i, s, layouts)
     end
     s = get_screen(s or ascreen.focused())
     local t = s.selected_tag
-    layouts = layouts or layout.layouts
-    if t then
-        local curlayout = layout.get(s)
-        local curindex
-        for k, v in ipairs(layouts) do
-            if v == curlayout or curlayout._type == v then
-                curindex = k
-                break
-            end
-        end
-        if not curindex then
-            -- Safety net: handle cases where another reference of the layout
-            -- might be given (e.g. when (accidentally) cloning it).
-            for k, v in ipairs(layouts) do
-                if v.name == curlayout.name then
-                    curindex = k
-                    break
-                end
-            end
-        end
-        if curindex then
-            local newindex = gmath.cycle(#layouts, curindex + i)
-            layout.set(layouts[newindex], t)
-        end
+
+    if not t then return end
+
+    layouts = layouts or t.layouts or {}
+
+    if #layouts == 0 then
+        layouts = layout.layouts
     end
+
+    local cur_l = layout.get(s)
+
+    -- First try to match the object
+    local cur_idx =  gtable.find_first_key(
+        layouts, function(_, v) return v == cur_l or cur_l._type == v end, true
+    )
+
+    -- Safety net: handle cases where another reference of the layout
+    -- might be given (e.g. when (accidentally) cloning it).
+    cur_idx = cur_idx or gtable.find_first_key(
+        layouts, function(_, v) return v.name == cur_l.name end, true
+    )
+
+    -- Trying to come up with some kind of fallback layouts to iterate would
+    -- never produce a result the user expect, so if there is nothing to
+    -- iterate over, do not iterate.
+    if not cur_idx then return end
+
+    local newindex = gmath.cycle(#layouts, cur_idx + i)
+    layout.set(layouts[newindex], t)
 end
 
 --- Set the layout function of the current tag.
