@@ -1383,6 +1383,14 @@ end
 --
 --@DOC_awful_placement_next_to_EXAMPLE@
 --
+-- The `args.mode` parameters allows to control from which `next_to` takes its
+-- source object from. The valid values are:
+--
+-- * geometry: Next to this geometry, `args.geometry` has to be set.
+-- * cursor: Next to the mouse.
+-- * cursor_inside
+-- * geometry_inside
+--
 -- @tparam drawable d A wibox or client
 -- @tparam table args
 -- @tparam string args.mode The mode
