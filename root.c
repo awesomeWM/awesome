@@ -374,13 +374,22 @@ luaA_root_keys(lua_State *L)
     return 1;
 }
 
-/* Get or set global mouse bindings.
- * This binding will be available when you click on the root window.
+/**
+ * Store the list of mouse buttons to be applied on the wallpaper (also
+ * known as root window).
  *
- * @param button_table An array of mouse button bindings objects, or nothing.
- * @return The array of mouse button bindings objects.
- * @staticfct buttons
+ * @property buttons
+ * @tparam[opt={}] table buttons The list of buttons.
+ * @see awful.button
+ *
+ * @usage
+ * root.buttons = {
+ *     awful.button({ }, 3, function () mymainmenu:toggle() end),
+ *     awful.button({ }, 4, awful.tag.viewnext),
+ *     awful.button({ }, 5, awful.tag.viewprev),
+ * }
  */
+
 static int
 luaA_root_buttons(lua_State *L)
 {

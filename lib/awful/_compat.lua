@@ -1,9 +1,10 @@
 -- This file contains all global backward compatibility workarounds for the
 -- Core API changes.
 local gtimer = require("gears.timer")
-local util   = require("awful.util" )
+local util   = require("awful.util")
 local spawn  = require("awful.spawn")
 local gdebug = require("gears.debug")
+local gprop  = require("gears.object.properties")
 
 local capi = {root = root}
 
@@ -64,13 +65,8 @@ end
 -- de-facto read-only due the confusion related the difference between the
 -- capi and "high level" format difference.
 
-
---- Get or set global mouse bindings.
---
--- This binding will be available when you click on the root window (usually
--- the wallpaper area).
--- @tparam[opt=nil] table|nil The list of `button` objects to set.
--- @treturn table The list of root window buttons.
-function root.buttons(btns)
-    return root._buttons(btns)
-end
+gprop._legacy_accessors(capi.root, "buttons", "_buttons", false, function(new_btns)
+    return new_btns[1] and (
+        type(new_btns[1]) == "button" or new_btns[1]._is_capi_button
+    ) or false
+end, true)
