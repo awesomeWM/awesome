@@ -174,6 +174,15 @@ function root._write_string(string, c)
     end
 end
 
+
+function root.set_newindex_miss_handler(h)
+    rawset(mouse, "_ni_handler", h)
+end
+
+function root.set_index_miss_handler(h)
+    rawset(mouse, "_i_handler", h)
+end
+
 return root
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
