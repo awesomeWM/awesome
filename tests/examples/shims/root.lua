@@ -128,6 +128,9 @@ function root.fake_input(event_type, detail, x, y)
     fake_input_handlers[event_type](detail, x, y)
 end
 
+function root._buttons()
+    return {}
+end
 
 -- Send an artificial set of key events to trigger a key combination.
 -- It only works in the shims and should not be used with UTF-8 chars.
