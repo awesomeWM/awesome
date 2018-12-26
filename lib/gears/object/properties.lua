@@ -7,7 +7,10 @@
 -- @submodule gears.object
 ---------------------------------------------------------------------------
 
+local gtable = require("gears.table")
+-- local gdebug = require("gears.debug")
 local object = {}
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 
 --- Add the missing properties handler to a CAPI object such as client/tag/screen.
@@ -82,6 +85,126 @@ function object.capi_index_fallback(class, args)
     -- Attach the accessor methods
     class.set_index_miss_handler(getter)
     class.set_newindex_miss_handler(setter)
+end
+
+
+-- (private api)
+-- Many legacy Awesome APIs such as `client:tags()`, `root.buttons()`,
+-- `client:keys()`, `drawin:geometry()`, etc used functions for both the getter
+-- and setter. This contrast with just about everything else that came after
+-- it and is an artifact of an earlier time before we had "good" Lua object
+-- support.
+--
+-- Because both consistency and backward compatibility are important, this
+-- table wrapper allows to support both the legacy method based accessors
+-- and key/value based accessors.
+--
+-- TO BE USED FOR DEPRECATION ONLY.
+
+local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set_empty)
+    local ret = gtable.clone(to_set, false)
+
+    -- .buttons used to be a function taking the result of `gears.table.join`.
+    -- For compatibility, support this, but from now on, it's a property.
+    return setmetatable(ret, {
+        __call = function(_, self, new_objs)
+--TODO uncomment
+--             gdebug.deprecate("`"..name.."` is no longer a function, it is a property. "..
+--                 "Remove the `gears.table.join` and use a brace enclosed table",
+--                 {deprecated_in=5}
+--             )
+
+            new_objs, self = is_object and new_objs or self, is_object and self or obj
+
+            -- Setter
+            if new_objs and #new_objs > 0 then
+                if (not set_empty) and not next(new_objs) then return end
+
+                local is_formatted = join_if(new_objs)
+
+                -- Because modules may rely on :buttons taking a list of
+                -- `capi.buttons`/`capi.key` and now the user passes a list of
+                -- `awful.button`/`awful.key`  convert this.
+
+                local result = is_formatted and
+                    new_objs or gtable.join(unpack(new_objs))
+
+                if capi_name and is_object then
+                    return self[capi_name](self, result)
+                elseif capi_name then
+                    return self[capi_name](result)
+                else
+                    self._private[name.."_formatted"] = result
+                    return self._private[name.."_formatted"]
+                end
+            end
+
+            -- Getter
+            if capi_name and is_object then
+                return self[capi_name](self)
+            elseif capi_name then
+                return self[capi_name]()
+            else
+                return self._private[name.."_formatted"] or {}
+            end
+        end
+    })
+end
+
+function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_empty)
+
+    -- Some objects have a special "object" property to add more properties, but
+    -- not all.
+
+    local magic_obj = obj.object and obj.object or obj
+
+    magic_obj["get_"..name] = function(self)
+        self = is_object and self or obj
+
+        self._private[name] = self._private[name] or copy_object(
+            obj, {}, name, capi_name, is_object, join_if, set_empty
+        )
+
+        assert(self._private[name])
+        return self._private[name]
+    end
+
+    magic_obj["set_"..name] = function(self, objs)
+        if (not set_empty) and not next(objs) then return end
+
+        if not is_object then
+            objs, self = self, obj
+        end
+        assert(objs)
+
+        -- When called from a declarative property list, "buttons" will be set
+        -- using the result of gears.table.join, detect this
+        local is_formatted = join_if(objs)
+
+--         if is_formatted then
+--TODO uncomment
+--             gdebug.deprecate("Remove the `gears.table.join` and replace it with braces",
+--                 {deprecated_in=5}
+--             )
+--         end
+
+
+        --TODO v6 Use the original directly and drop this legacy copy
+        local result = is_formatted and objs
+            or gtable.join(unpack(objs))
+
+        if is_object and capi_name then
+            self[capi_name](self, result)
+        elseif capi_name then
+            obj[capi_name](result)
+        else
+            self._private[name.."_formatted"] = result
+        end
+
+        self._private[name] = copy_object(
+            obj, objs, name, capi_name, is_object, join_if, set_empty
+        )
+    end
 end
 
 return setmetatable( object, {__call = function(_,...) object.capi_index_fallback(...) end})
