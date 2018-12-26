@@ -21,17 +21,23 @@ local common = {}
 -- @param object
 -- @treturn table
 function common.create_buttons(buttons, object)
+    local is_formatted = buttons and buttons[1] and (
+        type(buttons[1]) == "button" or buttons[1]._is_capi_button) or false
+
     if buttons then
         local btns = {}
-        for _, b in ipairs(buttons) do
-            -- Create a proxy button object: it will receive the real
-            -- press and release events, and will propagate them to the
-            -- button object the user provided, but with the object as
-            -- argument.
-            local btn = capi.button { modifiers = b.modifiers, button = b.button }
-            btn:connect_signal("press", function () b:emit_signal("press", object) end)
-            btn:connect_signal("release", function () b:emit_signal("release", object) end)
-            btns[#btns + 1] = btn
+        for _, src in ipairs(buttons) do
+            --TODO v6 Remove this legacy overhead
+            for _, b in ipairs(is_formatted and {src} or src) do
+                -- Create a proxy button object: it will receive the real
+                -- press and release events, and will propagate them to the
+                -- button object the user provided, but with the object as
+                -- argument.
+                local btn = capi.button { modifiers = b.modifiers, button = b.button }
+                btn:connect_signal("press", function () b:emit_signal("press", object) end)
+                btn:connect_signal("release", function () b:emit_signal("release", object) end)
+                btns[#btns + 1] = btn
+            end
         end
 
         return btns
