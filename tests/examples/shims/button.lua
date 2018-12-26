@@ -1,5 +1,6 @@
 return function() return {
     data = {},
+    _is_capi_button = true,
     connect_signal = function() end
 } end
 

@@ -374,7 +374,7 @@ luaA_root_keys(lua_State *L)
     return 1;
 }
 
-/** Get or set global mouse bindings.
+/* Get or set global mouse bindings.
  * This binding will be available when you click on the root window.
  *
  * @param button_table An array of mouse button bindings objects, or nothing.
@@ -587,7 +587,7 @@ luaA_root_newindex(lua_State *L)
 
 const struct luaL_Reg awesome_root_methods[] =
 {
-    { "buttons", luaA_root_buttons },
+    { "_buttons", luaA_root_buttons },
     { "keys", luaA_root_keys },
     { "cursor", luaA_root_cursor },
     { "fake_input", luaA_root_fake_input },

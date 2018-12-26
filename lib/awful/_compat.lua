@@ -56,3 +56,21 @@ do
     root.object = root_object
     assert(root.object == root_object)
 end
+
+-- root.bottons() used to be a capi function. However this proved confusing
+-- as rc.lua used `awful.button` and `root.buttons()` used capi.button. There
+-- was a little documented hack to "flatten" awful.button into a pair of
+-- capi.button. A consequence of this, beside being ugly, was that it was
+-- de-facto read-only due the confusion related the difference between the
+-- capi and "high level" format difference.
+
+
+--- Get or set global mouse bindings.
+--
+-- This binding will be available when you click on the root window (usually
+-- the wallpaper area).
+-- @tparam[opt=nil] table|nil The list of `button` objects to set.
+-- @treturn table The list of root window buttons.
+function root.buttons(btns)
+    return root._buttons(btns)
+end
