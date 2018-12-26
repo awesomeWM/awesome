@@ -176,13 +176,29 @@ end
 
 
 function root.set_newindex_miss_handler(h)
-    rawset(mouse, "_ni_handler", h)
+    rawset(root, "_ni_handler", h)
 end
 
 function root.set_index_miss_handler(h)
-    rawset(mouse, "_i_handler", h)
+    rawset(root, "_i_handler", h)
 end
 
-return root
+return setmetatable(root, {
+    __index = function(self, key)
+        if key == "screen" then
+            return screen[1]
+        end
+        local h = rawget(root,"_i_handler")
+        if h then
+            return h(self, key)
+        end
+    end,
+    __newindex = function(...)
+        local h = rawget(root,"_ni_handler")
+        if h then
+            h(...)
+        end
+    end,
+})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
