@@ -330,7 +330,7 @@ globalkeys = gears.table.join(
 )
 
 -- @DOC_CLIENT_KEYBINDINGS@
-clientkeys = gears.table.join(
+clientkeys = {
     awful.key({ modkey,           }, "f",
         function (c)
             c.fullscreen = not c.fullscreen
@@ -371,8 +371,8 @@ clientkeys = gears.table.join(
             c.maximized_horizontal = not c.maximized_horizontal
             c:raise()
         end ,
-        {description = "(un)maximize horizontally", group = "client"})
-)
+        {description = "(un)maximize horizontally", group = "client"}),
+}
 
 -- @DOC_NUMBER_KEYBINDINGS@
 -- Bind all key numbers to tags.
