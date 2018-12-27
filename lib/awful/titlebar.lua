@@ -492,6 +492,18 @@ local function load_titlebars(c, hide_all, keep)
     return true
 end
 
+local function get_children_by_id(self, name)
+    --TODO v5: Move the ID management to the hierarchy.
+    if self._drawable._widget
+      and self._drawable._widget._private
+      and self._drawable._widget._private.by_id then
+          return self._drawable.widget._private.by_id[name]
+    end
+
+    return {}
+end
+
+
 --- Get a client's titlebar.
 -- @tparam client c The client for which a titlebar is wanted.
 -- @tparam[opt={}] table args A table with extra arguments for the titlebar.
@@ -556,6 +568,7 @@ local function new(c, args)
 
     -- Handle declarative/recursive widget container
     ret.setup = base.widget.setup
+    ret.get_children_by_id = get_children_by_id
 
     c._private = c._private or {}
     c._private.titlebars = bars

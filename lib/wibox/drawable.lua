@@ -13,6 +13,7 @@ local capi = {
     screen = screen
 }
 local beautiful = require("beautiful")
+local base = require("wibox.widget.base")
 local cairo = require("lgi").cairo
 local color = require("gears.color")
 local object = require("gears.object")
@@ -226,7 +227,7 @@ end
 
 --- Set the widget that the drawable displays
 function drawable:set_widget(widget)
-    self._widget = widget
+    self._widget = base.make_widget_from_value(widget)
 
     -- Make sure the widget gets drawn
     self._need_relayout = true
