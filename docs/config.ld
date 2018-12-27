@@ -133,6 +133,7 @@ file = {
         -- documentation
         '../lib/awful/autofocus.lua',
         '../lib/awful/dbus.lua',
+        '../lib/awful/_compat.lua',
         '../lib/awful/init.lua',
         '../lib/awful/remote.lua',
         '../lib/awful/screen/dpi.lua',

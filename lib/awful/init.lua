@@ -6,34 +6,7 @@
 -- @module awful
 ---------------------------------------------------------------------------
 
--- TODO: This is a hack for backwards-compatibility with 3.5, remove!
-local util = require("awful.util")
-local gtimer = require("gears.timer")
-local gdebug = require("gears.debug")
-function timer(...) -- luacheck: ignore
-    gdebug.deprecate("gears.timer", {deprecated_in=4})
-    return gtimer(...)
-end
-
---TODO: This is a hack for backwards-compatibility with 3.5, remove!
--- Set awful.util.spawn* and awful.util.pread.
-local spawn = require("awful.spawn")
-
-util.spawn = function(...)
-   gdebug.deprecate("awful.spawn", {deprecated_in=4})
-   return spawn.spawn(...)
-end
-
-util.spawn_with_shell = function(...)
-   gdebug.deprecate("awful.spawn.with_shell", {deprecated_in=4})
-   return spawn.with_shell(...)
-end
-
-util.pread = function()
-    gdebug.deprecate("Use awful.spawn.easy_async() "
-            .. "for an asynchronous alternative", {deprecated_in=4})
-    return ""
-end
+require("awful._compat")
 
 return
 {
@@ -60,7 +33,7 @@ return
     titlebar = require("awful.titlebar");
     rules = require("awful.rules");
     popup = require("awful.popup");
-    spawn = spawn;
+    spawn = require("awful.spawn");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
