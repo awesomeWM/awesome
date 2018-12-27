@@ -197,7 +197,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 
     -- @DOC_SETUP_WIDGETS@
     -- Add widgets to the wibox
-    s.mywibox:setup {
+    s.mywibox.widget = {
         layout = wibox.layout.align.horizontal,
         { -- Left widgets
             layout = wibox.layout.fixed.horizontal,
@@ -543,7 +543,7 @@ client.connect_signal("request::titlebars", function(c)
         end),
     }
 
-    awful.titlebar(c) : setup {
+    awful.titlebar(c).widget = {
         { -- Left
             awful.titlebar.widget.iconwidget(c),
             buttons = buttons,
