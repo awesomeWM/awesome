@@ -335,11 +335,12 @@ luaA_root_fake_input(lua_State *L)
 }
 
 /** Get or set global key bindings.
- * These bindings will be available when you press keys on the root window.
+ * These bindings will be available when you press keys on the root window
+ * (the wallpaper).
  *
- * @tparam table|nil keys_array An array of key binding objects, or nothing.
- * @return The array of key bindings objects of this client.
- * @staticfct keys
+ * @property keys
+ * @param table
+ * @see awful.key
  */
 static int
 luaA_root_keys(lua_State *L)
@@ -597,7 +598,7 @@ luaA_root_newindex(lua_State *L)
 const struct luaL_Reg awesome_root_methods[] =
 {
     { "_buttons", luaA_root_buttons },
-    { "keys", luaA_root_keys },
+    { "_keys", luaA_root_keys },
     { "cursor", luaA_root_cursor },
     { "fake_input", luaA_root_fake_input },
     { "drawins", luaA_root_drawins },

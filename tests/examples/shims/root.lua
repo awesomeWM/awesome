@@ -32,7 +32,7 @@ function root.cursor() end
 
 local keys = {}
 
-function root.keys(k)
+function root._keys(k)
     keys = k or keys
     return keys
 end
