@@ -232,10 +232,11 @@ function layout.arrange(screen)
                 c:geometry(g)
             end
         end)
+        screen:emit_signal("arrange")
+
+        -- Release locks after signal to avoid deadly lock.
         arrange_lock = false
         delayed_arrange[screen] = nil
-
-        screen:emit_signal("arrange")
     end)
 end
 
