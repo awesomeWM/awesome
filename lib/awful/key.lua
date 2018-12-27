@@ -26,12 +26,13 @@ local key = { mt = {}, hotkeys = {} }
 -- @class table
 key.ignore_modifiers = { "Lock", "Mod2" }
 
---- Convert the modifiers into pc105 key names
+--- Convert the modifiers into pc105 key names.
 local conversion = {
     mod4    = "Super_L",
     control = "Control_L",
     shift   = "Shift_L",
     mod1    = "Alt_L",
+    mod5    = "ISO_Level3_Shift",  -- AltGr
 }
 
 --- Execute a key combination.
