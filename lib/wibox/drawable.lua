@@ -77,11 +77,11 @@ local function do_redraw(self)
     -- Relayout
     if self._need_relayout or self._need_complete_repaint then
         self._need_relayout = false
-        if self._widget_hierarchy and self.widget then
+        if self._widget_hierarchy and self._widget then
             local had_systray = systray_widget and self._widget_hierarchy:get_count(systray_widget) > 0
 
             self._widget_hierarchy:update(context,
-                self.widget, width, height, self._dirty_area)
+                self._widget, width, height, self._dirty_area)
 
             local has_systray = systray_widget and self._widget_hierarchy:get_count(systray_widget) > 0
             if had_systray and not has_systray then
@@ -89,9 +89,9 @@ local function do_redraw(self)
             end
         else
             self._need_complete_repaint = true
-            if self.widget then
+            if self._widget then
                 self._widget_hierarchy_callback_arg = {}
-                self._widget_hierarchy = hierarchy.new(context, self.widget, width, height,
+                self._widget_hierarchy = hierarchy.new(context, self._widget, width, height,
                         self._redraw_callback, self._layout_callback, self._widget_hierarchy_callback_arg)
             else
                 self._widget_hierarchy = nil
@@ -226,11 +226,15 @@ end
 
 --- Set the widget that the drawable displays
 function drawable:set_widget(widget)
-    self.widget = widget
+    self._widget = widget
 
     -- Make sure the widget gets drawn
     self._need_relayout = true
     self.draw()
+end
+
+function drawable:get_widget()
+    return rawget(self, "_widget")
 end
 
 --- Set the background of the drawable
@@ -480,7 +484,22 @@ function drawable.new(d, widget_context_skeleton, drawable_name)
     -- Make sure the drawable is drawn at least once
     ret._do_complete_repaint()
 
-    return ret
+    return setmetatable(ret, {
+        __index = function(self, k)
+            if rawget(self, "get_"..k) then
+                return rawget(self, "get_"..k)(self)
+            else
+                return rawget(ret, k)
+            end
+        end,
+        __newindex = function(self, k,v)
+            if rawget(self, "set_"..k) then
+                rawget(self, "set_"..k)(self, v)
+            else
+                rawset(self, k, v)
+            end
+        end
+    })
 end
 
 -- Redraw all drawables when the wallpaper changes
