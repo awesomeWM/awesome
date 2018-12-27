@@ -33,6 +33,8 @@ return function(_, _)
     -- backend.
     local bg = require("wibox.container.background")
     bg._use_fallback_algorithm()
+
+    require("awful._compat")
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
