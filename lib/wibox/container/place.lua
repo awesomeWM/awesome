@@ -61,13 +61,11 @@ function place:fit(context, width, height)
         and height or h
 end
 
-function place:set_widget(widget)
-    if widget then
-        base.check_widget(widget)
-    end
-    self._private.widget = widget
-    self:emit_signal("widget::layout_changed")
-end
+--- The widget to be placed.
+-- @property widget
+-- @tparam widget widget The widget
+
+place.set_widget = base.set_widget_common
 
 function place:get_widget()
     return self._private.widget

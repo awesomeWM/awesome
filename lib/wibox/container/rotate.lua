@@ -62,13 +62,7 @@ end
 -- @property widget
 -- @tparam widget widget The widget
 
-function rotate:set_widget(widget)
-    if widget then
-        base.check_widget(widget)
-    end
-    self._private.widget = widget
-    self:emit_signal("widget::layout_changed")
-end
+rotate.set_widget = base.set_widget_common
 
 function rotate:get_widget()
     return self._private.widget

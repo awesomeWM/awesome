@@ -129,13 +129,7 @@ end
 -- @property widget
 -- @tparam widget widget The widget
 
-function radialprogressbar:set_widget(widget)
-    if widget then
-        base.check_widget(widget)
-    end
-    self._private.widget = widget
-    self:emit_signal("widget::layout_changed")
-end
+radialprogressbar.set_widget = base.set_widget_common
 
 function radialprogressbar:get_children()
     return {self._private.widget}

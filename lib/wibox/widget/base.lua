@@ -155,6 +155,24 @@ function base.widget:get_all_children()
     return ret
 end
 
+--- Common implementation of the `:set_widget()` method exposed by many
+-- other widgets.
+--
+-- Use this if your widget has no custom logic when setting the widget.
+--
+-- @usage
+--   rawset(my_custom_widget, "set_widget", wibox.widget.base.set_widget_common)
+function base.set_widget_common(self, widget)
+    local w = widget and base.make_widget_from_value(widget)
+
+    if w then
+        base.check_widget(w)
+    end
+
+    self._private.widget = w
+    self:emit_signal("widget::layout_changed")
+end
+
 --- Emit a signal and ensure all parent widgets in the hierarchies also
 -- forward the signal. This is useful to track signals when there is a dynamic
 -- set of containers and layouts wrapping the widget.

@@ -102,9 +102,16 @@ function manual_layout:layout(context, width, height)
 end
 
 function manual_layout:add(...)
-    local wdgs = {...}
+    local wdgs = {}
     local old_count = #self._private.widgets
-    gtable.merge(self._private.widgets, {...})
+
+    for _, v in ipairs {...} do
+        local w = base.make_widget_from_value(v)
+        base.check_widget(w)
+        table.insert(wdgs, w)
+    end
+
+    gtable.merge(self._private.widgets, wdgs)
 
     -- Add the points
     for k, v in ipairs(wdgs) do
@@ -166,7 +173,7 @@ function manual_layout:add_at(widget, point)
     end
 
     self._private.pos[#self._private.widgets+1] = point
-    self:add(widget)
+    self:add(base.make_widget_from_value(widget))
 end
 
 --- Move a widget (by index).

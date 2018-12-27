@@ -293,10 +293,9 @@ function grid:add(...)
     assert(args.n > 0, "need at least one widget to add")
     local row, column
     for i=1, args.n do
-        local w = args[i]
         -- Get the next empty coordinate to insert the widget
         row, column = self:get_next_empty(row, column)
-        self:add_widget_at(w, row, column, 1, 1)
+        self:add_widget_at(args[i], row, column, 1, 1)
     end
 end
 
@@ -317,6 +316,7 @@ function grid:add_widget_at(child, row, col, row_span, col_span)
     col_span = (col_span and col_span > 0) and col_span or 1
 
     -- check if the object is a widget
+    child = base.make_widget_from_value(child)
     base.check_widget(child)
 
     -- test if the new widget superpose with existing ones

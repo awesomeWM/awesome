@@ -218,13 +218,7 @@ end
 -- @tparam widget widget The widget to be disaplayed inside of the background
 --  area
 
-function background:set_widget(widget)
-    if widget then
-        base.check_widget(widget)
-    end
-    self._private.widget = widget
-    self:emit_signal("widget::layout_changed")
-end
+background.set_widget = base.set_widget_common
 
 function background:get_widget()
     return self._private.widget

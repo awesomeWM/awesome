@@ -277,10 +277,14 @@ function scroll:set_widget(widget)
     if widget == self._private.widget then
         return
     end
-    if widget then
-        base.check_widget(widget)
+
+    local w = base.make_widget_from_value(widget)
+
+    if w then
+        base.check_widget(w)
     end
-    self._private.widget = widget
+
+    self._private.widget = w
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
 end
