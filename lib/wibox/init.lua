@@ -19,6 +19,7 @@ local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
 local cairo = require("lgi").cairo
 
+
 --- This provides widget box windows. Every wibox can also be used as if it were
 -- a drawin. All drawin functions and properties are also available on wiboxes!
 -- wibox
@@ -61,6 +62,10 @@ end
 
 function wibox:find_widgets(x, y)
     return self._drawable:find_widgets(x, y)
+end
+
+function wibox:_buttons(btns)
+    return self.drawin:_buttons(btns)
 end
 
 --- Create a widget that reflects the current state of this wibox.
@@ -207,11 +212,17 @@ function wibox:get_children_by_id(name)
     return {}
 end
 
-for _, k in pairs{ "buttons", "struts", "geometry", "get_xproperty", "set_xproperty" } do
+for _, k in pairs{ "struts", "geometry", "get_xproperty", "set_xproperty" } do
     wibox[k] = function(self, ...)
         return self.drawin[k](self.drawin, ...)
     end
 end
+
+object.properties._legacy_accessors(wibox.object, "buttons", "_buttons", true, function(new_btns)
+    return new_btns[1] and (
+        type(new_btns[1]) == "button" or new_btns[1]._is_capi_button
+    ) or false
+end, true)
 
 local function setup_signals(_wibox)
     local obj
@@ -264,6 +275,7 @@ local function new(args)
         return ret
     end
 
+    w._private = {}
     ret.drawin = w
     ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")
@@ -364,6 +376,8 @@ object.properties(capi.drawin, {
     setter_class = wibox.object,
     auto_emit    = true,
 })
+
+capi.drawin.object = wibox.object
 
 return setmetatable(wibox, wibox.mt)
 

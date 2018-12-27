@@ -421,6 +421,8 @@ function awfulwibar.new(args)
 
     w:connect_signal("property::visible", function() reattach(w) end)
 
+    assert(w.buttons)
+
     return w
 end
 

@@ -1344,6 +1344,12 @@ function client.object.is_transient_for(self, c2)
     return nil
 end
 
+object.properties._legacy_accessors(client, "buttons", "_buttons", true, function(new_btns)
+    return new_btns[1] and (
+        type(new_btns[1]) == "button" or new_btns[1]._is_capi_button
+    ) or false
+end, true)
+
 --- Set the client shape.
 -- @property shape
 -- @tparam gears.shape A gears.shape compatible function.

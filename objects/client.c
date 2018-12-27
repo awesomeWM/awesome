@@ -949,9 +949,9 @@
 
 /** Get or set mouse buttons bindings for a client.
  *
- * @param buttons_table An array of mouse button bindings objects, or nothing.
- * @return A table with all buttons.
- * @method buttons
+ * @property buttons
+ * @param table
+ * @see awful.button
  */
 
 /** Get the number of instances.
