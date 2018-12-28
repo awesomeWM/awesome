@@ -194,7 +194,7 @@ luaA_checkinteger(lua_State *L, int n)
     lua_Number d = lua_tonumber(L, n);
     if (d != (int)d)
         luaA_typerror(L, n, "integer");
-    return d;
+    return (int)d;
 }
 
 static inline lua_Integer

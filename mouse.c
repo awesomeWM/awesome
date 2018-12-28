@@ -251,8 +251,8 @@ luaA_mouse_coords(lua_State *L)
         if(!mouse_query_pointer_root(&mouse_x, &mouse_y, NULL, &mask))
             return 0;
 
-        x = round(luaA_getopt_number_range(L, 1, "x", mouse_x, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
-        y = round(luaA_getopt_number_range(L, 1, "y", mouse_y, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        x = (int) round(luaA_getopt_number_range(L, 1, "x", mouse_x, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        y = (int) round(luaA_getopt_number_range(L, 1, "y", mouse_y, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
 
         if(ignore_enter_notify)
             client_ignore_enterleave_events();

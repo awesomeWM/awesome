@@ -327,7 +327,7 @@ a_dbus_convert_value(lua_State *L, int idx, DBusMessageIter *iter)
 #define DBUS_MSG_RETURN_HANDLE_TYPE_NUMBER(type, dbustype) \
       case dbustype: \
         { \
-           type num = lua_tonumber(L, idx + 1); \
+           type num = (type) lua_tonumber(L, idx + 1); \
            dbus_message_iter_append_basic(iter, dbustype, &num); \
         } \
         break;

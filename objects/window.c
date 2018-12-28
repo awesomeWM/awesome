@@ -496,7 +496,7 @@ window_translate_type(window_type_t type)
 static int
 luaA_window_set_border_width(lua_State *L, window_t *c)
 {
-    window_set_border_width(L, -3, round(luaA_checknumber_range(L, -1, 0, MAX_X11_SIZE)));
+    window_set_border_width(L, -3, (int)round(luaA_checknumber_range(L, -1, 0, MAX_X11_SIZE)));
     return 0;
 }
 

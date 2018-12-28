@@ -66,7 +66,7 @@ static char **awesome_argv;
 static struct timeval last_wakeup;
 
 /** current limit for the main loop's runtime */
-static float main_loop_iteration_limit = 0.1;
+static float main_loop_iteration_limit = 0.1f;
 
 /** A pipe that is used to asynchronously handle SIGCHLD */
 static int sigchld_pipe[2];
@@ -433,10 +433,10 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
     /* Check how long this main loop iteration took */
     gettimeofday(&now, NULL);
     timersub(&now, &last_wakeup, &length_time);
-    length = length_time.tv_sec + length_time.tv_usec * 1.0f / 1e6;
+    length = length_time.tv_sec + length_time.tv_usec * 1.0f / (float) 1e6;
     if (length > main_loop_iteration_limit) {
         warn("Last main loop iteration took %.6f seconds! Increasing limit for "
-                "this warning to that value.", length);
+                "this warning to that value.", (double)length);
         main_loop_iteration_limit = length;
     }
 
