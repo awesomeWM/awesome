@@ -14,7 +14,7 @@ local tooltip = require("awful.tooltip")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local surface = require("gears.surface")
--- local gdebug = require("gears.debug")
+local gdebug = require("gears.debug")
 local gtable = require("gears.table")
 
 local function get_screen(s)
@@ -55,11 +55,11 @@ function layoutbox.new(args)
 
     if type(args) == "number" or type(args) == "screen" or args.fake_remove then
         screen, args = args, {}
---TODO uncomment
---         gdebug.deprecate(
---             "Use awful.widget.layoutbox{screen=s} instead of awful.widget.layoutbox(screen)",
---             {deprecated_in=5}
---         )
+
+        gdebug.deprecate(
+            "Use awful.widget.layoutbox{screen=s} instead of awful.widget.layoutbox(screen)",
+            {deprecated_in=5}
+        )
     end
 
     assert(type(args) == "table")
