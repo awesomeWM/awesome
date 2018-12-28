@@ -2,7 +2,7 @@ local runner    = require( "_runner"   )
 local wibox     = require( "wibox"     )
 local awful     = require( "awful"     )
 local beautiful = require( "beautiful" )
-local gtable    = require("gears.table")
+local gdebug    = require("gears.debug")
 
 local steps = {}
 
@@ -64,12 +64,20 @@ table.insert(steps, function()
     layout = w.widget
     assert(layout)
 
-    button:buttons(gtable.join(
-        button:buttons(),
+    -- Test both legacy and new APIs
+    gdebug.deprecate = function() end
+
+    assert(#button:buttons() == 4)
+    assert(#button.buttons   == 1)
+
+    button:add_button(
         awful.button({}, 1, nil, function ()
             button:emit_signal_recursive("test::recursive")
         end)
-    ))
+    )
+
+    assert(#button:buttons() == 8)
+    assert(#button.buttons   == 2)
 
     layout:connect_signal("test::recursive", function()
         got_called = true
