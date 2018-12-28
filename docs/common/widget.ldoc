@@ -48,6 +48,10 @@
 -- @param table
 -- @see awful.button
 
+--- Add a new `awful.button` to this widget.
+-- @tparam awful.button button The button to add.
+-- @function add_button
+
 --- Emit a signal and ensure all parent widgets in the hierarchies also
 -- forward the signal. This is useful to track signals when there is a dynamic
 -- set of containers and layouts wrapping the widget.

@@ -40,6 +40,29 @@ function base.widget:set_visible(b)
     end
 end
 
+--- Add a new `awful.button` to this widget.
+-- @tparam awful.button button The button to add.
+function base.widget:add_button(button)
+    if not button then return end
+
+    -- Simple case
+    if not self._private.buttons then
+        self:set_buttons({button})
+        return
+    end
+
+    -- This could happen if something accidentally uses rawset
+    assert(self._private.buttons_formatted)
+
+    -- an `awful.button` is a tupple of `capi.button`
+    self._private.buttons_formatted = gtable.join(
+        self._private.buttons_formatted,
+        button
+    )
+
+    table.insert(self._private.buttons, button)
+end
+
 --- Is the widget visible?
 -- @treturn boolean
 -- @method get_visible
