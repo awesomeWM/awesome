@@ -2800,6 +2800,8 @@ titlebar_get_area(client_t *c, client_titlebar_t bar)
         result.height -= c->titlebar[CLIENT_TITLEBAR_TOP].size;
         result.height -= c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
         break;
+    case CLIENT_TITLEBAR_COUNT:
+        break;
     default:
         fatal("Unknown titlebar kind %d\n", (int) bar);
     }
@@ -2894,6 +2896,8 @@ titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t b
         case CLIENT_TITLEBAR_LEFT:
             drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_left, c);
             break;
+        case CLIENT_TITLEBAR_COUNT:
+            break;
         default:
             fatal("Unknown titlebar kind %d\n", (int) bar);
         }
@@ -2940,6 +2944,9 @@ titlebar_resize(lua_State *L, int cidx, client_t *c, client_titlebar_t bar, int 
         diff_left = change;
         property_name = "property::titlebar_left";
         break;
+    case CLIENT_TITLEBAR_COUNT:
+        /* property_name has no valid value, there is nothing to do for it */
+        return;
     default:
         fatal("Unknown titlebar kind %d\n", (int) bar);
     }
