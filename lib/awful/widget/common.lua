@@ -129,7 +129,7 @@ function common.list_update(w, buttons, label, data, objects, args)
             cache = (args and args.widget_template) and
                 custom_template(args) or default_template()
 
-            cache.primary:buttons(common.create_buttons(buttons, o))
+            cache.primary.buttons = {common.create_buttons(buttons, o)}
 
             if cache.create_callback then
                 cache.create_callback(cache.primary, o, i, objects)

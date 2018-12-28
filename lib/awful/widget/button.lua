@@ -1,12 +1,12 @@
 ---------------------------------------------------------------------------
 -- A simple button widget.
--- @usage local button = awful.widget.button()
--- button:buttons(gears.table.join(
---     button:buttons(),
---     awful.button({}, 1, nil, function ()
---         print("Mouse was clicked")
---     end)
--- ))
+--
+--    button.buttons = {
+--        awful.button({}, 1, nil, function ()
+--            print("Mouse was clicked")
+--        end)
+--    }
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @widgetmod awful.widget.button

@@ -7,29 +7,29 @@ local gtable = require("gears.table")
 -- Create a titlebar and return a table with references to its member widgets.
 local function create_titlebar(c)
     local parts = {}
-    local buttons = gtable.join(
+    local buttons = {
         awful.button({ }, 1, function()
             client.focus = c
             c:raise()
             awful.mouse.client.move(c)
         end),
         awful.button({ }, 3, function()
-        client.focus = c
-        c:raise()
-        awful.mouse.client.resize(c)
-    end)
-    )
+            client.focus = c
+            c:raise()
+            awful.mouse.client.resize(c)
+        end)
+    }
 
     -- Widgets that are aligned to the left
     parts.icon = awful.titlebar.widget.iconwidget(c)
     local left_layout = wibox.layout.fixed.horizontal(parts.icon)
-    left_layout:buttons(buttons)
+    left_layout.buttons = buttons
 
     -- The title goes in the middle
     parts.title = awful.titlebar.widget.titlewidget(c)
     parts.title:set_align("center")
     local middle_layout = wibox.layout.flex.horizontal(parts.title)
-    middle_layout:buttons(buttons)
+    middle_layout.buttons = buttons
 
     parts.floating_button  = awful.titlebar.widget.floatingbutton(c)
     parts.maximized_button = awful.titlebar.widget.maximizedbutton(c)
