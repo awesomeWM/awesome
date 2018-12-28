@@ -18,7 +18,7 @@ return { create_wibox = function()
     local right_layout = wibox.layout.fixed.horizontal()
     local textclock = wibox.widget.textclock()
     right_layout:add(textclock)
-    right_layout:add(awful.widget.layoutbox(1))
+    right_layout:add(awful.widget.layoutbox{screen=1})
 
     -- Now bring it all together (with the tasklist in the middle)
     local layout = wibox.layout.align.horizontal()

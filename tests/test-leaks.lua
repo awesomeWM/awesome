@@ -41,7 +41,7 @@ end
 
 -- Use the layoutbox for testing delayed tooltips
 local function tooltip_delayed()
-    local l = awful.widget.layoutbox(1)
+    local l = awful.widget.layoutbox{screen = 1}
     local t = l._layoutbox_tooltip
     assert(t)
     return l, t
@@ -63,7 +63,7 @@ collectable(wibox.layout.align.horizontal())
 collectable(awful.widget.launcher({ image = cairo.ImageSurface(cairo.Format.ARGB32, 20, 20), command = "bash" }))
 collectable(awful.widget.prompt())
 collectable(wibox.widget.textclock())
-collectable(awful.widget.layoutbox(1))
+collectable(awful.widget.layoutbox{screen=1})
 
 -- Some widgets do things via timer.delayed_call
 prepare_for_collect = run_delayed_calls
