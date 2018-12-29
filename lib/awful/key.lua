@@ -12,6 +12,7 @@ local ipairs = ipairs
 local capi = { key = key, root = root, awesome = awesome }
 local gmath = require("gears.math")
 local gtable = require("gears.table")
+local gdebug = require("gears.debug")
 
 local key = { mt = {}, hotkeys = {} }
 
@@ -22,30 +23,6 @@ local key = { mt = {}, hotkeys = {} }
 -- @name awful.key.ignore_modifiers
 -- @class table
 key.ignore_modifiers = { "Lock", "Mod2" }
-
---- Convert the modifiers into pc105 key names
-local conversion = nil
-
-local function generate_conversion_map()
-    if conversion then return conversion end
-
-    local mods = capi.awesome._modifiers
-    assert(mods)
-
-    conversion = {}
-
-    for mod, keysyms in pairs(mods) do
-        for _, keysym in ipairs(keysyms) do
-            assert(keysym.keysym)
-            conversion[mod] = conversion[mod] or keysym.keysym
-            conversion[keysym.keysym] = mod
-        end
-    end
-
-    return conversion
-end
-
-capi.awesome.connect_signal("xkb::map_changed"  , function() conversion = nil end)
 
 --- Execute a key combination.
 -- If an awesome keybinding is assigned to the combination, it should be
@@ -59,40 +36,14 @@ capi.awesome.connect_signal("xkb::map_changed"  , function() conversion = nil en
 -- @tparam table mod A modified table. Valid modifiers are: Any, Mod1,
 --   Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
 -- @tparam string k The key
--- @staticfct awful.key.execute
+-- @deprecated awful.key.execute
 function key.execute(mod, k)
-    local modmap = generate_conversion_map()
-    local active = capi.awesome._active_modifiers
+    gdebug.deprecate("Use `awful.keyboard.emulate_key_combination` or "..
+        "`my_key:trigger()` instead of `awful.key.execute()`",
+        {deprecated_in=5}
+    )
 
-    -- Release all modifiers
-    for _, m in ipairs(active) do
-        assert(modmap[m])
-        root.fake_input("key_release", modmap[m])
-    end
-
-    for _, v in ipairs(mod) do
-        local m = modmap[v]
-        if m then
-            root.fake_input("key_press", m)
-        end
-    end
-
-    root.fake_input("key_press"  , k)
-    root.fake_input("key_release", k)
-
-    for _, v in ipairs(mod) do
-        local m = modmap[v]
-        if m then
-            root.fake_input("key_release", m)
-        end
-    end
-
-    -- Restore the previous modifiers all modifiers. Please note that yes,
-    -- there is a race condition if the user was fast enough to release the
-    -- key during this operation.
-    for _, m in ipairs(active) do
-        root.fake_input("key_press", modmap[m])
-    end
+    require("awful.keyboard").emulate_key_combination(mod, k)
 end
 
 --- Create a new key to use as binding.

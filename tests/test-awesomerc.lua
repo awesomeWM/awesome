@@ -48,7 +48,7 @@ local steps = {
         local l = old_c.screen.selected_tag.layout
         assert(l)
 
-        --awful.key.execute({modkey}, " ")
+        --awful.keyboard.emulate_key_combination({modkey}, " ")
         awful.layout.inc(1)
 
         assert(old_c.screen.selected_tag.layout ~= l)
@@ -56,7 +56,7 @@ local steps = {
         -- Test ontop
 
         assert(not old_c.ontop)
-        awful.key.execute({modkey}, "t")
+        awful.keyboard.emulate_key_combination({modkey}, "t")
         awesome.sync()
 
         return true
@@ -74,7 +74,7 @@ local steps = {
         -- Now, test the master_width_factor
         assert(t.master_width_factor == 0.5)
 
-        awful.key.execute({modkey}, "l")
+        awful.keyboard.emulate_key_combination({modkey}, "l")
         awesome.sync()
 
         return true
@@ -89,7 +89,7 @@ local steps = {
         -- Now, test the master_count
         assert(t.master_count == 1)
 
-        awful.key.execute({modkey, "Shift"}, "h")
+        awful.keyboard.emulate_key_combination({modkey, "Shift"}, "h")
         awesome.sync()
 
         return true
@@ -104,8 +104,8 @@ local steps = {
         -- Now, test the column_count
         assert(t.column_count == 1)
 
-        awful.key.execute({modkey, "Control"}, "h")
-        awful.key.execute({modkey, "Shift"  }, "l")
+        awful.keyboard.emulate_key_combination({modkey, "Control"}, "h")
+        awful.keyboard.emulate_key_combination({modkey, "Shift"  }, "l")
         awesome.sync()
 
         return true
@@ -120,7 +120,7 @@ local steps = {
         -- Now, test the switching tag
         assert(t.index == 1)
 
-        awful.key.execute({modkey, }, "Right")
+        awful.keyboard.emulate_key_combination({modkey, }, "Right")
         awesome.sync()
 
         return true
@@ -200,7 +200,7 @@ local steps = {
         -- tags[1] and the client history should be kept
         assert(client.focus == old_c)
 
-        --awful.key.execute({modkey, "Shift"  }, "#"..(9+i)) --FIXME
+        --awful.keyboard.emulate_key_combination({modkey, "Shift"  }, "#"..(9+i)) --FIXME
         client.focus:move_to_tag(tags[2])
 
         assert(not client.focus)
@@ -235,7 +235,7 @@ local steps = {
 
         if count == 1 then
             assert(num_pairs(cached_wiboxes) == 0)
-            awful.key.execute({modkey}, "s")
+            awful.keyboard.emulate_key_combination({modkey}, "s")
             return nil
 
         elseif count == 2 then
@@ -280,7 +280,7 @@ local steps = {
                     test_context.hotkeys01_clients_before < #client.get()
             ) then
                 -- open hotkeys popup with vim hotkeys:
-                awful.key.execute({modkey}, "s")
+                awful.keyboard.emulate_key_combination({modkey}, "s")
                 test_context.hotkeys01_count_vim = count
             end
 
