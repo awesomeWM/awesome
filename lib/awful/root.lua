@@ -43,11 +43,11 @@ for _, type_name in ipairs { "button", "key" } do
                 if idx then
                     for i=1, #v do
                         assert(
-                            new_values[idx+i] == v[i],
+                            new_values[idx] == v[i],
                             "The root private "..type_name.." table is corrupted"
                         )
 
-                        table.remove(new_values, idx+i)
+                        table.remove(new_values, idx)
                     end
                 end
 

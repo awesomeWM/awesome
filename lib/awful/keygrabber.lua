@@ -71,6 +71,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 local gtable = require("gears.table")
 local gobject = require("gears.object")
 local gtimer = require("gears.timer")
+local akeyboard = require("awful.keyboard")
 local glib = require("lgi").GLib
 local capi = { keygrabber = keygrabber, root = root, awesome = awesome }
 
@@ -89,9 +90,6 @@ local conversion = nil
 
 --BEGIN one day create a proper API to add and remove keybindings at runtime.
 -- Doing it this way is horrible.
-
--- This list of keybindings to add in the next event loop cycle.
-local delay_list = {}
 
 -- Read the modifiers name and map their keysyms to the modkeys
 local function generate_conversion_map()
@@ -119,60 +117,24 @@ local function add_root_keybindings(self, list)
         list, "`add_root_keybindings` needs to be called with a list of keybindings"
     )
 
-    local was_started = #delay_list > 0
-
-    -- When multiple `awful.keygrabber` objects are created in `rc.lua`, avoid
-    -- unpacking and repacking all keys for each instance and instead merge
-    -- everything into one operation. In not so extreme cases, not doing so
-    -- would slow down `awesome.restart()` by a small, but noticeable amount
-    -- of time.
-    table.insert(delay_list, {self, list})
-
-    -- As of Awesome v4.3, `root.keys()` is an all or nothing API and there
-    -- isn't a standard mechanism to add and remove keybindings at runtime
-    -- without replacing the full list. Given `rc.lua` sets this list, not
-    -- using a delayed call would cause all `awful.keygrabber` created above
-    -- `root.keys(globalkeys)` to be silently overwritten. --FIXME v5
-    if not was_started then
-        gtimer.delayed_call(function()
-            local ret = {}
-
-            for _, obj in ipairs(delay_list) do
-                local obj_self, obj_list = obj[1], obj[2]
-
-                for _, v in ipairs(obj_list) do
-                    local mods, key, press, release, data = unpack(v)
-
-                    if type(release) == 'table' then
-                        data = release
-                        release = nil
-                    end
-
-                    if press then
-                        local old_press = press
-                        press = function(...)
-                            obj_self:start()
-                            old_press(...)
-                        end
-                    end
-
-                    if release then
-                        local old_release = release
-                        release = function(...)
-                            obj_self:start()
-                            old_release(...)
-                        end
-                    end
-
-                    table.insert(ret, akey(mods, key, press, release, data))
-                end
+    for _, kb in ipairs(list) do
+        if kb.on_press then
+            local old_press = kb.on_press
+            kb.on_press = function(...)
+                self:start()
+                old_press(...)
             end
+        end
 
-            -- Wow...
-            capi.root.keys(gtable.join( capi.root.keys(), unpack(ret) ))
+        if kb.on_release then
+            local old_release = kb.on_release
+            kb.on_release = function(...)
+                self:start()
+                old_release(...)
+            end
+        end
 
-            delay_list = {}
-        end)
+        akeyboard.append_global_keybinding(kb)
     end
 end
 
@@ -249,13 +211,13 @@ local function runner(self, modifiers, key, event)
         end
 
         for _,v in ipairs(self._private.keybindings[key]) do
-            if #filtered_modifiers == #v[1] then
+            if #filtered_modifiers == #v.modifiers then
                 local match = true
-                for _,v2 in ipairs(v[1]) do
+                for _,v2 in ipairs(v.modifiers) do
                     match = match and mod[v2]
                 end
-                if match then
-                    v[3](self)
+                if match and v.on_press then
+                    v.on_press(self)
 
                     if self.mask_event_callback ~= false then
                         return
@@ -400,20 +362,13 @@ end
 
 --- The keybindings associated with this keygrabber.
 --
--- The keybindings syntax is the same as `awful.key` or `awful.prompt.hooks`. It
--- consists of a table with 4 entries.
---
--- * `mods` A table with modifier keys, such as `shift`, `mod4`, `mod1` (alt) or
---  `control`.
--- * `key` The key name, such as `left` or `f`
--- * `callback` A function that will be called when the key combination is
---  pressed.
--- * `description` A table various metadata to be used for `awful.hotkeys_popup`.
+-- This property contains a table of `awful.key` objects.
 --
 -- @property keybindings
 -- @param table
 -- @see export_keybindings
 -- @see root_keybindings
+-- @see awful.key
 
 --- If any key is pressed that is not in this list, the keygrabber is stopped.
 --
@@ -538,27 +493,62 @@ end
 -- Those keybindings will automatically start the keygrabbing when hit.
 --
 -- @method add_keybinding
--- @tparam table mods A table with modifier keys, such as `shift`, `mod4`, `mod1` (alt) or
---  `control`.
--- @tparam string key The key name, such as `left` or `f`
--- @tparam function callback A function that will be called when the key
--- combination is pressed.
--- @tparam[opt] table description A table various metadata to be used for `awful.hotkeys_popup`.
--- @tparam string description.description The keybinding description
+-- @tparam awful.key key The key.
 -- @tparam string description.group The keybinding group
-function keygrabber:add_keybinding(mods, key, callback, description)
+
+function keygrabber:add_keybinding(key, _keycode, _callback, _description)
+    local mods = not akey._is_awful_key and akey or nil
+
+    if mods then
+        gdebug.deprecate(":add_keybinding now takes `awful.key` objects instead"
+            .. " of multiple parameters",
+            {deprecated_in=5}
+        )
+
+        key = akey {
+            modifiers   = mods,
+            key         = _keycode,
+            description = _description,
+            on_press    = _callback
+        }
+    else
+        _keycode = key.key
+    end
+
     self._private.keybindings[key] = self._private.keybindings[key] or {}
-    table.insert(self._private.keybindings[key], {
-        mods, key, callback, description
-    })
+    table.insert(self._private.keybindings[_keycode], key)
 
     if self.export_keybindings then
-        add_root_keybindings(self, {{mods, key, callback, description}})
+        add_root_keybindings(self, {key})
     end
 end
 
 function keygrabber:set_root_keybindings(keys)
-    add_root_keybindings(self, keys)
+    local real_keys = {}
+
+    -- Handle the pre-object-oriented input structures.
+    for _, key in ipairs(keys) do
+        if key._is_awful_key then
+            table.insert(real_keys, key)
+        else
+            gdebug.deprecate(":set_root_keybindings now takes `awful.key` "
+                .. " objects instead of tables",
+                {deprecated_in=5}
+            )
+
+            local mods, keycode, press, release, data = unpack(key)
+
+            table.insert(real_keys, akey {
+                modifiers   = mods,
+                key         = keycode,
+                description = (data or {}).description,
+                on_press    = press,
+                on_release  = release,
+            })
+        end
+    end
+
+    add_root_keybindings(self, real_keys)
 end
 
 -- Turn into a set.
@@ -689,26 +679,41 @@ function keygrab.run_with_keybindings(args)
 
     -- Build the hook map
     for _,v in ipairs(args.keybindings or {}) do
-        if #v >= 3 and #v <= 4 then
-            local _,key,callback = unpack(v)
+        if v._is_awful_key then
+            ret._private.keybindings[v.key] = ret._private.keybindings[v.key] or {}
+            table.insert(ret._private.keybindings[v.key], v)
+        elseif #v >= 3 and #v <= 4 then
+            gdebug.deprecate("keybindings now contains `awful.key` objects"
+                .. "instead of multiple tables",
+                {deprecated_in=5}
+            )
+
+            local modifiers, key, callback = unpack(v)
             if type(callback) == "function" then
+
+                local k = akey {
+                    modifiers = modifiers,
+                    key       = key,
+                    on_press  = callback,
+                }
+
                 ret._private.keybindings[key] = ret._private.keybindings[key] or {}
-                table.insert(ret._private.keybindings[key], v)
+                table.insert(ret._private.keybindings[key], k)
             else
                 gdebug.print_warning(
                     "The hook's 3rd parameter has to be a function. " ..
-                        gdebug.dump(v)
+                        gdebug.dump(v or {})
                 )
             end
         else
             gdebug.print_warning(
-                "The hook has to have at least 3 parameters. ".. gdebug.dump(v)
+                "The keybindings should be awful.key objects".. gdebug.dump(v or {})
             )
         end
     end
 
     if args.export_keybindings then
-        add_root_keybindings(ret, args.keybindings)
+        ret:set_root_keybindings(args.keybindings)
     end
 
     local mt = getmetatable(ret)

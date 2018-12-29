@@ -2,7 +2,8 @@
 
 local gears = {table = require("gears.table")} --DOC_HIDE
 
-local awful = { keygrabber = require("awful.keygrabber") } --DOC_HIDE
+local awful = { keygrabber = require("awful.keygrabber"), --DOC_HIDE
+    key = require("awful.key") } --DOC_HIDE
 
     local map, actions = {
         verbs = {
@@ -44,6 +45,6 @@ local awful = { keygrabber = require("awful.keygrabber") } --DOC_HIDE
         stop_callback = parse,
         stop_key   = gears.table.keys(map.verbs),
         root_keybindings = {
-            {{"Mod4"}, "v"}
+            awful.key({"Mod4"}, "v")
         },
     }
