@@ -142,7 +142,7 @@ local function label(o)
         fg_color = theme.menubar_fg_focus or theme.menu_fg_focus or theme.fg_focus
         bg_color = theme.menubar_bg_focus or theme.menu_bg_focus or theme.bg_focus
     end
-    return colortext(o.name, fg_color),
+    return colortext(gstring.xml_escape(o.name), fg_color),
            bg_color,
            nil,
            o.icon
