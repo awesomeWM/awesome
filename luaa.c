@@ -66,6 +66,12 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
 
+/* XGetModifierMapping() */
+#include <X11/Xlib.h>
+
+/* XkbKeycodeToKeysym */
+#include <X11/XKBlib.h>
+
 #include <unistd.h> /* for gethostname() */
 
 #ifdef WITH_DBUS
@@ -388,6 +394,120 @@ luaA_fixups(lua_State *L)
     lua_setglobal(L, "selection");
 }
 
+static const char *
+get_modifier_name(int map_index)
+{
+    switch (map_index) {
+        case ShiftMapIndex:   return "Shift";
+        case LockMapIndex:    return "Lock";
+        case ControlMapIndex: return "Control";
+        case Mod1MapIndex:    return "Mod1"; /* Alt */
+        case Mod2MapIndex:    return "Mod2";
+        case Mod3MapIndex:    return "Mod3";
+        case Mod4MapIndex:    return "Mod4";
+        case Mod5MapIndex:    return "Mod5";
+
+    }
+
+    return 0; /* \0 */
+}
+
+/* Undocumented */
+/*
+ * The table of keybindings modifiers.
+ *
+ * Each modifier has zero to many entries depending on the keyboard layout.
+ * For example, `Shift` usually both has a left and right variant. Each
+ * modifier entry has a `keysym` and `keycode` entry. For the US PC 105
+ * keyboard, it looks like:
+ *
+ *    awesome.modifiers = {
+ *         Shift = {
+ *              {keycode = 50 , keysym = 'Shift_L'    },
+ *              {keycode = 62 , keysym = 'Shift_R'    },
+ *         },
+ *         Lock = {},
+ *         Control = {
+ *              {keycode = 37 , keysym = 'Control_L'  },
+ *              {keycode = 105, keysym = 'Control_R'  },
+ *         },
+ *         Mod1 = {
+ *              {keycode = 64 , keysym = 'Alt_L'      },
+ *              {keycode = 108, keysym = 'Alt_R'      },
+ *         },
+ *         Mod2 = {
+ *              {keycode = 77 , keysym = 'Num_Lock'   },
+ *         },
+ *         Mod3 = {},
+ *         Mod4 = {
+ *              {keycode = 133, keysym = 'Super_L'    },
+ *              {keycode = 134, keysym = 'Super_R'    },
+ *         },
+ *         Mod5 = {
+ *              {keycode = 203, keysym = 'Mode_switch'},
+ *         },
+ *    };
+ *
+ * @tfield table modifiers
+ * @tparam table modifiers.Shift The Shift modifiers.
+ * @tparam table modifiers.Lock The Lock modifiers.
+ * @tparam table modifiers.Control The Control modifiers.
+ * @tparam table modifiers.Mod1 The Mod1 (Alt) modifiers.
+ * @tparam table modifiers.Mod2 The Mod2 modifiers.
+ * @tparam table modifiers.Mod3 The Mod3 modifiers.
+ * @tparam table modifiers.Mod4 The Mod4 modifiers.
+ * @tparam table modifiers.Mod5 The Mod5 modifiers.
+ */
+
+/*
+ * Modifiers can change over time, given they are currently not tracked, just
+ * query them each time. Use with moderation.
+ */
+static int luaA_get_modifiers(lua_State *L)
+{
+    Display *display = XOpenDisplay(NULL);
+
+    if (!display)
+        return 0;
+
+    XModifierKeymap *mods = XGetModifierMapping(display);
+
+    lua_newtable(L);
+
+    /* This get the MAPPED modifiers, not all of them are */
+    for (int i = ShiftMapIndex; i <= Mod5MapIndex; i++) {
+        lua_pushstring(L, get_modifier_name(i));
+        lua_newtable(L);
+
+        for (int j = 0; j < mods->max_keypermod; j++) {
+            const KeyCode key_code = mods->modifiermap[i * mods->max_keypermod + j];
+            const KeySym  key_sym  = XkbKeycodeToKeysym(display, key_code, 0, 0);
+            if (key_sym != NoSymbol) {
+                /* The +1 because j starts at zero and Lua at 1 */
+                lua_pushinteger(L, j+1);
+
+                lua_newtable(L);
+
+                lua_pushstring(L, "keycode");
+                lua_pushinteger(L, key_code);
+                lua_settable(L, -3);
+
+                lua_pushstring(L, "keysym");
+                lua_pushstring(L, XKeysymToString(key_sym));
+                lua_settable(L, -3);
+
+                lua_settable(L, -3);
+            }
+        }
+        lua_settable(L, -3);
+    }
+
+    XFreeModifiermap(mods);
+    XCloseDisplay(display);
+
+    return 0;
+}
+
 
 /**
  * The version of awesome.
@@ -469,6 +589,12 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "startup"))
     {
         lua_pushboolean(L, globalconf.loop == NULL);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "_modifiers"))
+    {
+        luaA_get_modifiers(L);
         return 1;
     }
 
