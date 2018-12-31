@@ -124,13 +124,17 @@ function key:trigger()
     end
 end
 
+function key:get_has_root_binding()
+    return capi.root.has_key(self)
+end
+
 local function index_handler(self, k)
     if key["get_"..k] then
         return key["get_"..k](self)
     end
 
     if type(key[k]) == "function" then
-        return key[k](self)
+        return key[k]
     end
 
     local data = reverse_map[self]
