@@ -3,7 +3,7 @@
 --
 -- @author Yauhen Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2015 Yauhen Kirylau
--- @module beautiful.theme_assets
+-- @submodule beautiful
 ----------------------------------------------------------------------------
 
 local cairo = require("lgi").cairo
