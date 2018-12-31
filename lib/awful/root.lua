@@ -106,6 +106,14 @@ for _, type_name in ipairs { "button", "key" } do
         table.insert(removed, value)
     end
 
+    capi.root["has_"..type_name] = function(item)
+        if not item["_is_capi_"..type_name] then
+            item = item[1]
+        end
+
+        return gtable.hasitem(capi.root["_"..prop_name](), item) ~= nil
+    end
+
     assert(root[prop_name])
 
 end
