@@ -7,10 +7,34 @@ local mouse = {
     history       = {},
 }
 
+-- Avoid gears when possible
+local function contains(rect, point)
+    return point.x >= rect.x and point.x < rect.x+rect.width and
+        point.y >= rect.y and point.y < rect.y+rect.height
+end
+
 function mouse.coords(args)
     if args then
+        local old = {x = coords.x, y = coords.y}
         coords.x, coords.y = args.x, args.y
         table.insert(mouse.history, {x=coords.x, y=coords.y})
+
+        for _, d in ipairs(drawin.get()) do
+            local geo = d.geometry()
+            local was_in, is_in = contains(geo, old), contains(geo, coords)
+            local sig = {(is_in and not was_in) and "mouse::enter" or
+                (was_in and not is_in) and "mouse::leave" or "mouse::move"}
+
+            -- Enter is also a move, otherwise drawable.handle_motion isn't called
+            if sig[1] == "mouse::enter" then
+                table.insert(sig, "mouse::move")
+            end
+
+            for _, s in ipairs(sig) do
+                d:emit_signal(s, coords.x - geo.x, coords.y - geo.y)
+                d.drawable:emit_signal(s, coords.x - geo.x, coords.y - geo.y)
+            end
+        end
     end
 
     return coords

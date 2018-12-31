@@ -63,6 +63,9 @@ end
 -- Always show deprecated messages
 awesome.version = "v9999"
 
+-- SVG are composited. Without it we need a root surface
+awesome.composite_manager_running = true
+
 return awesome
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

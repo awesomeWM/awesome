@@ -10,13 +10,16 @@
 -- How to create a tooltip?
 -- ---
 --
---     myclock = wibox.widget.textclock("%T", 1)
---     myclock_t = awful.tooltip({
---         objects = { myclock },
---         timer_function = function()
---                 return os.date("Today is %A %B %d %Y\nThe time is %T")
---             end,
---         })
+-- @DOC_awful_tooltip_textclock_EXAMPLE@
+--
+-- Alternatively, you can use `mouse::enter` signal:
+--
+-- @DOC_awful_tooltip_textclock2_EXAMPLE@
+--
+-- How to create a tooltip without objects?
+-- ---
+--
+-- @DOC_awful_tooltip_mouse_EXAMPLE@
 --
 -- How to add the same tooltip to multiple objects?
 -- ---
@@ -124,6 +127,7 @@ local function apply_outside_mode(self)
     local _, position = a_placement.next_to(w, {
         geometry            = self._private.widget_geometry,
         preferred_positions = self.preferred_positions,
+        preferred_anchors   = self.preferred_alignments,
         honor_workarea      = true,
     })
 
@@ -228,6 +232,13 @@ end
 
 --- The horizontal alignment.
 --
+-- This is valid for the mouse mode only. For the outside mode, use
+-- `preferred_positions`.
+--
+-- @DOC_awful_tooltip_align_EXAMPLE@
+--
+-- @DOC_awful_tooltip_align2_EXAMPLE@
+--
 -- The following values are valid:
 --
 -- * top_left
@@ -241,6 +252,8 @@ end
 --
 -- @property align
 -- @see beautiful.tooltip_align
+-- @see mode
+-- @see preferred_positions
 
 --- The default tooltip alignment.
 -- @beautiful beautiful.tooltip_align
@@ -264,6 +277,9 @@ end
 
 --- The shape of the tooltip window.
 -- If the shape require some parameters, use `set_shape`.
+--
+-- @DOC_awful_tooltip_shape_EXAMPLE@
+--
 -- @property shape
 -- @see gears.shape
 -- @see set_shape
@@ -274,7 +290,6 @@ end
 -- @tparam gears.shape s The shape
 -- @see shape
 -- @see gears.shape
-
 function tooltip:set_shape(s)
     self.backgroundbox:set_shape(s)
 end
@@ -283,6 +298,14 @@ end
 -- This affects how the tooltip is placed. By default, the tooltip is `align`ed
 -- close to the mouse cursor. It is also possible to place the tooltip relative
 -- to the widget geometry.
+--
+-- **mouse:**
+--
+-- @DOC_awful_tooltip_mode_EXAMPLE@
+--
+-- **outside:**
+--
+-- @DOC_awful_tooltip_mode2_EXAMPLE@
 --
 -- Valid modes are:
 --
@@ -305,8 +328,17 @@ end
 
 --- The preferred positions when in `outside` mode.
 --
+-- @DOC_awful_tooltip_preferred_positions_EXAMPLE@
+--
 -- If the tooltip fits on multiple sides of the drawable, then this defines the
--- priority
+-- priority.
+--
+-- The valid table values are:
+--
+-- * "top"
+-- * "right"
+-- * "left"
+-- * "bottom"
 --
 -- The default is:
 --
@@ -314,6 +346,9 @@ end
 --
 -- @property preferred_positions
 -- @tparam table preferred_positions The position, ordered by priorities
+-- @see align
+-- @see mode
+-- @see preferred_alignments
 
 function tooltip:get_preferred_positions()
     return self._private.preferred_positions or
@@ -322,6 +357,48 @@ end
 
 function tooltip:set_preferred_positions(value)
     self._private.preferred_positions = value
+
+    set_geometry(self)
+end
+
+--- The preferred alignment when using the `outside` mode.
+--
+-- The values of the table are ordered by priority, the first one that fits
+-- will be used.
+--
+-- **front:**
+--
+-- @DOC_awful_tooltip_preferred_alignment_EXAMPLE@
+--
+-- **middle:**
+--
+-- @DOC_awful_tooltip_preferred_alignment2_EXAMPLE@
+--
+-- **back:**
+--
+-- @DOC_awful_tooltip_preferred_alignment3_EXAMPLE@
+--
+-- The valid table values are:
+--
+-- * front
+-- * middle
+-- * back
+--
+-- The default is:
+--
+--    {"front", "back", "middle"}
+--
+-- @property preferred_alignments
+-- @param string
+-- @see preferred_positions
+
+function tooltip:get_preferred_alignments()
+    return self._private.preferred_alignments or
+        {"front", "back", "middle"}
+end
+
+function tooltip:set_preferred_alignments(value)
+    self._private.preferred_alignments = value
 
     set_geometry(self)
 end
@@ -370,6 +447,8 @@ end
 
 --- Set all margins around the tooltip textbox
 --
+-- @DOC_awful_tooltip_margins_EXAMPLE@
+--
 -- @property margins
 -- @tparam tooltip self A tooltip object
 -- @tparam number New margins value
@@ -378,26 +457,62 @@ function tooltip:set_margins(val)
     self.marginbox:set_margins(val)
 end
 
+--- The border width.
+--
+-- @DOC_awful_tooltip_border_width_EXAMPLE@
+--
+-- @property border_width
+-- @param number
+
+function tooltip:set_border_width(val)
+    self.widget.shape_border_width = val
+end
+
+--- The border color.
+--
+-- @DOC_awful_tooltip_border_color_EXAMPLE@
+--
+-- @property border_color
+-- @param gears.color
+
+function tooltip:set_border_color(val)
+    self.widget.shape_border_color = val
+end
+
 --- Set the margins around the left and right of the tooltip textbox
+--
+-- @DOC_awful_tooltip_margins_leftright_EXAMPLE@
 --
 -- @property margins_leftright
 -- @tparam tooltip self A tooltip object
 -- @tparam number New margins value
 
 function tooltip:set_margin_leftright(val)
-    self.marginbox.left = val
-    self.marginbox.right = val
+    self.marginbox:set_left(val)
+    self.marginbox:set_right(val)
+end
+
+--TODO v5 deprecate this
+function tooltip:set_margins_leftright(val)
+    self:set_margin_leftright(val)
 end
 
 --- Set the margins around the top and bottom of the tooltip textbox
+--
+-- @DOC_awful_tooltip_margins_topbottom_EXAMPLE@
 --
 -- @property margins_topbottom
 -- @tparam tooltip self A tooltip object
 -- @tparam number New margins value
 
 function tooltip:set_margin_topbottom(val)
-    self.marginbox.top = val
-    self.marginbox.bottom = val
+    self.marginbox:set_top(val)
+    self.marginbox:set_bottom(val)
+end
+
+--TODO v5 deprecate this
+function tooltip:set_margins_topbottom(val)
+    self:set_margin_topbottom(val)
 end
 
 --- Add tooltip to an object.
@@ -509,7 +624,7 @@ function tooltip.new(args)
         function self.show(other, geo)
             -- Auto detect clients and wiboxes
             if other.drawable or other.pid then
-                geo = other:geometry()
+                geo = other
             end
 
             -- Cache the geometry in case it is needed later
