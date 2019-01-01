@@ -544,7 +544,7 @@ end
 local clients_menu = nil
 function menu.client_list(args, item_args, filter)
     if clients_menu and clients_menu.wibox.visible then
-	clients_menu:hide()
+        clients_menu:hide()
         clients_menu = nil
     else
         clients_menu = menu.clients(args, item_args, filter)
