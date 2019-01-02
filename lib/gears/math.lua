@@ -56,14 +56,22 @@ function gmath.subsets(set)
 end
 
 --- Make i cycle.
+--
+-- By default, this function only cycle forward. If it can be used with negative
+-- `i`, set `symetric` to true.
+--
 -- @class function
 -- @name cycle
--- @param t A length. Must be greater than zero.
--- @param i An absolute index to fit into #t.
--- @return An integer in (1, t) or nil if t is less than or equal to zero.
-function gmath.cycle(t, i)
-    if t < 1 then return end
+-- @tparam number t A length. Must be greater than zero.
+-- @tparam number i An absolute index to fit into #t.
+-- @tparam[opt=false] boolean symetric Also cycle backward.
+-- @treturn number|nil An integer in (1, t) or nil if t is less than or equal
+--  to zero. It returns `nil` if `symetric` is false and `i` less than 1.
+function gmath.cycle(t, i, symetric)
+    if t < 1 and not symetric then return end
+
     i = i % t
+
     if i == 0 then
         i = t
     end

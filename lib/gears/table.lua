@@ -86,15 +86,30 @@ function gtable.from_sparse(t)
 end
 
 --- Check if a table has an item and return its key.
+--
+-- If the input table only has continuous integer keys, consider setting
+-- `ordered` to make your code more predictable and easier to test.
+--
 -- @class function
 -- @name hasitem
--- @param t The table.
+-- @tparam table t The table.
 -- @param item The item to look for in values of the table.
--- @return The key were the item is found, or nil if not found.
-function gtable.hasitem(t, item)
-    for k, v in pairs(t) do
-        if v == item then
-            return k
+-- @tparam[opt=false] boolean ordered For indexed table, iterate in a
+--  predictable order.
+-- @tparam[opt=1] number first_key Where to begin looking.
+-- @return The key were the item is found, or `nil` if not found.
+function gtable.hasitem(t, item, ordered, first_key)
+    if not ordered then
+        for k, v in pairs(t) do
+            if v == item then
+                return k
+            end
+        end
+    else
+        for k = first_key or 1, #t do
+            if t[k] == item then
+                return k
+            end
         end
     end
 end
@@ -174,19 +189,18 @@ function gtable.clone(t, deep)
     return c
 end
 
----
--- Returns an iterator to cycle through, starting from the first element or the
+
+--- Returns an iterator to cycle through, starting from the first element or the
 -- given index, all elements of a table that match a given criteria.
 --
 -- @class function
 -- @name iterate
--- @tparam table t The table to iterate.
--- @tparam func  filter A function that returns true to indicate a positive
---   match.
--- @param func.item The item to filter.
--- @tparam[opt=1] int start Index to start iterating from.
---   Default is 1 (=> start of the table).
--- @treturn func
+-- @tparam table t The table to iterate
+-- @tparam[opt=nil] function filter a function that returns true to indicate a
+--  positive match.
+-- @tparam number start  what index to start iterating from.  Default is 1 (=> start of
+--  the table)
+-- @see gears.table.iterate_value
 function gtable.iterate(t, filter, start)
     local count  = 0
     local index  = start or 1
@@ -195,13 +209,47 @@ function gtable.iterate(t, filter, start)
     return function ()
         while count < length do
             local item = t[index]
-            index = gmath.cycle(#t, index + 1)
+            index = gmath.cycle(#t, index + 1, true)
             count = count + 1
             if filter(item) then return item end
         end
     end
 end
 
+--- Get the next (or previous) value from a table and cycle if necessary.
+--
+-- If the table contains the same value multiple type (aka, is not a set), the
+-- `first_index` has to be specified.
+--
+-- @tparam table t The input table.
+-- @param value A value from the table.
+-- @tparam[opt=1] number step_size How many element forward (or backward) to pick.
+-- @tparam[opt=nil] function filter An optional function. When it returns
+--  `false`, the element are skipped until a match if found. It takes the value
+--  as its sole parameter.
+-- @tparam[opt=1] number start_at Where to start the lookup from.
+-- @return The value. If there is a filter function and no element match,
+--  then `nil` is returned.
+-- @treturn number|nil The element (if any) key.
+function gtable.iterate_value(t, value, step_size, filter, start_at)
+    local k = gtable.hasitem(t, value, true, start_at)
+    if not k then return end
+
+    step_size = step_size or 1
+    local new_key = gmath.cycle(#t, k + step_size)
+
+    if filter and not filter(t[new_key]) then
+        for i=1, #t do
+            local k2 = gmath.cycle(#t, new_key + i)
+            if filter(t[k2]) then
+                return t[k2], k2
+            end
+        end
+        return
+    end
+
+    return t[new_key], new_key
+end
 
 --- Merge items from the one table to another one
 -- @class function
