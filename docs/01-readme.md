@@ -30,6 +30,29 @@ instance:
 
     CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/opt/awesome" make
 
+
+### Installing current git master as a package receipts
+
+#### Arch Linux AUR
+
+```
+sudo pacman -S --needed base-devel git
+git clone https://aur.archlinux.org/awesome-git.git
+cd awesome-git
+makepkg -fsri
+```
+
+#### Debian-based
+
+```
+sudo apt build-dep awesome
+git clone https://github.com/awesomewm/awesome
+cd awesome
+make package
+sudo apt install *.deb
+```
+
+
 ### Build dependencies
 
 Awesome has the following dependencies (besides a more-or-less standard POSIX
@@ -120,7 +143,7 @@ Then in gdb set any args and run it:
 
     (gdb) set arg --replace
     (gdb) run
-    
+
 ## Asking questions
 
 #### IRC
