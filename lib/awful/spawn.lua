@@ -474,7 +474,7 @@ end
 
 --- Call `spawn.easy_async` with a shell.
 -- This calls `cmd` with `$SHELL -c` (via `awful.util.shell`).
--- @tparam string|table cmd The command.
+-- @tparam string cmd The command.
 -- @tab callback Function with the following arguments
 --   @tparam string callback.stdout Output on stdout.
 --   @tparam string callback.stderr Output on stderr.
