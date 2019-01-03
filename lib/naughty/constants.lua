@@ -59,6 +59,7 @@ ret.config.defaults = {
 }
 
 ret.notification_closed_reason = {
+    too_many_on_screen   = -2,
     silent               = -1,
     expired              = 1,
     dismissedByUser      = 2, --TODO v5 remove this undocumented legacy constant

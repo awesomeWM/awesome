@@ -218,6 +218,9 @@ local notification = {}
 
 --- Emitted when the notification is destroyed.
 -- @signal destroyed
+-- @tparam number reason Why it was destroyed
+-- @tparam boolean keep_visible If it was kept visible.
+-- @see naughty.notification_closed_reason
 
 -- . --FIXME needs a description
 -- @property ignore_suspend If set to true this notification
@@ -234,7 +237,7 @@ local notification = {}
 -- @tparam[opt=false] boolean keep_visible If true, keep the notification visible
 -- @return True if the popup was successfully destroyed, nil otherwise
 function notification:destroy(reason, keep_visible)
-    self:emit_signal("destroyed")
+    self:emit_signal("destroyed", reason, keep_visible)
 
     return true
 end
