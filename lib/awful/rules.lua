@@ -326,13 +326,37 @@ function rules.remove_rule_source(name)
     return false
 end
 
--- Add the rules properties
-local function apply_awful_rules(c, props, callbacks)
-    for _, entry in ipairs(rules.matching_rules(c, rules.rules)) do
-        gtable.crush(props,entry.properties or {})
+--- Get (merged) properties and (list of) callbacks of rules matching a client.
+-- @client c The client.
+-- @tparam table _rules The rules to check. List with "rule", "rule_any",
+--   "except" and "except_any" keys.
+-- @treturn[0] table Merged properties from "properties" table of matching rules.
+-- @treturn[0] table List of callbacks from "callback" property of matching rules.
+-- @treturn[1] nil If no rules match the client.
+function rules.get_props_and_callbacks(c, _rules)
+    local matching_rules = rules.matching_rules(c, _rules)
+    if #matching_rules == 0 then
+        return
+    end
 
+    local props = {}
+    local callbacks = {}
+    for _, entry in ipairs(matching_rules) do
+        gtable.crush(props, entry.properties or {})
         if entry.callback then
             table.insert(callbacks, entry.callback)
+        end
+    end
+    return props, callbacks
+end
+
+--- Handle/add @{awful.rules.rules}.
+local function apply_awful_rules(c, props, callbacks)
+    local new_props, new_callbacks = rules.get_props_and_callbacks(c, rules.rules)
+    if new_props then
+        gtable.crush(props, new_props)
+        for _, callback in pairs(new_callbacks) do
+            table.insert(callbacks, callback)
         end
     end
 end
@@ -412,7 +436,8 @@ end
 
 rules.add_rule_source("awful.spawn_once", apply_singleton_rules, {"awful.spawn"}, {"awful.rules"})
 
---- Apply awful.rules.rules to a client.
+--- Apply rules to a client.
+-- @see rules.add_rule_source
 -- @client c The client.
 function rules.apply(c)
     local callbacks, props = {}, {}
