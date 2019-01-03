@@ -244,11 +244,11 @@ end
 function notification:reset_timeout(new_timeout)
     if self.timer then self.timer:stop() end
 
-    local timeout = new_timeout or self.timeout
-    self:set_timeout(self, timeout)
-    self.timeout = timeout
+    self.timeout = new_timeout or self.timeout
 
-    self.timer:start()
+    if not self.timer.started then
+        self.timer:start()
+    end
 end
 
 function notification:set_id(new_id)
@@ -264,10 +264,21 @@ function notification:set_timeout(timeout)
 
     if self.timer and self._private.timeout == timeout then return end
 
+    -- 0 == never
     if timeout > 0 then
         local timer_die = timer { timeout = timeout }
-        timer_die:connect_signal("timeout", function() die(cst.notification_closed_reason.expired) end)
-        if not self.suspended then --FIXME there's still a dependency loop to fix before it works
+
+        timer_die:connect_signal("timeout", function()
+            pcall(die, cst.notification_closed_reason.expired)
+
+            -- Prevent infinite timers events on errors.
+            if timer_die.started then
+                timer_die:stop()
+            end
+        end)
+
+        --FIXME there's still a dependency loop to fix before it works
+        if not self.suspended then
             timer_die:start()
         end
 
