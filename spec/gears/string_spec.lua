@@ -41,6 +41,14 @@ describe("gears.string", function()
         assert.is_true(gstring.endswith("something", "thing"))
         assert.is_false(gstring.endswith("something", "that"))
     end)
+
+    describe("split", function()
+        assert.is_same(gstring.split("", "\n"), {""})
+        assert.is_same(gstring.split("\n", "\n"), {"", ""})
+        assert.is_same(gstring.split("foo", "\n"), {"foo"})
+        assert.is_same(gstring.split("foo\n", "\n"), {"foo", ""})
+        assert.is_same(gstring.split("foo\nbar", "\n"), {"foo", "bar"})
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
