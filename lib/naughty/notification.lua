@@ -216,6 +216,11 @@ local notification = {}
 --@property suspended
 --@param boolean
 
+--- If the notification is expired.
+-- @property is_expired
+-- @param boolean
+-- @see naughty.expiration_paused
+
 --- Emitted when the notification is destroyed.
 -- @signal destroyed
 -- @tparam number reason Why it was destroyed
@@ -262,6 +267,14 @@ end
 
 function notification:set_timeout(timeout)
     local die = function (reason)
+        if reason == cst.notification_closed_reason.expired then
+            self.is_expired = true
+            if naughty.expiration_paused then
+                table.insert(naughty.notifications._expired[1], self)
+                return
+            end
+        end
+
         self:destroy(reason)
     end
 
@@ -453,6 +466,9 @@ local function create(args)
     for k, v in pairs(args) do
         private[k] = v
     end
+
+    -- It's an automatic property
+    n.is_expired = false
 
     rawset(n, "_private", private)
 

@@ -98,7 +98,19 @@ gtable.crush(naughty, require("naughty.constants"))
 -- @property suspended
 -- @param boolean
 
-local suspended = false
+--- Do not allow notifications to auto-expire.
+--
+-- When navigating the notifications, for example on mouse over or when
+-- keyboard navigation is enabled, it is very annoying when notifications
+-- just vanish.
+--
+-- @property expiration_paused
+-- @param[opt=false] boolean
+
+local properties = {
+    suspended         = false,
+    expiration_paused = false
+}
 
 --TODO v5 Deprecate the public `naughty.notifications` (to make it private)
 
@@ -112,7 +124,7 @@ local suspended = false
 -- @field die Function to be executed on timeout
 -- @field id Unique notification id based on a counter
 -- @table notifications
-naughty.notifications = { suspended = { } }
+naughty.notifications = { suspended = { }, _expired = {{}} }
 screen.connect_for_each_screen(function(s)
     naughty.notifications[s] = {
         top_left = {},
@@ -137,7 +149,7 @@ end)
 -- @deprecated naughty.is_suspended
 function naughty.is_suspended()
     gdebug.deprecate("Use naughty.suspended", {deprecated_in=5})
-    return suspended
+    return properties.suspended
 end
 
 --- Suspend notifications.
@@ -147,7 +159,7 @@ end
 -- @deprecated naughty.suspend
 function naughty.suspend()
     gdebug.deprecate("Use naughty.suspended = true", {deprecated_in=5})
-    suspended = true
+    properties.suspended = true
 end
 
 local conns = {}
@@ -196,9 +208,14 @@ function naughty.disconnect_signal(name, func)
 end
 
 local function resume()
-    suspended = false
+    properties.suspended = false
     for _, v in pairs(naughty.notifications.suspended) do
-        v:emit_signal("request::display")
+        local args = v._private.args
+        assert(args)
+        v._private.args = nil
+
+        naughty.emit_signal("added", v, args)
+        naughty.emit_signal("request::display", v, args)
         if v.timer then v.timer:start() end
     end
     naughty.notifications.suspended = { }
@@ -221,7 +238,7 @@ end
 -- @deprecated naughty.toggle
 function naughty.toggle()
     gdebug.deprecate("Use naughty.suspended = not naughty.suspended", {deprecated_in=5})
-    if suspended then
+    if properties.suspended then
         naughty.resume()
     else
         naughty.suspend()
@@ -339,10 +356,10 @@ end
 
 -- Remove the notification from the internal list(s)
 local function cleanup(self, reason)
-    if suspended then
-        for k, v in pairs(naughty.suspended) do
+    if properties.suspended then
+        for k, v in pairs(naughty.notifications.suspended) do
             if v == self then
-                table.remove(naughty.suspended, k)
+                table.remove(naughty.notifications.suspended, k)
                 break
             end
         end
@@ -357,7 +374,8 @@ local function cleanup(self, reason)
         n.idx = k
     end
 
-    if self.timer then
+    -- `self.timer.started` will be false if the expiration was paused.
+    if self.timer and self.timer.started then
         self.timer:stop()
     end
 
@@ -374,7 +392,17 @@ end
 
 -- Proxy the global suspension state on all notification objects
 local function get_suspended(self)
-    return suspended and not self.ignore_suspend
+    return properties.suspended and not self.ignore_suspend
+end
+
+function naughty.set_expiration_paused(p)
+    properties.expiration_paused = p
+
+    if not p then
+         for _, n in ipairs(naughty.notifications._expired[1]) do
+            n:destroy(naughty.notification_closed_reason.expired)
+         end
+    end
 end
 
 --- Emitted when a notification is created.
@@ -421,11 +449,12 @@ local function register(notification, args)
     notification.idx    = #naughty.notifications[s][notification.position]
     notification.screen = s
 
-    if suspended and not args.ignore_suspend then
+    if properties.suspended and not args.ignore_suspend then
+        notification._private.args = args
         table.insert(naughty.notifications.suspended, notification)
+    else
+        naughty.emit_signal("added", notification, args)
     end
-
-    naughty.emit_signal("added", notification, args)
 
     assert(rawget(notification, "preset"))
 
@@ -436,18 +465,22 @@ end
 naughty.connect_signal("new", register)
 
 local function index_miss(_, key)
-    if key == "suspended" then
-        return suspended
+    if rawget(naughty, "get_"..key) then
+         return rawget(naughty, "get_"..key)()
+    elseif properties[key] ~= nil then
+        return properties[key]
     else
         return nil
     end
 end
 
 local function set_index_miss(_, key, value)
-    if key == "suspended" then
+    if rawget(naughty, "set_"..key) then
+         return rawget(naughty, "set_"..key)(value)
+    elseif properties[key] ~= nil then
         assert(type(value) == "boolean")
-        suspended = value
-        if value then
+        properties[key] = value
+        if not value then
             resume()
         end
     else
