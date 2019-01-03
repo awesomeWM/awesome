@@ -216,9 +216,10 @@ for f in $tests; do
             continue
         fi
     fi
+
     # Make the filename absolute if it is not.
-    if [ "$f#/" = "$f" ]; then
-        f="$source_dir/$f"
+    if [ "${f#/}" = "$f" ]; then
+        f="$PWD/$f"
     fi
 
     # Execute the test file in awesome.
