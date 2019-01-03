@@ -4,7 +4,7 @@
 --
 -- @author Emmanuel Lepage-Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2016 Emmanuel Lepage-Vallee
--- @module gears.object.properties
+-- @submodule gears.object
 ---------------------------------------------------------------------------
 
 local object = {}
@@ -26,6 +26,7 @@ local object = {}
 --
 -- @param class A standard luaobject derived object
 -- @tparam[opt={}] table args A set of accessors configuration parameters
+-- @function gears.object.properties.capi_index_fallback
 function object.capi_index_fallback(class, args)
     args = args or {}
 

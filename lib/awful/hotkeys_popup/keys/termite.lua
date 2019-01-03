@@ -3,7 +3,7 @@
 --
 -- @author ikselven
 -- @copyright 2017 ikselven
--- @module awful.hotkeys_popup.keys.termite
+-- @submodule awful.hotkeys_popup
 ---------------------------------------------------------------------------
 
 local hotkeys_popup = require("awful.hotkeys_popup.widget")
