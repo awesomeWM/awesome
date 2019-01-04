@@ -239,7 +239,7 @@ if(GENERATE_MANPAGES)
                 set(asciilang ${lang})
             endif()
             add_custom_command(
-                COMMAND ${ASCIIDOCTOR_EXECUTABLE} -a lang=${asciilang} -d manpage -b manpage -o ${manfile} - < ${txtfile}
+                COMMAND ${ASCIIDOCTOR_EXECUTABLE} -a lang=${asciilang} -d manpage -b manpage -o ${manfile} ${txtfile}
                 WORKING_DIRECTORY ${BUILD_DIR}/${relpath2}
                 OUTPUT  ${manfile}
                 DEPENDS ${txtfile}
