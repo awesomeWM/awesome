@@ -465,6 +465,14 @@ function naughty.default_notification_handler(notification, args)
             iconbox = wibox.widget.imagebox()
             iconmargin = wibox.container.margin(iconbox, margin, margin, margin, margin)
 
+            if max_height and icon:get_height() > max_height then
+                icon_size = icon_size and math.min(max_height, icon_size) or max_height
+            end
+
+            if max_width and icon:get_width() > max_width then
+                icon_size = icon_size and math.min(max_width, icon_size) or max_width
+            end
+
             if icon_size and (icon:get_height() > icon_size or icon:get_width() > icon_size) then
                 size_info.icon_scale_factor = icon_size / math.max(icon:get_height(),
                                           icon:get_width())
