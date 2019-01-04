@@ -7,12 +7,12 @@ NAME
 awesome - awesome Fenstermanager
 
 SYNTAX
---------
+------
 
 *awesome* [*-v* | *--version*] [*-h* | *--help*] [*-c* | *--config* 'Datei'] [*-k* | *--check*] [*--search* 'Verzeichnis'] [*-a* | *--no-argb*] [*-r* | *--replace]
 
 BESCHREIBUNG
------------
+------------
 
 *awesome* ist ein Fenstermanager für X. Er verwaltet Fenster in verschiedenen Anordnungen, wie etwa überlappend oder geteilt. Jede Anordnung kann dynamisch angewendet werden, wodurch eine optimale Anpassung an die aktuelle Anwendung und die entsprechende Tätigkeit vorgenommen werden kann.
 
@@ -24,7 +24,7 @@ Fenster sind durch Bezeichner (Tags) in awesome gruppiert. Jedes Fenster kann mi
 Alle verfügbaren Bezeichner, die aktuelle Anordnung, der Titel eines sichtbaren Fenster, Text, etc.
 
 OPTIONEN
--------
+--------
 *-v*, *--version*::
     Gibt die Versionsinformationen auf der Standard-Ausgabe aus.
 *-h*, *--help*::
