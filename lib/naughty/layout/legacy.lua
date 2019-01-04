@@ -135,7 +135,7 @@ local escape_subs    = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
 
 -- Cache the markup
 local function set_escaped_text(self)
-    local text, title = self.text or "", self.title or ""
+    local text, title = self.message or "", self.title or ""
 
     if title then title = title .. "\n" else title = "" end
 
@@ -291,7 +291,7 @@ function naughty.default_notification_handler(notification, args)
     end
 
     local preset = notification.preset
-    local text   = args.text or preset.text
+    local text   = args.message or args.text or preset.message or preset.text
     local title  = args.title or preset.title
     local s      = get_screen(args.screen or preset.screen or screen.focused())
 

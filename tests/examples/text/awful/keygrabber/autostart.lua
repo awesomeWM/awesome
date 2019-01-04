@@ -11,7 +11,7 @@ awful.keygrabber {
     stop_callback  = function(_, _, _, sequence)
         autostart_works = true --DOC_HIDE
         assert(sequence == "abc") --DOC_HIDE
-        naughty.notification {text="The keys were:"..sequence}
+        naughty.notification {message="The keys were:"..sequence}
     end,
 }
 

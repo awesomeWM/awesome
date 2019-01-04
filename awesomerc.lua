@@ -25,9 +25,9 @@ require("awful.hotkeys_popup.keys")
 -- another config (This code will only ever execute for the fallback config)
 if awesome.startup_errors then
     naughty.notification {
-        preset = naughty.config.presets.critical,
-        title  = "Oops, there were errors during startup!",
-        text   = awesome.startup_errors
+        preset  = naughty.config.presets.critical,
+        title   = "Oops, there were errors during startup!",
+        message = awesome.startup_errors
     }
 end
 
@@ -40,9 +40,9 @@ do
         in_error = true
 
         naughty.notification {
-            preset = naughty.config.presets.critical,
-            title  = "Oops, an error happened!",
-            text   = tostring(err)
+            preset  = naughty.config.presets.critical,
+            title   = "Oops, an error happened!",
+            message = tostring(err)
         }
 
         in_error = false

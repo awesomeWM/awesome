@@ -20,6 +20,7 @@ local gtable  = require("gears.table")
 local timer   = require("gears.timer")
 local cst     = require("naughty.constants")
 local naughty = require("naughty.core")
+local gdebug  = require("gears.debug")
 
 local notification = {}
 
@@ -309,8 +310,24 @@ function notification:set_timeout(timeout)
     self._private.timeout = timeout
 end
 
+function notification:set_text(txt)
+    gdebug.deprecate(
+        "The `text` attribute is deprecated, use `message`",
+        {deprecated_in=5}
+    )
+    self:set_message(txt)
+end
+
+function notification:get_text()
+    gdebug.deprecate(
+        "The `text` attribute is deprecated, use `message`",
+        {deprecated_in=5}
+    )
+    return self:get_message()
+end
+
 local properties = {
-    "text"    , "title"   , "timeout" , "hover_timeout" ,
+    "message" , "title"   , "timeout" , "hover_timeout" ,
     "screen"  , "position", "ontop"   , "border_width"  ,
     "width"   , "font"    , "icon"    , "icon_size"     ,
     "fg"      , "bg"      , "height"  , "border_color"  ,
@@ -417,7 +434,7 @@ end
 -- @tparam[opt] table args.actions A list of `naughty.action`s.
 -- @bool[opt=false] args.ignore_suspend If set to true this notification
 --   will be shown even if notifications are suspended via `naughty.suspend`.
--- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
+-- @usage naughty.notify({ title = "Achtung!", message = "You're idling", timeout = 0 })
 -- @treturn ?table The notification object, or nil in case a notification was
 --   not displayed.
 -- @function naughty.notification
@@ -440,6 +457,14 @@ local function create(args)
     local n = gobject {
         enable_properties = true,
     }
+
+    if args.text then
+        gdebug.deprecate(
+            "The `text` attribute is deprecated, use `message`",
+            {deprecated_in=5}
+        )
+        args.message = args.text
+    end
 
     assert(naughty.emit_signal)
     -- Make sure all signals bubble up

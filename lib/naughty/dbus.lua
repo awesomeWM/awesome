@@ -122,13 +122,13 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
         local args = { }
         if data.member == "Notify" then
             if text ~= "" then
-                args.text = text
+                args.message = text
                 if title ~= "" then
                     args.title = title
                 end
             else
                 if title ~= "" then
-                    args.text = title
+                    args.message = title
                 else
                     return
                 end

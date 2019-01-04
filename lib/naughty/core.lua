@@ -334,7 +334,7 @@ end
 
 --- Replace title and text of an existing notification.
 --
--- This function is deprecated, use `notification.text = new_text` and
+-- This function is deprecated, use `notification.message = new_text` and
 -- `notification.title = new_title`
 --
 -- @tparam notification notification Notification object, which contents are to be replaced.
@@ -533,7 +533,7 @@ end
 -- @tparam[opt] table args.actions A list of `naughty.action`s.
 -- @bool[opt=false] args.ignore_suspend If set to true this notification
 --   will be shown even if notifications are suspended via `naughty.suspend`.
--- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
+-- @usage naughty.notify({ title = "Achtung!", message = "You're idling", timeout = 0 })
 -- @treturn ?table The notification object, or nil in case a notification was
 --   not displayed.
 -- @deprecated naughty.notify

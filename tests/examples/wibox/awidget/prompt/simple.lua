@@ -18,7 +18,7 @@ local naughty   = {} --DOC_HIDE
             textbox      = atextbox,
             exe_callback = function(input)
                 if not input or #input == 0 then return end
-                naughty.notification { text = "The input was: "..input }
+                naughty.notification { message = "The input was: "..input }
             end
         }
     end
