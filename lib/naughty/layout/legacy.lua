@@ -457,7 +457,8 @@ function naughty.default_notification_handler(notification, args)
         end
 
         -- is the icon file readable?
-        icon = surface.load_uncached(icon)
+        local had_icon = type(icon) == "string"
+        icon = surface.load_uncached_silently(icon)
 
         -- if we have an icon, use it
         if icon then
@@ -487,6 +488,9 @@ function naughty.default_notification_handler(notification, args)
             end
             iconbox:set_resize(false)
             iconbox:set_image(icon)
+        elseif had_icon then
+            require("gears.debug").print_warning("Naughty: failed to load icon "..
+                (args.icon or preset.icon).. "(title: "..title..")")
         end
     end
     notification.iconbox = iconbox
