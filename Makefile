@@ -5,12 +5,9 @@ else
     ECHO=@:
 endif
 
-TARGETS=awesome
 BUILDDIR=build
 
-all: $(TARGETS) ;
-
-$(TARGETS): cmake-build
+all: cmake-build ;
 
 $(BUILDDIR)/Makefile:
 	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
