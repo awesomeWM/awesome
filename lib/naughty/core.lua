@@ -497,8 +497,7 @@ end
 -- @tparam[opt] func args.callback Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.
--- @tparam[opt] table args.actions Mapping that maps a string to a callback when this
---   action is selected.
+-- @tparam[opt] table args.actions A list of `naughty.action`s.
 -- @bool[opt=false] args.ignore_suspend If set to true this notification
 --   will be shown even if notifications are suspended via `naughty.suspend`.
 -- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })

@@ -404,23 +404,25 @@ function naughty.default_notification_handler(notification, args)
     local actions_max_width = 0
     local actions_total_height = 0
     if actions then
-        for action, callback in pairs(actions) do
+        for _, action in ipairs(actions) do
+            assert(type(action) == "table")
+            assert(action.name ~= nil)
             local actiontextbox = wibox.widget.textbox()
             local actionmarginbox = wibox.container.margin()
             actionmarginbox:set_margins(margin)
             actionmarginbox:set_widget(actiontextbox)
             actiontextbox:set_valign("middle")
             actiontextbox:set_font(font)
-            actiontextbox:set_markup(string.format('☛ <u>%s</u>', action))
+            actiontextbox:set_markup(string.format('☛ <u>%s</u>', action.name))
             -- calculate the height and width
             local w, h = actiontextbox:get_preferred_size(s)
             local action_height = h + 2 * margin
             local action_width = w + 2 * margin
 
             actionmarginbox:buttons(gtable.join(
-                button({ }, 1, callback),
-                button({ }, 3, callback)
-                ))
+                button({ }, 1, function() action:trigger() end),
+                button({ }, 3, function() action:trigger() end)
+            ))
             actionslayout:add(actionmarginbox)
 
             actions_total_height = actions_total_height + action_height

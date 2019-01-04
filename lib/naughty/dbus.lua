@@ -27,6 +27,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 local naughty = require("naughty.core")
 local cst     = require("naughty.constants")
 local nnotif = require("naughty.notification")
+local naction = require("naughty.action")
 
 --- Notification library, dbus bindings
 local dbus = { config = {} }
@@ -158,10 +159,17 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                             notification:destroy(cst.notification_closed_reason.dismissed_by_user)
                         end
                     elseif action_id ~= nil and action_text ~= nil then
-                        args.actions[action_text] = function()
+                        local a = naction {
+                            name     = action_text,
+                            position = action_id,
+                        }
+
+                        a:connect_signal("invoked", function()
                             sendActionInvoked(notification.id, action_id)
                             notification:destroy(cst.notification_closed_reason.dismissed_by_user)
-                        end
+                        end)
+
+                        table.insert(args.actions, a)
                     end
                 end
             end

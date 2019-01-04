@@ -325,6 +325,43 @@ for _, prop in ipairs(properties) do
 
 end
 
+--TODO v6: remove this
+local function convert_actions(actions)
+    gdebug.deprecate(
+        "The notification actions should now be of type `naughty.action`, "..
+        "not strings or callback functions",
+        {deprecated_in=5}
+    )
+
+    local naction = require("naughty.action")
+
+    -- Does not attempt to handle when there is a mix of strings and objects
+    for idx, name in pairs(actions) do
+        local cb = nil
+
+        if type(name) == "function" then
+            cb = name
+        end
+
+        if type(idx) == "string" then
+            name, idx = idx, nil
+        end
+
+        local a = naction {
+            position = idx,
+            name     = name,
+        }
+
+        if cb then
+            a:connect_signal("invoked", cb)
+        end
+
+        -- Yes, it modifies `args`, this is legacy code, cloning the args
+        -- just for this isn't worth it.
+        actions[idx] = a
+    end
+end
+
 --- Create a notification.
 --
 -- @tab args The argument table containing any of the arguments below.
@@ -364,8 +401,7 @@ end
 -- @tparam[opt] func args.callback Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.
--- @tparam[opt] table args.actions Mapping that maps a string to a callback when this
---   action is selected.
+-- @tparam[opt] table args.actions A list of `naughty.action`s.
 -- @bool[opt=false] args.ignore_suspend If set to true this notification
 --   will be shown even if notifications are suspended via `naughty.suspend`.
 -- @usage naughty.notify({ title = "Achtung!", text = "You're idling", timeout = 0 })
@@ -377,6 +413,16 @@ local function create(args)
         args = cst.config.notify_callback(args)
         if not args then return end
     end
+
+    args = args or {}
+
+    -- Old actions usually have callbacks and names. But this isn't non
+    -- compliant with the spec. The spec has explicit ordering and optional
+    -- icons. The old format doesn't allow these metadata to be stored.
+    local is_old_action = args.actions and (
+        (args.actions[1] and type(args.actions[1]) == "string") or
+        (type(next(args.actions)) == "string")
+    )
 
     local n = gobject {
         enable_properties = true,
@@ -395,6 +441,10 @@ local function create(args)
         args.preset or cst.config.presets.normal or {},
         rawget(n, "preset") or {}
     ))
+
+    if is_old_action  then
+        convert_actions(args.actions)
+    end
 
     for k, v in pairs(n.preset) do
         private[k] = v
