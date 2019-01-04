@@ -7,7 +7,7 @@
 ---------------------------------------------------------------------------
 local get_dpi = require("beautiful.xresources").get_dpi
 local gears_debug = require("gears.debug")
-local gears_math = require("gears.math")
+local colorful = require("beautiful.colorful")
 local join = require("gears.table").join
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
@@ -17,24 +17,12 @@ local gtk = {
 }
 
 
-local function convert_gtk_channel_to_hex(channel_value)
-    return string.format("%02x", gears_math.round(channel_value * 255))
-end
-
-local function convert_gtk_color_to_hex(gtk_color)
-    return "#" ..
-        convert_gtk_channel_to_hex(gtk_color.red) ..
-        convert_gtk_channel_to_hex(gtk_color.green) ..
-        convert_gtk_channel_to_hex(gtk_color.blue) ..
-        convert_gtk_channel_to_hex(gtk_color.alpha)
-end
-
 local function lookup_gtk_color_to_hex(_style_context, color_name)
     local gtk_color = _style_context:lookup_color(color_name)
     if not gtk_color then
         return nil
     end
-    return convert_gtk_color_to_hex(gtk_color)
+    return tostring(colorful.color.new(gtk_color))
 end
 
 local function get_gtk_property(_style_context, property_name)
@@ -47,9 +35,9 @@ local function get_gtk_property(_style_context, property_name)
 end
 
 local function get_gtk_color_property_to_hex(_style_context, property_name)
-    return convert_gtk_color_to_hex(
+    return tostring(colorful.color.new(
         get_gtk_property(_style_context, property_name)
-    )
+    ))
 end
 
 local function read_gtk_color_properties_from_widget(gtk_widget, properties)
