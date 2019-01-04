@@ -1,9 +1,10 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+# local title = module and ldoc.module_typename(module).." "..module.name.." - "..ldoc.title or ldoc.title
 <html>
-<meta http-equiv="Content-Type" content="text/html; charset=$(ldoc.doc_charset)"/>
 <head>
-    <title>$(ldoc.title)</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=$(ldoc.doc_charset)"/>
+    <title>$(title)</title>
     <link rel="stylesheet" href="$(ldoc.css)" type="text/css" />
 # if ldoc.custom_css then -- add custom CSS file if configured.
     <link rel="stylesheet" href="$(ldoc.custom_css)" type="text/css" />
