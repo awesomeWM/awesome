@@ -495,7 +495,7 @@ end
 
 --- The first selected tag.
 -- @property selected_tag
--- @param table
+-- @param tag
 -- @treturn ?tag The first selected tag or nil.
 -- @see tag.selected
 -- @see selected_tags
