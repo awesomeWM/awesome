@@ -17,12 +17,12 @@ then
     then
         if [ "$A_RERUN" = "" ]
         then
-            A_RERUN="no" exec $AWESOME_RLWRAP $0 "$@"
+            A_RERUN="no" exec "$AWESOME_RLWRAP" "$0" "$@"
         fi
-        READ_CMD="read"
+        READ_ARGS=""
     else
         # No rlwrap: use bash's readline.
-        READ_CMD="read -e"
+        READ_ARGS="-e"
     fi
 fi
 
@@ -76,13 +76,13 @@ then
         fi
     done
     # run arguments
-    for arg in "$ARGS" ; do
+    for arg in "${ARGS[@]}"; do
         a_dbus_send "$arg"
     done
 elif [ -t 0 ]
 then
     FATAL_ERRORS=0
-    while $READ_CMD -p "awesome# " -r line
+    while read $READ_ARGS -p "awesome# " -r line
     do
         if [ "$line" = "" ]; then
             continue
