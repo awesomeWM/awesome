@@ -9,6 +9,7 @@ local Gio = {File               = require("lgi").Gio.File,
              FileQueryInfoFlags = require("lgi").Gio.FileQueryInfoFlags}
 
 local query_info = Gio.File.query_info
+local Gio.File:query_info = Gio.File.query_info
 
 describe("gears.filesystem file_readable", function()
     local shimmed_File = {}
