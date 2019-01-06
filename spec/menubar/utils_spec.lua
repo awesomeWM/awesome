@@ -20,6 +20,11 @@ describe("menubar.utils lookup_icon_uncached", function()
 
         local function shim(name, retval)
             shimmed[name] = glib[name]
+            glib[name] = function() return retval end
+        end
+
+        local function shim2(name, retval)
+            shimmed[name] = glib[name]
 assert.matches('z', tostring(shimmed[name]))
 assert.matches('z', tostring(glib[name]))
 assert.matches('z', glib[name])
@@ -27,7 +32,7 @@ assert.matches('z', glib[name])
         end
 
         shim('get_home_dir',         root .. "/home")
-        shim('get_user_data_dir',    root .. "/home/.local/share")
+        shim2('get_user_data_dir',    root .. "/home/.local/share")
         shim('get_system_data_dirs', {
             root .. "/usr/local/share",
             root .. "/usr/share"
