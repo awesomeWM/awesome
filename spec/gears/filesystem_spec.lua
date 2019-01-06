@@ -8,8 +8,6 @@ local Gio = {File               = require("lgi").Gio.File,
              FileInfo           = require("lgi").Gio.FileInfo,
              FileQueryInfoFlags = require("lgi").Gio.FileQueryInfoFlags}
 
-local query_info = Gio.File.query_info
-
 describe("gears.filesystem file_readable", function()
     local shimmed_File = {}
     local shimmed_FileInfo = {}
@@ -35,6 +33,8 @@ describe("gears.filesystem file_readable", function()
         shim_FileInfo('get_file_type', 'REGULAR')
         shim_FileInfo('get_attribute_boolean', 'true')
     end)
+
+local query_info = Gio.File.query_info
 
     teardown(function()
         for name, func in pairs(shimmed) do
