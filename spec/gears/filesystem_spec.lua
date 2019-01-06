@@ -9,11 +9,16 @@ local Gio = {File               = require("lgi").Gio.File,
              FileQueryInfoFlags = require("lgi").Gio.FileQueryInfoFlags}
 
 describe("gears.filesystem file_readable", function()
+    local shimmed = {}
     local shimmed_File = {}
     local shimmed_FileInfo = {}
     local shimmed_FileQueryInfoFlags = {}
 
     setup(function()
+        local function shim(name, retval)
+            shimmed[name] = Gio[name]
+            Gio[name] = function() return retval end
+        end
         local function shim_File(name, retval)
             shimmed_File[name] = Gio.File[name]
             Gio.File[name] = function() return retval end
@@ -27,14 +32,19 @@ describe("gears.filesystem file_readable", function()
             Gio.FileQueryInfoFlags[name] = function() return retval end
         end
 
+        shim('query_info', 'lgi.obj 0x55795ba08870:Gio.FileInfo(GFileInfo)')
         shim_FileQueryInfoFlags('NONE', '0.0')
         shim_File('new_for_path', 'lgi.obj 0x557958892160:GObject.Object(GLocalFile)')
         shim_File('query_info', 'lgi.obj 0x55795ba08870:Gio.FileInfo(GFileInfo)')
         shim_FileInfo('get_file_type', 'REGULAR')
         shim_FileInfo('get_attribute_boolean', 'true')
+        shim_FileInfo('query_info', 'lgi.obj 0x55795ba08870:Gio.FileInfo(GFileInfo)')
     end)
 
     teardown(function()
+        for name, func in pairs(shimmed) do
+            Gio[name] = func
+        end
         for name, func in pairs(shimmed_File) do
             Gio.File[name] = func
         end
