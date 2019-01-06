@@ -32,8 +32,8 @@ assert.matches('z', glib[name])
         end
 
         shim('get_home_dir',         root .. "/home")
-        shim2('get_user_data_dir',    root .. "/home/.local/share")
-        shim('get_system_data_dirs', {
+        shim('get_user_data_dir',    root .. "/home/.local/share")
+        shim2('get_system_data_dirs', {
             root .. "/usr/local/share",
             root .. "/usr/share"
         })
