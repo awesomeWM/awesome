@@ -22,7 +22,7 @@ describe("menubar.utils lookup_icon_uncached", function()
             shimmed[name] = glib[name]
             glib[name] = function() return retval end
 -- testing what glib[name] contains
-assert.matches('$', glib[name])
+assert.matches('$', tostring(glib[name]))
         end
 
         shim('get_home_dir',         root .. "/home")
