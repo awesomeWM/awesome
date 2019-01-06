@@ -12,6 +12,7 @@ describe("gears.filesystem file_readable", function()
     local shimmed_File = {}
     local shimmed_FileInfo = {}
     local shimmed_FileQueryInfoFlags = {}
+    local query_info
 
     setup(function()
         local function shim_File(name, retval)
@@ -32,9 +33,9 @@ describe("gears.filesystem file_readable", function()
         shim_File('query_info', 'lgi.obj 0x55795ba08870:Gio.FileInfo(GFileInfo)')
         shim_FileInfo('get_file_type', 'REGULAR')
         shim_FileInfo('get_attribute_boolean', 'true')
-    end)
 
-local query_info = Gio.File.query_info
+        query_info = Gio.File.query_info
+    end)
 
     teardown(function()
         for name, func in pairs(shimmed) do
