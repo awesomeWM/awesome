@@ -2,7 +2,7 @@
 -- @author Zach Peltzer
 -- @copyright 2017 Zach Peltzer
 ---------------------------------------------------------------------------
-
+-- just for educational testing
 local utils = require("menubar.utils")
 local theme = require("beautiful")
 local glib = require("lgi").GLib
