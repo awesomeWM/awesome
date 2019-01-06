@@ -5,7 +5,7 @@
 -- just for educational testing
 local utils = require("menubar.utils")
 local theme = require("beautiful")
---local glib = require("lgi").GLib
+local glib = require("lgi").GLib
 
 describe("menubar.utils lookup_icon_uncached", function()
     local shimmed = {}
@@ -19,8 +19,10 @@ describe("menubar.utils lookup_icon_uncached", function()
         local root = (os.getenv("SOURCE_DIRECTORY") or '.') .. "/spec/menubar"
 
         local function shim(name, retval)
-            shimmed[name] = name --glib[name]
---            glib[name] = function() return retval end
+            shimmed[name] = glib[name]
+            glib[name] = function() return retval end
+-- testing what glib[name] contains
+assert.matches('$', glib[name])
         end
 
         shim('get_home_dir',         root .. "/home")
@@ -36,7 +38,7 @@ describe("menubar.utils lookup_icon_uncached", function()
 
     teardown(function()
         for name, func in pairs(shimmed) do
---            glib[name] = func
+            glib[name] = func
         end
         theme.icon_theme = icon_theme
     end)
