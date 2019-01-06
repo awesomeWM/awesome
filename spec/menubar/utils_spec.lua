@@ -19,7 +19,7 @@ describe("menubar.utils lookup_icon_uncached", function()
         local root = (os.getenv("SOURCE_DIRECTORY") or '.') .. "/spec/menubar"
 
         local function shim(name, retval)
-            shimmed[name] = glib[name]
+            shimmed[name] = name --glib[name]
 --            glib[name] = function() return retval end
         end
 
