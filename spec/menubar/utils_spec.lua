@@ -20,6 +20,7 @@ describe("menubar.utils lookup_icon_uncached", function()
 
         local function shim(name, retval)
             shimmed[name] = glib[name]
+assert.matches('$', tostring(shimmed[name]))
             glib[name] = function() return retval end
         end
 
