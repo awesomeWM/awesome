@@ -7,7 +7,7 @@ endif
 
 BUILDDIR=build
 
-all: cmake-build ;
+all: awesome ;
 
 $(BUILDDIR)/Makefile:
 	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
@@ -15,10 +15,6 @@ $(BUILDDIR)/Makefile:
 	mkdir -p $(BUILDDIR)
 	$(ECHO) "Running cmake…"
 	cd $(BUILDDIR) && cmake $(CMAKE_ARGS) "$(CURDIR)"
-
-cmake-build: $(BUILDDIR)/Makefile
-	$(ECHO) "Building…"
-	$(MAKE) -C $(BUILDDIR)
 
 tags:
 	git ls-files | xargs ctags
