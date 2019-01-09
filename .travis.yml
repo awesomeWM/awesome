@@ -1,5 +1,4 @@
-sudo: required
-dist: trusty
+dist: xenial
 language: c
 
 # Build only master and stable branches.  Other branches go through PRs.
@@ -11,8 +10,7 @@ branches:
 env:
   matrix:
     - LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
-    # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
-    - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
+    - LUA=5.3 LUANAME=lua5.3 DO_COVERAGE=codecov
     # luajit: installed from source.
     - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1
     # Note: luarocks does not work with Lua 5.0.
@@ -54,21 +52,10 @@ install:
      ./autogen.sh --prefix=/usr
      make && sudo make install)
 
-  # Install Lua (per env).
-  # Note that Lua 5.3 is installed manually, because it is not available in Ubuntu Trusty.
+    # Install Lua (per env).
   - |
     set -e
-    if [[ "$LUA" == "5.3" ]]; then
-      (echo '#!/bin/sh' ; echo 'set -x' ; echo 'gcc -shared -Wl,--no-undefined -o "$@" -ldl -lm') > /tmp/myar
-      chmod a+x /tmp/myar
-      (cd /tmp
-       wget http://www.lua.org/ftp/lua-5.3.4.tar.gz -O lua.tar.gz
-       tar -xvzf lua.tar.gz
-       cd lua-5.3.*/src \
-        && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2 -DLUA_USE_APICHECK -Dlua_assert=assert" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="/tmp/myar" liblua.so \
-        && cd .. \
-        && sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB=liblua.so linux install)
-    elif [[ "$LUANAME" == "luajit-2.0" ]]; then
+    if [[ "$LUANAME" == "luajit-2.0" ]]; then
       (wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz -O- | tar xzf - -C /tmp
        cd /tmp/LuaJIT-*
        sudo make install PREFIX=/usr)
@@ -77,7 +64,10 @@ install:
       if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/luajit /usr/bin/lua; fi
     else
       sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
+      # lua5.3 does not install /usr/bin/lua, but lua5.1/lua5.2 do.
+      if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/${LUANAME} /usr/bin/lua; fi
     fi
+  - lua -v
 
   # Install luarocks (for the selected Lua version).
   - |
