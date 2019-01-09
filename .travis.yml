@@ -122,12 +122,12 @@ install:
   - if [ "$DO_COVERAGE" = "codecov" ]; then travis_retry wget -O /tmp/codecov-bash https://codecov.io/bash; fi
   - |
     do_codecov() {
-      echo "== do_codecov in $PWD: $*: build/luacov.stats.out: =="
+      echo "== do_codecov in $PWD: $*: build/luacov.report.out: =="
       if [ "$DO_COVERAGE" = "codecov" ]; then
         test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
-        travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -c -F "$1,${LUANAME//./}" || return 1
-        rm build/luacov.stats.out
+        travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F "$1,${LUANAME//./}" || return 1
+        rm build/luacov.report.out build/luacov.stats.out
       fi
       return 0
     }
