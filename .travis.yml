@@ -199,10 +199,7 @@ script:
         travis_fold_start "DO_COVERAGE"
 
         # Run tests/examples explicitly.
-        (mkdir -p tests/examples/build \
-         && cd tests/examples/build \
-         && cmake $CMAKE_ARGS .. \
-         && make)
+        make check-examples || exit 1
         do_codecov samples
 
         make check-unit || exit 1
