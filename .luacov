@@ -24,6 +24,19 @@ return {
             { escape_pattern(source .. '/'), ''},
         },
     },
+
+    -- Settings for luacov-multiple.
+    reporter = "multiple",
+    multiple = {
+        reporters = {"default", "multiple.cobertura"},
+        -- reporters = {"default", "multiple.cobertura", "multiple.html"},
+        cobertura = {
+            reportfile = 'build/coverage.xml'
+        },
+        -- html = {
+        --     reportfile = 'build/coverage/index.html'
+        -- }
+    }
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

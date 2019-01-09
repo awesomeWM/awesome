@@ -21,6 +21,9 @@ env:
   global:
     # Secure GH_APIDOC_TOKEN to push to awesomeWM/apidoc.
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
+    # Code Climate coverage.  This can only be used for coverage reporting,
+    # and is not encrypted to be usable with pull requests from forks.
+    - CC_TEST_REPORTER_ID=b10d552f73a1696f9b6729501fc96b1ed7c08285b576bb41f30e96876a110d7e
 
 before_install:
   - if [ "$BUILD_APIDOC" = true ] && [ -n "$DO_COVERAGE" ]; then echo "BUILD_APIDOC and DO_COVERAGE are not meant to be used together." >&2; exit 1; fi
@@ -98,6 +101,16 @@ install:
 
   # Install dependencies for code coverage testing.
   - if [ -n "$DO_COVERAGE" ]; then sudo luarocks install cluacov; fi
+  - |
+    if [ -n "$DO_COVERAGE" ]; then  # Code Climate
+      sudo luarocks install luacov-multiple
+
+      # Install Code Climate reporter (quite heavy; >10MB).
+      curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      chmod +x ./cc-test-reporter
+      ./cc-test-reporter before-build
+      ./cc-test-reporter env
+    fi
   - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
 
   # Determine custom version.
@@ -117,7 +130,10 @@ install:
         test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
         travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F "$1,${LUANAME//./}" || return 1
-        rm build/luacov.report.out build/luacov.stats.out
+        ./cc-test-reporter format-coverage -t coverage.py -o build/codeclimate.$1.json build/coverage.xml
+
+        # Delete processed files.
+        rm build/luacov.report.out build/luacov.stats.out build/coverage.xml
       fi
       return 0
     }
@@ -125,7 +141,23 @@ install:
     do_codecov_gcov() {
       echo "== do_codecov_gcov in $PWD: $*: =="
       if [ "$DO_COVERAGE" = "codecov" ]; then
-        travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
+        travis_retry bash /tmp/codecov-bash -X coveragepy -F "$1" || return 1
+
+        # NOTE: codecov runs gcov already (with `-pb`).
+        # find . -type f -name '*.gcno' -execdir gcov -pb {} +
+
+        # Delete any files for /usr:
+        # Otherwise Code Climate might fail with '"Invalid path part \"\""' after uploading (https://codeclimate.com/repos/5c35e985236f14026e00ceb2/settings/test_reports/5c3723a0f06c884132000fbc).
+        # (using -r/--relative-only with gcov would still produce those)
+        find . -type f -name '#usr#*.gcov' -delete
+        # Fix .gcov files (https://github.com/codeclimate/test-reporter/issues/381).
+        find -name '*.gcov' -exec sed -i -E 's/^(\s+)([0-9]+)\*/\1 \2/' {} +
+
+        # Run format-coverage for each directory containing .gcov files.
+        i=0
+        find -name '*.gcov' -printf '%h\n' | sort -u | while read -r dir; do
+          ./cc-test-reporter format-coverage -t gcov -o build/codeclimate.$1-$(( ++i )).json "$dir" -p "$PWD/build"
+        done
       fi
       return 0
     }
@@ -190,6 +222,12 @@ script:
         make check-themes || exit 1
         do_codecov functionaltests
         do_codecov_gcov c_code
+
+        if [ "$TRAVIS_TEST_RESULT" = 0 ] && [ "$DO_COVERAGE" = codecov ]; then
+          parts=$(find build -name 'codeclimate.*.json' | wc -l)
+          ./cc-test-reporter sum-coverage build/codeclimate.*.json -p "$parts"
+          ./cc-test-reporter upload-coverage
+        fi
 
         travis_fold_end
       else
