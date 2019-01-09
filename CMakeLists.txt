@@ -38,8 +38,6 @@ include_directories(
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
-set(CHECK_TARGETS check-integration)
-
 set(AWE_ICON_DIR ${SOURCE_DIR}/icons)
 set(AWE_THEMES_DIR ${SOURCE_DIR}/themes)
 
@@ -397,6 +395,8 @@ endif()
 # }}}
 
 # {{{ Tests
+add_custom_target(check DEPENDS check-integration)
+
 add_executable(test-gravity tests/test-gravity.c)
 target_link_libraries(test-gravity
     ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
@@ -413,7 +413,7 @@ add_custom_target(check-themes
     COMMENT "Testing themes"
     USES_TERMINAL
     DEPENDS generated_icons generate_awesomerc ${PROJECT_AWE_NAME})
-list(APPEND CHECK_TARGETS check-themes)
+add_dependencies(check check-themes)
 
 add_custom_target(check-requires
     lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
@@ -434,7 +434,7 @@ if(BUSTED_EXECUTABLE)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
-    list(APPEND CHECK_TARGETS check-unit)
+    add_dependencies(check check-unit)
 else()
     add_custom_target(check-unit true
         COMMENT "Skipping check-unit, since busted was not found"
@@ -450,7 +450,7 @@ if(LUACHECK_EXECUTABLE)
     list(APPEND CHECK_QA_TARGETS luacheck)
 endif()
 add_custom_target(check-qa DEPENDS ${CHECK_QA_TARGETS})
-add_custom_target(check DEPENDS ${CHECK_TARGETS} check-qa)
+add_dependencies(check check-qa check-examples)
 # }}}
 
 INCLUDE(${CMAKE_SOURCE_DIR}/Packaging.cmake)
