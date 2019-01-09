@@ -12,6 +12,11 @@ all: $(TARGETS) ;
 
 $(TARGETS): cmake-build
 
+# Run CMake always with CMAKE_ARGS defined.
+ifdef CMAKE_ARGS
+.PHONY: $(BUILDDIR)/Makefile
+endif
+
 $(BUILDDIR)/Makefile:
 	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
 	$(ECHO)
