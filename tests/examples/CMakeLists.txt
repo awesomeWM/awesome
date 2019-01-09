@@ -272,7 +272,7 @@ function(run_test test_path namespace escaped_content)
         file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
         add_custom_command(
             COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
-            COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
+            # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
             DEPENDS ${template} ${test_path}
             OUTPUT  ${OUTPUT_IMAGE_PATH}
             VERBATIM)
