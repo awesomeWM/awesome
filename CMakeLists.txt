@@ -434,12 +434,13 @@ if(BUSTED_EXECUTABLE)
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
-    add_dependencies(check check-unit)
 else()
     add_custom_target(check-unit true
         COMMENT "Skipping check-unit, since busted was not found"
         VERBATIM)
 endif()
+add_dependencies(check check-unit)
+
 a_find_program(LUACHECK_EXECUTABLE luacheck FALSE)
 if(LUACHECK_EXECUTABLE)
     add_custom_target(luacheck
