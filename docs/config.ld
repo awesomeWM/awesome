@@ -11,6 +11,7 @@ dir='../doc'
 -- Make the docs prettier
 pretty='lua'
 style=true
+template=true
 backtick_references=true
 merge=true
 use_markdown_titles=true

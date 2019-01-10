@@ -33,6 +33,16 @@ local manual_layout = {}
 -- @treturn boolean If the operation is successful
 -- @name insert
 -- @class function
+function manual_layout:insert(index, widget)
+    table.insert(self._private.widgets, index, widget)
+
+    -- Add the point
+    if widget.point then
+        table.insert(self._private.pos, index, widget.point)
+    end
+
+    self:emit_signal("widget::layout_changed")
+end
 
 --- Remove one or more widgets from the layout
 -- The last parameter can be a boolean, forcing a recursive seach of the

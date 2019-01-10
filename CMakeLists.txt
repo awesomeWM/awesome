@@ -239,7 +239,7 @@ if(GENERATE_MANPAGES)
                 set(asciilang ${lang})
             endif()
             add_custom_command(
-                COMMAND ${ASCIIDOCTOR_EXECUTABLE} -a lang=${asciilang} -d manpage -b manpage -o ${manfile} - < ${txtfile}
+                COMMAND ${ASCIIDOCTOR_EXECUTABLE} -a lang=${asciilang} -d manpage -b manpage -o ${manfile} ${txtfile}
                 WORKING_DIRECTORY ${BUILD_DIR}/${relpath2}
                 OUTPUT  ${manfile}
                 DEPENDS ${txtfile}
@@ -286,13 +286,13 @@ if(GENERATE_DOC)
 
     # Copy the aliases to the build directory
     file(COPY ${SOURCE_DIR}/docs/aliases DESTINATION ${BUILD_DIR}/docs)
-    file(COPY ${SOURCE_DIR}/docs/ldoc.css DESTINATION ${BUILD_DIR}/docs)
+
+    # Copy ldoc files.
+    configure_file(${SOURCE_DIR}/docs/ldoc.css ${BUILD_DIR}/docs COPYONLY)
+    configure_file(${SOURCE_DIR}/docs/ldoc.ltp ${BUILD_DIR}/docs COPYONLY)
 
     add_custom_target(ldoc ALL
-        DEPENDS
-            ${BUILD_DIR}/doc/index.html
-            ${BUILD_DIR}/docs/ldoc.css
-            generate_awesomerc
+        DEPENDS ${BUILD_DIR}/doc/index.html
     )
 
     if (STRICT_TESTS)
@@ -305,7 +305,15 @@ if(GENERATE_DOC)
         OUTPUT  ${BUILD_DIR}/doc/index.html
         COMMAND ${LDOC_EXECUTABLE} ${ldoc_args}
         WORKING_DIRECTORY ${AWE_DOC_DIR}
-        DEPENDS ${AWE_SRCS} ${AWE_LUA_FILES} ${AWE_MD_FILES} ${BUILD_DIR}/docs/config.ld generate-examples ${BUILD_DIR}/docs/ldoc.css
+        DEPENDS
+            ${AWE_SRCS}
+            ${AWE_LUA_FILES}
+            ${AWE_MD_FILES}
+            ${BUILD_DIR}/docs/config.ld
+            ${BUILD_DIR}/docs/ldoc.css
+            ${BUILD_DIR}/docs/ldoc.ltp
+            generate_awesomerc
+            generate-examples
         COMMENT "Generating API documentation${ldoc_desc_suffix}")
 endif()
 # }}}
@@ -416,23 +424,20 @@ add_custom_target(check-requires
 list(APPEND CHECK_QA_TARGETS check-requires)
 a_find_program(BUSTED_EXECUTABLE busted FALSE)
 if(BUSTED_EXECUTABLE)
-    # Keep the arguments in sync with the version below!
+    if(DO_COVERAGE)
+        set(BUSTED_ARGS "--coverage")
+    else()
+        set(BUSTED_ARGS)
+    endif()
     add_custom_target(check-unit
-        ${BUSTED_EXECUTABLE}
+        COMMAND ${BUSTED_EXECUTABLE} ${BUSTED_ARGS}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
     list(APPEND CHECK_TARGETS check-unit)
-
-    # Same as above, but with --coverage argument
-    add_custom_target(check-unit-coverage
-        ${BUSTED_EXECUTABLE} "--coverage"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Running unit tests under LuaCov"
-        VERBATIM)
 else()
     add_custom_target(check-unit true
-        COMMENT "Skipping check-unit, since busted was not found"
+        COMMENT "Skipping check-unit, since busted was not found (during configuration)"
         VERBATIM)
 endif()
 a_find_program(LUACHECK_EXECUTABLE luacheck FALSE)
