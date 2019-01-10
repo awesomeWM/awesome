@@ -133,9 +133,9 @@ install:
     do_codecov_gcov() {
       echo "== do_codecov_gcov in $PWD: $*: =="
       if [ "$DO_COVERAGE" = "codecov" ]; then
-
-        # Run format-coverage for each .gcno file separately.
-        # gcov will create .gcov files for the same source (e.g. for globalconf.h from awesome.c.gcno and event.c.gcno).
+        # Report coverage for each .gcno file separately.
+        # gcov will create .gcov files for the same source (e.g. for
+        # globalconf.h from awesome.c.gcno and event.c.gcno).
         i=0
         set -x
         (
@@ -143,26 +143,19 @@ install:
           find -path "*/lgi-check.dir" -prune -o \( -name '*.gcno' -print \) | while read -r gcno; do
             gcov -pb "$gcno"
 
-            # Debug.
-            find -name '*.gcov' -ls
+            mkdir gcov.$(( ++i ))
+            mv *.gcov "gcov.$i"
 
-            # Delete any files for /usr:
-            # Otherwise Code Climate might fail with '"Invalid path part \"\""' after uploading (https://codeclimate.com/repos/5c35e985236f14026e00ceb2/settings/test_reports/5c3723a0f06c884132000fbc).
-            # (using -r/--relative-only with gcov would still produce those)
-            find -maxdepth 1 -type f -name '#usr#*.gcov' -delete
+            # Delete any files for /usr.
+            # They are not relevant and might cause "Invalid path part" errors
+            # with Code Climate.
+            find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
 
-            # Upload to Codecov.
-            travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -F "$1"
-
-            # Fix .gcov files for Code Climate.
-            # (https://github.com/codeclimate/test-reporter/issues/381).
-            find -maxdepth 1 -name '*.gcov' -exec sed -i -E 's/^(\s+)([0-9]+)\*/\1 \2/' {} +
-
-            ../cc-test-reporter --debug format-coverage -t gcov -o codeclimate.$1-$(( ++i )).json .
-
-            # Delete processed files.
-            rm *.gcov
+            ../cc-test-reporter --debug format-coverage -t gcov -o codeclimate.gcov.json "$gcov.$i"
           done
+
+          # Upload to Codecov.
+          travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -F "$1,${LUANAME//./}"
         )
       fi
       return 0
