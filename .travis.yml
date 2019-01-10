@@ -148,7 +148,7 @@ install:
         set -x
         (
           cd build
-          find build/CMakeFiles/awesome.dir build/CMakeFiles/test-*.dir -type f -name '*.gcno' | while read -r gcno; do
+          find -path "*/lgi-check.dir" -prune -o \( -name '*.gcno' -print \) | while read -r gcno; do
             gcov -pb "$gcno"
 
             # Debug.
