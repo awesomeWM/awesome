@@ -436,7 +436,7 @@ if(BUSTED_EXECUTABLE)
         VERBATIM)
 else()
     add_custom_target(check-unit true
-        COMMENT "Skipping check-unit, since busted was not found"
+        COMMENT "Skipping check-unit, since busted was not found (during configuration)"
         VERBATIM)
 endif()
 add_dependencies(check check-unit)
