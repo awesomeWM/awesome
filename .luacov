@@ -10,6 +10,7 @@ end
 
 return {
     statsfile = build .. "/luacov.stats.out",
+    reportfile = build .. "/luacov.report.out",
 
     include = {
         escape_pattern(source) .. "/.+",
