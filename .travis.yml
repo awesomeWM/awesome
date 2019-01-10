@@ -141,23 +141,37 @@ install:
     do_codecov_gcov() {
       echo "== do_codecov_gcov in $PWD: $*: =="
       if [ "$DO_COVERAGE" = "codecov" ]; then
-        travis_retry bash /tmp/codecov-bash -X coveragepy -F "$1" || return 1
 
-        # NOTE: codecov runs gcov already (with `-pb`).
-        # find . -type f -name '*.gcno' -execdir gcov -pb {} +
-
-        # Delete any files for /usr:
-        # Otherwise Code Climate might fail with '"Invalid path part \"\""' after uploading (https://codeclimate.com/repos/5c35e985236f14026e00ceb2/settings/test_reports/5c3723a0f06c884132000fbc).
-        # (using -r/--relative-only with gcov would still produce those)
-        find . -type f -name '#usr#*.gcov' -delete
-        # Fix .gcov files (https://github.com/codeclimate/test-reporter/issues/381).
-        find -name '*.gcov' -exec sed -i -E 's/^(\s+)([0-9]+)\*/\1 \2/' {} +
-
-        # Run format-coverage for each directory containing .gcov files.
+        # Run format-coverage for each .gcno file separately.
+        # gcov will create .gcov files for the same source (e.g. for globalconf.h from awesome.c.gcno and event.c.gcno).
         i=0
-        find -name '*.gcov' -printf '%h\n' | sort -u | while read -r dir; do
-          ./cc-test-reporter format-coverage -t gcov -o build/codeclimate.$1-$(( ++i )).json "$dir" -p "$PWD/build"
-        done
+        set -x
+        (
+          cd build
+          find build/CMakeFiles/awesome.dir build/CMakeFiles/test-*.dir -type f -name '*.gcno' | while read -r gcno; do
+            gcov -pb "$gcno"
+
+            # Debug.
+            find -name '*.gcov' -ls
+
+            # Delete any files for /usr:
+            # Otherwise Code Climate might fail with '"Invalid path part \"\""' after uploading (https://codeclimate.com/repos/5c35e985236f14026e00ceb2/settings/test_reports/5c3723a0f06c884132000fbc).
+            # (using -r/--relative-only with gcov would still produce those)
+            find -maxdepth 0 -type f -name '#usr#*.gcov' -delete
+
+            # Upload to Codecov.
+            travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -F "$1"
+
+            # Fix .gcov files for Code Climate.
+            # (https://github.com/codeclimate/test-reporter/issues/381).
+            find -maxdepth 0 -name '*.gcov' -exec sed -i -E 's/^(\s+)([0-9]+)\*/\1 \2/' {} +
+
+            ./cc-test-reporter format-coverage -t gcov -o build/codeclimate.$1-$(( ++i )).json .
+
+            # Delete processed files.
+            rm *.gcov
+          done
+        )
       fi
       return 0
     }
