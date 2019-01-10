@@ -166,7 +166,7 @@ install:
             # (https://github.com/codeclimate/test-reporter/issues/381).
             find -maxdepth 0 -name '*.gcov' -exec sed -i -E 's/^(\s+)([0-9]+)\*/\1 \2/' {} +
 
-            ./cc-test-reporter format-coverage -t gcov -o build/codeclimate.$1-$(( ++i )).json .
+            ../cc-test-reporter format-coverage -t gcov -o build/codeclimate.$1-$(( ++i )).json .
 
             # Delete processed files.
             rm *.gcov
