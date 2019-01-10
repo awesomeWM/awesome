@@ -208,8 +208,9 @@ script:
         make check-unit || exit 1
         do_codecov unittests
         make check-integration || exit 1
-        make check-themes || exit 1
         do_codecov functionaltests
+        make check-themes || exit 1
+        do_codecov themes
         do_codecov_gcov c_code
 
         travis_fold_end
