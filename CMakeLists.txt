@@ -437,7 +437,7 @@ if(BUSTED_EXECUTABLE)
     list(APPEND CHECK_TARGETS check-unit)
 else()
     add_custom_target(check-unit true
-        COMMENT "Skipping check-unit, since busted was not found"
+        COMMENT "Skipping check-unit, since busted was not found (during configuration)"
         VERBATIM)
 endif()
 a_find_program(LUACHECK_EXECUTABLE luacheck FALSE)
