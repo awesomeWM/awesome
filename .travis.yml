@@ -184,7 +184,7 @@ script:
          && make)
         do_codecov samples
 
-        make check-unit-coverage || exit 1
+        make check-unit || exit 1
         do_codecov unittests
         make check-integration || exit 1
         make check-themes || exit 1

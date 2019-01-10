@@ -424,20 +424,17 @@ add_custom_target(check-requires
 list(APPEND CHECK_QA_TARGETS check-requires)
 a_find_program(BUSTED_EXECUTABLE busted FALSE)
 if(BUSTED_EXECUTABLE)
-    # Keep the arguments in sync with the version below!
+    if(DO_COVERAGE)
+        set(BUSTED_ARGS "--coverage")
+    else()
+        set(BUSTED_ARGS)
+    endif()
     add_custom_target(check-unit
-        ${BUSTED_EXECUTABLE}
+        COMMAND ${BUSTED_EXECUTABLE} ${BUSTED_ARGS}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
     list(APPEND CHECK_TARGETS check-unit)
-
-    # Same as above, but with --coverage argument
-    add_custom_target(check-unit-coverage
-        ${BUSTED_EXECUTABLE} "--coverage"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Running unit tests under LuaCov"
-        VERBATIM)
 else()
     add_custom_target(check-unit true
         COMMENT "Skipping check-unit, since busted was not found"
