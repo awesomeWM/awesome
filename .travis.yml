@@ -149,16 +149,16 @@ install:
             # Delete any files for /usr:
             # Otherwise Code Climate might fail with '"Invalid path part \"\""' after uploading (https://codeclimate.com/repos/5c35e985236f14026e00ceb2/settings/test_reports/5c3723a0f06c884132000fbc).
             # (using -r/--relative-only with gcov would still produce those)
-            find -maxdepth 0 -type f -name '#usr#*.gcov' -delete
+            find -maxdepth 1 -type f -name '#usr#*.gcov' -delete
 
             # Upload to Codecov.
             travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -F "$1"
 
             # Fix .gcov files for Code Climate.
             # (https://github.com/codeclimate/test-reporter/issues/381).
-            find -maxdepth 0 -name '*.gcov' -exec sed -i -E 's/^(\s+)([0-9]+)\*/\1 \2/' {} +
+            find -maxdepth 1 -name '*.gcov' -exec sed -i -E 's/^(\s+)([0-9]+)\*/\1 \2/' {} +
 
-            ../cc-test-reporter format-coverage -t gcov -o build/codeclimate.$1-$(( ++i )).json .
+            ../cc-test-reporter format-coverage -t gcov -o codeclimate.$1-$(( ++i )).json .
 
             # Delete processed files.
             rm *.gcov
@@ -230,6 +230,8 @@ script:
         do_codecov_gcov c_code
 
         if [ "$TRAVIS_TEST_RESULT" = 0 ] && [ "$DO_COVERAGE" = codecov ]; then
+          # Debug.
+          find build -name 'codeclimate.*.json' -ls
           parts=$(find build -name 'codeclimate.*.json' | wc -l)
           ./cc-test-reporter sum-coverage build/codeclimate.*.json -p "$parts"
           ./cc-test-reporter upload-coverage
