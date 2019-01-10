@@ -141,7 +141,7 @@ install:
             # Delete any files for /usr.
             # They are not relevant and might cause "Invalid path part" errors
             # with Code Climate.
-            rm gcov.$i/#usr#*.gcov
+            find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
           done
 
           # Upload to Codecov.
