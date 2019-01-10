@@ -108,8 +108,8 @@ install:
       # Install Code Climate reporter (quite heavy; >10MB).
       curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
       chmod +x ./cc-test-reporter
-      ./cc-test-reporter before-build
-      ./cc-test-reporter env
+      ./cc-test-reporter --debug before-build
+      ./cc-test-reporter --debug env
     fi
   - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
 
@@ -130,7 +130,7 @@ install:
         test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
         travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F "$1,${LUANAME//./}" || return 1
-        ./cc-test-reporter format-coverage -t coverage.py -o build/codeclimate.$1.json build/coverage.xml
+        ./cc-test-reporter --debug format-coverage -t coverage.py -o build/codeclimate.$1.json build/coverage.xml
 
         # Delete processed files.
         rm build/luacov.report.out build/luacov.stats.out build/coverage.xml
@@ -166,7 +166,7 @@ install:
             # (https://github.com/codeclimate/test-reporter/issues/381).
             find -maxdepth 1 -name '*.gcov' -exec sed -i -E 's/^(\s+)([0-9]+)\*/\1 \2/' {} +
 
-            ../cc-test-reporter format-coverage -t gcov -o codeclimate.$1-$(( ++i )).json .
+            ../cc-test-reporter --debug format-coverage -t gcov -o codeclimate.$1-$(( ++i )).json .
 
             # Delete processed files.
             rm *.gcov
@@ -241,8 +241,8 @@ script:
           # Debug.
           find build -name 'codeclimate.*.json' -ls
           parts=$(find build -name 'codeclimate.*.json' | wc -l)
-          ./cc-test-reporter sum-coverage build/codeclimate.*.json -p "$parts"
-          ./cc-test-reporter upload-coverage
+          ./cc-test-reporter --debug sum-coverage build/codeclimate.*.json -p "$parts"
+          ./cc-test-reporter --debug upload-coverage
         fi
 
         travis_fold_end
