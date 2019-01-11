@@ -151,7 +151,7 @@ install:
             # with Code Climate.
             find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
 
-            ../cc-test-reporter --debug format-coverage -t gcov -o codeclimate.gcov.json "$gcov.$i"
+            ../cc-test-reporter --debug format-coverage -t gcov -o codeclimate.gcov.json "gcov.$i"
           done
 
           # Upload to Codecov.
