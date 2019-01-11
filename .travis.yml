@@ -246,10 +246,6 @@ script:
         echo "Testing commit $commit"
         git checkout "$commit"
         git --no-pager show --stat
-
-        # Remove/clean any existing build dir.
-        sudo make distclean
-
         if ! make all check CMAKE_ARGS+="-D DO_COVERAGE=0"; then
           failed="$failed $commit"
         fi

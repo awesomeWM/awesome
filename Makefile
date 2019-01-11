@@ -5,9 +5,12 @@ else
     ECHO=@:
 endif
 
+TARGETS=awesome
 BUILDDIR=build
 
-all: awesome ;
+all: $(TARGETS) ;
+
+$(TARGETS): cmake-build
 
 $(BUILDDIR)/Makefile:
 	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
@@ -15,6 +18,10 @@ $(BUILDDIR)/Makefile:
 	mkdir -p $(BUILDDIR)
 	$(ECHO) "Running cmake…"
 	cd $(BUILDDIR) && cmake $(CMAKE_ARGS) "$(CURDIR)"
+
+cmake-build: $(BUILDDIR)/Makefile
+	$(ECHO) "Building…"
+	$(MAKE) -C $(BUILDDIR)
 
 tags:
 	git ls-files | xargs ctags
