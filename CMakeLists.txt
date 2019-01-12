@@ -38,8 +38,6 @@ include_directories(
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})
 
-set(CHECK_TARGETS check-integration)
-
 set(AWE_ICON_DIR ${SOURCE_DIR}/icons)
 set(AWE_THEMES_DIR ${SOURCE_DIR}/themes)
 
@@ -397,23 +395,28 @@ endif()
 # }}}
 
 # {{{ Tests
+add_custom_target(check DEPENDS check-integration)
+
 add_executable(test-gravity tests/test-gravity.c)
 target_link_libraries(test-gravity
     ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
+if(DO_COVERAGE)
+    set(TESTS_RUN_ENV DO_COVERAGE=1)
+endif()
 add_custom_target(check-integration
-    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ./tests/run.sh \$\${TEST_RUN_ARGS:--W}
+    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${TESTS_RUN_ENV} ./tests/run.sh \$\${TEST_RUN_ARGS:--W}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running integration tests"
     DEPENDS ${PROJECT_AWE_NAME}
     USES_TERMINAL)
 add_dependencies(check-integration test-gravity)
 add_custom_target(check-themes
-    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ./tests/themes/run.sh
+    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${TESTS_RUN_ENV} ./tests/themes/run.sh
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Testing themes"
     USES_TERMINAL
     DEPENDS generated_icons generate_awesomerc ${PROJECT_AWE_NAME})
-list(APPEND CHECK_TARGETS check-themes)
+add_dependencies(check check-themes)
 
 add_custom_target(check-requires
     lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
@@ -424,25 +427,23 @@ add_custom_target(check-requires
 list(APPEND CHECK_QA_TARGETS check-requires)
 a_find_program(BUSTED_EXECUTABLE busted FALSE)
 if(BUSTED_EXECUTABLE)
-    # Keep the arguments in sync with the version below!
+    if(DO_COVERAGE)
+        set(BUSTED_ARGS "--coverage")
+    else()
+        set(BUSTED_ARGS)
+    endif()
     add_custom_target(check-unit
-        ${BUSTED_EXECUTABLE}
+        COMMAND ${BUSTED_EXECUTABLE} ${BUSTED_ARGS}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
-    list(APPEND CHECK_TARGETS check-unit)
-
-    # Same as above, but with --coverage argument
-    add_custom_target(check-unit-coverage
-        ${BUSTED_EXECUTABLE} "--coverage"
-        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-        COMMENT "Running unit tests under LuaCov"
-        VERBATIM)
 else()
     add_custom_target(check-unit true
-        COMMENT "Skipping check-unit, since busted was not found"
+        COMMENT "Skipping check-unit, since busted was not found (during configuration)"
         VERBATIM)
 endif()
+add_dependencies(check check-unit)
+
 a_find_program(LUACHECK_EXECUTABLE luacheck FALSE)
 if(LUACHECK_EXECUTABLE)
     add_custom_target(luacheck
@@ -453,7 +454,7 @@ if(LUACHECK_EXECUTABLE)
     list(APPEND CHECK_QA_TARGETS luacheck)
 endif()
 add_custom_target(check-qa DEPENDS ${CHECK_QA_TARGETS})
-add_custom_target(check DEPENDS ${CHECK_TARGETS} check-qa)
+add_dependencies(check check-qa check-examples)
 # }}}
 
 INCLUDE(${CMAKE_SOURCE_DIR}/Packaging.cmake)

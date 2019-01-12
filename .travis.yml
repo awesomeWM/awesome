@@ -1,5 +1,4 @@
-sudo: required
-dist: trusty
+dist: xenial
 language: c
 
 # Build only master and stable branches.  Other branches go through PRs.
@@ -11,8 +10,7 @@ branches:
 env:
   matrix:
     - LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
-    # Lua 5.3 isn't available in Ubuntu Trusty, so some magic below installs it.
-    - LUA=5.3 LUANAME=lua5.3 LUALIBRARY=/usr/lib/liblua.so DO_COVERAGE=codecov
+    - LUA=5.3 LUANAME=lua5.3 DO_COVERAGE=codecov
     # luajit: installed from source.
     - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1
     # Note: luarocks does not work with Lua 5.0.
@@ -54,21 +52,10 @@ install:
      ./autogen.sh --prefix=/usr
      make && sudo make install)
 
-  # Install Lua (per env).
-  # Note that Lua 5.3 is installed manually, because it is not available in Ubuntu Trusty.
+    # Install Lua (per env).
   - |
     set -e
-    if [[ "$LUA" == "5.3" ]]; then
-      (echo '#!/bin/sh' ; echo 'set -x' ; echo 'gcc -shared -Wl,--no-undefined -o "$@" -ldl -lm') > /tmp/myar
-      chmod a+x /tmp/myar
-      (cd /tmp
-       wget http://www.lua.org/ftp/lua-5.3.4.tar.gz -O lua.tar.gz
-       tar -xvzf lua.tar.gz
-       cd lua-5.3.*/src \
-        && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2 -DLUA_USE_APICHECK -Dlua_assert=assert" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="/tmp/myar" liblua.so \
-        && cd .. \
-        && sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB=liblua.so linux install)
-    elif [[ "$LUANAME" == "luajit-2.0" ]]; then
+    if [[ "$LUANAME" == "luajit-2.0" ]]; then
       (wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz -O- | tar xzf - -C /tmp
        cd /tmp/LuaJIT-*
        sudo make install PREFIX=/usr)
@@ -77,12 +64,15 @@ install:
       if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/luajit /usr/bin/lua; fi
     else
       sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
+      # lua5.3 does not install /usr/bin/lua, but lua5.1/lua5.2 do.
+      if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/${LUANAME} /usr/bin/lua; fi
     fi
+  - lua -v
 
   # Install luarocks (for the selected Lua version).
   - |
-    travis_retry wget https://github.com/luarocks/luarocks/archive/v2.4.2.tar.gz
-    tar xf v2.4.2.tar.gz -C /tmp
+    travis_retry wget https://github.com/luarocks/luarocks/archive/v3.0.4.tar.gz
+    tar xf v3.0.4.tar.gz -C /tmp
     (cd /tmp/luarocks-* \
       && ./configure --lua-version=$LUA --with-lua-include=${LUAINCLUDE} ${LUAROCKS_ARGS} \
       && make build \
@@ -126,8 +116,8 @@ install:
       if [ "$DO_COVERAGE" = "codecov" ]; then
         test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
-        travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -c -F "$1,${LUANAME//./}" || return 1
-        rm build/luacov.stats.out
+        travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F "$1,${LUANAME//./}" || return 1
+        rm build/luacov.report.out build/luacov.stats.out
       fi
       return 0
     }
@@ -135,7 +125,28 @@ install:
     do_codecov_gcov() {
       echo "== do_codecov_gcov in $PWD: $*: =="
       if [ "$DO_COVERAGE" = "codecov" ]; then
-        travis_retry bash /tmp/codecov-bash -X coveragepy -c -F "$1" || return 1
+        # Report coverage for each .gcno file separately.
+        # gcov will create .gcov files for the same source (e.g. for
+        # globalconf.h from awesome.c.gcno and event.c.gcno).
+        i=0
+        set -x
+        (
+          cd build
+          find -path "*/lgi-check.dir" -prune -o \( -name '*.gcno' -print \) | while read -r gcno; do
+            gcov -pb "$gcno"
+
+            mkdir gcov.$(( ++i ))
+            mv *.gcov "gcov.$i"
+
+            # Delete any files for /usr.
+            # They are not relevant and might cause "Invalid path part" errors
+            # with Code Climate.
+            find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
+          done
+
+          # Upload to Codecov.
+          travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -F "$1,${LUANAME//./}"
+        )
       fi
       return 0
     }
@@ -194,11 +205,12 @@ script:
          && make)
         do_codecov samples
 
-        make check-unit-coverage || exit 1
+        make check-unit || exit 1
         do_codecov unittests
         make check-integration || exit 1
-        make check-themes || exit 1
         do_codecov functionaltests
+        make check-themes || exit 1
+        do_codecov themes
         do_codecov_gcov c_code
 
         travis_fold_end
@@ -234,6 +246,7 @@ script:
         echo "Testing commit $commit"
         git checkout "$commit"
         git --no-pager show --stat
+
         if ! make all check CMAKE_ARGS+="-D DO_COVERAGE=0"; then
           failed="$failed $commit"
         fi
