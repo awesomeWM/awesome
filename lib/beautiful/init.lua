@@ -186,6 +186,7 @@ end
 --   containing all the theme values.
 function beautiful.init(config)
     if config then
+        local state, err = nil, nil
         local homedir = os.getenv("HOME")
 
         -- If `config` is the path to a theme file, run this file,
@@ -195,12 +196,13 @@ function beautiful.init(config)
             config = config:gsub("^~/", homedir .. "/")
             local dir = Gio.File.new_for_path(config):get_parent()
             beautiful.theme_path = dir and (dir:get_path().."/") or nil
-            theme = protected_call(dofile, config)
+            state, err = pcall(function() theme = dofile(config) end)
         elseif type(config) == 'table' then
+            state = #config ~= 0
             theme = config
         end
 
-        if theme then
+        if state then
             -- expand '~'
             if homedir then
                 for k, v in pairs(theme) do
@@ -209,9 +211,12 @@ function beautiful.init(config)
             end
 
             if theme.font then set_font(theme.font) end
+            return true
         else
             theme = {}
-            return gears_debug.print_error("beautiful: error loading theme file " .. config)
+            gears_debug.print_error("beautiful: error loading theme: " .. tostring(config))
+            gears_debug.print_error("theme file error: " .. tostring(err))
+            return false, err
         end
     else
         return gears_debug.print_error("beautiful: error loading theme: no theme specified")
