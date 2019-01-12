@@ -17,7 +17,7 @@ local awful = { screen = require( "awful.screen" ) }
 --
 -- see `awful.hotkeys_popup.widget.show_help` for more information
 
-hotkeys_popup.show = function() hotkeys_popup.widget.show_help( _, awful.screen.focused() ) end
+hotkeys_popup.show = function() hotkeys_popup.widget.show_help( nil, awful.screen.focused() ) end
 
 --- Show popup with hotkeys help (shortcut to awful.hotkeys_popup.widget.show_help).
 --
