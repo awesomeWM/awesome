@@ -18,8 +18,8 @@ $(BUILDDIR)/Makefile:
 	$(ECHO) "Creating build directory and running cmake in it. You can also run CMake directly, if you want."
 	$(ECHO)
 	mkdir -p $(BUILDDIR)
-	$(ECHO) "Running cmake…"
-	cd $(BUILDDIR) && cmake $(CMAKE_ARGS) "$(CURDIR)"
+	$(ECHO) "Running cmake $(CMAKE_ARGS) -S . -B "$(BUILDDIR)"…"
+	cmake $(CMAKE_ARGS) -S . -B "$(BUILDDIR)"
 
 tags:
 	git ls-files | xargs ctags
