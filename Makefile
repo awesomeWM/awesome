@@ -14,8 +14,8 @@ cmake-build: $(BUILDDIR)/Makefile
 	$(ECHO) "Building…"
 	$(MAKE) -C $(BUILDDIR)
 
-# Run CMake always with CMAKE_ARGS defined.
-ifdef CMAKE_ARGS
+# Run CMake with CMAKE_ARGS defined on command line ("make CMAKE_ARGS=…").
+ifeq ($(origin CMAKE_ARGS),command line)
 .PHONY: $(BUILDDIR)/Makefile
 endif
 
