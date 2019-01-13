@@ -14,7 +14,7 @@ local beautiful = require("beautiful")
 -- Notification library
 local naughty = require("naughty")
 local menubar = require("menubar")
-local hotkeys_popup = require("awful.hotkeys_popup").widget
+local hotkeys_popup = require("awful.hotkeys_popup")
 -- Enable hotkeys help widget for VIM and other apps
 -- when client with a matching name is opened:
 require("awful.hotkeys_popup.keys")
@@ -98,13 +98,15 @@ local function client_menu_toggle_fn()
         end
     end
 end
+
+local function show_hotkeys_popup = function() hotkeys_popup.widget.show_help( nil, awful.screen.focused() ) end
 -- }}}
 
 -- {{{ Menu
 -- @DOC_MENU@
 -- Create a launcher widget and a main menu
 myawesomemenu = {
-   { "hotkeys", function() return false, hotkeys_popup.show_help end},
+   { "hotkeys", show_hotkeys_popup },
    { "manual", terminal .. " -e man awesome" },
    { "edit config", editor_cmd .. " " .. awesome.conffile },
    { "restart", awesome.restart },
