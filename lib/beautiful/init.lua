@@ -194,7 +194,7 @@ function beautiful.init(config)
             -- Expand the '~' $HOME shortcut
             config = config:gsub("^~/", homedir .. "/")
             local dir = Gio.File.new_for_path(config):get_parent()
-            beautiful.theme_path = dir and (dir:get_path().."/") or nil
+            rawset(beautiful, "theme_path", dir and (dir:get_path().."/") or nil)
             theme = protected_call(dofile, config)
         elseif type(config) == 'table' then
             theme = config
