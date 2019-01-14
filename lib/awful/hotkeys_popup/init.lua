@@ -6,7 +6,6 @@
 -- @module awful.hotkeys_popup
 ---------------------------------------------------------------------------
 
-
 local hotkeys_popup = {
   widget = require("awful.hotkeys_popup.widget"),
 }
