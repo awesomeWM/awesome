@@ -197,6 +197,7 @@ function beautiful.init(config)
             rawset(beautiful, "theme_path", dir and (dir:get_path().."/") or nil)
             theme = protected_call(dofile, config)
         elseif type(config) == 'table' then
+            rawset(beautiful, "theme_path", nil)
             theme = config
         end
 
