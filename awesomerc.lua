@@ -99,7 +99,9 @@ local function client_menu_toggle_fn()
     end
 end
 
-local function show_hotkeys_popup = function() hotkeys_popup.widget.show_help( nil, awful.screen.focused() ) end
+local function show_hotkeys_popup()
+    hotkeys_popup.show_help(nil, awful.screen.focused())
+end
 -- }}}
 
 -- {{{ Menu
