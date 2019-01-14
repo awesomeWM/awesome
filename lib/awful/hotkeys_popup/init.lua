@@ -12,7 +12,7 @@ local hotkeys_popup = {
 
 --- This is the same as awful.hotkeys_popup.widget.show_help
 --
--- example usage: 
+-- example usage:
 --     local hotkeys_popup = require("awful.hotkeys_popup")
 --     myawesomemenu = {{ "hotkeys", function() hotkeys_popup.show_help() end },
 --                      -- <more entries>
