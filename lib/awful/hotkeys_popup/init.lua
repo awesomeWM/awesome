@@ -13,7 +13,7 @@ local awful = { screen = require( "awful.screen" ) }
 
 --- Show popup with hotkeys help on the screen with the mouse (awful.menu callable)
 --
--- example usage: 
+-- example usage:
 --     local hotkeys_popup = require("awful.hotkeys_popup")
 --     myawesomemenu = {{ "hotkeys", function() hotkeys_popup.show_help() end },
 --                      -- <more entries>
@@ -25,7 +25,7 @@ hotkeys_popup.show = function() hotkeys_popup.widget.show_help( nil, awful.scree
 
 --- This is the same as awful.hotkeys_popup.widget.show_help
 --
--- example usage: 
+-- example usage:
 --     local hotkeys_popup = require("awful.hotkeys_popup")
 --     myawesomemenu = {{ "hotkeys", function() hotkeys_popup.show_help() end },
 --                      -- <more entries>
