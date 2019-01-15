@@ -172,6 +172,8 @@ extern const struct luaL_Reg awesome_mouse_meta[];
 
 /** Path to config file */
 static char *conffile;
+static char *config_file;
+static char *config_path;
 
 /** Check whether a composite manager is running.
  * \return True if such a manager is running.
@@ -405,6 +407,16 @@ luaA_fixups(lua_State *L)
  */
 
 /**
+ * The configuration filename which has been loaded.
+ * @tfield string config_file
+ */
+
+/**
+ * The location of the configuration file which has been loaded.
+ * @tfield string config_path
+ */
+
+/**
  * True if we are still in startup, false otherwise.
  * @tfield boolean startup
  */
@@ -451,6 +463,18 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "conffile"))
     {
         lua_pushstring(L, conffile);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "config_file"))
+    {
+        lua_pushstring(L, config_file);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "config_path"))
+    {
+        lua_pushstring(L, config_path);
         return 1;
     }
 
@@ -920,6 +944,9 @@ luaA_loadrc(const char *confpath)
     /* Set the conffile right now so it can be used inside the
      * configuration file. */
     conffile = a_strdup(confpath);
+    char * eop = strrchr(confpath,'/');
+    config_file = eop ? a_strdup(eop + 1) : a_strdup(confpath);
+    config_path = eop ? a_strndup(confpath, a_strlen(confpath) - a_strlen(config_file) - 1) : p_new(char, 1);
     /* Move error handling function before function */
     lua_pushcfunction(L, luaA_dofunction_on_error);
     lua_insert(L, -2);
@@ -935,6 +962,8 @@ luaA_loadrc(const char *confpath)
     fprintf(stderr, "%s\n", err);
     /* An error happened, so reset this. */
     conffile = NULL;
+    config_file = NULL;
+    config_path = NULL;
     /* Pop luaA_dofunction_on_error() and the error message */
     lua_pop(L, 2);
 
