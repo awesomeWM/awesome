@@ -66,9 +66,6 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
 
-/* XkbKeycodeToKeysym */
-#include <X11/XKBlib.h>
-
 #include <unistd.h> /* for gethostname() */
 
 #ifdef WITH_DBUS
@@ -462,11 +459,6 @@ get_modifier_name(int map_index)
  */
 static int luaA_get_modifiers(lua_State *L)
 {
-    Display *display = XOpenDisplay(NULL);
-
-    if (!display)
-        return 0;
-
     xcb_get_modifier_mapping_reply_t *mods = xcb_get_modifier_mapping_reply(globalconf.connection,
             xcb_get_modifier_mapping(globalconf.connection), NULL);
     if (!mods)
@@ -512,7 +504,6 @@ static int luaA_get_modifiers(lua_State *L)
     }
 
     free(mods);
-    XCloseDisplay(display);
 
     return 0;
 }
