@@ -398,14 +398,14 @@ static const char *
 get_modifier_name(int map_index)
 {
     switch (map_index) {
-        case ShiftMapIndex:   return "Shift";
-        case LockMapIndex:    return "Lock";
-        case ControlMapIndex: return "Control";
-        case Mod1MapIndex:    return "Mod1"; /* Alt */
-        case Mod2MapIndex:    return "Mod2";
-        case Mod3MapIndex:    return "Mod3";
-        case Mod4MapIndex:    return "Mod4";
-        case Mod5MapIndex:    return "Mod5";
+        case XCB_MAP_INDEX_SHIFT:   return "Shift";
+        case XCB_MAP_INDEX_LOCK:    return "Lock";
+        case XCB_MAP_INDEX_CONTROL: return "Control";
+        case XCB_MAP_INDEX_1:       return "Mod1"; /* Alt */
+        case XCB_MAP_INDEX_2:       return "Mod2";
+        case XCB_MAP_INDEX_3:       return "Mod3";
+        case XCB_MAP_INDEX_4:       return "Mod4";
+        case XCB_MAP_INDEX_5:       return "Mod5";
 
     }
 
@@ -475,7 +475,7 @@ static int luaA_get_modifiers(lua_State *L)
     lua_newtable(L);
 
     /* This get the MAPPED modifiers, not all of them are */
-    for (int i = ShiftMapIndex; i <= Mod5MapIndex; i++) {
+    for (int i = XCB_MAP_INDEX_SHIFT; i <= XCB_MAP_INDEX_5; i++) {
         lua_pushstring(L, get_modifier_name(i));
         lua_newtable(L);
 
