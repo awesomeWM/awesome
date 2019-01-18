@@ -495,7 +495,9 @@ static int luaA_get_modifiers(lua_State *L)
                 lua_settable(L, -3);
 
                 lua_pushstring(L, "keysym");
-                lua_pushstring(L, XKeysymToString(key_sym));
+                char *string = key_get_keysym_name(key_sym);
+                lua_pushstring(L, string);
+                p_delete(&string);
                 lua_settable(L, -3);
 
                 lua_settable(L, -3);
