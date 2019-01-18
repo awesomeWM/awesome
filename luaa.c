@@ -473,6 +473,7 @@ static int luaA_get_modifiers(lua_State *L)
         return 0;
 
     xcb_keycode_t *mappings = xcb_get_modifier_mapping_keycodes(mods);
+    struct xkb_keymap *keymap = xkb_state_get_keymap(globalconf.xkb_state);
 
     lua_newtable(L);
 
@@ -482,9 +483,10 @@ static int luaA_get_modifiers(lua_State *L)
         lua_newtable(L);
 
         for (int j = 0; j < mods->keycodes_per_modifier; j++) {
+            const xkb_keysym_t *keysyms;
             const xcb_keycode_t key_code = mappings[i * mods->keycodes_per_modifier + j];
-            const xcb_keysym_t  key_sym  = XkbKeycodeToKeysym(display, key_code, 0, 0);
-            if (key_sym != XCB_NO_SYMBOL) {
+            xkb_keymap_key_get_syms_by_level(keymap, key_code, 0, 0, &keysyms);
+            if (keysyms != NULL) {
                 /* The +1 because j starts at zero and Lua at 1 */
                 lua_pushinteger(L, j+1);
 
@@ -494,8 +496,11 @@ static int luaA_get_modifiers(lua_State *L)
                 lua_pushinteger(L, key_code);
                 lua_settable(L, -3);
 
+                /* Technically it is possible to get multiple keysyms here,
+                 * but... we just use the first one.
+                 */
                 lua_pushstring(L, "keysym");
-                char *string = key_get_keysym_name(key_sym);
+                char *string = key_get_keysym_name(keysyms[0]);
                 lua_pushstring(L, string);
                 p_delete(&string);
                 lua_settable(L, -3);
