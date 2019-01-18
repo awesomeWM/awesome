@@ -66,9 +66,6 @@
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
 
-/* XGetModifierMapping() */
-#include <X11/Xlib.h>
-
 /* XkbKeycodeToKeysym */
 #include <X11/XKBlib.h>
 
@@ -470,7 +467,12 @@ static int luaA_get_modifiers(lua_State *L)
     if (!display)
         return 0;
 
-    XModifierKeymap *mods = XGetModifierMapping(display);
+    xcb_get_modifier_mapping_reply_t *mods = xcb_get_modifier_mapping_reply(globalconf.connection,
+            xcb_get_modifier_mapping(globalconf.connection), NULL);
+    if (!mods)
+        return 0;
+
+    xcb_keycode_t *mappings = xcb_get_modifier_mapping_keycodes(mods);
 
     lua_newtable(L);
 
@@ -479,10 +481,10 @@ static int luaA_get_modifiers(lua_State *L)
         lua_pushstring(L, get_modifier_name(i));
         lua_newtable(L);
 
-        for (int j = 0; j < mods->max_keypermod; j++) {
-            const KeyCode key_code = mods->modifiermap[i * mods->max_keypermod + j];
-            const KeySym  key_sym  = XkbKeycodeToKeysym(display, key_code, 0, 0);
-            if (key_sym != NoSymbol) {
+        for (int j = 0; j < mods->keycodes_per_modifier; j++) {
+            const xcb_keycode_t key_code = mappings[i * mods->keycodes_per_modifier + j];
+            const xcb_keysym_t  key_sym  = XkbKeycodeToKeysym(display, key_code, 0, 0);
+            if (key_sym != XCB_NO_SYMBOL) {
                 /* The +1 because j starts at zero and Lua at 1 */
                 lua_pushinteger(L, j+1);
 
@@ -502,7 +504,7 @@ static int luaA_get_modifiers(lua_State *L)
         lua_settable(L, -3);
     }
 
-    XFreeModifiermap(mods);
+    free(mods);
     XCloseDisplay(display);
 
     return 0;
