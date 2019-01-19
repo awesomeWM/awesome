@@ -65,6 +65,65 @@ describe("menubar.utils lookup_icon_uncached", function()
         assert_found_in_path('awesome',  '/.icons/awesome/64x64/apps/awesome.png')
         assert_found_in_path('awesome2', '/.icons/awesome/scalable/apps/awesome2.png')
     end)
+
+-- Check for no argument :: if not icon_file or icon_file == "" then
+    it('no icon specified', function()
+        assert.is_false(utils.lookup_icon_uncached())
+        assert.is_false(utils.lookup_icon_uncached(nil)) -- Same as above?
+        assert.is_false(utils.lookup_icon_uncached(false))
+        assert.is_false(utils.lookup_icon_uncached(''))
+    end)
+
+-- Check for icon not in search path :: if icon_file:sub(1, 1) == '/' and supported_icon_formats[icon_file_ext] then
+    it('finds icons even those not in the search paths when full path specified', function()
+
+        -- Shimmed icon base directories contain the following icons:
+        --
+        --     usr/share/icon5.png
+        --     usr/share/icon6.xpm
+        --     usr/share/icon7.svg
+
+        assert_found_in_path('/spec/menubar/usr/share/icon5.png', '/spec/menubar/usr/share/icon5.png')
+        assert_found_in_path('/spec/menubar/usr/share/icon6.xpm', '/spec/menubar/usr/share/icon6.xpm')
+        assert_found_in_path('/spec/menubar/usr/share/icon7.svg', '/spec/menubar/usr/share/icon7.svg')
+
+        assert.is_same(nil, utils.lookup_icon_uncached('/.png')) -- supported file does not exist in location
+        assert.is_same(nil, utils.lookup_icon_uncached('/blah/icon6.png')) -- supported file does not exist in location
+    end)
+
+-- Check icon with specified extension matching :: if supported_icon_formats[icon_file_ext] and
+    it('finds icons with specified supported extension in search path', function()
+
+        -- Shimmed icon base directories contain the following icons:
+        --
+        --     .icons/icon5.png
+        --     .icons/icon6.xpm
+        --     .icons/icon7.svg
+
+        assert_found_in_path('icon5.png', '/.icons/icon5.png')
+        assert_found_in_path('icon6.xpm', '/spec/menubar/.icons/icon6.xpm')
+        assert_found_in_path('icon7.svg', '/spec/menubar/.icons/icon7.svg')
+
+        --  Will fail as file does not exist (but extension is supported)
+        assert.is_false(utils.lookup_icon_uncached('icon8.png'))
+    end)
+
+-- Check icon with no (or invalid) extension matching :: if NOT supported_icon_formats[icon_file_ext]
+    it('finds icons without specified path or extension', function()
+
+        -- Shimmed icon base directories contain the following icons:
+        --
+        --     .icons/icon6.xpm
+        --     .icons/icon7.svg
+
+        assert_found_in_path('icon6', '/spec/menubar/.icons/icon6.xpm') -- Similar to original tests and testing xpm extension
+        assert_found_in_path('icon7', '/spec/menubar/.icons/icon7.svg') -- Similar to original tests and testing svg extension
+
+        assert.is_false(utils.lookup_icon_uncached('/png')) -- supported file does not exist in given location
+        assert.is_false(utils.lookup_icon_uncached('.png')) -- file does not exist
+        assert.is_false(utils.lookup_icon_uncached('png')) -- file does not exist
+        assert.is_false(utils.lookup_icon_uncached('icon9')) -- file does not exist
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
