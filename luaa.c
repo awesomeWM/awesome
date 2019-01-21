@@ -508,6 +508,31 @@ static int luaA_get_modifiers(lua_State *L)
     return 0;
 }
 
+/* Undocumented */
+/*
+ * A table with the currently active modifier names.
+ *
+ * @tfield table _active_modifiers
+ */
+
+static int luaA_get_active_modifiers(lua_State *L)
+{
+    int count = 1;
+    lua_newtable(L);
+
+    for (int i = XCB_MAP_INDEX_SHIFT; i <= XCB_MAP_INDEX_5; i++) {
+        const int active = xkb_state_mod_index_is_active (globalconf.xkb_state, i,
+            XKB_STATE_MODS_DEPRESSED | XKB_STATE_MODS_EFFECTIVE
+        );
+
+        if (active) {
+            lua_pushstring(L, get_modifier_name(i));
+            lua_rawseti(L,-2, count++);
+        }
+    }
+
+    return 0;
+}
 
 /**
  * The version of awesome.
@@ -595,6 +620,12 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "_modifiers"))
     {
         luaA_get_modifiers(L);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "_active_modifiers"))
+    {
+        luaA_get_active_modifiers(L);
         return 1;
     }
 
