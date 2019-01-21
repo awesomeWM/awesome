@@ -16,7 +16,7 @@ local awful = {keygrabber = require("awful.keygrabber"), --DOC_HIDE
             {{"Mod1", "Shift"}, "Tab", awful.client.focus.history.select_next    },
         },
         -- Note that it is using the key name and not the modifier name.
-        stop_key           = "Alt_L",
+        stop_key           = "Mod1",
         stop_event         = "release",
         start_callback     = awful.client.focus.history.disable_tracking,
         stop_callback      = awful.client.focus.history.enable_tracking,
