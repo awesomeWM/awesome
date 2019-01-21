@@ -119,8 +119,8 @@ local gtable = require("gears.table")
 local a_place = require("awful.placement")
 local protected_call = require("gears.protected_call")
 local aspawn = require("awful.spawn")
-local gsort = require("gears.sort")
 local gdebug = require("gears.debug")
+local gmatcher = require("gears.matcher")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local rules = {}
@@ -128,26 +128,14 @@ local rules = {}
 --- This is the global rules table.
 rules.rules = {}
 
+local crules = gmatcher()
+
 --- Check if a client matches a rule.
 -- @client c The client.
 -- @tab rule The rule to check.
 -- @treturn bool True if it matches, false otherwise.
 function rules.match(c, rule)
-    if not rule then return false end
-    for field, value in pairs(rule) do
-        if c[field] then
-            if type(c[field]) == "string" then
-                if not c[field]:match(value) and c[field] ~= value then
-                    return false
-                end
-            elseif c[field] ~= value then
-                return false
-            end
-        else
-            return false
-        end
-    end
-    return true
+    return crules:_match(c, rule)
 end
 
 --- Check if a client matches any part of a rule.
@@ -155,19 +143,7 @@ end
 -- @tab rule The rule to check.
 -- @treturn bool True if at least one rule is matched, false otherwise.
 function rules.match_any(c, rule)
-    if not rule then return false end
-    for field, values in pairs(rule) do
-        if c[field] then
-            for _, value in ipairs(values) do
-                if c[field] == value then
-                    return true
-                elseif type(c[field]) == "string" and c[field]:match(value) then
-                    return true
-                end
-            end
-        end
-    end
-    return false
+    return crules:_match_any(c, rule)
 end
 
 --- Does a given rule entry match a client?
@@ -176,8 +152,7 @@ end
 --   `except_any`).
 -- @treturn bool
 function rules.matches(c, entry)
-    return (rules.match(c, entry.rule) or rules.match_any(c, entry.rule_any)) and
-        (not rules.match(c, entry.except) and not rules.match_any(c, entry.except_any))
+    return crules:matches_rule(c, entry)
 end
 
 --- Get list of matching rules for a client.
@@ -186,13 +161,7 @@ end
 --   "except_any" keys.
 -- @treturn table The list of matched rules.
 function rules.matching_rules(c, _rules)
-    local result = {}
-    for _, entry in ipairs(_rules) do
-        if (rules.matches(c, entry)) then
-            table.insert(result, entry)
-        end
-    end
-    return result
+    return crules:matching_rules(c, _rules)
 end
 
 --- Check if a client matches a given set of rules.
@@ -201,22 +170,22 @@ end
 --   `except` and `except_any` keys.
 -- @treturn bool True if at least one rule is matched, false otherwise.
 function rules.matches_list(c, _rules)
-    for _, entry in ipairs(_rules) do
-        if (rules.matches(c, entry)) then
-            return true
-        end
-    end
-    return false
+    return crules:matches_rules(c, _rules)
+end
+
+--- Remove a source.
+-- @tparam string name The source name.
+-- @treturn boolean If the source was removed,
+function rules.remove_rule_source(name)
+    return crules:remove_matching_source(name)
 end
 
 
--- Contains the sources.
--- The elements are ordered "first in, first executed". Thus, the higher the
--- index, the higher the priority. Each entry is a table with a `name` and a
--- `callback` field. This table is exposed for debugging purpose. The API
--- is private and should be modified using the public accessors.
-local rule_sources = {}
-local rule_source_sort = gsort.topological()
+--- Apply awful.rules.rules to a client.
+-- @client c The client.
+function rules.apply(c)
+    return crules:apply(c)
+end
 
 --- Add a new rule source.
 --
@@ -257,73 +226,13 @@ local rule_source_sort = gsort.topological()
 -- @tparam[opt={}] table precede A list of names of sources this source have a
 --  priority over.
 -- @treturn boolean Returns false if a dependency conflict was found.
-function rules.add_rule_source(name, callback, depends_on, precede)
-    depends_on = depends_on  or {}
-    precede    = precede or {}
-    assert(type( depends_on ) == "table")
-    assert(type( precede    ) == "table")
+-- @function awful.rules.add_rule_source
 
-    for _, v in ipairs(rule_sources) do
-        -- Names must be unique
-        assert(
-            v.name ~= name,
-            "Name must be unique, but '" .. name .. "' was already registered."
-        )
+function rules.add_rule_source(name, cb, ...)
+    local function callback(_, ...)
+        cb(...)
     end
-
-    local new_sources = rule_source_sort:clone()
-
-    new_sources:prepend(name, precede    )
-    new_sources:append (name, depends_on )
-
-    local res, err = new_sources:sort()
-
-    if err then
-        gdebug.print_warning("Failed to add the rule source: "..err)
-        return false
-    end
-
-    -- Only replace the source once the additions have been proven safe
-    rule_source_sort = new_sources
-
-    local callbacks = {}
-
-    -- Get all callbacks for *existing* sources.
-    -- It is important to remember that names can be used in the sorting even
-    -- if the source itself doesn't (yet) exists.
-    for _, v in ipairs(rule_sources) do
-        callbacks[v.name] = v.callback
-    end
-
-    rule_sources = {}
-    callbacks[name]    = callback
-
-    for _, v in ipairs(res) do
-        if callbacks[v] then
-            table.insert(rule_sources, 1, {
-                callback = callbacks[v],
-                name     = v
-            })
-        end
-    end
-
-    return true
-end
-
---- Remove a source.
--- @tparam string name The source name.
--- @treturn boolean If the source was removed
-function rules.remove_rule_source(name)
-    rule_source_sort:remove(name)
-
-    for k, v in ipairs(rule_sources) do
-        if v.name == name then
-            table.remove(rule_sources, k)
-            return true
-        end
-    end
-
-    return false
+    return crules:add_matching_function(name, callback, ...)
 end
 
 -- Add the rules properties
@@ -413,17 +322,6 @@ end
 -- @rulesources awful.spawn_once
 
 rules.add_rule_source("awful.spawn_once", apply_singleton_rules, {"awful.spawn"}, {"awful.rules"})
-
---- Apply awful.rules.rules to a client.
--- @client c The client.
-function rules.apply(c)
-    local callbacks, props = {}, {}
-    for _, v in ipairs(rule_sources) do
-        v.callback(c, props, callbacks)
-    end
-
-    rules.execute(c, props, callbacks)
-end
 
 local function add_to_tag(c, t)
     if not t then return end
@@ -621,7 +519,9 @@ end
 -- @client c The client.
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
-function rules.execute(c, props, callbacks)
+-- @function awful.rules.execute
+
+crules._execute = function(_, c, props, callbacks)
     -- This has to be done first, as it will impact geometry related props.
     if props.titlebars_enabled and (type(props.titlebars_enabled) ~= "function"
             or props.titlebars_enabled(c,props)) then
@@ -733,6 +633,8 @@ function rules.execute(c, props, callbacks)
         c:emit_signal('request::activate', "rules", {raise=not awesome.startup})
     end
 end
+
+function rules.execute(...) crules:_execute(...) end
 
 -- TODO v5 deprecate this
 function rules.completed_with_payload_callback(c, props, callbacks)
