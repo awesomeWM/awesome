@@ -47,6 +47,8 @@ menu_gen.all_categories = {
                icon_name = "applications-office", use = true },
     internet = { app_type = "Network", name = "Internet",
                 icon_name = "applications-internet", use = true },
+    science = { app_type = "Science", name="Science",
+                icon_name = "applications-science", use = true },
     settings = { app_type = "Settings", name = "Settings",
                  icon_name = "applications-utilities", use = true },
     tools = { app_type = "System", name = "System Tools",
