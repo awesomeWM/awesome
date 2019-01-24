@@ -854,12 +854,21 @@ end
 function tag.object.set_layouts(self, layouts)
     tag.setproperty(self, "_custom_layouts", {})
     tag.setproperty(self, "_layouts", gtable.clone(layouts, false))
-    update_layouts(self, self.layout, self.layout)
+
+    local cur = tag.getproperty(self, "layout")
+    update_layouts(self, cur, cur)
+
     self:emit_signal("property::layouts")
 end
 
 function tag.object.get_layout(t)
-    return tag.getproperty(t, "layout") or require("awful.layout.suit.floating")
+    local l = tag.getproperty(t, "layout")
+    if l then return l end
+
+    local layouts = tag.getproperty(t, "_layouts")
+
+    return layouts and layouts[1]
+        or require("awful.layout.suit.floating")
 end
 
 --- Set layout.

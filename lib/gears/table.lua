@@ -100,6 +100,48 @@ function gtable.hasitem(t, item)
     end
 end
 
+--- Get all matching table keys for a `matcher` function.
+--
+-- @tparam table t The table.
+-- @tparam function matcher A function taking the key and value as arguments and
+--   returning a boolean.
+-- @tparam[opt=false] boolean ordered If true, only look for continuous
+--   numeric keys.
+-- @tparam[opt=nil] number max The maximum number of entries to find.
+-- @treturn table|nil An ordered table with all the keys or `nil` if none were
+--   found.
+function gtable.find_keys(t, matcher, ordered, max)
+    if max == 0 then return nil end
+
+    ordered, max = ordered or false, 0
+    local ret, it = {}, ordered and ipairs or pairs
+
+    for k, v in it(t) do
+        if matcher(k,v) then
+            table.insert(ret, k)
+
+            if #ret == max then break end
+        end
+    end
+
+    return #ret > 0 and ret or nil
+end
+
+--- Find the first key that matches a function.
+--
+-- @tparam table t The table.
+-- @tparam function matcher A function taking the key and value as arguments and
+--   returning a boolean.
+-- @tparam[opt=false] boolean ordered If true, only look for continuous
+--   numeric keys.
+-- @return The table key or nil
+function gtable.find_first_key(t, matcher, ordered)
+    local ret = gtable.find_keys(t, matcher, ordered, 1)
+
+    return ret and ret[1] or nil
+end
+
+
 --- Get a sorted table with all integer keys from a table.
 -- @class function
 -- @name keys
