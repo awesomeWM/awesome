@@ -134,7 +134,6 @@ describe("menubar.utils lookup_icon_uncached", function()
         assert.is_false(utils.lookup_icon_uncached('png')) -- file does not exist
         assert.is_false(utils.lookup_icon_uncached('icon9')) -- file does not exist
     end)
---]]
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
