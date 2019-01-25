@@ -180,28 +180,57 @@ function beautiful.get_font_height(name)
     return load_font(name).height
 end
 
---- Init function, should be run at the beginning of configuration file.
+--- Function that initializes the theme settings. Should be run at the
+-- beginning of the awesome configuration file (normally rc.lua).
+--
+-- Example usages:
+--
+--    -- Using a table
+--    beautiful.init({font = 'Monospace Bold 10'})
+--
+--    -- From a config file
+--    beautiful.init("<path>/theme.lua")
+--
+-- Example "<path>/theme.lua" (see `05-awesomerc.md:Variable_definitions`):
+--
+--    theme = {}
+--        theme.font = 'Monospace Bold 10'
+--    return theme
+--
+-- Example using the return value:
+--
+--    local beautiful = require("beautiful")
+--    if not beautiful.init("<path>/theme.lua") then
+--        beautiful.init("<path>/.last.theme.lua") -- a known good fallback
+--    end
+--
 -- @tparam string|table config The theme to load. It can be either the path to
---   the theme file (returning a table) or directly the table
+--   the theme file (which should return a table) or directly a table
 --   containing all the theme values.
+-- @treturn true|nil True if successful, nil in case of error.
 function beautiful.init(config)
     if config then
+        local state, t_theme = nil, nil
         local homedir = os.getenv("HOME")
 
         -- If `config` is the path to a theme file, run this file,
         -- otherwise if it is a theme table, save it.
-        if type(config) == 'string' then
+        local t_config = type(config)
+        if t_config == 'string' then
             -- Expand the '~' $HOME shortcut
             config = config:gsub("^~/", homedir .. "/")
             local dir = Gio.File.new_for_path(config):get_parent()
             rawset(beautiful, "theme_path", dir and (dir:get_path().."/") or nil)
             theme = protected_call(dofile, config)
-        elseif type(config) == 'table' then
+            t_theme = type(theme)
+            state = t_theme == 'table' and next(theme)
+        elseif t_config == 'table' then
             rawset(beautiful, "theme_path", nil)
             theme = config
+            state = next(theme)
         end
 
-        if theme then
+        if state then
             -- expand '~'
             if homedir then
                 for k, v in pairs(theme) do
@@ -210,9 +239,16 @@ function beautiful.init(config)
             end
 
             if theme.font then set_font(theme.font) end
+            return true
         else
+            rawset(beautiful, "theme_path", nil)
             theme = {}
-            return gears_debug.print_error("beautiful: error loading theme file " .. config)
+            local file = t_config == 'string' and (" from: " .. config)
+            local err = (file and t_theme == 'table' and "got an empty table" .. file)
+                     or (file and t_theme ~= 'table' and "got a " .. t_theme .. file)
+                     or (t_config == 'table' and "got an empty table")
+                     or ("got a " .. t_config)
+            return gears_debug.print_error("beautiful: error loading theme: " .. err)
         end
     else
         return gears_debug.print_error("beautiful: error loading theme: no theme specified")
