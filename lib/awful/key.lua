@@ -9,14 +9,11 @@
 -- Grab environment we need
 local setmetatable = setmetatable
 local ipairs = ipairs
-local capi = { key = key, root = root }
+local capi = { key = key, root = root, awesome = awesome }
 local gmath = require("gears.math")
 local gtable = require("gears.table")
 
-
-
 local key = { mt = {}, hotkeys = {} }
-
 
 --- Modifiers to ignore.
 -- By default this is initialized as { "Lock", "Mod2" }
@@ -27,23 +24,53 @@ local key = { mt = {}, hotkeys = {} }
 key.ignore_modifiers = { "Lock", "Mod2" }
 
 --- Convert the modifiers into pc105 key names
-local conversion = {
-    mod4    = "Super_L",
-    control = "Control_L",
-    shift   = "Shift_L",
-    mod1    = "Alt_L",
-}
+local conversion = nil
+
+local function generate_conversion_map()
+    if conversion then return conversion end
+
+    local mods = capi.awesome._modifiers
+    assert(mods)
+
+    conversion = {}
+
+    for mod, keysyms in pairs(mods) do
+        for _, keysym in ipairs(keysyms) do
+            assert(keysym.keysym)
+            conversion[mod] = conversion[mod] or keysym.keysym
+            conversion[keysym.keysym] = mod
+        end
+    end
+
+    return conversion
+end
+
+capi.awesome.connect_signal("xkb::map_changed"  , function() conversion = nil end)
 
 --- Execute a key combination.
 -- If an awesome keybinding is assigned to the combination, it should be
 -- executed.
+--
+-- To limit the chances of accidentally leaving a modifier key locked when
+-- calling this function from a keybinding, make sure is attached to the
+-- release event and not the press event.
+--
 -- @see root.fake_input
 -- @tparam table mod A modified table. Valid modifiers are: Any, Mod1,
 --   Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
 -- @tparam string k The key
 function key.execute(mod, k)
+    local modmap = generate_conversion_map()
+    local active = capi.awesome._active_modifiers
+
+    -- Release all modifiers
+    for _, m in ipairs(active) do
+        assert(modmap[m])
+        root.fake_input("key_release", modmap[m])
+    end
+
     for _, v in ipairs(mod) do
-        local m = conversion[v:lower()]
+        local m = modmap[v]
         if m then
             root.fake_input("key_press", m)
         end
@@ -53,10 +80,17 @@ function key.execute(mod, k)
     root.fake_input("key_release", k)
 
     for _, v in ipairs(mod) do
-        local m = conversion[v:lower()]
+        local m = modmap[v]
         if m then
             root.fake_input("key_release", m)
         end
+    end
+
+    -- Restore the previous modifiers all modifiers. Please note that yes,
+    -- there is a race condition if the user was fast enough to release the
+    -- key during this operation.
+    for _, m in ipairs(active) do
+        root.fake_input("key_press", modmap[m])
     end
 end
 

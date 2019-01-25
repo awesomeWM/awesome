@@ -388,6 +388,151 @@ luaA_fixups(lua_State *L)
     lua_setglobal(L, "selection");
 }
 
+static const char *
+get_modifier_name(int map_index)
+{
+    switch (map_index) {
+        case XCB_MAP_INDEX_SHIFT:   return "Shift";
+        case XCB_MAP_INDEX_LOCK:    return "Lock";
+        case XCB_MAP_INDEX_CONTROL: return "Control";
+        case XCB_MAP_INDEX_1:       return "Mod1"; /* Alt */
+        case XCB_MAP_INDEX_2:       return "Mod2";
+        case XCB_MAP_INDEX_3:       return "Mod3";
+        case XCB_MAP_INDEX_4:       return "Mod4";
+        case XCB_MAP_INDEX_5:       return "Mod5";
+
+    }
+
+    return 0; /* \0 */
+}
+
+/* Undocumented */
+/*
+ * The table of keybindings modifiers.
+ *
+ * Each modifier has zero to many entries depending on the keyboard layout.
+ * For example, `Shift` usually both has a left and right variant. Each
+ * modifier entry has a `keysym` and `keycode` entry. For the US PC 105
+ * keyboard, it looks like:
+ *
+ *    awesome.modifiers = {
+ *         Shift = {
+ *              {keycode = 50 , keysym = 'Shift_L'    },
+ *              {keycode = 62 , keysym = 'Shift_R'    },
+ *         },
+ *         Lock = {},
+ *         Control = {
+ *              {keycode = 37 , keysym = 'Control_L'  },
+ *              {keycode = 105, keysym = 'Control_R'  },
+ *         },
+ *         Mod1 = {
+ *              {keycode = 64 , keysym = 'Alt_L'      },
+ *              {keycode = 108, keysym = 'Alt_R'      },
+ *         },
+ *         Mod2 = {
+ *              {keycode = 77 , keysym = 'Num_Lock'   },
+ *         },
+ *         Mod3 = {},
+ *         Mod4 = {
+ *              {keycode = 133, keysym = 'Super_L'    },
+ *              {keycode = 134, keysym = 'Super_R'    },
+ *         },
+ *         Mod5 = {
+ *              {keycode = 203, keysym = 'Mode_switch'},
+ *         },
+ *    };
+ *
+ * @tfield table modifiers
+ * @tparam table modifiers.Shift The Shift modifiers.
+ * @tparam table modifiers.Lock The Lock modifiers.
+ * @tparam table modifiers.Control The Control modifiers.
+ * @tparam table modifiers.Mod1 The Mod1 (Alt) modifiers.
+ * @tparam table modifiers.Mod2 The Mod2 modifiers.
+ * @tparam table modifiers.Mod3 The Mod3 modifiers.
+ * @tparam table modifiers.Mod4 The Mod4 modifiers.
+ * @tparam table modifiers.Mod5 The Mod5 modifiers.
+ */
+
+/*
+ * Modifiers can change over time, given they are currently not tracked, just
+ * query them each time. Use with moderation.
+ */
+static int luaA_get_modifiers(lua_State *L)
+{
+    xcb_get_modifier_mapping_reply_t *mods = xcb_get_modifier_mapping_reply(globalconf.connection,
+            xcb_get_modifier_mapping(globalconf.connection), NULL);
+    if (!mods)
+        return 0;
+
+    xcb_keycode_t *mappings = xcb_get_modifier_mapping_keycodes(mods);
+    struct xkb_keymap *keymap = xkb_state_get_keymap(globalconf.xkb_state);
+
+    lua_newtable(L);
+
+    /* This get the MAPPED modifiers, not all of them are */
+    for (int i = XCB_MAP_INDEX_SHIFT; i <= XCB_MAP_INDEX_5; i++) {
+        lua_pushstring(L, get_modifier_name(i));
+        lua_newtable(L);
+
+        for (int j = 0; j < mods->keycodes_per_modifier; j++) {
+            const xkb_keysym_t *keysyms;
+            const xcb_keycode_t key_code = mappings[i * mods->keycodes_per_modifier + j];
+            xkb_keymap_key_get_syms_by_level(keymap, key_code, 0, 0, &keysyms);
+            if (keysyms != NULL) {
+                /* The +1 because j starts at zero and Lua at 1 */
+                lua_pushinteger(L, j+1);
+
+                lua_newtable(L);
+
+                lua_pushstring(L, "keycode");
+                lua_pushinteger(L, key_code);
+                lua_settable(L, -3);
+
+                /* Technically it is possible to get multiple keysyms here,
+                 * but... we just use the first one.
+                 */
+                lua_pushstring(L, "keysym");
+                char *string = key_get_keysym_name(keysyms[0]);
+                lua_pushstring(L, string);
+                p_delete(&string);
+                lua_settable(L, -3);
+
+                lua_settable(L, -3);
+            }
+        }
+        lua_settable(L, -3);
+    }
+
+    free(mods);
+
+    return 0;
+}
+
+/* Undocumented */
+/*
+ * A table with the currently active modifier names.
+ *
+ * @tfield table _active_modifiers
+ */
+
+static int luaA_get_active_modifiers(lua_State *L)
+{
+    int count = 1;
+    lua_newtable(L);
+
+    for (int i = XCB_MAP_INDEX_SHIFT; i <= XCB_MAP_INDEX_5; i++) {
+        const int active = xkb_state_mod_index_is_active (globalconf.xkb_state, i,
+            XKB_STATE_MODS_DEPRESSED | XKB_STATE_MODS_EFFECTIVE
+        );
+
+        if (active) {
+            lua_pushstring(L, get_modifier_name(i));
+            lua_rawseti(L,-2, count++);
+        }
+    }
+
+    return 0;
+}
 
 /**
  * The version of awesome.
@@ -469,6 +614,18 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "startup"))
     {
         lua_pushboolean(L, globalconf.loop == NULL);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "_modifiers"))
+    {
+        luaA_get_modifiers(L);
+        return 1;
+    }
+
+    if(A_STREQ(buf, "_active_modifiers"))
+    {
+        luaA_get_active_modifiers(L);
         return 1;
     }
 

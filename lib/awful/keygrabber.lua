@@ -72,7 +72,7 @@ local gtable = require("gears.table")
 local gobject = require("gears.object")
 local gtimer = require("gears.timer")
 local glib = require("lgi").GLib
-local capi = { keygrabber = keygrabber, root = root }
+local capi = { keygrabber = keygrabber, root = root, awesome = awesome }
 
 local keygrab = {}
 
@@ -85,23 +85,34 @@ local keygrabber = {
 }
 
 -- Instead of checking for every modifiers, check the key directly.
---FIXME This is slightly broken but still good enough for `mask_modkeys`
-local conversion = {
-    Super_L   = "Mod4",
-    Control_L = "Control",
-    Shift_L   = "Shift",
-    Alt_L     = "Mod1",
-    Super_R   = "Mod4",
-    Control_R = "Control",
-    Shift_R   = "Shift",
-    Alt_R     = "Mod1",
-}
+local conversion = nil
 
 --BEGIN one day create a proper API to add and remove keybindings at runtime.
 -- Doing it this way is horrible.
 
 -- This list of keybindings to add in the next event loop cycle.
 local delay_list = {}
+
+-- Read the modifiers name and map their keysyms to the modkeys
+local function generate_conversion_map()
+    if conversion then return conversion end
+
+    local mods = capi.awesome._modifiers
+    assert(mods)
+
+    conversion = {}
+
+    for mod, keysyms in pairs(mods) do
+        for _, keysym in ipairs(keysyms) do
+            assert(keysym.keysym)
+            conversion[keysym.keysym] = mod
+        end
+    end
+
+    return conversion
+end
+
+capi.awesome.connect_signal("xkb::map_changed"  , function() conversion = nil end)
 
 local function add_root_keybindings(self, list)
     assert(
@@ -168,9 +179,11 @@ local function grabber(mod, key, event)
 end
 
 local function runner(self, modifiers, key, event)
+    local converted = generate_conversion_map()[key]
+
     -- Stop the keygrabber with the `stop_key`
-    if key == self.stop_key
-        and event == self.stop_event and self.stop_key then
+    if (key == self.stop_key or (converted and converted == self.stop_key))
+      and event == self.stop_event and self.stop_key then
         self:stop(key, modifiers)
         return false
     end
@@ -191,7 +204,7 @@ local function runner(self, modifiers, key, event)
         end
     end
 
-    local is_modifier = conversion[key] ~= nil
+    local is_modifier = converted ~= nil
 
     -- Reset the inactivity timer on each events.
     if self._private.timer and self._private.timer.started then

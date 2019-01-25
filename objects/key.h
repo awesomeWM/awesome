@@ -23,6 +23,7 @@
 #define AWESOME_OBJECTS_KEY_H
 
 #include "common/luaobject.h"
+#include <xkbcommon/xkbcommon.h>
 
 typedef struct keyb_t
 {
@@ -46,6 +47,8 @@ int luaA_key_array_get(lua_State *, int, key_array_t *);
 
 int luaA_pushmodifiers(lua_State *, uint16_t);
 uint16_t luaA_tomodifiers(lua_State *L, int ud);
+
+char * key_get_keysym_name(xkb_keysym_t keysym);
 
 #endif
 

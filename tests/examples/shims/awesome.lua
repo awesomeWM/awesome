@@ -66,6 +66,35 @@ awesome.version = "v9999"
 -- SVG are composited. Without it we need a root surface
 awesome.composite_manager_running = true
 
+awesome._modifiers = {
+     Shift = {
+          {keycode = 50 , keysym = 'Shift_L'    },
+          {keycode = 62 , keysym = 'Shift_R'    },
+     },
+     Lock = {},
+     Control = {
+          {keycode = 37 , keysym = 'Control_L'  },
+          {keycode = 105, keysym = 'Control_R'  },
+     },
+     Mod1 = {
+          {keycode = 64 , keysym = 'Alt_L'      },
+          {keycode = 108, keysym = 'Alt_R'      },
+     },
+     Mod2 = {
+          {keycode = 77 , keysym = 'Num_Lock'   },
+     },
+     Mod3 = {},
+     Mod4 = {
+          {keycode = 133, keysym = 'Super_L'    },
+          {keycode = 134, keysym = 'Super_R'    },
+     },
+     Mod5 = {
+          {keycode = 203, keysym = 'Mode_switch'},
+     },
+}
+
+awesome._active_modifiers = {}
+
 return awesome
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -9,6 +9,10 @@ local done
 local timer = GLib.Timer()
 
 local steps = {
+    function()
+        assert(awesome._modifiers.Control)
+        return true
+    end,
     function(count)
         if count == 1 then
             -- POSIX allows us to use awk
@@ -22,7 +26,11 @@ local steps = {
             -- Apply some limit on how long awesome may need to process 'things'
             return timer:elapsed() < 5
         end
-    end
+    end,
+    function()
+        assert(awesome._modifiers.Control)
+        return true
+    end,
 }
 runner.run_steps(steps)
 
