@@ -104,10 +104,11 @@ function arcchart:after_draw_children(_, cr, width, height)
     local max_val = self:get_max_value()
     local sum = 0
 
+    for _, v in ipairs(values) do
+        sum = sum + v
+    end
+
     if not max_val then
-        for _, v in ipairs(values) do
-            sum = sum + v
-        end
         max_val = sum
     end
 
