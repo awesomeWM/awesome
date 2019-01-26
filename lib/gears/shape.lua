@@ -472,8 +472,11 @@ function module.arc(cr, width, height, thickness, start_angle, end_angle, start_
     if end_rounded then
         arc_length = arc_length - thickness/2
 
-        -- And back to angles
-        end_angle = start_angle + (arc_length/(radius - thickness/2))
+        -- And back to angles. Also make sure to avoid underflowing when the
+        -- rounded edge radius is greater than the angle delta.
+        end_angle = start_angle + math.max(
+            0, arc_length/(radius - thickness/2)
+        )
     end
 
     -- The path is a curcular arc joining 4 points
