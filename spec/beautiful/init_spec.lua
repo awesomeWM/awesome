@@ -46,7 +46,7 @@ describe("beautiful init", function()
         assert.has_no_error(function() beautiful.init(dir .. "Good.lua") end, "")
 
         -- Check the return values (remove the shim)
-        gdebug.print_error = shim
+        gdebug.print_error = function() end
 
         assert.is_nil(beautiful.init({}))
         assert.is_nil(beautiful.init(dir .. "Bad_1.lua"))
@@ -55,6 +55,8 @@ describe("beautiful init", function()
         assert.is_nil(beautiful.init(dir .. "Bad_4.lua"))
         assert.is_nil(beautiful.init(dir .. "Bad_5.lua"))
         assert.is_nil(beautiful.init(dir .. "NO_FILE"))
+
+        gdebug.print_error = shim
 
         assert.is_true(beautiful.init({ font = "Monospace Bold 12" }))
         assert.is_true(beautiful.init(dir .. "Good.lua"))
