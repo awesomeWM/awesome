@@ -104,10 +104,11 @@ function arcchart:after_draw_children(_, cr, width, height)
     local max_val = self:get_max_value()
     local sum = 0
 
+    for _, v in ipairs(values) do
+        sum = sum + v
+    end
+
     if not max_val then
-        for _, v in ipairs(values) do
-            sum = sum + v
-        end
         max_val = sum
     end
 
@@ -131,7 +132,7 @@ function arcchart:after_draw_children(_, cr, width, height)
 
         shape.arc(cr, wa.width-border_width, wa.height-border_width,
             thickness+border_width, math.pi-end_angle, math.pi-start_angle,
-            (use_rounded_edges and k == 1), (use_rounded_edges and k == #values)
+            (use_rounded_edges and k == #values), (use_rounded_edges and k == 1)
         )
 
         cr:fill()
