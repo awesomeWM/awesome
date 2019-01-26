@@ -541,6 +541,28 @@ function menu.clients(args, item_args, filter)
     return m
 end
 
+local clients_menu = nil
+
+--- Use menu.clients to build and open the client menu if it isn't already open.
+-- Close the client menu if it is already open.
+-- See `awful.menu.clients` for more information.
+-- @tparam[opt] table args Menu table, see `new()` for more information.
+-- @tparam[opt] table item_args Table that will be merged into each item, see
+--   `new()` for more information.
+-- @tparam[opt] func filter A function taking a client as an argument and
+--   returning `true` or `false` to indicate whether the client should be
+--   included in the menu.
+-- @return The menu.
+function menu.client_list(args, item_args, filter)
+    if clients_menu and clients_menu.wibox.visible then
+        clients_menu:hide()
+        clients_menu = nil
+    else
+        clients_menu = menu.clients(args, item_args, filter)
+    end
+    return clients_menu
+end
+
 --------------------------------------------------------------------------------
 
 --- Default awful.menu.entry constructor
