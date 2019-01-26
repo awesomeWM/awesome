@@ -582,13 +582,19 @@ event_handle_leavenotify(xcb_leave_notify_event_t *ev)
 
     globalconf.timestamp = ev->time;
 
-    if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
+    /*
+     * Ignore events with non-normal modes. Those are because a grab
+     * activated/deactivated. Everything will be "back to normal" after the
+     * grab.
+     *
+     * Also ignore events with detail "inferior". This means that the window was
+     * left for a child window, i.e. the pointer is basically still inside of
+     * our window.
+     */
+    if(ev->mode != XCB_NOTIFY_MODE_NORMAL || ev->detail == XCB_NOTIFY_DETAIL_INFERIOR)
         return;
 
-    /* Ignore leave with detail inferior (we were left for a window contained in
-     * our window, so technically the pointer is still inside of this window).
-     */
-    if(ev->detail != XCB_NOTIFY_DETAIL_INFERIOR && (c = client_getbyframewin(ev->event)))
+    if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(L, c);
         luaA_object_emit_signal(L, -1, "mouse::leave", 0);
@@ -612,7 +618,16 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
 
     globalconf.timestamp = ev->time;
 
-    if(ev->mode != XCB_NOTIFY_MODE_NORMAL)
+    /*
+     * Ignore events with non-normal modes. Those are because a grab
+     * activated/deactivated. Everything will be "back to normal" after the
+     * grab.
+     *
+     * Also ignore events with detail "inferior". This means that the cursor was
+     * previously inside of a child window and now left that child window. For
+     * our purposes, the cursor was already inside our window before.
+     */
+    if(ev->mode != XCB_NOTIFY_MODE_NORMAL || ev->detail == XCB_NOTIFY_DETAIL_INFERIOR)
         return;
 
     if((drawin = drawin_getbywin(ev->event)))
@@ -626,11 +641,7 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
     if((c = client_getbyframewin(ev->event)))
     {
         luaA_object_push(L, c);
-        /* Ignore enter with detail inferior: The pointer was previously inside
-         * of a child window, so technically this isn't a 'real' enter.
-         */
-        if (ev->detail != XCB_NOTIFY_DETAIL_INFERIOR)
-            luaA_object_emit_signal(L, -1, "mouse::enter", 0);
+        luaA_object_emit_signal(L, -1, "mouse::enter", 0);
 
         drawable_t *d = client_get_drawable(c, ev->event_x, ev->event_y);
         if (d)
