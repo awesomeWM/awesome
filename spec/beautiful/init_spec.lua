@@ -25,7 +25,9 @@ describe("beautiful init", function()
     it('Check beautiful.init', function()
         -- Check the error messages (needs a shim)
         shim = gdebug.print_error
-        gdebug.print_error = function(message) error(message) end
+
+        -- This spec tests error code, obviously it will print some.
+        gdebug.print_error = function(message)  end
 
         assert.has_error(function() beautiful.init({}) end,
             "beautiful: error loading theme: got an empty table")
