@@ -131,7 +131,7 @@ function arcchart:after_draw_children(_, cr, width, height)
 
         shape.arc(cr, wa.width-border_width, wa.height-border_width,
             thickness+border_width, math.pi-end_angle, math.pi-start_angle,
-            (use_rounded_edges and k == 1), (use_rounded_edges and k == #values)
+            (use_rounded_edges and k == #values), (use_rounded_edges and k == 1)
         )
 
         cr:fill()
