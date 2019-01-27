@@ -31,7 +31,8 @@ local function is_dark(color_value)
     return is_dark_bg
 end
 local function reduce_contrast(color, ratio)
-    ratio = (ratio or 127) / 255
+    -- turn ratio to a percentage range [0,1]
+    ratio = (ratio or 50) / 100
     -- Negative number here will lighten
     return colorful.darken(color, is_dark(tostring(color)) and -ratio or ratio)
 end

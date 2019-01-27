@@ -102,14 +102,11 @@
 -- @module beautiful.colorful
 ---------------------------------------------------------------------------
 
-local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
-
 local colorful = {}
 
 local color = {
     -- set the from and as tables
     from = {},
-    as = {}
 }
 
 -- Metatable for color instances. This is set up near the end of the file.
@@ -145,12 +142,15 @@ local function between(v, l, h)
     return false
 end
 
+-- The formulas in hsl_to_rgb and rgb_to_hsl are described at the
+-- Wikipedia page https://en.wikipedia.org/wiki/HSL_and_HSV
+
 -- Expects Hue [0,360], Saturation [0,1], Lightness [0,1]
 -- Does NOT check bounds
 local function hsl_to_rgb(hue, saturation, lightness)
     -- If s = 0 then it's a grey
     if saturation == 0 then
-        return unpack({lightness, lightness, lightness})
+        return lightness, lightness, lightness
     end
     local C = (1 - math.abs(2 * lightness - 1)) * saturation
     local X = C * (1 - math.abs((hue / 60) % 2 - 1))
@@ -169,13 +169,13 @@ local function hsl_to_rgb(hue, saturation, lightness)
     elseif 300 <= hue and hue <= 360 then
         r,g,b = C,0,X
     end
-    return unpack({r+m, g+m, b+m})
+    return r+m, g+m, b+m
 end
 
 -- Expects Red, Blue, and Green [0,1]
 -- Does NOT check bounds
 local function rgb_to_hsl(red, green, blue)
-    local h,s,l = 0,0,0 -- luacheck: ignore
+    local h,s,l
     local M = math.max(red, green, blue)
     local m = math.min(red, green, blue)
     local C = M - m
@@ -198,7 +198,7 @@ local function rgb_to_hsl(red, green, blue)
     else
         s = C / (1 - math.abs((2 * l) - 1))
     end
-    return unpack({h, s, l})
+    return h, s, l
 end
 
 -- Create a color object
@@ -208,10 +208,6 @@ local function create_color_object(r,g,b,h,s,l,a)
         hue = h, saturation = s, lightness = l,
         alpha = a
     }, color_mt)
-    -- allow as functions to use color object variables
-    setmetatable(o.as, {
-        __index = o
-    })
     return o
 end
 
@@ -299,7 +295,6 @@ end
 
 local css = {
     integer = "%d?%d?%d",   -- 0-999 (but 0-255 for values)
-    --percent = "%d?%d?%d%%", -- 0-999% (but 0-100% for values)
     float   = "%d?%.?%d+",  -- this is _very_ crude, but probably fast
     comma   = "%s*,%s*",    -- whitespace optional comma
     space   = "%s+",        -- whitespace required
@@ -336,411 +331,381 @@ local color_patterns = {
     -- }}}
     -- {{{ Functional patterns
     -- {{{ rgb(d, d, d) integers 0-255
-    { "rgbi", table.concat({
-        css.rgb, -- functional header
-        capt(css.integer), -- red
-        css.comma, -- separator
-        capt(css.integer), -- green
-        css.comma, -- separator
-        capt(css.integer), -- blue
+    { "rgbi",
+        css.rgb .. -- functional header
+        capt(css.integer) .. -- red
+        css.comma .. -- separator
+        capt(css.integer) .. -- green
+        css.comma .. -- separator
+        capt(css.integer) .. -- blue
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(d, d, d, f) integers 0-255, float 0-1
-    { "rgbif", table.concat({
-        css.rgb, -- functional header
-        capt(css.integer), -- red
-        css.comma, -- separator
-        capt(css.integer), -- green
-        css.comma, -- separator
-        capt(css.integer), -- blue
-        css.comma, -- separator
-        capt(css.float), -- alpha
+    { "rgbif",
+        css.rgb .. -- functional header
+        capt(css.integer) .. -- red
+        css.comma .. -- separator
+        capt(css.integer) .. -- green
+        css.comma .. -- separator
+        capt(css.integer) .. -- blue
+        css.comma .. -- separator
+        capt(css.float) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(d, d, d, %) integers 0-255, percentage 0-100
-    { "rgbip", table.concat({
-        css.rgb, -- functional header
-        capt(css.integer), -- red
-        css.comma, -- separator
-        capt(css.integer), -- green
-        css.comma, -- separator
-        capt(css.integer), -- blue
-        css.comma,
-        perc(capt(css.integer)), -- alpha
+    { "rgbip",
+        css.rgb .. -- functional header
+        capt(css.integer) .. -- red
+        css.comma .. -- separator
+        capt(css.integer) .. -- green
+        css.comma .. -- separator
+        capt(css.integer) .. -- blue
+        css.comma ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(d d d) integers 0-255
-    { "rgbi", table.concat({
-        css.rgb, -- functional header
-        capt(css.integer), -- red
-        css.space, -- separator
-        capt(css.integer), -- green
-        css.space, -- separator
-        capt(css.integer), -- blue
+    { "rgbi",
+        css.rgb .. -- functional header
+        capt(css.integer) .. -- red
+        css.space .. -- separator
+        capt(css.integer) .. -- green
+        css.space .. -- separator
+        capt(css.integer) .. -- blue
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(d d d / f) integers 0-255, float 0-1
-    { "rgbif", table.concat({
-        css.rgb, -- functional header
-        capt(css.integer), -- red
-        css.space, -- separator
-        capt(css.integer), -- green
-        css.space, -- separator
-        capt(css.integer), -- blue
-        css.slash,
-        capt(css.float), -- alpha
+    { "rgbif",
+        css.rgb .. -- functional header
+        capt(css.integer) .. -- red
+        css.space .. -- separator
+        capt(css.integer) .. -- green
+        css.space .. -- separator
+        capt(css.integer) .. -- blue
+        css.slash ..
+        capt(css.float) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(d d d / %) integers 0-255, percentage 0-100
-    { "rgbip", table.concat({
-        css.rgb, -- functional header
-        capt(css.integer), -- red
-        css.space, -- separator
-        capt(css.integer), -- green
-        css.space, -- separator
-        capt(css.integer), -- blue
-        css.slash,
-        perc(capt(css.integer)), -- alpha
+    { "rgbip",
+        css.rgb .. -- functional header
+        capt(css.integer) .. -- red
+        css.space .. -- separator
+        capt(css.integer) .. -- green
+        css.space .. -- separator
+        capt(css.integer) .. -- blue
+        css.slash ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(%, %, %) percentage 0-100
-    { "rgbp", table.concat({
-        css.rgb, -- functional header
-        perc(capt(css.integer)), -- red
-        css.comma, -- separator
-        perc(capt(css.integer)), -- green
-        css.comma, -- separator
-        perc(capt(css.integer)), -- blue
+    { "rgbp",
+        css.rgb .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- blue
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(%, %, %, f) percentage 0-100, float 0-1
-    { "rgbpf", table.concat({
-        css.rgb, -- functional header
-        perc(capt(css.integer)), -- red
-        css.comma, -- separator
-        perc(capt(css.integer)), -- green
-        css.comma, -- separator
-        perc(capt(css.integer)), -- blue
-        css.comma,
-        capt(css.float), -- alpha
+    { "rgbpf",
+        css.rgb .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- blue
+        css.comma ..
+        capt(css.float) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(%, %, %, %) percentage 0-100
-    { "rgbpp", table.concat({
-        css.rgb, -- functional header
-        perc(capt(css.integer)), -- red
-        css.comma, -- separator
-        perc(capt(css.integer)), -- green
-        css.comma, -- separator
-        perc(capt(css.integer)), -- blue
-        css.comma, -- separator
-        perc(capt(css.integer)), -- alpha
+    { "rgbpp",
+        css.rgb .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- blue
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(% % %) percentage 0-100
-    { "rgbp", table.concat({
-        css.rgb, -- functional header
-        perc(capt(css.integer)), -- red
-        css.space, -- separator
-        perc(capt(css.integer)), -- green
-        css.space, -- separator
-        perc(capt(css.integer)), -- blue
+    { "rgbp",
+        css.rgb .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- blue
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(% % % / f) percentage 0-100, float 0-1
-    { "rgbpf", table.concat({
-        css.rgb, -- functional header
-        perc(capt(css.integer)), -- red
-        css.space, -- separator
-        perc(capt(css.integer)), -- green
-        css.space, -- separator
-        perc(capt(css.integer)), -- blue
-        css.slash,
-        capt(css.float), -- alpha
+    { "rgbpf",
+        css.rgb .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- blue
+        css.slash ..
+        capt(css.float) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgb(% % % / %) percentage 0-100
-    { "rgbpp", table.concat({
-        css.rgb, -- functional header
-        perc(capt(css.integer)), -- red
-        css.space, -- separator
-        perc(capt(css.integer)), -- green
-        css.space, -- separator
-        perc(capt(css.integer)), -- blue
-        css.slash,
-        perc(capt(css.integer)), -- alpha
+    { "rgbpp",
+        css.rgb .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- blue
+        css.slash ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgba(d, d, d, f) integers 0-255, float 0-1
-    { "rgbif", table.concat({
-        css.rgba, -- functional header
-        capt(css.integer), -- red
-        css.comma, -- separator
-        capt(css.integer), -- green
-        css.comma, -- separator
-        capt(css.integer), -- blue
-        css.comma, -- separator
-        capt(css.float), -- alpha
+    { "rgbif",
+        css.rgba .. -- functional header
+        capt(css.integer) .. -- red
+        css.comma .. -- separator
+        capt(css.integer) .. -- green
+        css.comma .. -- separator
+        capt(css.integer) .. -- blue
+        css.comma .. -- separator
+        capt(css.float) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgba(d, d, d, %) integers 0-255, percentage 0-100
-    { "rgbip", table.concat({
-        css.rgba, -- functional header
-        capt(css.integer), -- red
-        css.comma, -- separator
-        capt(css.integer), -- green
-        css.comma, -- separator
-        capt(css.integer), -- blue
-        css.comma,
-        perc(capt(css.integer)), -- alpha
+    { "rgbip",
+        css.rgba .. -- functional header
+        capt(css.integer) .. -- red
+        css.comma .. -- separator
+        capt(css.integer) .. -- green
+        css.comma .. -- separator
+        capt(css.integer) .. -- blue
+        css.comma ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgba(d d d / f) integers 0-255, float 0-1
-    { "rgbif", table.concat({
-        css.rgba, -- functional header
-        capt(css.integer), -- red
-        css.space, -- separator
-        capt(css.integer), -- green
-        css.space, -- separator
-        capt(css.integer), -- blue
-        css.slash,
-        capt(css.float), -- alpha
+    { "rgbif",
+        css.rgba .. -- functional header
+        capt(css.integer) .. -- red
+        css.space .. -- separator
+        capt(css.integer) .. -- green
+        css.space .. -- separator
+        capt(css.integer) .. -- blue
+        css.slash ..
+        capt(css.float) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgba(d d d / %) integers 0-255, percentage 0-100
-    { "rgbip", table.concat({
-        css.rgba, -- functional header
-        capt(css.integer), -- red
-        css.space, -- separator
-        capt(css.integer), -- green
-        css.space, -- separator
-        capt(css.integer), -- blue
-        css.slash,
-        perc(capt(css.integer)), -- alpha
+    { "rgbip",
+        css.rgba .. -- functional header
+        capt(css.integer) .. -- red
+        css.space .. -- separator
+        capt(css.integer) .. -- green
+        css.space .. -- separator
+        capt(css.integer) .. -- blue
+        css.slash ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgba(%, %, %, f) percentage 0-100, float 0-1
-    { "rgbpf", table.concat({
-        css.rgba, -- functional header
-        perc(capt(css.integer)), -- red
-        css.comma, -- separator
-        perc(capt(css.integer)), -- green
-        css.comma, -- separator
-        perc(capt(css.integer)), -- blue
-        css.comma,
-        capt(css.float), -- alpha
+    { "rgbpf",
+        css.rgba .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- blue
+        css.comma ..
+        capt(css.float) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgba(%, %, %, %) percentage 0-100
-    { "rgbpp", table.concat({
-        css.rgba, -- functional header
-        perc(capt(css.integer)), -- red
-        css.comma, -- separator
-        perc(capt(css.integer)), -- green
-        css.comma, -- separator
-        perc(capt(css.integer)), -- blue
-        css.comma, -- separator
-        perc(capt(css.integer)), -- alpha
+    { "rgbpp",
+        css.rgba .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- blue
+        css.comma .. -- separator
+        perc(capt(css.integer)) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgba(% % % / f) percentage 0-100, float 0-1
-    { "rgbpf", table.concat({
-        css.rgba, -- functional header
-        perc(capt(css.integer)), -- red
-        css.space, -- separator
-        perc(capt(css.integer)), -- green
-        css.space, -- separator
-        perc(capt(css.integer)), -- blue
-        css.slash,
-        capt(css.float), -- alpha
+    { "rgbpf",
+        css.rgba .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- blue
+        css.slash ..
+        capt(css.float) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ rgba(% % % / %) percentage 0-100
-    { "rgbpp", table.concat({
-        css.rgba, -- functional header
-        perc(capt(css.integer)), -- red
-        css.space, -- separator
-        perc(capt(css.integer)), -- green
-        css.space, -- separator
-        perc(capt(css.integer)), -- blue
-        css.slash,
-        perc(capt(css.integer)), -- alpha
+    { "rgbpp",
+        css.rgba .. -- functional header
+        perc(capt(css.integer)) .. -- red
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- green
+        css.space .. -- separator
+        perc(capt(css.integer)) .. -- blue
+        css.slash ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol -- EOL
-        }, "")
     },
     -- }}}
     -- {{{ hsl(d, %, %) integers 0-360, percentage 0-100
-    { "hsl", table.concat({
-        css.hsl,
-        capt(css.integer), -- hue
-        css.comma,
-        perc(capt(css.integer)), -- saturation
-        css.comma,
-        perc(capt(css.integer)), -- lightness
+    { "hsl",
+        css.hsl ..
+        capt(css.integer) .. -- hue
+        css.comma ..
+        perc(capt(css.integer)) .. -- saturation
+        css.comma ..
+        perc(capt(css.integer)) .. -- lightness
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsl(d, %, %, f) integers 0-360, percentage 0-100, float 0-1
-    { "hslxf", table.concat({
-        css.hsl,
-        capt(css.integer), -- hue
-        css.comma,
-        perc(capt(css.integer)), -- saturation
-        css.comma,
-        perc(capt(css.integer)), -- lightness
-        css.comma,
-        capt(css.float), -- alpha
+    { "hslxf",
+        css.hsl ..
+        capt(css.integer) .. -- hue
+        css.comma ..
+        perc(capt(css.integer)) .. -- saturation
+        css.comma ..
+        perc(capt(css.integer)) .. -- lightness
+        css.comma ..
+        capt(css.float) .. -- alpha
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsl(d, %, %, %) integers 0-360, percentage 0-100
-    { "hslxp", table.concat({
-        css.hsl,
-        capt(css.integer), -- hue
-        css.comma,
-        perc(capt(css.integer)), -- saturation
-        css.comma,
-        perc(capt(css.integer)), -- lightness
-        css.comma,
-        perc(capt(css.integer)), -- alpha
+    { "hslxp",
+        css.hsl ..
+        capt(css.integer) .. -- hue
+        css.comma ..
+        perc(capt(css.integer)) .. -- saturation
+        css.comma ..
+        perc(capt(css.integer)) .. -- lightness
+        css.comma ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsl(d % %) integers 0-360, percentage 0-100
-    { "hsl", table.concat({
-        css.hsl,
-        capt(css.integer), -- hue
-        css.space,
-        perc(capt(css.integer)), -- saturation
-        css.space,
-        perc(capt(css.integer)), -- lightness
+    { "hsl",
+        css.hsl ..
+        capt(css.integer) .. -- hue
+        css.space ..
+        perc(capt(css.integer)) .. -- saturation
+        css.space ..
+        perc(capt(css.integer)) .. -- lightness
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsl(d % % / f) integers 0-360, percentage 0-100, float 0-1
-    { "hslxf", table.concat({
-        css.hsl,
-        capt(css.integer), -- hue
-        css.space,
-        perc(capt(css.integer)), -- saturation
-        css.space,
-        perc(capt(css.integer)), -- lightness
-        css.slash,
-        capt(css.float), -- alpha
+    { "hslxf",
+        css.hsl ..
+        capt(css.integer) .. -- hue
+        css.space ..
+        perc(capt(css.integer)) .. -- saturation
+        css.space ..
+        perc(capt(css.integer)) .. -- lightness
+        css.slash ..
+        capt(css.float) .. -- alpha
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsl(d % % / %) integers 0-360, percentage 0-100
-    { "hslxp", table.concat({
-        css.hsl,
-        capt(css.integer), -- hue
-        css.space,
-        perc(capt(css.integer)), -- saturation
-        css.space,
-        perc(capt(css.integer)), -- lightness
-        css.slash,
-        perc(capt(css.integer)), -- alpha
+    { "hslxp",
+        css.hsl ..
+        capt(css.integer) .. -- hue
+        css.space ..
+        perc(capt(css.integer)) .. -- saturation
+        css.space ..
+        perc(capt(css.integer)) .. -- lightness
+        css.slash ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsla(d, %, %, f) integers 0-360, percentage 0-100, float 0-1
-    { "hslxf", table.concat({
-        css.hsla,
-        capt(css.integer), -- hue
-        css.comma,
-        perc(capt(css.integer)), -- saturation
-        css.comma,
-        perc(capt(css.integer)), -- lightness
-        css.comma,
-        capt(css.float), -- alpha
+    { "hslxf",
+        css.hsla ..
+        capt(css.integer) .. -- hue
+        css.comma ..
+        perc(capt(css.integer)) .. -- saturation
+        css.comma ..
+        perc(capt(css.integer)) .. -- lightness
+        css.comma ..
+        capt(css.float) .. -- alpha
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsla(d, %, %, %) integers 0-360, percentage 0-100
-    { "hslxp", table.concat({
-        css.hsla,
-        capt(css.integer), -- hue
-        css.comma,
-        perc(capt(css.integer)), -- saturation
-        css.comma,
-        perc(capt(css.integer)), -- lightness
-        css.comma,
-        perc(capt(css.integer)), -- alpha
+    { "hslxp",
+        css.hsla ..
+        capt(css.integer) .. -- hue
+        css.comma ..
+        perc(capt(css.integer)) .. -- saturation
+        css.comma ..
+        perc(capt(css.integer)) .. -- lightness
+        css.comma ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsla(d % % / f) integers 0-360, percentage 0-100, float 0-1
-    { "hslxf", table.concat({
-        css.hsla,
-        capt(css.integer), -- hue
-        css.space,
-        perc(capt(css.integer)), -- saturation
-        css.space,
-        perc(capt(css.integer)), -- lightness
-        css.slash,
-        capt(css.float), -- alpha
+    { "hslxf",
+        css.hsla ..
+        capt(css.integer) .. -- hue
+        css.space ..
+        perc(capt(css.integer)) .. -- saturation
+        css.space ..
+        perc(capt(css.integer)) .. -- lightness
+        css.slash ..
+        capt(css.float) .. -- alpha
         css.eol
-        }, "")
     },
     -- }}}
     -- {{{ hsla(d % % / %) integers 0-360, percentage 0-100
-    { "hslxp", table.concat({
-        css.hsla,
-        capt(css.integer), -- hue
-        css.space,
-        perc(capt(css.integer)), -- saturation
-        css.space,
-        perc(capt(css.integer)), -- lightness
-        css.slash,
-        perc(capt(css.integer)), -- alpha
+    { "hslxp",
+        css.hsla ..
+        capt(css.integer) .. -- hue
+        css.space ..
+        perc(capt(css.integer)) .. -- saturation
+        css.space ..
+        perc(capt(css.integer)) .. -- lightness
+        css.slash ..
+        perc(capt(css.integer)) .. -- alpha
         css.eol
-        }, "")
     },
     -- }}}
     -- }}}
@@ -769,6 +734,7 @@ function color.from.string(str)
                 if ta ~= nil then
                     a = tonumber(m[4], 16)
                 end
+                if r == nil or g == nil or b == nil or a == nil then return nil end
                 -- if type is shorthand
                 if tv == "s" then
                     r = r * 16 + r
@@ -781,33 +747,35 @@ function color.from.string(str)
                 local r = tonumber(m[1])
                 local g = tonumber(m[2])
                 local b = tonumber(m[3])
-                local a = 255
+                if r == nil or g == nil or b == nil then return nil end
                 -- if values percentages
                 if tv == "p" then
                     r,g,b = r/100 * 255, g/100 * 255, b/100 * 255
                 end
                 -- check for alpha
+                local a = 255
                 if ta ~= nil then
                     a = tonumber(m[4])
+                    if a == nil then return nil end
                     if ta == "p" then
                         a = a/100
                     end
                     a = a * 255 -- both float and percentage need this
                 end
-                if r == nil or g == nil or b == nil or a == nil then return nil end
                 return color.from.rgba(r,g,b,a)
             elseif th == "hsl" then
                 local h = tonumber(m[1])
                 local s = tonumber(m[2]) / 100 -- always percentage
                 local l = tonumber(m[3]) / 100 -- always percentage
                 local a = 1
+                if h == nil or s == nil or l == nil then return nil end
                 if ta ~= nil then
                     a = tonumber(m[4])
+                    if a == nil then return nil end
                     if ta == "p" then
                         a = a / 100
                     end
                 end
-                if h == nil or s == nil or l == nil or a == nil then return nil end
                 return color.from.hsla(h,s,l,a)
             end
         end
@@ -859,8 +827,6 @@ function color.from.rgba(r,g,b,a)
     g = clamp(g, 0, 255) / 255
     b = clamp(b, 0, 255) / 255
     a = clamp(a, 0, 255) / 255
-    -- make sure values are valid
-    if r == nil or g == nil or b == nil or a == nil then return nil end
     -- hsl function expects RGB in range [0,1]
     local h,s,l = rgb_to_hsl(r,g,b)
     return create_color_object(r,g,b,h,s,l,a)
@@ -900,7 +866,6 @@ function color.from.hsla(h,s,l,a)
     end
     s = clamp(s, 0.0, 1.0)
     l = clamp(l, 0.0, 1.0)
-    if s == nil or l == nil then return nil end
     local r,g,b = hsl_to_rgb(h,s,l)
     return create_color_object(r,g,b,h,s,l,a)
 end
@@ -1023,7 +988,7 @@ end
 
 -- {{{ Color harmony functions
 
---- Returns the complement of a color
+--- Returns the complement of a color (+180deg hue)
 -- Adds 180 to Hue (hue will self-adjust to be within [0,360])
 -- @return A new color object representing the complementary color, or nil if invalid
 -- @usage local complemented_color = c:complement()
@@ -1032,13 +997,13 @@ function color:complement()
     return color.from.hsla(hue, self.saturation, self.lightness, self.alpha)
 end
 
---- Returns the left and right analogous colors (30deg hue shift)
+--- Returns the left and right analogous colors (+30deg, -30deg hue)
 -- @return A new color object representing a -30 degree hue shift of the color, or nil if invalid
 -- @return A new color object representing a +30 degree hue shift of the color, or nil if invalid
 -- @usage local left, right = c:analogous()
 function color:analogous()
-    local left = self.hue - 30
-    local right = self.hue + 30
+    local left = self.hue + 30
+    local right = self.hue - 30
     return color.from.hsla(
             left,
             self.saturation,
@@ -1051,8 +1016,7 @@ function color:analogous()
             self.alpha)
 end
 
---- Returns the left and right complementary colors (30deg shift from
---complementary color)
+--- Returns the left and right complementary colors (+210deg, +150deg hue)
 -- @return A new color object representing the +210 degree hue shift (180 + 30)
 -- of the color, or nil if invalid
 -- @return A new color object representing the +150 degree hue shift (180 - 30)
@@ -1073,7 +1037,7 @@ function color:split_complementary()
             self.alpha)
 end
 
---- Returns the left and right triadic colors (120deg shift from base color)
+--- Returns the left and right triadic colors (+120deg, -120deg hue)
 -- @return A new color object representing a +120 degree hue shift of the color, or nil if invalid
 -- @return A new color object representing a -120 degree hue shift of the color, or nil if invalid
 -- @usage local left, right = c:triadic()
@@ -1092,8 +1056,7 @@ function color:triadic()
             self.alpha)
 end
 
---- Returns three colors making up the tetradic colors (base complement, base
---+ 60deg, base + 60deg complement)
+--- Returns three colors making up the tetradic colors (+180deg, +60deg, +240deg hue)
 -- @return A new color object representing the complementary color, or nil if
 -- invalid
 -- @return A new color object representing a +60 degree shift of the color, or
@@ -1122,8 +1085,8 @@ end
 
 --- Return the string representation of the color in #RRGGBBAA format
 -- @treturn string A string represention of the color in #RRGGBBAA format
--- @usage local hexa_str = c.as:hexa()
-function color.as:hexa()
+-- @usage local hexa_str = c:hexa()
+function color:hexa()
     local r = round(self.red   * 255)
     local g = round(self.green * 255)
     local b = round(self.blue  * 255)
@@ -1133,8 +1096,8 @@ end
 
 --- Return the string representation of the color in #RRGGBB format
 -- @treturn string A string represention of the color in #RRGGBB format
--- @usage local hex_str = c.as:hex()
-function color.as:hex()
+-- @usage local hex_str = c:hex()
+function color:hex()
     local r = round(self.red   * 255)
     local g = round(self.green * 255)
     local b = round(self.blue  * 255)
@@ -1148,8 +1111,8 @@ end
 --- Return the decimal representation of the color including the alpha channel
 -- @treturn number The decimal represention of the color including the alpha
 -- channel
--- @usage local deca_color = c.as:deca()
-function color.as:deca()
+-- @usage local deca_color = c:deca()
+function color:deca()
     return math.floor(
           lshift(round(self.red   * 0xFF), 24)
         + lshift(round(self.green * 0xFF), 16)
@@ -1161,8 +1124,8 @@ end
 --- Return the decimal representation of the color
 -- @treturn number The decimal represention of the color not including the
 -- alpha channel
--- @usage local dec_color = c.as:dec()
-function color.as:dec()
+-- @usage local dec_color = c:dec()
+function color:dec()
     return math.floor(
           lshift(round(self.red   * 0xFF), 16)
         + lshift(round(self.green * 0xFF), 8)
@@ -1179,27 +1142,23 @@ end
 -- @treturn number Saturation [0,1]
 -- @treturn number Lightness [0,1]
 -- @treturn number Alpha [0,1]
--- @usage local h,s,l,a = c.as:hsla()
-function color.as:hsla()
-    return unpack({
-        self.hue,
+-- @usage local h,s,l,a = c:hsla()
+function color:hsla()
+    return self.hue,
         self.saturation,
         self.lightness,
         self.alpha
-    })
 end
 
 --- Return the Hue, Saturation, and Lightness
 -- @treturn number Hue [0,360]
 -- @treturn number Saturation [0,1]
 -- @treturn number Lightness [0,1]
--- @usage local h,s,l = c.as:hsl()
-function color.as:hsl()
-    return unpack({
-        self.hue,
+-- @usage local h,s,l = c:hsl()
+function color:hsl()
+    return self.hue,
         self.saturation,
-        self.lightness,
-    })
+        self.lightness
 end
 
 --- Return the Red, Green, Blue, and Alpha
@@ -1207,27 +1166,23 @@ end
 -- @treturn number Green [0,1]
 -- @treturn number Blue [0,1]
 -- @treturn number Alpha [0,1]
--- @usage local r,g,b,a = c.as:rgba()
-function color.as:rgba()
-    return unpack({
-        self.red,
+-- @usage local r,g,b,a = c:rgba()
+function color:rgba()
+    return self.red,
         self.green,
         self.blue,
         self.alpha
-    })
 end
 
 --- Return the Red, Green, and Blue
 -- @treturn number Red [0,1]
 -- @treturn number Green [0,1]
 -- @treturn number Blue [0,1]
--- @usage local r,g,b = c.as:rgb()
-function color.as:rgb()
-    return unpack({
-        self.red,
+-- @usage local r,g,b = c:rgb()
+function color:rgb()
+    return self.red,
         self.green,
-        self.blue,
-    })
+        self.blue
 end
 
 -- }}} Multi-return output
@@ -1236,71 +1191,8 @@ end
 
 -- }}} Color output functions
 
---- Color metamethods
--- @section color_meta
-
 color_mt.__index = color
-color_mt.__tostring = color.as.hex
-
---- Shorthand invert of a color
--- @function color.__unm
--- @see beautiful.colorful.color.invert
-color_mt.__unm = color.invert
-
---- Add the RGBA values of two colors
--- @function color.__add
--- @tparam lhs beautiful.colorful.color A color object
--- @tparam rhs beautiful.colorful.color A color object
--- @treturn beautiful.colorful.color A new color object with RGBA values added
--- @usage colorful.color("#123") + colorful.color("#321") -- returns #444444
-color_mt.__add = function(lhs, rhs)
-    if type(rhs) ~= "table" then return nil end
-    return color.from.rgba(
-        (lhs.red + rhs.red) * 255,
-        (lhs.green + rhs.green) * 255,
-        (lhs.blue + rhs.blue) * 255,
-        (lhs.alpha + rhs.alpha) * 255
-    )
-end
-
---- Subtract the RGBA values of two colors
--- @function color.__sub
--- @tparam lhs beautiful.colorful.color A color object
--- @tparam rhs beautiful.colorful.color A color object
--- @treturn beautiful.colorful.color A new color object with RGBA values
--- subtracted
--- @usage colorful.color("#123") - colorful.color("#321") -- returns #000022
-color_mt.__sub = function(lhs, rhs)
-    if type(rhs) ~= "table" then return nil end
-    return color.from.rgba(
-        (lhs.red - rhs.red) * 255,
-        (lhs.green - rhs.green) * 255,
-        (lhs.blue - rhs.blue) * 255,
-        (lhs.alpha - rhs.alpha) * 255
-    )
-end
-
---- Compare the lightness value of two colors
--- @function color.__lt
--- @tparam lhs beautiful.colorful.color A color object
--- @tparam rhs beautiful.colorful.color A color object
--- @treturn boolean True if lhs lightness is less than rhs lightness
--- @usage colorful.color("#ffcc99") < colorful.color("#aabbcc") -- returns false (0.8 < 0.73333)
-color_mt.__lt = function(lhs, rhs)
-    if type(rhs) ~= "table" then return nil end
-    return lhs.lightness < rhs.lightness
-end
-
---- Compare the lightness value of two colors
--- @function color.__gt
--- @tparam lhs beautiful.colorful.color A color object
--- @tparam rhs beautiful.colorful.color A color object
--- @treturn boolean True if lhs lightness is greater than rhs lightness
--- @usage colorful.color("#ffcc99") > colorful.color("#aabbcc") -- returns true (0.8 > 0.73333)
-color_mt.__gt = function(lhs, rhs)
-    if type(rhs) ~= "table" then return nil end
-    return lhs.lightness > rhs.lightness
-end
+color_mt.__tostring = color.hex
 
 --- A color object
 -- @type color
@@ -1309,6 +1201,7 @@ colorful.color = color
 setmetatable(color, {
     __call = function(_,...) return color.new(...) end,
 })
+
 -- {{{ Color changing wrapper functions
 
 --- Wrappers for Color object functions

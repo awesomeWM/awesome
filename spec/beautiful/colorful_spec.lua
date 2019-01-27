@@ -377,7 +377,7 @@ describe("Colorful", function()
                 -- we convert to [0,1]
                 local h,s,l = col[2][1], col[2][2]/100, col[2][3]/100
                 local c = Color.new({h,s,l})
-                assert.is.same(col[1], c.as:hex())
+                assert.is.same(col[1], c:hex())
             end
         end)
 
@@ -385,14 +385,14 @@ describe("Colorful", function()
             for _,col in ipairs(colors) do
                 local c = Color.new(col[1])
                 local dec = tonumber(col[1]:sub(2), 16)
-                assert.is.same(c.as:dec(), dec)
+                assert.is.same(c:dec(), dec)
             end
         end)
 
         it("from functional string", function()
             for _,col in ipairs(color_functional) do
                 local c= Color.new(col[2])
-                assert.is.same(col[1], c.as:hexa())
+                assert.is.same(col[1], c:hexa())
             end
         end)
     end)
@@ -402,7 +402,7 @@ describe("Colorful", function()
             for _,col in ipairs(colors) do
                 local c = Color.new(col[1])
                 c = c:lighten(0.25)
-                assert.is.same(col[3], c.as:hex())
+                assert.is.same(col[3], c:hex())
             end
         end)
 
@@ -410,7 +410,7 @@ describe("Colorful", function()
             for _,col in ipairs(colors) do
                 local c = Color.new(col[1])
                 c = c:darken(0.25)
-                assert.is.same(col[4], c.as:hex())
+                assert.is.same(col[4], c:hex())
             end
         end)
 
@@ -418,7 +418,7 @@ describe("Colorful", function()
             for _,col in ipairs(colors) do
                 local c = Color.new(col[1])
                 c = c:invert()
-                assert.is.same(col[5], c.as:hex())
+                assert.is.same(col[5], c:hex())
             end
         end)
 
@@ -427,7 +427,7 @@ describe("Colorful", function()
                 local c1 = Color.new(col[1])
                 local c2 = Color.new(col[5])
                 local mix = c1:mix(c2, 0)
-                assert.is.same(col[5], mix.as:hex())
+                assert.is.same(col[5], mix:hex())
             end
         end)
 
@@ -436,7 +436,7 @@ describe("Colorful", function()
                 local c1 = Color.new(col[1])
                 local c2 = Color.new(col[5])
                 local mix = c1:mix(c2, 0.25)
-                assert.is.same(col[6], mix.as:hex())
+                assert.is.same(col[6], mix:hex())
             end
         end)
 
@@ -445,7 +445,7 @@ describe("Colorful", function()
                 local c1 = Color.new(col[1])
                 local c2 = Color.new(col[5])
                 local mix = c1:mix(c2, 0.5)
-                assert.is.same("#808080", mix.as:hex())
+                assert.is.same("#808080", mix:hex())
             end
         end)
 
@@ -454,7 +454,7 @@ describe("Colorful", function()
                 local c1 = Color.new(col[1])
                 local c2 = Color.new(col[5])
                 local mix = c1:mix(c2, 0.75)
-                assert.is.same(col[7], mix.as:hex())
+                assert.is.same(col[7], mix:hex())
             end
         end)
 
@@ -463,7 +463,7 @@ describe("Colorful", function()
                 local c1 = Color.new(col[1])
                 local c2 = Color.new(col[5])
                 local mix = c1:mix(c2, 1)
-                assert.is.same(col[1], mix.as:hex())
+                assert.is.same(col[1], mix:hex())
             end
         end)
 
@@ -471,7 +471,7 @@ describe("Colorful", function()
             for _,col in ipairs(colors) do
                 local c = Color.new(col[1])
                 c = c:saturate(0.25)
-                assert.is.same(col[8], c.as:hex())
+                assert.is.same(col[8], c:hex())
             end
         end)
 
@@ -479,7 +479,7 @@ describe("Colorful", function()
             for _,col in ipairs(colors) do
                 local c = Color.new(col[1])
                 c = c:desaturate(0.25)
-                assert.is.same(col[9], c.as:hex())
+                assert.is.same(col[9], c:hex())
             end
         end)
 
@@ -487,7 +487,7 @@ describe("Colorful", function()
             for _,col in ipairs(colors) do
                 local c = Color.new(col[1])
                 c = c:grayscale()
-                assert.is.same(col[10], c.as:hex())
+                assert.is.same(col[10], c:hex())
             end
         end)
     end)
