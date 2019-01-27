@@ -30,8 +30,6 @@ end
 
 -- Prepare drawing the children of this widget
 function background:before_draw_children(context, cr, width, height)
-    local source = self._private.foreground or cr:get_source()
-
     -- Redirect drawing to a temporary surface if there is a shape
     if self._private.shape then
         cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
@@ -39,11 +37,14 @@ function background:before_draw_children(context, cr, width, height)
 
     -- Draw the background
     if self._private.background then
+        cr:save()
         cr:set_source(self._private.background)
         cr:rectangle(0, 0, width, height)
         cr:fill()
+        cr:restore()
     end
     if self._private.bgimage then
+        cr:save()
         if type(self._private.bgimage) == "function" then
             self._private.bgimage(context, cr, width, height,unpack(self._private.bgimage_args))
         else
@@ -52,9 +53,8 @@ function background:before_draw_children(context, cr, width, height)
             cr:rectangle(0, 0, width, height)
             cr:fill()
         end
+        cr:restore()
     end
-
-    cr:set_source(source)
 end
 
 -- Draw the border
