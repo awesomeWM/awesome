@@ -1,6 +1,7 @@
 --DOC_GEN_IMAGE
 --DOC_HIDE_ALL
 --DOC_NO_USAGE
+require("_date")
 local awful     = require("awful")
 local gears     = require("gears")
 local wibox     = require("wibox")
