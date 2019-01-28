@@ -58,7 +58,7 @@ with existing user configurations.
    global one.
  * There is now a `awful.layout.get_tag_layout_index()` function to get the
    index of the current layout in the global layout list
-   (`awful.layout..layouts`)
+   (`awful.layout.layouts`)
  * The `wibox.layout.manual` layout now has an `:insert()` method.
 
 ### Better DPI handling
@@ -124,7 +124,7 @@ The following widgets have been added:
  </tr>
 <tr>
  <td>
-  <a href='../classes/wibox.widget.checkbox.html'>wibox.widget.separator</a>
+  <a href='../classes/wibox.widget.separator.html'>wibox.widget.separator</a>
  </td>
  <td><img src='../images/AUTOGEN_wibox_widget_defaults_separator.svg' /></td>
 </tr>
