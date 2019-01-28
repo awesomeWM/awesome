@@ -268,20 +268,16 @@ function background:get_shape_border_color()
     return self._private.shape_border_color
 end
 
---- When a `shape` is set, make sure nothing is drawn outside of it.
---@DOC_wibox_container_background_clip_EXAMPLE@
--- @property shape_clip
--- @tparam boolean value If the shape clip is enable
-
 function background:set_shape_clip(value)
-    if self._private.shape_clip == value then return end
-
-    self._private.shape_clip = value
-    self:emit_signal("widget::redraw_needed")
+    if value then return end
+    require("gears.debug").print_warning("shape_clip property of background container was removed."
+        .. " Use wibox.layout.stack instead if you want shape_clip=false.")
 end
 
 function background:get_shape_clip()
-    return self._private.shape_clip or false
+    require("gears.debug").print_warning("shape_clip property of background container was removed."
+        .. " Use wibox.layout.stack instead if you want shape_clip=false.")
+    return true
 end
 
 --- The background image to use
