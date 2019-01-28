@@ -382,7 +382,7 @@ end
 -- @tparam string|pattern args.style.shape_border_width_selected
 -- @tparam string|pattern args.style.shape_border_color_selected
 -- @treturn widget The action widget.
--- @function naughty.widget.layoutlist
+-- @function awful.widget.layoutlist
 
 local is_connected, instances = false, setmetatable({}, {__mode = "v"})
 
