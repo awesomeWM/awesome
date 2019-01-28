@@ -1,9 +1,27 @@
 # NEWS
 
-<a name="v43"></a>
-# Awesome window manager framework version 4.3 changes
+<a name="v44"></a>
+# DRAFT Awesome window manager framework version 4.4 changes DRAFT
 
 <center> <img src="../images/AUTOGEN_wibox_logo_logo_and_name.svg" /> </center>
+
+## This is work in progress and describes the current state.
+
+Some general text about Awesome v4.4 should be here. Hopefully someone will
+notice that it is not yet here before we release...
+
+## New features
+
+## Noteworthy fixes
+
+## Behavior changes
+
+* The `shape_clip` option of `wibox.container.background` was removed. The code
+  now always behaves as if this option is set to `true`. The old behaviour can
+  be simulated with `wibox.layout.stack`.
+
+<a name="v43"></a>
+# Awesome window manager framework version 4.3 changes
 
 Awesome v4.3 is the third release of the 4.x API. It comes after one and a half
 years of little fixes and improvements. Awesome v4.2 was very stable thanks to
