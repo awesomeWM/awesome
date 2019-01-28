@@ -17,6 +17,17 @@ local TimeZone = glib.TimeZone
 
 local textclock = { mt = {} }
 
+local DateTime_new_now = DateTime.new_now
+
+-- When $SOURCE_DATE_EPOCH and $SOURCE_DIRECTORY are both set, then this code is
+-- most likely being run by the test runner. Ensure reproducible dates.
+local source_date_epoch = tonumber(os.getenv("SOURCE_DATE_EPOCH"))
+if source_date_epoch and os.getenv("SOURCE_DIRECTORY") then
+    DateTime_new_now = function()
+        return DateTime.new_from_unix_utc(source_date_epoch)
+    end
+end
+
 --- Set the clock's format
 -- @property format
 -- @tparam string format The new time format.  This can contain pango markup
@@ -87,7 +98,7 @@ local function new(format, refresh, tzid)
     w._private.timezone = tzid and TimeZone.new(tzid)
 
     function w._private.textclock_update_cb()
-        local str = DateTime.new_now(w._private.timezone or TimeZone.new_local()):format(w._private.format)
+        local str = DateTime_new_now(w._private.timezone or TimeZone.new_local()):format(w._private.format)
         if str == nil then
             require("gears.debug").print_warning("textclock: "
                     .. "g_date_time_format() failed for format "
