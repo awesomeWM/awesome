@@ -1,6 +1,7 @@
 --DOC_NO_USAGE --DOC_GEN_IMAGE
 local awful     = require("awful") --DOC_HIDE
 local wibox     = require("wibox") --DOC_HIDE
+require("_date") --DOC_HIDE
 
 screen[1]._resize {width = 480, height = 100} --DOC_HIDE
 

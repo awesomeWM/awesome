@@ -5,6 +5,7 @@ local awful     = require("awful")
 local gears     = require("gears")
 local wibox     = require("wibox")
 local beautiful = require("beautiful") --DOC_HIDE
+require("_date")
 
 screen[1]._resize {width = 640, height = 480}
 
