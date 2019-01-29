@@ -20,67 +20,103 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 
 local background = { mt = {} }
 
--- Draw this widget
-function background:draw(context, cr, width, height)
-    if not self._private.widget or not self._private.widget:get_visible() then
-        return
+-- Make sure a surface pattern is freed *now*
+local function dispose_pattern(pattern)
+    local status, s = pattern:get_surface()
+    if status == "SUCCESS" then
+        s:finish()
     end
+end
 
-    -- Keep the shape path in case there is a border
-    self._private.path = nil
-
+-- Prepare drawing the children of this widget
+function background:before_draw_children(context, cr, width, height)
+    -- Redirect drawing to a temporary surface if there is a shape
     if self._private.shape then
-        -- Only add the offset if there is something to draw
-        local offset = ((self._private.shape_border_width and self._private.shape_border_color)
-            and self._private.shape_border_width or 0) / 2
-
-        cr:translate(offset, offset)
-        self._private.shape(cr, width - 2*offset, height - 2*offset, unpack(self._private.shape_args or {}))
-        cr:translate(-offset, -offset)
-        self._private.path = cr:copy_path()
-        cr:clip()
+        cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
     end
 
+    -- Draw the background
     if self._private.background then
+        cr:save()
         cr:set_source(self._private.background)
-        cr:paint()
+        cr:rectangle(0, 0, width, height)
+        cr:fill()
+        cr:restore()
     end
     if self._private.bgimage then
+        cr:save()
         if type(self._private.bgimage) == "function" then
             self._private.bgimage(context, cr, width, height,unpack(self._private.bgimage_args))
         else
             local pattern = cairo.Pattern.create_for_surface(self._private.bgimage)
             cr:set_source(pattern)
-            cr:paint()
+            cr:rectangle(0, 0, width, height)
+            cr:fill()
         end
+        cr:restore()
     end
-
 end
 
 -- Draw the border
-function background:after_draw_children(_, cr)
-    -- Draw the border
-    if self._private.path and self._private.shape_border_width and self._private.shape_border_width > 0 then
-        cr:append_path(self._private.path)
+function background:after_draw_children(_, cr, width, height)
+    if not self._private.shape then
+        return
+    end
+
+    -- Okay, there is a shape. Get it as a path.
+    local bw = self._private.shape_border_width or 0
+
+    cr:translate(bw, bw)
+    self._private.shape(cr, width - 2*bw, height - 2*bw, unpack(self._private.shape_args or {}))
+    cr:translate(-bw, -bw)
+
+    if bw > 0 then
+        -- Now we need to do a border, somehow. We begin with another
+        -- temporary surface.
+        cr:push_group_with_content(cairo.Content.ALPHA)
+
+        -- Mark everything as "this is border"
+        cr:set_source_rgba(0, 0, 0, 1)
+        cr:paint()
+
+        -- Now remove the inside of the shape to get just the border
+        cr:set_operator(cairo.Operator.SOURCE)
+        cr:set_source_rgba(0, 0, 0, 0)
+        cr:fill_preserve()
+
+        local mask = cr:pop_group()
+        -- Now actually draw the border via the mask we just created.
         cr:set_source(color(self._private.shape_border_color or self._private.foreground or beautiful.fg_normal))
+        cr:set_operator(cairo.Operator.SOURCE)
+        cr:mask(mask)
 
-        cr:set_line_width(self._private.shape_border_width)
-        cr:stroke()
-        self._private.path = nil
-    end
-end
-
--- Prepare drawing the children of this widget
-function background:before_draw_children(_, cr)
-    if self._private.foreground then
-        cr:set_source(self._private.foreground)
+        dispose_pattern(mask)
     end
 
-    -- Clip the shape
-    if self._private.path and self._private.shape_clip then
-        cr:append_path(self._private.path)
-        cr:clip()
-    end
+    -- We now have the right content in a temporary surface. Copy it to the
+    -- target surface. For this, we need another mask
+    cr:push_group_with_content(cairo.Content.ALPHA)
+
+    -- Draw the border with 2 * border width (this draws both
+    -- inside and outside, only half of it is outside)
+    cr.line_width = 2 * bw
+    cr:set_source_rgba(0, 0, 0, 1)
+    cr:stroke_preserve()
+
+    -- Now fill the whole inside so that it is also include in the mask
+    cr:fill()
+
+    local mask = cr:pop_group()
+    local source = cr:pop_group() -- This pops what was pushed in before_draw_children
+
+    -- This now draws the content of the background widget to the actual
+    -- target, but only the part that is inside the mask
+    cr:set_operator(cairo.Operator.OVER)
+    cr:set_source(source)
+    cr:mask(mask)
+
+    dispose_pattern(mask)
+    dispose_pattern(source)
 end
 
 -- Layout this widget
@@ -232,20 +268,16 @@ function background:get_shape_border_color()
     return self._private.shape_border_color
 end
 
---- When a `shape` is set, make sure nothing is drawn outside of it.
---@DOC_wibox_container_background_clip_EXAMPLE@
--- @property shape_clip
--- @tparam boolean value If the shape clip is enable
-
 function background:set_shape_clip(value)
-    if self._private.shape_clip == value then return end
-
-    self._private.shape_clip = value
-    self:emit_signal("widget::redraw_needed")
+    if value then return end
+    require("gears.debug").print_warning("shape_clip property of background container was removed."
+        .. " Use wibox.layout.stack instead if you want shape_clip=false.")
 end
 
 function background:get_shape_clip()
-    return self._private.shape_clip or false
+    require("gears.debug").print_warning("shape_clip property of background container was removed."
+        .. " Use wibox.layout.stack instead if you want shape_clip=false.")
+    return true
 end
 
 --- The background image to use
