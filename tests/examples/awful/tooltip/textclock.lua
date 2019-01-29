@@ -1,5 +1,6 @@
 --DOC_GEN_IMAGE
 --DOC_NO_USAGE
+require("_date") --DOC_HIDE
 screen[1]._resize {width = 300, height = 75} --DOC_HIDE
 local awful = {tooltip = require("awful.tooltip"), wibar = require("awful.wibar")} --DOC_HIDE
 local wibox = { widget = { textclock = require("wibox.widget.textclock") }, --DOC_HIDE
