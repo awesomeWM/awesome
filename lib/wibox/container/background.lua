@@ -55,6 +55,10 @@ function background:before_draw_children(context, cr, width, height)
         end
         cr:restore()
     end
+
+    if self._private.foreground then
+        cr:set_source(self._private.foreground)
+    end
 end
 
 -- Draw the border
