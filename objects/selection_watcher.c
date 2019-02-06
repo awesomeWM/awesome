@@ -20,15 +20,132 @@
  */
 
 #include "objects/selection_watcher.h"
+#include "common/luaobject.h"
+#include "globalconf.h"
+
+#include <xcb/xfixes.h>
+
+#define REGISTRY_WATCHER_TABLE_INDEX "awesome_selection_watchers"
+
+typedef struct selection_watcher_t
+{
+    LUA_OBJECT_HEADER
+    /** Is this watcher currently active and watching? Used as reference with luaL_ref */
+    int active_ref;
+    /** Atom identifying the selection to watch */
+    xcb_atom_t selection;
+} selection_watcher_t;
+
+static lua_class_t selection_watcher_class;
+LUA_OBJECT_FUNCS(selection_watcher_class, selection_watcher_t, selection_watcher)
 
 void
 event_handle_xfixes_selection_notify(xcb_generic_event_t *ev)
 {
 }
 
+/** Create a new selection watcher object.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on the stack.
+ */
+static int
+luaA_selection_watcher_new(lua_State *L)
+{
+    size_t name_length;
+    const char *name;
+    xcb_intern_atom_reply_t *reply;
+    selection_watcher_t *selection;
+
+    name = luaL_checklstring(L, 2, &name_length);
+    selection = (void *) selection_watcher_class.allocator(L);
+    selection->active_ref = LUA_NOREF;
+
+    /* Get the atom identifying the selection to watch */
+    reply = xcb_intern_atom_reply(globalconf.connection,
+            xcb_intern_atom_unchecked(globalconf.connection, false, name_length, name),
+            NULL);
+    if (reply) {
+        selection->selection = reply->atom;
+        p_delete(&reply);
+    }
+
+    return 1;
+}
+
+static int
+luaA_selection_watcher_set_active(lua_State *L, selection_watcher_t *selection)
+{
+    bool b = luaA_checkboolean(L, -1);
+    bool is_active = selection->active_ref != LUA_NOREF;
+    if(b != is_active)
+    {
+        if (b)
+        {
+            /* Selection becomes active */
+
+            /* Reference the selection watcher. For this, first get the tracking
+             * table out of the registry. */
+            lua_pushliteral(L, REGISTRY_WATCHER_TABLE_INDEX);
+            lua_rawget(L, LUA_REGISTRYINDEX);
+
+            /* Then actually get the reference */
+            lua_pushvalue(L, -3 - 1);
+            selection->active_ref = luaL_ref(L, -2);
+
+            /* And pop the tracking table again */
+            lua_pop(L, 1);
+        } else {
+            /* Unreference the selection object */
+            lua_pushliteral(L, REGISTRY_WATCHER_TABLE_INDEX);
+            lua_rawget(L, LUA_REGISTRYINDEX);
+            luaL_unref(L, -1, selection->active_ref);
+            lua_pop(L, 1);
+
+            selection->active_ref = LUA_NOREF;
+        }
+        luaA_object_emit_signal(L, -3, "property::active", 0);
+    }
+    return 0;
+}
+
+static int
+luaA_selection_watcher_get_active(lua_State *L, selection_watcher_t *selection)
+{
+    lua_pushboolean(L, selection->active_ref != LUA_NOREF);
+    return 1;
+}
+
 void
 selection_watcher_class_setup(lua_State *L)
 {
+    static const struct luaL_Reg selection_watcher_methods[] =
+    {
+        LUA_CLASS_METHODS(selection_watcher)
+        { "__call", luaA_selection_watcher_new },
+        { NULL, NULL }
+    };
+
+    static const struct luaL_Reg selection_watcher_meta[] = {
+        LUA_OBJECT_META(selection_watcher)
+        LUA_CLASS_META
+        { NULL, NULL }
+    };
+
+    /* Reference a table in the registry that tracks active watchers. This code
+     * does debug.getregistry()[REGISTRY_WATCHER_TABLE_INDEX] = {}
+     */
+    lua_pushliteral(L, REGISTRY_WATCHER_TABLE_INDEX);
+    lua_newtable(L);
+    lua_rawset(L, LUA_REGISTRYINDEX);
+
+    luaA_class_setup(L, &selection_watcher_class, "selection_watcher", NULL,
+            (lua_class_allocator_t) selection_watcher_new, NULL, NULL,
+            luaA_class_index_miss_property, luaA_class_newindex_miss_property,
+            selection_watcher_methods, selection_watcher_meta);
+    luaA_class_add_property(&selection_watcher_class, "active",
+            (lua_class_propfunc_t) luaA_selection_watcher_set_active,
+            (lua_class_propfunc_t) luaA_selection_watcher_get_active,
+            (lua_class_propfunc_t) luaA_selection_watcher_set_active);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
