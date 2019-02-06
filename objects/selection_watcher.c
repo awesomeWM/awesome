@@ -34,6 +34,8 @@ typedef struct selection_watcher_t
     int active_ref;
     /** Atom identifying the selection to watch */
     xcb_atom_t selection;
+    /** Window used for watching */
+    xcb_window_t window;
 } selection_watcher_t;
 
 static lua_class_t selection_watcher_class;
@@ -42,6 +44,27 @@ LUA_OBJECT_FUNCS(selection_watcher_class, selection_watcher_t, selection_watcher
 void
 event_handle_xfixes_selection_notify(xcb_generic_event_t *ev)
 {
+    xcb_xfixes_selection_notify_event_t *e = (void *) ev;
+    lua_State *L = globalconf_get_lua_State();
+
+    /* Iterate over all active selection watchers */
+    lua_pushliteral(L, REGISTRY_WATCHER_TABLE_INDEX);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    lua_pushnil(L);
+    while (lua_next(L, -2) != 0) {
+        if (lua_type(L, -1) == LUA_TUSERDATA) {
+            selection_watcher_t *selection = lua_touserdata(L, -1);
+
+            if (selection->selection == e->selection && selection->window == e->window) {
+                lua_pushboolean(L, e->owner != XCB_NONE);
+                luaA_object_emit_signal(L, -2, "selection_changed", 1);
+            }
+        }
+        /* Remove the watcher */
+        lua_pop(L, 1);
+    }
+    /* Remove watcher table */
+    lua_pop(L, 1);
 }
 
 /** Create a new selection watcher object.
@@ -59,6 +82,7 @@ luaA_selection_watcher_new(lua_State *L)
     name = luaL_checklstring(L, 2, &name_length);
     selection = (void *) selection_watcher_class.allocator(L);
     selection->active_ref = LUA_NOREF;
+    selection->window = XCB_NONE;
 
     /* Get the atom identifying the selection to watch */
     reply = xcb_intern_atom_reply(globalconf.connection,
@@ -83,6 +107,25 @@ luaA_selection_watcher_set_active(lua_State *L, selection_watcher_t *selection)
         {
             /* Selection becomes active */
 
+            /* Create a window for it */
+            if (selection->window == XCB_NONE)
+                selection->window = xcb_generate_id(globalconf.connection);
+            xcb_create_window(globalconf.connection, globalconf.screen->root_depth,
+                    selection->window, globalconf.screen->root, -1, -1, 1, 1, 0,
+                    XCB_COPY_FROM_PARENT, globalconf.screen->root_visual,
+                    0, NULL);
+
+            /* Start watching for selection changes */
+            if (globalconf.have_xfixes)
+            {
+                xcb_xfixes_select_selection_input(globalconf.connection, selection->window, selection->selection,
+                        XCB_XFIXES_SELECTION_EVENT_MASK_SET_SELECTION_OWNER |
+                        XCB_XFIXES_SELECTION_EVENT_MASK_SELECTION_WINDOW_DESTROY |
+                        XCB_XFIXES_SELECTION_EVENT_MASK_SELECTION_CLIENT_CLOSE);
+            } else {
+                luaA_warn(L, "X11 server does not support the XFixes extension; cannot watch selections");
+            }
+
             /* Reference the selection watcher. For this, first get the tracking
              * table out of the registry. */
             lua_pushliteral(L, REGISTRY_WATCHER_TABLE_INDEX);
@@ -95,6 +138,11 @@ luaA_selection_watcher_set_active(lua_State *L, selection_watcher_t *selection)
             /* And pop the tracking table again */
             lua_pop(L, 1);
         } else {
+            /* Stop watching and destroy the window */
+            if (globalconf.have_xfixes)
+                xcb_xfixes_select_selection_input(globalconf.connection, selection->window, selection->selection, 0);
+            xcb_destroy_window(globalconf.connection, selection->window);
+
             /* Unreference the selection object */
             lua_pushliteral(L, REGISTRY_WATCHER_TABLE_INDEX);
             lua_rawget(L, LUA_REGISTRYINDEX);
