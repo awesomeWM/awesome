@@ -51,8 +51,10 @@ end)
 
 local function check_state(owned, unowned)
     assert(not had_error, "there was an error")
-    assert(owned_clipboard_changes == owned, string.format("expected %d owned changes, but got %d", owned, owned_clipboard_changes))
-    assert(unowned_clipboard_changes == unowned, string.format("expected %d unowned changes, but got %d", unowned, unowned_clipboard_changes))
+    assert(owned_clipboard_changes == owned,
+        string.format("expected %d owned changes, but got %d", owned, owned_clipboard_changes))
+    assert(unowned_clipboard_changes == unowned,
+        string.format("expected %d unowned changes, but got %d", unowned, unowned_clipboard_changes))
 end
 
 local continue = false
