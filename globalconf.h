@@ -110,6 +110,8 @@ typedef struct
     bool have_input_shape;
     /** Check for XKB extension */
     bool have_xkb;
+    /** Check for XFixes extension */
+    bool have_xfixes;
     uint8_t event_base_shape;
     uint8_t event_base_xkb;
     uint8_t event_base_randr;
