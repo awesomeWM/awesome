@@ -106,6 +106,33 @@ selection_transfer_finished(lua_State *L, int ud)
 }
 
 static void
+selection_push_data(lua_State *L, xcb_get_property_reply_t *property)
+{
+    if (property->type == XCB_ATOM_ATOM && property->format == 32) {
+        size_t num_atoms = xcb_get_property_value_length(property) / 4;
+        xcb_atom_t *atoms = xcb_get_property_value(property);
+        xcb_get_atom_name_cookie_t cookies[num_atoms];
+
+        for (size_t i = 0; i < num_atoms; i++)
+                cookies[i] = xcb_get_atom_name_unchecked(globalconf.connection, atoms[i]);
+
+        lua_newtable(L);
+        for (size_t i = 0; i < num_atoms; i++) {
+            xcb_get_atom_name_reply_t *reply = xcb_get_atom_name_reply(
+                    globalconf.connection, cookies[i], NULL);
+            if (reply)
+            {
+                lua_pushlstring(L, xcb_get_atom_name_name(reply), xcb_get_atom_name_name_length(reply));
+                lua_rawseti(L, -2, i+1);
+            }
+            p_delete(&reply);
+        }
+    } else {
+        lua_pushlstring(L, xcb_get_property_value(property), xcb_get_property_value_length(property));
+    }
+}
+
+static void
 selection_handle_selectionnotify(lua_State *L, int ud, xcb_atom_t property)
 {
     selection_getter_t *selection;
@@ -134,7 +161,7 @@ selection_handle_selectionnotify(lua_State *L, int ud, xcb_atom_t property)
                 p_delete(&property_r);
                 return;
             }
-            lua_pushlstring(L, xcb_get_property_value(property_r), xcb_get_property_value_length(property_r));
+            selection_push_data(L, property_r);
             luaA_object_emit_signal(L, ud, "data", 1);
             p_delete(&property_r);
         }
@@ -190,7 +217,7 @@ property_handle_awesome_selection_atom(uint8_t state, xcb_window_t window)
     {
         if (property_r->value_len > 0)
         {
-            lua_pushlstring(L, xcb_get_property_value(property_r), xcb_get_property_value_length(property_r));
+            selection_push_data(L, property_r);
             luaA_object_emit_signal(L, -2, "data", 1);
         }
         else
