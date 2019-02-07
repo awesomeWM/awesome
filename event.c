@@ -23,6 +23,7 @@
 #include "awesome.h"
 #include "property.h"
 #include "objects/tag.h"
+#include "objects/selection_getter.h"
 #include "objects/drawin.h"
 #include "xwindow.h"
 #include "ewmh.h"
@@ -1105,6 +1106,7 @@ void event_handle(xcb_generic_event_t *event)
         EVENT(XCB_REPARENT_NOTIFY, event_handle_reparentnotify);
         EVENT(XCB_UNMAP_NOTIFY, event_handle_unmapnotify);
         EVENT(XCB_SELECTION_CLEAR, event_handle_selectionclear);
+        EVENT(XCB_SELECTION_NOTIFY, event_handle_selectionnotify);
 #undef EVENT
     }
 

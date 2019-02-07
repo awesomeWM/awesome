@@ -21,6 +21,7 @@
 
 #include "objects/selection_getter.h"
 #include "common/luaobject.h"
+#include "common/atoms.h"
 #include "globalconf.h"
 
 #define REGISTRY_GETTER_TABLE_INDEX "awesome_selection_getters"
@@ -82,10 +83,69 @@ luaA_selection_getter_new(lua_State *L)
     target_atom = reply ? reply->atom : XCB_NONE;
     p_delete(&reply);
 
-    (void) name_atom;
-    (void) target_atom;
+    xcb_convert_selection(globalconf.connection, selection->window, name_atom,
+            target_atom, AWESOME_SELECTION_ATOM, globalconf.timestamp);
 
     return 1;
+}
+
+static void
+selection_handle_selectionnotify(lua_State *L, int ud, xcb_atom_t property)
+{
+    selection_getter_t *selection;
+
+    ud = luaA_absindex(L, ud);
+    selection = lua_touserdata(L, ud);
+
+    if (property != XCB_NONE)
+    {
+        xcb_get_property_reply_t *property_r = xcb_get_property_reply(globalconf.connection,
+                xcb_get_property(globalconf.connection, true, selection->window, AWESOME_SELECTION_ATOM,
+                    XCB_GET_PROPERTY_TYPE_ANY, 0, 0xffffffff), NULL);
+
+        if (property_r)
+        {
+            lua_pushlstring(L, xcb_get_property_value(property_r), xcb_get_property_value_length(property_r));
+            luaA_object_emit_signal(L, ud, "data", 1);
+            p_delete(&property_r);
+        }
+    }
+
+    luaA_object_emit_signal(L, ud, "data_end", 0);
+
+    /* Now unreference the selection object; it's dead */
+    lua_pushliteral(L, REGISTRY_GETTER_TABLE_INDEX);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    luaL_unref(L, -1, selection->ref);
+    lua_pop(L, 1);
+
+    selection->ref = LUA_NOREF;
+}
+
+void
+event_handle_selectionnotify(xcb_selection_notify_event_t *ev)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    /* Iterate over all active selection getters */
+    lua_pushliteral(L, REGISTRY_GETTER_TABLE_INDEX);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    lua_pushnil(L);
+    while (lua_next(L, -2) != 0) {
+        if (lua_type(L, -1) == LUA_TUSERDATA) {
+            selection_getter_t *selection = lua_touserdata(L, -1);
+            if (ev->requestor == selection->window) {
+                /* Found the right selection */
+                selection_handle_selectionnotify(L, -1, ev->property);
+                lua_pop(L, 2);
+                break;
+            }
+        }
+        /* Remove the value, leaving only the key */
+        lua_pop(L, 1);
+    }
+    /* Remove the getter table */
+    lua_pop(L, 1);
 }
 
 void
