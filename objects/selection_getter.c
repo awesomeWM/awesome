@@ -20,10 +20,101 @@
  */
 
 #include "objects/selection_getter.h"
+#include "common/luaobject.h"
+#include "globalconf.h"
+
+#define REGISTRY_GETTER_TABLE_INDEX "awesome_selection_getters"
+
+typedef struct selection_getter_t
+{
+    LUA_OBJECT_HEADER
+    /** Reference in the special table to this object */
+    int ref;
+    /** Window used for the transfer */
+    xcb_window_t window;
+} selection_getter_t;
+
+static lua_class_t selection_getter_class;
+LUA_OBJECT_FUNCS(selection_getter_class, selection_getter_t, selection_getter)
+
+static void
+selection_getter_wipe(selection_getter_t *selection)
+{
+    xcb_destroy_window(globalconf.connection, selection->window);
+}
+
+static int
+luaA_selection_getter_new(lua_State *L)
+{
+    size_t name_length, target_length;
+    const char *name, *target;
+    xcb_intern_atom_cookie_t cookies[2];
+    xcb_intern_atom_reply_t *reply;
+    selection_getter_t *selection;
+    xcb_atom_t name_atom, target_atom;
+
+    name = luaL_checklstring(L, 2, &name_length);
+    target = luaL_checklstring(L, 3, &target_length);
+
+    /* Create a selection object */
+    selection = (void *) selection_getter_class.allocator(L);
+    selection->window = xcb_generate_id(globalconf.connection);
+    xcb_create_window(globalconf.connection, globalconf.screen->root_depth,
+            selection->window, globalconf.screen->root, -1, -1, 1, 1, 0,
+            XCB_COPY_FROM_PARENT, globalconf.screen->root_visual, 0, NULL);
+
+    /* Save it in the registry */
+    lua_pushliteral(L, REGISTRY_GETTER_TABLE_INDEX);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    lua_pushvalue(L, -2);
+    selection->ref = luaL_ref(L, -2);
+    lua_pop(L, 1);
+
+    /* Get the atoms identifying the request */
+    cookies[0] = xcb_intern_atom_unchecked(globalconf.connection, false, name_length, name);
+    cookies[1] = xcb_intern_atom_unchecked(globalconf.connection, false, target_length, target);
+
+    reply = xcb_intern_atom_reply(globalconf.connection, cookies[0], NULL);
+    name_atom = reply ? reply->atom : XCB_NONE;
+    p_delete(&reply);
+
+    reply = xcb_intern_atom_reply(globalconf.connection, cookies[1], NULL);
+    target_atom = reply ? reply->atom : XCB_NONE;
+    p_delete(&reply);
+
+    (void) name_atom;
+    (void) target_atom;
+
+    return 1;
+}
 
 void
 selection_getter_class_setup(lua_State *L)
 {
+    static const struct luaL_Reg selection_getter_methods[] =
+    {
+        { "__call", luaA_selection_getter_new },
+        { NULL, NULL }
+    };
+
+    static const struct luaL_Reg selection_getter_metha[] = {
+        LUA_OBJECT_META(selection_getter)
+        LUA_CLASS_META
+        { NULL, NULL }
+    };
+
+    /* Store a table in the registry that tracks active getters. This code does
+     * debug.getregistry(){REGISTRY_GETTER_TABLE_INDEX] = {}
+     */
+    lua_pushliteral(L, REGISTRY_GETTER_TABLE_INDEX);
+    lua_newtable(L);
+    lua_rawset(L, LUA_REGISTRYINDEX);
+
+    luaA_class_setup(L, &selection_getter_class, "selection_getter", NULL,
+            (lua_class_allocator_t) selection_getter_new,
+            (lua_class_collector_t) selection_getter_wipe, NULL,
+            luaA_class_index_miss_property, luaA_class_newindex_miss_property,
+            selection_getter_methods, selection_getter_metha);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
