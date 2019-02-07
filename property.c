@@ -25,6 +25,7 @@
 #include "ewmh.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
+#include "objects/selection_getter.h"
 #include "xwindow.h"
 
 #include <xcb/xcb_atom.h>
@@ -523,6 +524,9 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
 
     /* background change */
     HANDLE(_XROOTPMAP_ID, property_handle_xrootpmap_id)
+
+    /* selection transfers */
+    HANDLE(AWESOME_SELECTION_ATOM, property_handle_awesome_selection_atom)
 
     /* If nothing was found, return */
     END;

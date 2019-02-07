@@ -90,6 +90,22 @@ luaA_selection_getter_new(lua_State *L)
 }
 
 static void
+selection_transfer_finished(lua_State *L, int ud)
+{
+    selection_getter_t *selection = lua_touserdata(L, ud);
+
+    /* Unreference the selection object; it's dead */
+    lua_pushliteral(L, REGISTRY_GETTER_TABLE_INDEX);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    luaL_unref(L, -1, selection->ref);
+    lua_pop(L, 1);
+
+    selection->ref = LUA_NOREF;
+
+    luaA_object_emit_signal(L, ud, "data_end", 0);
+}
+
+static void
 selection_handle_selectionnotify(lua_State *L, int ud, xcb_atom_t property)
 {
     selection_getter_t *selection;
@@ -99,34 +115,37 @@ selection_handle_selectionnotify(lua_State *L, int ud, xcb_atom_t property)
 
     if (property != XCB_NONE)
     {
+        xcb_change_window_attributes(globalconf.connection, selection->window,
+            XCB_CW_EVENT_MASK, (uint32_t[]) { XCB_EVENT_MASK_PROPERTY_CHANGE });
+
         xcb_get_property_reply_t *property_r = xcb_get_property_reply(globalconf.connection,
                 xcb_get_property(globalconf.connection, true, selection->window, AWESOME_SELECTION_ATOM,
                     XCB_GET_PROPERTY_TYPE_ANY, 0, 0xffffffff), NULL);
 
         if (property_r)
         {
+            if (property_r->type == INCR)
+            {
+                /* This is an incremental transfer. The above GetProperty had
+                 * delete=true. This indicates to the other end that the
+                 * transfer should start now. Right now we only get an estimate
+                 * of the size of the data to be transferred, which we ignore.
+                 */
+                p_delete(&property_r);
+                return;
+            }
             lua_pushlstring(L, xcb_get_property_value(property_r), xcb_get_property_value_length(property_r));
             luaA_object_emit_signal(L, ud, "data", 1);
             p_delete(&property_r);
         }
     }
 
-    luaA_object_emit_signal(L, ud, "data_end", 0);
-
-    /* Now unreference the selection object; it's dead */
-    lua_pushliteral(L, REGISTRY_GETTER_TABLE_INDEX);
-    lua_rawget(L, LUA_REGISTRYINDEX);
-    luaL_unref(L, -1, selection->ref);
-    lua_pop(L, 1);
-
-    selection->ref = LUA_NOREF;
+    selection_transfer_finished(L, ud);
 }
 
-void
-event_handle_selectionnotify(xcb_selection_notify_event_t *ev)
+static int
+selection_getter_find_by_window(lua_State *L, xcb_window_t window)
 {
-    lua_State *L = globalconf_get_lua_State();
-
     /* Iterate over all active selection getters */
     lua_pushliteral(L, REGISTRY_GETTER_TABLE_INDEX);
     lua_rawget(L, LUA_REGISTRYINDEX);
@@ -134,17 +153,68 @@ event_handle_selectionnotify(xcb_selection_notify_event_t *ev)
     while (lua_next(L, -2) != 0) {
         if (lua_type(L, -1) == LUA_TUSERDATA) {
             selection_getter_t *selection = lua_touserdata(L, -1);
-            if (ev->requestor == selection->window) {
-                /* Found the right selection */
-                selection_handle_selectionnotify(L, -1, ev->property);
-                lua_pop(L, 2);
-                break;
+            if (selection->window == window) {
+                /* Found the right selection, remove table and key */
+                lua_remove(L, -2);
+                lua_remove(L, -2);
+                return 1;
             }
         }
         /* Remove the value, leaving only the key */
         lua_pop(L, 1);
     }
     /* Remove the getter table */
+    lua_pop(L, 1);
+
+    return 0;
+}
+
+int
+property_handle_awesome_selection_atom(uint8_t state, xcb_window_t window)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    if (state != XCB_PROPERTY_NEW_VALUE)
+        return 0;
+
+    if (selection_getter_find_by_window(L, window) == 0)
+        return 0;
+
+    selection_getter_t *selection = lua_touserdata(L, -1);
+
+    xcb_get_property_reply_t *property_r = xcb_get_property_reply(globalconf.connection,
+            xcb_get_property(globalconf.connection, true, selection->window, AWESOME_SELECTION_ATOM,
+                XCB_GET_PROPERTY_TYPE_ANY, 0, 0xffffffff), NULL);
+
+    if (property_r)
+    {
+        if (property_r->value_len > 0)
+        {
+            lua_pushlstring(L, xcb_get_property_value(property_r), xcb_get_property_value_length(property_r));
+            luaA_object_emit_signal(L, -2, "data", 1);
+        }
+        else
+        {
+            /* Transfer finished */
+            selection_transfer_finished(L, -1);
+        }
+
+        p_delete(&property_r);
+    }
+
+    lua_pop(L, 1);
+    return 0;
+}
+
+void
+event_handle_selectionnotify(xcb_selection_notify_event_t *ev)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    if (selection_getter_find_by_window(L, ev->requestor) == 0)
+        return;
+
+    selection_handle_selectionnotify(L, -1, ev->property);
     lua_pop(L, 1);
 }
 
