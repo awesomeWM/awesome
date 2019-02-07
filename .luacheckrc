@@ -27,6 +27,7 @@ read_globals = {
     "keygrabber",
     "mousegrabber",
     "root",
+    "selection_getter",
     "selection",
     "tag",
     "window",
