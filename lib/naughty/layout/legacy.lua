@@ -374,6 +374,10 @@ function naughty.default_notification_handler(notification, args)
     notification.textbox = textbox
     set_escaped_text(notification)
 
+    -- Update the content if it changes
+    notification:connect_signal("property::message", set_escaped_text)
+    notification:connect_signal("property::title"  , set_escaped_text)
+
     local actionslayout = wibox.layout.fixed.vertical()
     local actions_max_width = 0
     local actions_total_height = 0
@@ -435,47 +439,58 @@ function naughty.default_notification_handler(notification, args)
         -- is the icon file readable?
         local had_icon = type(icon) == "string"
         icon = surface.load_uncached_silently(icon)
-
-        -- if we have an icon, use it
         if icon then
             iconbox = wibox.widget.imagebox()
             iconmargin = wibox.container.margin(iconbox, margin, margin, margin, margin)
+        end
 
-            if max_height and icon:get_height() > max_height then
-                icon_size = icon_size and math.min(max_height, icon_size) or max_height
+        -- if we have an icon, use it
+        local function update_icon(icn)
+            if icn then
+                if max_height and icn:get_height() > max_height then
+                    icon_size = icon_size and math.min(max_height, icon_size) or max_height
+                end
+
+                if max_width and icn:get_width() > max_width then
+                    icon_size = icon_size and math.min(max_width, icon_size) or max_width
+                end
+
+                if icon_size and (icn:get_height() > icon_size or icn:get_width() > icon_size) then
+                    size_info.icon_scale_factor = icon_size / math.max(icn:get_height(),
+                                            icn:get_width())
+
+                    size_info.icon_w = icn:get_width () * size_info.icon_scale_factor
+                    size_info.icon_h = icn:get_height() * size_info.icon_scale_factor
+
+                    local scaled =
+                        cairo.ImageSurface(cairo.Format.ARGB32,
+                            gmath.round(size_info.icon_w),
+                            gmath.round(size_info.icon_h))
+
+                    local cr = cairo.Context(scaled)
+                    cr:scale(size_info.icon_scale_factor, size_info.icon_scale_factor)
+                    cr:set_source_surface(icn, 0, 0)
+                    cr:paint()
+                    icn = scaled
+                else
+                    size_info.icon_w = icn:get_width ()
+                    size_info.icon_h = icn:get_height()
+                end
+                iconbox:set_resize(false)
+                iconbox:set_image(icn)
             end
+        end
 
-            if max_width and icon:get_width() > max_width then
-                icon_size = icon_size and math.min(max_width, icon_size) or max_width
-            end
-
-            if icon_size and (icon:get_height() > icon_size or icon:get_width() > icon_size) then
-                size_info.icon_scale_factor = icon_size / math.max(icon:get_height(),
-                                          icon:get_width())
-
-                size_info.icon_w = icon:get_width () * size_info.icon_scale_factor
-                size_info.icon_h = icon:get_height() * size_info.icon_scale_factor
-
-                local scaled =
-                    cairo.ImageSurface(cairo.Format.ARGB32,
-                        gmath.round(size_info.icon_w),
-                        gmath.round(size_info.icon_h))
-
-                local cr = cairo.Context(scaled)
-                cr:scale(size_info.icon_scale_factor, size_info.icon_scale_factor)
-                cr:set_source_surface(icon, 0, 0)
-                cr:paint()
-                icon = scaled
-            else
-                size_info.icon_w = icon:get_width ()
-                size_info.icon_h = icon:get_height()
-            end
-            iconbox:set_resize(false)
-            iconbox:set_image(icon)
+        if icon then
+            notification:connect_signal("property::icon", function()
+                update_icon(surface.load_uncached_silently(notification.icon))
+            end)
+            update_icon(icon)
         elseif had_icon then
             require("gears.debug").print_warning("Naughty: failed to load icon "..
                 (args.icon or preset.icon).. "(title: "..title..")")
         end
+
     end
     notification.iconbox = iconbox
 
