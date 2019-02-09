@@ -28,6 +28,7 @@ read_globals = {
     "mousegrabber",
     "root",
     "selection",
+    "selection_watcher",
     "tag",
     "window",
     "table.unpack",

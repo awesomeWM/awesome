@@ -68,6 +68,7 @@ environment):
 - [libxcb-util >= 0.3.8](https://xcb.freedesktop.org/)
 - [libxcb-keysyms >= 0.3.4](https://xcb.freedesktop.org/)
 - [libxcb-icccm >= 0.3.8](https://xcb.freedesktop.org/)
+- [libxcb-xfixes](https://xcb.freedesktop.org/)
 - [xcb-util-xrm >= 1.0](https://github.com/Airblader/xcb-util-xrm)
 - [libxkbcommon](http://xkbcommon.org/) with X11 support enabled
 - [libstartup-notification >=
