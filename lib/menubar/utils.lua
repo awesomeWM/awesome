@@ -127,8 +127,8 @@ local all_icon_sizes = {
     '16x16'
 }
 
---- List of supported icon formats.
-local supported_icon_formats = { png = 1, xpm = 2, svg = 3 }
+--- List of supported icon exts.
+local supported_icon_file_exts = { png = 1, xpm = 2, svg = 3 }
 
 local icon_lookup_path = nil
 --- Get a list of icon lookup paths.
@@ -214,29 +214,28 @@ function utils.lookup_icon_uncached(icon_file)
         return false
     end
 
-    local icon_file_ext = icon_file:match(".*%.(.-)$")
-    if icon_file:sub(1, 1) == '/' and supported_icon_formats[icon_file_ext] then
-        -- If the path to the icon is absolute and its format is
-        -- supported, do not perform a lookup.
+    local icon_file_ext = icon_file:match(".+%.(.*)$")
+    if icon_file:sub(1, 1) == '/' and supported_icon_file_exts[icon_file_ext] then
+        -- If the path to the icon is absolute do not perform a lookup [nil if unsupported ext or missing]
         return gfs.file_readable(icon_file) and icon_file or nil
     else
+        -- Look for the requested file in the lookup path
         for _, directory in ipairs(get_icon_lookup_path()) do
-            local directory_file = directory .. "/" .. icon_file
-            if supported_icon_formats[icon_file_ext] and
-                    gfs.file_readable(directory_file) then
-                return directory_file
+            local possible_file = directory .. "/" .. icon_file
+            -- Check to see if file exists if requested with a valid extension
+            if supported_icon_file_exts[icon_file_ext] and gfs.file_readable(possible_file) then
+                return possible_file
             else
-                -- Icon is probably specified without path and format,
-                -- like 'firefox'. Try to add supported extensions to
-                -- it and see if such file exists.
-                for format, _ in pairs(supported_icon_formats) do
-                    local possible_file = directory_file .. "." .. format
-                    if gfs.file_readable(possible_file) then
-                        return possible_file
+                -- Find files with any supported extension if icon specified without, eg: 'firefox'
+                for ext, _ in pairs(supported_icon_file_exts) do
+                    local possible_file_new_ext = possible_file .. "." .. ext
+                    if gfs.file_readable(possible_file_new_ext) then
+                        return possible_file_new_ext
                     end
                 end
             end
         end
+        -- No icon found
         return false
     end
 end
