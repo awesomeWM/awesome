@@ -50,6 +50,7 @@
 #include "objects/drawin.h"
 #include "objects/selection_getter.h"
 #include "objects/screen.h"
+#include "objects/selection_acquire.h"
 #include "objects/selection_watcher.h"
 #include "objects/tag.h"
 #include "property.h"
@@ -1039,6 +1040,9 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
 
     /* Export keys */
     key_class_setup(L);
+
+    /* Export selection acquire */
+    selection_acquire_class_setup(L);
 
     /* Export selection watcher */
     selection_watcher_class_setup(L);
