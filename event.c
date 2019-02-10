@@ -1111,6 +1111,7 @@ void event_handle(xcb_generic_event_t *event)
         EVENT(XCB_UNMAP_NOTIFY, event_handle_unmapnotify);
         EVENT(XCB_SELECTION_CLEAR, event_handle_selectionclear);
         EVENT(XCB_SELECTION_NOTIFY, event_handle_selectionnotify);
+        EVENT(XCB_SELECTION_REQUEST, selection_handle_selectionrequest);
 #undef EVENT
     }
 

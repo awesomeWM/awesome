@@ -107,6 +107,62 @@ selection_handle_selectionclear(xcb_selection_clear_event_t *ev)
     lua_pop(L, 1);
 }
 
+static void
+selection_transfer_notify(xcb_window_t requestor, xcb_atom_t selection, xcb_atom_t target, xcb_atom_t property, xcb_timestamp_t time)
+{
+    xcb_selection_notify_event_t ev;
+
+    p_clear(&ev, 1);
+    ev.response_type = XCB_SELECTION_NOTIFY;
+    ev.requestor = requestor;
+    ev.selection = selection;
+    ev.target = target;
+    ev.property = property;
+    ev.time = time;
+
+    xcb_send_event(globalconf.connection, false, requestor, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
+}
+
+static void
+selection_transfer_reject(xcb_window_t requestor, xcb_atom_t selection,
+        xcb_atom_t target, xcb_timestamp_t time)
+{
+    selection_transfer_notify(requestor, selection, target, XCB_NONE, time);
+}
+
+#include "common/atoms.h" /* TODO remove */
+static void
+selection_transfer_begin(lua_State *L, int ud, xcb_window_t requestor,
+        xcb_atom_t selection, xcb_atom_t target, xcb_atom_t property,
+        xcb_timestamp_t time)
+{
+    /* TODO implement this */
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+            requestor, property, UTF8_STRING, 8, 5, "Test\n");
+    selection_transfer_notify(requestor, selection, target, property, time);
+}
+
+void
+selection_handle_selectionrequest(xcb_selection_request_event_t *ev)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    if (ev->property == XCB_NONE)
+        /* Obsolete client */
+        ev->property = ev->target;
+
+    if (selection_acquire_find_by_window(L, ev->owner) == 0)
+    {
+        selection_transfer_reject(ev->requestor, ev->selection, ev->target, ev->time);
+        return;
+    }
+
+    selection_transfer_begin(L, -1, ev->requestor, ev->selection, ev->target,
+            ev->property, ev->time);
+
+    lua_pop(L, 1);
+}
+
 static int
 luaA_selection_acquire_new(lua_State *L)
 {
