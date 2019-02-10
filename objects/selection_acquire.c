@@ -39,13 +39,6 @@ typedef struct selection_acquire_t
 static lua_class_t selection_acquire_class;
 LUA_OBJECT_FUNCS(selection_acquire_class, selection_acquire_t, selection_acquire)
 
-static void
-selection_acquire_wipe(selection_acquire_t *selection)
-{
-    if (selection->window != XCB_NONE)
-        xcb_destroy_window(globalconf.connection, selection->window);
-}
-
 static int
 luaA_selection_acquire_new(lua_State *L)
 {
@@ -97,6 +90,31 @@ luaA_selection_acquire_new(lua_State *L)
     return 1;
 }
 
+static int
+luaA_selection_acquire_release(lua_State *L)
+{
+    selection_acquire_t *selection = luaA_checkudata(L, 1, &selection_acquire_class);
+
+    xcb_destroy_window(globalconf.connection, selection->window);
+    selection->window = XCB_NONE;
+
+    /* Unreference the object, it's now dead */
+    lua_pushliteral(L, REGISTRY_ACQUIRE_TABLE_INDEX);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    luaL_unref(L, -1, selection->ref);
+    lua_pop(L, 1);
+
+    selection->ref = LUA_NOREF;
+
+    return 0;
+}
+
+static bool
+selection_acquire_checker(selection_acquire_t *selection)
+{
+    return selection->window != XCB_NONE;
+}
+
 void
 selection_acquire_class_setup(lua_State *L)
 {
@@ -110,6 +128,7 @@ selection_acquire_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(selection_acquire)
         LUA_CLASS_META
+        { "release", luaA_selection_acquire_release },
         { NULL, NULL }
     };
 
@@ -119,8 +138,8 @@ selection_acquire_class_setup(lua_State *L)
     lua_rawset(L, LUA_REGISTRYINDEX);
 
     luaA_class_setup(L, &selection_acquire_class, "selection_acquire", NULL,
-            (lua_class_allocator_t) selection_acquire_new,
-            (lua_class_collector_t) selection_acquire_wipe, NULL,
+            (lua_class_allocator_t) selection_acquire_new, NULL,
+            (lua_class_checker_t) selection_acquire_checker,
             luaA_class_index_miss_property, luaA_class_newindex_miss_property,
             selection_acquire_methods, selection_acquire_meta);
 }
