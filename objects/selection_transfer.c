@@ -133,6 +133,33 @@ selection_transfer_begin(lua_State *L, int ud, xcb_window_t requestor,
     lua_pop(L, 1);
 }
 
+static int
+luaA_selection_transfer_send(lua_State *L)
+{
+    size_t data_length;
+    const char *data;
+    uint8_t format = 8;
+    xcb_atom_t type = UTF8_STRING;
+
+    selection_transfer_t *transfer = luaA_checkudata(L, 1, &selection_transfer_class);
+    if (transfer->state != TRANSFER_WAIT_FOR_DATA)
+        luaL_error(L, "Transfer object is not ready for more data to be sent");
+
+    luaA_checktable(L, 2);
+    lua_pushliteral(L, "data");
+    lua_rawget(L, 2);
+
+    data = luaL_checklstring(L, -1, &data_length);
+
+    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+            transfer->requestor, transfer->property, type, format, data_length, data);
+    selection_transfer_notify(transfer->requestor, transfer->selection,
+            transfer->target, transfer->property, transfer->time);
+    transfer_done(L, transfer);
+
+    return 0;
+}
+
 static bool
 selection_transfer_checker(selection_transfer_t *transfer)
 {
@@ -151,6 +178,7 @@ selection_transfer_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(selection_transfer)
         LUA_CLASS_META
+        { "send", luaA_selection_transfer_send },
         { NULL, NULL }
     };
 
