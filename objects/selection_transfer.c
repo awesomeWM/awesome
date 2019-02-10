@@ -138,21 +138,60 @@ luaA_selection_transfer_send(lua_State *L)
 {
     size_t data_length;
     const char *data;
-    uint8_t format = 8;
-    xcb_atom_t type = UTF8_STRING;
 
     selection_transfer_t *transfer = luaA_checkudata(L, 1, &selection_transfer_class);
     if (transfer->state != TRANSFER_WAIT_FOR_DATA)
         luaL_error(L, "Transfer object is not ready for more data to be sent");
 
+    /* Get format and data from the table */
     luaA_checktable(L, 2);
+    lua_pushliteral(L, "format");
+    lua_rawget(L, 2);
     lua_pushliteral(L, "data");
     lua_rawget(L, 2);
 
-    data = luaL_checklstring(L, -1, &data_length);
+    if (lua_isstring(L, -2)) {
+        const char *format_string = luaL_checkstring(L, -2);
+        if (A_STRNEQ(format_string, "atom"))
+            luaL_error(L, "Unknown format '%s'", format_string);
 
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-            transfer->requestor, transfer->property, type, format, data_length, data);
+        /* 'data' is a table with strings */
+        size_t len = luaA_rawlen(L, -1);
+
+        /* Get an array with atoms */
+        size_t atom_lengths[len];
+        const char *atom_strings[len];
+        for (size_t i = 0; i < len; i++) {
+            lua_rawgeti(L, -1, i+1);
+            atom_strings[i] = luaL_checklstring(L, -1, &atom_lengths[i]);
+            lua_pop(L, 1);
+        }
+
+        xcb_intern_atom_cookie_t cookies[len];
+        xcb_atom_t atoms[len];
+        for (size_t i = 0; i < len; i++) {
+            cookies[i] = xcb_intern_atom_unchecked(globalconf.connection, false,
+                    atom_lengths[i], atom_strings[i]);
+        }
+        for (size_t i = 0; i < len; i++) {
+            xcb_intern_atom_reply_t *reply = xcb_intern_atom_reply(globalconf.connection,
+                    cookies[i], NULL);
+            atoms[i] = reply ? reply->atom : XCB_NONE;
+            p_delete(&reply);
+        }
+
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                transfer->requestor, transfer->property, XCB_ATOM_ATOM, 32,
+                len, &atoms[0]);
+    } else {
+        /* 'data' is a string with the data to transfer */
+        data = luaL_checklstring(L, -1, &data_length);
+
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                transfer->requestor, transfer->property, UTF8_STRING, 8,
+                data_length, data);
+    }
+
     selection_transfer_notify(transfer->requestor, transfer->selection,
             transfer->target, transfer->property, transfer->time);
     transfer_done(L, transfer);
