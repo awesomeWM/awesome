@@ -25,6 +25,7 @@
 #include "objects/tag.h"
 #include "objects/selection_getter.h"
 #include "objects/drawin.h"
+#include "objects/selection_acquire.h"
 #include "objects/selection_watcher.h"
 #include "xwindow.h"
 #include "ewmh.h"
@@ -1013,7 +1014,8 @@ event_handle_selectionclear(xcb_selection_clear_event_t *ev)
     {
         warn("Lost WM_Sn selection, exiting...");
         g_main_loop_quit(globalconf.loop);
-    }
+    } else
+        selection_handle_selectionclear(ev);
 }
 
 /** \brief awesome xerror function.

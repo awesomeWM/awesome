@@ -23,8 +23,10 @@
 #define AWESOME_OBJECTS_SELECTION_ACQUIRE_H
 
 #include <lua.h>
+#include <xcb/xcb.h>
 
 void selection_acquire_class_setup(lua_State*);
+void selection_handle_selectionclear(xcb_selection_clear_event_t*);
 
 #endif
 
