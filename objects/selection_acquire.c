@@ -20,6 +20,7 @@
  */
 
 #include "objects/selection_acquire.h"
+#include "objects/selection_transfer.h"
 #include "common/luaobject.h"
 #include "globalconf.h"
 
@@ -105,41 +106,6 @@ selection_handle_selectionclear(xcb_selection_clear_event_t *ev)
 
     selection_release(L, -1);
     lua_pop(L, 1);
-}
-
-static void
-selection_transfer_notify(xcb_window_t requestor, xcb_atom_t selection, xcb_atom_t target, xcb_atom_t property, xcb_timestamp_t time)
-{
-    xcb_selection_notify_event_t ev;
-
-    p_clear(&ev, 1);
-    ev.response_type = XCB_SELECTION_NOTIFY;
-    ev.requestor = requestor;
-    ev.selection = selection;
-    ev.target = target;
-    ev.property = property;
-    ev.time = time;
-
-    xcb_send_event(globalconf.connection, false, requestor, XCB_EVENT_MASK_NO_EVENT, (char *) &ev);
-}
-
-static void
-selection_transfer_reject(xcb_window_t requestor, xcb_atom_t selection,
-        xcb_atom_t target, xcb_timestamp_t time)
-{
-    selection_transfer_notify(requestor, selection, target, XCB_NONE, time);
-}
-
-#include "common/atoms.h" /* TODO remove */
-static void
-selection_transfer_begin(lua_State *L, int ud, xcb_window_t requestor,
-        xcb_atom_t selection, xcb_atom_t target, xcb_atom_t property,
-        xcb_timestamp_t time)
-{
-    /* TODO implement this */
-    xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-            requestor, property, UTF8_STRING, 8, 5, "Test\n");
-    selection_transfer_notify(requestor, selection, target, property, time);
 }
 
 void
