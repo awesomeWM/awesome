@@ -54,8 +54,14 @@ luaA_selection_getter_new(lua_State *L)
     selection_getter_t *selection;
     xcb_atom_t name_atom, target_atom;
 
-    name = luaL_checklstring(L, 2, &name_length);
-    target = luaL_checklstring(L, 3, &target_length);
+    luaA_checktable(L, 2);
+    lua_pushliteral(L, "selection");
+    lua_gettable(L, 2);
+    lua_pushliteral(L, "target");
+    lua_gettable(L, 2);
+
+    name = luaL_checklstring(L, -2, &name_length);
+    target = luaL_checklstring(L, -1, &target_length);
 
     /* Create a selection object */
     selection = (void *) selection_getter_class.allocator(L);
