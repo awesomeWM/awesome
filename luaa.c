@@ -48,6 +48,7 @@
 #include "objects/client.h"
 #include "objects/drawable.h"
 #include "objects/drawin.h"
+#include "objects/selection_getter.h"
 #include "objects/screen.h"
 #include "objects/selection_watcher.h"
 #include "objects/tag.h"
@@ -1032,6 +1033,9 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
 
     /* Export client */
     client_class_setup(L);
+
+    /* Export selection getter */
+    selection_getter_class_setup(L);
 
     /* Export keys */
     key_class_setup(L);
