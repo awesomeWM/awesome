@@ -27,7 +27,7 @@
 
 void selection_getter_class_setup(lua_State*);
 void event_handle_selectionnotify(xcb_selection_notify_event_t*);
-int property_handle_awesome_selection_atom(uint8_t, xcb_window_t);
+void property_handle_awesome_selection_atom(uint8_t, xcb_window_t);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
