@@ -29,7 +29,8 @@
 
 enum transfer_state {
     TRANSFER_WAIT_FOR_DATA,
-    TRANSFER_INCREMENTAL,
+    TRANSFER_INCREMENTAL_SENDING,
+    TRANSFER_INCREMENTAL_DONE,
     TRANSFER_DONE
 };
 
@@ -48,6 +49,8 @@ typedef struct selection_transfer_t
     enum transfer_state state;
     /* Offset into TRANSFER_DATA_INDEX for the next chunk of data */
     size_t offset;
+    /* Can there be more data coming from Lua? */
+    bool more_data;
 } selection_transfer_t;
 
 static lua_class_t selection_transfer_class;
@@ -94,6 +97,53 @@ transfer_done(lua_State *L, selection_transfer_t *transfer)
     lua_rawget(L, LUA_REGISTRYINDEX);
     luaL_unref(L, -1, transfer->ref);
     transfer->ref = LUA_NOREF;
+    lua_pop(L, 1);
+}
+
+static void
+transfer_continue_incremental(lua_State *L, int ud)
+{
+    const char *data;
+    size_t data_length;
+    selection_transfer_t *transfer = luaA_checkudata(L, ud, &selection_transfer_class);
+
+    ud = luaA_absindex(L, ud);
+
+    /* Get the data that is to be sent next */
+    luaA_getuservalue(L, ud);
+    lua_pushliteral(L, TRANSFER_DATA_INDEX);
+    lua_rawget(L, -2);
+    lua_remove(L, -2);
+
+    data = luaL_checklstring(L, -1, &data_length);
+    if (transfer->offset == data_length) {
+        if (transfer->more_data) {
+            /* Request the next piece of data from Lua */
+            transfer->state = TRANSFER_INCREMENTAL_DONE;
+            luaA_object_emit_signal(L, ud, "continue", 0);
+            if (transfer->state != TRANSFER_INCREMENTAL_DONE) {
+                /* Lua gave us more data to send. */
+                lua_pop(L, 1);
+                return;
+            }
+        }
+        /* End of transfer */
+        xcb_change_window_attributes(globalconf.connection,
+                transfer->requestor, XCB_CW_EVENT_MASK,
+                (uint32_t[]) { 0 });
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                transfer->requestor, transfer->property, UTF8_STRING, 8,
+                0, NULL);
+        transfer_done(L, transfer);
+    } else {
+        /* Send next piece of data */
+        assert(transfer->offset < data_length);
+        size_t next_length = MIN(data_length - transfer->offset, max_property_length());
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                transfer->requestor, transfer->property, UTF8_STRING, 8,
+                next_length, &data[transfer->offset]);
+        transfer->offset += next_length;
+    }
     lua_pop(L, 1);
 }
 
@@ -153,22 +203,43 @@ luaA_selection_transfer_send(lua_State *L)
     size_t incr_size = 0;
 
     selection_transfer_t *transfer = luaA_checkudata(L, 1, &selection_transfer_class);
-    if (transfer->state != TRANSFER_WAIT_FOR_DATA)
+    if (transfer->state != TRANSFER_WAIT_FOR_DATA && transfer->state != TRANSFER_INCREMENTAL_DONE)
         luaL_error(L, "Transfer object is not ready for more data to be sent");
 
-    /* Get format and data from the table */
     luaA_checktable(L, 2);
+
+    lua_pushliteral(L, "continue");
+    lua_rawget(L, 2);
+    transfer->more_data = incr = lua_toboolean(L, -1);
+    if (incr && lua_isnumber(L, -1))
+        incr_size = lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
+    if (transfer->state == TRANSFER_INCREMENTAL_DONE) {
+        /* Save the data on the transfer object */
+        lua_pushliteral(L, "data");
+        lua_rawget(L, 2);
+
+        luaA_getuservalue(L, 1);
+        lua_pushliteral(L, TRANSFER_DATA_INDEX);
+        lua_pushvalue(L, -3);
+        lua_rawset(L, -3);
+        lua_pop(L, 1);
+
+        /* Continue the incremental transfer */
+        transfer->state = TRANSFER_INCREMENTAL_SENDING;
+        transfer->offset = 0;
+
+        transfer_continue_incremental(L, 1);
+
+        return 0;
+    }
+
+    /* Get format and data from the table */
     lua_pushliteral(L, "format");
     lua_rawget(L, 2);
     lua_pushliteral(L, "data");
     lua_rawget(L, 2);
-
-    lua_pushliteral(L, "continue");
-    lua_rawget(L, 2);
-    incr = lua_toboolean(L, -1);
-    if (incr && lua_isnumber(L, -1))
-        incr_size = lua_tonumber(L, -1);
-    lua_pop(L, 1);
 
     if (lua_isstring(L, -2)) {
         const char *format_string = luaL_checkstring(L, -2);
@@ -231,7 +302,7 @@ luaA_selection_transfer_send(lua_State *L)
             lua_rawset(L, -3);
             lua_pop(L, 1);
 
-            transfer->state = TRANSFER_INCREMENTAL;
+            transfer->state = TRANSFER_INCREMENTAL_SENDING;
             transfer->offset = 0;
         } else {
             xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
@@ -246,43 +317,6 @@ luaA_selection_transfer_send(lua_State *L)
         transfer_done(L, transfer);
 
     return 0;
-}
-
-static void
-transfer_continue_incremental(lua_State *L, int ud)
-{
-    const char *data;
-    size_t data_length;
-    selection_transfer_t *transfer = luaA_checkudata(L, ud, &selection_transfer_class);
-
-    ud = luaA_absindex(L, ud);
-
-    /* Get the data that is to be sent next */
-    luaA_getuservalue(L, ud);
-    lua_pushliteral(L, TRANSFER_DATA_INDEX);
-    lua_rawget(L, -2);
-    lua_remove(L, -2);
-
-    data = luaL_checklstring(L, -1, &data_length);
-    if (transfer->offset == data_length) {
-        /* End of transfer */
-        xcb_change_window_attributes(globalconf.connection,
-                transfer->requestor, XCB_CW_EVENT_MASK,
-                (uint32_t[]) { 0 });
-        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                transfer->requestor, transfer->property, UTF8_STRING, 8,
-                0, NULL);
-        transfer_done(L, transfer);
-    } else {
-        /* Send next piece of data */
-        assert(transfer->offset < data_length);
-        size_t next_length = MIN(data_length - transfer->offset, max_property_length());
-        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                transfer->requestor, transfer->property, UTF8_STRING, 8,
-                next_length, &data[transfer->offset]);
-        transfer->offset += next_length;
-    }
-    lua_pop(L, 1);
 }
 
 void
@@ -300,7 +334,7 @@ selection_transfer_handle_propertynotify(xcb_property_notify_event_t *ev)
     while (lua_next(L, -2) != 0) {
         if (lua_type(L, -1) == LUA_TUSERDATA) {
             selection_transfer_t *transfer = lua_touserdata(L, -1);
-            if (transfer->state == TRANSFER_INCREMENTAL
+            if (transfer->state == TRANSFER_INCREMENTAL_SENDING
                     && transfer->requestor == ev->window
                     && transfer->property == ev->atom) {
                 transfer_continue_incremental(L, -1);
