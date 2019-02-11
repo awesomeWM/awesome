@@ -26,6 +26,7 @@
 #include "objects/client.h"
 #include "objects/drawin.h"
 #include "objects/selection_getter.h"
+#include "objects/selection_transfer.h"
 #include "xwindow.h"
 
 #include <xcb/xcb_atom.h>
@@ -487,6 +488,7 @@ property_handle_propertynotify(xcb_property_notify_event_t *ev)
     globalconf.timestamp = ev->time;
 
     property_handle_propertynotify_xproperty(ev);
+    selection_transfer_handle_propertynotify(ev);
 
     /* Find the correct event handler */
 #define HANDLE(atom_, cb) \

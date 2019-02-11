@@ -25,9 +25,11 @@
 #include "globalconf.h"
 
 #define REGISTRY_TRANSFER_TABLE_INDEX "awesome_selection_transfers"
+#define TRANSFER_DATA_INDEX "data_for_next_chunk"
 
 enum transfer_state {
     TRANSFER_WAIT_FOR_DATA,
+    TRANSFER_INCREMENTAL,
     TRANSFER_DONE
 };
 
@@ -44,10 +46,19 @@ typedef struct selection_transfer_t
     xcb_timestamp_t time;
     /* Current state of the transfer */
     enum transfer_state state;
+    /* Offset into TRANSFER_DATA_INDEX for the next chunk of data */
+    size_t offset;
 } selection_transfer_t;
 
 static lua_class_t selection_transfer_class;
 LUA_OBJECT_FUNCS(selection_transfer_class, selection_transfer_t, selection_transfer)
+
+static size_t max_property_length(void)
+{
+    uint32_t max_request_length = xcb_get_maximum_request_length(globalconf.connection);
+    max_request_length = MIN(max_request_length, (1<<16) - 1);
+    return max_request_length * 4 - sizeof(xcb_change_property_request_t);
+}
 
 static void
 selection_transfer_notify(xcb_window_t requestor, xcb_atom_t selection,
@@ -138,6 +149,8 @@ luaA_selection_transfer_send(lua_State *L)
 {
     size_t data_length;
     const char *data;
+    bool incr = false;
+    size_t incr_size = 0;
 
     selection_transfer_t *transfer = luaA_checkudata(L, 1, &selection_transfer_class);
     if (transfer->state != TRANSFER_WAIT_FOR_DATA)
@@ -150,10 +163,19 @@ luaA_selection_transfer_send(lua_State *L)
     lua_pushliteral(L, "data");
     lua_rawget(L, 2);
 
+    lua_pushliteral(L, "continue");
+    lua_rawget(L, 2);
+    incr = lua_toboolean(L, -1);
+    if (incr && lua_isnumber(L, -1))
+        incr_size = lua_tonumber(L, -1);
+    lua_pop(L, 1);
+
     if (lua_isstring(L, -2)) {
         const char *format_string = luaL_checkstring(L, -2);
         if (A_STRNEQ(format_string, "atom"))
             luaL_error(L, "Unknown format '%s'", format_string);
+        if (incr)
+            luaL_error(L, "Cannot transfer atoms in pieces");
 
         /* 'data' is a table with strings */
         size_t len = luaA_rawlen(L, -1);
@@ -187,16 +209,111 @@ luaA_selection_transfer_send(lua_State *L)
         /* 'data' is a string with the data to transfer */
         data = luaL_checklstring(L, -1, &data_length);
 
-        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
-                transfer->requestor, transfer->property, UTF8_STRING, 8,
-                data_length, data);
+        if (!incr)
+            incr_size = data_length;
+
+        if (data_length >= max_property_length())
+            incr = true;
+
+        if (incr) {
+            xcb_change_window_attributes(globalconf.connection,
+                    transfer->requestor, XCB_CW_EVENT_MASK,
+                    (uint32_t[]) { XCB_EVENT_MASK_PROPERTY_CHANGE });
+
+            xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                    transfer->requestor, transfer->property, INCR, 32, 1,
+                    (const uint32_t[]) { incr_size });
+
+            /* Save the data on the transfer object */
+            luaA_getuservalue(L, 1);
+            lua_pushliteral(L, TRANSFER_DATA_INDEX);
+            lua_pushvalue(L, -3);
+            lua_rawset(L, -3);
+            lua_pop(L, 1);
+
+            transfer->state = TRANSFER_INCREMENTAL;
+            transfer->offset = 0;
+        } else {
+            xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                    transfer->requestor, transfer->property, UTF8_STRING, 8,
+                    data_length, data);
+        }
     }
 
     selection_transfer_notify(transfer->requestor, transfer->selection,
             transfer->target, transfer->property, transfer->time);
-    transfer_done(L, transfer);
+    if (!incr)
+        transfer_done(L, transfer);
 
     return 0;
+}
+
+static void
+transfer_continue_incremental(lua_State *L, int ud)
+{
+    const char *data;
+    size_t data_length;
+    selection_transfer_t *transfer = luaA_checkudata(L, ud, &selection_transfer_class);
+
+    ud = luaA_absindex(L, ud);
+
+    /* Get the data that is to be sent next */
+    luaA_getuservalue(L, ud);
+    lua_pushliteral(L, TRANSFER_DATA_INDEX);
+    lua_rawget(L, -2);
+    lua_remove(L, -2);
+
+    data = luaL_checklstring(L, -1, &data_length);
+    if (transfer->offset == data_length) {
+        /* End of transfer */
+        xcb_change_window_attributes(globalconf.connection,
+                transfer->requestor, XCB_CW_EVENT_MASK,
+                (uint32_t[]) { 0 });
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                transfer->requestor, transfer->property, UTF8_STRING, 8,
+                0, NULL);
+        transfer_done(L, transfer);
+    } else {
+        /* Send next piece of data */
+        assert(transfer->offset < data_length);
+        size_t next_length = MIN(data_length - transfer->offset, max_property_length());
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                transfer->requestor, transfer->property, UTF8_STRING, 8,
+                next_length, &data[transfer->offset]);
+        transfer->offset += next_length;
+    }
+    lua_pop(L, 1);
+}
+
+void
+selection_transfer_handle_propertynotify(xcb_property_notify_event_t *ev)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    if (ev->state != XCB_PROPERTY_DELETE)
+        return;
+
+    /* Iterate over all active selection acquire objects */
+    lua_pushliteral(L, REGISTRY_TRANSFER_TABLE_INDEX);
+    lua_rawget(L, LUA_REGISTRYINDEX);
+    lua_pushnil(L);
+    while (lua_next(L, -2) != 0) {
+        if (lua_type(L, -1) == LUA_TUSERDATA) {
+            selection_transfer_t *transfer = lua_touserdata(L, -1);
+            if (transfer->state == TRANSFER_INCREMENTAL
+                    && transfer->requestor == ev->window
+                    && transfer->property == ev->atom) {
+                transfer_continue_incremental(L, -1);
+                /* Remove table, key and transfer object */
+                lua_pop(L, 3);
+                return;
+            }
+        }
+        /* Remove the value, leaving only the key */
+        lua_pop(L, 1);
+    }
+    /* Remove the table */
+    lua_pop(L, 1);
 }
 
 static bool
