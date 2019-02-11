@@ -128,12 +128,12 @@ transfer_continue_incremental(lua_State *L, int ud)
             }
         }
         /* End of transfer */
-        xcb_change_window_attributes(globalconf.connection,
-                transfer->requestor, XCB_CW_EVENT_MASK,
-                (uint32_t[]) { 0 });
         xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                 transfer->requestor, transfer->property, UTF8_STRING, 8,
                 0, NULL);
+        xcb_change_window_attributes(globalconf.connection,
+                transfer->requestor, XCB_CW_EVENT_MASK,
+                (uint32_t[]) { 0 });
         transfer_done(L, transfer);
     } else {
         /* Send next piece of data */
