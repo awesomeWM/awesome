@@ -202,16 +202,16 @@ selection_getter_find_by_window(lua_State *L, xcb_window_t window)
     return 0;
 }
 
-int
+void
 property_handle_awesome_selection_atom(uint8_t state, xcb_window_t window)
 {
     lua_State *L = globalconf_get_lua_State();
 
     if (state != XCB_PROPERTY_NEW_VALUE)
-        return 0;
+        return;
 
     if (selection_getter_find_by_window(L, window) == 0)
-        return 0;
+        return;
 
     selection_getter_t *selection = lua_touserdata(L, -1);
 
@@ -236,7 +236,6 @@ property_handle_awesome_selection_atom(uint8_t state, xcb_window_t window)
     }
 
     lua_pop(L, 1);
-    return 0;
 }
 
 void
