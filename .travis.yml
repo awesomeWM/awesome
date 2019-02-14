@@ -116,7 +116,7 @@ install:
       if [ "$DO_COVERAGE" = "codecov" ]; then
         test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
-        travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov -e LUANAME,LGIVER || return 1
+        travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -e LUANAME,LGIVER || return 1
         rm build/luacov.report.out build/luacov.stats.out
       fi
       return 0
@@ -145,7 +145,7 @@ install:
           done
 
           # Upload to Codecov.
-          travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -F gcov -e LUANAME,LGIVER
+          travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -e LUANAME,LGIVER
         )
       fi
       return 0
