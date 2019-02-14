@@ -60,6 +60,7 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 local glib = require("lgi").GLib
 local object = require("gears.object")
 local protected_call = require("gears.protected_call")
+local gdebug = require("gears.debug")
 
 --- Timer objects. This type of object is useful when triggering events repeatedly.
 -- The timer will emit the "timeout" signal every N seconds, N being the timeout
@@ -85,7 +86,7 @@ local timer = { mt = {} }
 --- Start the timer.
 function timer:start()
     if self.data.source_id ~= nil then
-        print(traceback("timer already started"))
+        gdebug.print_error(traceback("timer already started"))
         return
     end
     self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
@@ -98,7 +99,7 @@ end
 --- Stop the timer.
 function timer:stop()
     if self.data.source_id == nil then
-        print(traceback("timer not started"))
+        gdebug.print_error(traceback("timer not started"))
         return
     end
     glib.source_remove(self.data.source_id)
