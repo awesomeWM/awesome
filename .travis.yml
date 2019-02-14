@@ -118,6 +118,7 @@ install:
         luacov || return 1
         # Set env variable for codecov.
         TESTS="$1"
+        export TESTS
         travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -e LUANAME,TESTS || return 1
         rm build/luacov.report.out build/luacov.stats.out
       fi
@@ -149,6 +150,7 @@ install:
           # Upload to Codecov.
           # Set env variable for codecov.
           TESTS="$1"
+          export TESTS
           travis_retry bash /tmp/codecov-bash -X gcov -X coveragepy -e LUANAME,TESTS
         )
       fi
