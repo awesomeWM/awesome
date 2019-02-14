@@ -9,18 +9,13 @@ branches:
 
 env:
   matrix:
-    - LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
     - LUA=5.3 LUANAME=lua5.3 DO_COVERAGE=codecov
-    # luajit: installed from source.
-    - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1
-    # Note: luarocks does not work with Lua 5.0.
-    - LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
-    # Lua 5.2 with older lgi and screen size not divisible by 2.
-    # SOURCE_DATE_EPOCH: used for stable dates during build.
-    - LUA=5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079 BUILD_APIDOC=true DO_CHECKQA=1 EMPTY_THEME_WHILE_LOADING=1 SOURCE_DATE_EPOCH=1893456000
   global:
     # Secure GH_APIDOC_TOKEN to push to awesomeWM/apidoc.
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
+    # Code Climate coverage.  This can only be used for coverage reporting,
+    # and is not encrypted to be usable with pull requests from forks.
+    - CC_TEST_REPORTER_ID=b10d552f73a1696f9b6729501fc96b1ed7c08285b576bb41f30e96876a110d7e
 
 before_install:
   - if [ "$BUILD_APIDOC" = true ] && [ -n "$DO_COVERAGE" ]; then echo "BUILD_APIDOC and DO_COVERAGE are not meant to be used together." >&2; exit 1; fi
@@ -98,6 +93,16 @@ install:
 
   # Install dependencies for code coverage testing.
   - if [ -n "$DO_COVERAGE" ]; then sudo luarocks install cluacov; fi
+  - |
+    if [ -n "$DO_COVERAGE" ]; then  # Code Climate
+      sudo luarocks install luacov-multiple
+
+      # Install Code Climate reporter (quite heavy; >10MB).
+      curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+      chmod +x ./cc-test-reporter
+      ./cc-test-reporter --debug before-build
+      ./cc-test-reporter --debug env
+    fi
   - if [ "$DO_COVERAGE" = "coveralls" ]; then sudo luarocks install luacov-coveralls; fi
 
   # Determine custom version.
@@ -117,7 +122,10 @@ install:
         test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
         luacov || return 1
         travis_retry bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F "$1,${LUANAME//./}" || return 1
-        rm build/luacov.report.out build/luacov.stats.out
+        ./cc-test-reporter --debug format-coverage -t coverage.py -o build/codeclimate.$1.json build/coverage.xml
+
+        # Delete processed files.
+        rm build/luacov.report.out build/luacov.stats.out build/coverage.xml
       fi
       return 0
     }
@@ -142,6 +150,8 @@ install:
             # They are not relevant and might cause "Invalid path part" errors
             # with Code Climate.
             find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
+
+            ../cc-test-reporter --debug format-coverage -t gcov -o codeclimate.gcov.json "gcov.$i"
           done
 
           # Upload to Codecov.
@@ -212,6 +222,14 @@ script:
         make check-themes || exit 1
         do_codecov themes
         do_codecov_gcov c_code
+
+        if [ "$TRAVIS_TEST_RESULT" = 0 ] && [ "$DO_COVERAGE" = codecov ]; then
+          # Debug.
+          find build -name 'codeclimate.*.json' -ls
+          parts=$(find build -name 'codeclimate.*.json' | wc -l)
+          ./cc-test-reporter --debug sum-coverage build/codeclimate.*.json -p "$parts"
+          ./cc-test-reporter --debug upload-coverage
+        fi
 
         travis_fold_end
       else
