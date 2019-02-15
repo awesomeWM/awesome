@@ -23,7 +23,7 @@ local function handle_result(success, ...)
 end
 
 local do_pcall
-if _VERSION <= "Lua 5.1" then
+if not select(2, xpcall(function(a) return a end, error, true)) then
     -- Lua 5.1 doesn't support arguments in xpcall :-(
     do_pcall = function(func, ...)
         local args = { ... }
