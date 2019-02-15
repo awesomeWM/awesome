@@ -11,7 +11,7 @@ mouse.coords{x=50, y= 10}
 
     local wb = wibox {width = 100, height = 44, x = 50, y = 25, visible = true}
 
-awesome.emit_signal("refresh")
+require("gears.delayed_call").run_now()
 local tt = awful.tooltip {
     text = "A tooltip!",
     objects = {wb},
@@ -21,4 +21,4 @@ tt.bg = beautiful.bg_normal
 
 mouse.coords{x=75, y= 35}
 mouse.push_history()
-awesome.emit_signal("refresh")
+require("gears.delayed_call").run_now()

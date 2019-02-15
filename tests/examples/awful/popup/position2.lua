@@ -32,7 +32,7 @@ local p = awful.popup { --DOC_HIDE
     placement    = awful.placement.centered, --DOC_HIDE
 } --DOC_HIDE
 p:_apply_size_now() --DOC_HIDE
-awesome.emit_signal("refresh") --DOC_HIDE
+require("gears.delayed_call").run_now() --DOC_HIDE
 p._drawable._do_redraw() --DOC_HIDE
 
 --DOC_HIDE Necessary as the widgets are drawn later

@@ -15,7 +15,7 @@ local wb = awful.wibar { position = "top" } --DOC_HIDE
 wb:setup { layout = wibox.layout.align.horizontal, --DOC_HIDE
     nil, nil, mytextclock} --DOC_HIDE
 
-awesome.emit_signal("refresh") --DOC_HIDE the hierarchy is async
+require("gears.delayed_call").run_now() --DOC_HIDE the hierarchy is async
 
     local myclock_t = awful.tooltip {
         objects        = { mytextclock },
@@ -24,7 +24,7 @@ awesome.emit_signal("refresh") --DOC_HIDE the hierarchy is async
         end,
     }
 
-awesome.emit_signal("refresh") --DOC_HIDE
+require("gears.delayed_call").run_now() --DOC_HIDE
 
 mouse.coords{x=250, y= 10} --DOC_HIDE
 mouse.push_history() --DOC_HIDE

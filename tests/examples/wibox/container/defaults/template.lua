@@ -64,7 +64,7 @@ local container = wibox.widget {
 
 -- Emulate the event loop for 10 iterations
 for _ = 1, 10 do
-    awesome:emit_signal("refresh")
+    require("gears.delayed_call").run_now()
 end
 
 -- Get the example fallback size (the tests can return a size if the want)

@@ -111,7 +111,7 @@ local p10 = awful.popup {
     shape = gears.shape.infobubble,
 }
 
-awesome.emit_signal("refresh")
+require("gears.delayed_call").run_now()
 p10:bind_to_widget(mytextclock)
 
 -- The titlebar
