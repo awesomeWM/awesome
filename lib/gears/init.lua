@@ -23,6 +23,7 @@ return
     string = require("gears.string");
     sort = require("gears.sort");
     filesystem = require("gears.filesystem");
+    delayed_call = require("gears.delayed_call");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
