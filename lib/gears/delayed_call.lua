@@ -21,10 +21,11 @@ local delayed_calls = {}
 -- prematurely.
 -- @function gears.delayed_call.run_now
 function module.run_now()
-    for _, callback in ipairs(delayed_calls) do
+    local to_run
+    to_run, delayed_calls = delayed_calls, {}
+    for _, callback in ipairs(to_run) do
         protected_call(unpack(callback))
     end
-    delayed_calls = {}
 end
 
 --- Call the given function at the end of the current main loop iteration
