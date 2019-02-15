@@ -226,12 +226,17 @@ function timer.weak_start_new(timeout, callback)
 end
 
 local delayed_calls = {}
-capi.awesome.connect_signal("refresh", function()
+
+--- Run all pending delayed calls now. This function should best not be used at
+-- all, because it means that less batching happens and the delayed calls run
+-- prematurely.
+-- @function gears.timer.run_delayed_calls_now
+function timer.run_delayed_calls_now()
     for _, callback in ipairs(delayed_calls) do
         protected_call(unpack(callback))
     end
     delayed_calls = {}
-end)
+end
 
 --- Call the given function at the end of the current main loop iteration
 -- @tparam function callback The function that should be called
@@ -241,6 +246,8 @@ function timer.delayed_call(callback, ...)
     assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))
     table.insert(delayed_calls, { callback, ... })
 end
+
+capi.awesome.connect_signal("refresh", timer.run_delayed_calls_now)
 
 function timer.mt.__call(_, ...)
     return timer.new(...)

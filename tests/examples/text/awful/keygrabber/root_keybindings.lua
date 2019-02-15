@@ -27,7 +27,7 @@ awful.keygrabber {
 --DOC_NEWLINE
 -- The following will **NOT** trigger the keygrabbing because it isn't exported
 -- to the root (global) keys. Adding `export_keybindings` would solve that
-awesome.emit_signal("refresh") --DOC_HIDE `root_keybindings` is async
+require("gears.timer").run_delayed_calls_now() --DOC_HIDE `root_keybindings` is async
 root._execute_keybinding({"Mod4", "Shift"}, "i")
 assert(#keybinding_works == 0)
 

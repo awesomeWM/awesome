@@ -11,7 +11,7 @@ local wibox = require("wibox")
 
     local wb = wibox {width = 100, height = 44, x = 100, y = 50, visible = true}
 
-awesome.emit_signal("refresh")
+require("gears.timer").run_delayed_calls_now()
 
 for _, side in ipairs{ "left", "right", "bottom", "top" } do
     local tt = awful.tooltip {
@@ -26,4 +26,4 @@ end
 
 mouse.coords{x=125, y= 75}
 mouse.push_history()
-awesome.emit_signal("refresh")
+require("gears.timer").run_delayed_calls_now()

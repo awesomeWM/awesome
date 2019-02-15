@@ -13,7 +13,7 @@ image_type = image_type or "svg"
 
 -- Emulate the event loop for 10 iterations
 for _ = 1, 10 do
-    awesome:emit_signal("refresh")
+    require("gears.timer").run_delayed_calls_now()
 end
 
 -- Get the example fallback size (the tests can return a size if the want)

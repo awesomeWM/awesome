@@ -99,7 +99,7 @@ local widget, w, h = loadfile(file_path)(generic_widget, generic_before_after)
 
 -- Emulate the event loop for 10 iterations
 for _ = 1, 10 do
-    awesome:emit_signal("refresh")
+    require("gears.timer").run_delayed_calls_now()
 end
 
 -- Save to the output file
