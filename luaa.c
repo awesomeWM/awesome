@@ -141,13 +141,6 @@ extern const struct luaL_Reg awesome_mouse_meta[];
  * @signal xkb::group_changed.
  */
 
-/** Refresh.
- *
- * This signal is emitted as a kind of idle signal in the event loop.
- * One example usage is in `gears.timer` to executed delayed calls.
- * @signal refresh
- */
-
 /** Awesome is about to enter the event loop.
  *
  * This means all initialization has been done.
@@ -1185,6 +1178,7 @@ luaA_emit_startup()
 void
 luaA_emit_refresh()
 {
+    /* TODO v5: Deprecate / remove this */
     lua_State *L = globalconf_get_lua_State();
     signal_object_emit(L, &global_signals, "refresh", 0);
 }
