@@ -24,7 +24,7 @@ local awful = {keygrabber = require("awful.keygrabber"), --DOC_HIDE
     }
 
 --DOC_HIDE Trigger the keybinging
-awesome.emit_signal("refresh") --DOC_HIDE `export_keybindings` is async
+require("gears.delayed_call").run_now() --DOC_HIDE `export_keybindings` is async
 root.fake_input("key_press", "Alt_L")--DOC_HIDE
 root.fake_input("key_press", "Tab")--DOC_HIDE
 root.fake_input("key_release", "Tab")--DOC_HIDE

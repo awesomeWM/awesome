@@ -7,8 +7,8 @@ local create_wibox = require("_wibox_helper").create_wibox
 local wibox = require("wibox")
 
 local prepare_for_collect = nil
-local function emit_refresh()
-    awesome.emit_signal("refresh")
+local function run_delayed_calls()
+    require("gears.delayed_call").run_now()
 end
 
 -- Make the layoutbox in the default config GC'able
@@ -18,7 +18,7 @@ for s in screen do
     s.mywibox = nil
     s.mylayoutbox = nil
 end
-emit_refresh()
+run_delayed_calls()
 
 -- Test if some objects can be garbage collected
 local function collectable(a, b, c, d, e, f, g, h, last)
@@ -66,19 +66,19 @@ collectable(wibox.widget.textclock())
 collectable(awful.widget.layoutbox(1))
 
 -- Some widgets do things via timer.delayed_call
-prepare_for_collect = emit_refresh
+prepare_for_collect = run_delayed_calls
 collectable(tooltip_delayed())
 
-prepare_for_collect = emit_refresh
+prepare_for_collect = run_delayed_calls
 collectable(tooltip_now())
 
-prepare_for_collect = emit_refresh
+prepare_for_collect = run_delayed_calls
 collectable(awful.widget.taglist{screen=1, filter=awful.widget.taglist.filter.all})
 
-prepare_for_collect = emit_refresh
+prepare_for_collect = run_delayed_calls
 collectable(awful.widget.tasklist{screen=1, filter=awful.widget.tasklist.filter.currenttags})
 
-prepare_for_collect = emit_refresh
+prepare_for_collect = run_delayed_calls
 collectable(create_wibox())
 
 runner.run_steps({ function() return true end })
