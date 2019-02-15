@@ -35,6 +35,8 @@
 #define _NET_WM_STATE_ADD 1
 #define _NET_WM_STATE_TOGGLE 2
 
+#define ALL_DESKTOPS 0xffffffff
+
 /** Update client EWMH hints.
  * \param L The Lua VM state.
  */
@@ -430,7 +432,7 @@ ewmh_process_desktop(client_t *c, uint32_t desktop)
 {
     lua_State *L = globalconf_get_lua_State();
     int idx = desktop;
-    if(desktop == 0xffffffff)
+    if(desktop == ALL_DESKTOPS)
     {
         luaA_object_push(L, c);
         lua_pushboolean(L, true);
@@ -517,6 +519,13 @@ ewmh_client_update_desktop(client_t *c)
 {
     int i;
 
+    if(c->sticky)
+    {
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                            c->window, _NET_WM_DESKTOP, XCB_ATOM_CARDINAL, 32, 1,
+                            (uint32_t[]) { ALL_DESKTOPS });
+        return;
+    }
     for(i = 0; i < globalconf.tags.len; i++)
         if(is_client_tagged(c, globalconf.tags.tab[i]))
         {
