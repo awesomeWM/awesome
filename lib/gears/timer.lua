@@ -49,14 +49,10 @@
 -- @classmod gears.timer
 ---------------------------------------------------------------------------
 
-local capi = { awesome = awesome }
-local ipairs = ipairs
 local pairs = pairs
 local setmetatable = setmetatable
-local table = table
 local tonumber = tonumber
 local traceback = debug.traceback
-local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local glib = require("lgi").GLib
 local object = require("gears.object")
 local protected_call = require("gears.protected_call")
@@ -81,6 +77,8 @@ local protected_call = require("gears.protected_call")
 -- @signal timeout
 
 local timer = { mt = {} }
+
+timer.delayed_call = require("gears.delayed_call") -- TODO v5 deprecate this
 
 --- Start the timer.
 function timer:start()
@@ -223,23 +221,6 @@ function timer.weak_start_new(timeout, callback)
             return cb()
         end
     end)
-end
-
-local delayed_calls = {}
-capi.awesome.connect_signal("refresh", function()
-    for _, callback in ipairs(delayed_calls) do
-        protected_call(unpack(callback))
-    end
-    delayed_calls = {}
-end)
-
---- Call the given function at the end of the current main loop iteration
--- @tparam function callback The function that should be called
--- @param ... Arguments to the callback function
--- @function gears.timer.delayed_call
-function timer.delayed_call(callback, ...)
-    assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))
-    table.insert(delayed_calls, { callback, ... })
 end
 
 function timer.mt.__call(_, ...)
