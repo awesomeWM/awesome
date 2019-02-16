@@ -65,14 +65,14 @@ local notification = {}
 -- @beautiful beautiful.notification_height
 -- @tparam int notification_height
 
---- Unique identifier of the notification.
+-- Unique identifier of the notification.
 -- This is the equivalent to a PID as allows external applications to select
 -- notifications.
--- @property text
+-- @property id
 -- @param string
 -- @see title
 
---- Text of the notification.
+-- Text of the notification  [[deprecated]]
 -- @property text
 -- @param string
 -- @see title
