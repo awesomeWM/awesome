@@ -2,6 +2,7 @@
 -- regressing as the new notification API is improving.
 local spawn     = require("awful.spawn")
 local naughty   = require("naughty"    )
+local gdebug    = require("gears.debug")
 local cairo     = require("lgi"        ).cairo
 local beautiful = require("beautiful")
 
@@ -49,12 +50,14 @@ local active, destroyed, reasons, counter = {}, {}, {}, 0
 
 local default_width, default_height = 0, 0
 
-naughty.connect_signal("added", function(n)
+local function added_callback(n)
     table.insert(active, n)
     counter = counter + 1
-end)
+end
 
-naughty.connect_signal("destroyed", function(n, reason)
+naughty.connect_signal("added", added_callback)
+
+local function destroyed_callback(n, reason)
     local found = false
 
     for k, n2 in ipairs(active) do
@@ -71,7 +74,9 @@ naughty.connect_signal("destroyed", function(n, reason)
     end
 
     table.insert(destroyed, n)
-end)
+end
+
+naughty.connect_signal("destroyed", destroyed_callback)
 
 table.insert(steps, function()
     if not has_cmd_notify then return true end
@@ -663,6 +668,85 @@ if has_cmd_send then
     end)
 
 end
+
+-- Now check if the old deprecated (but still supported) APIs don't have errors.
+table.insert(steps, function()
+    -- Tests are (by default) not allowed to call deprecated APIs
+    gdebug.deprecate = function() end
+
+    local n = naughty.notification {
+        title   = "foo",
+        message = "bar",
+        timeout = 25000,
+    }
+
+    -- Make sure the suspension don't cause errors
+    assert(not naughty.is_suspended())
+    assert(not naughty.suspended)
+    naughty.suspend()
+    assert(naughty.is_suspended())
+    assert(naughty.suspended)
+    naughty.resume()
+    assert(not naughty.is_suspended())
+    assert(not naughty.suspended)
+    naughty.toggle()
+    assert(naughty.is_suspended())
+    assert(naughty.suspended)
+    naughty.toggle()
+    assert(not naughty.is_suspended())
+    assert(not naughty.suspended)
+    naughty.suspended = not naughty.suspended
+    assert(naughty.is_suspended())
+    assert(naughty.suspended)
+    naughty.suspended = not naughty.suspended
+    assert(not naughty.is_suspended())
+    assert(not naughty.suspended)
+
+    -- Replace the text
+    assert(n.message == "bar")
+    assert(n.text    == "bar")
+    assert(n.title   == "foo")
+    naughty.replace_text(n, "foobar", "baz")
+    assert(n.title   == "foobar")
+    assert(n.message == "baz")
+    assert(n.text    == "baz")
+
+    -- Test the ID system
+    n.id = 1337
+    assert(n.id == 1337)
+    assert(naughty.getById(1337) == n)
+    assert(naughty.get_by_id(1337) == n)
+    assert(naughty.getById(42) ~= n)
+    assert(naughty.get_by_id(42) ~= n)
+
+    -- The timeout
+    naughty.reset_timeout(n, 1337)
+
+    -- Destroy using the old API
+    local old_count = #destroyed
+    naughty.destroy(n)
+    assert(old_count == #destroyed - 1)
+
+    -- Destroy using the old API, while suspended
+    local n2 = naughty.notification {
+        title   = "foo",
+        message = "bar",
+        timeout = 25000,
+    }
+    naughty.suspended = true
+    naughty.destroy(n2)
+    assert(old_count == #destroyed - 2)
+    naughty.suspended = false
+
+    -- The old notify function and "text" instead of "message"
+    naughty.notify { text = "foo" }
+
+    -- Finish by testing disconnect_signal
+    naughty.disconnect_signal("destroyed", destroyed_callback)
+    naughty.disconnect_signal("added", added_callback)
+
+    return true
+end)
 
 -- Test many screens.
 
