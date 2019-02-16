@@ -385,9 +385,6 @@ luaA_fixups(lua_State *L)
     /* replace type */
     lua_pushcfunction(L, luaAe_type);
     lua_setglobal(L, "type");
-    /* set selection */
-    lua_pushcfunction(L, luaA_selection_get);
-    lua_setglobal(L, "selection");
 }
 
 static const char *
@@ -1042,6 +1039,9 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
 
     /* Export selection watcher */
     selection_watcher_class_setup(L);
+
+    /* Setup the selection interface */
+    selection_setup(L);
 
     /* add Lua search paths */
     lua_getglobal(L, "package");

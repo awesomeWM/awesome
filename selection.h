@@ -24,7 +24,7 @@
 
 #include <lua.h>
 
-int luaA_selection_get(lua_State *);
+void selection_setup(lua_State *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
