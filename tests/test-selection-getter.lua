@@ -61,7 +61,7 @@ runner.run_steps{
 
         -- Now query the state of the clipboard (should be empty)
         continue = false
-        local s = selection_getter{ selection = "CLIPBOARD", target = "TARGETS" }
+        local s = selection.getter{ selection = "CLIPBOARD", target = "TARGETS" }
         s:connect_signal("data", function(...) error("Got unexpected data: " .. dump_return{...}) end)
         s:connect_signal("data_end", function()
             assert(not continue)
@@ -97,7 +97,7 @@ runner.run_steps{
 
         -- Query whether the clipboard contains a text (UTF8_STRING)
         continue = false
-        local s = selection_getter{ selection = "CLIPBOARD", target = "TARGETS" }
+        local s = selection.getter{ selection = "CLIPBOARD", target = "TARGETS" }
         local data = nil
         s:connect_signal("data", function(_, d)
             assert(not data)
@@ -120,7 +120,7 @@ runner.run_steps{
 
         -- Query the text in the clipboard
         continue = false
-        local s = selection_getter{ selection = "CLIPBOARD", target = "UTF8_STRING" }
+        local s = selection.getter{ selection = "CLIPBOARD", target = "UTF8_STRING" }
         local data = nil
         s:connect_signal("data", function(_, d)
             assert(data == nil)
@@ -161,7 +161,7 @@ runner.run_steps{
 
         -- Query the image in the clipboard
         continue = false
-        local s = selection_getter{ selection = "CLIPBOARD", target = "image/bmp" }
+        local s = selection.getter{ selection = "CLIPBOARD", target = "image/bmp" }
         local data = {}
         s:connect_signal("data", function(_, d)
             table.insert(data, d)

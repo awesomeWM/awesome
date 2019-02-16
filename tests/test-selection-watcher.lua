@@ -29,9 +29,9 @@ Gtk.main()
 local had_error = false
 local owned_clipboard_changes, unowned_clipboard_changes = 0, 0
 
-local clipboard_watcher = selection_watcher("CLIPBOARD")
-local clipboard_watcher_inactive = selection_watcher("CLIPBOARD")
-local primary_watcher = selection_watcher("PRIMARY")
+local clipboard_watcher = selection.watcher("CLIPBOARD")
+local clipboard_watcher_inactive = selection.watcher("CLIPBOARD")
+local primary_watcher = selection.watcher("PRIMARY")
 
 clipboard_watcher:connect_signal("selection_changed", function(_, owned)
     if owned then
