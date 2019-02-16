@@ -52,6 +52,7 @@ static xcb_window_t selection_window = XCB_NONE;
 static int
 luaA_selection_get(lua_State *L)
 {
+    luaA_deprecate(L, "selection.getter(\"PRIMARY\", \"UTF8_STRING\")");
     if(selection_window == XCB_NONE)
     {
         xcb_screen_t *screen = globalconf.screen;
