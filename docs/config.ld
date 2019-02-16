@@ -121,9 +121,12 @@ file = {
         '../lib/gears/init.lua',
         '../lib/wibox/layout/init.lua',
         '../lib/wibox/container/init.lua',
+        '../lib/naughty/constants.lua',
+        '../lib/naughty/dbus.lua',
 
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',
+        '../lib/naughty/layout/init.lua',
 
         -- Deprecated classes for one years or more don't deserve entries
         -- in the index

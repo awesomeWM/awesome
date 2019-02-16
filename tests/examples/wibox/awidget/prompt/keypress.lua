@@ -15,7 +15,7 @@ local naughty   = {} --DOC_HIDE
         prompt               = "<b>Run: </b>",
         keypressed_callback  = function(mod, key, cmd) --luacheck: no unused args
             if key == "Shift_L" then
-                notif = naughty.notify { text = "Shift pressed" }
+                notif = naughty.notification { message = "Shift pressed" }
             end
         end,
         keyreleased_callback = function(mod, key, cmd) --luacheck: no unused args

@@ -31,8 +31,7 @@ local steps = {
             fake_screen.selected_tag.layout = max
 
             -- Display a notification on the screen-to-be-removed
-            naughty.notify{ text = "test", screen = fake_screen }
-
+            naughty.notification { message = "test", screen = fake_screen }
             return true
         end
     end,
