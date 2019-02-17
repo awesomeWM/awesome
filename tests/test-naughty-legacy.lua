@@ -88,7 +88,7 @@ naughty.connect_signal("destroyed", destroyed_callback)
 table.insert(steps, function()
     if not has_cmd_notify then return true end
 
-    spawn('notify-send title message -t 25000')
+    spawn{ 'notify-send', 'title', 'message', '-t', '25000' }
 
     return true
 end)
@@ -128,7 +128,7 @@ table.insert(steps, function()
     -- There is some magic behind this, check it works
     assert(naughty.suspended)
 
-    spawn('notify-send title message -t 25000')
+    spawn{ 'notify-send', 'title', 'message', '-t', '25000' }
 
     return true
 end)
@@ -150,7 +150,7 @@ table.insert(steps, function(count)
     active[1]:destroy()
     assert(#active == 0)
 
-    spawn('notify-send title message -t 1')
+    spawn{ 'notify-send', 'title', 'message', '-t', '1' }
 
     return true
 end)
@@ -175,7 +175,7 @@ table.insert(steps, function()
     -- There is some magic behind this, make sure it works
     assert(naughty.expiration_paused)
 
-    spawn('notify-send title message -t 1')
+    spawn{ 'notify-send', 'title', 'message', '-t', '1' }
 
     return true
 end)
@@ -209,9 +209,9 @@ table.insert(steps, function()
     -- so better not "document" the instantaneous clearing of the queue.
     if #active > 0 then return end
 
-    spawn('notify-send low      message -t 25000 -u low')
-    spawn('notify-send normal   message -t 25000 -u normal')
-    spawn('notify-send critical message -t 25000 -u critical')
+    spawn{ 'notify-send', 'low',      'message', '-t', '25000', '-u', 'low' }
+    spawn{ 'notify-send', 'normal',   'message', '-t', '25000', '-u', 'normal' }
+    spawn{ 'notify-send', 'critical', 'message', '-t', '25000', '-u', 'critical' }
 
     return true
 end)
@@ -236,7 +236,7 @@ table.insert(steps, function()
     -- Everything should fit, otherwise the math is wrong in
     -- `neughty.layout.legacy` and its a regression.
     for i=1, max_notif do
-        spawn('notify-send "notif '..i..'" message -t 25000 -u low')
+        spawn{ 'notify-send', 'notif '..i, 'message', '-t', '25000', '-u', 'low' }
     end
 
     return true
@@ -285,7 +285,7 @@ table.insert(steps, function()
 
     -- Now add even more!
     for i=1, 5 do
-        spawn('notify-send "notif '..i..'" message -t 25000 -u low')
+        spawn{ 'notify-send', 'notif '..i, 'message', '-t', '25000', '-u', 'low' }
     end
 
     return true
@@ -566,20 +566,21 @@ end)
 -- Test more advanced features than what notify-send can provide.
 if has_cmd_send then
 
-    local cmd = [[dbus-send \
-        --type=method_call \
-        --print-reply=literal \
-        --dest=org.freedesktop.Notifications \
-        /org/freedesktop/Notifications \
-        org.freedesktop.Notifications.Notify \
-        string:"Awesome test" \
-        uint32:0 \
-        string:"" \
-        string:"title" \
-        string:"message body" \
-        array:string:1,"one",2,"two",3,"three" \
-        dict:string:string:"","" \
-        int32:25000]]
+    local cmd = { 'dbus-send',
+        '--type=method_call',
+        '--print-reply=literal',
+        '--dest=org.freedesktop.Notifications',
+        '/org/freedesktop/Notifications',
+        'org.freedesktop.Notifications.Notify',
+        'string:"Awesome test"',
+        'uint32:0',
+        'string:""',
+        'string:"title"',
+        'string:"message body"',
+        'array:string:1,one,2,two,3,three',
+        'dict:string:string:"",""',
+        'int32:25000'
+    }
 
     -- Test the actions.
     table.insert(steps, function()
@@ -632,20 +633,21 @@ if has_cmd_send then
         n:connect_signal("property::message", function() message_u = true end)
         n:connect_signal("property::actions", function() actions_u = true end)
 
-        local update = [[dbus-send \
-        --type=method_call \
-        --print-reply=literal \
-        --dest=org.freedesktop.Notifications \
-        /org/freedesktop/Notifications \
-        org.freedesktop.Notifications.Notify \
-        string:"Awesome test" \
-        uint32:]].. nid ..[[ \
-        string:"" \
-        string:"updated title" \
-        string:"updated message body" \
-        array:string:1,"four",2,"five",3,"six" \
-        dict:string:string:"","" \
-        int32:25000]]
+        local update = { 'dbus-send',
+        '--type=method_call',
+        '--print-reply=literal',
+        '--dest=org.freedesktop.Notifications',
+        '/org/freedesktop/Notifications',
+        'org.freedesktop.Notifications.Notify',
+        'string:"Awesome test"',
+        'uint32:' .. nid,
+        'string:""',
+        'string:updated title',
+        'string:updated message body',
+        'array:string:1,four,2,five,3,six',
+        'dict:string:string:"",""',
+        'int32:25000',
+        }
 
         spawn(update)
 
