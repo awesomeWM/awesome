@@ -8,7 +8,7 @@ local beautiful = require("beautiful")
 
 -- mouse.coords{x=50, y= 10}
 
-awesome.emit_signal("refresh")
+require("gears.timer").run_delayed_calls_now()
 
 local x_offset = 0
 
@@ -20,13 +20,13 @@ for _, color in ipairs{ "#ff0000", "#00ff00", "#0000ff", "#00ffff" } do
         border_color = color,
     }
     tt.bg = beautiful.bg_normal
-    awesome.emit_signal("refresh")
+    require("gears.timer").run_delayed_calls_now()
     tt:show()
-    awesome.emit_signal("refresh")
+    require("gears.timer").run_delayed_calls_now()
     tt.wibox.x = x_offset
     x_offset = x_offset + 640/5
 end
 
 mouse.coords{x=125, y= 0}
 -- mouse.push_history()
-awesome.emit_signal("refresh")
+require("gears.timer").run_delayed_calls_now()

@@ -41,7 +41,7 @@ do
 end
 
 local function do_pending_repaint()
-    awesome.emit_signal("refresh")
+    require("gears.timer").run_delayed_calls_now()
 end
 
 local function create_and_draw_wibox()

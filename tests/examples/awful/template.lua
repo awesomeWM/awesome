@@ -13,7 +13,7 @@ local args = loadfile(file_path)() or {}
 
 -- Emulate the event loop for 5 iterations
 for _ = 1, 5 do
-    awesome.emit_signal("refresh")
+    require("gears.timer").run_delayed_calls_now()
 end
 
 -- Draw the result
@@ -172,7 +172,7 @@ end
 
 -- Emulate the event loop for another 5 iterations
 for _ = 1, 5 do
-    awesome.emit_signal("refresh")
+    require("gears.timer").run_delayed_calls_now()
 end
 
 for _, d in ipairs(drawin.get()) do
