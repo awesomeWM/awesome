@@ -198,7 +198,6 @@ static int
 luaA_selection_transfer_send(lua_State *L)
 {
     size_t data_length;
-    const char *data;
     bool incr = false;
     size_t incr_size = 0;
 
@@ -278,7 +277,7 @@ luaA_selection_transfer_send(lua_State *L)
                 len, &atoms[0]);
     } else {
         /* 'data' is a string with the data to transfer */
-        data = luaL_checklstring(L, -1, &data_length);
+        const char *data = luaL_checklstring(L, -1, &data_length);
 
         if (!incr)
             incr_size = data_length;
