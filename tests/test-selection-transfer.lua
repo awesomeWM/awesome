@@ -66,20 +66,20 @@ end
 runner.run_steps{
     function()
         -- Get the selection
-        local s = assert(selection_acquire("CLIPBOARD"),
+        local s = assert(selection_acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
 
         -- Steal selection ownership from ourselves and test that it works
         local s_released
         s:connect_signal("release", function() s_released = true end)
 
-        selection = assert(selection_acquire("CLIPBOARD"),
+        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
 
         assert(s_released)
 
         -- Now test selection transfers
-        selection = assert(selection_acquire("CLIPBOARD"),
+        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
         selection:connect_signal("request", function(_, target, transfer)
             if target == "TARGETS" then
@@ -108,7 +108,7 @@ runner.run_steps{
         continue = false
 
         -- Now test piece-wise selection transfers
-        selection = assert(selection_acquire("CLIPBOARD"),
+        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
         selection:connect_signal("request", function(_, target, transfer)
             if target == "TARGETS" then
@@ -148,7 +148,7 @@ runner.run_steps{
         continue = false
 
         -- Now test a huge transfer
-        selection = assert(selection_acquire("CLIPBOARD"),
+        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
         selection:connect_signal("request", function(_, target, transfer)
             if target == "TARGETS" then
@@ -212,7 +212,7 @@ runner.run_steps{
         continue = false
 
         -- Test for "release" signal when we lose selection
-        selection = assert(selection_acquire("CLIPBOARD"),
+        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
         selection:connect_signal("release", function() selection_released = true end)
         awesome.sync()

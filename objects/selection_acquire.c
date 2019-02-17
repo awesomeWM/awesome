@@ -139,7 +139,10 @@ luaA_selection_acquire_new(lua_State *L)
     xcb_atom_t name_atom;
     selection_acquire_t *selection;
 
-    name = luaL_checklstring(L, 2, &name_length);
+    luaA_checktable(L, 2);
+    lua_pushliteral(L, "selection");
+    lua_gettable(L, 2);
+    name = luaL_checklstring(L, -1, &name_length);
 
     /* Get the atom identifying the selection */
     reply = xcb_intern_atom_reply(globalconf.connection,
