@@ -102,6 +102,8 @@ Additionally, the following optional dependencies exist:
   generate slightly better backtraces on crashes
 - `Xephyr` or `Xvfb` for running integration tests
 - [GTK+ >= 3.10](https://www.gtk.org/) for `./themes/gtk/`
+- [xcb-errors](https://gitlab.freedesktop.org/xorg/lib/libxcb-errors) for
+  pretty-printing of X11 errors
 
 ## Running Awesome
 

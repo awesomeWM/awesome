@@ -145,6 +145,9 @@ awesome_atexit(bool restart)
 
     /* Disconnect *after* closing lua */
     xcb_cursor_context_free(globalconf.cursor_ctx);
+#ifdef WITH_XCB_ERRORS
+    xcb_errors_context_free(globalconf.errors_ctx);
+#endif
     xcb_disconnect(globalconf.connection);
 
     close(sigchld_pipe[0]);
@@ -750,6 +753,11 @@ main(int argc, char **argv)
                 globalconf.default_cmap, globalconf.screen->root,
                 globalconf.visual->visual_id);
     }
+
+#ifdef WITH_XCB_ERRORS
+    if (xcb_errors_context_new(globalconf.connection, &globalconf.errors_ctx) < 0)
+        fatal("Failed to initialize xcb-errors");
+#endif
 
     /* Get a recent timestamp */
     acquire_timestamp();

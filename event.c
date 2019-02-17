@@ -1036,10 +1036,24 @@ xerror(xcb_generic_error_t *e)
            && e->major_code == XCB_CONFIGURE_WINDOW))
         return;
 
-    warn("X error: request=%s (major %d, minor %d), error=%s (%d)",
-         xcb_event_get_request_label(e->major_code),
+#ifdef WITH_XCB_ERRORS
+    const char *major = xcb_errors_get_name_for_major_code(
+            globalconf.errors_ctx, e->major_code);
+    const char *minor = xcb_errors_get_name_for_minor_code(
+            globalconf.errors_ctx, e->major_code, e->minor_code);
+    const char *extension = NULL;
+    const char *error = xcb_errors_get_name_for_error(
+            globalconf.errors_ctx, e->error_code, &extension);
+#else
+    const char *major = xcb_event_get_request_label(e->major_code);
+    const char *minor = NULL;
+    const char *extension = NULL;
+    const char *error = xcb_event_get_error_label(e->error_code);
+#endif
+    warn("X error: request=%s%s%s (major %d, minor %d), error=%s%s%s (%d)",
+         major, minor == NULL ? "" : "-", NONULL(minor),
          e->major_code, e->minor_code,
-         xcb_event_get_error_label(e->error_code),
+         NONULL(extension), extension == NULL ? "" : "-", error,
          e->error_code);
 
     return;
