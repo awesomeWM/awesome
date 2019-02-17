@@ -65,14 +65,14 @@ local notification = {}
 -- @beautiful beautiful.notification_height
 -- @tparam int notification_height
 
---- Unique identifier of the notification.
+-- Unique identifier of the notification.
 -- This is the equivalent to a PID as allows external applications to select
 -- notifications.
--- @property text
+-- @property id
 -- @param string
 -- @see title
 
---- Text of the notification.
+-- Text of the notification  [[deprecated]]
 -- @property text
 -- @param string
 -- @see title
@@ -237,13 +237,22 @@ local notification = {}
 
 --FIXME add methods such as persist
 
---- Destroy notification by notification object
+--- Destroy notification by notification object.
 --
 -- @tparam string reason One of the reasons from `notification_closed_reason`
 -- @tparam[opt=false] boolean keep_visible If true, keep the notification visible
--- @return True if the popup was successfully destroyed, nil otherwise
+-- @return True if the popup was successfully destroyed, false otherwise
 function notification:destroy(reason, keep_visible)
+    if self._private.is_destroyed then
+          gdebug.print_warning("Trying to destroy the same notification twice. It"..
+            " was destroyed because: "..self._private.destroy_reason)
+          return false
+    end
+
     self:emit_signal("destroyed", reason, keep_visible)
+
+    self._private.is_destroyed = true
+    self._private.destroy_reason = reason
 
     return true
 end
