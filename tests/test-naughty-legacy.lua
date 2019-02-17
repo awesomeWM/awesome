@@ -44,7 +44,14 @@ check_cmd()
 
 -- Can't test anything of value the documentation example tests don't already
 -- hit.
-if not has_cmd_send then require("_runner").run_steps {}; return end
+if not has_cmd_send then
+    require("gears.debug").print_warning("Did not find dbus-send, skipping test")
+    require("_runner").run_steps {}
+    return
+end
+if not has_cmd_notify then
+    require("gears.debug").print_warning("Did not find notify-send, skipping some tests")
+end
 
 local active, destroyed, reasons, counter = {}, {}, {}, 0
 
