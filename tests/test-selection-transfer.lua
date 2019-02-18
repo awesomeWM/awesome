@@ -179,6 +179,8 @@ runner.run_steps{
         return true
     end,
 
+    -- The large data transfer above transfers 3 * 2^25 bytes of data. That's
+    -- 96 MiB and takes a while.
     wait_a_bit,
     wait_a_bit,
     wait_a_bit,
