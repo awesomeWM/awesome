@@ -101,7 +101,7 @@ typedef struct
     /** Do we have RandR 1.5 or newer? */
     bool have_randr_15;
     /** Do we have a RandR screen update pending? */
-    bool screen_need_refresh;
+    bool screen_refresh_pending;
     /** Check for XTest extension */
     bool have_xtest;
     /** Check for SHAPE extension */

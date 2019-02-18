@@ -661,12 +661,10 @@ screen_modified(screen_t *existing_screen, screen_t *other_screen)
     }
 }
 
-void
-screen_refresh(void)
+static gboolean
+screen_refresh(gpointer unused)
 {
-    if(!globalconf.screen_need_refresh || !globalconf.have_randr_13)
-        return;
-    globalconf.screen_need_refresh = false;
+    globalconf.screen_refresh_pending = false;
 
     screen_array_t new_screens;
     screen_array_t removed_screens;
@@ -740,6 +738,18 @@ screen_refresh(void)
 
     if (list_changed)
         luaA_class_emit_signal(L, &screen_class, "list", 0);
+
+    return G_SOURCE_REMOVE;
+}
+
+void
+screen_schedule_refresh(void)
+{
+    if(globalconf.screen_refresh_pending || !globalconf.have_randr_13)
+        return;
+
+    globalconf.screen_refresh_pending = true;
+    g_idle_add_full(G_PRIORITY_LOW, screen_refresh, NULL, NULL);
 }
 
 /** Return the squared distance of the given screen to the coordinates.

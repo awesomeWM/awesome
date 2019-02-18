@@ -459,7 +459,7 @@ event_handle_configurenotify(xcb_configure_notify_event_t *ev)
     xcb_screen_t *screen = globalconf.screen;
 
     if(ev->window == screen->root)
-        globalconf.screen_need_refresh = true;
+        screen_schedule_refresh();
 
     /* Copy what XRRUpdateConfiguration() would do: Update the configuration */
     if(ev->window == screen->root) {
@@ -881,7 +881,7 @@ event_handle_randr_screen_change_notify(xcb_randr_screen_change_notify_event_t *
         globalconf.screen->height_in_millimeters = ev->mheight;;
     }
 
-    globalconf.screen_need_refresh = true;
+    screen_schedule_refresh();
 }
 
 /** XRandR event handler for RRNotify subtype XRROutputChangeNotifyEvent
