@@ -128,18 +128,24 @@ luaA_rawlen(lua_State *L, int idx)
 static inline void
 luaA_registerlib(lua_State *L, const char *libname, const luaL_Reg *l)
 {
+    assert(libname);
 #if LUA_VERSION_NUM >= 502
-    if (libname)
-    {
-        lua_newtable(L);
-        luaL_setfuncs(L, l, 0);
-        lua_pushvalue(L, -1);
-        lua_setglobal(L, libname);
-    }
-    else
-        luaL_setfuncs(L, l, 0);
+    lua_newtable(L);
+    luaL_setfuncs(L, l, 0);
+    lua_pushvalue(L, -1);
+    lua_setglobal(L, libname);
 #else
     luaL_register(L, libname, l);
+#endif
+}
+
+static inline void
+luaA_setfuncs(lua_State *L, const luaL_Reg *l)
+{
+#if LUA_VERSION_NUM >= 502
+    luaL_setfuncs(L, l, 0);
+#else
+    luaL_register(L, NULL, l);
 #endif
 }
 
