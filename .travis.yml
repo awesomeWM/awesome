@@ -64,13 +64,15 @@ jobs:
             - *BASE_PACKAGES
             - liblua5.3-dev
             - lua5.3
-    - env: LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
+    - env: LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build WITH_XCB_ERRORS=yes
       addons:
         apt:
           packages:
             - *BASE_PACKAGES
             - liblua5.1-dev
             - lua5.1
+            # For xcb-errors
+            - xcb-proto
     - env: LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/x86_64-linux-gnu/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4
       addons:
         apt:
@@ -109,6 +111,16 @@ install:
      cd /tmp/xcb-util-xrm
      ./autogen.sh --prefix=/usr
      make && sudo make install)
+
+  # Install xcb-errors if needed
+  - |
+    set -e
+    if [[ "$WITH_XCB_ERRORS" == "yes" ]]; then
+      git clone --depth 1 --recursive https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git /tmp/xcb-errors
+      (cd /tmp/xcb-errors
+       ./autogen.sh --prefix=/usr
+       make && sudo make install)
+    fi
 
   - |
     # Install Lua (per env).
