@@ -6,8 +6,10 @@ set(VERSION devel)
 
 set(CODENAME "Too long")
 
-option(WITH_DBUS "build with D-BUS" ON)
-option(GENERATE_MANPAGES "generate manpages" ON)
+include(AutoOption.cmake)
+
+autoOption(WITH_DBUS "build with D-BUS")
+autoOption(GENERATE_MANPAGES "generate manpages")
 option(COMPRESS_MANPAGES "compress manpages" ON)
 option(GENERATE_DOC "generate API documentation" ON)
 option(DO_COVERAGE "build with coverage" OFF)
@@ -84,8 +86,7 @@ if(GENERATE_MANPAGES)
             SET(missing ${missing} " gzip")
         endif()
 
-        message(STATUS "Not generating manpages. Missing: " ${missing})
-        set(GENERATE_MANPAGES OFF)
+        autoDisable(GENERATE_MANPAGES "Not generating manpages. Missing: " ${missing})
     endif()
 endif()
 # }}}
@@ -214,8 +215,7 @@ if(WITH_DBUS)
         set(AWESOME_OPTIONAL_LDFLAGS ${AWESOME_OPTIONAL_LDFLAGS} ${DBUS_LDFLAGS})
         set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${DBUS_INCLUDE_DIRS})
     else()
-        set(WITH_DBUS OFF)
-        message(STATUS "DBUS not found. Disabled.")
+        autoDisable(WITH_DBUS "DBus not found.")
     endif()
 endif()
 # }}}
