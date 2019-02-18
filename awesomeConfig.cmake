@@ -275,14 +275,14 @@ if(GENERATE_DOC)
     # Load the common documentation
     include(docs/load_ldoc.cmake)
 
-    # Use `include`, rather than `add_subdirectory`, to keep the variables
-    # The file is a valid CMakeLists.txt and can be executed directly if only
-    # the image artefacts are needed.
-    include(tests/examples/CMakeLists.txt)
-
     # Generate the widget lists
     include(docs/widget_lists.cmake)
 endif()
+
+# Use `include`, rather than `add_subdirectory`, to keep the variables
+# The file is a valid CMakeLists.txt and can be executed directly if only
+# the image artefacts are needed.
+include(tests/examples/CMakeLists.txt)
 
 # {{{ Configure files
 file(GLOB awesome_base_c_configure_files RELATIVE ${SOURCE_DIR}

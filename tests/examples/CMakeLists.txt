@@ -20,7 +20,9 @@ cmake_minimum_required(VERSION 3.0.0)
 execute_process(COMMAND lua -e "p = package.path:gsub(';', '\\\\;'); io.stdout:write(p)"
     OUTPUT_VARIABLE "LUA_PATH_")
 
-# Make sure the system can be called from the test directory
+# Allow to use the example tests by themselves.
+# This was used on Travis for separate coverage reporting, but is not really
+# required anymore.
 if(NOT SOURCE_DIR AND ${CMAKE_CURRENT_SOURCE_DIR} MATCHES "/tests/examples")
     get_filename_component(TOP_SOURCE_DIR
                            "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
@@ -256,25 +258,25 @@ function(run_test test_path namespace escaped_content)
 
     file(RELATIVE_PATH rel_template "${TOP_SOURCE_DIR}" "${template}")
     file(RELATIVE_PATH rel_test_path "${TOP_SOURCE_DIR}" "${test_path}")
+
+    # Add target to run this as test (via check-examples, not ignoring errors).
+    set(TARGET_NAME "run-${rel_test_path}")
+    STRING(REPLACE "/" "-" TARGET_NAME ${TARGET_NAME})
+    set(EXAMPLE_DOC_TEST_TARGETS ${EXAMPLE_DOC_TEST_TARGETS} ${TARGET_NAME}
+        PARENT_SCOPE)
+    add_custom_target(${TARGET_NAME}
+        COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
+        VERBATIM)
+
     if(NOT ${OUTPUT_IMAGE_PATH} STREQUAL "")
         file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
         add_custom_command(
             COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
-            COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
+            # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
             DEPENDS ${template} ${test_path}
             OUTPUT  ${OUTPUT_IMAGE_PATH}
             VERBATIM)
         set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUT_IMAGE_PATH} ${EXAMPLE_DOC_GENERATED_FILES}
-            PARENT_SCOPE)
-    else()
-        set(TARGET_NAME "run-${rel_test_path}")
-        STRING(REPLACE "/" "-" TARGET_NAME ${TARGET_NAME})
-        add_custom_target(${TARGET_NAME}
-            COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
-            COMMENT "Running ${rel_test_path} (via ${rel_template})"
-            DEPENDS ${template} ${test_path}
-            VERBATIM)
-        set(EXAMPLE_DOC_EXTRA_TARGETS ${TARGET_NAME} ${EXAMPLE_DOC_EXTRA_TARGETS}
             PARENT_SCOPE)
     endif()
 
@@ -310,11 +312,7 @@ foreach(file ${test_files})
     endif()
 endforeach()
 
-add_custom_target(generate-examples ALL DEPENDS ${EXAMPLE_DOC_GENERATED_FILES} ${EXAMPLE_DOC_EXTRA_TARGETS})
-
-add_custom_target(check-examples
-    ${CMAKE_COMMAND} ${CMAKE_SOURCE_DIR}
-    WORKING_DIRECTORY ${CMAKE_BINARY_DIR})
-list(APPEND CHECK_TARGETS check-examples)
+add_custom_target(generate-examples DEPENDS ${EXAMPLE_DOC_GENERATED_FILES})
+add_custom_target(check-examples DEPENDS ${EXAMPLE_DOC_TEST_TARGETS})
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
