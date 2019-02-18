@@ -131,9 +131,8 @@ local escape_subs    = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
 
 -- Cache the markup
 local function set_escaped_text(self)
-    local text, title = self.message or "", self.title or ""
-
-    if title then title = title .. "\n" else title = "" end
+    local text = self.message or ""
+    local title = self.title and self.title .. "\n" or ""
 
     local textbox = self.textbox
 
