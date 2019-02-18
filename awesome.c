@@ -71,6 +71,33 @@ static float main_loop_iteration_limit = 0.1;
 /** A pipe that is used to asynchronously handle SIGCHLD */
 static int sigchld_pipe[2];
 
+/* Initialise various random number generators */
+static void
+init_rng(void)
+{
+    /* LuaJIT uses its own, internal RNG, so initialise that */
+    lua_State *L = globalconf_get_lua_State();
+
+    /* Get math.randomseed */
+    lua_getglobal(L, "math");
+    lua_getfield(L, -1, "randomseed");
+
+    /* Push a seed */
+    lua_pushnumber(L, g_random_int() + g_random_double());
+
+    /* Call math.randomseed */
+    lua_call(L, 1, 0);
+
+    /* Remove "math" global */
+    lua_pop(L, 1);
+
+    /* Lua 5.1, Lua 5.2, and (sometimes) Lua 5.3 use rand()/srand() */
+    srand(g_random_int());
+
+    /* When Lua 5.3 is built with LUA_USE_POSIX, it uses random()/srandom() */
+    srandom(g_random_int());
+}
+
 /** Call before exiting.
  */
 void
@@ -864,6 +891,7 @@ main(int argc, char **argv)
     /* init lua */
     luaA_init(&xdg, &searchpath);
     string_array_wipe(&searchpath);
+    init_rng();
 
     ewmh_init_lua();
 
