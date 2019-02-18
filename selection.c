@@ -49,7 +49,7 @@ static xcb_window_t selection_window = XCB_NONE;
  * \luastack
  * \lreturn A string with the current X selection buffer.
  */
-int
+static int
 luaA_selection_get(lua_State *L)
 {
     if(selection_window == XCB_NONE)
@@ -130,6 +130,13 @@ luaA_selection_get(lua_State *L)
 
     p_delete(&event);
     return 0;
+}
+
+void
+selection_setup(lua_State *L)
+{
+    lua_pushcfunction(L, luaA_selection_get);
+    lua_setglobal(L, "selection");
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
