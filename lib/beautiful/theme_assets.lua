@@ -213,21 +213,22 @@ end
 -- @tparam color color Icons' color.
 -- @tparam string state `"normal"` or `"focus"`.
 -- @tparam string postfix `nil`, `"hover"` or `"press"`.
+-- @tparam string toggle_state `nil`, `"active"` or `"inactive"`.
 -- @treturn table Beautiful theme table with the images recolored.
-function theme_assets.recolor_titlebar(theme, color, state, postfix)
+function theme_assets.recolor_titlebar(theme, color, state, postfix, toggle_state)
     if postfix then postfix='_'..postfix end
-    for _, titlebar_icon_name in ipairs({
-        'titlebar_close_button_'..state..'',
-        'titlebar_minimize_button_'..state..'',
-        'titlebar_ontop_button_'..state..'_inactive',
-        'titlebar_ontop_button_'..state..'_active',
-        'titlebar_sticky_button_'..state..'_inactive',
-        'titlebar_sticky_button_'..state..'_active',
-        'titlebar_floating_button_'..state..'_inactive',
-        'titlebar_floating_button_'..state..'_active',
-        'titlebar_maximized_button_'..state..'_inactive',
-        'titlebar_maximized_button_'..state..'_active',
-    }) do
+    if toggle_state then toggle_state='_'..toggle_state end
+    local titlebar_icon_names = toggle_state and {} or {
+        'titlebar_close_button_'..state,
+        'titlebar_minimize_button_'..state,
+    }
+    for _, ts in ipairs(toggle_state and {toggle_state} or {"_active", "_inactive"}) do
+        table.insert(titlebar_icon_names, 'titlebar_ontop_button_'..state..ts)
+        table.insert(titlebar_icon_names, 'titlebar_sticky_button_'..state..ts)
+        table.insert(titlebar_icon_names, 'titlebar_floating_button_'..state..ts)
+        table.insert(titlebar_icon_names, 'titlebar_maximized_button_'..state..ts)
+    end
+    for _, titlebar_icon_name in ipairs(titlebar_icon_names) do
         local full_name = postfix and (
             titlebar_icon_name .. postfix
         ) or titlebar_icon_name
