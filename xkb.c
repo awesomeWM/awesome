@@ -297,21 +297,33 @@ xkb_reload_keymap(void)
     }
 }
 
-void
-xkb_refresh(void)
+static gboolean
+xkb_refresh(gpointer unused)
 {
     lua_State *L = globalconf_get_lua_State();
 
+    globalconf.xkb_update_pending = false;
     if (globalconf.xkb_reload_keymap)
         xkb_reload_keymap();
     if (globalconf.xkb_map_changed)
-          signal_object_emit(L, &global_signals, "xkb::map_changed", 0);
+        signal_object_emit(L, &global_signals, "xkb::map_changed", 0);
     if (globalconf.xkb_group_changed)
-          signal_object_emit(L, &global_signals, "xkb::group_changed", 0);
+        signal_object_emit(L, &global_signals, "xkb::group_changed", 0);
 
     globalconf.xkb_reload_keymap = false;
     globalconf.xkb_map_changed = false;
     globalconf.xkb_group_changed = false;
+
+    return G_SOURCE_REMOVE;
+}
+
+static void
+xkb_schedule_refresh(void)
+{
+    if (globalconf.xkb_update_pending)
+        return;
+    globalconf.xkb_update_pending = true;
+    g_idle_add_full(G_PRIORITY_LOW, xkb_refresh, NULL, NULL);
 }
 
 /** The xkb notify event handler.
@@ -335,12 +347,14 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
 
           if (new_keyboard_event->changed & XCB_XKB_NKN_DETAIL_KEYCODES)
               globalconf.xkb_map_changed = true;
+          xkb_schedule_refresh();
           break;
         }
       case XCB_XKB_MAP_NOTIFY:
         {
           globalconf.xkb_reload_keymap = true;
           globalconf.xkb_map_changed = true;
+          xkb_schedule_refresh();
           break;
         }
       case XCB_XKB_STATE_NOTIFY:
@@ -356,7 +370,10 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
                                 state_notify_event->lockedGroup);
 
           if (state_notify_event->changed & XCB_XKB_STATE_PART_GROUP_STATE)
+          {
               globalconf.xkb_group_changed = true;
+              xkb_schedule_refresh();
+          }
 
           break;
         }
@@ -369,6 +386,7 @@ event_handle_xkb_notify(xcb_generic_event_t* event)
 void
 xkb_init(void)
 {
+    globalconf.xkb_update_pending = false;
     globalconf.xkb_reload_keymap = false;
     globalconf.xkb_map_changed = false;
     globalconf.xkb_group_changed = false;

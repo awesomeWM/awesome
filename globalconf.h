@@ -189,6 +189,8 @@ typedef struct
     struct xkb_context *xkb_ctx;
     /* xkb state of dead keys on keyboard */
     struct xkb_state *xkb_state;
+    /* Do we have a pending xkb update call? */
+    bool xkb_update_pending;
     /* Do we have a pending reload? */
     bool xkb_reload_keymap;
     /* Do we have a pending map change? */
