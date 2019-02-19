@@ -222,9 +222,10 @@ local function protected_method_call(_conn, _sender, _obj, _interface, method, p
             end
 
             invocation:return_value(GLib.Variant("(u)", { notification.id }))
+        else
+            counter = counter+1
+            invocation:return_value(GLib.Variant("(u)", { counter }))
         end
-        counter = counter+1
-        invocation:return_value(GLib.Variant("(u)", { counter }))
     elseif method == "CloseNotification" then
         local obj = naughty.get_by_id(parameters.value[1])
         if obj then
