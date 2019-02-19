@@ -5,13 +5,35 @@ local naughty   = require("naughty"    )
 local gdebug    = require("gears.debug")
 local cairo     = require("lgi"        ).cairo
 local beautiful = require("beautiful")
+local Gio       = require("lgi"        ).Gio
+local GLib      = require("lgi"        ).GLib
 
 -- This module test deprecated APIs
 require("gears.debug").deprecate = function() end
 
+local dbus_connection = assert(Gio.bus_get_sync(Gio.BusType.SESSION))
+
+local function send_notify(app, id, icon, summary, body, actions, hints, timeout, callback)
+    local parameters = GLib.Variant("(susssasa{sv}i)", {
+        app, id, icon, summary, body, actions, hints, timeout
+    })
+    local reply_type = GLib.VariantType.new("(u)")
+
+    local function invoke_callback(conn, result)
+        local new_id = conn:call_finish(result).value[1]
+        if callback then
+            callback(new_id)
+        end
+    end
+    dbus_connection:call("org.freedesktop.Notifications",
+        "/org/freedesktop/Notifications", "org.freedesktop.Notifications",
+        "Notify", parameters, reply_type, Gio.DBusCallFlags.NO_AUTO_START, -1,
+        nil, invoke_callback)
+end
+
 local steps = {}
 
-local has_cmd_notify, has_cmd_send = false
+local has_cmd_notify = false
 
 -- Use `notify-send` instead of the shimmed version to better test the dbus
 -- to notification code.
@@ -30,25 +52,12 @@ local function check_cmd()
             has_cmd_notify = true
         end
 
-        f = io.open(p.."dbus-send")
-        if f then
-            f:close()
-            has_cmd_send = true
-        end
-
-        if has_cmd_notify and has_cmd_send then return end
+        if has_cmd_notify then return end
     end
 end
 
 check_cmd()
 
--- Can't test anything of value the documentation example tests don't already
--- hit.
-if not has_cmd_send then
-    require("gears.debug").print_warning("Did not find dbus-send, skipping test")
-    require("_runner").run_steps {}
-    return
-end
 if not has_cmd_notify then
     require("gears.debug").print_warning("Did not find notify-send, skipping some tests")
 end
@@ -564,119 +573,87 @@ table.insert(steps, function()
 end)
 
 -- Test more advanced features than what notify-send can provide.
-if has_cmd_send then
 
-    local cmd = { 'dbus-send',
-        '--type=method_call',
-        '--print-reply=literal',
-        '--dest=org.freedesktop.Notifications',
-        '/org/freedesktop/Notifications',
-        'org.freedesktop.Notifications.Notify',
-        'string:"Awesome test"',
-        'uint32:0',
-        'string:""',
-        'string:"title"',
-        'string:"message body"',
-        'array:string:1,one,2,two,3,three',
-        'dict:string:string:"",""',
-        'int32:25000'
-    }
+-- Test the actions.
+table.insert(steps, function()
 
-    -- Test the actions.
-    table.insert(steps, function()
+    assert(#active == 0)
 
-        assert(#active == 0)
+    send_notify("Awesome test", 0, "", "title", "message body",
+        { "1", "one", "2", "two", "3", "three" }, {}, 25000)
 
-        spawn(cmd)
+    return true
+end)
 
-        return true
-    end)
+table.insert(steps, function()
+    if #active == 0 then return end
 
-    table.insert(steps, function()
-        if #active == 0 then return end
+    assert(#active == 1)
+    local n = active[1]
 
-        assert(#active == 1)
-        local n = active[1]
+    assert(n.box)
+    assert(#n.actions == 3)
+    assert(n.actions[1].name == "one"  )
+    assert(n.actions[2].name == "two"  )
+    assert(n.actions[3].name == "three")
 
-        assert(n.box)
-        assert(#n.actions == 3)
-        assert(n.actions[1].name == "one"  )
-        assert(n.actions[2].name == "two"  )
-        assert(n.actions[3].name == "three")
+    n:destroy()
 
-        n:destroy()
+    return true
+end)
 
-        return true
-    end)
+--TODO Test too many actions.
 
-    --TODO Test too many actions.
+--TODO Test action with long names.
 
-    --TODO Test action with long names.
+local nid, name_u, message_u, actions_u = nil
 
-    local nid, name_u, message_u, actions_u = nil
-
-    -- Test updating a notification.
-    table.insert(steps, function()
-        spawn.easy_async(cmd, function(out)
-            nid = tonumber(out:match(" [0-9]+"):match("[0-9]+"))
+-- Test updating a notification.
+table.insert(steps, function()
+    send_notify("Awesome test", 0, "", "title", "message body",
+        { "1", "one", "2", "two", "3", "three" }, {}, 25000, function(id)
+            nid = id
         end)
 
-        return true
-    end)
+    return true
+end)
 
-    table.insert(steps, function()
-        if #active == 0 or not nid then return end
+table.insert(steps, function()
+    if #active == 0 or not nid then return end
 
-        local n = active[1]
+    local n = active[1]
 
-        n:connect_signal("property::title"  , function() name_u    = true end)
-        n:connect_signal("property::message", function() message_u = true end)
-        n:connect_signal("property::actions", function() actions_u = true end)
+    n:connect_signal("property::title"  , function() name_u    = true end)
+    n:connect_signal("property::message", function() message_u = true end)
+    n:connect_signal("property::actions", function() actions_u = true end)
 
-        local update = { 'dbus-send',
-        '--type=method_call',
-        '--print-reply=literal',
-        '--dest=org.freedesktop.Notifications',
-        '/org/freedesktop/Notifications',
-        'org.freedesktop.Notifications.Notify',
-        'string:"Awesome test"',
-        'uint32:' .. nid,
-        'string:""',
-        'string:updated title',
-        'string:updated message body',
-        'array:string:1,four,2,five,3,six',
-        'dict:string:string:"",""',
-        'int32:25000',
-        }
+    send_notify("Awesome test", nid, "", "updated title", "updated message body",
+        { "1", "four", "2", "five", "3", "six" }, {}, 25000)
 
-        spawn(update)
+    return true
+end)
 
-        return true
-    end)
+-- Test if all properties have been updated.
+table.insert(steps, function()
+    if not name_u    then return end
+    if not message_u then return end
+    if not actions_u then return end
 
-    -- Test if all properties have been updated.
-    table.insert(steps, function()
-        if not name_u    then return end
-        if not message_u then return end
-        if not actions_u then return end
+    -- No new notification should have been created.
+    assert(#active == 1)
 
-        -- No new notification should have been created.
-        assert(#active == 1)
+    local n = active[1]
 
-        local n = active[1]
+    assert(n.title   == "updated title"       )
+    assert(n.message == "updated message body")
 
-        assert(n.title   == "updated title"       )
-        assert(n.message == "updated message body")
+    assert(#n.actions == 3)
+    assert(n.actions[1].name == "four" )
+    assert(n.actions[2].name == "five" )
+    assert(n.actions[3].name == "six"  )
 
-        assert(#n.actions == 3)
-        assert(n.actions[1].name == "four" )
-        assert(n.actions[2].name == "five" )
-        assert(n.actions[3].name == "six"  )
-
-        return true
-    end)
-
-end
+    return true
+end)
 
 -- Now check if the old deprecated (but still supported) APIs don't have errors.
 table.insert(steps, function()
