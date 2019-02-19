@@ -61,7 +61,7 @@ local function sendActionInvoked(notificationId, action)
     if bus_connection then
         bus_connection:emit_signal(nil, "/org/freedesktop/Notifications",
             "org.freedesktop.Notifications", "ActionInvoked",
-            GLib.Variant("(us)", notificationId, action))
+            GLib.Variant("(us)", { notificationId, action }))
     end
 end
 
@@ -69,7 +69,7 @@ local function sendNotificationClosed(notificationId, reason)
     if bus_connection then
         bus_connection:emit_signal("/org/freedesktop/Notifications",
             "org.freedesktop.Notifications", "NotificationClosed",
-            GLib.Variant("(uu)", notificationId, reason))
+            GLib.Variant("(uu)", { notificationId, reason }))
     end
 end
 
