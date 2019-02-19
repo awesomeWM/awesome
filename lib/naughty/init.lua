@@ -5,10 +5,8 @@
 ---------------------------------------------------------------------------
 
 local naughty = require("naughty.core")
-if dbus then
-    naughty.dbus = require("naughty.dbus")
-end
 
+naughty.dbus = require("naughty.dbus")
 naughty.layout = require("naughty.layout")
 naughty.notification = require("naughty.notification")
 

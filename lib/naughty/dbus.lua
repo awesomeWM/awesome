@@ -7,17 +7,18 @@
 -- @module naughty.dbus
 ---------------------------------------------------------------------------
 
-assert(dbus)
-
 -- Package environment
 local pairs = pairs
 local type = type
 local string = string
-local capi = { awesome = awesome,
-               dbus = dbus }
+local capi = { awesome = awesome }
 local gtable = require("gears.table")
 local gsurface = require("gears.surface")
-local cairo = require("lgi").cairo
+local lgi = require("lgi")
+local cairo = lgi.cairo
+local Gio = lgi.Gio
+local GLib = lgi.GLib
+local GObject = lgi.GObject
 
 local schar = string.char
 local sbyte = string.byte
@@ -55,21 +56,20 @@ dbus.config.mapping = {
     {{urgency = urgency.critical}, cst.config.presets.critical}
 }
 
+local bus_connection
 local function sendActionInvoked(notificationId, action)
-    if capi.dbus then
-        capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications", "ActionInvoked",
-        "u", notificationId,
-        "s", action)
+    if bus_connection then
+        bus_connection:emit_signal(nil, "/org/freedesktop/Notifications",
+            "org.freedesktop.Notifications", "ActionInvoked",
+            GLib.Variant("(us)", notificationId, action))
     end
 end
 
 local function sendNotificationClosed(notificationId, reason)
-    if capi.dbus then
-        capi.dbus.emit_signal("session", "/org/freedesktop/Notifications",
-        "org.freedesktop.Notifications", "NotificationClosed",
-        "u", notificationId,
-        "u", reason)
+    if bus_connection then
+        bus_connection:emit_signal("/org/freedesktop/Notifications",
+            "org.freedesktop.Notifications", "NotificationClosed",
+            GLib.Variant("(uu)", notificationId, reason))
     end
 end
 
@@ -120,179 +120,197 @@ local function convert_icon(w, h, rowstride, channels, data)
     return res
 end
 
-capi.dbus.connect_signal("org.freedesktop.Notifications",
-    function (data, appname, replaces_id, icon, title, text, actions, hints, expire)
+local function method_call(_conn, _sender, _obj, _interface, method, parameters, invocation)
+    if method == "Notify" then
+        local appname, replaces_id, icon, title, text, actions, hints, expire =
+            unpack(parameters.value)
+
         local args = { }
-        if data.member == "Notify" then
-            if text ~= "" then
-                args.message = text
-                if title ~= "" then
-                    args.title = title
+        if text ~= "" then
+            args.message = text
+            if title ~= "" then
+                args.title = title
+            end
+        else
+            if title ~= "" then
+                args.message = title
+            else
+                return
+            end
+        end
+        if appname ~= "" then
+            args.appname = appname
+        end
+        for _, obj in pairs(dbus.config.mapping) do
+            local filter, preset = obj[1], obj[2]
+            if (not filter.urgency or filter.urgency == hints.urgency) and
+            (not filter.category or filter.category == hints.category) and
+            (not filter.appname or filter.appname == appname) then
+                args.preset = gtable.join(args.preset, preset)
+            end
+        end
+        local preset = args.preset or cst.config.defaults
+        local notification
+        if actions then
+            args.actions = {}
+
+            for i = 1,#actions,2 do
+                local action_id = actions[i]
+                local action_text = actions[i + 1]
+
+                if action_id == "default" then
+                    args.run = function()
+                        sendActionInvoked(notification.id, "default")
+                        notification:destroy(cst.notification_closed_reason.dismissed_by_user)
+                    end
+                elseif action_id ~= nil and action_text ~= nil then
+                    local a = naction {
+                        name     = action_text,
+                        position = action_id,
+                    }
+
+                    a:connect_signal("invoked", function()
+                        sendActionInvoked(notification.id, action_id)
+                        notification:destroy(cst.notification_closed_reason.dismissed_by_user)
+                    end)
+
+                    table.insert(args.actions, a)
+                end
+            end
+        end
+        args.destroy = function(reason)
+            sendNotificationClosed(notification.id, reason)
+        end
+        if not preset.callback or (type(preset.callback) == "function" and
+            preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
+            if icon ~= "" then
+                args.icon = icon
+            elseif hints.icon_data or hints.image_data then
+                if hints.icon_data == nil then hints.icon_data = hints.image_data end
+
+                -- icon_data is an array:
+                -- 1 -> width
+                -- 2 -> height
+                -- 3 -> rowstride
+                -- 4 -> has alpha
+                -- 5 -> bits per sample
+                -- 6 -> channels
+                -- 7 -> data
+                local w, h, rowstride, _, _, channels, icon_data = unpack(hints.icon_data)
+                args.icon = convert_icon(w, h, rowstride, channels, icon_data)
+            end
+            if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
+                args.replaces_id = replaces_id
+            end
+            if expire and expire > -1 then
+                args.timeout = expire / 1000
+            end
+            args.freedesktop_hints = hints
+
+            -- Try to update existing objects when possible
+            notification = naughty.get_by_id(replaces_id)
+
+            if notification then
+                for k, v in pairs(args) do
+                    notification[k] = v
                 end
             else
-                if title ~= "" then
-                    args.message = title
-                else
-                    return
-                end
+                counter = counter+1
+                args.id = counter
+                notification = nnotif(args)
             end
-            if appname ~= "" then
-                args.appname = appname
-            end
-            for _, obj in pairs(dbus.config.mapping) do
-                local filter, preset = obj[1], obj[2]
-                if (not filter.urgency or filter.urgency == hints.urgency) and
-                (not filter.category or filter.category == hints.category) and
-                (not filter.appname or filter.appname == appname) then
-                    args.preset = gtable.join(args.preset, preset)
-                end
-            end
-            local preset = args.preset or cst.config.defaults
-            local notification
-            if actions then
-                args.actions = {}
 
-                for i = 1,#actions,2 do
-                    local action_id = actions[i]
-                    local action_text = actions[i + 1]
-
-                    if action_id == "default" then
-                        args.run = function()
-                            sendActionInvoked(notification.id, "default")
-                            notification:destroy(cst.notification_closed_reason.dismissed_by_user)
-                        end
-                    elseif action_id ~= nil and action_text ~= nil then
-                        local a = naction {
-                            name     = action_text,
-                            position = action_id,
-                        }
-
-                        a:connect_signal("invoked", function()
-                            sendActionInvoked(notification.id, action_id)
-                            notification:destroy(cst.notification_closed_reason.dismissed_by_user)
-                        end)
-
-                        table.insert(args.actions, a)
-                    end
-                end
-            end
-            args.destroy = function(reason)
-                sendNotificationClosed(notification.id, reason)
-            end
-            if not preset.callback or (type(preset.callback) == "function" and
-                preset.callback(data, appname, replaces_id, icon, title, text, actions, hints, expire)) then
-                if icon ~= "" then
-                    args.icon = icon
-                elseif hints.icon_data or hints.image_data then
-                    if hints.icon_data == nil then hints.icon_data = hints.image_data end
-
-                    -- icon_data is an array:
-                    -- 1 -> width
-                    -- 2 -> height
-                    -- 3 -> rowstride
-                    -- 4 -> has alpha
-                    -- 5 -> bits per sample
-                    -- 6 -> channels
-                    -- 7 -> data
-                    local w, h, rowstride, _, _, channels, icon_data = unpack(hints.icon_data)
-                    args.icon = convert_icon(w, h, rowstride, channels, icon_data)
-                end
-                if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
-                    args.replaces_id = replaces_id
-                end
-                if expire and expire > -1 then
-                    args.timeout = expire / 1000
-                end
-                args.freedesktop_hints = hints
-
-                -- Try to update existing objects when possible
-                notification = naughty.get_by_id(replaces_id)
-
-                if notification then
-                    for k, v in pairs(args) do
-                        notification[k] = v
-                    end
-                else
-                    counter = counter+1
-                    args.id = counter
-                    notification = nnotif(args)
-                end
-
-                return "u", notification.id
-            end
-            counter = counter+1
-            return "u", counter
-        elseif data.member == "CloseNotification" then
-            local obj = naughty.get_by_id(appname)
-            if obj then
-                obj:destroy(cst.notification_closed_reason.dismissed_by_command)
-            end
-        elseif data.member == "GetServerInfo" or data.member == "GetServerInformation" then
-            -- name of notification app, name of vender, version, specification version
-            return "s", "naughty", "s", "awesome", "s", capi.awesome.version, "s", "1.0"
-        elseif data.member == "GetCapabilities" then
-            -- We actually do display the body of the message, we support <b>, <i>
-            -- and <u> in the body and we handle static (non-animated) icons.
-            return "as", { "s", "body", "s", "body-markup", "s", "icon-static", "s", "actions" }
+            invocation:return_value(GLib.Variant("(u)", { notification.id }))
         end
-end)
-
-capi.dbus.connect_signal("org.freedesktop.DBus.Introspectable", function (data)
-    if data.member == "Introspect" then
-        local xml = [=[<!DOCTYPE node PUBLIC "-//freedesktop//DTD D-BUS Object
-    Introspection 1.0//EN"
-    "http://www.freedesktop.org/standards/dbus/1.0/introspect.dtd">
-    <node>
-      <interface name="org.freedesktop.DBus.Introspectable">
-        <method name="Introspect">
-          <arg name="data" direction="out" type="s"/>
-        </method>
-      </interface>
-      <interface name="org.freedesktop.Notifications">
-        <method name="GetCapabilities">
-          <arg name="caps" type="as" direction="out"/>
-        </method>
-        <method name="CloseNotification">
-          <arg name="id" type="u" direction="in"/>
-        </method>
-        <method name="Notify">
-          <arg name="app_name" type="s" direction="in"/>
-          <arg name="id" type="u" direction="in"/>
-          <arg name="icon" type="s" direction="in"/>
-          <arg name="summary" type="s" direction="in"/>
-          <arg name="body" type="s" direction="in"/>
-          <arg name="actions" type="as" direction="in"/>
-          <arg name="hints" type="a{sv}" direction="in"/>
-          <arg name="timeout" type="i" direction="in"/>
-          <arg name="return_id" type="u" direction="out"/>
-        </method>
-        <method name="GetServerInformation">
-          <arg name="return_name" type="s" direction="out"/>
-          <arg name="return_vendor" type="s" direction="out"/>
-          <arg name="return_version" type="s" direction="out"/>
-          <arg name="return_spec_version" type="s" direction="out"/>
-        </method>
-        <method name="GetServerInfo">
-          <arg name="return_name" type="s" direction="out"/>
-          <arg name="return_vendor" type="s" direction="out"/>
-          <arg name="return_version" type="s" direction="out"/>
-       </method>
-       <signal name="NotificationClosed">
-          <arg name="id" type="u" direction="out"/>
-          <arg name="reason" type="u" direction="out"/>
-       </signal>
-       <signal name="ActionInvoked">
-          <arg name="id" type="u" direction="out"/>
-          <arg name="action_key" type="s" direction="out"/>
-       </signal>
-      </interface>
-    </node>]=]
-        return "s", xml
+        counter = counter+1
+        invocation:return_value(GLib.Variant("(u)", { counter }))
+    elseif method == "CloseNotification" then
+        local obj = naughty.get_by_id(parameters.value[1])
+        if obj then
+            obj:destroy(cst.notification_closed_reason.dismissed_by_command)
+        end
+        invocation:return_value(GLib.Variant("()"))
+    elseif method == "GetServerInformation" then
+        -- name of notification app, name of vender, version, specification version
+        invocation:return_value(GLib.Variant("(ssss)", {
+            "naughty", "awesome", capi.awesome.version, "1.0"
+        }))
+    elseif method == "GetServerInfo" then
+        -- name of notification app, name of vender, version
+        invocation:return_value(GLib.Variant("(sss)", {
+            "naughty", "awesome", capi.awesome.version
+        }))
+    elseif method == "GetCapabilities" then
+        -- We actually do display the body of the message, we support <b>, <i>
+        -- and <u> in the body and we handle static (non-animated) icons.
+        invocation:return_value(GLib.Variant("(as)", {
+            { "body", "body-markup", "icon-static", "actions" }
+        }))
     end
-end)
+end
+
+local function new_arg(name, signature)
+    local result = Gio.DBusArgInfo()
+    result.ref_count = 1
+    result.name = name
+    result.signature = signature
+    return result
+end
+
+local function new_method(name, in_args, out_args)
+    local result = Gio.DBusMethodInfo()
+    result.ref_count = 1
+    result.name = name
+    result.in_args = in_args
+    result.out_args = out_args
+    return result
+end
+
+local function new_signal(name, args)
+    local result = Gio.DBusSignalInfo()
+    result.ref_count = 1
+    result.name = name
+    result.args = args
+    return result
+end
+
+local get_capabilities_method =
+    new_method("GetCapabilities", nil, { new_arg("caps", "as") })
+local close_notification_method =
+    new_method("CloseNotification", { new_arg("id", "u") }, nil)
+local get_server_information_method = new_method("GetServerInformation", nil, {
+    new_arg("return_name", "s"), new_arg("return_vendor", "s"),
+    new_arg("return_version", "s"), new_arg("return_spec_version", "s")
+})
+local get_server_info_method = new_method("GetServerInfo", nil, {
+    new_arg("return_name", "s"), new_arg("return_vendor", "s"),
+    new_arg("return_version", "s")
+})
+local notify_method = new_method("Notify", {
+    new_arg("app_name", "s"), new_arg("id", "u"), new_arg("icon", "s"),
+    new_arg("summary", "s"), new_arg("body", "s"), new_arg("actions", "as"),
+    new_arg("hints", "a{sv}"), new_arg("timeout", "i") },
+    { new_arg("return_id", "u") })
+local notification_closed_signal = new_signal("NotificationClosed",
+    { new_arg("id", "u"), new_arg("reason", "u") })
+local action_invoked_signal = new_signal("ActionInvoked",
+    { new_arg("id", "u"), new_arg("action_key", "s") })
+
+local interface_info = Gio.DBusInterfaceInfo()
+interface_info.ref_count = 1
+interface_info.name = "org.freedesktop.Notifications"
+interface_info.methods = { get_capabilities_method, close_notification_method,
+    notify_method, get_server_information_method, get_server_info_method }
+interface_info.signals = { notification_closed_signal, action_invoked_signal }
+
+local function on_bus_acquire(conn, _name)
+    bus_connection = conn
+    conn:register_object("/org/freedesktop/Notifications", interface_info, GObject.Closure(method_call))
+end
 
 -- listen for dbus notification requests
-capi.dbus.request_name("session", "org.freedesktop.Notifications")
+Gio.bus_own_name(Gio.BusType.SESSION, "org.freedesktop.Notifications",
+    Gio.BusNameOwnerFlags.NONE, GObject.Closure(on_bus_acquire), nil, nil)
 
 return dbus
 

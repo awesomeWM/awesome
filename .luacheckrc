@@ -20,7 +20,6 @@ files["themes/*"].ignore = {"631"}
 read_globals = {
     "awesome",
     "button",
-    "dbus",
     "drawable",
     "drawin",
     "key",
