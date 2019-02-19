@@ -252,7 +252,7 @@ end
 
 local function new_arg(name, signature)
     local result = Gio.DBusArgInfo()
-    result.ref_count = 1
+    --result.ref_count = 1
     result.name = name
     result.signature = signature
     return result
@@ -260,7 +260,7 @@ end
 
 local function new_method(name, in_args, out_args)
     local result = Gio.DBusMethodInfo()
-    result.ref_count = 1
+    --result.ref_count = 1
     result.name = name
     result.in_args = in_args
     result.out_args = out_args
@@ -269,7 +269,7 @@ end
 
 local function new_signal(name, args)
     local result = Gio.DBusSignalInfo()
-    result.ref_count = 1
+    --result.ref_count = 1
     result.name = name
     result.args = args
     return result
@@ -298,7 +298,7 @@ local action_invoked_signal = new_signal("ActionInvoked",
     { new_arg("id", "u"), new_arg("action_key", "s") })
 
 local interface_info = Gio.DBusInterfaceInfo()
-interface_info.ref_count = 1
+--interface_info.ref_count = 1
 interface_info.name = "org.freedesktop.Notifications"
 interface_info.methods = { get_capabilities_method, close_notification_method,
     notify_method, get_server_information_method, get_server_info_method }
