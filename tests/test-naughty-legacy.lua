@@ -4,16 +4,41 @@ local spawn     = require("awful.spawn")
 local naughty   = require("naughty"    )
 local gdebug    = require("gears.debug")
 local cairo     = require("lgi"        ).cairo
+local Gio       = require("lgi"        ).Gio
+local GLib      = require("lgi"        ).GLib
 local beautiful = require("beautiful")
 
 -- This module test deprecated APIs
 require("gears.debug").deprecate = function() end
 
+local dbus_connection = assert(Gio.bus_get_sync(Gio.BusType.SESSION))
+
+local function simple_send_notify_callback(conn, result)
+    -- This gives us the id which we don't need, but it still provides it
+    local _ = conn:call_finish(result).value[1]
+end
+
+local function simple_send_notify(summary, body, timeout, urgency)
+    local hints = {}
+    if urgency then
+        local urgency_map = { low = 0, normal = 1, critical = 2 }
+        hints.urgency = GLib.Variant("y", assert(urgency_map[urgency], urgency))
+    end
+    local parameters = GLib.Variant("(susssasa{sv}i)", {
+        "notify-send", 0, "", summary, body, {}, hints, timeout, urgency
+    })
+    local reply_type = GLib.VariantType.new("(u)")
+    dbus_connection:call("org.freedesktop.Notifications",
+        "/org/freedesktop/Notifications", "org.freedesktop.Notifications",
+        "Notify", parameters, reply_type, Gio.DBusCallFlags.NO_AUTO_START, -1,
+        nil, simple_send_notify_callback)
+end
+
 local steps = {}
 
-local has_cmd_notify, has_cmd_send = false
+local has_cmd_send = false
 
--- Use `notify-send` instead of the shimmed version to better test the dbus
+-- Use `dbus-send` instead of the shimmed version to better test the dbus
 -- to notification code.
 local function check_cmd()
     local path = os.getenv("PATH")
@@ -24,19 +49,13 @@ local function check_cmd()
 
         pos = np+1
 
-        local f = io.open(p.."notify-send")
-        if f then
-            f:close()
-            has_cmd_notify = true
-        end
-
         f = io.open(p.."dbus-send")
         if f then
             f:close()
             has_cmd_send = true
         end
 
-        if has_cmd_notify and has_cmd_send then return end
+        if has_cmd_send then return end
     end
 end
 
@@ -48,9 +67,6 @@ if not has_cmd_send then
     require("gears.debug").print_warning("Did not find dbus-send, skipping test")
     require("_runner").run_steps {}
     return
-end
-if not has_cmd_notify then
-    require("gears.debug").print_warning("Did not find notify-send, skipping some tests")
 end
 
 local active, destroyed, reasons, counter = {}, {}, {}, 0
@@ -86,15 +102,12 @@ end
 naughty.connect_signal("destroyed", destroyed_callback)
 
 table.insert(steps, function()
-    if not has_cmd_notify then return true end
-
-    spawn{ 'notify-send', 'title', 'message', '-t', '25000' }
+    simple_send_notify('title', 'message', 25000)
 
     return true
 end)
 
 table.insert(steps, function()
-    if not has_cmd_notify then return true end
     if #active ~= 1 then return end
 
     local n = active[1]
@@ -128,7 +141,7 @@ table.insert(steps, function()
     -- There is some magic behind this, check it works
     assert(naughty.suspended)
 
-    spawn{ 'notify-send', 'title', 'message', '-t', '25000' }
+    simple_send_notify('title', 'message', 25000)
 
     return true
 end)
@@ -150,7 +163,7 @@ table.insert(steps, function(count)
     active[1]:destroy()
     assert(#active == 0)
 
-    spawn{ 'notify-send', 'title', 'message', '-t', '1' }
+    simple_send_notify('title', 'message', 1)
 
     return true
 end)
@@ -175,7 +188,7 @@ table.insert(steps, function()
     -- There is some magic behind this, make sure it works
     assert(naughty.expiration_paused)
 
-    spawn{ 'notify-send', 'title', 'message', '-t', '1' }
+    simple_send_notify('title', 'message', 1)
 
     return true
 end)
@@ -209,9 +222,9 @@ table.insert(steps, function()
     -- so better not "document" the instantaneous clearing of the queue.
     if #active > 0 then return end
 
-    spawn{ 'notify-send', 'low',      'message', '-t', '25000', '-u', 'low' }
-    spawn{ 'notify-send', 'normal',   'message', '-t', '25000', '-u', 'normal' }
-    spawn{ 'notify-send', 'critical', 'message', '-t', '25000', '-u', 'critical' }
+    simple_send_notify('low',      'message', 25000, 'low')
+    simple_send_notify('normal',   'message', 25000, 'normal')
+    simple_send_notify('critical', 'message', 25000, 'critical')
 
     return true
 end)
@@ -236,7 +249,7 @@ table.insert(steps, function()
     -- Everything should fit, otherwise the math is wrong in
     -- `neughty.layout.legacy` and its a regression.
     for i=1, max_notif do
-        spawn{ 'notify-send', 'notif '..i, 'message', '-t', '25000', '-u', 'low' }
+        simple_send_notify('notif '..i, 'message', 25000, 'low')
     end
 
     return true
@@ -285,7 +298,7 @@ table.insert(steps, function()
 
     -- Now add even more!
     for i=1, 5 do
-        spawn{ 'notify-send', 'notif '..i, 'message', '-t', '25000', '-u', 'low' }
+        simple_send_notify('notif '..i, 'message', 25000, 'low')
     end
 
     return true
