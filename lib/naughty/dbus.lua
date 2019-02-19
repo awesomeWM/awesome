@@ -14,6 +14,7 @@ local string = string
 local capi = { awesome = awesome }
 local gtable = require("gears.table")
 local gsurface = require("gears.surface")
+local protected_call = require("gears.protected_call")
 local lgi = require("lgi")
 local cairo = lgi.cairo
 local Gio = lgi.Gio
@@ -120,7 +121,7 @@ local function convert_icon(w, h, rowstride, channels, data)
     return res
 end
 
-local function method_call(_conn, _sender, _obj, _interface, method, parameters, invocation)
+local function protected_method_call(_conn, _sender, _obj, _interface, method, parameters, invocation)
     if method == "Notify" then
         local appname, replaces_id, icon, title, text, actions, hints, expire =
             unpack(parameters.value)
@@ -302,6 +303,10 @@ interface_info.name = "org.freedesktop.Notifications"
 interface_info.methods = { get_capabilities_method, close_notification_method,
     notify_method, get_server_information_method, get_server_info_method }
 interface_info.signals = { notification_closed_signal, action_invoked_signal }
+
+local function method_call(...)
+    protected_call(protected_method_call, ...)
+end
 
 local function on_bus_acquire(conn, _name)
     bus_connection = conn
