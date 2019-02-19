@@ -89,7 +89,7 @@ runner.run_steps = function(steps, options)
                 -- Next step.
                 step = step+1
                 step_count = 0
-                wait = 5
+                wait = 20
                 t.timeout = 0
                 t:again()
                 return
