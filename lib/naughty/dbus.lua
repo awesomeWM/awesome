@@ -67,7 +67,7 @@ end
 
 local function sendNotificationClosed(notificationId, reason)
     if bus_connection then
-        bus_connection:emit_signal("/org/freedesktop/Notifications",
+        bus_connection:emit_signal(nil, "/org/freedesktop/Notifications",
             "org.freedesktop.Notifications", "NotificationClosed",
             GLib.Variant("(uu)", { notificationId, reason }))
     end
