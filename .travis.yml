@@ -7,17 +7,84 @@ branches:
     - master
     - 3.5
 
-env:
-  matrix:
-    - LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
-    - LUA=5.3 LUANAME=lua5.3 DO_COVERAGE=codecov
-    # luajit: installed from source.
-    - LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5 TEST_PREV_COMMITS=1
+addons:
+  apt:
+    packages: &BASE_PACKAGES
+      # Build dependencies.
+      # See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
+      - libnotify-bin
+      - libcairo2-dev
+      - gir1.2-gtk-3.0
+      - libpango1.0-dev
+      - libxcb-xtest0-dev
+      - libxcb-icccm4-dev
+      - libxcb-randr0-dev
+      - libxcb-keysyms1-dev
+      - libxcb-xinerama0-dev
+      - libdbus-1-dev
+      - libxdg-basedir-dev
+      - libstartup-notification0-dev
+      - imagemagick
+      - libxcb1-dev
+      - libxcb-shape0-dev
+      - libxcb-util0-dev
+      - libx11-xcb-dev
+      - libxcb-cursor-dev
+      - libxcb-xkb-dev
+      - libxcb-xfixes0-dev
+      - libxkbcommon-dev
+      - libxkbcommon-x11-dev
+      # Deps for tests.
+      - dbus-x11
+      - xterm
+      - xdotool
+      - xterm
+      - xvfb
+      - zsh
+      - x11-apps
+      # Need xorg-macros
+      - xutils-dev
+      # lgi.
+      - gir1.2-pango-1.0
+      - libgirepository1.0-dev
+
+jobs:
+  include:
+    - env: LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
+      addons:
+        apt:
+          packages:
+            - *BASE_PACKAGES
+            - liblua5.2-dev
+            - lua5.2
+    - env: LUA=5.3 LUANAME=lua5.3 DO_COVERAGE=codecov
+      addons:
+        apt:
+          packages:
+            - *BASE_PACKAGES
+            - liblua5.3-dev
+            - lua5.3
     # Note: luarocks does not work with Lua 5.0.
-    - LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
+    - env: LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
+      addons:
+        apt:
+          packages:
+            - *BASE_PACKAGES
+            - liblua5.1-dev
+            - lua5.1
+    # luajit: installed from source.
+    - env: LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5
     # Lua 5.2 with older lgi and screen size not divisible by 2.
     # SOURCE_DATE_EPOCH: used for stable dates during build.
-    - LUA=5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079 BUILD_APIDOC=true DO_CHECKQA=1 EMPTY_THEME_WHILE_LOADING=1 SOURCE_DATE_EPOCH=1893456000
+    - env: LUA=5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079 BUILD_APIDOC=true DO_CHECKQA=1 EMPTY_THEME_WHILE_LOADING=1 SOURCE_DATE_EPOCH=1893456000 TEST_PREV_COMMITS=1
+      addons:
+        apt:
+          packages:
+            - *BASE_PACKAGES
+            - liblua5.2-dev
+            - lua5.2
+
+env:
   global:
     # Secure GH_APIDOC_TOKEN to push to awesomeWM/apidoc.
     - secure: "R/HYDclnws1I1+v9Yjt+RKa4CsFhbBT9tiwE3EfPhEj2KCYX4sFRMxuZvLf5sq0XWdrQaPhQ54fgAZGr3f054JKRXcTB0g9J6nhSHz9kIjPh446gafUhEeDQcZRwM/MeCWiwFIkiZm6smYoDFE9JTWu6quNV+lQ4kcVDOp2ibEc="
@@ -29,23 +96,9 @@ before_install:
   - cmake --version
 
 install:
-  # Travis boilerplate: the apt-get cache might be out of date.
-  - travis_retry sudo apt-get update -qq
-
-  # Do not install recommended packages with apt-get.
-  - echo 'APT::Install-Recommends "false";' | sudo tee /etc/apt/apt.conf.d/no-recommends
-
-  # Install build dependencies.
-  # See also `apt-cache showsrc awesome | grep -E '^(Version|Build-Depends)'`.
-  - sudo apt-get install -y libnotify-bin libcairo2-dev gir1.2-gtk-3.0 libpango1.0-dev libxcb-xtest0-dev libxcb-icccm4-dev libxcb-randr0-dev libxcb-keysyms1-dev libxcb-xinerama0-dev libdbus-1-dev libxdg-basedir-dev libstartup-notification0-dev imagemagick libxcb1-dev libxcb-shape0-dev libxcb-util0-dev libx11-xcb-dev libxcb-cursor-dev libxcb-xkb-dev libxcb-xfixes0-dev libxkbcommon-dev libxkbcommon-x11-dev
   - sudo gem install asciidoctor
-
-  # Deps for tests.
-  - sudo apt-get install -y dbus-x11 xterm xdotool xterm xvfb zsh x11-apps
-
-  # Need xorg-macros
-  - sudo apt-get install -y xutils-dev
   - |
+    # Install xcb-util-xrm.
     set -e
     (git clone --depth 1 --recursive https://github.com/Airblader/xcb-util-xrm.git /tmp/xcb-util-xrm
      cd /tmp/xcb-util-xrm
@@ -63,7 +116,6 @@ install:
       # "Create" /usr/bin/lua if needed (Yup, this is a bad hack)
       if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/luajit /usr/bin/lua; fi
     else
-      sudo apt-get install -y lib${LUANAME}-dev ${LUANAME} ${INSTALL_PKGS}
       # lua5.3 does not install /usr/bin/lua, but lua5.1/lua5.2 do.
       if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/${LUANAME} /usr/bin/lua; fi
     fi
@@ -78,8 +130,6 @@ install:
       && make build \
       && sudo make install)
 
-  # lgi.
-  - sudo apt-get install -y gir1.2-pango-1.0 libgirepository1.0-dev
   - travis_retry sudo luarocks install lgi $LGIVER
 
   # Install busted for "make check-unit".
