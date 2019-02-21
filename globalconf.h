@@ -101,7 +101,7 @@ typedef struct
     /** Do we have RandR 1.5 or newer? */
     bool have_randr_15;
     /** Do we have a RandR screen update pending? */
-    bool screen_need_refresh;
+    bool screen_refresh_pending;
     /** Check for XTest extension */
     bool have_xtest;
     /** Check for SHAPE extension */
@@ -189,6 +189,8 @@ typedef struct
     struct xkb_context *xkb_ctx;
     /* xkb state of dead keys on keyboard */
     struct xkb_state *xkb_state;
+    /* Do we have a pending xkb update call? */
+    bool xkb_update_pending;
     /* Do we have a pending reload? */
     bool xkb_reload_keymap;
     /* Do we have a pending map change? */
