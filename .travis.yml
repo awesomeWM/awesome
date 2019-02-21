@@ -72,8 +72,13 @@ jobs:
             - *BASE_PACKAGES
             - liblua5.1-dev
             - lua5.1
-    # luajit: installed from source.
-    - env: LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.5
+    - env: LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/x86_64-linux-gnu/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4
+      addons:
+        apt:
+          packages:
+            - *BASE_PACKAGES
+            - libluajit-5.1-dev
+            - luajit
     # Lua 5.2 with older lgi and screen size not divisible by 2.
     # SOURCE_DATE_EPOCH: used for stable dates during build.
     - env: LUA=5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079 BUILD_APIDOC=true DO_CHECKQA=1 EMPTY_THEME_WHILE_LOADING=1 SOURCE_DATE_EPOCH=1893456000 TEST_PREV_COMMITS=1
@@ -105,14 +110,9 @@ install:
      ./autogen.sh --prefix=/usr
      make && sudo make install)
 
-    # Install Lua (per env).
   - |
-    set -e
+    # Install Lua (per env).
     if [[ "$LUANAME" == "luajit-2.0" ]]; then
-      (wget http://luajit.org/download/LuaJIT-2.0.5.tar.gz -O- | tar xzf - -C /tmp
-       cd /tmp/LuaJIT-*
-       sudo make install PREFIX=/usr)
-
       # "Create" /usr/bin/lua if needed (Yup, this is a bad hack)
       if [ ! -e "/usr/bin/lua" ]; then sudo ln -s /usr/bin/luajit /usr/bin/lua; fi
     else
