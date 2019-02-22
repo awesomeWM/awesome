@@ -34,7 +34,7 @@ install:
 	$(MAKE) -C $(BUILDDIR) install
 
 distclean:
-	$(ECHO) -n "Cleaning up build directory…"
+	$(ECHO) "Cleaning up build directory…"
 	$(RM) -r $(BUILDDIR)
 
 # Use an explicit rule to not "update" the Makefile via the implicit rule below.
