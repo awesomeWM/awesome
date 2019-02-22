@@ -114,7 +114,6 @@ file = {
         -- exclude these modules, as they do not contain any written
         -- documentation
         '../lib/awful/autofocus.lua',
-        '../lib/awful/dbus.lua',
         '../lib/awful/init.lua',
         '../lib/awful/remote.lua',
         '../lib/awful/startup_notification.lua',
