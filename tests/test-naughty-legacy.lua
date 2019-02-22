@@ -698,12 +698,12 @@ table.insert(steps, function()
     assert(n.text    == "baz")
 
     -- Test the ID system
-    n.id = 1337
-    assert(n.id == 1337)
-    assert(naughty.getById(1337) == n)
-    assert(naughty.get_by_id(1337) == n)
-    assert(naughty.getById(42) ~= n)
-    assert(naughty.get_by_id(42) ~= n)
+--     n.id = 1337
+--     assert(n.id == 1337)
+--     assert(naughty.getById(1337) == n)
+--     assert(naughty.get_by_id(1337) == n)
+--     assert(naughty.getById(42) ~= n)
+--     assert(naughty.get_by_id(42) ~= n)
 
     -- The timeout
     naughty.reset_timeout(n, 1337)
