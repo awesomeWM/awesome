@@ -453,6 +453,8 @@ local function create(args)
         if not args then return end
     end
 
+    assert(not args.id, "Identifiers cannot be specified externally")
+
     args = args or {}
 
     -- Old actions usually have callbacks and names. But this isn't non
@@ -524,7 +526,18 @@ local function create(args)
         n:set_timeout(n._private.timeout or n.preset.timeout)
     end
 
+    n.id = notification._gen_next_id()
+
     return n
+end
+
+-- This allows notification to be updated later.
+local counter = 1
+
+-- Identifier support.
+function notification._gen_next_id()
+    counter = counter+1
+    return counter
 end
 
 return setmetatable(notification, {__call = function(_, ...) return create(...) end})
