@@ -735,13 +735,32 @@ table.insert(steps, function()
     assert(not naughty.suspended)
 
     -- Replace the text
+    assert(n.title   == "foo")
     assert(n.message == "bar")
     assert(n.text    == "bar")
-    assert(n.title   == "foo")
+    local width, height = n.width, n.height
+    assert(width)
+    assert(height)
     naughty.replace_text(n, "foobar", "baz")
     assert(n.title   == "foobar")
     assert(n.message == "baz")
     assert(n.text    == "baz")
+    assert(n.width > width)
+    assert(n.height == height)
+    width, height = n.width, n.height
+    naughty.replace_text(n, "foo", "bar\nbaz")
+    assert(n.title   == "foo")
+    assert(n.message == "bar\nbaz")
+    assert(n.text    == "bar\nbaz")
+    assert(n.width < width)
+    assert(n.height > height)
+    width, height = n.width, n.height
+    naughty.replace_text(n, "foo", "bar")
+    assert(n.title   == "foo")
+    assert(n.message == "bar")
+    assert(n.text    == "bar")
+    assert(n.width == width)
+    assert(n.height < height)
 
     -- Test the ID system
     local id = n.id

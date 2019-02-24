@@ -126,42 +126,6 @@ local function get_offset(s, position, idx, width, height)
     return v
 end
 
-local escape_pattern = "[<>&]"
-local escape_subs    = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
-
--- Cache the markup
-local function set_escaped_text(self)
-    local text = self.message or ""
-    local title = self.title and self.title .. "\n" or ""
-
-    local textbox = self.textbox
-
-    local function set_markup(pattern, replacements)
-        return textbox:set_markup_silently(string.format('<b>%s</b>%s', title, text:gsub(pattern, replacements)))
-    end
-
-    local function set_text()
-        textbox:set_text(string.format('%s %s', title, text))
-    end
-
-    -- Since the title cannot contain markup, it must be escaped first so that
-    -- it is not interpreted by Pango later.
-    title = title:gsub(escape_pattern, escape_subs)
-    -- Try to set the text while only interpreting <br>.
-    if not set_markup("<br.->", "\n") then
-        -- That failed, escape everything which might cause an error from pango
-        if not set_markup(escape_pattern, escape_subs) then
-            -- Ok, just ignore all pango markup. If this fails, we got some invalid utf8
-            if not pcall(set_text) then
-                textbox:set_markup("<i>&lt;Invalid markup or UTF8, cannot display message&gt;</i>")
-            end
-        end
-    end
-end
-
-naughty.connect_signal("property::text" ,set_escaped_text)
-naughty.connect_signal("property::title",set_escaped_text)
-
 
 --- Re-arrange notifications according to their position and index - internal
 --
@@ -240,6 +204,45 @@ local function update_size(notification)
     -- update positions of other notifications
     arrange(n.screen)
 end
+
+
+local escape_pattern = "[<>&]"
+local escape_subs    = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
+
+-- Cache the markup
+local function set_escaped_text(self)
+    local text = self.message or ""
+    local title = self.title and self.title .. "\n" or ""
+
+    local textbox = self.textbox
+
+    local function set_markup(pattern, replacements)
+        return textbox:set_markup_silently(string.format('<b>%s</b>%s', title, text:gsub(pattern, replacements)))
+    end
+
+    local function set_text()
+        textbox:set_text(string.format('%s %s', title, text))
+    end
+
+    -- Since the title cannot contain markup, it must be escaped first so that
+    -- it is not interpreted by Pango later.
+    title = title:gsub(escape_pattern, escape_subs)
+    -- Try to set the text while only interpreting <br>.
+    if not set_markup("<br.->", "\n") then
+        -- That failed, escape everything which might cause an error from pango
+        if not set_markup(escape_pattern, escape_subs) then
+            -- Ok, just ignore all pango markup. If this fails, we got some invalid utf8
+            if not pcall(set_text) then
+                textbox:set_markup("<i>&lt;Invalid markup or UTF8, cannot display message&gt;</i>")
+            end
+        end
+    end
+
+    if self.size_info then update_size(self) end
+end
+
+naughty.connect_signal("property::text" ,set_escaped_text)
+naughty.connect_signal("property::title",set_escaped_text)
 
 
 local function cleanup(self, _ --[[reason]], keep_visible)
