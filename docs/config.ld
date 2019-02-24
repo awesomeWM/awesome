@@ -69,8 +69,10 @@ new_type("clientlayout", "Client layouts", false, "param")
 new_type("sourcefunction", "List source functions", false)
 -- Document some callback prototypes
 new_type("callback", "Callback functions prototype", false, "Parameters")
--- awful.rules sources
+-- gears.matcher / awful.rules sources
 new_type("rulesources", "Rule sources", false, "param")
+-- gears.matcher / awful.rules rule components
+new_type("rulecomponent", "Rule components", false, "Type")
 -- Filter functions for the taglist/tasklist/layoutlist
 new_type("filterfunction", "List filters", false)
 -- Extra client properties available only in awful.rules/spawn constructs
