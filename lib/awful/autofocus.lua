@@ -43,7 +43,7 @@ end
 
 --- Give focus on tag selection change.
 --
--- @param tag A tag object
+-- @tparam tag t A tag object
 local function check_focus_tag(t)
     local s = t.screen
     if (not s) or (not s.valid) then return end
