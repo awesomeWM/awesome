@@ -73,9 +73,6 @@ local function sendNotificationClosed(notificationId, reason)
     end
 end
 
--- This allow notification to be upadated later.
-local counter = 1
-
 local function convert_icon(w, h, rowstride, channels, data)
     -- Do the arguments look sane? (e.g. we have enough data)
     local expected_length = rowstride * (h - 1) + w * channels
@@ -213,15 +210,13 @@ capi.dbus.connect_signal("org.freedesktop.Notifications",
                         notification[k] = v
                     end
                 else
-                    counter = counter+1
-                    args.id = counter
                     notification = nnotif(args)
                 end
 
                 return "u", notification.id
             end
-            counter = counter+1
-            return "u", counter
+
+            return "u", nnotif._gen_next_id()
         elseif data.member == "CloseNotification" then
             local obj = naughty.get_by_id(appname)
             if obj then

@@ -257,6 +257,7 @@ local function test_overlap()
 
     for _, n1 in ipairs(active) do
         assert(n1.box)
+        assert(n1.id)
 
         -- Check for overlapping the workarea
         assert(n1.box.y+default_height < wa.y+wa.height)
@@ -405,6 +406,7 @@ table.insert(steps, function()
         timeout = 25000,
     }
 
+    assert(n1.id)
     assert(n1.iconbox)
     assert(n1.iconbox._private.image:get_width () == beautiful.notification_icon_size)
     assert(n1.iconbox._private.image:get_height() == beautiful.notification_icon_size)
@@ -420,6 +422,7 @@ table.insert(steps, function()
         timeout = 25000,
     }
 
+    assert(n2.id)
     assert(n2.iconbox)
     assert(n2.iconbox._private.image:get_width () == 32)
     assert(n2.iconbox._private.image:get_height() == 32)
@@ -655,6 +658,49 @@ table.insert(steps, function()
     return true
 end)
 
+local int_n = nil
+
+-- Test replace_id with internally generated notifications.
+-- Even if it makes little sense, it should work and is used in the wild.
+table.insert(steps, function()
+    int_n = naughty.notification {
+        title   = "foo",
+        message = "bar",
+        timeout = 25000,
+    }
+
+    local nid2 = int_n.id
+    assert(int_n.id)
+    local res, err = pcall(function()
+        int_n.id = 1337
+    end)
+
+    assert(err:match("Notification identifier can only be set once"))
+    assert(not res)
+    assert(int_n.id == nid2)
+
+    -- watch out, capi.dbus signals are not normal object signals
+    send_notify("Awesome test", nid2, "", "title2", "text2",
+        { "the one action" }, {}, 123)
+
+    return true
+end)
+
+-- Test that the values were replaced
+table.insert(steps, function()
+    if int_n.title ~= "title2" then return end
+
+    assert(int_n.title   == "title2")
+    assert(int_n.message == "text2" )
+    --assert(int_n.timeout == 123     ) --FIXME
+    int_n:destroy()
+
+    --TODO test what happens when updating a destroyed notification
+    -- There is currently no API to resurrect notifications.
+
+    return true
+end)
+
 -- Now check if the old deprecated (but still supported) APIs don't have errors.
 table.insert(steps, function()
     -- Tests are (by default) not allowed to call deprecated APIs
@@ -698,10 +744,9 @@ table.insert(steps, function()
     assert(n.text    == "baz")
 
     -- Test the ID system
-    n.id = 1337
-    assert(n.id == 1337)
-    assert(naughty.getById(1337) == n)
-    assert(naughty.get_by_id(1337) == n)
+    local id = n.id
+    assert(naughty.getById(id) == n)
+    assert(naughty.get_by_id(id) == n)
     assert(naughty.getById(42) ~= n)
     assert(naughty.get_by_id(42) ~= n)
 
