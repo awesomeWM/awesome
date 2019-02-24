@@ -282,70 +282,40 @@ set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
 # }}}
 
-if(GENERATE_DOC)
-    # Load the common documentation
-    include(docs/load_ldoc.cmake)
-
-    # Generate the widget lists
-    include(docs/widget_lists.cmake)
-endif()
-
 # Use `include`, rather than `add_subdirectory`, to keep the variables
 # The file is a valid CMakeLists.txt and can be executed directly if only
 # the image artefacts are needed.
 include(tests/examples/CMakeLists.txt)
 
-# {{{ Configure files
-file(GLOB awesome_base_c_configure_files RELATIVE ${SOURCE_DIR}
-    ${SOURCE_DIR}/*.c
-    ${SOURCE_DIR}/*.h)
-
-file(GLOB awesome_c_configure_files RELATIVE ${SOURCE_DIR}
-    ${SOURCE_DIR}/common/*.c
-    ${SOURCE_DIR}/common/*.h
-    ${SOURCE_DIR}/objects/*.c
-    ${SOURCE_DIR}/objects/*.h)
-
-file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR}
-    ${SOURCE_DIR}/lib/*.lua)
-
-file(GLOB_RECURSE awesome_theme_configure_files RELATIVE ${SOURCE_DIR}
-    ${SOURCE_DIR}/themes/*/*.lua)
-
-set(AWESOME_CONFIGURE_FILES
-    ${awesome_base_c_configure_files}
-    ${awesome_theme_configure_files}
-    config.h
-    docs/config.ld
-    awesome-version-internal.h)
-
-foreach(file ${AWESOME_CONFIGURE_FILES})
-    configure_file(${SOURCE_DIR}/${file}
-                   ${BUILD_DIR}/${file}
-                   ESCAPE_QUOTES
-                   @ONLY)
-endforeach()
-
-set(AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES
-    ${awesome_c_configure_files}
-    ${awesome_lua_configure_files}
+add_custom_target(generate-documented-code
+    DEPENDS
+        check-examples
+        generate-examples
 )
 
-if(DO_COVERAGE)
-    foreach(file ${AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES})
-        configure_file(${SOURCE_DIR}/${file}
-                    ${BUILD_DIR}/${file}
-                    COPYONLY)
-    endforeach()
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -g -O0 --coverage -fprofile-arcs -ftest-coverage")
-else()
-    foreach(file ${AWESOME_CONFIGURE_COPYONLY_WITHCOV_FILES})
-        configure_file(${SOURCE_DIR}/${file}
-                    ${BUILD_DIR}/${file}
-                    ESCAPE_QUOTES
-                    @ONLY)
-    endforeach()
+if(GENERATE_DOC)
+    add_custom_command(
+        TARGET
+            generate-documented-code
+        DEPENDS
+            generate-examples
+            ${SOURCE_DIR}/docs/config.ld
+            ${SOURCE_DIR}/docs/ldoc.ltp
+            ${SOURCE_DIR}/docs/load_ldoc.cmake
+            ${SOURCE_DIR}/docs/gen_documented.cmake
+            ${SOURCE_DIR}/tests/examples/CMakeLists.txt
+        COMMAND
+            ${CMAKE_COMMAND}
+                -DSOURCE_DIR=${CMAKE_SOURCE_DIR}
+                -DBUILD_DIR=${BUILD_DIR}
+                -P ${SOURCE_DIR}/docs/gen_documented.cmake
+    )
+
+    # Generate the widget lists
+    include(docs/widget_lists.cmake)
 endif()
+
+configure_file(config.h.in ${BUILD_DIR}/config/config.h)
 
 #}}}
 
@@ -362,6 +332,7 @@ add_custom_target(lgi-check-run ALL
 # {{{ Generate some aggregated documentation from lua script
 
 add_custom_target(setup_directories DEPENDS lgi-check-run)
+add_custom_target(generate-rules-list)
 
 add_custom_command(TARGET setup_directories
         COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/script_files/
@@ -381,18 +352,20 @@ add_custom_command(
 )
 
 add_custom_command(
-        OUTPUT ${BUILD_DIR}/docs/common/rules_index.ldoc
-        COMMAND lua ${SOURCE_DIR}/docs/build_rules_index.lua
-            ${BUILD_DIR}/docs/common/rules_index.ldoc
+        TARGET generate-rules-list
 
-        # Cheap trick until the ldoc `configure_file` is ported to be a build
-        # step rather than part of cmake.
-        COMMAND ${CMAKE_COMMAND} -E copy ${BUILD_DIR}/docs/common/rules_index.ldoc
+        WORKING_DIRECTORY ${SOURCE_DIR}
+
+        COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/docs/common/
+
+        COMMAND lua ${SOURCE_DIR}/docs/build_rules_index.lua
             ${SOURCE_DIR}/docs/common/rules_index.ldoc
 
         DEPENDS
             lgi-check-run
+            setup_directories
             ${SOURCE_DIR}/docs/build_rules_index.lua
+            ${SOURCE_DIR}/docs/build_rules_index.ldoc
             ${SOURCE_DIR}/docs/_parser.lua
 )
 
@@ -414,14 +387,13 @@ add_custom_command(
 # Create a target for the auto-generated awesomerc.lua and other files
 add_custom_target(generate_awesomerc DEPENDS
     setup_directories
+    generate-rules-list
     ${BUILD_DIR}/awesomerc.lua
     ${BUILD_DIR}/script_files/theme.lua
     ${BUILD_DIR}/script_files/rc.lua
     ${SOURCE_DIR}/awesomerc.lua
     ${BUILD_DIR}/docs/06-appearance.md
     ${SOURCE_DIR}/docs/05-awesomerc.md.lua
-    ${SOURCE_DIR}/docs/build_rules_index.lua
-    ${BUILD_DIR}/docs/common/rules_index.ldoc
     ${SOURCE_DIR}/docs/sample_theme.lua
     ${SOURCE_DIR}/docs/sample_files.lua
     ${SOURCE_DIR}/awesomerc.lua

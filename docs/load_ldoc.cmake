@@ -1,13 +1,18 @@
-# To avoid copy pasting, some documentation is stored in reusable files
-set(SHAPE_FILE "${SOURCE_DIR}/docs/common/${SHAPE_NAME}.lua")
 
-foreach(path ${BUILD_DIR}/docs/common/;${SOURCE_DIR}/docs/common/)
+foreach(path ${SOURCE_DIR}/docs/common/)
     # Get the documentation file list
     file(GLOB doc_files RELATIVE "${path}" "${path}/*.ldoc")
 
     foreach(doc_file_name ${doc_files})
+        # Apply all @DOC_foo@ in the file. Note that including a .ldoc from a
+        # .ldoc isn't currently supported (but could be).
+        configure_file("${path}/${doc_file_name}"
+            ${BUILD_DIR}/docs/common/${file}
+            @ONLY
+        )
+
         # Read the file
-        file(READ "${path}/${doc_file_name}" doc_file_content)
+        file(READ "${BUILD_DIR}/docs/common/${doc_file_name}" doc_file_content)
 
         # Remove the file extension
         string(REGEX REPLACE "\\.ldoc" "" DOC_FILE_NAME ${doc_file_name})

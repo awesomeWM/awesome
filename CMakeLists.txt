@@ -33,10 +33,12 @@ endif()
 include(awesomeConfig.cmake)
 
 include_directories(
-    ${BUILD_DIR}
+    ${SOURCE_DIR}
+    ${BUILD_DIR}/config/
     ${AWESOME_COMMON_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
-    ${AWESOME_OPTIONAL_INCLUDE_DIRS})
+    ${AWESOME_OPTIONAL_INCLUDE_DIRS}
+)
 
 set(AWE_ICON_DIR ${SOURCE_DIR}/icons)
 set(AWE_THEMES_DIR ${SOURCE_DIR}/themes)
@@ -50,50 +52,48 @@ set(AWE_DOC_FILES
     ${SOURCE_DIR}/LICENSE)
 
 set(AWE_SRCS
-    ${BUILD_DIR}/awesome.c
-    ${BUILD_DIR}/banning.c
-    ${BUILD_DIR}/color.c
-    ${BUILD_DIR}/dbus.c
-    ${BUILD_DIR}/draw.c
-    ${BUILD_DIR}/event.c
-    ${BUILD_DIR}/ewmh.c
-    ${BUILD_DIR}/keygrabber.c
-    ${BUILD_DIR}/luaa.c
-    ${BUILD_DIR}/mouse.c
-    ${BUILD_DIR}/mousegrabber.c
-    ${BUILD_DIR}/property.c
-    ${BUILD_DIR}/root.c
-    ${BUILD_DIR}/selection.c
-    ${BUILD_DIR}/spawn.c
-    ${BUILD_DIR}/stack.c
-    ${BUILD_DIR}/strut.c
-    ${BUILD_DIR}/systray.c
-    ${BUILD_DIR}/xwindow.c
-    ${BUILD_DIR}/xkb.c
-    ${BUILD_DIR}/xrdb.c
-    ${BUILD_DIR}/common/atoms.c
-    ${BUILD_DIR}/common/backtrace.c
-    ${BUILD_DIR}/common/buffer.c
-    ${BUILD_DIR}/common/luaclass.c
-    ${BUILD_DIR}/common/lualib.c
-    ${BUILD_DIR}/common/luaobject.c
-    ${BUILD_DIR}/common/util.c
-    ${BUILD_DIR}/common/version.c
-    ${BUILD_DIR}/common/xcursor.c
-    ${BUILD_DIR}/common/xembed.c
-    ${BUILD_DIR}/common/xutil.c
-    ${BUILD_DIR}/objects/button.c
-    ${BUILD_DIR}/objects/client.c
-    ${BUILD_DIR}/objects/drawable.c
-    ${BUILD_DIR}/objects/drawin.c
-    ${BUILD_DIR}/objects/key.c
-    ${BUILD_DIR}/objects/screen.c
-    ${BUILD_DIR}/objects/selection_acquire.c
-    ${BUILD_DIR}/objects/selection_transfer.c
-    ${BUILD_DIR}/objects/selection_watcher.c
-    ${BUILD_DIR}/objects/tag.c
-    ${BUILD_DIR}/objects/selection_getter.c
-    ${BUILD_DIR}/objects/window.c)
+    awesome.c
+    banning.c
+    color.c
+    dbus.c
+    draw.c
+    event.c
+    ewmh.c
+    keygrabber.c
+    luaa.c
+    mouse.c
+    mousegrabber.c
+    property.c
+    root.c
+    selection.c
+    spawn.c
+    stack.c
+    strut.c
+    systray.c
+    xwindow.c
+    xkb.c
+    xrdb.c
+    common/atoms.c
+    common/backtrace.c
+    common/buffer.c
+    common/luaclass.c
+    common/lualib.c
+    common/luaobject.c
+    common/util.c
+    common/version.c
+    common/xcursor.c
+    common/xembed.c
+    common/xutil.c
+    objects/button.c
+    objects/client.c
+    objects/drawable.c
+    objects/drawin.c
+    objects/key.c
+    objects/screen.c
+    objects/selection_watcher.c
+    objects/tag.c
+    objects/selection_getter.c
+    objects/window.c)
 
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awesome.1.txt
@@ -154,26 +154,28 @@ target_link_libraries(${PROJECT_AWE_NAME}
 # atoms
 file(MAKE_DIRECTORY ${BUILD_DIR}/common)
 add_custom_command(
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/config/common/
     COMMAND ${SOURCE_DIR}/build-utils/atoms-ext.sh ${SOURCE_DIR}/common/atoms.list
-    ARGS    > ${BUILD_DIR}/common/atoms-extern.h
-    OUTPUT  ${BUILD_DIR}/common/atoms-extern.h
+    ARGS    > ${BUILD_DIR}/config/common/atoms-extern.h
+    OUTPUT  ${BUILD_DIR}/config/common/atoms-extern.h
     WORKING_DIRECTORY ${SOURCE_DIR}
     DEPENDS ${SOURCE_DIR}/common/atoms.list
     COMMENT "Generating atoms-extern.h"
     VERBATIM)
 
 add_custom_command(
+    COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/config/common/
     COMMAND ${SOURCE_DIR}/build-utils/atoms-int.sh ${SOURCE_DIR}/common/atoms.list
-    ARGS    > ${BUILD_DIR}/common/atoms-intern.h
-    OUTPUT  ${BUILD_DIR}/common/atoms-intern.h
+    ARGS    > ${BUILD_DIR}/config/common/atoms-intern.h
+    OUTPUT  ${BUILD_DIR}/config/common/atoms-intern.h
     WORKING_DIRECTORY ${SOURCE_DIR}
     DEPENDS ${SOURCE_DIR}/common/atoms.list
     COMMENT "Generating atoms-intern.h"
     VERBATIM)
 
 add_custom_target(generated_sources
-    DEPENDS ${BUILD_DIR}/common/atoms-intern.h
-            ${BUILD_DIR}/common/atoms-extern.h)
+    DEPENDS ${BUILD_DIR}/config/common/atoms-intern.h
+            ${BUILD_DIR}/config/common/atoms-extern.h)
 
 # Default theme directory
 file(MAKE_DIRECTORY ${BUILD_DIR}/themes/default)
@@ -270,11 +272,10 @@ endif()
 # {{{ Lua API Documentation
 if(GENERATE_DOC)
     if(NOT BUILD_DIR STREQUAL SOURCE_DIR)
-        file(MAKE_DIRECTORY ${BUILD_DIR}/lib)
         file(MAKE_DIRECTORY ${BUILD_DIR}/doc)
     endif()
 
-    file(GLOB_RECURSE AWE_LUA_FILES ${BUILD_DIR}/lib/*.lua)
+    file(GLOB_RECURSE AWE_LUA_FILES ${SOURCE_DIR}/lib/*.lua)
     file(GLOB_RECURSE AWE_MD_FILES ${AWE_DOC_DIR}/*.md)
     file(GLOB_RECURSE AWE_MD_LUA_FILES RELATIVE "${SOURCE_DIR}/docs" docs/*.md.lua)
     foreach(file ${AWE_MD_LUA_FILES})
@@ -282,12 +283,6 @@ if(GENERATE_DOC)
         string(REPLACE ".lua" "" file ${file})
         list(APPEND AWE_MD_FILES "${AWE_DOC_DIR}/${file}")
     endforeach()
-
-    # Copy the images to the build directory
-    file(COPY ${SOURCE_DIR}/docs/images DESTINATION ${BUILD_DIR}/doc)
-
-    # Copy the aliases to the build directory
-    file(COPY ${SOURCE_DIR}/docs/aliases DESTINATION ${BUILD_DIR}/docs)
 
     # Copy ldoc files.
     configure_file(${SOURCE_DIR}/docs/ldoc.css ${BUILD_DIR}/docs COPYONLY)
@@ -298,10 +293,10 @@ if(GENERATE_DOC)
     )
 
     if (STRICT_TESTS)
-        set(ldoc_args --fatalwarnings .)
+        set(ldoc_args --fatalwarnings ${BUILD_DIR}/processed/)
         set(ldoc_desc_suffix " (fatal warnings)")
     else()
-        set(ldoc_args .)
+        set(ldoc_args ${BUILD_DIR}/processed/)
     endif()
     add_custom_command(
         OUTPUT  ${BUILD_DIR}/doc/index.html
@@ -311,11 +306,13 @@ if(GENERATE_DOC)
             ${AWE_SRCS}
             ${AWE_LUA_FILES}
             ${AWE_MD_FILES}
-            ${BUILD_DIR}/docs/config.ld
-            ${BUILD_DIR}/docs/ldoc.css
-            ${BUILD_DIR}/docs/ldoc.ltp
+            ${SOURCE_DIR}/docs/config.ld
+            ${SOURCE_DIR}/docs/ldoc.css
+            ${SOURCE_DIR}/docs/ldoc.ltp
             generate_awesomerc
+            check-examples
             generate-examples
+            generate-documented-code
         COMMENT "Generating API documentation${ldoc_desc_suffix}")
 endif()
 # }}}
@@ -373,8 +370,6 @@ endif()
 # {{{ Installation
 install(TARGETS ${PROJECT_AWE_NAME} RUNTIME DESTINATION bin)
 install(FILES "utils/awesome-client" DESTINATION bin PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
-install(DIRECTORY ${BUILD_DIR}/lib DESTINATION ${AWESOME_DATA_PATH}
-    PATTERN "*.in" EXCLUDE)
 install(FILES ${BUILD_DIR}/awesomerc.lua DESTINATION ${AWESOME_SYSCONFDIR}
         RENAME rc.lua)
 if(GENERATE_MANPAGES)
