@@ -268,15 +268,21 @@ function(run_test test_path namespace escaped_content)
         COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
         VERBATIM)
 
-    if(NOT ${OUTPUT_IMAGE_PATH} STREQUAL "")
-        file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
+    set(OUTPUTS "")
+    if(NOT expected_output_path STREQUAL "/dev/null")
+        set(OUTPUTS "${expected_output_path}")
+    endif()
+    if(NOT OUTPUT_IMAGE_PATH STREQUAL "")
+        set(OUTPUTS "${OUTPUTS}" "${OUTPUT_IMAGE_PATH}")
+    endif()
+    if(NOT OUTPUTS STREQUAL "")
         add_custom_command(
             COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
             # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
             DEPENDS ${template} ${test_path}
-            OUTPUT  ${OUTPUT_IMAGE_PATH}
+            OUTPUT ${OUTPUTS}
             VERBATIM)
-        set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUT_IMAGE_PATH} ${EXAMPLE_DOC_GENERATED_FILES}
+        set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUTS} ${EXAMPLE_DOC_GENERATED_FILES}
             PARENT_SCOPE)
     endif()
 
