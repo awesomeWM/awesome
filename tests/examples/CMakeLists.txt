@@ -273,7 +273,7 @@ function(run_test test_path namespace escaped_content)
         set(OUTPUTS "${expected_output_path}")
     endif()
     if(NOT OUTPUT_IMAGE_PATH STREQUAL "")
-        set(OUTPUTS "${OUTPUTS}" "${OUTPUT_IMAGE_PATH}")
+        set(OUTPUTS ${OUTPUTS} "${OUTPUT_IMAGE_PATH}")
     endif()
     if(NOT OUTPUTS STREQUAL "")
         add_custom_command(
@@ -282,7 +282,7 @@ function(run_test test_path namespace escaped_content)
             DEPENDS ${template} ${test_path}
             OUTPUT ${OUTPUTS}
             VERBATIM)
-        set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUTS} ${EXAMPLE_DOC_GENERATED_FILES}
+        set(EXAMPLE_DOC_GENERATED_FILES ${EXAMPLE_DOC_GENERATED_FILES} ${OUTPUTS}
             PARENT_SCOPE)
     endif()
 
