@@ -91,7 +91,7 @@ Last commit message:
 $LAST_COMMIT_MSG
 
 Commits: https://github.com/awesomeWM/awesome/compare/${TRAVIS_COMMIT_RANGE/.../..}
-Build URL: https://travis-ci.org/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
+Build URL: https://travis-ci.com/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
 git commit -m "[relevant] $COMMIT_MSG"
 
 # Commit the irrelevant changes.
