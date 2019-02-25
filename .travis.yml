@@ -88,6 +88,7 @@ jobs:
             - *BASE_PACKAGES
             - liblua5.2-dev
             - lua5.2
+            - lua-discount
 
 env:
   global:
@@ -143,7 +144,6 @@ install:
   - |
     if [ "$BUILD_APIDOC" = "true" ] || [ "$DO_CHECKQA" = 1 ]; then
       travis_retry sudo luarocks install ldoc
-      travis_retry sudo luarocks install lua-discount
     fi
 
   # Install dependencies for code coverage testing.
