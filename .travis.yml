@@ -64,7 +64,6 @@ jobs:
             - *BASE_PACKAGES
             - liblua5.3-dev
             - lua5.3
-    # Note: luarocks does not work with Lua 5.0.
     - env: LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build
       addons:
         apt:
