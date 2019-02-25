@@ -217,6 +217,10 @@ install:
       travis_fold_end
       return 0
     }
+
+after_install:
+  - luarocks list --porcelain | column -t -s $'\t'
+
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true -D DO_COVERAGE=$DO_COVERAGE -D CMAKE_C_FLAGS=-Werror"
   - |
