@@ -27,6 +27,7 @@ read_globals = {
     "keygrabber",
     "mousegrabber",
     "root",
+    "selection_acquire",
     "selection_getter",
     "selection",
     "selection_watcher",
