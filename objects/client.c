@@ -1241,7 +1241,7 @@ client_restore_enterleave_events(void)
     check(globalconf.pending_enter_leave_begin.sequence != 0);
     pair.begin = globalconf.pending_enter_leave_begin;
     pair.end = xcb_no_operation(globalconf.connection);
-    xcb_ungrab_server(globalconf.connection);
+    xutil_ungrab_server(globalconf.connection);
     globalconf.pending_enter_leave_begin.sequence = 0;
     sequence_pair_array_append(&globalconf.ignore_enter_leave_events, pair);
 }
@@ -1587,7 +1587,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                                  globalconf.screen->root,
                                  XCB_CW_EVENT_MASK,
                                  ROOT_WINDOW_EVENT_MASK);
-    xcb_ungrab_server(globalconf.connection);
+    xutil_ungrab_server(globalconf.connection);
 
     /* Do this now so that we don't get any events for the above
      * (Else, reparent could cause an UnmapNotify) */
@@ -1978,7 +1978,7 @@ client_set_minimized(lua_State *L, int cidx, bool s)
                                          c->window,
                                          XCB_CW_EVENT_MASK,
                                          client_select_input_val);
-            xcb_ungrab_server(globalconf.connection);
+            xutil_ungrab_server(globalconf.connection);
         }
         else
         {

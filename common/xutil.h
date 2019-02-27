@@ -54,6 +54,20 @@ xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
     return NULL;
 }
 
+static inline void
+xutil_ungrab_server(xcb_connection_t *connection)
+{
+    /* XCB's output buffer might have filled up between the GrabServer request
+     * and now. Thus, the GrabServer might already have been sent and the
+     * following UngrabServer would sit around in the output buffer for an
+     * indeterminate time and might cause problems. We cannot detect this
+     * situation, so just always flush directly after UngrabServer.
+     */
+    xcb_ungrab_server(connection);
+    xcb_flush(connection);
+}
+#define xcb_ungrab_server do_not_use_xcb_ungrab_server_directly
+
 uint16_t xutil_key_mask_fromstr(const char *);
 void xutil_key_mask_tostr(uint16_t, const char **, size_t *);
 
