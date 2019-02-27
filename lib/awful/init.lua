@@ -30,7 +30,7 @@ util.spawn_with_shell = function(...)
 end
 
 util.pread = function()
-    gdebug.deprecate("Use io.popen() directly or look at awful.spawn.easy_async() "
+    gdebug.deprecate("Use awful.spawn.easy_async() "
             .. "for an asynchronous alternative", {deprecated_in=4})
     return ""
 end
