@@ -345,8 +345,7 @@ acquire_timestamp(void)
             atom, type, 8, 0, "");
     xcb_change_window_attributes(globalconf.connection, win,
             XCB_CW_EVENT_MASK, (uint32_t[]) { 0 });
-    xcb_ungrab_server(globalconf.connection);
-    xcb_flush(globalconf.connection);
+    xutil_ungrab_server(globalconf.connection);
 
     /* Now wait for the event */
     while((event = xcb_wait_for_event(globalconf.connection)))
@@ -882,8 +881,7 @@ main(int argc, char **argv)
                                  ROOT_WINDOW_EVENT_MASK);
 
     /* we will receive events, stop grabbing server */
-    xcb_ungrab_server(globalconf.connection);
-    xcb_flush(globalconf.connection);
+    xutil_ungrab_server(globalconf.connection);
 
     /* get the current wallpaper, from now on we are informed when it changes */
     root_update_wallpaper();
