@@ -360,6 +360,8 @@ end
 
 -- Remove the notification from the internal list(s)
 local function cleanup(self, reason)
+    assert(reason, "Use n:destroy() instead of emitting the signal directly")
+
     if properties.suspended then
         for k, v in pairs(naughty.notifications.suspended) do
             if v == self then
