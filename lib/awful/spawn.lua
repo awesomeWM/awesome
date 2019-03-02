@@ -645,6 +645,8 @@ end
 -- @tparam[opt] function callback A callback function when the client is created.
 -- @see awful.rules
 function spawn.once(cmd, rules, matcher, unique_id, callback)
+    assert(type(cmd) == "string" or type(cmd) == "table")
+    assert(type(rules) == "table")
     local hash = unique_id or hash_command(cmd, rules)
     local status = register_common(hash, rules, matcher, callback)
     run_after_startup(function()
@@ -677,6 +679,8 @@ end
 -- @tparam[opt] function callback A callback function when the client is created.
 -- @see awful.rules
 function spawn.single_instance(cmd, rules, matcher, unique_id, callback)
+    assert(type(cmd) == "string" or type(cmd) == "table")
+    assert(type(rules) == "table")
     local hash = unique_id or hash_command(cmd, rules)
     register_common(hash, rules, matcher, callback)
     run_after_startup(function()
