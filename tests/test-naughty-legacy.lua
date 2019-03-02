@@ -789,7 +789,21 @@ table.insert(steps, function()
     naughty.suspended = false
 
     -- The old notify function and "text" instead of "message"
-    naughty.notify { text = "foo" }
+    n = naughty.notify { text = "foo" }
+    assert(n.message == "foo")
+    assert(n.text    == "foo")
+
+    -- Calling `naughty.notify` with replace_id.
+    n2 = naughty.notify {
+        replaces_id = n.id,
+        message     = "bar",
+        title       = "foo",
+    }
+
+    assert(n         == n2   )
+    assert(n.message == "bar")
+    assert(n.text    == "bar")
+    assert(n.title   == "foo")
 
     -- Finish by testing disconnect_signal
     naughty.disconnect_signal("destroyed", destroyed_callback)
