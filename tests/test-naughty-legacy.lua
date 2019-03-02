@@ -748,10 +748,10 @@ table.insert(steps, function()
     assert(n.width > width)
     assert(n.height == height)
     width, height = n.width, n.height
-    naughty.replace_text(n, "foo", "bar\nbaz")
+    naughty.replace_text(n, "foo", "bar\nbar")
     assert(n.title   == "foo")
-    assert(n.message == "bar\nbaz")
-    assert(n.text    == "bar\nbaz")
+    assert(n.message == "bar\nbar")
+    assert(n.text    == "bar\nbar")
     assert(n.width < width)
     assert(n.height > height)
     width, height = n.width, n.height
