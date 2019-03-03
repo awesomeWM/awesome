@@ -92,165 +92,6 @@ local function destroyed_callback(n, reason)
     table.insert(destroyed, n)
 end
 
-naughty.connect_signal("destroyed", destroyed_callback)
-
-table.insert(steps, function()
-    if not has_cmd_notify then return true end
-
-    spawn{ 'notify-send', 'title', 'message', '-t', '25000' }
-
-    return true
-end)
-
-table.insert(steps, function()
-    if not has_cmd_notify then return true end
-    if #active ~= 1 then return end
-
-    local n = active[1]
-
-    assert(n.box)
-    local offset = 2*n.box.border_width
-    default_width  = n.box.width+offset
-    default_height = n.box.height + offset + naughty.config.spacing
-
-    assert(default_width  > 0)
-    assert(default_height > 0)
-
-    -- Make sure the expiration timer is started
-    assert(n.timer)
-    assert(n.timer.started)
-    assert(n.is_expired == false)
-
-    n:destroy()
-
-    assert(#active == 0)
-
-    return true
-end)
-
--- Test pausing incoming notifications.
-table.insert(steps, function()
-    assert(not naughty.suspended)
-
-    naughty.suspended = true
-
-    -- There is some magic behind this, check it works
-    assert(naughty.suspended)
-
-    spawn{ 'notify-send', 'title', 'message', '-t', '25000' }
-
-    return true
-end)
-
--- Test resuming incoming notifications.
-table.insert(steps, function(count)
-    if count ~= 4 then return end
-
-    assert(#active == 0)
-    assert(#naughty.notifications.suspended == 1)
-    assert(naughty.notifications.suspended[1]:get_suspended())
-
-    naughty.resume()
-
-    assert(not naughty.suspended)
-    assert(#naughty.notifications.suspended == 0)
-    assert(#active == 1)
-
-    active[1]:destroy()
-    assert(#active == 0)
-
-    spawn{ 'notify-send', 'title', 'message', '-t', '1' }
-
-    return true
-end)
-
--- Test automatic expiration.
-table.insert(steps, function()
-    if counter ~= 3 then return end
-
-    return true
-end)
-
-table.insert(steps, function()
-    if #active > 0 then return end
-
-    -- It expired after one milliseconds, so it should be gone as soon as
-    -- it is registered.
-    assert(#active == 0)
-
-    assert(not naughty.expiration_paused)
-    naughty.expiration_paused = true
-
-    -- There is some magic behind this, make sure it works
-    assert(naughty.expiration_paused)
-
-    spawn{ 'notify-send', 'title', 'message', '-t', '1' }
-
-    return true
-end)
-
--- Test disabling automatic expiration.
-table.insert(steps, function()
-    if counter ~= 4 then return end
-
-    -- It should not expire by itself, so that should always be true
-    assert(#active == 1)
-
-    return true
-end)
-
--- Wait long enough to avoid races.
-table.insert(steps, function(count)
-    if count ~= 4 then return end
-
-    assert(#active == 1)
-    assert(active[1].is_expired)
-
-    naughty.expiration_paused = false
-    assert(not naughty.expiration_paused)
-
-    return true
-end)
-
--- Make sure enabling expiration process the expired queue.
-table.insert(steps, function()
-    -- Right now this doesn't require a step for itself, but this could change
-    -- so better not "document" the instantaneous clearing of the queue.
-    if #active > 0 then return end
-
-    spawn{ 'notify-send', 'low',      'message', '-t', '25000', '-u', 'low' }
-    spawn{ 'notify-send', 'normal',   'message', '-t', '25000', '-u', 'normal' }
-    spawn{ 'notify-send', 'critical', 'message', '-t', '25000', '-u', 'critical' }
-
-    return true
-end)
-
--- Test the urgency level and default preset.
-table.insert(steps, function()
-    if counter ~= 7 then return end
-
-    while #active > 0 do
-        active[1]:destroy()
-    end
-
-    return true
-end)
-
--- Test what happens when the screen has the maximum number of notification it
--- can display at one.
-table.insert(steps, function()
-    local wa = mouse.screen.workarea
-    local max_notif = math.floor(wa.height/default_height)
-
-    -- Everything should fit, otherwise the math is wrong in
-    -- `neughty.layout.legacy` and its a regression.
-    for i=1, max_notif do
-        spawn{ 'notify-send', 'notif '..i, 'message', '-t', '25000', '-u', 'low' }
-    end
-
-    return true
-end)
-
 -- Test vertical overlapping
 local function test_overlap()
     local wa = mouse.screen.workarea
@@ -283,44 +124,220 @@ local function test_overlap()
     end
 end
 
--- Check the lack of overlapping and the presence of the expected content.
+-- Set the default size.
 table.insert(steps, function()
-    local wa = mouse.screen.workarea
-    local max_notif = math.floor(wa.height/default_height)
-    if counter ~= 7 + max_notif then return end
 
-    assert(#active == max_notif)
+    local n = naughty.notification {
+        title   = "title",
+        message = "message"
+    }
 
-    test_overlap()
+    assert(n.box)
+    local offset = 2*n.box.border_width
+    default_width  = n.box.width+offset
+    default_height = n.box.height + offset + naughty.config.spacing
 
-    -- Now add even more!
-    for i=1, 5 do
-        spawn{ 'notify-send', 'notif '..i, 'message', '-t', '25000', '-u', 'low' }
-    end
+    assert(default_width  > 0)
+    assert(default_height > 0)
 
+    n:destroy()
+
+    -- This one doesn't count.
+    active, destroyed, reasons, counter = {}, {}, {}, 0
     return true
 end)
 
--- Test the code to hide the older notifications when there is too many for the
--- screen.
-table.insert(steps, function()
-    local wa = mouse.screen.workarea
-    local max_notif = math.floor(wa.height/default_height)
-    if counter ~= 7 + max_notif + 5 then return end
+naughty.connect_signal("destroyed", destroyed_callback)
 
-    -- The other should have been hidden
-    assert(#active == max_notif)
+if has_cmd_notify then
+    table.insert(steps, function()
+        spawn{ 'notify-send', 'title', 'message', '-t', '25000' }
 
-    assert(reasons[naughty.notification_closed_reason.too_many_on_screen] == 5)
+        return true
+    end)
 
-    test_overlap()
+    table.insert(steps, function()
+        if #active ~= 1 then return end
 
-    while #active > 0 do
+        local n = active[1]
+
+        assert(n.box)
+
+        -- Make sure the expiration timer is started
+        assert(n.timer)
+        assert(n.timer.started)
+        assert(n.is_expired == false)
+
+        n:destroy()
+
+        assert(#active == 0)
+
+        return true
+    end)
+
+    -- Test pausing incoming notifications.
+    table.insert(steps, function()
+        assert(not naughty.suspended)
+
+        naughty.suspended = true
+
+        -- There is some magic behind this, check it works
+        assert(naughty.suspended)
+
+        spawn{ 'notify-send', 'title', 'message', '-t', '25000' }
+
+        return true
+    end)
+
+    -- Test resuming incoming notifications.
+    table.insert(steps, function(count)
+        if count ~= 4 then return end
+
+        assert(#active == 0)
+        assert(#naughty.notifications.suspended == 1)
+        assert(naughty.notifications.suspended[1]:get_suspended())
+
+        naughty.resume()
+
+        assert(not naughty.suspended)
+        assert(#naughty.notifications.suspended == 0)
+        assert(#active == 1)
+
         active[1]:destroy()
-    end
+        assert(#active == 0)
 
-    return true
-end)
+        spawn{ 'notify-send', 'title', 'message', '-t', '1' }
+
+        return true
+    end)
+
+    -- Test automatic expiration.
+    table.insert(steps, function()
+        if counter ~= 3 then return end
+
+        return true
+    end)
+
+    table.insert(steps, function()
+        if #active > 0 then return end
+
+        -- It expired after one milliseconds, so it should be gone as soon as
+        -- it is registered.
+        assert(#active == 0)
+
+        assert(not naughty.expiration_paused)
+        naughty.expiration_paused = true
+
+        -- There is some magic behind this, make sure it works
+        assert(naughty.expiration_paused)
+
+        spawn{ 'notify-send', 'title', 'message', '-t', '1' }
+
+        return true
+    end)
+
+    -- Test disabling automatic expiration.
+    table.insert(steps, function()
+        if counter ~= 4 then return end
+
+        -- It should not expire by itself, so that should always be true
+        assert(#active == 1)
+
+        return true
+    end)
+
+    -- Wait long enough to avoid races.
+    table.insert(steps, function(count)
+        if count ~= 4 then return end
+
+        assert(#active == 1)
+        assert(active[1].is_expired)
+
+        naughty.expiration_paused = false
+        assert(not naughty.expiration_paused)
+
+        return true
+    end)
+
+    -- Make sure enabling expiration process the expired queue.
+    table.insert(steps, function()
+        -- Right now this doesn't require a step for itself, but this could change
+        -- so better not "document" the instantaneous clearing of the queue.
+        if #active > 0 then return end
+
+        spawn{ 'notify-send', 'low',      'message', '-t', '25000', '-u', 'low' }
+        spawn{ 'notify-send', 'normal',   'message', '-t', '25000', '-u', 'normal' }
+        spawn{ 'notify-send', 'critical', 'message', '-t', '25000', '-u', 'critical' }
+
+        return true
+    end)
+
+    -- Test the urgency level and default preset.
+    table.insert(steps, function()
+        if counter ~= 7 then return end
+
+        while #active > 0 do
+            active[1]:destroy()
+        end
+
+        return true
+    end)
+
+    -- Test what happens when the screen has the maximum number of notification it
+    -- can display at one.
+    table.insert(steps, function()
+        local wa = mouse.screen.workarea
+        local max_notif = math.floor(wa.height/default_height)
+
+        -- Everything should fit, otherwise the math is wrong in
+        -- `neughty.layout.legacy` and its a regression.
+        for i=1, max_notif do
+            spawn{ 'notify-send', 'notif '..i, 'message', '-t', '25000', '-u', 'low' }
+        end
+
+        return true
+    end)
+
+    -- Check the lack of overlapping and the presence of the expected content.
+    table.insert(steps, function()
+        local wa = mouse.screen.workarea
+        local max_notif = math.floor(wa.height/default_height)
+        if counter ~= 7 + max_notif then return end
+
+        assert(#active == max_notif)
+
+        test_overlap()
+
+        -- Now add even more!
+        for i=1, 5 do
+            spawn{ 'notify-send', 'notif '..i, 'message', '-t', '25000', '-u', 'low' }
+        end
+
+        return true
+    end)
+
+    -- Test the code to hide the older notifications when there is too many for the
+    -- screen.
+    table.insert(steps, function()
+        local wa = mouse.screen.workarea
+        local max_notif = math.floor(wa.height/default_height)
+        if counter ~= 7 + max_notif + 5 then return end
+
+        -- The other should have been hidden
+        assert(#active == max_notif)
+
+        assert(reasons[naughty.notification_closed_reason.too_many_on_screen] == 5)
+
+        test_overlap()
+
+        while #active > 0 do
+            active[1]:destroy()
+        end
+
+        return true
+    end)
+
+end
 
 local positions = {
     "top_left"      , "top_middle"    , "top_right"     ,
@@ -748,10 +765,10 @@ table.insert(steps, function()
     assert(n.width > width)
     assert(n.height == height)
     width, height = n.width, n.height
-    naughty.replace_text(n, "foo", "bar\nbaz")
+    naughty.replace_text(n, "foo", "bar\nbar")
     assert(n.title   == "foo")
-    assert(n.message == "bar\nbaz")
-    assert(n.text    == "bar\nbaz")
+    assert(n.message == "bar\nbar")
+    assert(n.text    == "bar\nbar")
     assert(n.width < width)
     assert(n.height > height)
     width, height = n.width, n.height
@@ -789,7 +806,21 @@ table.insert(steps, function()
     naughty.suspended = false
 
     -- The old notify function and "text" instead of "message"
-    naughty.notify { text = "foo" }
+    n = naughty.notify { text = "foo" }
+    assert(n.message == "foo")
+    assert(n.text    == "foo")
+
+    -- Calling `naughty.notify` with replace_id.
+    n2 = naughty.notify {
+        replaces_id = n.id,
+        message     = "bar",
+        title       = "foo",
+    }
+
+    assert(n         == n2   )
+    assert(n.message == "bar")
+    assert(n.text    == "bar")
+    assert(n.title   == "foo")
 
     -- Finish by testing disconnect_signal
     naughty.disconnect_signal("destroyed", destroyed_callback)

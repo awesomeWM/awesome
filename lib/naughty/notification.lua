@@ -249,6 +249,8 @@ function notification:destroy(reason, keep_visible)
           return false
     end
 
+    reason = reason or cst.notification_closed_reason.dismissed_by_user
+
     self:emit_signal("destroyed", reason, keep_visible)
 
     self._private.is_destroyed = true

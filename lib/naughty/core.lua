@@ -360,6 +360,8 @@ end
 
 -- Remove the notification from the internal list(s)
 local function cleanup(self, reason)
+    assert(reason, "Use n:destroy() instead of emitting the signal directly")
+
     if properties.suspended then
         for k, v in pairs(naughty.notifications.suspended) do
             if v == self then
@@ -552,6 +554,17 @@ function naughty.notify(args)
 
     --TODO v6 remove this hack
     nnotif = nnotif or require("naughty.notification")
+
+    -- The existing notification object, if any.
+    local n = args and args.replaces_id and
+        naughty.get_by_id(args.replaces_id) or nil
+
+    -- It was possible to update the notification content using `replaces_id`.
+    -- This is a concept that come from the dbus API and leaked into the public
+    -- API. It has all kind of issues and brokenness, but it being used.
+    if n then
+        return gtable.crush(n, args)
+    end
 
     return nnotif(args)
 end
