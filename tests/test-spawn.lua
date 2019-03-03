@@ -334,6 +334,20 @@ local steps = {
     function()
         if #client.get() ~= 1 then return end
         assert(matcher_called)
+        client.get()[1]:kill()
+        return true
+    end,
+    -- Test that rules are optional
+    function()
+        if #client.get() ~= 0 then return end
+
+        spawn.single_instance(tiny_client("client4"))
+        spawn.once(tiny_client("client5"))
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 2 then return end
         return true
     end,
 }
