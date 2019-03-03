@@ -33,6 +33,11 @@
 #include <xcb/xcb_xrm.h>
 #include <X11/Xresource.h>
 
+#include "config.h"
+#ifdef WITH_XCB_ERRORS
+#include <xcb/xcb_errors.h>
+#endif
+
 #include "objects/key.h"
 #include "common/xembed.h"
 #include "common/buffer.h"
@@ -82,6 +87,10 @@ typedef struct
     int default_screen;
     /** xcb-cursor context */
     xcb_cursor_context_t *cursor_ctx;
+#ifdef WITH_XCB_ERRORS
+    /** xcb-errors context */
+    xcb_errors_context_t *errors_ctx;
+#endif
     /** Keys symbol table */
     xcb_key_symbols_t *keysyms;
     /** Logical screens */

@@ -8,6 +8,7 @@
 #define AWESOME_DEFAULT_CONF  "@AWESOME_SYSCONFDIR@/rc.lua"
 
 #cmakedefine WITH_DBUS
+#cmakedefine WITH_XCB_ERRORS
 #cmakedefine HAS_EXECINFO
 
 #endif //_CONFIG_H_

@@ -54,6 +54,11 @@ eprint_version(void)
 #else
     const char *has_dbus = "✘";
 #endif
+#ifdef WITH_XCB_ERRORS
+    const char *has_xcb_errors = "✔";
+#else
+    const char *has_xcb_errors = "✘";
+#endif
 #ifdef HAS_EXECINFO
     const char *has_execinfo = "✔";
 #else
@@ -63,12 +68,13 @@ eprint_version(void)
     printf("awesome %s (%s)\n"
            " • Compiled against %s (running with %s)\n"
            " • D-Bus support: %s\n"
+           " • xcb-errors support: %s\n"
            " • execinfo support: %s\n"
            " • xcb-randr version: %d.%d\n"
            " • LGI version: %s\n",
            AWESOME_VERSION, AWESOME_RELEASE,
            LUA_RELEASE, lua_tostring(L, -2),
-           has_dbus, has_execinfo,
+           has_dbus, has_xcb_errors, has_execinfo,
            XCB_RANDR_MAJOR_VERSION, XCB_RANDR_MINOR_VERSION,
            lua_tostring(L, -1));
     lua_close(L);
