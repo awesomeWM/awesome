@@ -388,7 +388,9 @@ local function apply_singleton_rules(c, props, callbacks)
 
     if info then
         c.single_instance_id = info.hash
-        gtable.crush(props, info.rules)
+        if info.rules then
+            gtable.crush(props, info.rules)
+        end
         table.insert(callbacks, info.callback)
         table.insert(info.instances, c)
 

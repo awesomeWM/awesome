@@ -637,7 +637,7 @@ end
 -- Note that this also wont work with shell or terminal commands.
 --
 -- @tparam string|table cmd The command.
--- @tparam table rules The properties that need to be applied to the client.
+-- @tparam[opt] table rules The properties that need to be applied to the client.
 -- @tparam[opt] function matcher A matching function to find the instance
 --  among running clients.
 -- @tparam[opt] string unique_id A string to identify the client so it isn't executed
@@ -669,7 +669,7 @@ end
 -- faster than the client has time to start.
 --
 -- @tparam string|table cmd The command.
--- @tparam table rules The properties that need to be applied to the client.
+-- @tparam[opt] table rules The properties that need to be applied to the client.
 -- @tparam[opt] function matcher A matching function to find the instance
 --  among running clients.
 -- @tparam[opt] string unique_id A string to identify the client so it isn't executed
