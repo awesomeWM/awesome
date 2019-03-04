@@ -516,6 +516,10 @@ local function create(args)
         private[k] = v
     end
 
+    -- notif.actions should not be nil to allow cheching if there is actions
+    -- using the shorthand `if #notif.actions > 0 then`
+    private.actions = private.actions or {}
+
     -- It's an automatic property
     n.is_expired = false
 
