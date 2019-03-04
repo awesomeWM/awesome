@@ -1484,7 +1484,11 @@ function placement.next_to(d, args)
 
         does_fit[pos.name] = fit and {geo, dir} or nil
 
-        if fit and preferred_positions[pos.name] and preferred_positions[pos.name] < pref_idx then
+        -- preferred_positions is optional
+        local better_pos_idx = preferred_positions[pos.name]
+            and preferred_positions[pos.name] < pref_idx or false
+
+        if fit and (better_pos_idx or not pref_name) then
             pref_idx  = preferred_positions[pos.name]
             pref_name = pos.name
         end
@@ -1493,7 +1497,11 @@ function placement.next_to(d, args)
         if fit then break end
     end
 
-    local ngeo, dir = unpack(does_fit[pref_name] or {}) --FIXME why does this happen
+    if not pref_name then return end
+
+    assert(does_fit[pref_name])
+
+    local ngeo, dir = unpack(does_fit[pref_name])
 
     -- The requested placement isn't possible due to the lack of space, better
     -- do nothing an try random things
