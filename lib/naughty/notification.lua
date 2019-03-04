@@ -161,7 +161,17 @@ local notification = {}
 -- @see gears.color
 
 --- Widget shape.
+--
+-- Note that when using a custom `request::display` handler or `naughty.rules`,
+-- choosing between multiple shapes depending on the content can be done using
+-- expressions like:
+--
+--    -- The notification object is called `n`
+--    shape = #n.actions > 0 and
+--        gears.shape.rounded_rect or gears.shape.rounded_bar,
+--
 --@DOC_naughty_shape_EXAMPLE@
+--
 -- @property shape
 -- @param gears.shape
 
