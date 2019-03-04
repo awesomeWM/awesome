@@ -380,16 +380,18 @@ local function convert_actions(actions)
 
     local naction = require("naughty.action")
 
+    local new_actions = {}
+
     -- Does not attempt to handle when there is a mix of strings and objects
     for idx, name in pairs(actions) do
-        local cb = nil
+        local cb, old_idx = nil, idx
 
         if type(name) == "function" then
             cb = name
         end
 
         if type(idx) == "string" then
-            name, idx = idx, nil
+            name, idx = idx, #actions+1
         end
 
         local a = naction {
@@ -401,9 +403,14 @@ local function convert_actions(actions)
             a:connect_signal("invoked", cb)
         end
 
-        -- Yes, it modifies `args`, this is legacy code, cloning the args
-        -- just for this isn't worth it.
-        actions[idx] = a
+        new_actions[old_idx] = a
+    end
+
+    -- Yes, it modifies `args`, this is legacy code, cloning the args
+    -- just for this isn't worth it.
+    for old_idx, a in pairs(new_actions) do
+        actions[a.position] = a
+        actions[ old_idx  ] = nil
     end
 end
 
@@ -497,7 +504,7 @@ local function create(args)
         rawget(n, "preset") or {}
     ))
 
-    if is_old_action  then
+    if is_old_action then
         convert_actions(args.actions)
     end
 
