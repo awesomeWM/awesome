@@ -530,6 +530,12 @@ local function create(args)
     -- using the shorthand `if #notif.actions > 0 then`
     private.actions = private.actions or {}
 
+    -- Make sure the action are for this notification. Sharing actions with
+    -- multiple notification is not supported.
+    for _, a in ipairs(private.actions) do
+        a.notification = n
+    end
+
     -- It's an automatic property
     n.is_expired = false
 
