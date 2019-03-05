@@ -43,6 +43,10 @@ local action = {}
 -- @property icon
 -- @tparam gears.surface|string icon
 
+--- If the action should hide the label and only display the icon.
+-- @property icon_only
+-- @param[opt=false] boolean
+
 --- The notification.
 -- @property notification
 -- @tparam naughty.notification notification
@@ -80,7 +84,7 @@ function action:set_position(value)
     --TODO make sure the position is unique
 end
 
-for _, prop in ipairs { "name", "icon", "notification" } do
+for _, prop in ipairs { "name", "icon", "notification", "icon_only" } do
     action["get_"..prop] = function(self)
         return self._private[prop]
     end
