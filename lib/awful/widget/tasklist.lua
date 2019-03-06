@@ -279,6 +279,7 @@ local function tasklist_label(c, args, tb)
     local shape              = args.shape or theme.tasklist_shape
     local shape_border_width = args.shape_border_width or theme.tasklist_shape_border_width
     local shape_border_color = args.shape_border_color or theme.tasklist_shape_border_color
+    local icon_size = args.icon_size or theme.tasklist_icon_size
 
     -- symbol to use to indicate certain client properties
     local sticky = args.sticky or theme.tasklist_sticky or "▪"
@@ -394,6 +395,7 @@ local function tasklist_label(c, args, tb)
         shape              = shape,
         shape_border_width = shape_border_width,
         shape_border_color = shape_border_color,
+        icon_size          = icon_size,
     }
 
     return text, bg, bg_image, not tasklist_disable_icon and c.icon or nil, other_args
@@ -451,6 +453,7 @@ end
 -- @tparam[opt=nil] string args.style.bg_image_urgent
 -- @tparam[opt=nil] string args.style.bg_image_minimize
 -- @tparam[opt=nil] boolean args.style.tasklist_disable_icon
+-- @tparam[opt=nil] number args.style.icon_size The size of the icon
 -- @tparam[opt=false] boolean args.style.disable_task_name
 -- @tparam[opt=nil] string args.style.font
 -- @tparam[opt=left] string args.style.align *left*, *right* or *center*

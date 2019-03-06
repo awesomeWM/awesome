@@ -261,6 +261,7 @@ function taglist.taglist_label(t, args)
     local shape              = args.shape or theme.taglist_shape
     local shape_border_width = args.shape_border_width or theme.taglist_shape_border_width
     local shape_border_color = args.shape_border_color or theme.taglist_shape_border_color
+    local icon_size = args.icon_size or theme.taglist_icon_size
     -- TODO: Re-implement bg_resize
     local bg_resize = false -- luacheck: ignore
     local is_selected = false
@@ -379,6 +380,7 @@ function taglist.taglist_label(t, args)
         shape              = shape,
         shape_border_width = shape_border_width,
         shape_border_color = shape_border_color,
+        icon_size          = icon_size,
     }
 
     return text, bg_color, bg_image, not taglist_disable_icon and icon or nil, other_args

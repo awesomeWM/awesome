@@ -161,6 +161,14 @@ function common.list_update(w, buttons, label, data, objects, args)
             cache.ibm:set_margins(0)
         end
 
+        if item_args.icon_size and cache.ib then
+            cache.ib.forced_height = item_args.icon_size
+            cache.ib.forced_width  = item_args.icon_size
+        elseif cache.ib then
+            cache.ib.forced_height = nil
+            cache.ib.forced_width  = nil
+        end
+
         w:add(cache.primary)
    end
 end
