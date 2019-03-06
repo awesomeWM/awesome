@@ -116,6 +116,10 @@ function common.list_update(w, buttons, label, data, objects, args)
                 cache.create_callback(cache.primary, o, i, objects)
             end
 
+            if args and args.create_callback then
+                args.create_callback(cache.primary, o, i, objects)
+            end
+
             data[o] = cache
         elseif cache.update_callback then
             cache.update_callback(cache.primary, o, i, objects)
