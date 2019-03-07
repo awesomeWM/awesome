@@ -386,6 +386,11 @@ function taglist.taglist_label(t, args)
     return text, bg_color, bg_image, not taglist_disable_icon and icon or nil, other_args
 end
 
+-- Remove some callback boilerplate from the user provided templates.
+local function create_callback(w, t)
+    common._set_common_property(w, "tag", t)
+end
+
 local function taglist_update(s, w, buttons, filter, data, style, update_function, args)
     local tags = {}
 
@@ -402,6 +407,7 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
 
     update_function(w, buttons, label, data, tags, {
         widget_template = args.widget_template,
+        create_callback = create_callback,
     })
 end
 
