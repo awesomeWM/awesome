@@ -417,7 +417,9 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
 
     local function label(c, tb) return tasklist_label(c, style, tb) end
 
-    update_function(w, buttons, label, data, clients, args)
+    update_function(w, buttons, label, data, clients, {
+        widget_template = args.widget_template,
+    })
 end
 
 --- Create a new tasklist widget.

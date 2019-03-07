@@ -400,7 +400,9 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
 
     local function label(c) return taglist.taglist_label(c, style) end
 
-    update_function(w, buttons, label, data, tags, args)
+    update_function(w, buttons, label, data, tags, {
+        widget_template = args.widget_template,
+    })
 end
 
 --- Create a new taglist widget. The last two arguments (update_function
