@@ -87,7 +87,13 @@ local timer = require("gears.timer")
 local gcolor = require("gears.color")
 local gstring = require("gears.string")
 local gdebug = require("gears.debug")
+local dpi = require("beautiful").xresources.apply_dpi
 local base = require("wibox.widget.base")
+local wfixed = require("wibox.layout.fixed")
+local wmargin = require("wibox.container.margin")
+local wtextbox = require("wibox.widget.textbox")
+local clienticon = require("awful.widget.clienticon")
+local wbackground = require("wibox.container.background")
 
 local function get_screen(s)
     return s and screen[s]
@@ -246,6 +252,32 @@ local instances
 
 -- Public structures
 tasklist.filter, tasklist.source = {}, {}
+
+-- This is the same template as awful.widget.common, but with an clienticon widget
+local default_template = {
+    {
+        {
+            clienticon,
+            id     = "icon_margin_role",
+            left   = dpi(4),
+            widget = wmargin
+        },
+        {
+            {
+                id     = "text_role",
+                widget = wtextbox,
+            },
+            id     = "text_margin_role",
+            left   = dpi(4),
+            right  = dpi(4),
+            widget = wmargin
+        },
+        fill_space = true,
+        layout     = wfixed.horizontal
+    },
+    id     = "background_role",
+    widget = wbackground
+}
 
 local function tasklist_label(c, args, tb)
     if not args then args = {} end
@@ -423,7 +455,7 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
     local function label(c, tb) return tasklist_label(c, style, tb) end
 
     update_function(w, buttons, label, data, clients, {
-        widget_template = args.widget_template,
+        widget_template = args.widget_template or default_template,
         create_callback = create_callback,
     })
 end
