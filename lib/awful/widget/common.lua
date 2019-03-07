@@ -91,6 +91,19 @@ local function default_template()
     }
 end
 
+-- Find all the childrens (without the hierarchy) and set a property.
+function common._set_common_property(widget, property, value)
+    if widget["set_"..property] then
+        widget["set_"..property](widget, value)
+    end
+
+    if widget.get_children then
+        for _, w in ipairs(widget:get_children()) do
+            common._set_common_property(w, property, value)
+        end
+    end
+end
+
 --- Common update method.
 -- @param w The widget.
 -- @tab buttons
