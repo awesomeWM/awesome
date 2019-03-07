@@ -401,6 +401,11 @@ local function tasklist_label(c, args, tb)
     return text, bg, bg_image, not tasklist_disable_icon and c.icon or nil, other_args
 end
 
+-- Remove some callback boilerplate from the user provided templates.
+local function create_callback(w, t)
+    common._set_common_property(w, "client", t)
+end
+
 local function tasklist_update(s, w, buttons, filter, data, style, update_function, args)
     local clients = {}
 
@@ -419,6 +424,7 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
 
     update_function(w, buttons, label, data, clients, {
         widget_template = args.widget_template,
+        create_callback = create_callback,
     })
 end
 

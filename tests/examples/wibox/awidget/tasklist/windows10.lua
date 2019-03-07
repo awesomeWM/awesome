@@ -52,17 +52,11 @@ end --DOC_HIDE
                 widget        = wibox.container.background,
             },
             {
-                {
-                    id     = "clienticon",
-                    widget = awful.widget.clienticon,
-                },
+                awful.widget.clienticon,
                 margins = 5,
                 widget  = wibox.container.margin
             },
             nil,
-            create_callback = function(self, c, index, objects) --luacheck: no unused args
-                self:get_children_by_id("clienticon")[1].client = c
-            end,
             layout = wibox.layout.align.vertical,
         },
     }
