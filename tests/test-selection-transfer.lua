@@ -53,7 +53,7 @@ assert_equal(clipboard:wait_for_targets(), nil)
 assert_equal(clipboard:wait_for_text(), nil)
 ]] .. done_footer
 
-local selection
+local selection_object
 local selection_released
 local continue
 
@@ -66,22 +66,22 @@ end
 runner.run_steps{
     function()
         -- Get the selection
-        local s = assert(selection_acquire{ selection = "CLIPBOARD" },
+        local s = assert(selection.acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
 
         -- Steal selection ownership from ourselves and test that it works
         local s_released
         s:connect_signal("release", function() s_released = true end)
 
-        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
+        selection_object = assert(selection.acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
 
         assert(s_released)
 
         -- Now test selection transfers
-        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
+        selection_object = assert(selection.acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
-        selection:connect_signal("request", function(_, target, transfer)
+        selection_object:connect_signal("request", function(_, target, transfer)
             if target == "TARGETS" then
                 transfer:send{
                     format = "atom",
@@ -108,9 +108,9 @@ runner.run_steps{
         continue = false
 
         -- Now test piece-wise selection transfers
-        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
+        selection_object = assert(selection.acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
-        selection:connect_signal("request", function(_, target, transfer)
+        selection_object:connect_signal("request", function(_, target, transfer)
             if target == "TARGETS" then
                 transfer:send{
                     format = "atom",
@@ -148,9 +148,9 @@ runner.run_steps{
         continue = false
 
         -- Now test a huge transfer
-        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
+        selection_object = assert(selection.acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
-        selection:connect_signal("request", function(_, target, transfer)
+        selection_object:connect_signal("request", function(_, target, transfer)
             if target == "TARGETS" then
                 transfer:send{
                     format = "atom",
@@ -195,7 +195,7 @@ runner.run_steps{
         continue = false
 
         -- Now test that :release() works
-        selection:release()
+        selection_object:release()
         awesome.sync()
         spawn.with_line_callback({ "lua", "-e", check_empty_selection },
             { stdout = function(line)
@@ -214,9 +214,9 @@ runner.run_steps{
         continue = false
 
         -- Test for "release" signal when we lose selection
-        selection = assert(selection_acquire{ selection = "CLIPBOARD" },
+        selection_object = assert(selection.acquire{ selection = "CLIPBOARD" },
             "Failed to acquire the clipboard selection")
-        selection:connect_signal("release", function() selection_released = true end)
+        selection_object:connect_signal("release", function() selection_released = true end)
         awesome.sync()
         spawn.with_line_callback({ "lua", "-e", acquire_and_clear_clipboard },
             { exit = function() continue = true end })
