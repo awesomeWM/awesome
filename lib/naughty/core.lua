@@ -111,6 +111,17 @@ gtable.crush(naughty, require("naughty.constants"))
 -- @property expiration_paused
 -- @param[opt=false] boolean
 
+--- A table with all active notifications.
+--
+-- Please note that this list is kept up-to-date even in suspended mode.
+--
+-- **Signal:**
+--
+-- * property::active
+--
+-- @property active
+-- @param table
+
 local properties = {
     suspended         = false,
     expiration_paused = false
@@ -129,6 +140,9 @@ local properties = {
 -- @field id Unique notification id based on a counter
 -- @table notifications
 naughty.notifications = { suspended = { }, _expired = {{}} }
+
+naughty._active = {}
+
 screen.connect_for_each_screen(function(s)
     naughty.notifications[s] = {
         top_left = {},
@@ -315,10 +329,15 @@ function naughty.get_by_id(id)
             for _, notification in pairs(naughty.notifications[s][p]) do
                 if notification.id == id then
                     return notification
-                 end
+                end
             end
         end
     end
+end
+
+-- Use an explicit getter to make it read only.
+function naughty.get_active()
+    return naughty._active
 end
 
 --- Set new notification timeout.
@@ -380,6 +399,14 @@ local function cleanup(self, reason)
         n.idx = k
     end
 
+    -- Remove from the global active list.
+    for k, n in ipairs(naughty._active) do
+         if n == self then
+            table.remove(naughty._active, k)
+            naughty.emit_signal("property::active")
+         end
+    end
+
     -- `self.timer.started` will be false if the expiration was paused.
     if self.timer and self.timer.started then
         self.timer:stop()
@@ -439,8 +466,6 @@ end
 --  including, but not limited to, all `naughty.notification` properties.
 -- @signal request::preset
 
-
-
 -- Register a new notification object.
 local function register(notification, args)
 
@@ -451,6 +476,7 @@ local function register(notification, args)
     local s = get_screen(args.screen or notification.preset.screen or screen.focused())
 
     -- insert the notification to the table
+    table.insert(naughty._active, notification)
     table.insert(naughty.notifications[s][notification.position], notification)
     notification.idx    = #naughty.notifications[s][notification.position]
     notification.screen = s
@@ -463,6 +489,8 @@ local function register(notification, args)
     end
 
     assert(rawget(notification, "preset"))
+
+    naughty.emit_signal("property::active")
 
     -- return the notification
     return notification
