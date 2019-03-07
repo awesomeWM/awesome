@@ -6,4 +6,5 @@
 
 return {
     legacy = require( "naughty.layout.legacy" );
+    box    = require( "naughty.layout.box"    );
 }

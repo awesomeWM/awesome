@@ -6,4 +6,5 @@
 
 return {
     actions       = require( "naughty.list.actions"       );
+    notifications = require( "naughty.list.notifications" );
 }
