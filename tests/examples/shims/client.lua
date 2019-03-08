@@ -25,6 +25,8 @@ end
 -- Create fake clients to move around
 function client.gen_fake(args)
     local ret = gears_obj()
+    awesome._forward_class(ret, client)
+
     ret.data = {}
     ret.type = "normal"
     ret.valid = true

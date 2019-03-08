@@ -42,8 +42,18 @@ local function _shim_fake_class()
     return obj, meta
 end
 
+local function forward_class(obj, class)
+    assert(obj.emit_signal)
+    local es = obj.emit_signal
+    function obj:emit_signal(name, ...)
+        es(obj, name, ...)
+        class.emit_signal(name, obj, ...)
+    end
+end
+
 local awesome = _shim_fake_class()
 awesome._shim_fake_class = _shim_fake_class
+awesome._forward_class = forward_class
 
 -- Avoid c.screen = acreen.focused() to be called, all tests will fail
 awesome.startup = true

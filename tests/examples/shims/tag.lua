@@ -13,6 +13,7 @@ end
 
 local function new_tag(_, args)
     local ret = gears_obj()
+    awesome._forward_class(ret, tag)
 
     ret.data = {}
     ret.name = args.name or "test"

@@ -5,6 +5,8 @@ screen._count = 0
 
 local function create_screen(args)
     local s = gears_obj()
+    awesome._forward_class(s, screen)
+
     s.data = {}
     s.valid = true
 
