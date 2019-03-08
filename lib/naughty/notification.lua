@@ -551,7 +551,8 @@ local function create(args)
 
     -- Let all listeners handle the actual visual aspects
     if (not n.ignore) and (not n.preset.ignore) then
-        naughty.emit_signal("request::display", n, args)
+        naughty.emit_signal("request::display" , n, args)
+        naughty.emit_signal("request::fallback", n, args)
     end
 
     -- Because otherwise the setter logic would not be executed

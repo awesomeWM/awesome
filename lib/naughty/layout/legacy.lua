@@ -279,23 +279,10 @@ end
 
 naughty.connect_signal("destroyed", cleanup)
 
---- The default notification GUI handler.
---
--- To disable this handler, use:
---
---    naughty.disconnect_signal(
---        "request::display", naughty.default_notification_handler
---    )
---
--- It looks like:
---
---@DOC_naughty_actions_EXAMPLE@
---
--- @tparam table notification The `naughty.notification` object.
--- @tparam table args Any arguments passed to the `naughty.notify` function,
---  including, but not limited to all `naughty.notification` properties.
--- @signalhandler naughty.default_notification_handler
 function naughty.default_notification_handler(notification, args)
+    -- This is a fallback for users whose config doesn't have the newer
+    -- `request::display` section.
+    if naughty.has_display_handler then return end
 
     -- If request::display is called more than once, simply make sure the wibox
     -- is visible.
@@ -561,4 +548,4 @@ function naughty.default_notification_handler(notification, args)
     end
 end
 
-naughty.connect_signal("request::display", naughty.default_notification_handler)
+naughty.connect_signal("request::fallback", naughty.default_notification_handler)
