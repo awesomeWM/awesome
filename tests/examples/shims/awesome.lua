@@ -13,10 +13,15 @@ local function _shim_fake_class()
         __newindex = function()end,
     }
 
-    obj._connect_signal = obj.connect_signal
+    obj._connect_signal    = obj.connect_signal
+    obj._disconnect_signal = obj.disconnect_signal
 
     function obj.connect_signal(name, func)
         return obj._connect_signal(obj, name, func)
+    end
+
+    function obj.disconnect_signal(name, func)
+        return obj._disconnect_signal(obj, name, func)
     end
 
     function obj.set_index_miss_handler(handler)
