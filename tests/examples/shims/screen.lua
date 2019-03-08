@@ -19,10 +19,12 @@ local function create_screen(args)
     }
 
     function s._resize(args2)
+        local old  = s.geometry
         geo.x      = args2.x      or geo.x
         geo.y      = args2.y      or geo.y
         geo.width  = args2.width  or geo.width
         geo.height = args2.height or geo.height
+        s:emit_signal("property::geometry", old)
     end
 
     s.outputs = { ["LVDS1"] = {
