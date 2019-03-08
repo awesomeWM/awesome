@@ -402,8 +402,14 @@ function naughty.default_notification_handler(notification, args)
             local action_width = w + 2 * margin
 
             actionmarginbox:buttons(gtable.join(
-                button({ }, 1, function() action:invoke() end),
-                button({ }, 3, function() action:invoke() end)
+                button({ }, 1, function()
+                    action:invoke()
+                    notification:destroy()
+                end),
+                button({ }, 3, function()
+                    action:invoke()
+                    notification:destroy()
+                end)
             ))
             actionslayout:add(actionmarginbox)
 
