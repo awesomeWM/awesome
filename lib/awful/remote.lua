@@ -51,6 +51,7 @@ local function method_call(_conn, _sender, _obj, _interface, _method, parameters
     local results = { pcall(f) }
     if not table.remove(results, 1) then
         invocation:return_dbus_error("org.awesomewm.awful.Remote.ExecutionError", results[1])
+        return
     end
     local types = ""
     local retvals = {}
