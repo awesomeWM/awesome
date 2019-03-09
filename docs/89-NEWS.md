@@ -10,15 +10,36 @@
 Some general text about Awesome v4.4 should be here. Hopefully someone will
 notice that it is not yet here before we release...
 
+This document was last updated at commit v4.3-148-g795c792d1.
+
 ## New features
+
+* Lua code can interact with the selection contents via the new
+  `selection.acquire`, `selection.getter`, and `selection.watcher` objects
+* Pending delayed calls (`gears.timer.delayed_call`) can be dispatched via
+  `gears.timer.run_delayed_calls_now()`
+* `naughty` was rewritten TODO TODO say more about this TODO TODO
+* The `rules` argument in `awful.spawn.once` and `.single_instance` is now
+  optional
 
 ## Noteworthy fixes
 
+* `$SOURCE_DATE_EPOCH` is honored in more places when generating the
+  documentation
+* Fix setting shapes via `awful.rules`
+* Set `_NET_WM_DESKTOP` for sticky windows correctly
+* Under complicated circumstances, AwesomeWM could have run Lua code while
+  having the X11 server grabbed. This had the potential to cause deadlocks with
+  Lua code using `io.popen`. Usage of `io.popen` is still strongly discouraged.
+
 ## Behavior changes
 
+* `wibox.container.background` applies shapes differently. The new approach
+  should be more consistent with a border.
 * The `shape_clip` option of `wibox.container.background` was removed. The code
   now always behaves as if this option is set to `true`. The old behaviour can
   be simulated with `wibox.layout.stack`.
+* Awesome now initialises Lua's random number generator from a good source
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes
