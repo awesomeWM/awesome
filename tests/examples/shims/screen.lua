@@ -136,6 +136,7 @@ screen._add_screen {width=320, height=240}
 screen._grid_vertical_margin = 10
 screen._grid_horizontal_margin = 10
 
+screen.primary = screen[1]
 
 function screen.count()
     return screen._count
