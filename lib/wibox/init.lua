@@ -81,7 +81,8 @@ function wibox:to_widget()
         shape              = self._shape,
         forced_width       = self:geometry().width  + 2*bw,
         forced_height      = self:geometry().height + 2*bw,
-        widget             = wibox.container.background
+        widget             = wibox.container.background,
+        input_passthrough  = false
     }
 end
 
@@ -340,7 +341,7 @@ local function new(args)
         ret.shape = args.shape
     end
 
-    if args.screen then
+    if args.input_passthrough then
         ret.input_passthrough = args.input_passthrough
     end
 
