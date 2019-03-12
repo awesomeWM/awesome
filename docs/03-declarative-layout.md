@@ -28,6 +28,15 @@ configurable rules.
 
 @DOC_layout_WIDGET_LIST@
 
+### Other
+
+Notifications also have their own widgets.
+
+<img src="../images/AUTOGEN_wibox_nwidget_default.svg" />
+
+More information about the notification widgets can be found on the
+`naughty.notification` documentation page.
+
 ### The different type of widget boxes (Wibox)
 
 The Awesome API uses the word "wibox" (widget box) to describe an area of the
@@ -53,6 +62,9 @@ positioning, relative positioning, and manual positioning.
 
 The `awful.tooltip` is a very simple `wibox` that allows to display text next
 to an object such as the mouse.
+
+The `naughty.layout.box` allows to provide custom widgets to use within the
+notifications.
 
 Finally, the `awful.titlebar`, while not technically a real `wibox`, acts
 exactly the same way and allows to attach widgets on each side of clients.
