@@ -13,6 +13,11 @@
 --
 --@DOC_naughty_actions_EXAMPLE@
 --
+-- Use the `naughty.notification.position` property to control where the popup
+-- is located.
+--
+--@DOC_awful_notification_corner_EXAMPLE@
+--
 -- @author koniu &lt;gkusnierz@gmail.com&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2008 koniu
