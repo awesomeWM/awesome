@@ -53,7 +53,7 @@ local notification = {}
 -- @beautiful beautiful.notification_opacity
 -- @tparam[opt] int notification_opacity
 
---- Notifications margin.
+--- The margins inside of the notification widget (or popup).
 -- @beautiful beautiful.notification_margin
 -- @tparam int notification_margin
 
@@ -65,6 +65,11 @@ local notification = {}
 -- @beautiful beautiful.notification_height
 -- @tparam int notification_height
 
+--- The spacing between the notifications.
+-- @beautiful beautiful.notification_spacing
+-- @param[opt=2] number
+-- @see gears.surface
+
 -- Unique identifier of the notification.
 -- This is the equivalent to a PID as allows external applications to select
 -- notifications.
@@ -72,8 +77,12 @@ local notification = {}
 -- @param string
 -- @see title
 
--- Text of the notification  [[deprecated]]
--- @property text
+--- Text of the notification.
+--
+-- This exists only for the pre-AwesomeWM v4.4 new notification implementation.
+-- Please always use `title`.
+--
+-- @deprecatedproperty text
 -- @param string
 -- @see title
 
@@ -107,22 +116,28 @@ local notification = {}
 -- * *bottom_middle*
 -- * *middle*
 --
---@DOC_awful_notification_corner_EXAMPLE@
+--@DOC_awful_notification_box_corner_EXAMPLE@
 --
 -- @property position
 -- @param string
+-- @see awful.placement.next_to
 
 --- Boolean forcing popups to display on top.
 -- @property ontop
 -- @param boolean
 
 --- Popup height.
+--
+--@DOC_awful_notification_geometry_EXAMPLE@
+--
 -- @property height
 -- @param number
+-- @see width
 
 --- Popup width.
 -- @property width
 -- @param number
+-- @see height
 
 --- Notification font.
 --@DOC_naughty_colors_EXAMPLE@
@@ -138,12 +153,18 @@ local notification = {}
 -- @param number
 
 --- Foreground color.
+--
+--@DOC_awful_notification_fg_EXAMPLE@
+--
 -- @property fg
 -- @tparam string|color|pattern fg
 -- @see title
 -- @see gears.color
 
 --- Background color.
+--
+--@DOC_awful_notification_bg_EXAMPLE@
+--
 -- @property bg
 -- @tparam string|color|pattern bg
 -- @see title
@@ -155,6 +176,9 @@ local notification = {}
 -- @see title
 
 --- Border color.
+--
+--@DOC_awful_notification_border_color_EXAMPLE@
+--
 -- @property border_color
 -- @param string
 -- @see title
@@ -170,6 +194,8 @@ local notification = {}
 --    shape = #n.actions > 0 and
 --        gears.shape.rounded_rect or gears.shape.rounded_bar,
 --
+--@DOC_awful_notification_shape_EXAMPLE@
+--
 --@DOC_naughty_shape_EXAMPLE@
 --
 -- @property shape
@@ -180,6 +206,9 @@ local notification = {}
 -- @param number From 0 to 1
 
 --- Widget margin.
+--
+--@DOC_awful_notification_margin_EXAMPLE@
+--
 -- @property margin
 -- @tparam number|table margin
 -- @see shape
