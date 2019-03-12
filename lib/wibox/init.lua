@@ -340,7 +340,7 @@ local function new(args)
         ret.shape = args.shape
     end
 
-    if args.screen then
+    if args.input_passthrough then
         ret.input_passthrough = args.input_passthrough
     end
 
