@@ -149,6 +149,10 @@ file = {
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',
         '../lib/naughty/layout/init.lua',
+        '../lib/naughty/widget/init.lua',
+        '../lib/naughty/container/init.lua',
+        '../lib/naughty/list/init.lua',
+        '../lib/naughty/widget/_default.lua',
 
         -- Deprecated classes for one years or more don't deserve entries
         -- in the index
