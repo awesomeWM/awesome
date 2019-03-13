@@ -266,7 +266,7 @@ function notification:reset_timeout(new_timeout)
 
     self.timeout = new_timeout or self.timeout
 
-    if not self.timer.started then
+    if self.timer and not self.timer.started then
         self.timer:start()
     end
 end
