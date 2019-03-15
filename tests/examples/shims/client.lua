@@ -33,6 +33,12 @@ function client.gen_fake(args)
     ret.icon_sizes = {{16,16}}
     ret.name = "Example Client"
 
+    -- This is a hack because there's a `:is_transient_for(c2)` method
+    -- and a `transient_for` property. It will cause a stack overflow
+    -- since the auto-alias will kick in if the property is allowed to
+    -- be `nil`.
+    ret.transient_for = false
+
     -- Apply all properties
     for k,v in pairs(args or {}) do
         ret[k] = v
