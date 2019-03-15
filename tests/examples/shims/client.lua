@@ -140,13 +140,15 @@ function client.gen_fake(args)
 
     client.focus = ret
 
+    setmetatable(ret, {
+        __index     = function(...) return meta.__index(...) end,
+        __newindex = function(...) return meta.__newindex(...) end
+    })
+
     client.emit_signal("manage", ret)
     assert(not args.screen or (args.screen == ret.screen))
 
-    return setmetatable(ret, {
-                        __index     = function(...) return meta.__index(...) end,
-                        __newindex = function(...) return meta.__newindex(...) end
-                    })
+    return ret
 end
 
 function client.get(s)
