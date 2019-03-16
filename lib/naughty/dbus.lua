@@ -244,7 +244,7 @@ local function protected_method_call(_, sender, object_path, interface, method, 
         -- We actually do display the body of the message, we support <b>, <i>
         -- and <u> in the body and we handle static (non-animated) icons.
         invocation:return_value(GLib.Variant("(as)", {
-            { "s", "body", "s", "body-markup", "s", "icon-static", "s", "actions" }
+            { "body", "body-markup", "icon-static", "actions" }
         }))
     end
 end
