@@ -191,7 +191,17 @@ local function protected_method_call(_, sender, object_path, interface, method, 
             if icon ~= "" then
                 args.icon = icon
             elseif hints.icon_data or hints.image_data then
-                if hints.icon_data == nil then hints.icon_data = hints.image_data end
+                -- Icon data is a bit complex and hence needs special care:
+                -- .value breaks with the array of bytes (ay) that we get here.
+                -- So, bypass it and look up the needed value differently
+                local icon_data
+                for k, v in parameters:get_child_value(7 - 1):pairs() do
+                    if k == "icon_data" then
+                        icon_data = v
+                    elseif k == "image_data" and icon_data == nil then
+                        icon_data = v
+                    end
+                end
 
                 -- icon_data is an array:
                 -- 1 -> width
@@ -201,8 +211,12 @@ local function protected_method_call(_, sender, object_path, interface, method, 
                 -- 5 -> bits per sample
                 -- 6 -> channels
                 -- 7 -> data
-                local w, h, rowstride, _, _, channels, icon_data = unpack(hints.icon_data)
-                args.icon = convert_icon(w, h, rowstride, channels, icon_data)
+
+                -- Get the value as a GVariant and then use LGI's special
+                -- GVariant.data to get that as an LGI byte buffer. That one can
+                -- then by converted to a string via its __tostring metamethod.
+                local data = tostring(icon_data:get_child_value(7 - 1).data)
+                args.icon = convert_icon(icon_data[1], icon_data[2], icon_data[3], icon_data[6], data)
             end
             if replaces_id and replaces_id ~= "" and replaces_id ~= 0 then
                 args.replaces_id = replaces_id
