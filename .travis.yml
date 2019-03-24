@@ -162,7 +162,7 @@ install:
           cat lcov.info
 
           # Upload to Codecov.
-          travis_retry bash /tmp/codecov-bash -f lcov.info -X gcov -X coveragepy -X fix -F gcov -e LUANAME,LGIVER
+          travis_retry bash /tmp/codecov-bash -f lcov.info -X gcov -X coveragepy -F gcov -e LUANAME,LGIVER
         )
       fi
       return 0
