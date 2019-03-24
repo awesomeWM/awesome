@@ -154,17 +154,15 @@ install:
     do_codecov_gcov() {
       echo "== do_codecov_gcov in $PWD: $*: =="
       if [ "$DO_COVERAGE" = "codecov" ]; then
-        # Report coverage for each .gcno file separately.
-        # gcov will create .gcov files for the same source (e.g. for
-        # globalconf.h from awesome.c.gcno and event.c.gcno).
-        i=0
         set -x
         (
           cd build
           lcov --capture --base-directory .. --directory . --output-file lcov.info
 
+          cat lcov.info
+
           # Upload to Codecov.
-          travis_retry bash /tmp/codecov-bash -f lcov.info -X gcov -X coveragepy -F gcov -e LUANAME,LGIVER
+          travis_retry bash /tmp/codecov-bash -f lcov.info -X gcov -X coveragepy -X fix -F gcov -e LUANAME,LGIVER
         )
       fi
       return 0
