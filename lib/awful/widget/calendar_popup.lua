@@ -39,13 +39,11 @@ local calendar_popup = { offset = 0, mt = {} }
 local properties = { "markup", "fg_color", "bg_color", "shape", "padding", "border_width", "border_color", "opacity" }
 local styles = { "year", "month", "yearheader", "monthheader", "header", "weekday", "weeknumber", "normal", "focus" }
 
-
 --- The generic calendar style table.
 --
 -- Each table property can also be defined by `beautiful.calendar_[flag]_[property]=val`.
 -- @beautiful beautiful.calendar_style
 -- @tparam cell_properties table Table of cell style properties
-
 
 --- Cell properties.
 -- @field markup Markup function or format string
@@ -68,8 +66,6 @@ local styles = { "year", "month", "yearheader", "monthheader", "header", "weekda
 -- @field normal Normal day cell properties table
 -- @field focus Current day cell properties table
 -- @table cell_flags
-
-
 
 --- Create a container for the grid layout
 -- @tparam table tprops Table of calendar container properties.
@@ -98,19 +94,18 @@ local function embed(tprops)
                 margins = props.padding + props.border_width,
                 widget  = wibox.container.margin
             },
-            shape              = props.shape or gears.shape.rectangle,
-            shape_border_color = props.border_color,
-            shape_border_width = props.border_width,
-            fg                 = props.fg_color,
-            bg                 = props.bg_color,
-            opacity            = props.opacity,
-            widget             = wibox.container.background
+            shape        = props.shape or gears.shape.rectangle,
+            border_color = props.border_color,
+            border_width = props.border_width,
+            fg           = props.fg_color,
+            bg           = props.bg_color,
+            opacity      = props.opacity,
+            widget       = wibox.container.background
         }
         return out
     end
     return fn
 end
-
 
 --- Parse the properties of the cell type and set default values
 -- @tparam string cell The cell type
@@ -164,7 +159,6 @@ local function parse_all_options(args)
     end
     return props
 end
-
 
 --- Make the geometry of a wibox
 -- @tparam widget widget Calendar widget
@@ -236,13 +230,11 @@ function calendar_popup:call_calendar(offset, position, screen)
     return self
 end
 
-
 --- Toggle calendar visibility
 function calendar_popup:toggle()
     self:call_calendar(0)
     self.visible = not self.visible
 end
-
 
 --- Attach the calendar to a widget to display at a specific position.
 --
@@ -285,7 +277,6 @@ function calendar_popup:attach(widget, position, args)
     end
     return self
 end
-
 
 --- Return a new calendar wibox by type.
 --
@@ -384,7 +375,6 @@ end
 function calendar_popup.month(args)
     return get_cal_wibox("month", args)
 end
-
 
 --- A year calendar wibox.
 --

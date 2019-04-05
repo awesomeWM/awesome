@@ -67,12 +67,12 @@ beautiful.bg_focus = "#b9214f" --DOC_HIDE
                 margins = (props.padding or 2) + (props.border_width or 0),
                 widget  = wibox.container.margin
             },
-            shape              = props.shape,
-            shape_border_color = props.border_color or "#b9214f",
-            shape_border_width = props.border_width or 0,
-            fg                 = props.fg_color or "#999999",
-            bg                 = props.bg_color or default_bg,
-            widget             = wibox.container.background
+            shape        = props.shape,
+            border_color = props.border_color or "#b9214f",
+            border_width = props.border_width or 0,
+            fg           = props.fg_color or "#999999",
+            bg           = props.bg_color or default_bg,
+            widget       = wibox.container.background
         }
         return ret
     end

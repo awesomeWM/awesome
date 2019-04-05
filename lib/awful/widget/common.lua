@@ -148,9 +148,9 @@ function common.list_update(w, buttons, label, data, objects, args)
                 })
             end
 
-            cache.bgb.shape              = item_args.shape
-            cache.bgb.shape_border_width = item_args.shape_border_width
-            cache.bgb.shape_border_color = item_args.shape_border_color
+            cache.bgb.shape        = item_args.shape
+            cache.bgb.border_width = item_args.shape_border_width
+            cache.bgb.border_color = item_args.shape_border_color
 
         end
 

@@ -198,8 +198,8 @@ local function create_info(text, x, y, width, height)
         forced_width  = width,
         forced_height = height,
         shape = gears.shape.rectangle,
-        shape_border_width = 1,
-        shape_border_color = beautiful.border_color,
+        border_width = 1,
+        border_color = beautiful.border_color,
         bg = "#ffff0055",
         widget = wibox.container.background
     }, {x = x, y = y})
