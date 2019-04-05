@@ -21,6 +21,15 @@ This document was last updated at commit v4.3-148-g795c792d1.
 * `naughty` was rewritten TODO TODO say more about this TODO TODO
 * The `rules` argument in `awful.spawn.once` and `.single_instance` is now
   optional
+* The `wibox.container.background` now has a `border_strategy` property to
+  define how the content is resized when a border is present.
+* The `wibox.container.margin` now allows tables in the `margins` property.
+* The declarative widget systax now allows to directly use functions instead of
+  `{widget = myfunction}`.
+* The `awful.widget.tasklist` now resize the client icons properly.
+* The `awful.widget.tasklist` and `awful.widget.taglist` will now set the
+  `client` and `tag` properly respectively on each widget of the template
+  automatically. This reduces the amount of boilerplate code.
 
 ## Noteworthy fixes
 
