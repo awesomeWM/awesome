@@ -15,6 +15,7 @@ local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local gtable = require("gears.table")
 local gshape = require("gears.shape")
+local gdebug = require("gears.debug")
 local setmetatable = setmetatable
 local type = type
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -282,8 +283,19 @@ function background:get_border_width()
     return self._private.shape_border_width
 end
 
-background.get_shape_border_width = background.get_border_width
-background.set_shape_border_width = background.set_border_width
+function background.get_shape_border_width(...)
+    gdebug.deprecate("Use `border_width` instead of `shape_border_width`",
+        {deprecated_in=5})
+
+    return background.get_border_width(...)
+end
+
+function background.set_shape_border_width(...)
+    gdebug.deprecate("Use `border_width` instead of `shape_border_width`",
+        {deprecated_in=5})
+
+    background.set_border_width(...)
+end
 
 --- When a `shape` is set, also draw a border.
 --
@@ -312,8 +324,19 @@ function background:get_border_color()
     return self._private.shape_border_color
 end
 
-background.get_shape_border_color = background.get_border_color
-background.set_shape_border_color = background.set_border_color
+function background.get_shape_border_color(...)
+    gdebug.deprecate("Use `border_color` instead of `shape_border_color`",
+        {deprecated_in=5})
+
+    return background.get_border_color(...)
+end
+
+function background.set_shape_border_color(...)
+    gdebug.deprecate("Use `border_color` instead of `shape_border_color`",
+        {deprecated_in=5})
+
+    background.set_border_color(...)
+end
 
 function background:set_shape_clip(value)
     if value then return end
