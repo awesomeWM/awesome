@@ -241,10 +241,6 @@ local function set_escaped_text(self)
     if self.size_info then update_size(self) end
 end
 
-naughty.connect_signal("property::text" ,set_escaped_text)
-naughty.connect_signal("property::title",set_escaped_text)
-
-
 local function cleanup(self, _ --[[reason]], keep_visible)
     -- It is not a legacy notification
     if not self.box then return end
