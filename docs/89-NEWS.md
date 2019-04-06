@@ -14,6 +14,9 @@ This document was last updated at commit v4.3-148-g795c792d1.
 
 ## New features
 
+* `awful.screen` now has a `request::wallpaper` and a
+  `request::desktop_decoration` signal. They make some workflow implementation
+  cleaner.
 * Lua code can interact with the selection contents via the new
   `selection.acquire`, `selection.getter`, and `selection.watcher` objects
 * Pending delayed calls (`gears.timer.delayed_call`) can be dispatched via
