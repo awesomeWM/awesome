@@ -126,7 +126,7 @@ local function add_root_keybindings(self, list)
     -- everything into one operation. In not so extreme cases, not doing so
     -- would slow down `awesome.restart()` by a small, but noticeable amount
     -- of time.
-    gtable.merge(delay_list, list)
+    table.insert(delay_list, {self, list})
 
     -- As of Awesome v4.3, `root.keys()` is an all or nothing API and there
     -- isn't a standard mechanism to add and remove keybindings at runtime
@@ -137,26 +137,30 @@ local function add_root_keybindings(self, list)
         gtimer.delayed_call(function()
             local ret = {}
 
-            for _, v in ipairs(delay_list) do
-                local mods, key, press, release, description = unpack(v)
+            for _, obj in ipairs(delay_list) do
+                local obj_self, obj_list = obj[1], obj[2]
 
-                if press then
-                    local old_press = press
-                    press = function(...)
-                        self:start()
-                        old_press(...)
+                for _, v in ipairs(obj_list) do
+                    local mods, key, press, release, description = unpack(v)
+
+                    if press then
+                        local old_press = press
+                        press = function(...)
+                            obj_self:start()
+                            old_press(...)
+                        end
                     end
-                end
 
-                if release then
-                    local old_release = release
-                    release = function(...)
-                        self:start()
-                        old_release(...)
+                    if release then
+                        local old_release = release
+                        release = function(...)
+                            obj_self:start()
+                            old_release(...)
+                        end
                     end
-                end
 
-                table.insert(ret, akey(mods, key, press, release, description))
+                    table.insert(ret, akey(mods, key, press, release, description))
+                end
             end
 
             -- Wow...
