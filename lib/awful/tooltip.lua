@@ -465,7 +465,7 @@ end
 -- @param number
 
 function tooltip:set_border_width(val)
-    self.widget.shape_border_width = val
+    self.widget.border_width = val
 end
 
 --- The border color.
@@ -476,7 +476,7 @@ end
 -- @param gears.color
 
 function tooltip:set_border_color(val)
-    self.widget.shape_border_color = val
+    self.widget.border_color = val
 end
 
 --- Set the margins around the left and right of the tooltip textbox
@@ -679,23 +679,23 @@ function tooltip.new(args)
     self.widget = wibox.widget {
         {
             {
-                id = 'text_role',
-                font = font,
+                id     = 'text_role',
+                font   = font,
                 widget = wibox.widget.textbox,
             },
-            id = 'margin_role',
-            left = m_lr,
-            right = m_lr,
-            top = m_tb,
+            id     = 'margin_role',
+            left   = m_lr,
+            right  = m_lr,
+            top    = m_tb,
             bottom = m_tb,
             widget = wibox.container.margin,
         },
-        id = 'background_role',
-        bg = bg,
-        shape = self._private.shape,
-        shape_border_width = border_width,
-        shape_border_color = border_color,
-        widget = wibox.container.background,
+        id           = 'background_role',
+        bg           = bg,
+        shape        = self._private.shape,
+        border_width = border_width,
+        border_color = border_color,
+        widget       = wibox.container.background,
     }
     self.textbox = self.widget:get_children_by_id('text_role')[1]
     self.marginbox = self.widget:get_children_by_id('margin_role')[1]

@@ -13,10 +13,10 @@ local container = wibox.widget {
         {
             {
                 before,
-                shape_border_color = beautiful.border_color,
-                shape_border_width = beautiful.border_width,
-                shape              = shape.rounded_rect,
-                widget             = wibox.container.background,
+                border_color = beautiful.border_color,
+                border_width = beautiful.border_width,
+                shape        = shape.rounded_rect,
+                widget       = wibox.container.background,
             },
             strategy = 'exact',
             width    = 70,
@@ -29,11 +29,11 @@ local container = wibox.widget {
                     text   = " ",
                     widget = wibox.widget.textbox,
                 },
-                bg                 = beautiful.bg_normal,
-                shape_border_color = beautiful.border_color,
-                shape_border_width = beautiful.border_width,
-                widget             = wibox.container.background,
-                shape              = shape.transform(shape.arrow)
+                bg           = beautiful.bg_normal,
+                border_color = beautiful.border_color,
+                border_width = beautiful.border_width,
+                widget       = wibox.container.background,
+                shape        = shape.transform(shape.arrow)
                 : rotate_at(15,15,math.pi/2)
                 : translate(0,-8)
                 : scale(0.9, 0.9),
@@ -46,10 +46,10 @@ local container = wibox.widget {
         {
             {
                 after,
-                shape_border_color = beautiful.border_color,
-                shape_border_width = beautiful.border_width,
-                shape              = shape.rounded_rect,
-                widget             = wibox.container.background,
+                border_color = beautiful.border_color,
+                border_width = beautiful.border_width,
+                shape        = shape.rounded_rect,
+                widget       = wibox.container.background,
             },
             strategy = 'exact',
             width    = 70,

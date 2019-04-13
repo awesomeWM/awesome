@@ -25,6 +25,8 @@ end
 -- Create fake clients to move around
 function client.gen_fake(args)
     local ret = gears_obj()
+    awesome._forward_class(ret, client)
+
     ret.data = {}
     ret.type = "normal"
     ret.valid = true
@@ -32,6 +34,12 @@ function client.gen_fake(args)
     ret.border_width = 1
     ret.icon_sizes = {{16,16}}
     ret.name = "Example Client"
+
+    -- This is a hack because there's a `:is_transient_for(c2)` method
+    -- and a `transient_for` property. It will cause a stack overflow
+    -- since the auto-alias will kick in if the property is allowed to
+    -- be `nil`.
+    ret.transient_for = false
 
     -- Apply all properties
     for k,v in pairs(args or {}) do
@@ -140,13 +148,15 @@ function client.gen_fake(args)
 
     client.focus = ret
 
+    setmetatable(ret, {
+        __index     = function(...) return meta.__index(...) end,
+        __newindex = function(...) return meta.__newindex(...) end
+    })
+
     client.emit_signal("manage", ret)
     assert(not args.screen or (args.screen == ret.screen))
 
-    return setmetatable(ret, {
-                        __index     = function(...) return meta.__index(...) end,
-                        __newindex = function(...) return meta.__newindex(...) end
-                    })
+    return ret
 end
 
 function client.get(s)

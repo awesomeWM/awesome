@@ -5,6 +5,8 @@ screen._count = 0
 
 local function create_screen(args)
     local s = gears_obj()
+    awesome._forward_class(s, screen)
+
     s.data = {}
     s.valid = true
 
@@ -17,10 +19,12 @@ local function create_screen(args)
     }
 
     function s._resize(args2)
+        local old  = s.geometry
         geo.x      = args2.x      or geo.x
         geo.y      = args2.y      or geo.y
         geo.width  = args2.width  or geo.width
         geo.height = args2.height or geo.height
+        s:emit_signal("property::geometry", old)
     end
 
     s.outputs = { ["LVDS1"] = {
@@ -132,6 +136,7 @@ screen._add_screen {width=320, height=240}
 screen._grid_vertical_margin = 10
 screen._grid_horizontal_margin = 10
 
+screen.primary = screen[1]
 
 function screen.count()
     return screen._count

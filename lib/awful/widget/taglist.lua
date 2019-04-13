@@ -261,6 +261,7 @@ function taglist.taglist_label(t, args)
     local shape              = args.shape or theme.taglist_shape
     local shape_border_width = args.shape_border_width or theme.taglist_shape_border_width
     local shape_border_color = args.shape_border_color or theme.taglist_shape_border_color
+    local icon_size = args.icon_size or theme.taglist_icon_size
     -- TODO: Re-implement bg_resize
     local bg_resize = false -- luacheck: ignore
     local is_selected = false
@@ -379,9 +380,15 @@ function taglist.taglist_label(t, args)
         shape              = shape,
         shape_border_width = shape_border_width,
         shape_border_color = shape_border_color,
+        icon_size          = icon_size,
     }
 
     return text, bg_color, bg_image, not taglist_disable_icon and icon or nil, other_args
+end
+
+-- Remove some callback boilerplate from the user provided templates.
+local function create_callback(w, t)
+    common._set_common_property(w, "tag", t)
 end
 
 local function taglist_update(s, w, buttons, filter, data, style, update_function, args)
@@ -398,7 +405,10 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
 
     local function label(c) return taglist.taglist_label(c, style) end
 
-    update_function(w, buttons, label, data, tags, args)
+    update_function(w, buttons, label, data, tags, {
+        widget_template = args.widget_template,
+        create_callback = create_callback,
+    })
 end
 
 --- Create a new taglist widget. The last two arguments (update_function

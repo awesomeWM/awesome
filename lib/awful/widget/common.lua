@@ -62,6 +62,7 @@ local function default_template()
     return custom_template {
         widget_template = {
             id = 'background_role',
+            border_strategy = 'inner',
             widget = wibox.container.background,
             {
                 widget = wibox.layout.fixed.horizontal,
@@ -90,6 +91,19 @@ local function default_template()
     }
 end
 
+-- Find all the childrens (without the hierarchy) and set a property.
+function common._set_common_property(widget, property, value)
+    if widget["set_"..property] then
+        widget["set_"..property](widget, value)
+    end
+
+    if widget.get_children then
+        for _, w in ipairs(widget:get_children()) do
+            common._set_common_property(w, property, value)
+        end
+    end
+end
+
 --- Common update method.
 -- @param w The widget.
 -- @tab buttons
@@ -113,6 +127,10 @@ function common.list_update(w, buttons, label, data, objects, args)
 
             if cache.create_callback then
                 cache.create_callback(cache.primary, o, i, objects)
+            end
+
+            if args and args.create_callback then
+                args.create_callback(cache.primary, o, i, objects)
             end
 
             data[o] = cache
@@ -148,9 +166,9 @@ function common.list_update(w, buttons, label, data, objects, args)
                 })
             end
 
-            cache.bgb.shape              = item_args.shape
-            cache.bgb.shape_border_width = item_args.shape_border_width
-            cache.bgb.shape_border_color = item_args.shape_border_color
+            cache.bgb.shape        = item_args.shape
+            cache.bgb.border_width = item_args.shape_border_width
+            cache.bgb.border_color = item_args.shape_border_color
 
         end
 
@@ -158,6 +176,14 @@ function common.list_update(w, buttons, label, data, objects, args)
             cache.ib:set_image(icon)
         elseif cache.ibm then
             cache.ibm:set_margins(0)
+        end
+
+        if item_args.icon_size and cache.ib then
+            cache.ib.forced_height = item_args.icon_size
+            cache.ib.forced_width  = item_args.icon_size
+        elseif cache.ib then
+            cache.ib.forced_height = nil
+            cache.ib.forced_width  = nil
         end
 
         w:add(cache.primary)

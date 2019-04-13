@@ -1,11 +1,13 @@
 --DOC_GEN_IMAGE
 --DOC_HIDE_ALL
 --DOC_NO_USAGE
+--DOC_NO_DASH
 require("_date")
 local awful     = require("awful")
 local gears     = require("gears")
 local wibox     = require("wibox")
 local beautiful = require("beautiful") --DOC_HIDE
+local look      = require("_default_look")
 
 screen[1]._resize {width = 640, height = 480}
 
@@ -22,36 +24,6 @@ c:geometry {
 }
 c._old_geo = {c:geometry()}
 c:set_label("A client")
-
-local wb = awful.wibar {
-    position = "top",
-}
-
--- Create the same number of tags as the default config
-awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, screen[1], awful.layout.layouts[1])
-
--- Only bother with widgets that are visible by default
-local mykeyboardlayout = awful.widget.keyboardlayout()
-local mytextclock = wibox.widget.textclock()
-local mylayoutbox = awful.widget.layoutbox(screen[1])
-local mytaglist = awful.widget.taglist(screen[1], awful.widget.taglist.filter.all, {})
-local mytasklist = awful.widget.tasklist(screen[1], awful.widget.tasklist.filter.currenttags, {})
-
-wb:setup {
-    layout = wibox.layout.align.horizontal,
-    { -- Left widgets
-        layout = wibox.layout.fixed.horizontal,
-        awful.titlebar.widget.iconwidget(c), --looks close enough
-        mytaglist,
-    },
-    mytasklist, -- Middle widget
-    { -- Right widgets
-        layout = wibox.layout.fixed.horizontal,
-        mykeyboardlayout,
-        mytextclock,
-        mylayoutbox,
-    },
-}
 
 -- The popup
 awful.popup {
@@ -112,37 +84,11 @@ local p10 = awful.popup {
 }
 
 require("gears.timer").run_delayed_calls_now()
-p10:bind_to_widget(mytextclock)
+p10:bind_to_widget(look.mytextclock)
 
 -- The titlebar
 
-local top_titlebar = awful.titlebar(c, {
-    height    = 20,
-    bg_normal = "#ff0000",
-})
-
-top_titlebar : setup {
-    { -- Left
-        awful.titlebar.widget.iconwidget(c),
-        layout  = wibox.layout.fixed.horizontal
-    },
-    { -- Middle
-        { -- Title
-            align  = "center",
-            widget = awful.titlebar.widget.titlewidget(c)
-        },
-        layout  = wibox.layout.flex.horizontal
-    },
-    { -- Right
-        awful.titlebar.widget.floatingbutton (c),
-        awful.titlebar.widget.maximizedbutton(c),
-        awful.titlebar.widget.stickybutton   (c),
-        awful.titlebar.widget.ontopbutton    (c),
-        awful.titlebar.widget.closebutton    (c),
-        layout = wibox.layout.fixed.horizontal()
-    },
-    layout = wibox.layout.align.horizontal
-}
+c:emit_signal("request::titlebars", "rules", {})--DOC_HIDE
 
 -- Normal wiboxes
 
@@ -198,8 +144,8 @@ local function create_info(text, x, y, width, height)
         forced_width  = width,
         forced_height = height,
         shape = gears.shape.rectangle,
-        shape_border_width = 1,
-        shape_border_color = beautiful.border_color,
+        border_width = 1,
+        border_color = beautiful.border_color,
         bg = "#ffff0055",
         widget = wibox.container.background
     }, {x = x, y = y})
@@ -228,7 +174,7 @@ create_info("awful.wibar", 200, 50, 100, 30)
 create_info("awful.titlebar", 250, 350, 100, 30)
 create_info("awful.tooltip", 30, 130, 100, 30)
 create_info("awful.popup", 450, 240, 100, 30)
-create_info("Standard `wibox1`", 420, 420, 130, 30)
+create_info("Standard `wibox`", 420, 420, 130, 30)
 
 create_line(250, 10, 250, 55)
 create_line(75, 100, 75, 135)

@@ -69,7 +69,7 @@ table.insert(steps, function()
         awful.button({}, 1, nil, function ()
             button:emit_signal_recursive("test::recursive")
         end)
-))
+    ))
 
     layout:connect_signal("test::recursive", function()
         got_called = true
@@ -89,7 +89,7 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    assert(button._private.image ~= img)
+    if button._private.image == img then return end
 
     return true
 end)
@@ -115,30 +115,30 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-assert(button._private.image ~= img)
+    if button._private.image == img then return end
 
-return true
+    return true
 end)
 
 table.insert(steps, function()
--- just make sure the button is not released for nothing
-assert(button._private.image ~= img)
+    -- just make sure the button is not released for nothing
+    assert(button._private.image ~= img)
 
--- test if the button is released when the mouse move out
-awful.placement.right(mouse--[[, {parent = w}]])
-root.fake_input("button_release", 1)
-awesome.sync()
+    -- test if the button is released when the mouse move out
+    awful.placement.right(mouse--[[, {parent = w}]])
+    root.fake_input("button_release", 1)
+    awesome.sync()
 
-return true
+    return true
 end)
 
 table.insert(steps, function()
-assert(button._private.image == img)
+    assert(button._private.image == img)
 
--- The button had plenty of clicks by now. Make sure everything worked
-assert(got_called)
+    -- The button had plenty of clicks by now. Make sure everything worked
+    assert(got_called)
 
-return true
+    return true
 end)
 
 runner.run_steps(steps)

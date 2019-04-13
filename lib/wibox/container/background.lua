@@ -14,6 +14,8 @@ local surface = require("gears.surface")
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local gtable = require("gears.table")
+local gshape = require("gears.shape")
+local gdebug = require("gears.debug")
 local setmetatable = setmetatable
 local type = type
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -30,8 +32,11 @@ end
 
 -- Prepare drawing the children of this widget
 function background:before_draw_children(context, cr, width, height)
+    local bw    = self._private.shape_border_width or 0
+    local shape = self._private.shape or (bw > 0 and gshape.rectangle or nil)
+
     -- Redirect drawing to a temporary surface if there is a shape
-    if self._private.shape then
+    if shape then
         cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
     end
 
@@ -63,15 +68,17 @@ end
 
 -- Draw the border
 function background:after_draw_children(_, cr, width, height)
-    if not self._private.shape then
+    local bw    = self._private.shape_border_width or 0
+    local shape = self._private.shape or (bw > 0 and gshape.rectangle or nil)
+
+    if not shape then
         return
     end
 
     -- Okay, there is a shape. Get it as a path.
-    local bw = self._private.shape_border_width or 0
 
     cr:translate(bw, bw)
-    self._private.shape(cr, width - 2*bw, height - 2*bw, unpack(self._private.shape_args or {}))
+    shape(cr, width - 2*bw, height - 2*bw, unpack(self._private.shape_args or {}))
     cr:translate(-bw, -bw)
 
     if bw > 0 then
@@ -126,7 +133,12 @@ end
 -- Layout this widget
 function background:layout(_, width, height)
     if self._private.widget then
-        return { base.place_widget_at(self._private.widget, 0, 0, width, height) }
+        local bw = self._private.border_strategy == "inner" and
+            self._private.shape_border_width or 0
+
+        return { base.place_widget_at(
+            self._private.widget, bw, bw, width-2*bw, height-2*bw
+        ) }
     end
 end
 
@@ -136,7 +148,14 @@ function background:fit(context, width, height)
         return 0, 0
     end
 
-    return base.fit_widget(self, context, self._private.widget, width, height)
+    local bw = self._private.border_strategy == "inner" and
+        self._private.shape_border_width or 0
+
+    local w, h = base.fit_widget(
+        self, context, self._private.widget, width - 2*bw, height - 2*bw
+    )
+
+    return w+2*bw, h+2*bw
 end
 
 --- The widget displayed in the background widget.
@@ -207,7 +226,7 @@ function background:get_fg()
     return self._private.foreground
 end
 
---- The background shap     e.
+--- The background shape.
 --
 -- Use `set_shape` to set additional shape paramaters.
 --
@@ -240,36 +259,83 @@ end
 --- When a `shape` is set, also draw a border.
 --
 -- See `wibox.container.background.shape` for an usage example.
--- @property shape_border_width
+-- @deprecatedproperty shape_border_width
 -- @tparam number width The border width
+-- @see border_width
 
-function background:set_shape_border_width(width)
+--- Add a border of a specific width.
+--
+-- If the shape is set, the border will also be shaped.
+--
+-- See `wibox.container.background.shape` for an usage example.
+-- @property border_width
+-- @tparam[opt=0] number width The border width.
+-- @see border_color
+
+function background:set_border_width(width)
     if self._private.shape_border_width == width then return end
 
     self._private.shape_border_width = width
     self:emit_signal("widget::redraw_needed")
 end
 
-function background:get_shape_border_width()
+function background:get_border_width()
     return self._private.shape_border_width
+end
+
+function background.get_shape_border_width(...)
+    gdebug.deprecate("Use `border_width` instead of `shape_border_width`",
+        {deprecated_in=5})
+
+    return background.get_border_width(...)
+end
+
+function background.set_shape_border_width(...)
+    gdebug.deprecate("Use `border_width` instead of `shape_border_width`",
+        {deprecated_in=5})
+
+    background.set_border_width(...)
 end
 
 --- When a `shape` is set, also draw a border.
 --
 -- See `wibox.container.background.shape` for an usage example.
--- @property shape_border_color
+-- @deprecatedproperty shape_border_color
 -- @param[opt=self._private.foreground] fg The border color, pattern or gradient
 -- @see gears.color
+-- @see border_color
 
-function background:set_shape_border_color(fg)
+--- Set the color for the border.
+--
+-- See `wibox.container.background.shape` for an usage example.
+-- @property border_color
+-- @param[opt=self._private.foreground] fg The border color, pattern or gradient
+-- @see gears.color
+-- @see border_width
+
+function background:set_border_color(fg)
     if self._private.shape_border_color == fg then return end
 
     self._private.shape_border_color = fg
     self:emit_signal("widget::redraw_needed")
 end
 
-function background:get_shape_border_color()
+function background:get_border_color()
     return self._private.shape_border_color
+end
+
+function background.get_shape_border_color(...)
+    gdebug.deprecate("Use `border_color` instead of `shape_border_color`",
+        {deprecated_in=5})
+
+    return background.get_border_color(...)
+end
+
+function background.set_shape_border_color(...)
+    gdebug.deprecate("Use `border_color` instead of `shape_border_color`",
+        {deprecated_in=5})
+
+    background.set_border_color(...)
 end
 
 function background:set_shape_clip(value)
@@ -282,6 +348,21 @@ function background:get_shape_clip()
     require("gears.debug").print_warning("shape_clip property of background container was removed."
         .. " Use wibox.layout.stack instead if you want shape_clip=false.")
     return true
+end
+
+--- How the border width affects the contained widget.
+--
+-- The valid values are:
+--
+-- * *none*: Just apply the border, do not affect the content size (default).
+-- * *inner*: Squeeze the size of the content by the border width.
+--
+-- @property border_strategy
+-- @param[opt="none"] string
+
+function background:set_border_strategy(value)
+    self._private.border_strategy = value
+    self:emit_signal("widget::layout_changed")
 end
 
 --- The background image to use

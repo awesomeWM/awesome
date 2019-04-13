@@ -2,13 +2,23 @@ local gears_obj = require("gears.object")
 
 local tag, meta = awesome._shim_fake_class()
 
+local function has_selected_tag(s)
+    for _, t in ipairs(root._tags) do
+        if t.selected and ((not s) or s == t.screen) then
+            return true
+        end
+    end
+    return false
+end
+
 local function new_tag(_, args)
     local ret = gears_obj()
+    awesome._forward_class(ret, tag)
 
     ret.data = {}
     ret.name = args.name or "test"
     ret.activated = true
-    ret.selected = true
+    ret.selected = not has_selected_tag(args.screen)
 
     function ret:clients(_) --TODO handle new
         local list = {}

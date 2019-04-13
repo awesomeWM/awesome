@@ -420,6 +420,14 @@ function base.place_widget_at(widget, x, y, width, height)
     return base.place_widget_via_matrix(widget, matrix.create_translate(x, y), width, height)
 end
 
+-- Check if `obj` can be called (either using the metacall or as a function)
+local function is_callable(obj)
+    local t = type(obj)
+    return t == "function" or (
+        t == "table" and getmetatable(obj) and getmetatable(obj).__call
+    ), t
+end
+
 -- Read the table, separate attributes from widgets.
 local function parse_table(t, leave_empty)
     local max = 0
@@ -491,9 +499,11 @@ local function drill(ids, content)
         local v, id2, e = widgets[k], id, nil
         if v then
             -- It is another declarative container, parse it.
-            if not v.is_widget then
+            if (not v.is_widget) and (v.widget or v.layout) then
                 e, id2 = drill(ids, v)
                 widgets[k] = e
+            elseif (not v.is_widget) and is_callable(v) then
+                 widgets[k] = v()
             end
             base.check_widget(widgets[k])
 
@@ -599,13 +609,11 @@ end
 -- @param[opt=nil] ... Arguments passed to the contructor (if any).
 -- @treturn The new widget.
 function base.make_widget_from_value(wdg, ...)
-    local is_table = type(wdg) == "table"
-    local is_function = ((not is_table) and type(wdg) == "function")
-        or (is_table and getmetatable(wdg) and getmetatable(wdg).__call)
+    local is_function, t = is_callable(wdg)
 
     if is_function then
         wdg = wdg(...)
-    elseif is_table and not wdg.is_widget then
+    elseif t == "table" and not wdg.is_widget then
         wdg = base.make_widget_declarative(wdg)
     else
         assert(wdg.is_widget, "The argument is not a function, table, or widget.")

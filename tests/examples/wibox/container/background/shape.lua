@@ -30,11 +30,11 @@ parent : setup {
             bottom = 3,
             widget = wibox.container.margin
         },
-        shape              = gears.shape.hexagon,
-        bg                 = beautiful.bg_normal,
-        shape_border_color = beautiful.border_color,
-        shape_border_width = beautiful.border_width,
-        widget             = wibox.container.background
+        shape        = gears.shape.hexagon,
+        bg           = beautiful.bg_normal,
+        border_color = beautiful.border_color,
+        border_width = beautiful.border_width,
+        widget       = wibox.container.background
     },
     spacing = 10,
     layout  = wibox.layout.fixed.vertical

@@ -87,7 +87,13 @@ local timer = require("gears.timer")
 local gcolor = require("gears.color")
 local gstring = require("gears.string")
 local gdebug = require("gears.debug")
+local dpi = require("beautiful").xresources.apply_dpi
 local base = require("wibox.widget.base")
+local wfixed = require("wibox.layout.fixed")
+local wmargin = require("wibox.container.margin")
+local wtextbox = require("wibox.widget.textbox")
+local clienticon = require("awful.widget.clienticon")
+local wbackground = require("wibox.container.background")
 
 local function get_screen(s)
     return s and screen[s]
@@ -247,6 +253,32 @@ local instances
 -- Public structures
 tasklist.filter, tasklist.source = {}, {}
 
+-- This is the same template as awful.widget.common, but with an clienticon widget
+local default_template = {
+    {
+        {
+            clienticon,
+            id     = "icon_margin_role",
+            left   = dpi(4),
+            widget = wmargin
+        },
+        {
+            {
+                id     = "text_role",
+                widget = wtextbox,
+            },
+            id     = "text_margin_role",
+            left   = dpi(4),
+            right  = dpi(4),
+            widget = wmargin
+        },
+        fill_space = true,
+        layout     = wfixed.horizontal
+    },
+    id     = "background_role",
+    widget = wbackground
+}
+
 local function tasklist_label(c, args, tb)
     if not args then args = {} end
     local theme = beautiful.get()
@@ -279,6 +311,7 @@ local function tasklist_label(c, args, tb)
     local shape              = args.shape or theme.tasklist_shape
     local shape_border_width = args.shape_border_width or theme.tasklist_shape_border_width
     local shape_border_color = args.shape_border_color or theme.tasklist_shape_border_color
+    local icon_size = args.icon_size or theme.tasklist_icon_size
 
     -- symbol to use to indicate certain client properties
     local sticky = args.sticky or theme.tasklist_sticky or "▪"
@@ -394,9 +427,15 @@ local function tasklist_label(c, args, tb)
         shape              = shape,
         shape_border_width = shape_border_width,
         shape_border_color = shape_border_color,
+        icon_size          = icon_size,
     }
 
     return text, bg, bg_image, not tasklist_disable_icon and c.icon or nil, other_args
+end
+
+-- Remove some callback boilerplate from the user provided templates.
+local function create_callback(w, t)
+    common._set_common_property(w, "client", t)
 end
 
 local function tasklist_update(s, w, buttons, filter, data, style, update_function, args)
@@ -415,7 +454,10 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
 
     local function label(c, tb) return tasklist_label(c, style, tb) end
 
-    update_function(w, buttons, label, data, clients, args)
+    update_function(w, buttons, label, data, clients, {
+        widget_template = args.widget_template or default_template,
+        create_callback = create_callback,
+    })
 end
 
 --- Create a new tasklist widget.
@@ -451,6 +493,7 @@ end
 -- @tparam[opt=nil] string args.style.bg_image_urgent
 -- @tparam[opt=nil] string args.style.bg_image_minimize
 -- @tparam[opt=nil] boolean args.style.tasklist_disable_icon
+-- @tparam[opt=nil] number args.style.icon_size The size of the icon
 -- @tparam[opt=false] boolean args.style.disable_task_name
 -- @tparam[opt=nil] string args.style.font
 -- @tparam[opt=left] string args.style.align *left*, *right* or *center*

@@ -95,20 +95,30 @@ end
 
 --- Set all the margins to val.
 -- @property margins
--- @tparam number val The margin value
+-- @tparam number|table val The margin value. It can be a number or a table with
+--  the *left*/*right*/*top*/*bottom* keys.
 
 function margin:set_margins(val)
-    if self._private.left   == val and
-       self._private.right  == val and
-       self._private.top    == val and
-       self._private.bottom == val then
-        return
+
+    if type(val) == "number" or not val then
+        if self._private.left   == val and
+           self._private.right  == val and
+           self._private.top    == val and
+           self._private.bottom == val then
+            return
+        end
+
+        self._private.left   = val
+        self._private.right  = val
+        self._private.top    = val
+        self._private.bottom = val
+    elseif type(val) == "table" then
+        self._private.left   = val.left   or self._private.left
+        self._private.right  = val.right  or self._private.right
+        self._private.top    = val.top    or self._private.top
+        self._private.bottom = val.bottom or self._private.bottom
     end
 
-    self._private.left = val
-    self._private.right = val
-    self._private.top = val
-    self._private.bottom = val
     self:emit_signal("widget::layout_changed")
 end
 

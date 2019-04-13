@@ -26,9 +26,9 @@ end --DOC_HIDE
         filter   = awful.widget.tasklist.filter.currenttags,
         buttons  = tasklist_buttons,
         style    = {
-            shape_border_width = 1,
-            shape_border_color = "#777777",
-            shape  = gears.shape.rounded_bar,
+            border_width = 1,
+            border_color = "#777777",
+            shape        = gears.shape.rounded_bar,
         },
         layout   = {
             spacing = 10,

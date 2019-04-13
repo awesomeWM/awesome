@@ -13,10 +13,15 @@ local function _shim_fake_class()
         __newindex = function()end,
     }
 
-    obj._connect_signal = obj.connect_signal
+    obj._connect_signal    = obj.connect_signal
+    obj._disconnect_signal = obj.disconnect_signal
 
     function obj.connect_signal(name, func)
         return obj._connect_signal(obj, name, func)
+    end
+
+    function obj.disconnect_signal(name, func)
+        return obj._disconnect_signal(obj, name, func)
     end
 
     function obj.set_index_miss_handler(handler)
@@ -37,8 +42,18 @@ local function _shim_fake_class()
     return obj, meta
 end
 
+local function forward_class(obj, class)
+    assert(obj.emit_signal)
+    local es = obj.emit_signal
+    function obj:emit_signal(name, ...)
+        es(obj, name, ...)
+        class.emit_signal(name, obj, ...)
+    end
+end
+
 local awesome = _shim_fake_class()
 awesome._shim_fake_class = _shim_fake_class
+awesome._forward_class = forward_class
 
 -- Avoid c.screen = acreen.focused() to be called, all tests will fail
 awesome.startup = true
