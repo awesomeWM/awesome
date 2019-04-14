@@ -18,6 +18,14 @@ end
 
 local rect = {x1 = math.huge ,y1 = math.huge , x2 = -math.huge , y2 = -math.huge}
 
+if #drawin.get() == 0 then
+    -- The code below would calculate -math.huge - math.huge and end up trying
+    -- to draw something of size -math.huge times -math.huge. Turn this weird
+    -- error into a better error message.
+    error("Got no drawins to draw. "
+            .. "That's not good and would cause errors later on.")
+end
+
 -- Get the region with wiboxes
 for _, d in ipairs(drawin.get()) do
     local w = d.get_wibox and d:get_wibox() or nil
