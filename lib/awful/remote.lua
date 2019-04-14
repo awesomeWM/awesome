@@ -25,7 +25,7 @@ if dbus then
             end
             local results = { pcall(f) }
             if not table.remove(results, 1) then
-                return "s", "Error during execution: " .. results[1]
+                return "s", "Error during execution: " .. tostring(results[1])
             end
             local retvals = {}
             for _, v in ipairs(results) do
