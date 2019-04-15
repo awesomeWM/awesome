@@ -211,6 +211,8 @@ local escape_subs    = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
 
 -- Cache the markup
 local function set_escaped_text(self)
+    if not self.box then return end
+
     local text = self.message or ""
     local title = self.title and self.title .. "\n" or ""
 
@@ -370,7 +372,6 @@ function naughty.default_notification_handler(notification, args)
     textbox:set_font(font)
 
     notification.textbox = textbox
-    set_escaped_text(notification)
 
     -- Update the content if it changes
     notification:connect_signal("property::message", set_escaped_text)
@@ -513,10 +514,14 @@ function naughty.default_notification_handler(notification, args)
     notification.box.visible = true
 
     -- populate widgets
+    set_escaped_text(notification)
+
     local layout = wibox.layout.fixed.horizontal()
+
     if iconmargin then
         layout:add(iconmargin)
     end
+
     layout:add(marginbox)
 
     local completelayout = wibox.layout.fixed.vertical()
