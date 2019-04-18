@@ -22,6 +22,8 @@
 #include "common/luaclass.h"
 #include "common/luaobject.h"
 
+#define CONNECTED_SUFFIX "::connected"
+
 struct lua_class_property
 {
     /** Name of the property */
@@ -300,6 +302,24 @@ luaA_class_connect_signal_from_stack(lua_State *L, lua_class_t *lua_class,
                                      const char *name, int ud)
 {
     luaA_checkfunction(L, ud);
+
+    /* Duplicate the function in the stack */
+    lua_pushvalue(L, ud);
+
+    char *buf = p_alloca(char, a_strlen(name) + a_strlen(CONNECTED_SUFFIX) + 1);
+
+    /* Create a new signal to notify there is a global connection. */
+    sprintf(buf, "%s%s", name, CONNECTED_SUFFIX);
+
+    /* Emit a signal to notify Lua of the global connection.
+     *
+     * This can useful during initialization where the signal needs to be
+     * artificially emitted for existing objects as soon as something connects
+     * to it
+     */
+    luaA_class_emit_signal(L, lua_class, buf, 1);
+
+    /* Register the signal to the CAPI list */
     signal_connect(&lua_class->signals, name, luaA_object_ref(L, ud));
 }
 
@@ -511,5 +531,7 @@ luaA_class_new(lua_State *L, lua_class_t *lua_class)
 
     return 1;
 }
+
+#undef CONNECTED_SUFFIX
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

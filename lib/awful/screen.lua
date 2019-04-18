@@ -602,6 +602,54 @@ function screen.object.set_dpi(s, dpi)
     s.data.dpi = dpi
 end
 
+--- Emitted when a new screen is added.
+--
+-- The handler(s) of this signal are responsible of adding elements such as
+-- bars, docks or other elements to a screen. The signal is emitted when a
+-- screen is added, including during startup.
+--
+-- The only default implementation is the one provided by `rc.lua`.
+--
+-- @signal request::desktop_decoration
+-- @tparam screen s The screen object.
+
+--- Emitted when a new screen needs a wallpaper.
+--
+-- The handler(s) of this signal are responsible to set the wallpaper. The
+-- signal is emitted when a screen is added (including at startup), when its
+-- DPI changes or when its geometry changes.
+--
+-- The only default implementation is the one provided by `rc.lua`.
+--
+-- @signal request::wallpaper
+-- @tparam screen s The screen object.
+
+-- Set the wallpaper(s) and create the bar(s) for new screens
+capi.screen.connect_signal("added", function(s)
+    s:emit_signal("request::desktop_decoration")
+    s:emit_signal("request::wallpaper")
+end)
+
+-- Resize the wallpaper(s)
+for _, prop in ipairs {"geometry", "dpi" } do
+    capi.screen.connect_signal("property::"..prop, function(s)
+        s:emit_signal("request::wallpaper")
+    end)
+end
+
+-- Create the bar for existing screens when an handler is added
+capi.screen.connect_signal("request::desktop_decoration::connected", function(new_handler)
+    for s in capi.screen do
+        new_handler(s)
+    end
+end)
+
+-- Set the wallpaper when an handler is added.
+capi.screen.connect_signal("request::wallpaper::connected", function(new_handler)
+    for s in capi.screen do
+        new_handler(s)
+    end
+end)
 
 --- When the tag history changed.
 -- @signal tag::history::update
