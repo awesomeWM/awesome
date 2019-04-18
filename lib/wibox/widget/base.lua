@@ -7,6 +7,7 @@
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
+local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 local gtable = require("gears.table")
 local setmetatable = setmetatable
@@ -609,17 +610,22 @@ end
 --
 -- @param wdg The value.
 -- @param[opt=nil] ... Arguments passed to the contructor (if any).
--- @treturn The new widget.
 -- @constructorfct wibox.widget.base.make_widget_from_value
+-- @treturn widget|nil The new widget or `nil` in case of failure.
 function base.make_widget_from_value(wdg, ...)
+    if not wdg then return nil end
+
     local is_function, t = is_callable(wdg)
 
     if is_function then
         wdg = wdg(...)
-    elseif t == "table" and not wdg.is_widget then
-        wdg = base.make_widget_declarative(wdg)
+    elseif t == "table" then
+        wdg = wdg.is_widget and wdg or base.make_widget_declarative(wdg)
     else
-        assert(wdg.is_widget, "The argument is not a function, table, or widget.")
+        gdebug.print_warning(
+            "The argument is not a function, table, or widget."
+        )
+        return nil
     end
 
     return wdg
