@@ -43,7 +43,7 @@ local awful = { keygrabber = require("awful.keygrabber") } --DOC_HIDE
     awful.keygrabber {
         stop_callback = parse,
         stop_key   = gears.table.keys(map.verbs),
-        root_keybingins = {
+        root_keybindings = {
             {{"Mod4"}, "v"}
         },
     }
