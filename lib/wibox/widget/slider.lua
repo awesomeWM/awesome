@@ -339,9 +339,9 @@ function slider:draw(_, cr, width, height)
             - (handle_width - handle_border_width/2) * (active_rate - 0.5)
         cr:set_source(color.create_pattern{
             type        = "linear",
-            from        = {0,0,0},
-            to          = {bar_active_width, 0, bar_active_width},
-            stops       = {{1, bar_active_color}, {1, bar_color}}
+            from        = {0,0},
+            to          = {bar_active_width, 0},
+            stops       = {{0.99, bar_active_color}, {0.99, bar_color}}
         })
     end
 
