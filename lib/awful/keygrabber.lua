@@ -219,8 +219,8 @@ local function runner(self, modifiers, key, event)
     local seq_len = glib.utf8_strlen(self.sequence, -1)
 
     -- Record the key sequence
-    if key == "BackSpace" and seq_len > 0 then
-        self.sequence = glib.utf8_substring(self.sequence, 0, seq_len - 2)
+    if key == "BackSpace" and seq_len > 0 and event == "release" then
+        self.sequence = glib.utf8_substring(self.sequence, 0, seq_len - 1)
     elseif glib.utf8_strlen(key, -1) == 1 and  event == "release" then
         self.sequence = self.sequence..key
     end
