@@ -90,6 +90,14 @@ local slider = {mt={}}
 -- @property bar_color
 -- @param color
 
+--- The bar (active) color.
+--
+--@DOC_wibox_widget_slider_bar_active_color_EXAMPLE@
+--
+-- Only works when both `bar_active_color` and `bar_color` are passed as hex color string
+-- @property bar_active_color
+-- @param color
+
 --- The bar (background) margins.
 --
 --@DOC_wibox_widget_slider_bar_margins_EXAMPLE@
@@ -186,6 +194,12 @@ local slider = {mt={}}
 -- @beautiful beautiful.slider_bar_color
 -- @param color
 
+--- The bar (active) color.
+-- Only works when both `beautiful.slider_bar_color` and `beautiful.slider_bar_active_color` are hex color strings
+-- @beautiful beautiful.slider_bar_active_color
+-- @param color
+
+
 local properties = {
     -- Handle
     handle_shape         = shape.rectangle,
@@ -199,6 +213,7 @@ local properties = {
     bar_shape            = shape.rectangle,
     bar_height           = false,
     bar_color            = false,
+    bar_active_color     = false,
     bar_margins          = {},
     bar_border_width     = 0,
     bar_border_color     = false,
@@ -252,11 +267,33 @@ local function get_extremums(self)
 end
 
 function slider:draw(_, cr, width, height)
+    local value = self._private.value or self._private.min or 0
+
+    local maximum = self._private.maximum
+        or properties.maximum
+
+    local minimum = self._private.minimum
+        or properties.minimum
+
+    local range = maximum - minimum
+    local active_rate = (value - minimum) / range
+
+    local handle_height, handle_width = height, self._private.handle_width
+        or beautiful.slider_handle_width
+        or height/2
+
+    local handle_border_width = self._private.handle_border_width
+        or beautiful.slider_handle_border_width
+        or properties.handle_border_width or 0
+
     local bar_height = self._private.bar_height
 
     -- If there is no background, then skip this
     local bar_color = self._private.bar_color
         or beautiful.slider_bar_color
+
+    local bar_active_color = self._private.bar_active_color
+        or beautiful.slider_bar_active_color
 
     if bar_color then
         cr:set_source(color(bar_color))
@@ -297,6 +334,17 @@ function slider:draw(_, cr, width, height)
 
     bar_shape(cr, width - x_offset - right_margin, bar_height or height)
 
+    if bar_active_color and type(bar_color) == "string" and type(bar_active_color) == "string" then
+        local bar_active_width = active_rate * (width - x_offset - right_margin)
+            - (handle_width - handle_border_width/2) * (active_rate - 0.5)
+        cr:set_source(color.create_pattern{
+            type        = "linear",
+            from        = {0,0},
+            to          = {bar_active_width, 0},
+            stops       = {{0.99, bar_active_color}, {0.99, bar_color}}
+        })
+    end
+
     if bar_color then
         if bar_border_width == 0 then
             cr:fill()
@@ -334,10 +382,6 @@ function slider:draw(_, cr, width, height)
         cr:set_source(color(handle_color))
     end
 
-    local handle_height, handle_width = height, self._private.handle_width
-        or beautiful.slider_handle_width
-        or height/2
-
     local handle_shape = self._private.handle_shape
         or beautiful.slider_handle_shape
         or properties.handle_shape
@@ -362,17 +406,11 @@ function slider:draw(_, cr, width, height)
         end
     end
 
-    local value = self._private.value or self._private.min or 0
-
     -- Get the widget size back to it's non-transfored value
     local min, _, interval = get_extremums(self)
     local rel_value = ((value-min)/interval) * (width-handle_width)
 
     cr:translate(x_offset + rel_value, y_offset)
-
-    local handle_border_width = self._private.handle_border_width
-        or beautiful.slider_handle_border_width
-        or properties.handle_border_width or 0
 
     handle_shape(cr, handle_width, handle_height)
 
