@@ -141,7 +141,12 @@ local function add_root_keybindings(self, list)
                 local obj_self, obj_list = obj[1], obj[2]
 
                 for _, v in ipairs(obj_list) do
-                    local mods, key, press, release, description = unpack(v)
+                    local mods, key, press, release, data = unpack(v)
+
+                    if type(release) == 'table' then
+                        data = release
+                        release = nil
+                    end
 
                     if press then
                         local old_press = press
@@ -159,7 +164,7 @@ local function add_root_keybindings(self, list)
                         end
                     end
 
-                    table.insert(ret, akey(mods, key, press, release, description))
+                    table.insert(ret, akey(mods, key, press, release, data))
                 end
             end
 
