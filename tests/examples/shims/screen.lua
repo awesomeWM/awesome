@@ -40,26 +40,26 @@ local function create_screen(args)
     end
 
     return setmetatable(s,{ __index = function(_, key)
-        if key == "geometry" then
-            return {
-                x      = geo.x or 0,
-                y      = geo.y or 0,
-                width  = geo.width ,
-                height = geo.height,
-            }
-        elseif key == "workarea" then
-            return {
-                x      = (geo.x or 0) + wa  ,
-                y      = (geo.y or 0) + wa  ,
-                width  = geo.width    - 2*wa,
-                height = geo.height   - 2*wa,
-            }
-        else
-            return meta.__index(_, key)
-        end
-    end,
-    __newindex = function(...) return meta.__newindex(...) end
-})
+            if key == "geometry" then
+                return {
+                    x      = geo.x or 0,
+                    y      = geo.y or 0,
+                    width  = geo.width ,
+                    height = geo.height,
+                }
+            elseif key == "workarea" then
+                return {
+                    x      = (geo.x or 0) + wa  ,
+                    y      = (geo.y or 0) + wa  ,
+                    width  = geo.width    - 2*wa,
+                    height = geo.height   - 2*wa,
+                }
+            else
+                return meta.__index(_, key)
+            end
+        end,
+        __newindex = function(...) return meta.__newindex(...) end
+    })
 end
 
 local screens = {}
