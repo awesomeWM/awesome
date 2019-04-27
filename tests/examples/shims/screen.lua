@@ -1,7 +1,7 @@
 local gears_obj = require("gears.object")
 
 local screen, meta = awesome._shim_fake_class()
-screen._count = 0
+screen._count, screen._deleted = 0, {}
 
 local function create_screen(args)
     local s = gears_obj()
@@ -41,6 +41,8 @@ local function create_screen(args)
     end
 
     return setmetatable(s,{ __index = function(_, key)
+            assert(s.valid)
+
             if key == "geometry" then
                 return {
                     x      = geo.x or 0,
@@ -59,7 +61,7 @@ local function create_screen(args)
                 return meta.__index(_, key)
             end
         end,
-        __newindex = function(...) return meta.__newindex(...) end
+        __newindex = function(...) assert(s.valid); return meta.__newindex(...) end
     })
 end
 
@@ -91,8 +93,36 @@ function screen._get_extents()
     return xmax.geometry.x+xmax.geometry.width, ymax.geometry.y+ymax.geometry.height
 end
 
+-- The way the `screen` module is used to store both number and object is
+-- problematic since it can cause invalid screens to be "resurrected".
+local function catch_invalid(_, s)
+    -- The CAPI implementation allows `nil`
+    if s == nil or type(s) == "string" then return end
+
+    assert(screen ~= s, "Some code tried (and failed) to shadow the global `screen`")
+
+    -- Valid numbers wont get this far.
+    assert(type(s) == "table", "Expected a table, but got a "..type(s))
+
+    if type(s) == "number" then return end
+
+    assert(s.geometry, "The object is not a screen")
+    assert(s.outputs, "The object is not a screen")
+
+    assert((not screen._deleted[s]) or (not s.valid), "The shims are broken")
+
+    assert(not screen._deleted[s], "The screen "..tostring(s).."has been deleted")
+
+    -- Other errors. If someone place an object in the `screen` module, it wont
+    -- get this far. So the remaining cases are probably bugs.
+    assert(false)
+end
+
 function screen._clear()
+    assert(#screen == screen._count)
     for i=1, #screen do
+        screen._deleted[screen[i]] = true
+        screen[i].valid = false
         screen[screen[i]] = nil
         screen[i] = nil
     end
@@ -144,7 +174,8 @@ function screen.count()
 end
 
 return setmetatable(screen, {
-    __call = iter_scr
+    __call  = iter_scr,
+    __index = catch_invalid
 })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

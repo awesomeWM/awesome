@@ -53,9 +53,14 @@ function mouse.push_history()
     mouse.history = {}
 end
 
+local forced_screen = nil
+
 return setmetatable(mouse, {
     __index = function(self, key)
         if key == "screen" then
+            if forced_screen and screen._deleted[forced_screen] then
+                forced_screen = nil
+            end
             return screen[1]
         end
         local h = rawget(mouse,"_i_handler")
@@ -63,10 +68,13 @@ return setmetatable(mouse, {
             return h(self, key)
         end
     end,
-    __newindex = function(...)
+    __newindex = function(_, k, v)
         local h = rawget(mouse,"_ni_handler")
-        if h then
-            h(...)
+        if k == "screen" then
+            -- This will assert if the screen is invalid
+            forced_screen = v and screen[v] or nil
+        elseif h then
+            h(_, k, v)
         end
     end,
 })
