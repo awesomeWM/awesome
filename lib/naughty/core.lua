@@ -512,6 +512,12 @@ function naughty.set_expiration_paused(p)
     end
 end
 
+--- Emitted when an error occurred and requires attention.
+-- @signal request::display_error
+-- @tparam string message The error message.
+-- @tparam boolean startup If the error occurred during the initial loading of
+--  rc.lua (and thus caused the fallback to kick in).
+
 --- Emitted when a notification is created.
 -- @signal added
 -- @tparam naughty.notification notification The notification object
