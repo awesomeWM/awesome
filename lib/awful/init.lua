@@ -35,6 +35,7 @@ local ret = {
     tooltip = require("awful.tooltip");
     permissions = require("awful.permissions");
     titlebar = require("awful.titlebar");
+    wallpaper = require("awful.wallpaper");
     rules = require("awful.rules");
     popup = require("awful.popup");
     spawn = require("awful.spawn");
