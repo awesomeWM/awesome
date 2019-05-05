@@ -660,12 +660,13 @@ a_dbus_cleanup(void)
  * \return The corresponding D-Bus connection.
  */
 static DBusConnection *
-a_dbus_bus_getbyname(const char *name)
+a_dbus_bus_getbyname(lua_State *L, const char *name)
 {
     if(A_STREQ(name, "system"))
         return dbus_connection_system;
     if(A_STREQ(name, "session"))
         return dbus_connection_session;
+    luaL_error(L, "Unknown dbus connection '%s', only 'system' and 'session' are valid", name);
     return NULL;
 }
 
@@ -681,7 +682,7 @@ luaA_dbus_request_name(lua_State *L)
 {
     const char *bus = luaL_checkstring(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(L, bus);
     lua_pushboolean(L, a_dbus_request_name(dbus_connection, name));
     return 1;
 }
@@ -698,7 +699,7 @@ luaA_dbus_release_name(lua_State *L)
 {
     const char *bus = luaL_checkstring(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(L, bus);
     lua_pushboolean(L, a_dbus_release_name(dbus_connection, name));
     return 1;
 }
@@ -714,7 +715,7 @@ luaA_dbus_add_match(lua_State *L)
 {
     const char *bus = luaL_checkstring(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(L, bus);
 
     if(dbus_connection)
     {
@@ -737,7 +738,7 @@ luaA_dbus_remove_match(lua_State *L)
 {
     const char *bus = luaL_checkstring(L, 1);
     const char *name = luaL_checkstring(L, 2);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(L, bus);
 
     if(dbus_connection)
     {
@@ -811,7 +812,7 @@ luaA_dbus_emit_signal(lua_State *L)
     const char *path = luaL_checkstring(L, 2);
     const char *itface = luaL_checkstring(L, 3);
     const char *name = luaL_checkstring(L, 4);
-    DBusConnection *dbus_connection = a_dbus_bus_getbyname(bus_name);
+    DBusConnection *dbus_connection = a_dbus_bus_getbyname(L, bus_name);
     DBusMessage* msg = dbus_message_new_signal(path, itface, name);
     if (msg == NULL) {
         luaA_warn(L, "your D-Bus signal emitting method error'd");
