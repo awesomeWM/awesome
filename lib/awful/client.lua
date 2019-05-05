@@ -1476,6 +1476,51 @@ function client.remove_request_filter(request, f, context)
     return false
 end
 
+--- Block a contextual request.
+--
+-- This only works when the request handler checks uses
+-- `check_allowed_requests`.
+--
+-- It can be used, for example, to prevent a client from resizing or moving
+-- itself by blocking `request::geometry` with the `ewmh` context.
+--
+-- Note that if other request filters handle the request, they may have priority
+-- over this policy. This method can often be convenient, but is less powerful
+-- than using a custom request filter.
+--
+-- @function client.grant_requests
+-- @see check_allowed_requests
+-- @see awful.client.add_request_filter
+-- @see awful.client.remove_request_filter
+
+function client.object.grant_requests(self, request, context, value)
+    local reqs = client.property.get(c, "blocked_requests")
+
+    if not reqs then
+        reqs = {}
+        return client.property.get(c, "blocked_requests", reqs)
+    end
+
+    reqs[request] = reqs[request] or {}
+    reqs[request][context] = value
+end
+
+-- Add a request filter for each common client requests.
+--
+-- It can simplify some common filtering like preventing clients from resizing
+-- themselves. It is mostly intended to by used by the rules, but is also
+-- provided as an API so that extensions can modify it. It can also be useful
+-- for adding a keybinding to toggle some requests.
+for _, req in ipairs { "activate", "geometry", "tag", "urgent" } do
+    client.add_request_filter("request::"..req, function(c, ctx)
+        local reqs = client.property.get(c, "blocked_requests") or {}
+
+        -- Can return true, false or nil. The lack of "or" is intentional.
+        return reqs["request::"..req]
+            and reqs["request::"..req][ctx or ""]
+    end)
+end
+
 -- Register standards signals
 
 --- The last geometry when client was floating.
