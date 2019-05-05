@@ -18,10 +18,16 @@ local beautiful = require("beautiful")
 local alayout = require("awful.layout")
 local atag = require("awful.tag")
 
-local ewmh = {
-    generic_activate_filters    = {},
-    contextual_activate_filters = {},
-}
+local ewmh = setmetatable({}, {
+    __index = function(_, k)
+        -- deprecated members
+        if k == "generic_activate_filters" then
+            return aclient._get_request_filters("request::activate", "generic")
+        elseif k == "contextual_activate_filters" then
+            return aclient._get_request_filters("request::activate", "contextual")
+        end
+    end
+})
 
 --- Honor the screen padding when maximizing.
 -- @beautiful beautiful.maximized_honor_padding
@@ -34,22 +40,6 @@ local ewmh = {
 --- Hide the border on maximized clients.
 -- @beautiful beautiful.maximized_hide_border
 -- @tparam[opt=false] boolean maximized_hide_border
-
---- The list of all registered generic request::activate (focus stealing)
--- filters. If a filter is added to only one context, it will be in
--- `ewmh.contextual_activate_filters`["context_name"].
--- @table[opt={}] generic_activate_filters
--- @see ewmh.activate
--- @see ewmh.add_activate_filter
--- @see ewmh.remove_activate_filter
-
---- The list of all registered contextual request::activate (focus stealing)
--- filters. If a filter is added to only one context, it will be in
--- `ewmh.generic_activate_filters`.
--- @table[opt={}] contextual_activate_filters
--- @see ewmh.activate
--- @see ewmh.add_activate_filter
--- @see ewmh.remove_activate_filter
 
 --- Update a client's settings when its geometry changes, skipping signals
 -- resulting from calls within.
@@ -89,7 +79,7 @@ end
 --  be selected if none of the client's tags are selected?
 -- @tparam[opt=false] boolean hints.switch_to_tags Select all tags associated
 --  with the client.
-function ewmh.activate(c, context, hints) -- luacheck: no unused args
+function ewmh.activate(c, context, hints)
     hints = hints or  {}
 
     if c.focusable == false and not hints.force then
@@ -100,20 +90,7 @@ function ewmh.activate(c, context, hints) -- luacheck: no unused args
         return
     end
 
-    local found, ret = false
-
-    -- Execute the filters until something handle the request
-    for _, tab in ipairs {
-        ewmh.contextual_activate_filters[context] or {},
-        ewmh.generic_activate_filters
-    } do
-        for i=#tab, 1, -1 do
-            ret = tab[i](c, context, hints)
-            if ret ~= nil then found=true; break end
-        end
-
-        if found then break end
-    end
+    local ret = c:check_allowed_requests("request::activate", context, hints)
 
     -- Minimized clients can be requested to have focus by, for example, 3rd
     -- party toolbars and they might not try to unminimize it first.
@@ -164,46 +141,21 @@ end
 --
 -- @tparam function f The callback
 -- @tparam[opt] string context The `request::activate` context
--- @see generic_activate_filters
--- @see contextual_activate_filters
--- @see remove_activate_filter
--- @staticfct awful.ewmh.add_activate_filter
+-- @deprecated awful.ewmh.add_activate_filter
+-- @see awful.client.add_request_filter
 function ewmh.add_activate_filter(f, context)
-    if not context then
-        table.insert(ewmh.generic_activate_filters, f)
-    else
-        ewmh.contextual_activate_filters[context] =
-            ewmh.contextual_activate_filters[context] or {}
-
-        table.insert(ewmh.contextual_activate_filters[context], f)
-    end
+    aclient.add_request_filter("request::activate", f, context)
 end
 
 --- Remove an activate (focus stealing) filter function.
 -- This is an helper to avoid dealing with `ewmh.add_activate_filter` directly.
 -- @tparam function f The callback
 -- @tparam[opt] string context The `request::activate` context
+-- @deprecated awful.ewmh.remove_activate_filter
 -- @treturn boolean If the callback existed
--- @see generic_activate_filters
--- @see contextual_activate_filters
--- @see add_activate_filter
--- @staticfct awful.ewmh.remove_activate_filter
+-- @see awful.client.remove_request_filter
 function ewmh.remove_activate_filter(f, context)
-    local tab = context and (ewmh.contextual_activate_filters[context] or {})
-        or ewmh.generic_activate_filters
-
-    for k, v in ipairs(tab) do
-        if v == f then
-            table.remove(tab, k)
-
-            -- In case the callback is there multiple time.
-            ewmh.remove_activate_filter(f, context)
-
-            return true
-        end
-    end
-
-    return false
+    aclient.remove_request_filter("request::activate", f, context)
 end
 
 -- Get tags that are on the same screen as the client. This should _almost_
@@ -428,7 +380,7 @@ end
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.client_geometry_requests(c, context, hints)
-    if context == "ewmh" and hints then
+    if context == "ewmh" and hints  then
         if c.immobilized_horizontal then
             hints = gtable.clone(hints)
             hints.x = nil
@@ -444,7 +396,7 @@ function ewmh.client_geometry_requests(c, context, hints)
 end
 
 -- The magnifier layout doesn't work with focus follow mouse.
-ewmh.add_activate_filter(function(c)
+aclient.add_request_filter("request::activate", function(c)
     if alayout.get(c.screen) ~= alayout.suit.magnifier
       and aclient.focus.filter(c) then
         return nil

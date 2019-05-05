@@ -1365,6 +1365,117 @@ function client.object.set_shape(self, shape)
     set_shape(self)
 end
 
+local request_filters = {generic={}, contextual={}}
+
+--- Use the common filtering system to allow or deny various requests.
+--
+-- Each request:: handler should call this.
+--
+-- @tparam string request The request name (like *request::activate*).
+-- @tparam[opt=""] string context The request context, if any.
+-- @tparam[opt={}] table hints The request context hints, if any.
+-- @treturn boolean|nil True if the request is explicitly granted, false if
+--  the request is explicitly denied and nil if nothing matches the request.
+function client.object:check_allowed_requests(request, context, hints)
+    local generic = client._get_request_filters(request, "generic")
+    local ctx = client._get_request_filters(request, "contextual")[context] or {}
+
+    -- Execute the filters until something handle the request
+    for _, tab in ipairs { ctx, generic } do
+        for i=#tab, 1, -1 do
+            local ret = tab[i](self, context, hints)
+
+            if ret ~= nil then
+                return ret
+            end
+        end
+    end
+
+    return nil
+end
+
+-- Get the list of filters for a request.
+--
+-- A previous iteration of this API made this data public. The newer
+-- `gears.sort` and `gears.matcher` APIs makes that only (narrow) use case
+-- for that disappear. This (private) function exists for legacy compatibility.
+function client._get_request_filters(request, group)
+    if not request_filters[group] then return {} end
+
+    return request_filters[group][request] or {}
+end
+
+--- Add an activate (focus stealing) filter function.
+--
+-- The callback takes the following parameters:
+--
+-- * **c** (*client*) The client requesting the activation
+-- * **context** (*string*) The activation context.
+-- * **hints** (*table*) Some additional hints (depending on the context)
+--
+-- If the callback returns `true`, the client will be activated. If the callback
+-- returns `false`, the activation request is cancelled unless the `force` hint is
+-- set. If the callback returns `nil`, the previous callback will be executed.
+-- This will continue until either a callback handles the request or when it runs
+-- out of callbacks. In that case, the request will be granted if the client is
+-- visible.
+--
+-- For example, to block Firefox from stealing the focus, use:
+--
+--    awful.ewmh.add_request_filter("request::activate", function(c)
+--        if c.class == "Firefox" then return false end
+--    end, "ewmh")
+--
+-- @tparam function f The callback
+-- @tparam[opt] string context The `request::activate` context
+-- @see generic_activate_filters
+-- @see contextual_activate_filters
+-- @see remove_activate_filter
+-- @see request::activate
+-- @see request::geometry
+-- @see request::titlebars
+-- @see request::tag
+-- @see request::urgent
+function client.add_request_filter(request, f, context)
+    if not context then
+        request_filters.generic[request] = request_filters.generic[request] or {}
+        table.insert(request_filters.generic[request], f)
+    else
+        request_filters.contextual[request] = request_filters.contextual[request] or {}
+
+        request_filters.contextual[request][context] =
+            request_filters.contextual[request][context] or {}
+
+        table.insert(request_filters.contextual[request][context], f)
+    end
+end
+
+--- Remove an activate (focus stealing) filter function.
+-- This is an helper to avoid dealing with `ewmh.add_request_filter` directly.
+-- @tparam function f The callback
+-- @tparam[opt] string context The `request::activate` context
+-- @treturn boolean If the callback existed.
+-- @see request::activate
+-- @see request::geometry
+-- @see request::titlebars
+function client.remove_request_filter(request, f, context)
+    local tab = context and (ewmh.contextual_activate_filters[context] or {})
+        or ewmh.generic_activate_filters
+
+    for k, v in ipairs(tab) do
+        if v == f then
+            table.remove(tab, k)
+
+            -- In case the callback is there multiple time.
+            ewmh.remove_request_filter(request, f, context)
+
+            return true
+        end
+    end
+
+    return false
+end
+
 -- Register standards signals
 
 --- The last geometry when client was floating.
