@@ -181,6 +181,12 @@ end
 -- @tparam[opt] tag|boolean t A tag to use. If true, then the client is made sticky.
 -- @tparam[opt={}] table hints Extra information
 function ewmh.tag(c, t, hints) --luacheck: no unused
+    local is_accepted = c:check_allowed_requests(
+        "request::tag", hints and hints.reason or "", hints
+    ) ~= false
+
+    if not is_accepted then return end
+
     -- There is nothing to do
     if not t and #get_valid_tags(c, c.screen) > 0 then return end
 
@@ -207,6 +213,12 @@ end
 -- @client c A client
 -- @tparam boolean urgent If the client should be urgent
 function ewmh.urgent(c, urgent)
+    local is_accepted = c:check_allowed_requests(
+        "request::urgent", ""--[[TODO]], hints
+    ) ~= false
+
+    if not is_accepted then return end
+
     if c ~= client.focus and not aclient.property.get(c,"ignore_urgent") then
         c.urgent = urgent
     end
@@ -229,6 +241,10 @@ local context_mapper = {
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.geometry(c, context, hints)
+    local is_accepted = c:check_allowed_requests("request::geometry", context, hints) ~= false
+
+    if not is_accepted then return end
+
     local layout = c.screen.selected_tag and c.screen.selected_tag.layout or nil
 
     -- Setting the geometry will not work unless the client is floating.
@@ -299,9 +315,12 @@ end
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.merge_maximization(c, context, hints)
-    if context ~= "client_maximize_horizontal" and context ~= "client_maximize_vertical" then
-        return
-    end
+    local is_accepted = (
+        context == "client_maximize_horizontal" or
+        context == "client_maximize_vertical"
+    ) and c:check_allowed_requests("request::geometry", context, hints) ~= false
+
+    if not is_accepted then return end
 
     if not c._delay_maximization then
         c._delay_maximization = function()
@@ -380,19 +399,22 @@ end
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.client_geometry_requests(c, context, hints)
-    if context == "ewmh" and hints  then
-        if c.immobilized_horizontal then
-            hints = gtable.clone(hints)
-            hints.x = nil
-            hints.width = nil
-        end
-        if c.immobilized_vertical then
-            hints = gtable.clone(hints)
-            hints.y = nil
-            hints.height = nil
-        end
-        c:geometry(hints)
+    local is_accepted = context == "ewmh" and hints
+        and c:check_allowed_requests("request::geometry", context, hints) ~= false
+
+    if not is_accepted then return end
+
+    if c.immobilized_horizontal then
+        hints = gtable.clone(hints)
+        hints.x = nil
+        hints.width = nil
     end
+    if c.immobilized_vertical then
+        hints = gtable.clone(hints)
+        hints.y = nil
+        hints.height = nil
+    end
+    c:geometry(hints)
 end
 
 -- The magnifier layout doesn't work with focus follow mouse.
