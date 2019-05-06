@@ -1492,6 +1492,7 @@ end
 -- @see check_allowed_requests
 -- @see awful.client.add_request_filter
 -- @see awful.client.remove_request_filter
+-- @see granted_requests
 
 function client.object.grant_requests(self, request, context, value)
     local reqs = client.property.get(c, "blocked_requests")
@@ -1520,6 +1521,29 @@ for _, req in ipairs { "activate", "geometry", "tag", "urgent" } do
             and reqs["request::"..req][ctx or ""]
     end)
 end
+
+--- This property allows to contextually enable or disable some client requests.
+--
+-- The first table takes the request name as key and a table as the argument.
+-- That table has the context as key a boolean to grant (true) or deny (false)
+-- the request.
+--
+--    granted_requests = {
+--        geometry = {
+--            ewmh      = false,
+--            maximized = true,
+--        },
+--        activate = {
+--            -- Some context have `.` in their name, use the correct Lua syntax:
+--            ["client.movetotag"] = true,
+--            mouse_enter          = false,
+--        },
+--    }
+--
+-- @clientruleproperty granted_requests
+-- @see check_allowed_requests
+-- @see awful.client.add_request_filter
+-- @see awful.client.remove_request_filter
 
 -- Register standards signals
 
