@@ -134,6 +134,42 @@ function object:emit_signal(name, ...)
     end
 end
 
+function object._setup_class_signals(t)
+    local conns = {}
+
+    function t.connect_signal(name, func)
+        assert(name)
+        conns[name] = conns[name] or {}
+        table.insert(conns[name], func)
+    end
+
+    --- Emit a notification signal.
+    -- @tparam string name The signal name.
+    -- @param ... The signal callback arguments
+    function t.emit_signal(name, ...)
+        assert(name)
+        for _, func in pairs(conns[name] or {}) do
+            func(...)
+        end
+    end
+
+    --- Disconnect a signal from a source.
+    -- @tparam string name The name of the signal
+    -- @tparam function func The attached function
+    -- @treturn boolean If the disconnection was successful
+    function t.disconnect_signal(name, func)
+        for k, v in ipairs(conns[name] or {}) do
+            if v == func then
+                table.remove(conns[name], k)
+                return true
+            end
+        end
+        return false
+    end
+
+    return conns
+end
+
 local function get_miss(self, key)
     local class = rawget(self, "_class")
 

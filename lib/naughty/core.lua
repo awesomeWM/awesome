@@ -14,9 +14,10 @@
 
 -- Package environment
 local capi = { screen = screen }
-local gdebug = require("gears.debug")
-local screen = require("awful.screen")
-local gtable = require("gears.table")
+local gdebug  = require("gears.debug")
+local screen  = require("awful.screen")
+local gtable  = require("gears.table")
+local gobject = require("gears.object")
 
 local naughty = {}
 
@@ -249,7 +250,7 @@ function naughty.suspend()
     properties.suspended = true
 end
 
-local conns = {}
+local conns = gobject._setup_class_signals(naughty)
 
 --- Connect a global signal on the notification engine.
 --
@@ -261,41 +262,21 @@ local conns = {}
 --
 -- @tparam string name The name of the signal
 -- @tparam function func The function to attach
+-- @staticfct naughty.connect_signal
 -- @usage naughty.connect_signal("added", function(notif)
 --    -- do something
 -- end)
--- @staticfct naughty.connect_signal
-function naughty.connect_signal(name, func)
-    assert(name)
-    conns[name] = conns[name] or {}
-    table.insert(conns[name], func)
-end
 
 --- Emit a notification signal.
 -- @tparam string name The signal name.
 -- @param ... The signal callback arguments
 -- @staticfct naughty.emit_signal
-function naughty.emit_signal(name, ...)
-    assert(name)
-    for _, func in pairs(conns[name] or {}) do
-        func(...)
-    end
-end
 
 --- Disconnect a signal from a source.
 -- @tparam string name The name of the signal
 -- @tparam function func The attached function
--- @treturn boolean If the disconnection was successful
 -- @staticfct naughty.disconnect_signal
-function naughty.disconnect_signal(name, func)
-    for k, v in ipairs(conns[name] or {}) do
-        if v == func then
-            table.remove(conns[name], k)
-            return true
-        end
-    end
-    return false
-end
+-- @treturn boolean If the disconnection was successful
 
 local function resume()
     properties.suspended = false
