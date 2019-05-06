@@ -222,6 +222,7 @@ local capi =
     awesome = awesome,
     mouse = mouse,
     client = client,
+    root = root,
 }
 local lgi = require("lgi")
 local Gio = lgi.Gio
@@ -229,6 +230,7 @@ local GLib = lgi.GLib
 local util   = require("awful.util")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
+local string = require("gears.string")
 local aclient = require("awful.client")
 local protected_call = require("gears.protected_call")
 
@@ -587,6 +589,19 @@ local function register_common(hash, rules, matcher, callback)
     return status
 end
 
+-- Store the hashes in a persistent global list.
+local function register_root(hash)
+    local current = string.split(capi.root.get_xproperty("_spawn_cache") or "", ";")
+
+    if gtable.hasitem(current, hash) then return false end
+
+    current = current .. ";"..hash
+
+    capi.root.set_xproperty("_spawn_cache", current)
+
+    return true
+end
+
 local function run_once_common(hash, cmd, keep_pid)
     local pid, snid = spawn.spawn(cmd)
 
@@ -653,6 +668,10 @@ end
 -- @staticfct awful.spawn.once
 function spawn.once(cmd, rules, matcher, unique_id, callback)
     local hash = unique_id or hash_command(cmd, rules)
+
+    -- Allow commands without client(s) to use this.
+    if not register_root(hash) then return end
+
     local status = register_common(hash, rules, matcher, callback)
     run_after_startup(function()
         if not status.exec and not is_running(hash, matcher) then
@@ -737,6 +756,9 @@ end
 capi.awesome.connect_signal("spawn::canceled" , spawn.on_snid_cancel   )
 capi.awesome.connect_signal("spawn::timeout"  , spawn.on_snid_cancel   )
 capi.client.connect_signal ("manage"          , spawn.on_snid_callback )
+
+-- The format is hexadecimal strings delimited by `;`.
+capi.awesome.register_xproperty("_spawn_cache", "string")
 
 return setmetatable(spawn, { __call = function(_, ...) return spawn.spawn(...) end })
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
