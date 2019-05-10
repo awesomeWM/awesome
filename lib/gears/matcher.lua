@@ -100,10 +100,19 @@ end
 --
 -- @param o The object.
 -- @tparam[opt=nil] table rules The rules to check. List with "rule", "rule_any",
---  "except" and "except_any" keys.
+--  "except" and "except_any" keys. If no rules are provided, one is selected at
+--  random. Unless more rule sources are added, there is only one to begin with.
 -- @treturn table The list of matched rules.
 function matcher:matching_rules(o, rules)
+    rules = rules or select(2, next(self._matching_rules))
+
     local result = {}
+
+    if not rules then
+        gdebug.print_warning("This matcher has no rule source")
+        return result
+    end
+
     for _, entry in ipairs(rules) do
         if self:matches_rule(o, entry) then
             table.insert(result, entry)
@@ -286,6 +295,45 @@ function matcher:_execute(o, props, callbacks)
             o[property] = value
         end
     end
+end
+
+--- Add a new rule to the default set.
+-- @tparam string source The source name.
+-- @tparam table rule A valid rule.
+-- @method append_rule
+function matcher:append_rule(source, rule)
+    if not self._matching_rules[source] then
+        self:add_matching_rules(source, {}, {}, {})
+    end
+    table.insert(self._matching_rules[source], rule)
+end
+
+--- Add a new rules to the default set.
+-- @tparam string source The source name.
+-- @tparam table rules A table with rules.
+-- @method append_rules
+function matcher:append_rules(source, rules)
+    for _, rule in ipairs(rules) do
+        self:append_rule(source, rule)
+    end
+end
+
+--- Remove a new rule to the default set.
+-- @tparam string source The source name.
+-- @tparam table rule A valid rule.
+-- @treturn boolean If the rule was removed.
+-- @method remove_rule
+function matcher:remove_rule(source, rule)
+    if not self._matching_rules[source] then return end
+
+    for k, v in ipairs(self._matching_rules[source]) do
+        if v == rule then
+            table.remove(self._matching_rules[source], k)
+            return true
+        end
+    end
+
+    return false
 end
 
 local module = {}
