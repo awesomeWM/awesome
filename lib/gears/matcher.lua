@@ -35,9 +35,44 @@
 local gtable = require("gears.table")
 local gsort = require("gears.sort")
 local gdebug = require("gears.debug")
+local gobject = require("gears.object")
 local protected_call = require("gears.protected_call")
 
 local matcher = {}
+
+--- A rule has been added to a set of matching rules.
+-- @signal rule::appended
+-- @tparam table gears.matcher The matcher.
+-- @tparam table rule The rule.
+-- @tparam table source The matching rules source name.
+-- @tparam table content The matching rules source content.
+-- @see append_rule
+-- @see append_rules
+
+--- A rule has been removed to a set of matching rules.
+-- @signal rule::removed
+-- @tparam table gears.matcher The matcher.
+-- @tparam table rule The rule.
+-- @tparam table source The matching rules source name.
+-- @tparam table content The matching rules source content.
+-- @see remove_rule
+
+--- A matching source function has been added.
+-- @signal matching_function::added
+-- @tparam table gears.matcher The matcher.
+-- @tparam function callback The callback.
+-- @see add_matching_function
+
+--- A matching source table has been added.
+-- @signal matching_rules::added
+-- @tparam table gears.matcher The matcher.
+-- @tparam function callback The callback.
+-- @see add_matching_rules
+
+--- A matching source function has been removed.
+-- @signal matching_source::removed
+-- @tparam table gears.matcher The matcher.
+-- @see remove_matching_source
 
 -- Check if an object matches a rule.
 -- @param o The object.
@@ -162,6 +197,8 @@ function matcher:add_matching_rules(name, rules, depends_on, precede)
 
     self._matching_rules[name] = rules
 
+    self:emit_signal("matching_rules::added", rules)
+
     return self:add_matching_function(name, matching_fct, depends_on, precede)
 end
 
@@ -230,6 +267,8 @@ function matcher:add_matching_function(name, callback, depends_on, precede)
         end
     end
 
+    self:emit_signal("matching_function::added", callback)
+
     return true
 end
 
@@ -245,10 +284,12 @@ function matcher:remove_matching_source(name)
 
     for k, v in ipairs(self._matching_source) do
         if v.name == name then
+            self:emit_signal("matching_source::removed", v)
             table.remove(self._matching_source, k)
             return true
         end
     end
+
 
     self._matching_rules[name] = nil
 
@@ -306,6 +347,7 @@ function matcher:append_rule(source, rule)
         self:add_matching_rules(source, {}, {}, {})
     end
     table.insert(self._matching_rules[source], rule)
+    self:emit_signal("rule::appended", rule, source, self._matching_rules[source])
 end
 
 --- Add a new rules to the default set.
@@ -329,6 +371,7 @@ function matcher:remove_rule(source, rule)
     for k, v in ipairs(self._matching_rules[source]) do
         if v == rule then
             table.remove(self._matching_rules[source], k)
+            self:emit_signal("rule::removed", rule, source, self._matching_rules[source])
             return true
         end
     end
@@ -343,7 +386,9 @@ local module = {}
 -- @return A new rule solver object.
 
 local function new()
-    local ret = {}
+    local ret = gobject()
+
+    rawset(ret, "_private", {rules = {}})
 
     -- Contains the sources.
     -- The elements are ordered "first in, first executed". Thus, the higher the
