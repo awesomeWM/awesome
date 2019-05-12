@@ -86,7 +86,6 @@ function mouse.client.move(c, snap, finished_cb) --luacheck: no unused args
 
     if not c
         or c.fullscreen
-        or c.maximized
         or c.type == "desktop"
         or c.type == "splash"
         or c.type == "dock" then
@@ -194,7 +193,6 @@ function mouse.client.resize(c, corner, args)
     if not c then return end
 
     if c.fullscreen
-        or c.maximized
         or c.type == "desktop"
         or c.type == "splash"
         or c.type == "dock" then
@@ -242,12 +240,16 @@ function mouse.resize_handler(c, context, hints)
         local lay = t and t.layout or nil
 
         if (lay and lay == layout.suit.floating) or c.floating then
-            c:geometry {
-                x      = hints.x,
-                y      = hints.y,
-                width  = hints.width,
-                height = hints.height,
-            }
+            local geometry = {}
+            if not c.immobilized_horizontal then
+                geometry.x      = hints.x
+                geometry.width  = hints.width
+            end
+            if not c.immobilized_vertical then
+                geometry.y      = hints.y
+                geometry.height = hints.height
+            end
+            c:geometry(geometry)
         elseif lay and lay.resize_handler then
             lay.resize_handler(c, context, hints)
         end
