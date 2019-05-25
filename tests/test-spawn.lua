@@ -37,8 +37,6 @@ app:run {''}
 ]]}
 end
 
-local matcher_called = false
-
 local steps = {
     function()
         -- Test various error conditions. There are quite a number of them...
@@ -322,18 +320,46 @@ local steps = {
     end,
     -- Test the matcher
     function()
+        -- pre spawn client
+        if #client.get() ~= 0 then return end
+        spawn(tiny_client("client1"))
+
+        return true
+    end,
+    function()
+        -- test matcher
+        if #client.get() ~= 1 then return end
+
+        local matcher = function(c)
+            return c.class == "client1" or c.class == "client2"
+        end
+
+        -- This should do nothing
+        spawn.once(tiny_client("client2"), {tag=screen[1].tags[5]}, matcher)
+        spawn.single_instance(tiny_client("client2"), {tag=screen[1].tags[5]}, matcher)
+
+        return true
+    end,
+    function()
+        -- clean up
+        if #client.get() ~= 1 then return end
+        client.get()[1]:kill()
+        return true
+    end,
+    -- Test rules works with matcher if client doesn't support startup id
+    -- Can this test be performed using '_client' module without external 'xterm' application?
+    function()
         if #client.get() ~= 0 then return end
 
         spawn.single_instance("xterm", {tag=screen[1].tags[5]}, function(c)
-            matcher_called = true
-            return c.class == "xterm"
+            return c.class == "XTerm"
         end)
 
         return true
     end,
     function()
         if #client.get() ~= 1 then return end
-        assert(matcher_called)
+        assert(client.get()[1]:tags()[1] == screen[1].tags[5])
         client.get()[1]:kill()
         return true
     end,
