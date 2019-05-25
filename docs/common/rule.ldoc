@@ -44,3 +44,15 @@
 -- @param table
 -- @see rule
 -- @see except
+
+--- An identifier for this rule.
+--
+-- It can be anything. It will be compared with the `==` operator. Strings are
+-- highly recommended.
+--
+-- Setting an `id` is useful to be able to remove the rule by using its id
+-- instead of a table reference. Modules can also listen to `rule::appended` and
+-- modify or disable a rule.
+--
+-- @rulecomponent id
+-- @param table|string|number|function

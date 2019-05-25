@@ -362,14 +362,14 @@ end
 
 --- Remove a new rule to the default set.
 -- @tparam string source The source name.
--- @tparam table rule A valid rule.
+-- @tparam string|table rule An existing rule or its `id`.
 -- @treturn boolean If the rule was removed.
 -- @method remove_rule
 function matcher:remove_rule(source, rule)
     if not self._matching_rules[source] then return end
 
     for k, v in ipairs(self._matching_rules[source]) do
-        if v == rule then
+        if v == rule or v.id == rule then
             table.remove(self._matching_rules[source], k)
             self:emit_signal("rule::removed", rule, source, self._matching_rules[source])
             return true
