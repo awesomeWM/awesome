@@ -727,11 +727,10 @@ end
 -- fullscreen, maximized, or horizontally maximized?
 --
 -- This property is read only.
--- @property immobilized
+-- @property immobilized_horizontal
 -- @param boolean The immobilized state
 -- @see maximized
 -- @see maximized_horizontal
--- @see maximized_vertical
 -- @see fullscreen
 
 function client.object.is_immobilized_horizontal(c)
@@ -744,10 +743,9 @@ end
 -- fullscreen, maximized, or vertically maximized?
 --
 -- This property is read only.
--- @property immobilized
+-- @property immobilized_vertical
 -- @param boolean The immobilized state
 -- @see maximized
--- @see maximized_horizontal
 -- @see maximized_vertical
 -- @see fullscreen
 
