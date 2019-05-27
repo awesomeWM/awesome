@@ -462,12 +462,15 @@ local function mouse_press(self, x, y, button_id, _, geo)
     local matrix = matrix_from_device:translate(-wgeo.x, -wgeo.y)
 
     capi.mousegrabber.run(function(mouse)
+        local relative_x, relative_y = matrix:transform_point(mouse.x, mouse.y)
         if not mouse.buttons[1] then
+            local fw = geo.drawable:find_widgets(mouse.x, mouse.y)
+            self:emit_signal("button::release", relative_x, relative_y, 1, {}, fw)
             return false
         end
 
         -- Calculate the point relative to the widget
-        move_handle(self, width, matrix:transform_point(mouse.x, mouse.y))
+        move_handle(self, width, relative_x, relative_y)
 
         return true
     end,"fleur")
