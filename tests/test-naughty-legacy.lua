@@ -342,6 +342,7 @@ end
 local positions = {
     "top_left"      , "top_middle"    , "top_right"     ,
     "bottom_left"   , "bottom_middle" , "bottom_right"  ,
+    "middle"        ,
 }
 
 -- Test each corners.
