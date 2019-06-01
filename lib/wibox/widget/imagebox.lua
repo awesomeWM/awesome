@@ -11,25 +11,34 @@ local surface = require("gears.surface")
 local gtable = require("gears.table")
 local setmetatable = setmetatable
 local type = type
+local cairo = require("lgi").cairo
 local print = print
+local math = math
+local string = string
+
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local imagebox = { mt = {} }
 
 -- Draw an imagebox with the given cairo context in the given geometry.
 function imagebox:draw(_, cr, width, height)
-    if not self._private.image then return end
-    if width == 0 or height == 0 then return end
+    if width == 0 or height == 0 or not self._private.default then return end
+    local _surface = self._private.image
 
     if not self._private.resize_forbidden then
         -- Let's scale the image so that it fits into (width, height)
-        local w = self._private.image:get_width()
-        local h = self._private.image:get_height()
-        local aspect = width / w
-        local aspect_h = height / h
-        if aspect > aspect_h then aspect = aspect_h end
+        local w, h = self._private.default.width, self._private.default.height
+        local aspect = math.min(width / w, height / h)
 
-        cr:scale(aspect, aspect)
+        if self._private.pixbuf_scale then
+            -- advanced scaling with pixbuf
+            local requested_size = { height = math.floor(w * aspect), width = math.floor(h * aspect) }
+            _surface = self:_generate_surface(nil, requested_size)
+            if not _surface then return end
+        else
+            --regular raster scaling with cairo
+            cr:scale(aspect, aspect)
+        end
     end
 
     -- Set the clip
@@ -37,43 +46,47 @@ function imagebox:draw(_, cr, width, height)
         cr:clip(self._private.clip_shape(cr, width, height, unpack(self._private.clip_args)))
     end
 
-    cr:set_source_surface(self._private.image, 0, 0)
+    cr:set_source_surface(_surface, 0, 0)
     cr:paint()
 end
 
 -- Fit the imagebox into the given geometry
 function imagebox:fit(_, width, height)
-    if not self._private.image then
-        return 0, 0
-    end
+    if not self._private.default then return 0, 0 end
+    local w, h = self._private.default.width, self._private.default.height
 
-    local w = self._private.image:get_width()
-    local h = self._private.image:get_height()
-
-    if w > width then
-        h = h * width / w
-        w = width
-    end
-    if h > height then
-        w = w * height / h
-        h = height
-    end
-
-    if h == 0 or w == 0 then
-        return 0, 0
-    end
-
-    if not self._private.resize_forbidden then
-        local aspect = width / w
-        local aspect_h = height / h
-
-        -- Use the smaller one of the two aspect ratios.
-        if aspect > aspect_h then aspect = aspect_h end
-
-        w, h = w * aspect, h * aspect
+    if not self._private.resize_forbidden or w > width or h > height then
+        local aspect = math.min(width / w, height / h)
+        return w * aspect, h * aspect
     end
 
     return w, h
+end
+
+
+---@local
+---Generate cairo surface with requested size
+---@tparam[opt] string source Custom file name, if not defined then current image file settled to imagebox
+---  will be used.
+---@tparam[opt] table size Requested surface size, *width* and *height* keys should be included both.
+---@treturn cairo.surface the new surface
+function imagebox:_generate_surface(source, size)
+    source = source or self._private.pixbuf_source
+    if not source then return end
+
+    -- try to generate surface from image file
+    local _surface = surface.load(source, size)
+    if not _surface then
+        print(debug.traceback())
+        return
+    elseif _surface.width <= 0 or _surface.height <= 0 then
+        return
+    end
+
+    -- image cache implemented on 'surface' module side
+    -- leave link to last used surface here to prevent it be garbage collected
+    self._private.image = _surface
+    return _surface
 end
 
 --- Set an imagebox' image
@@ -81,33 +94,31 @@ end
 -- @param image Either a string or a cairo image surface. A string is
 --   interpreted as the path to a png image file.
 -- @return true on success, false if the image cannot be used
-
 function imagebox:set_image(image)
-    if type(image) == "string" then
-        image = surface.load(image)
-        if not image then
-            print(debug.traceback())
+    if type(image) == "string" and image ~= self._private.pixbuf_source then
+        -- process image file
+        local default_surface = self:_generate_surface(image)
+        if default_surface then
+            self._private.pixbuf_source = image
+            self._private.pixbuf_scale = string.match(image, "%.svg$") ~= nil
+        else
             return false
+        end
+    else
+        -- clean up all pixbuf related things
+        self._private.pixbuf_scale = false
+        self._private.pixbuf_source = nil
+
+        -- surface given as argument
+        if image and cairo.Surface:is_type_of(image) and image.width > 0 and image.height > 0 then
+            self._private.image = image
+        else
+            self._private.image = nil
         end
     end
 
-    image = image and surface.load(image)
-
-    if image then
-        local w = image.width
-        local h = image.height
-        if w <= 0 or h <= 0 then
-            return false
-        end
-    end
-
-    if self._private.image == image then
-        -- The image could have been modified, so better redraw
-        self:emit_signal("widget::redraw_needed")
-        return true
-    end
-
-    self._private.image = image
+    local _surface = self._private.image
+    self._private.default = _surface and { width = _surface.width, height = _surface.height }
 
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")

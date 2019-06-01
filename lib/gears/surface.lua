@@ -34,9 +34,10 @@ end
 -- @param _surface The surface to load or nil
 -- @param default The default value to return on error; when nil, then a surface
 -- in an error state is returned.
+-- @tparam[opt] table size Requested surface size, *width* and *height* keys should be included both.
 -- @return The loaded surface, or the replacement default
 -- @return An error message, or nil on success
-function surface.load_uncached_silently(_surface, default)
+function surface.load_uncached_silently(_surface, default, size)
     -- On nil, return some sane default
     if not _surface then
         return get_default(default)
@@ -47,7 +48,13 @@ function surface.load_uncached_silently(_surface, default)
     end
     -- Strings are assumed to be file names and get loaded
     if type(_surface) == "string" then
-        local pixbuf, err = GdkPixbuf.Pixbuf.new_from_file(_surface)
+        local pixbuf, err = nil, nil
+        if size then
+            pixbuf, err = GdkPixbuf.Pixbuf.new_from_file_at_scale(_surface, size.width, size.height, true)
+        else
+            pixbuf, err = GdkPixbuf.Pixbuf.new_from_file(_surface)
+        end
+
         if not pixbuf then
             return get_default(default), tostring(err)
         end
@@ -69,30 +76,32 @@ end
 -- @param _surface The surface to load or nil
 -- @param default The default value to return on error; when nil, then a surface
 -- in an error state is returned.
+-- @tparam[opt] table size Requested surface size, *width* and *height* keys should be included both.
 -- @return The loaded surface, or the replacement default, or nil if called with
 -- nil.
 -- @return An error message, or nil on success
-function surface.load_silently(_surface, default)
+function surface.load_silently(_surface, default, size)
     if type(_surface) == "string" then
-        local cache = surface_cache[_surface]
+        local key = size and _surface .. size.width .. size.height or _surface
+        local cache = surface_cache[key]
         if cache then
             return cache
         end
-        local result, err = surface.load_uncached_silently(_surface, default)
+        local result, err = surface.load_uncached_silently(_surface, default, size)
         if not err then
             -- Cache the file
-            surface_cache[_surface] = result
+            surface_cache[key] = result
         end
         return result, err
     end
     return surface.load_uncached_silently(_surface, default)
 end
 
-local function do_load_and_handle_errors(_surface, func)
+local function do_load_and_handle_errors(_surface, func, size)
     if type(_surface) == 'nil' then
         return get_default()
     end
-    local result, err = func(_surface, false)
+    local result, err = func(_surface, false, size)
     if result then
         return result
     end
@@ -105,18 +114,20 @@ end
 -- This is usually needed for loading images by file name. Errors are handled
 -- via `gears.debug.print_error`.
 -- @param _surface The surface to load or nil
+-- @tparam[opt] table size Requested surface size, *width* and *height* keys should be included both.
 -- @return The loaded surface, or nil
-function surface.load_uncached(_surface)
-    return do_load_and_handle_errors(_surface, surface.load_uncached_silently)
+function surface.load_uncached(_surface, size)
+    return do_load_and_handle_errors(_surface, surface.load_uncached_silently, size)
 end
 
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name. Errors are handled
 -- via `gears.debug.print_error`.
 -- @param _surface The surface to load or nil
+-- @tparam[opt] table size Requested surface size, *width* and *height* keys should be included both.
 -- @return The loaded surface, or nil
-function surface.load(_surface)
-    return do_load_and_handle_errors(_surface, surface.load_silently)
+function surface.load(_surface, size)
+    return do_load_and_handle_errors(_surface, surface.load_silently, size)
 end
 
 function surface.mt.__call(_, ...)
