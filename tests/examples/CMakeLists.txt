@@ -27,7 +27,7 @@ if(NOT SOURCE_DIR AND ${CMAKE_CURRENT_SOURCE_DIR} MATCHES "/tests/examples")
     get_filename_component(TOP_SOURCE_DIR
                            "${CMAKE_CURRENT_SOURCE_DIR}/../.." ABSOLUTE)
 else()
-    set(TOP_SOURCE_DIR ${CMAKE_SOURCE_DIR})
+    get_filename_component(TOP_SOURCE_DIR "${SOURCE_DIR}" ABSOLUTE)
 endif()
 
 if (DO_COVERAGE)
@@ -264,20 +264,32 @@ function(run_test test_path namespace escaped_content)
     STRING(REPLACE "/" "-" TARGET_NAME ${TARGET_NAME})
     set(EXAMPLE_DOC_TEST_TARGETS ${EXAMPLE_DOC_TEST_TARGETS} ${TARGET_NAME}
         PARENT_SCOPE)
-    add_custom_target(${TARGET_NAME}
-        COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
-        VERBATIM)
 
-    if(NOT ${OUTPUT_IMAGE_PATH} STREQUAL "")
-        file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
-        add_custom_command(
-            COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
-            # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
-            DEPENDS ${template} ${test_path}
-            OUTPUT  ${OUTPUT_IMAGE_PATH}
-            VERBATIM)
-        set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUT_IMAGE_PATH} ${EXAMPLE_DOC_GENERATED_FILES}
+    IF (NOT DISABLE_COMMANDS)
+        string(REGEX REPLACE "^_text_" "" MODULE_NAME ${namespace})
+        string(REGEX REPLACE "^_" "" MODULE_NAME ${MODULE_NAME})
+        string(REPLACE "_" "." MODULE_NAME ${MODULE_NAME})
+
+        add_custom_target(${TARGET_NAME}
+            DEPENDS
+                ${OUTPUT_IMAGE_PATH}
+                ${template}
+                ${test_path}
+            VERBATIM
+        )
+
+        set(EXAMPLE_DOC_EXTRA_TARGETS ${${TARGET_NAME}} ${EXAMPLE_DOC_EXTRA_TARGETS}
             PARENT_SCOPE)
+
+        add_custom_command(
+            TARGET ${TARGET_NAME}
+            COMMAND
+                "${TOP_SOURCE_DIR}/tests/examples/runner.sh"
+                    "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
+            COMMENT
+                "Generating the artifacts for ${TEST_FILE_NAME} documentation in ${MODULE_NAME}"
+            VERBATIM
+        )
     endif()
 
     # Export the outout to the parent scope.
@@ -312,7 +324,9 @@ foreach(file ${test_files})
     endif()
 endforeach()
 
-add_custom_target(generate-examples DEPENDS ${EXAMPLE_DOC_GENERATED_FILES})
-add_custom_target(check-examples DEPENDS ${EXAMPLE_DOC_TEST_TARGETS})
+IF (NOT DISABLE_COMMANDS)
+    add_custom_target(generate-examples DEPENDS ${EXAMPLE_DOC_EXTRA_TARGETS})
+    add_custom_target(check-examples DEPENDS ${EXAMPLE_DOC_TEST_TARGETS})
+ENDIF()
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker
