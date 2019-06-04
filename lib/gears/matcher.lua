@@ -81,7 +81,12 @@ local matcher = {}
 function matcher:_match(o, rule)
     if not rule then return false end
     for field, value in pairs(rule) do
-        if o[field] then
+        local pm = self._private.prop_matchers[field]
+        if pm then
+            if not pm(o, value, field) then
+                return false
+            end
+        elseif o[field] ~= nil then
             if type(o[field]) == "string" then
                 if not o[field]:match(value) and o[field] ~= value then
                     return false
@@ -105,7 +110,10 @@ function matcher:_match_any(o, rule)
     for field, values in pairs(rule) do
         if o[field] then
             for _, value in ipairs(values) do
-                if o[field] == value then
+                local pm = self._private.prop_matchers[field]
+                if pm and pm(o, value, field) then
+                    return true
+                elseif o[field] == value then
                     return true
                 elseif type(o[field]) == "string" and o[field]:match(value) then
                     return true
@@ -168,6 +176,45 @@ function matcher:matches_rules(o, rules)
         end
     end
     return false
+end
+
+--- Assign a function to match an object property against a value.
+--
+-- The default matcher uses the `==` operator for all types. It also uses the
+-- `:match()` method for string and allows pattern matching. If the value is a
+-- function, then that function is called with the object and the current
+-- properties to be applied. If the function returns true, the match is
+-- accepted.
+--
+-- Custom property matcher are useful when objects are compared. This avoids
+-- having to implement custom metatable for everything.
+--
+-- The `f` function receives 3 arguments:
+--
+-- * The object to match against (anything)
+-- * The value to compare
+-- * The property/field name.
+--
+-- It should return `true` if it matches and `false` otherwise.
+--
+-- @tparam string name The property name.
+-- @tparam function f The matching function.
+-- @method add_property_matcher
+-- @usage -- Manually match the screen in various ways.
+-- matcher:add_property_matcher("screen", function(c, value)
+--    return c.screen == value
+--        or screen[c.screen] == value
+--        or c.screen.outputs[value] ~= nil
+--        or value == "any"
+--        or (value == "primary" and c.screen == screen.primary)
+-- end)
+--
+function matcher:add_property_matcher(name, f)
+    assert(not self._private.prop_matchers[name], name .. " already has a matcher")
+
+    self._private.prop_matchers[name] = f
+
+    self:emit_signal("property_matcher::added", name, f)
 end
 
 local function default_rules_callback(self, o, props, callbacks, rules)
@@ -388,7 +435,7 @@ local module = {}
 local function new()
     local ret = gobject()
 
-    rawset(ret, "_private", {rules = {}})
+    rawset(ret, "_private", { rules = {}, prop_matchers = {} })
 
     -- Contains the sources.
     -- The elements are ordered "first in, first executed". Thus, the higher the
