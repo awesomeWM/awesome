@@ -163,7 +163,13 @@ custom_display_name_handler = function(item, default_handler)
         return default_handler(item) .. "</a> <i class=\"deprecated_label\">[deprecated]</i><a>"
     end
 
-    return default_handler(item)
+    local ret = default_handler(item)
+
+    -- Get rid of the "module:" in front of method names. It is either wrong or
+    -- just redundant.
+    ret = ret:gsub("([^:]*)(:[^:])","%2")
+
+    return ret
 end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
