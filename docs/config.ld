@@ -160,7 +160,7 @@ custom_display_name_handler = function(item, default_handler)
     end
 
     if item.type == "deprecated" or item.type == "deprecatedproperty" then
-        return default_handler(item) .. "</a> <i class=\"deprecated_label\">[deprecated]</i><a>"
+        return default_handler(item) .. "<i class=\"deprecated_label\"> [deprecated]</i>"
     end
 
     local ret = default_handler(item)
