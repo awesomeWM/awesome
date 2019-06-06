@@ -95,6 +95,7 @@ new_type("containermod", "Widget containers", true)
 new_type("layoutmod"   , "Widget layouts"   , true)
 new_type("coreclassmod", "Core components"  , true)
 new_type("popupmod"    , "Popups and bars"  , true)
+new_type("utillib"     , "Utility libraries", true)
 
 file = {
     -- C parts of libraries

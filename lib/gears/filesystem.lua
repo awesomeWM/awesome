@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 --- Filesystem module for gears
 --
--- @module gears.filesystem
+-- @utillib gears.filesystem
 ---------------------------------------------------------------------------
 
 -- Grab environment we need

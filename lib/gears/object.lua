@@ -6,7 +6,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod gears.object
+-- @utillib gears.object
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

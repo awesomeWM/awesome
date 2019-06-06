@@ -7,7 +7,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
--- @module gears.geometry
+-- @utillib gears.geometry
 ---------------------------------------------------------------------------
 local math = math
 

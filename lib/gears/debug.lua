@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @module gears.debug
+-- @utillib gears.debug
 ---------------------------------------------------------------------------
 
 local tostring = tostring

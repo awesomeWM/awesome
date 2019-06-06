@@ -20,7 +20,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
--- @module gears.wallpaper
+-- @utillib gears.wallpaper
 ---------------------------------------------------------------------------
 
 local cairo = require("lgi").cairo

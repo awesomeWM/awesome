@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2016 Uli Schlachter
--- @module gears.protected_call
+-- @utillib gears.protected_call
 ---------------------------------------------------------------------------
 
 local gdebug = require("gears.debug")
