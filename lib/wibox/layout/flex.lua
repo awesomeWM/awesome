@@ -3,7 +3,7 @@
 --@DOC_wibox_layout_defaults_flex_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.layout.flex
+-- @layoutmod wibox.layout.flex
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")

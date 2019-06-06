@@ -3,7 +3,7 @@
 --@DOC_wibox_layout_defaults_fixed_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.layout.fixed
+-- @layoutmod wibox.layout.fixed
 ---------------------------------------------------------------------------
 
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)

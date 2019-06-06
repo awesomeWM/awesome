@@ -7,7 +7,7 @@
 --@DOC_wibox_layout_defaults_manual_EXAMPLE@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
--- @classmod wibox.layout.manual
+-- @layoutmod wibox.layout.manual
 ---------------------------------------------------------------------------
 local gtable = require("gears.table")
 local base = require("wibox.widget.base")

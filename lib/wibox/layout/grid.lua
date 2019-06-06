@@ -13,7 +13,7 @@
 --@DOC_wibox_layout_defaults_grid_EXAMPLE@
 -- @author getzze
 -- @copyright 2017 getzze
--- @classmod wibox.layout.grid
+-- @layoutmod wibox.layout.grid
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

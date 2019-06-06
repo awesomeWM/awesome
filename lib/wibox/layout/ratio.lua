@@ -6,7 +6,7 @@
 --@DOC_wibox_layout_defaults_ratio_EXAMPLE@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
--- @classmod wibox.layout.ratio
+-- @layoutmod wibox.layout.ratio
 ---------------------------------------------------------------------------
 
 local base  = require("wibox.widget.base" )
