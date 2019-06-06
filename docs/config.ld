@@ -121,11 +121,6 @@ file = {
     '../lib/',
     -- Auto generated scripts
     '../script_files/',
-    -- Old APIs the user should not longer use directly
-    '../docs/aliases/awful_client.lua',
-    '../docs/aliases/awful_screen.lua',
-    '../docs/aliases/awful_tag.lua',
-    '../docs/aliases/awful_mouse.lua',
     exclude = {
         -- exclude these modules, as they do not contain any written
         -- documentation
@@ -149,6 +144,8 @@ file = {
         -- in the index
         '../lib/awful/widget/graph.lua',
         '../lib/awful/widget/progressbar.lua',
+        '../lib/awful/widget/textclock.lua',
+        '../lib/awful/wibox.lua',
         '../lib/wibox/layout/constraint.lua',
         '../lib/wibox/layout/margin.lua',
         '../lib/wibox/layout/mirror.lua',
@@ -163,11 +160,24 @@ local no_prefix = {
     deprecatedproperty = true,
 }
 
+-- These modules merge the doc of their `awful` siblings.
+local coreclassmap = {
+    tag    = "tag<span class='listplusign'> and awful.tag</span>",
+    screen = "screen<span class='listplusign'> and awful.screen</span>",
+    client = "client<span class='listplusign'> and awful.client</span>",
+    mouse  = "mouse<span class='listplusign'> and awful.mouse</span>",
+}
+
 custom_display_name_handler = function(item, default_handler)
     -- Remove the "namespace" from the signals and properties
     if no_prefix[item.type] then
         local name = item.name:match("%.([^.]+)$")
         return name ~= "" and name or item.name
+    end
+
+    -- Handle the left sidebar modules.
+    if item.type == "coreclassmod" and coreclassmap[item.name] then
+        return coreclassmap[item.name]
     end
 
     if item.type == "deprecated" or item.type == "deprecatedproperty" then

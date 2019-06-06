@@ -15,8 +15,8 @@
 --   <tr><td><a href='../classes/client.html#client.callback'>callback</a></td><td>A function to call when this client is ready</td></tr>
 --   <tr><td><a href='../classes/client.html#client.marked'>marked</a></td><td>If a client is marked or not</td></tr>
 --   <tr><td><a href='../classes/client.html#client.is_fixed'>is\_fixed</a></td><td>Return if a client has a fixed size or not</td></tr>
---   <tr><td><a href='../classes/client.html#client.immobilized'>immobilized</a></td><td>Is the client immobilized horizontally?</td></tr>
---   <tr><td><a href='../classes/client.html#client.immobilized'>immobilized</a></td><td>Is the client immobilized vertically?</td></tr>
+--   <tr><td><a href='../classes/client.html#client.immobilized_horizontal'>immobilized\_horizontal</a></td><td>Is the client immobilized horizontally?</td></tr>
+--   <tr><td><a href='../classes/client.html#client.immobilized_vertical'>immobilized\_vertical</a></td><td>Is the client immobilized vertically?</td></tr>
 --   <tr><td><a href='../classes/client.html#client.floating'>floating</a></td><td>The client floating state</td></tr>
 --   <tr><td><a href='../classes/client.html#client.x'>x</a></td><td>The x coordinates</td></tr>
 --   <tr><td><a href='../classes/client.html#client.y'>y</a></td><td>The y coordinates</td></tr>

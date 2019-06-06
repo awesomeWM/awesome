@@ -355,6 +355,12 @@ a:target + * {
   background-color: #FF9;
 }
 
+/* tag + awful.tag */
+.listplusign {
+    color: #b7c1ff;
+    text-decoration: underline;
+    text-decoration-color: white;
+}
 
 /* styles for prettification of source */
 pre .comment { color: #bbccaa; }
