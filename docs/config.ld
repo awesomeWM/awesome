@@ -1,3 +1,6 @@
+local args = ...
+
+
 -- Configuration file for ldoc
 
 project='awesome'
@@ -86,6 +89,11 @@ kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 -- Sort modules alphabetically
 sort_modules=true
 
+-- Add more project level (left side index) types.
+new_type("widgetmod"   , "Widgets"   , true)
+new_type("containermod", "Widget containers", true)
+new_type("layoutmod"   , "Widget layouts"   , true)
+
 file = {
     -- C parts of libraries
     '../dbus.c',
@@ -152,7 +160,6 @@ local no_prefix = {
 }
 
 custom_display_name_handler = function(item, default_handler)
-
     -- Remove the "namespace" from the signals and properties
     if no_prefix[item.type] then
         local name = item.name:match("%.([^.]+)$")
