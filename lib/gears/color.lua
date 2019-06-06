@@ -39,7 +39,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @module gears.color
+-- @themelib gears.color
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

@@ -3,7 +3,7 @@
 --
 -- @author Yauheni Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2016-2017 Yauheni Kirylau
--- @module beautiful.gtk
+-- @themelib beautiful.gtk
 ---------------------------------------------------------------------------
 local get_dpi = require("beautiful.xresources").get_dpi
 local gears_debug = require("gears.debug")

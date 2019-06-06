@@ -38,7 +38,7 @@
 --
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2011-2016 Emmanuel Lepage Vallee
--- @module gears.shape
+-- @themelib gears.shape
 ---------------------------------------------------------------------------
 local g_matrix = require( "gears.matrix" )
 local unpack   = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)

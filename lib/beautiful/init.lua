@@ -4,7 +4,7 @@
 -- @author Damien Leone &lt;damien.leone@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Damien Leone, Julien Danjou
--- @module beautiful
+-- @themelib beautiful
 ----------------------------------------------------------------------------
 
 -- Grab environment
