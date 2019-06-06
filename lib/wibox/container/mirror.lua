@@ -3,7 +3,7 @@
 --@DOC_wibox_container_defaults_mirror_EXAMPLE@
 -- @author dodo
 -- @copyright 2012 dodo
--- @classmod wibox.container.mirror
+-- @containermod wibox.container.mirror
 ---------------------------------------------------------------------------
 
 local type = type

@@ -4,7 +4,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2017 Uli Schlachter
--- @classmod awful.widget.only_on_screen
+-- @containermod awful.widget.only_on_screen
 ---------------------------------------------------------------------------
 
 local type = type

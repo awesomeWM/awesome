@@ -3,7 +3,7 @@
 --@DOC_wibox_container_defaults_margin_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.container.margin
+-- @containermod wibox.container.margin
 ---------------------------------------------------------------------------
 
 local pairs = pairs

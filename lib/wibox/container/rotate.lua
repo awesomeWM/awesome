@@ -4,7 +4,7 @@
 --@DOC_wibox_container_defaults_rotate_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.container.rotate
+-- @containermod wibox.container.rotate
 ---------------------------------------------------------------------------
 
 local error = error

@@ -7,7 +7,7 @@
 --@DOC_wibox_container_defaults_arcchart_EXAMPLE@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2013 Emmanuel Lepage Vallee
--- @classmod wibox.container.arcchart
+-- @containermod wibox.container.arcchart
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

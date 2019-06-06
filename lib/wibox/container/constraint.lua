@@ -3,7 +3,7 @@
 --@DOC_wibox_container_defaults_constraint_EXAMPLE@
 -- @author Lukáš Hrázký
 -- @copyright 2012 Lukáš Hrázký
--- @classmod wibox.container.constraint
+-- @containermod wibox.container.constraint
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

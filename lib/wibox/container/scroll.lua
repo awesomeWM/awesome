@@ -20,7 +20,7 @@
 -- }
 -- @author Uli Schlachter (based on ideas from Saleur Geoffrey)
 -- @copyright 2015 Uli Schlachter
--- @classmod wibox.container.scroll
+-- @containermod wibox.container.scroll
 ---------------------------------------------------------------------------
 
 local cache = require("gears.cache")

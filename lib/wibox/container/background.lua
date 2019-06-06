@@ -5,7 +5,7 @@
 --@DOC_wibox_container_defaults_background_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.container.background
+-- @containermod wibox.container.background
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
