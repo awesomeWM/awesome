@@ -169,6 +169,20 @@ custom_display_name_handler = function(item, default_handler)
     -- just redundant.
     ret = ret:gsub("([^:]*)(:[^:])","%2")
 
+    -- Undocumented API to get rid of `module.rounded_rect` rather than
+    -- `gears.shape.rounded_rect`
+    if ret:sub(1, 7) == "module." and module then
+        return ret:gsub("^module", item.module.name)
+    end
+
+    -- Undocumented API to make the libraries and classmod "function" section
+    -- more consistent. Right now some have their full awful.foo.bar while other
+    -- have "just" `bar`. Given we use constructors from metatables, we have no
+    -- choice but to use the full function name. It also makes copy/paste easier.
+    if item.type == "function" and (not ret:find(".", 1, true)) and (not ret:find(":", 1, true)) then
+        return item.module.name .. "." .. ret
+    end
+
     return ret
 end
 
