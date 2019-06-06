@@ -50,7 +50,7 @@ tparam_alias('screen', 'screen')
 tparam_alias('screen_or_idx', 'screen|int')
 
 -- Hack to get the functions and method on top of the signals and properties
-new_type("function", "Functions")
+new_type("function", "Functions", false, "Parameters")
 -- Documentation for objects properties
 new_type("property", "Object properties", false, "Type")
 -- Documentation for objects deprecated properties
@@ -62,17 +62,17 @@ new_type("signalhandler", "Request handlers", false, "Arguments")
 -- Allow objects to define a set of beautiful properties affecting them
 new_type("beautiful", "Theme variables", false, "Type")
 -- Put deprecated methods in their own section
-new_type("deprecated", "Deprecated functions", false, "param")
+new_type("deprecated", "Deprecated functions", false, "Parameters")
 -- For the legacy stateless layout related functions
-new_type("legacylayout", "Layout related functions", false, "param")
+new_type("legacylayout", "Layout related functions", false, "Parameters")
 -- Have a category for the client layouts
-new_type("clientlayout", "Client layouts", false, "param")
+new_type("clientlayout", "Client layouts", false, "Parameters")
 -- Source functions for the taglist/tasklist/layoutlist
 new_type("sourcefunction", "List source functions", false)
 -- Document some callback prototypes
 new_type("callback", "Callback functions prototype", false, "Parameters")
 -- gears.matcher / awful.rules sources
-new_type("rulesources", "Rule sources", false, "param")
+new_type("rulesources", "Rule sources", false, "Parameters")
 -- gears.matcher / awful.rules rule components
 new_type("rulecomponent", "Rule components", false, "Type")
 -- Filter functions for the taglist/tasklist/layoutlist
