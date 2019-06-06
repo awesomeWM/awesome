@@ -63,15 +63,10 @@ function only_on_screen:get_widget()
     return self._private.widget
 end
 
---- Get the number of children element
--- @treturn table The children
 function only_on_screen:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function only_on_screen:set_children(children)
     self:set_widget(children[1])
 end

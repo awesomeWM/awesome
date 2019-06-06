@@ -80,15 +80,10 @@ function margin:get_widget()
     return self._private.widget
 end
 
--- Get the number of children element
--- @treturn table The children
 function margin:get_children()
     return {self._private.widget}
 end
 
--- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function margin:set_children(children)
     self:set_widget(children[1])
 end
@@ -136,7 +131,7 @@ function margin:get_color()
 end
 
 --- Draw the margin even if the content size is 0x0 (default: true)
--- @function draw_empty
+-- @method draw_empty
 -- @tparam boolean draw_empty Draw nothing is content is 0x0 or draw the margin anyway
 
 function margin:set_draw_empty(draw_empty)
@@ -150,6 +145,7 @@ end
 
 --- Reset this layout. The widget will be unreferenced, the margins set to 0
 -- and the color erased
+-- @method reset
 function margin:reset()
     self:set_widget(nil)
     self:set_margins(0)

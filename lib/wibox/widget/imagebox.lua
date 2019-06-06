@@ -119,7 +119,7 @@ end
 -- is trimmed.
 --
 -- @property clip_shape
--- @param clip_shape A `gears_shape` compatible shape function
+-- @tparam function clip_shape A `gears_shape` compatible shape function
 -- @see gears.shape
 -- @see set_clip_shape
 
@@ -129,7 +129,8 @@ end
 --
 -- Any other parameters will be passed to the clip shape function
 --
--- @param clip_shape A `gears_shape` compatible shape function
+-- @tparam function clip_shape A `gears_shape` compatible shape function.
+-- @method set_clip_shape
 -- @see gears.shape
 -- @see clip_shape
 function imagebox:set_clip_shape(clip_shape, ...)

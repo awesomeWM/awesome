@@ -70,6 +70,7 @@ end
 --- Get the preferred size of a textbox.
 -- This returns the size that the textbox would use if infinite space were
 -- available.
+-- @method get_preferred_size
 -- @tparam integer|screen s The screen on which the textbox will be displayed.
 -- @treturn number The preferred width.
 -- @treturn number The preferred height.
@@ -88,6 +89,7 @@ end
 --- Get the preferred height of a textbox at a given width.
 -- This returns the height that the textbox would use when it is limited to the
 -- given width.
+-- @method get_height_for_width
 -- @tparam number width The available width.
 -- @tparam integer|screen s The screen on which the textbox will be displayed.
 -- @treturn number The needed height.
@@ -105,6 +107,7 @@ end
 --- Get the preferred size of a textbox.
 -- This returns the size that the textbox would use if infinite space were
 -- available.
+-- @method get_preferred_size_at_dpi
 -- @tparam number dpi The DPI value to render at.
 -- @treturn number The preferred width.
 -- @treturn number The preferred height.
@@ -119,6 +122,7 @@ end
 --- Get the preferred height of a textbox at a given width.
 -- This returns the height that the textbox would use when it is limited to the
 -- given width.
+-- @method get_height_for_width_at_dpi
 -- @tparam number width The available width.
 -- @tparam number dpi The DPI value to render at.
 -- @treturn number The needed height.
@@ -136,6 +140,7 @@ end
 -- @tparam string text The text to set. This can contain pango markup (e.g.
 --   `<b>bold</b>`). You can use `gears.string.escape` to escape
 --   parts of it.
+-- @method set_markup_silently
 -- @treturn[1] boolean true
 -- @treturn[2] boolean false
 -- @treturn[2] string Error message explaining why the markup was invalid.

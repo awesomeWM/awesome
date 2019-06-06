@@ -463,6 +463,7 @@ end
 -- Note that only a single keygrabber can be started at any one time. If another
 -- keygrabber (or this one) is currently running. This method returns false.
 --
+-- @method start
 -- @treturn boolean If the keygrabber was successfully started.
 function keygrabber:start()
     if self.grabber or keygrab.current_instance then
@@ -514,7 +515,7 @@ function keygrabber:start()
 end
 
 --- Stop the keygrabber.
--- @function keygrabber:stop
+-- @method stop
 function keygrabber:stop(_stop_key, _stop_mods) -- (at)function disables ldoc params
     keygrab.stop(self.grabber)
 
@@ -534,6 +535,7 @@ end
 --
 -- Those keybindings will automatically start the keygrabbing when hit.
 --
+-- @method add_keybinding
 -- @tparam table mods A table with modifier keys, such as `shift`, `mod4`, `mod1` (alt) or
 --  `control`.
 -- @tparam string key The key name, such as `left` or `f`

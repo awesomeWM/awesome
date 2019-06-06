@@ -220,6 +220,7 @@ _need_scroll_redraw = function(self)
 end
 
 --- Pause the scrolling animation.
+-- @method pause
 -- @see continue
 function scroll:pause()
     if self._private.paused then
@@ -230,6 +231,7 @@ function scroll:pause()
 end
 
 --- Continue the scrolling animation.
+-- @method continue
 -- @see pause
 function scroll:continue()
     if not self._private.paused then
@@ -244,6 +246,7 @@ end
 -- For must scroll step functions, the effect of this function should be to
 -- display the widget without any scrolling applied.
 -- This function does not undo the effect of @{pause}.
+-- @method reset_scrolling
 function scroll:reset_scrolling()
     self._private.timer:start()
     if self._private.paused then
@@ -252,6 +255,7 @@ function scroll:reset_scrolling()
 end
 
 --- Set the direction in which this widget scroll.
+-- @method set_direction
 -- @param dir Either "h" for horizontal scrolling or "v" for vertical scrolling
 function scroll:set_direction(dir)
     if dir == self._private.dir then
@@ -285,20 +289,16 @@ function scroll:get_widget()
     return self._private.widget
 end
 
---- Get the number of children element
--- @treturn table The children
 function scroll:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function scroll:set_children(children)
     self:set_widget(children[1])
 end
 
 --- Specify the expand mode that is used for extra space.
+-- @method set_expand
 -- @tparam boolean expand If true, the widget is expanded to include the extra
 -- space. If false, the extra space is simply left empty.
 -- @see set_extra_space
@@ -311,6 +311,7 @@ function scroll:set_expand(expand)
 end
 
 --- Set the number of frames per second that this widget should draw.
+-- @method set_fps
 -- @tparam number fps The number of frames per second
 function scroll:set_fps(fps)
     if fps == self._private.fps then
@@ -323,6 +324,7 @@ end
 
 --- Set the amount of extra space that should be included in the scrolling. This
 -- extra space will likely be left empty between repetitions of the widgets.
+-- @method set_extra_space
 -- @tparam number extra_space The amount of extra space
 -- @see set_expand
 function scroll:set_extra_space(extra_space)
@@ -336,6 +338,7 @@ end
 --- Set the speed of the scrolling animation. The exact meaning depends on the
 -- step function that is used, but for the simplest step functions, this will be
 -- in pixels per second.
+-- @method set_speed
 -- @tparam number speed The speed for the animation
 function scroll:set_speed(speed)
     if speed == self._private.speed then
@@ -349,6 +352,7 @@ end
 -- @{set_direction}. If the child widget is smaller than this size, no scrolling
 -- is done. If the child widget is larger, then only this size will be visible
 -- and the rest is made visible via scrolling.
+-- @method set_max_size
 -- @tparam number max_size The maximum size of this widget or nil for unlimited.
 function scroll:set_max_size(max_size)
     if max_size == self._private.max_size then
@@ -373,6 +377,7 @@ end
 --
 -- The step function should return a single number. This number is the offset at
 -- which the widget is drawn and should be between 0 and `size+extra_space`.
+-- @method set_step_function
 -- @tparam function step_function A step function.
 -- @see step_functions
 function scroll:set_step_function(step_function)
@@ -387,6 +392,7 @@ end
 
 --- Set an upper limit for the space for scrolling.
 -- This restricts the child widget's maximal size.
+-- @method set_space_for_scrolling
 -- @tparam number space_for_scrolling The space for scrolling
 function scroll:set_space_for_scrolling(space_for_scrolling)
     if space_for_scrolling == self._private.space_for_scrolling then
@@ -419,6 +425,7 @@ local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size
 end
 
 --- Get a new horizontal scrolling container.
+-- @function wibox.container.scroll.horizontal
 -- @param[opt] widget The widget that should be scrolled
 -- @param[opt=20] fps The number of frames per second
 -- @param[opt=10] speed The speed of the animation
@@ -433,6 +440,7 @@ function scroll.horizontal(widget, fps, speed, extra_space, expand, max_size, st
 end
 
 --- Get a new vertical scrolling container.
+-- @function wibox.container.scroll.vertical
 -- @param[opt] widget The widget that should be scrolled
 -- @param[opt=20] fps The number of frames per second
 -- @param[opt=10] speed The speed of the animation
@@ -452,18 +460,21 @@ scroll.step_functions = {}
 
 --- A step function that scrolls the widget in an increasing direction with
 -- constant speed.
+-- @callback scroll.step_functions.linear_increase
 function scroll.step_functions.linear_increase(elapsed, size, _, speed, extra_space)
     return (elapsed * speed) % (size + extra_space)
 end
 
 --- A step function that scrolls the widget in an decreasing direction with
 -- constant speed.
+-- @callback scroll.step_functions.linear_decrease
 function scroll.step_functions.linear_decrease(elapsed, size, _, speed, extra_space)
     return (-elapsed * speed) % (size + extra_space)
 end
 
 --- A step function that scrolls the widget to its end and back to its
 -- beginning, then back to its end, etc. The speed is constant.
+-- @callback scroll.step_functions.linear_back_and_forth
 function scroll.step_functions.linear_back_and_forth(elapsed, size, visible_size, speed)
     local state = ((elapsed * speed) % (2 * size)) / size
     state = state <= 1 and state or 2 - state
@@ -473,6 +484,7 @@ end
 --- A step function that scrolls the widget to its end and back to its
 -- beginning, then back to its end, etc. The speed is null at the ends and
 -- maximal in the middle.
+-- @callback scroll.step_functions.nonlinear_back_and_forth
 function scroll.step_functions.nonlinear_back_and_forth(elapsed, size, visible_size, speed)
     local state = ((elapsed * speed) % (2 * size)) / size
     local negate = false
@@ -501,6 +513,7 @@ end
 --- A step function that scrolls the widget to its end and back to its
 -- beginning, then back to its end, etc. The speed is null at the ends and
 -- maximal in the middle. At both ends the widget stands still for a moment.
+-- @callback scroll.step_functions.waiting_nonlinear_back_and_forth
 function scroll.step_functions.waiting_nonlinear_back_and_forth(elapsed, size, visible_size, speed)
     local state = ((elapsed * speed) % (2 * size)) / size
     local negate = false

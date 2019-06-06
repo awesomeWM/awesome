@@ -17,37 +17,28 @@ local flex = {}
 
 --@DOC_fixed_COMMON@
 
---- Replace the layout children
--- @tparam table children A table composed of valid widgets
--- @name set_children
--- @class function
-
 --- Add some widgets to the given fixed layout
 -- @param layout The layout you are modifying.
 -- @tparam widget ... Widgets that should be added (must at least be one)
--- @name add
--- @class function
+-- @method add
 
 --- Remove a widget from the layout
 -- @tparam index The widget index to remove
 -- @treturn boolean index If the operation is successful
--- @name remove
--- @class function
+-- @method remove
 
 --- Remove one or more widgets from the layout
 -- The last parameter can be a boolean, forcing a recursive seach of the
 -- widget(s) to remove.
 -- @param widget ... Widgets that should be removed (must at least be one)
 -- @treturn boolean If the operation is successful
--- @name remove_widgets
--- @class function
+-- @method remove_widgets
 
 --- Insert a new widget in the layout at position `index`
 -- @tparam number index The position
 -- @param widget The widget
 -- @treturn boolean If the operation is successful
--- @name insert
--- @class function
+-- @method insert
 
 --- The widget used to fill the spacing between the layout elements.
 --

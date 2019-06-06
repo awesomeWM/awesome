@@ -218,6 +218,10 @@ function piechart:get_data()
     return list
 end
 
+--- Create a new piechart.
+-- @function wibox.widget.piechart
+-- @tparam table data_list The data.
+
 local function new(data_list)
 
     local ret = base.make_widget(nil, nil, {

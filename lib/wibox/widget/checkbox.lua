@@ -224,6 +224,12 @@ function checkbox:set_paddings(val)
     self:emit_signal("widget::redraw_needed")
 end
 
+--- Create a new checkbox.
+-- @function wibox.widget.checkbox
+-- @tparam[opt=false] boolean checked
+-- @tparam[opt] table args
+-- @tparam gears.color args.color The color.
+
 local function new(checked, args)
     checked, args = checked or false, args or {}
 

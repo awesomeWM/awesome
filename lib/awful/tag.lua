@@ -218,8 +218,8 @@ function tag.move(new_index, target_tag)
     tag.object.set_index(target_tag, new_index)
 end
 
---- Swap 2 tags
--- @function tag.swap
+--- Swap 2 tags.
+-- @method swap
 -- @param tag2 The second tag
 -- @see client.swap
 function tag.object.swap(self, tag2)
@@ -1371,7 +1371,7 @@ function tag.viewprev(screen)
 end
 
 --- View only a tag.
--- @function tag.view_only
+-- @method view_only
 -- @see selected
 function tag.object.view_only(self)
     local tags = self.screen.tags
@@ -1684,6 +1684,8 @@ object.properties(capi.tag, {
     getter_fallback = tag.getproperty,
     setter_fallback = tag.setproperty,
 })
+
+--@DOC_object_COMMON@
 
 return setmetatable(tag, tag.mt)
 

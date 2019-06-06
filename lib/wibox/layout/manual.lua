@@ -15,24 +15,24 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 
 local manual_layout = {}
 
---- Add some widgets to the given stack layout
+--- Add some widgets to the given stack layout.
+--
+-- @method add
 -- @param layout The layout you are modifying.
 -- @tparam widget ... Widgets that should be added
--- @name add
--- @class function
 
---- Remove a widget from the layout
+--- Remove a widget from the layout.
+--
+-- @method remove
 -- @tparam index The widget index to remove
 -- @treturn boolean index If the operation is successful
--- @name remove
--- @class function
 
---- Insert a new widget in the layout at position `index`
+--- Insert a new widget in the layout at position `index`.
+--
+-- @method insert
 -- @tparam number index The position
 -- @param widget The widget
 -- @treturn boolean If the operation is successful
--- @name insert
--- @class function
 function manual_layout:insert(index, widget)
     table.insert(self._private.widgets, index, widget)
 
@@ -44,13 +44,14 @@ function manual_layout:insert(index, widget)
     self:emit_signal("widget::layout_changed")
 end
 
---- Remove one or more widgets from the layout
+--- Remove one or more widgets from the layout.
+--
 -- The last parameter can be a boolean, forcing a recursive seach of the
 -- widget(s) to remove.
+--
+-- @method remove_widgets
 -- @param widget ... Widgets that should be removed (must at least be one)
 -- @treturn boolean If the operation is successful
--- @name remove_widgets
--- @class function
 
 
 function manual_layout:fit(_, width, height)
@@ -145,6 +146,8 @@ end
 --           The function is compatible with the `awful.placement` prototype.
 --
 --@DOC_wibox_layout_manual_add_at_EXAMPLE@
+--
+-- @method add_at
 -- @tparam widget widget The widget.
 -- @tparam table|function point Either an `{x=x,y=y}` table or a function
 --  returning the new geometry.
@@ -167,6 +170,7 @@ function manual_layout:add_at(widget, point)
 end
 
 --- Move a widget (by index).
+-- @method move
 -- @tparam number index The widget index.
 -- @tparam table|function point A new point value.
 -- @see add_at
@@ -179,6 +183,8 @@ end
 --- Move a widget.
 --
 --@DOC_wibox_layout_manual_move_widget_EXAMPLE@
+--
+-- @method move_widget
 -- @tparam widget widget The widget.
 -- @tparam table|function point A new point value.
 -- @see add_at
@@ -206,7 +212,9 @@ function manual_layout:reset()
 end
 
 --- Create a manual layout.
+-- @function wibox.layout.manual
 -- @tparam table ... Widgets to add to the layout.
+
 local function new_manual(...)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

@@ -222,6 +222,7 @@ local function find_widget(widgets_table, widget)
 end
 
 --- Get the number of rows and columns occupied by the widgets in the grid.
+-- @method get_dimension
 -- @treturn number,number The number of rows and columns
 function grid:get_dimension()
     return self._private.num_rows, self._private.num_cols
@@ -248,6 +249,7 @@ end
 
 --- Find the next available cell to insert a widget.
 -- The grid is browsed according to the `orientation`.
+-- @method get_next_empty
 -- @tparam[opt=1] number hint_row The row coordinate of the last occupied cell.
 -- @tparam[opt=1] number hint_column The column coordinate of the last occupied cell.
 -- @return number,number The row,column coordinate of the next empty cell
@@ -281,7 +283,10 @@ end
 
 
 --- Add some widgets to the given grid layout.
--- The widgets are assumed to span one cell
+--
+-- The widgets are assumed to span one cell.
+--
+-- @method add
 -- @param ... Widgets that should be added (must at least be one)
 function grid:add(...)
     local args = { n=select('#', ...), ... }
@@ -298,6 +303,8 @@ end
 --- Add a widget to the grid layout at specific coordinate.
 --
 --@DOC_wibox_layout_grid_add_EXAMPLE@
+--
+-- @method add_widget_at
 -- @param child Widget that should be added
 -- @tparam number row Row number for the top left corner of the widget
 -- @tparam number col Column number for the top left corner of the widget
@@ -341,6 +348,7 @@ function grid:add_widget_at(child, row, col, row_span, col_span)
 end
 
 --- Remove one or more widgets from the layout.
+-- @method remove
 -- @param ... Widgets that should be removed (must at least be one)
 -- @treturn boolean If the operation is successful
 function grid:remove(...)
@@ -366,6 +374,8 @@ end
 --- Remove widgets at the coordinates.
 --
 --@DOC_wibox_layout_grid_remove_EXAMPLE@
+--
+-- @method remove_widgets_at
 -- @tparam number row The row coordinate of the widget to remove
 -- @tparam number col The column coordinate of the widget to remove
 -- @tparam[opt=1] number row_span The number of rows the area to remove spans.
@@ -388,6 +398,7 @@ function grid:remove_widgets_at(row, col, row_span, col_span)
 end
 
 --- Return the coordinates of the widget.
+-- @method get_widget_position
 -- @param widget The widget
 -- @treturn table The `position` table of the coordinates in the grid, with
 -- fields `row`, `col`, `row_span` and `col_span`.
@@ -405,6 +416,7 @@ end
 
 
 --- Return the widgets at the coordinates.
+-- @method get_widgets_at
 -- @tparam number row The row coordinate of the widget
 -- @tparam number col The column coordinate of the widget
 -- @tparam[opt=1] number row_span The number of rows to span.
@@ -427,6 +439,7 @@ function grid:get_widgets_at(row, col, row_span, col_span)
 end
 
 --- Replace old widget by new widget, spanning the same columns and rows.
+-- @method replace_widget
 -- @param old The widget to remove
 -- @param new The widget to add
 -- @treturn boolean If the operation is successful (widget found)
@@ -494,6 +507,8 @@ end
 --- Insert column at index.
 --
 --@DOC_wibox_layout_grid_insert_column_EXAMPLE@
+--
+-- @method insert_column
 -- @tparam number|nil index Insert the new column at index. If `nil`, the column is added at the end.
 -- @treturn number The index of the inserted column
 function grid:insert_column(index)
@@ -508,8 +523,9 @@ function grid:insert_column(index)
 end
 
 --- Extend column at index.
---
 --@DOC_wibox_layout_grid_extend_column_EXAMPLE@
+--
+-- @method extend_column
 -- @tparam number|nil index Extend the column at index. If `nil`, the last column is extended.
 -- @treturn number The index of the extended column
 function grid:extend_column(index)
@@ -526,6 +542,8 @@ end
 --- Remove column at index.
 --
 --@DOC_wibox_layout_grid_remove_column_EXAMPLE@
+--
+-- @method remove_column
 -- @tparam number|nil index Remove column at index. If `nil`, the last column is removed.
 -- @treturn number The index of the removed column
 function grid:remove_column(index)
@@ -542,6 +560,8 @@ end
 --- Insert row at index.
 --
 -- see `insert_column`
+--
+-- @method insert_row
 -- @tparam number|nil index Insert the new row at index. If `nil`, the row is added at the end.
 -- @treturn number The index of the inserted row
 function grid:insert_row(index)
@@ -558,6 +578,8 @@ end
 --- Extend row at index.
 --
 -- see `extend_column`
+--
+-- @method extend_row
 -- @tparam number|nil index Extend the row at index. If `nil`, the last row is extended.
 -- @treturn number The index of the extended row
 function grid:extend_row(index)
@@ -574,6 +596,8 @@ end
 --- Remove row at index.
 --
 -- see `remove_column`
+--
+-- @method remove_row
 -- @tparam number|nil index Remove row at index. If `nil`, the last row is removed.
 -- @treturn number The index of the removed row
 function grid:remove_row(index)
@@ -597,7 +621,7 @@ function grid:get_children()
     return ret
 end
 
--- Add list of children to the layout
+-- Add list of children to the layout.
 function grid:set_children(children)
     self:reset()
     if #children > 0 then
@@ -837,6 +861,7 @@ end
 -- Remove all widgets and reset row and column counts
 --
 -- **Signal:** widget::reset
+-- @method reset
 function grid:reset()
     self._private.widgets = {}
     -- reset the number of columns and rows to the forced value or to 0

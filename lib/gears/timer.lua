@@ -84,6 +84,7 @@ local gdebug = require("gears.debug")
 local timer = { mt = {} }
 
 --- Start the timer.
+-- @method start
 function timer:start()
     if self.data.source_id ~= nil then
         gdebug.print_error(traceback("timer already started"))
@@ -97,6 +98,7 @@ function timer:start()
 end
 
 --- Stop the timer.
+-- @method stop
 function timer:stop()
     if self.data.source_id == nil then
         gdebug.print_error(traceback("timer not started"))
@@ -110,6 +112,7 @@ end
 --- Restart the timer.
 -- This is equivalent to stopping the timer if it is running and then starting
 -- it.
+-- @method again
 function timer:again()
     if self.data.source_id ~= nil then
         self:stop()

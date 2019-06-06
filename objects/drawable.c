@@ -188,7 +188,7 @@ luaA_drawable_get_surface(lua_State *L, drawable_t *drawable)
 /** Refresh a drawable's content. This has to be called whenever some drawing to
  * the drawable's surface has been done and should become visible.
  *
- * @function refresh
+ * @method refresh
  */
 static int
 luaA_drawable_refresh(lua_State *L)
@@ -203,7 +203,7 @@ luaA_drawable_refresh(lua_State *L)
 /** Get drawable geometry. The geometry consists of x, y, width and height.
  *
  * @treturn table A table with drawable coordinates and geometry.
- * @function geometry
+ * @method geometry
  */
 static int
 luaA_drawable_geometry(lua_State *L)

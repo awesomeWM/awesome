@@ -185,6 +185,10 @@ for _, prop in ipairs {"orientation", "color", "thickness", "span_ratio",
     end
 end
 
+--- Create a new separator.
+-- @function wibox.widget.separator
+-- @tparam table args The arguments (all properties are available).
+
 local function new(args)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,

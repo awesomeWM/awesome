@@ -61,10 +61,6 @@ function place:fit(context, width, height)
         and height or h
 end
 
---- The widget to be placed.
--- @property widget
--- @tparam widget widget The widget
-
 function place:set_widget(widget)
     if widget then
         base.check_widget(widget)
@@ -77,20 +73,20 @@ function place:get_widget()
     return self._private.widget
 end
 
---- Get the number of children element
--- @treturn table The children
+--- Get or set the children elements.
+-- @property children
+-- @tparam table The children
+
 function place:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function place:set_children(children)
     self:set_widget(children[1])
 end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
+-- @method reset
 function place:reset()
     self:set_widget(nil)
 end

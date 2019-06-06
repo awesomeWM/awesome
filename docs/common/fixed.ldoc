@@ -4,8 +4,7 @@
 -- @tparam number index A widget or a widget index
 -- @param widget2 The widget to take the place of the first one
 -- @treturn boolean If the operation is successful
--- @name set
--- @class function
+-- @method set
 
 --- Replace the first instance of `widget` in the layout with `widget2`.
 -- **Signal:** widget::replaced The argument is the new widget and the old one
@@ -14,16 +13,14 @@
 -- @param widget2 The widget to replace `widget` with
 -- @tparam[opt=false] boolean recursive Dig in all compatible layouts to find the widget.
 -- @treturn boolean If the operation is successful
--- @name replace_widget
--- @class function
+-- @method replace_widget
 
 --- Swap 2 widgets in a layout.
 -- **Signal:** widget::swapped The arguments are both widgets and both (new) indexes.
 -- @tparam number index1 The first widget index
 -- @tparam number index2 The second widget index
 -- @treturn boolean If the operation is successful
--- @name swap
--- @class function
+-- @method swap
 
 --- Swap 2 widgets in a layout.
 -- If widget1 is present multiple time, only the first instance is swapped
@@ -33,8 +30,7 @@
 -- @param widget2 The second widget
 -- @tparam[opt=false] boolean recursive Dig in all compatible layouts to find the widget.
 -- @treturn boolean If the operation is successful
--- @name swap_widgets
--- @class function
+-- @method swap_widgets
 
 --- Get all direct children of this layout.
 -- @param layout The layout you are modifying.
@@ -43,5 +39,4 @@
 --- Reset a ratio layout. This removes all widgets from the layout.
 -- **Signal:** widget::reset
 -- @param layout The layout you are modifying.
--- @name reset
--- @class function
+-- @method reset

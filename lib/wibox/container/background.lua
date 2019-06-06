@@ -175,15 +175,10 @@ function background:get_widget()
     return self._private.widget
 end
 
--- Get children element
--- @treturn table The children
 function background:get_children()
     return {self._private.widget}
 end
 
--- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function background:set_children(children)
     self:set_widget(children[1])
 end
@@ -239,6 +234,7 @@ end
 --- Set the background shape.
 --
 -- Any other arguments will be passed to the shape function
+-- @method set_shape
 -- @param shape A function taking a context, width and height as arguments
 -- @see gears.shape
 -- @see shape

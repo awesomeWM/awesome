@@ -57,7 +57,7 @@ function screen.getdistance_sq(s, x, y)
 end
 
 --- Get the square distance between a `screen` and a point.
--- @function screen.get_square_distance
+-- @method get_square_distance
 -- @tparam number x X coordinate of point
 -- @tparam number y Y coordinate of point
 -- @treturn number The squared distance of the screen to the provided point.
@@ -128,7 +128,7 @@ end
 -- This gets the next screen relative to this one in
 -- the specified direction.
 --
--- @function screen:get_next_in_direction
+-- @method get_next_in_direction
 -- @param self Screen.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 function screen.object.get_next_in_direction(self, dir)
@@ -388,7 +388,7 @@ end
 --
 -- This is used by `all_clients` internally (with `stacked=true`).
 --
--- @function screen:get_all_clients
+-- @method get_all_clients
 -- @tparam[opt=true] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table The clients list.
 function screen.object.get_all_clients(s, stacked)
@@ -410,7 +410,7 @@ end
 --
 -- This is used by `tiles_clients` internally (with `stacked=true`).
 --
--- @function screen:get_tiled_clients
+-- @method get_tiled_clients
 -- @tparam[opt=true] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table The clients list.
 function screen.object.get_tiled_clients(s, stacked)
@@ -660,6 +660,8 @@ object.properties(capi.screen, {
     setter_class = screen.object,
     auto_emit    = true,
 })
+
+--@DOC_object_COMMON@
 
 return screen
 

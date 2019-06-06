@@ -69,6 +69,7 @@ function textclock:get_refresh()
 end
 
 --- Force a textclock to update now.
+-- @method force_update
 function textclock:force_update()
     self._timer:emit_signal("timeout")
 end

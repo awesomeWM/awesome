@@ -1199,7 +1199,7 @@ luaA_screen_fake_add(lua_State *L)
 }
 
 /** Remove a screen.
- * @function fake_remove
+ * @method fake_remove
  */
 static int
 luaA_screen_fake_remove(lua_State *L)
@@ -1231,7 +1231,7 @@ luaA_screen_fake_remove(lua_State *L)
  * @tparam integer y The new Y-coordinate for screen.
  * @tparam integer width The new width for screen.
  * @tparam integer height The new height for screen.
- * @function fake_resize
+ * @method fake_resize
  */
 static int
 luaA_screen_fake_resize(lua_State *L)
@@ -1258,7 +1258,7 @@ luaA_screen_fake_resize(lua_State *L)
 
 /** Swap a screen with another one in global screen list.
  * @client s A screen to swap with.
- * @function swap
+ * @method swap
  */
 static int
 luaA_screen_swap(lua_State *L)

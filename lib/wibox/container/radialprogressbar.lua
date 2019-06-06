@@ -134,21 +134,17 @@ function radialprogressbar:set_widget(widget)
     self:emit_signal("widget::layout_changed")
 end
 
---- Get the children elements
--- @treturn table The children
 function radialprogressbar:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function radialprogressbar:set_children(children)
     self._private.widget = children and children[1]
     self:emit_signal("widget::layout_changed")
 end
 
 --- Reset this container.
+-- @method reset
 function radialprogressbar:reset()
     self:set_widget(nil)
 end

@@ -231,6 +231,7 @@ end
 
 --- Add a value to the graph
 --
+-- @method add_value
 -- @param value The value to be added to the graph
 -- @param group The stack color group index.
 function graph:add_value(value, group)
@@ -265,6 +266,7 @@ function graph:add_value(value, group)
 end
 
 --- Clear the graph.
+-- @method clear
 function graph:clear()
     self._private.values = {}
     self:emit_signal("widget::redraw_needed")
@@ -272,7 +274,9 @@ function graph:clear()
 end
 
 --- Set the graph height.
--- @param height The height to set.
+-- @property height
+-- @param number The height to set.
+
 function graph:set_height(height)
     if height >= 5 then
         self._private.height = height
@@ -282,7 +286,9 @@ function graph:set_height(height)
 end
 
 --- Set the graph width.
--- @param width The width to set.
+-- @property width
+-- @param number The width to set.
+
 function graph:set_width(width)
     if width >= 5 then
         self._private.width = width

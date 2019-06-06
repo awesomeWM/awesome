@@ -197,21 +197,17 @@ function arcchart:set_widget(widget)
     self:emit_signal("widget::layout_changed")
 end
 
---- Get the children elements.
--- @treturn table The children
 function arcchart:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function arcchart:set_children(children)
     self._private.widget = children and children[1]
     self:emit_signal("widget::layout_changed")
 end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
+-- @method reset
 function arcchart:reset()
     self:set_widget(nil)
 end

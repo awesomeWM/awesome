@@ -62,7 +62,8 @@ function fixed:layout(context, width, height)
     return result
 end
 
---- Add some widgets to the given fixed layout
+--- Add some widgets to the given layout
+-- @method add
 -- @param ... Widgets that should be added (must at least be one)
 function fixed:add(...)
     -- No table.pack in Lua 5.1 :-(
@@ -77,6 +78,7 @@ end
 
 
 --- Remove a widget from the layout
+-- @method remove
 -- @tparam number index The widget index to remove
 -- @treturn boolean index If the operation is successful
 function fixed:remove(index)
@@ -92,6 +94,7 @@ end
 --- Remove one or more widgets from the layout
 -- The last parameter can be a boolean, forcing a recursive seach of the
 -- widget(s) to remove.
+-- @method remove_widgets
 -- @param widget ... Widgets that should be removed (must at least be one)
 -- @treturn boolean If the operation is successful
 function fixed:remove_widgets(...)
@@ -128,6 +131,7 @@ function fixed:set_children(children)
 end
 
 --- Replace the first instance of `widget` in the layout with `widget2`
+-- @method replace_widget
 -- @param widget The widget to replace
 -- @param widget2 The widget to replace `widget` with
 -- @tparam[opt=false] boolean recursive Digg in all compatible layouts to find the widget.
@@ -219,8 +223,9 @@ function fixed:set_spacing_widget(wdg)
     self:emit_signal("widget::layout_changed")
 end
 
---- Insert a new widget in the layout at position `index`
+--- Insert a new widget in the layout at position `index`.
 -- **Signal:** widget::inserted The arguments are the widget and the index
+-- @method insert
 -- @tparam number index The position
 -- @param widget The widget
 -- @treturn boolean If the operation is successful
@@ -235,7 +240,7 @@ function fixed:insert(index, widget)
     return true
 end
 
--- Fit the fixed layout into the given space
+-- Fit the fixed layout into the given space.
 -- @param context The context in which we are fit.
 -- @param orig_width The available width.
 -- @param orig_height The available height.

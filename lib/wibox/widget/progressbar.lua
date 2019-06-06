@@ -368,7 +368,9 @@ function progressbar:fit(_, width, height)
 end
 
 --- Set the progressbar value.
--- @param value The progress bar value between 0 and 1.
+-- @property value
+-- @param number The progress bar value between 0 and 1.
+
 function progressbar:set_value(value)
     value = value or 0
 

@@ -199,20 +199,20 @@
 --- Get or set mouse buttons bindings to a wibox.
 --
 -- @param buttons_table A table of buttons objects, or nothing.
--- @function buttons
+-- @method buttons
 
 --- Get or set wibox geometry. That's the same as accessing or setting the x,
 -- y, width or height properties of a wibox.
 --
 -- @param A table with coordinates to modify.
 -- @return A table with wibox coordinates and geometry.
--- @function geometry
+-- @method geometry
 
 --- Get or set wibox struts.
 --
 -- @param strut A table with new strut, or nothing
 -- @return The wibox strut in a table.
--- @function struts
+-- @method struts
 -- @see client.struts
 
 --- The default background color.
@@ -226,8 +226,7 @@
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @param args An array containing the widgets disposition
--- @name setup
--- @class function
+-- @method setup
 
 --- The background of the wibox.
 -- @param c The background to use. This must either be a cairo pattern object,
@@ -255,5 +254,4 @@
 -- @treturn table A sorted table of widgets positions. The first element is the biggest
 -- container while the last is the topmost widget. The table contains *x*, *y*,
 -- *width*, *height* and *widget*.
--- @name find_widgets
--- @class function
+-- @method find_widgets

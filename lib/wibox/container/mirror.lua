@@ -61,20 +61,16 @@ function mirror:get_widget()
     return self._private.widget
 end
 
---- Get the number of children element
--- @treturn table The children
 function mirror:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function mirror:set_children(children)
     self:set_widget(children[1])
 end
 
 --- Reset this layout. The widget will be removed and the axes reset.
+-- @method reset
 function mirror:reset()
     self._private.horizontal = false
     self._private.vertical = false

@@ -51,15 +51,10 @@ function constraint:get_widget()
     return self._private.widget
 end
 
---- Get the number of children element
--- @treturn table The children
 function constraint:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function constraint:set_children(children)
     self:set_widget(children[1])
 end
@@ -121,6 +116,7 @@ end
 
 --- Reset this layout. The widget will be unreferenced, strategy set to "max"
 -- and the constraints set to nil.
+-- @method reset
 function constraint:reset()
     self._private.width = nil
     self._private.height = nil

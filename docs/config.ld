@@ -52,12 +52,16 @@ tparam_alias('tab', 'table')
 tparam_alias('screen', 'screen')
 tparam_alias('screen_or_idx', 'screen|int')
 
--- Hack to get the functions and method on top of the signals and properties
+-- Hack to get the functions on top of the signals and properties
 new_type("function", "Functions", false, "Parameters")
 -- Documentation for objects properties
 new_type("property", "Object properties", false, "Type")
 -- Documentation for objects deprecated properties
 new_type("deprecatedproperty", "Deprecated object properties", false, "Type")
+-- Use a custom type for the methods to bypass the faulty ldoc built-in detection.
+-- (yes, the space after Methods *is* on purpose to avoid clashing with ldoc
+--  internal "methods" concept)
+new_type("method", "Object methods ", false, "Parameters")
 -- New type for signals
 new_type("signal", "Signals", false, "Arguments")
 -- New type for signals connections
@@ -155,6 +159,21 @@ file = {
     }
 }
 
+-- Mimics the ldoc built-in method style, but better.
+--
+-- This custom renderer exists because using ldoc built-in method detection
+-- turned out to be too unreliable and upstream is dead.
+local function render_methods(item)
+    local ret = item.name
+
+    -- Some methods will have it depending on the weather. Most wont.
+    if not ret:find(":") then
+        ret = ":"..ret
+    end
+
+    return ret .. (item.args and " "..item.args or "")
+end
+
 local no_prefix = {
     property = true, signal = true, clientruleproperty = true,
     deprecatedproperty = true,
@@ -182,6 +201,10 @@ custom_display_name_handler = function(item, default_handler)
 
     if item.type == "deprecated" or item.type == "deprecatedproperty" then
         return default_handler(item) .. "<i class=\"deprecated_label\"> [deprecated]</i>"
+    end
+
+    if item.type == "method" then
+        return render_methods(item)
     end
 
     local ret = default_handler(item)
