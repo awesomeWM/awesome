@@ -18,7 +18,7 @@
 --
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
--- @classmod awful.popup
+-- @popupmod awful.popup
 ---------------------------------------------------------------------------
 local wibox     = require( "wibox"           )
 local util      = require( "awful.util"      )

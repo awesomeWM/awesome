@@ -39,7 +39,7 @@
 --
 -- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt;
 -- @copyright 2009 Sébastien Gross
--- @classmod awful.tooltip
+-- @popupmod awful.tooltip
 -------------------------------------------------------------------------
 
 local timer = require("gears.timer")

@@ -5,7 +5,7 @@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2016 Emmanuel Lepage Vallee
--- @classmod awful.wibar
+-- @popupmod awful.wibar
 ---------------------------------------------------------------------------
 
 -- Grab environment we need

@@ -22,7 +22,7 @@
 --
 -- @author getzze
 -- @copyright 2017 getzze
--- @classmod awful.widget.calendar_popup
+-- @popupmod awful.widget.calendar_popup
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

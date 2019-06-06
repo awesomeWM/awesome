@@ -9,7 +9,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
--- @classmod awful.titlebar
+-- @popupmod awful.titlebar
 ---------------------------------------------------------------------------
 
 local error = error
