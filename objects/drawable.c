@@ -27,7 +27,7 @@
  *
  * @author Uli Schlachter &lt;psychon@znc.in&gt;
  * @copyright 2012 Uli Schlachter
- * @classmod drawable
+ * @coreclassmod drawable
  */
 
 #include "drawable.h"

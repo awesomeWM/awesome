@@ -46,7 +46,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2014 Uli Schlachter
--- @classmod gears.timer
+-- @coreclassmod gears.timer
 ---------------------------------------------------------------------------
 
 local capi = { awesome = awesome }

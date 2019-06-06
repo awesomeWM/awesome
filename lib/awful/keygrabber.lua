@@ -60,7 +60,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2012 dodo
 -- @copyright 2017 Emmanuel Lepage Vallee
--- @classmod awful.keygrabber
+-- @coreclassmod awful.keygrabber
 ---------------------------------------------------------------------------
 
 local ipairs = ipairs
@@ -731,7 +731,6 @@ end
 -- @return the given callback `g`.
 --
 -- @deprecated awful.keygrabber.run
--- @see keygrabber.run
 
 --- A lower level API to interact with the keygrabber directly.
 --

@@ -22,7 +22,7 @@
 /** awesome mousegrabber API
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @module mousegrabber
+ * @coreclassmod mousegrabber
  */
 
 #include "mousegrabber.h"

@@ -42,7 +42,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @classmod screen
+ * @coreclassmod screen
  */
 
 #include "objects/screen.h"

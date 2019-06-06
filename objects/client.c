@@ -84,7 +84,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @classmod client
+ * @coreclassmod client
  */
 
 #include "objects/client.h"

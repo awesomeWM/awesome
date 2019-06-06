@@ -93,6 +93,7 @@ sort_modules=true
 new_type("widgetmod"   , "Widgets"   , true)
 new_type("containermod", "Widget containers", true)
 new_type("layoutmod"   , "Widget layouts"   , true)
+new_type("coreclassmod", "Core components"  , true)
 
 file = {
     -- C parts of libraries

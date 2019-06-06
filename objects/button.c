@@ -30,7 +30,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @classmod button
+ * @coreclassmod button
  */
 
 #include "button.h"

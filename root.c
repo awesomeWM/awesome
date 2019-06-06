@@ -22,7 +22,7 @@
 /** awesome root window API
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @module root
+ * @coreclassmod root
  */
 
 #include "globalconf.h"

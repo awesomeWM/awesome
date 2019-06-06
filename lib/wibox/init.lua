@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox
+-- @coreclassmod wibox
 ---------------------------------------------------------------------------
 
 local capi = {

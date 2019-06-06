@@ -180,7 +180,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @classmod tag
+ * @coreclassmod tag
  */
 
 #include "tag.h"

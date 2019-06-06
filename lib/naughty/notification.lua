@@ -13,7 +13,7 @@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2008 koniu
 -- @copyright 2017 Emmanuel Lepage Vallee
--- @classmod naughty.notification
+-- @coreclassmod naughty.notification
 ---------------------------------------------------------------------------
 local gobject = require("gears.object")
 local gtable  = require("gears.table")

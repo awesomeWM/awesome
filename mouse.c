@@ -57,7 +57,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @module mouse
+ * @coreclassmod mouse
  */
 
 #include "mouse.h"
