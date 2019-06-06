@@ -19,7 +19,7 @@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2014, 2017 Emmanuel Lepage Vallee
--- @classmod wibox.widget.separator
+-- @widgetmod wibox.widget.separator
 ---------------------------------------------------------------------------
 local beautiful = require( "beautiful"         )
 local base      = require( "wibox.widget.base" )

@@ -13,7 +13,7 @@
 --@DOC_wibox_widget_defaults_graph_EXAMPLE@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @classmod wibox.widget.graph
+-- @widgetmod wibox.widget.graph
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

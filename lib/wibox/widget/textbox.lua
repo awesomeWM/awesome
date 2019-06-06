@@ -4,7 +4,7 @@
 -- @author Uli Schlachter
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
--- @classmod wibox.widget.textbox
+-- @widgetmod wibox.widget.textbox
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")

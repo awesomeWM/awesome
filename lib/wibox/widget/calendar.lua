@@ -21,7 +21,7 @@
 --
 -- @author getzze
 -- @copyright 2017 getzze
--- @classmod wibox.widget.calendar
+-- @widgetmod wibox.widget.calendar
 ---------------------------------------------------------------------------
 
 

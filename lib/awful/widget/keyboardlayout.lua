@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Aleksey Fedotov &lt;lexa@cfotr.com&gt;
 -- @copyright 2015 Aleksey Fedotov
--- @classmod awful.widget.keyboardlayout
+-- @widgetmod awful.widget.keyboardlayout
 ---------------------------------------------------------------------------
 
 local capi = {awesome = awesome}

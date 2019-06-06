@@ -6,7 +6,7 @@
 -- @author Grigory Mishchenko &lt;grishkokot@gmail.com&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2015 Grigory Mishchenko, 2016 Emmanuel Lepage Vallee
--- @classmod wibox.widget.slider
+-- @widgetmod wibox.widget.slider
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

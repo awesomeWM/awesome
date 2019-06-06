@@ -9,7 +9,7 @@
 -- ))
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
--- @classmod awful.widget.button
+-- @widgetmod awful.widget.button
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

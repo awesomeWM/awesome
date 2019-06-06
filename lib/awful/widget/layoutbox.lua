@@ -3,7 +3,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @classmod awful.widget.layoutbox
+-- @widgetmod awful.widget.layoutbox
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

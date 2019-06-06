@@ -1,7 +1,7 @@
 --- Container showing the icon of a client.
 -- @author Uli Schlachter
 -- @copyright 2017 Uli Schlachter
--- @classmod awful.widget.clienticon
+-- @widgetmod awful.widget.clienticon
 
 local base = require("wibox.widget.base")
 local surface = require("gears.surface")

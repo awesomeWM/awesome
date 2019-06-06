@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.widget.systray
+-- @widgetmod wibox.widget.systray
 ---------------------------------------------------------------------------
 
 local wbase = require("wibox.widget.base")

@@ -70,7 +70,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
--- @classmod awful.widget.tasklist
+-- @widgetmod awful.widget.tasklist
 ---------------------------------------------------------------------------
 
 -- Grab environment we need

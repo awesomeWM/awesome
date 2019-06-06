@@ -17,7 +17,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @classmod wibox.widget.progressbar
+-- @widgetmod wibox.widget.progressbar
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

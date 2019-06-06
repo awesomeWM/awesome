@@ -27,7 +27,7 @@
 -- @author Benjamin Petrenko
 -- @author Yauheni Kirylau
 -- @copyright 2015, 2016 Benjamin Petrenko, Yauheni Kirylau
--- @classmod awful.widget.watch
+-- @widgetmod awful.widget.watch
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

@@ -6,7 +6,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @copyright 2018 Aire-One
--- @classmod awful.widget.prompt
+-- @widgetmod awful.widget.prompt
 ---------------------------------------------------------------------------
 
 --- The prompt foreground color.

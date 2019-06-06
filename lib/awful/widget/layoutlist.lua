@@ -20,7 +20,7 @@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2010, 2018 Emmanuel Lepage Vallee
--- @classmod awful.widget.layoutlist
+-- @widgetmod awful.widget.layoutlist
 ----------------------------------------------------------------------------
 
 local capi     = {screen = screen, tag = tag}

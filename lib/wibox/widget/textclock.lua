@@ -3,7 +3,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @classmod wibox.widget.textclock
+-- @widgetmod wibox.widget.textclock
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

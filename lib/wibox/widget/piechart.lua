@@ -7,7 +7,7 @@
 --@DOC_wibox_widget_defaults_piechart_EXAMPLE@
 -- @author Emmanuel Lepage Valle
 -- @copyright 2012 Emmanuel Lepage Vallee
--- @classmod wibox.widget.piechart
+-- @widgetmod wibox.widget.piechart
 ---------------------------------------------------------------------------
 
 local color     = require( "gears.color"       )

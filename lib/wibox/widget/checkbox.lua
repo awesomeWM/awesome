@@ -8,7 +8,7 @@
 --@DOC_wibox_widget_defaults_checkbox_EXAMPLE@
 -- @author Emmanuel Lepage Valle
 -- @copyright 2010 Emmanuel Lepage Vallee
--- @classmod wibox.widget.checkbox
+-- @widgetmod wibox.widget.checkbox
 ---------------------------------------------------------------------------
 
 local color     = require( "gears.color"       )
