@@ -457,7 +457,7 @@ end
 
 --- Returns a new horizontal ratio layout. A ratio layout shares the available space.
 -- equally among all widgets. Widgets can be added via :add(widget).
--- @function wibox.layout.ratio.horizontal
+-- @constructorfct wibox.layout.ratio.horizontal
 -- @tparam widget ... Widgets that should be added to the layout.
 function ratio.horizontal(...)
     return get_layout("horizontal", ...)
@@ -465,7 +465,7 @@ end
 
 --- Returns a new vertical ratio layout. A ratio layout shares the available space.
 -- equally among all widgets. Widgets can be added via :add(widget).
--- @function wibox.layout.ratio.vertical
+-- @constructorfct wibox.layout.ratio.vertical
 -- @tparam widget ... Widgets that should be added to the layout.
 function ratio.vertical(...)
     return get_layout("vertical", ...)

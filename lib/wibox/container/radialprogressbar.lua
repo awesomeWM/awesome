@@ -233,7 +233,7 @@ end
 --- Returns a new radialprogressbar layout. A radialprogressbar layout
 -- radialprogressbars a given widget. Use `.widget` to set the widget.
 -- @param[opt] widget The widget to display.
--- @function wibox.container.radialprogressbar
+-- @constructorfct wibox.container.radialprogressbar
 local function new(widget)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,

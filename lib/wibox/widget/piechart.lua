@@ -219,7 +219,7 @@ function piechart:get_data()
 end
 
 --- Create a new piechart.
--- @function wibox.widget.piechart
+-- @constructorfct wibox.widget.piechart
 -- @tparam table data_list The data.
 
 local function new(data_list)

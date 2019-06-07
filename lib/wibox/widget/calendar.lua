@@ -352,7 +352,7 @@ end
 -- @tparam number|nil date.day Date day
 -- @tparam[opt="Monospace 10"] string font Font of the calendar
 -- @treturn widget The month calendar widget
--- @function wibox.widget.calendar.month
+-- @constructorfct wibox.widget.calendar.month
 function calendar.month(date, font)
     return get_calendar("month", date, font)
 end
@@ -368,7 +368,7 @@ end
 -- @tparam number|nil date.day Date day
 -- @tparam[opt="Monospace 10"] string font Font of the calendar
 -- @treturn widget The year calendar widget
--- @function wibox.widget.calendar.year
+-- @constructorfct wibox.widget.calendar.year
 function calendar.year(date, font)
     return get_calendar("year", date, font)
 end

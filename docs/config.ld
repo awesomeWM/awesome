@@ -52,6 +52,8 @@ tparam_alias('tab', 'table')
 tparam_alias('screen', 'screen')
 tparam_alias('screen_or_idx', 'screen|int')
 
+-- The first stereotype are the constructors.
+new_type("constructorfct", "Constructors", false, "Parameters")
 -- Hack to get the functions on top of the signals and properties
 new_type("function", "Functions", false, "Parameters")
 -- Documentation for objects properties
@@ -223,8 +225,14 @@ custom_display_name_handler = function(item, default_handler)
     -- more consistent. Right now some have their full awful.foo.bar while other
     -- have "just" `bar`. Given we use constructors from metatables, we have no
     -- choice but to use the full function name. It also makes copy/paste easier.
-    if item.type == "function" and (not ret:find(".", 1, true)) and (not ret:find(":", 1, true)) then
-        return item.module.name .. "." .. ret
+    if (item.type == "function" or item.type == "constructorfct")
+      and (not ret:find(".", 1, true)) and (not ret:find(":", 1, true)) then
+        ret = item.module.name .. "." .. ret
+    end
+
+    -- It isn't there by default.
+    if item.type == "constructorfct" then
+        ret = ret .. " " .. item.args
     end
 
     return ret

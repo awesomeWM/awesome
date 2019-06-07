@@ -156,7 +156,7 @@ function stack:set_vertical_offset(value)
 end
 
 --- Create a new stack layout.
--- @function wibox.layout.stack
+-- @constructorfct wibox.layout.stack
 -- @treturn widget A new stack layout
 
 local function new(...)

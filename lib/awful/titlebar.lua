@@ -502,7 +502,7 @@ end
 -- @tparam[opt=top] string args.fg_normal
 -- @tparam[opt=top] string args.fg_focus
 -- @tparam[opt=top] string args.font
--- @function awful.titlebar
+-- @constructorfct awful.titlebar
 local function new(c, args)
     args = args or {}
     local position = args.position or "top"

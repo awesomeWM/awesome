@@ -279,6 +279,7 @@ end
 -- three widgets. The widget set via :set_left() is left-aligned. :set_right()
 -- sets a widget which will be right-aligned. The remaining space between those
 -- two will be given to the widget set via :set_middle().
+-- @constructorfct wibox.layout.align.horizontal
 -- @tparam[opt] widget left Widget to be put to the left.
 -- @tparam[opt] widget middle Widget to be put to the middle.
 -- @tparam[opt] widget right Widget to be put to the right.
@@ -296,6 +297,7 @@ end
 -- three widgets. The widget set via :set_top() is top-aligned. :set_bottom()
 -- sets a widget which will be bottom-aligned. The remaining space between those
 -- two will be given to the widget set via :set_middle().
+-- @constructorfct wibox.layout.align.vertical
 -- @tparam[opt] widget top Widget to be put to the top.
 -- @tparam[opt] widget middle Widget to be put to the middle.
 -- @tparam[opt] widget bottom Widget to be put to the right.

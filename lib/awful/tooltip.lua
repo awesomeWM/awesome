@@ -577,7 +577,7 @@ end
 -- @see text
 -- @see markup
 -- @see align
--- @function awful.tooltip
+-- @constructorfct awful.tooltip
 function tooltip.new(args)
     -- gears.object, properties are linked to set_/get_ functions
     local self = object {

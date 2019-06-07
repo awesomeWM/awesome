@@ -91,7 +91,7 @@ end
 -- @param[opt] widget The widget to display.
 -- @param[opt] s The screen to display on.
 -- @treturn table A new only_on_screen container
--- @function wibox.container.only_on_screen
+-- @constructorfct awful.widget.only_on_screen
 local function new(widget, s)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

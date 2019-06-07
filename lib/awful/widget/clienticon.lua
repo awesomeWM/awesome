@@ -99,7 +99,7 @@ end
 --- Returns a new clienticon.
 -- @tparam client c The client whose icon should be displayed.
 -- @treturn widget A new `widget`
--- @function awful.widget.clienticon
+-- @constructorfct awful.widget.clienticon
 local function new(c)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

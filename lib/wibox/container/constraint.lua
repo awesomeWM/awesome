@@ -136,7 +136,7 @@ end
 -- @param[opt] width The maximum width of the widget. nil for no limit.
 -- @param[opt] height The maximum height of the widget. nil for no limit.
 -- @treturn table A new constraint container
--- @function wibox.container.constraint
+-- @constructorfct wibox.container.constraint
 local function new(widget, strategy, width, height)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

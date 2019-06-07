@@ -663,7 +663,7 @@ end
 -- @tparam[opt=false] boolean args.autostart Start the grabbing immediately
 -- @tparam[opt=false] boolean args.mask_modkeys Do not call the callbacks on
 --  modifier keys (like `Control` or `Mod4`) events.
--- @function awful.keygrabber
+-- @constructorfct awful.keygrabber
 function keygrab.run_with_keybindings(args)
     args = args or {}
 

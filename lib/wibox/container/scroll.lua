@@ -425,7 +425,7 @@ local function get_layout(dir, widget, fps, speed, extra_space, expand, max_size
 end
 
 --- Get a new horizontal scrolling container.
--- @function wibox.container.scroll.horizontal
+-- @constructorfct wibox.container.scroll.horizontal
 -- @param[opt] widget The widget that should be scrolled
 -- @param[opt=20] fps The number of frames per second
 -- @param[opt=10] speed The speed of the animation
@@ -440,7 +440,7 @@ function scroll.horizontal(widget, fps, speed, extra_space, expand, max_size, st
 end
 
 --- Get a new vertical scrolling container.
--- @function wibox.container.scroll.vertical
+-- @constructorfct wibox.container.scroll.vertical
 -- @param[opt] widget The widget that should be scrolled
 -- @param[opt=20] fps The number of frames per second
 -- @param[opt=10] speed The speed of the animation

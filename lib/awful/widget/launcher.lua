@@ -16,6 +16,7 @@ local launcher = { mt = {} }
 -- @param args Standard widget table arguments, plus image for the image path
 -- and command for the command to run on click, or either menu to create menu.
 -- @return A launcher widget.
+-- @constructorfct awful.widget.launcher
 function launcher.new(args)
     if not args.command and not args.menu then return end
     local w = wbutton(args)

@@ -1173,7 +1173,7 @@ luaA_screen_count(lua_State *L)
  * @tparam integer width width for screen.
  * @tparam integer height height for screen.
  * @return The new screen.
- * @function fake_add
+ * @constructorfct fake_add
  */
 static int
 luaA_screen_fake_add(lua_State *L)

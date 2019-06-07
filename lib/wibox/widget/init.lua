@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.widget
+-- @module wibox.widget
 ---------------------------------------------------------------------------
 
 local cairo = require("lgi").cairo

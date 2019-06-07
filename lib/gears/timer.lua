@@ -157,7 +157,7 @@ local timer_instance_mt = {
 --  "timeout" signal.
 -- @tparam[opt=false] boolean args.single_shot Run only once then stop.
 -- @treturn timer
--- @function gears.timer
+-- @constructorfct gears.timer
 function timer.new(args)
     args = args or {}
     local ret = object()
@@ -256,6 +256,8 @@ capi.awesome.connect_signal("refresh", timer.run_delayed_calls_now)
 function timer.mt.__call(_, ...)
     return timer.new(...)
 end
+
+--@DOC_object_COMMON@
 
 return setmetatable(timer, timer.mt)
 

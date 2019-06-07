@@ -322,7 +322,7 @@ end
 -- Note that widgets ignore `forced_height`. They will use the preferred/minimum width
 -- on the horizontal axis, and a stretched height on the vertical axis.
 -- @tparam widget ... Widgets that should be added to the layout.
--- @function wibox.layout.fixed.horizontal
+-- @constructorfct wibox.layout.fixed.horizontal
 function fixed.horizontal(...)
     return get_layout("x", ...)
 end
@@ -333,7 +333,7 @@ end
 -- Note that widgets ignore `forced_width`. They will use the preferred/minimum height
 -- on the vertical axis, and a stretched width on the horizontal axis.
 -- @tparam widget ... Widgets that should be added to the layout.
--- @function wibox.layout.fixed.vertical
+-- @constructorfct wibox.layout.fixed.vertical
 function fixed.vertical(...)
     return get_layout("y", ...)
 end

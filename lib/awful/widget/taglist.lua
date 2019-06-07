@@ -462,7 +462,7 @@ end
 -- @param style **DEPRECATED** use args.style
 -- @param update_function **DEPRECATED** use args.update_function
 -- @param base_widget **DEPRECATED** use args.base_widget
--- @function awful.widget.taglist
+-- @constructorfct awful.widget.taglist
 function taglist.new(args, filter, buttons, style, update_function, base_widget)
 
     local screen = nil

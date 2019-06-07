@@ -212,7 +212,7 @@ function manual_layout:reset()
 end
 
 --- Create a manual layout.
--- @function wibox.layout.manual
+-- @constructorfct wibox.layout.manual
 -- @tparam table ... Widgets to add to the layout.
 
 local function new_manual(...)

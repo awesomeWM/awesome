@@ -316,7 +316,7 @@ end
 
 --- Returns a new arcchart layout.
 -- @param[opt] widget The widget to display.
--- @function wibox.container.arcchart
+-- @constructorfct wibox.container.arcchart
 local function new(widget)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,

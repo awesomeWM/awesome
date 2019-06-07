@@ -133,7 +133,7 @@ end
 -- @param[opt] widget The widget to display.
 -- @param[opt] dir The direction to rotate to.
 -- @treturn table A new rotate container.
--- @function wibox.container.rotate
+-- @constructorfct wibox.container.rotate
 local function new(widget, dir)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

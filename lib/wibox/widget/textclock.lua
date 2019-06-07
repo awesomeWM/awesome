@@ -88,7 +88,7 @@ end
 --   e.g. "Z" for UTC, "±hh:mm" or "Europe/Amsterdam". See
 --   https://developer.gnome.org/glib/stable/glib-GTimeZone.html#g-time-zone-new.
 -- @treturn table A textbox widget.
--- @function wibox.widget.textclock
+-- @constructorfct wibox.widget.textclock
 local function new(format, refresh, tzid)
     local w = textbox()
     gtable.crush(w, textclock, true)

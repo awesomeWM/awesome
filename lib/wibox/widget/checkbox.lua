@@ -225,7 +225,7 @@ function checkbox:set_paddings(val)
 end
 
 --- Create a new checkbox.
--- @function wibox.widget.checkbox
+-- @constructorfct wibox.widget.checkbox
 -- @tparam[opt=false] boolean checked
 -- @tparam[opt] table args
 -- @tparam gears.color args.color The color.

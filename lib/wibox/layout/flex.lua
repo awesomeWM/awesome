@@ -170,7 +170,7 @@ end
 --- Returns a new horizontal flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
 -- @tparam widget ... Widgets that should be added to the layout.
--- @function wibox.layout.flex.horizontal
+-- @constructorfct wibox.layout.flex.horizontal
 function flex.horizontal(...)
     return get_layout("horizontal", ...)
 end
@@ -178,7 +178,7 @@ end
 --- Returns a new vertical flex layout. A flex layout shares the available space
 -- equally among all widgets. Widgets can be added via :add(widget).
 -- @tparam widget ... Widgets that should be added to the layout.
--- @function wibox.layout.flex.vertical
+-- @constructorfct wibox.layout.flex.vertical
 function flex.vertical(...)
     return get_layout("vertical", ...)
 end

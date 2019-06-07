@@ -166,7 +166,7 @@ end
 -- Note that this widget can only exist once.
 -- @tparam boolean revers Show in the opposite direction
 -- @treturn table The new `systray` widget
--- @function wibox.widget.systray
+-- @constructorfct wibox.widget.systray
 
 local function new(revers)
     local ret = wbase.make_widget(nil, nil, {enable_properties = true})

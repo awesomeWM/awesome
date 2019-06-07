@@ -172,7 +172,7 @@ end
 -- @tparam[opt="center"] string halign The horizontal alignment
 -- @tparam[opt="center"] string valign The vertical alignment
 -- @treturn table A new place container.
--- @function wibox.container.place
+-- @constructorfct wibox.container.place
 local function new(widget, halign, valign)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

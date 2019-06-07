@@ -259,7 +259,7 @@ end
 --        layout = awful.layout.suit.max,
 --    })
 --
--- @function awful.tag.add
+-- @constructorfct awful.tag.add
 -- @param name The tag name, a string
 -- @param props The tags inital properties, a table
 -- @return The created tag

@@ -885,7 +885,7 @@ end
 --
 -- A grid layout sets widgets in a grids of custom number of rows and columns.
 -- @tparam[opt="y"] string orientation The preferred grid extension direction.
--- @function wibox.layout.grid
+-- @constructorfct wibox.layout.grid
 local function new(orientation)
     -- Preference for vertical direction: fill rows first, extend grid with new row
     local dir = (orientation == "horizontal"or orientation == "vertical")
@@ -924,7 +924,7 @@ end
 -- up to `forced_num_rows`. Then the next column is filled, creating it if it doesn't exist.
 -- @tparam number|nil forced_num_rows Forced number of rows (`nil` for automatic).
 -- @tparam widget ... Widgets that should be added to the layout.
--- @function wibox.layout.grid.horizontal
+-- @constructorfct wibox.layout.grid.horizontal
 function grid.horizontal(forced_num_rows, widget, ...)
     local ret = new("horizontal")
     ret:set_forced_num_rows(forced_num_rows)
@@ -942,7 +942,7 @@ end
 -- up to `forced_num_cols`. Then the next row is filled, creating it if it doesn't exist.
 -- @tparam number|nil forced_num_cols Forced number of columns (`nil` for automatic).
 -- @tparam widget ... Widgets that should be added to the layout.
--- @function wibox.layout.grid.vertical
+-- @constructorfct wibox.layout.grid.vertical
 function grid.vertical(forced_num_cols, widget, ...)
     local ret = new("vertical")
     ret:set_forced_num_cols(forced_num_cols)

@@ -451,7 +451,7 @@ end
 -- @usage naughty.notify({ title = "Achtung!", message = "You're idling", timeout = 0 })
 -- @treturn ?table The notification object, or nil in case a notification was
 --   not displayed.
--- @function naughty.notification
+-- @constructorfct naughty.notification
 local function create(args)
     if cst.config.notify_callback then
         args = cst.config.notify_callback(args)

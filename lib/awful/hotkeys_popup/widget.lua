@@ -125,6 +125,7 @@ widget.merge_duplicates = true
 -- @tparam[opt] table args.labels Labels used for displaying human-readable keynames.
 -- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
 -- @return Widget instance.
+-- @constructorfct awful.widget.hotkeys_popup.widget.new
 function widget.new(args)
     args = args or {}
     local widget_instance = {

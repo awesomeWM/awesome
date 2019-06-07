@@ -385,7 +385,7 @@ end
 -- @param[opt] widget The widget to display.
 -- @param[opt] bg The background to use for that widget.
 -- @param[opt] shape A `gears.shape` compatible shape function
--- @function wibox.container.background
+-- @constructorfct wibox.container.background
 local function new(widget, bg, shape)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,

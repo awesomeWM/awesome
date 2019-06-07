@@ -475,7 +475,7 @@ end
 
 --- Create a slider widget.
 -- @tparam[opt={}] table args
--- @function wibox.widget.slider
+-- @constructorfct wibox.widget.slider
 local function new(args)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,

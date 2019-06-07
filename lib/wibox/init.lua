@@ -253,7 +253,7 @@ end
 -- @tparam[opt=nil] table args
 --@DOC_wibox_constructor_COMMON@
 -- @treturn wibox The new wibox
--- @function .wibox
+-- @constructorfct wibox
 
 local function new(args)
     args = args or {}

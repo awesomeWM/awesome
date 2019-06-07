@@ -190,7 +190,7 @@ end
 -- @param[opt] color A color for the margins.
 -- @param[opt] draw_empty whether or not to draw the margin when the content is empty
 -- @treturn table A new margin container
--- @function wibox.container.margin
+-- @constructorfct wibox.container.margin
 local function new(widget, left, right, top, bottom, color, draw_empty)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

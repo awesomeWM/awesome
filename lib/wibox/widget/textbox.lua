@@ -280,7 +280,7 @@ end
 -- @tparam[opt=""] string text The textbox content
 -- @tparam[opt=false] boolean ignore_markup Ignore the pango/HTML markup
 -- @treturn table A new textbox widget
--- @function wibox.widget.textbox
+-- @constructorfct wibox.widget.textbox
 local function new(text, ignore_markup)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

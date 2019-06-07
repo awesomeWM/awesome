@@ -252,7 +252,11 @@ local function update_layout(self)
     update_status(self)
 end
 
---- Create a keyboard layout widget. It shows current keyboard layout name in a textbox.
+--- Create a keyboard layout widget.
+--
+-- It shows current keyboard layout name in a textbox.
+--
+-- @constructorfct awful.widget.keyboardlayout
 -- @return A keyboard layout widget.
 function keyboardlayout.new()
     local widget = textbox()

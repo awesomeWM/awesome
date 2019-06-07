@@ -108,7 +108,7 @@ end
 -- @param[opt] widget The widget to display.
 -- @param[opt] reflection A table describing the reflection to apply.
 -- @treturn table A new mirror container
--- @function wibox.container.mirror
+-- @constructorfct wibox.container.mirror
 local function new(widget, reflection)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
     ret._private.horizontal = false

@@ -157,7 +157,7 @@ end
 --   to fit into the available space.
 -- @param clip_shape A `gears.shape` compatible function
 -- @treturn table A new `imagebox`
--- @function wibox.widget.imagebox
+-- @constructorfct wibox.widget.imagebox
 local function new(image, resize_allowed, clip_shape)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

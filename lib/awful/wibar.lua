@@ -344,7 +344,7 @@ end
 -- @tparam string args.stretch If the wibar need to be stretched to fill the screen.
 --@DOC_wibox_constructor_COMMON@
 -- @return The new wibar
--- @function awful.wibar
+-- @constructorfct awful.wibar
 function awfulwibar.new(args)
     args = args or {}
     local position = args.position or "top"

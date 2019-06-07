@@ -394,7 +394,7 @@ end
 -- @tparam table|number args.offset The X and Y offset compared to the parent object
 -- @tparam boolean args.hide_on_right_click Whether or not to hide the popup on
 --  right clicks.
--- @function awful.popup
+-- @constructorfct awful.popup
 local function create_popup(_, args)
     assert(args)
 
