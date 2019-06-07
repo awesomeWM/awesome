@@ -196,6 +196,7 @@ local conns = {}
 -- @usage naughty.connect_signal("added", function(notif)
 --    -- do something
 -- end)
+-- @staticfct naughty.connect_signal
 function naughty.connect_signal(name, func)
     assert(name)
     conns[name] = conns[name] or {}
@@ -205,6 +206,7 @@ end
 --- Emit a notification signal.
 -- @tparam string name The signal name.
 -- @param ... The signal callback arguments
+-- @staticfct naughty.emit_signal
 function naughty.emit_signal(name, ...)
     assert(name)
     for _, func in pairs(conns[name] or {}) do
@@ -216,6 +218,7 @@ end
 -- @tparam string name The name of the signal
 -- @tparam function func The attached function
 -- @treturn boolean If the disconnection was successful
+-- @staticfct naughty.disconnect_signal
 function naughty.disconnect_signal(name, func)
     for k, v in ipairs(conns[name] or {}) do
         if v == func then
@@ -291,6 +294,7 @@ end
 -- @treturn true|nil True if all notifications were successfully destroyed, nil
 -- otherwise.
 -- @see notification_closed_reason
+-- @staticfct naughty.destroy_all_notifications
 function naughty.destroy_all_notifications(screens, reason)
     if not screens then
         screens = {}
@@ -323,6 +327,7 @@ end
 --
 -- @param id ID of the notification
 -- @return notification object if it was found, nil otherwise
+-- @staticfct naughty.get_by_id
 function naughty.get_by_id(id)
     -- iterate the notifications to get the notfications with the correct ID
     for s in pairs(naughty.notifications) do

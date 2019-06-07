@@ -12,10 +12,9 @@ local gtable = {}
 
 --- Join all tables given as arguments.
 -- This will iterate over all tables and insert their entries into a new table.
--- @class function
--- @name join
 -- @tparam table ... Tables to join.
 -- @treturn table A new table containing all entries from the arguments.
+-- @staticfct gears.table.join
 function gtable.join(...)
     local ret = {}
     for i = 1, select("#", ...) do
@@ -36,12 +35,12 @@ end
 --- Override elements in the first table by the one in the second.
 --
 -- Note that this method doesn't copy entries found in `__index`.
--- @class function
--- @name crush
+--
 -- @tparam table t the table to be overriden
 -- @tparam table set the table used to override members of `t`
 -- @tparam[opt=false] bool raw Use rawset (avoid the metatable)
 -- @treturn table t (for convenience)
+-- @staticfct gears.table.crush
 function gtable.crush(t, set, raw)
     if raw then
         for k, v in pairs(set) do
@@ -63,10 +62,9 @@ end
 --
 -- This function removes any entries with non-numeric keys.
 --
--- @class function
--- @name from_sparse
 -- @tparam table t A potentially sparse table.
 -- @treturn table A packed table with only numeric keys.
+-- @staticfct gears.table.from_sparse
 function gtable.from_sparse(t)
     local keys= {}
     for k in pairs(t) do
@@ -86,12 +84,12 @@ function gtable.from_sparse(t)
 end
 
 --- Check if a table has an item and return its key.
--- @class function
--- @name hasitem
+--
 -- @tparam table t The table.
 -- @param item The item to look for in values of the table.
 -- @treturn[1] string|number The key of the item.
 -- @treturn[2] nil
+-- @staticfct gears.table.hasitem
 function gtable.hasitem(t, item)
     for k, v in pairs(t) do
         if v == item then
@@ -110,6 +108,7 @@ end
 -- @tparam[opt=nil] number max The maximum number of entries to find.
 -- @treturn table|nil An ordered table with all the keys or `nil` if none were
 --   found.
+-- @staticfct gears.table.find_keys
 function gtable.find_keys(t, matcher, ordered, max)
     if max == 0 then return nil end
 
@@ -134,7 +133,8 @@ end
 --   returning a boolean.
 -- @tparam[opt=false] boolean ordered If true, only look for continuous
 --   numeric keys.
--- @return The table key or nil
+-- @return The table key or nil.
+-- @staticfct gears.table.find_first_key
 function gtable.find_first_key(t, matcher, ordered)
     local ret = gtable.find_keys(t, matcher, ordered, 1)
 
@@ -143,10 +143,10 @@ end
 
 
 --- Get a sorted table with all integer keys from a table.
--- @class function
--- @name keys
+--
 -- @tparam table t The table for which the keys to get.
--- @treturn table A table with keys
+-- @treturn table A table with keys.
+-- @staticfct gears.table.keys
 function gtable.keys(t)
     local keys = { }
     for k, _ in pairs(t) do
@@ -159,11 +159,11 @@ function gtable.keys(t)
 end
 
 --- Filter a table's keys for certain content type.
--- @class function
--- @name keys_filter
+--
 -- @tparam table t The table to retrieve the keys for.
 -- @tparam string ... The types to look for.
 -- @treturn table A filtered table.
+-- @staticfct gears.table.keys_filter
 function gtable.keys_filter(t, ...)
     local keys = gtable.keys(t)
     local keys_filtered = { }
@@ -179,10 +179,10 @@ function gtable.keys_filter(t, ...)
 end
 
 --- Reverse a table.
--- @class function
--- @name reverse
+--
 -- @tparam table t The table to reverse.
 -- @treturn table A reversed table.
+-- @staticfct gears.table.reverse
 function gtable.reverse(t)
     local tr = { }
     -- Reverse all elements with integer keys.
@@ -199,11 +199,11 @@ function gtable.reverse(t)
 end
 
 --- Clone a table.
--- @class function
--- @name clone
+--
 -- @tparam table t The table to clone.
 -- @tparam[opt=true] bool deep Create a deep clone?
 -- @treturn table A clone of `t`.
+-- @staticfct gears.table.clone
 function gtable.clone(t, deep)
     deep = deep == nil and true or deep
     local c = { }
@@ -218,11 +218,10 @@ function gtable.clone(t, deep)
 end
 
 --- Iterate over a table.
+--
 -- Returns an iterator to cycle through all elements of a table that match a
 -- given criteria, starting from the first element or the given index.
 --
--- @class function
--- @name iterate
 -- @tparam table t The table to iterate.
 -- @tparam func  filter A function that returns true to indicate a positive
 --   match.
@@ -230,6 +229,7 @@ end
 -- @tparam[opt=1] int start Index to start iterating from.
 --   Default is 1 (=> start of the table).
 -- @treturn func
+-- @staticfct gears.table.iterate
 function gtable.iterate(t, filter, start)
     local count  = 0
     local index  = start or 1
@@ -246,11 +246,11 @@ function gtable.iterate(t, filter, start)
 end
 
 --- Merge items from one table to another one.
--- @class function
--- @name merge
+--
 -- @tparam table t The container table
 -- @tparam table set The mixin table.
--- @treturn table (for convenience)
+-- @treturn table (for convenience).
+-- @staticfct gears.table.merge
 function gtable.merge(t, set)
     for _, v in ipairs(set) do
         table.insert(t, v)
@@ -259,13 +259,14 @@ function gtable.merge(t, set)
 end
 
 --- Map a function to a table.
+--
 -- The function is applied to each value on the table, returning a modified
 -- table.
--- @class function
--- @name map
+--
 -- @tparam function f The function to be applied to each value in the table.
 -- @tparam table tbl The container table whose values will be operated on.
 -- @treturn table
+-- @staticfct gears.table.map
 function gtable.map(f, tbl)
     local t = {}
     for k,v in pairs(tbl) do

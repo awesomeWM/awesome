@@ -724,16 +724,6 @@ function keygrab.run_with_keybindings(args)
     return ret
 end
 
---- Run a grabbing function.
---
--- Calling this is equivalent to `keygrabber.run`.
---
--- @param g The key grabber callback that will get the key events until it
---   will be deleted or a new grabber is added.
--- @return the given callback `g`.
---
--- @deprecated awful.keygrabber.run
-
 --- A lower level API to interact with the keygrabber directly.
 --
 -- Grab keyboard input and read pressed keys, calling the least callback
@@ -750,7 +740,7 @@ end
 --
 -- Here is the content of the modifier table:
 --
--- <table>
+-- <table class='widget_list' border=1>
 --  <tr style='font-weight: bold;'>
 --   <th align='center'>Modifier name </th>
 --   <th align='center'>Key name</th>
@@ -785,7 +775,7 @@ end
 --     end
 --   end)
 -- end
--- @function awful.keygrabber.run
+-- @deprecated awful.keygrabber.run
 function keygrab.run(g)
     -- Remove the grabber if it is in the stack.
     keygrab.stop(g)
@@ -807,7 +797,7 @@ end
 local signals = {}
 
 --- Connect to a signal for all keygrabbers at once.
--- @function awful.keygrabber.connect_signal
+-- @staticfct awful.keygrabber.connect_signal
 -- @tparam string name The signal name.
 -- @tparam function callback The callback.
 function keygrab.connect_signal(name, callback)
@@ -820,7 +810,7 @@ function keygrab.connect_signal(name, callback)
 end
 
 --- Disconnect to a signal for all keygrabbers at once.
--- @function awful.keygrabber.disconnect_signal
+-- @staticfct awful.keygrabber.disconnect_signal
 -- @tparam string name The signal name.
 -- @tparam function callback The callback.
 function keygrab.disconnect_signal(name, callback)
@@ -840,7 +830,7 @@ end
 -- `my_keygrabber:emit_signal(name, ...)`. This function works on the whole
 -- keygrabber module, not one of its instance.
 --
--- @function awful.keygrabber.emit_signal
+-- @staticfct awful.keygrabber.emit_signal
 -- @tparam string name The signal name.
 -- @param ... Other arguments for the callbacks.
 function keygrab.emit_signal(name, ...)

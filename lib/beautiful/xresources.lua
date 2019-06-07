@@ -3,7 +3,7 @@
 --
 -- @author Yauhen Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2015 Yauhen Kirylau
--- @submodule beautiful
+-- @module beautiful
 ----------------------------------------------------------------------------
 
 -- Grab environment
@@ -45,7 +45,8 @@ local fallback = {
 }
 
 --- Get current base colorscheme from xrdb.
--- @treturn table Color table with keys 'background', 'foreground' and 'color0'..'color15'
+-- @treturn table Color table with keys 'background', 'foreground' and 'color0'..'color15'.
+-- @staticfct beautiful.xresources.get_current_theme
 function xresources.get_current_theme()
     local keys = { 'background', 'foreground' }
     for i=0,15 do table.insert(keys, "color"..i) end
@@ -77,7 +78,7 @@ end
 -- This function is deprecated. Use `s.dpi` and avoid getting the DPI without
 -- a screen.
 --
--- @deprecated xresources.get_dpi
+-- @deprecated beautiful.xresources.get_dpi
 -- @tparam[opt] integer|screen s The screen.
 -- @treturn number DPI value.
 
@@ -118,6 +119,7 @@ end
 --- Set DPI for a given screen (defaults to global).
 -- @tparam number dpi DPI value.
 -- @tparam[opt] integer s Screen.
+-- @staticfct beautiful.xresources.set_dpi
 function xresources.set_dpi(dpi, s)
     s = get_screen(s)
     if not s then
@@ -132,6 +134,7 @@ end
 -- @tparam number size Size
 -- @tparam[opt] integer|screen s The screen.
 -- @treturn integer Resulting size (rounded to integer).
+-- @staticfct beautiful.xresources.apply_dpi
 function xresources.apply_dpi(size, s)
     return round(size / 96 * xresources.get_dpi(s))
 end

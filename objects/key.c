@@ -74,17 +74,17 @@
 /** Get the number of instances.
  *
  * @return The number of key objects alive.
- * @function instances
+ * @staticfct instances
  */
 
 /** Set a __index metamethod for all key instances.
  * @tparam function cb The meta-method
- * @function set_index_miss_handler
+ * @staticfct set_index_miss_handler
  */
 
 /** Set a __newindex metamethod for all key instances.
  * @tparam function cb The meta-method
- * @function set_newindex_miss_handler
+ * @staticfct set_newindex_miss_handler
  */
 
 static void

@@ -454,6 +454,7 @@ end
 --   with mod table, key and command as arguments when a key was pressed.
 --   [**DEPRECATED**]
 -- @see gears.color
+-- @staticfct awful.prompt.run
 function prompt.run(args, textbox, exe_callback, completion_callback,
                     history_path, history_max, done_callback,
                     changed_callback, keypressed_callback)

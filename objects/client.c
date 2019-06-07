@@ -932,17 +932,17 @@
 /** Get the number of instances.
  *
  * @return The number of client objects alive.
- * @function instances
+ * @staticfct instances
  */
 
 /* Set a __index metamethod for all client instances.
  * @tparam function cb The meta-method
- * @function set_index_miss_handler
+ * @staticfct set_index_miss_handler
  */
 
 /* Set a __newindex metamethod for all client instances.
  * @tparam function cb The meta-method
- * @function set_newindex_miss_handler
+ * @staticfct set_newindex_miss_handler
  */
 
 typedef enum {
@@ -2426,7 +2426,7 @@ client_kill(client_t *c)
  * @tparam[opt] boolean stacked Return clients in stacking order? (ordered from
  *   top to bottom).
  * @treturn table A table with clients.
- * @function get
+ * @staticfct get
  */
 static int
 luaA_client_get(lua_State *L)

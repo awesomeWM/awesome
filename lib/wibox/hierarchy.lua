@@ -5,7 +5,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2015 Uli Schlachter
--- @module wibox.hierarchy
+-- @classmod wibox.hierarchy
 ---------------------------------------------------------------------------
 
 local matrix = require("gears.matrix")
@@ -22,6 +22,7 @@ local widgets_to_count = setmetatable({}, { __mode = "k" })
 -- occurrences. Note that for correct operations, the widget must not yet be
 -- visible in any hierarchy.
 -- @param widget The widget that should be counted.
+-- @staticfct wibox.hierarchy.count_widget
 function hierarchy.count_widget(widget)
     widgets_to_count[widget] = true
 end
@@ -203,6 +204,7 @@ end
 --   hierarchy on widget::layout_changed on some widget.
 -- @param callback_arg A second argument that is given to the above callbacks.
 -- @return A new widget hierarchy
+-- @constructorfct wibox.hierarchy.new
 function hierarchy.new(context, widget, width, height, redraw_callback, layout_callback, callback_arg)
     local result = hierarchy_new(redraw_callback, layout_callback, callback_arg)
     result:update(context, widget, width, height)
@@ -217,6 +219,7 @@ end
 -- @param[opt] region A region to use for accumulating changed parts
 -- @return A cairo region describing the changed parts (either the `region`
 --   argument or a new, internally created region).
+-- @method update
 function hierarchy:update(context, widget, width, height, region)
     region = region or cairo.Region.create()
     hierarchy_update(self, context, widget, width, height, region, self._matrix, self._matrix_to_device)
@@ -224,6 +227,7 @@ function hierarchy:update(context, widget, width, height, region)
 end
 
 --- Get the widget that this hierarchy manages.
+-- @method get_widget
 function hierarchy:get_widget()
     return self._widget
 end
@@ -231,6 +235,7 @@ end
 --- Get a matrix that transforms to the parent's coordinate space from this
 -- hierarchy's coordinate system.
 -- @return A matrix describing the transformation.
+-- @method get_matrix_to_parent
 function hierarchy:get_matrix_to_parent()
     return self._matrix
 end
@@ -239,6 +244,7 @@ end
 -- system (aka the coordinate system of the device that this
 -- hierarchy is applied upon) from this hierarchy's coordinate system.
 -- @return A matrix describing the transformation.
+-- @method get_matrix_to_device
 function hierarchy:get_matrix_to_device()
     return self._matrix_to_device
 end
@@ -246,6 +252,7 @@ end
 --- Get a matrix that transforms from the parent's coordinate space into this
 -- hierarchy's coordinate system.
 -- @return A matrix describing the transformation.
+-- @method get_matrix_from_parent
 function hierarchy:get_matrix_from_parent()
     local m = self:get_matrix_to_parent()
     return m:invert()
@@ -255,6 +262,7 @@ end
 -- system (aka the coordinate system of the device that this
 -- hierarchy is applied upon) into this hierarchy's coordinate system.
 -- @return A matrix describing the transformation.
+-- @method get_matrix_from_device
 function hierarchy:get_matrix_from_device()
     local m = self:get_matrix_to_device()
     return m:invert()
@@ -264,6 +272,7 @@ end
 -- This includes the size of this element plus the size of all children
 -- (after applying the corresponding transformation).
 -- @return x, y, width, height
+-- @method get_draw_extents
 function hierarchy:get_draw_extents()
     local ext = self._draw_extents
     return ext.x, ext.y, ext.width, ext.height
@@ -271,6 +280,7 @@ end
 
 --- Get the size that this hierarchy logically covers (in the current coordinate space).
 -- @return width, height
+-- @method get_size
 function hierarchy:get_size()
     local ext = self._size
     return ext.width, ext.height
@@ -278,6 +288,7 @@ end
 
 --- Get a list of all children.
 -- @return List of all children hierarchies.
+-- @method get_children
 function hierarchy:get_children()
     return self._children
 end
@@ -286,6 +297,7 @@ end
 -- only works with widgets registered via `count_widget`.
 -- @param widget The widget that should be counted
 -- @return The number of times that this widget is contained in this hierarchy.
+-- @method get_count
 function hierarchy:get_count(widget)
     return self._widget_counts[widget] or 0
 end
@@ -301,6 +313,7 @@ end
 -- context. The context's clip is used to skip parts that aren't visible.
 -- @param context The context in which widgets are drawn.
 -- @param cr The cairo context that is used for drawing.
+-- @method draw
 function hierarchy:draw(context, cr)
     local widget = self:get_widget()
     if not widget._private.visible then

@@ -217,11 +217,6 @@ local function set_position(wb, position, skip_reattach)
     end
 end
 
---- Stretch the wibar.
---
--- @property stretch
--- @param[opt=true] boolean
-
 local function get_stretch(w)
     return w._stretch
 end
@@ -233,7 +228,8 @@ local function set_stretch(w, value)
 end
 
 --- Remove a wibar.
--- @function remove
+-- @method remove
+
 local function remove(self)
     self.visible = false
 

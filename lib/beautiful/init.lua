@@ -37,6 +37,56 @@ local descs = setmetatable({}, { __mode = 'k' })
 local fonts = setmetatable({}, { __mode = 'v' })
 local active_font
 
+
+-- luacheck: max comment line length 300
+
+--- Get GTK+3 theme variables from GtkStyleContext
+-- @treturn table Key-value table with the following structure:
+-- <table class='widget_list' border=1>
+-- <tr style='font-weight: bold;'> <th align='center'>Result key</th> <th align='center'>StyleContext key</th> <th align='center'>StyleContext fallback #1</th> <th align='center'>StyleContext fallback #2</th> <th align='center'>GTK Widget fallback</th> </tr>
+-- <tr> <td>`font_size`</td> <td></td> <td></td> <td></td> <td>Label font-size</td> </tr>
+-- <tr> <td>`font_family`</td> <td></td> <td></td> <td></td> <td>Label font-family</td> </tr>
+-- <tr> <td>`bg_color`</td> <td>`theme_bg_color`</td> <td></td> <td></td> <td>Window bg</td> </tr>
+-- <tr> <td>`fg_color`</td> <td>`theme_fg_color`</td> <td></td> <td></td> <td>Window fg</td> </tr>
+-- <tr> <td>`base_color`</td> <td>`theme_base_color`</td> <td></td> <td></td> <td>Entry bg</td> </tr>
+-- <tr> <td>`text_color`</td> <td>`theme_text_color`</td> <td></td> <td></td> <td>Entry fg</td> </tr>
+-- <tr> <td>`button_bg_color`</td> <td>`theme_button_bg_color`</td> <td>`theme_bg_color`</td> <td></td> <td>Button bg</td> </tr>
+-- <tr> <td>`button_fg_color`</td> <td>`theme_button_fg_color`</td> <td>`theme_fg_color`</td> <td></td> <td>Button fg</td> </tr>
+-- <tr> <td>`button_border_color`</td> <td></td> <td></td> <td></td> <td>Button border-color</td> </tr>
+-- <tr> <td>`button_border_radius`</td> <td></td> <td></td> <td></td> <td>Button border-radius</td> </tr>
+-- <tr> <td>`button_border_width`</td> <td></td> <td></td> <td></td> <td>Button border-top-width</td> </tr>
+-- <tr> <td>`selected_bg_color`</td> <td>`theme_selected_bg_color`</td> <td></td> <td></td> <td>ToggleButton bg</td> </tr>
+-- <tr> <td>`selected_fg_color`</td> <td>`theme_selected_fg_color`</td> <td></td> <td></td> <td>ToggleButton fg</td> </tr>
+-- <tr> <td>`menubar_bg_color`</td> <td>`menubar_bg_color`</td> <td>`theme_bg_color`</td> <td></td> <td>HeaderBar bg</td> </tr>
+-- <tr> <td>`menubar_fg_color`</td> <td>`menubar_fg_color`</td> <td>`theme_fg_color`</td> <td></td> <td>HeaderBar fg</td> </tr>
+-- <tr> <td>`header_button_bg_color`</td> <td>`header_button_bg_color`</td> <td>`menubar_bg_color`</td> <td>`theme_bg_color`</td> <td>HeaderBar > Button bg</td> </tr>
+-- <tr> <td>`header_button_fg_color`</td> <td>`header_button_fg_color`</td> <td>`menubar_fg_color`</td> <td>`theme_fg_color`</td> <td>HeaderBar > Button fg</td> </tr>
+-- <tr> <td>`header_button_border_color`</td> <td></td> <td></td> <td></td> <td>HeaderBar > Button border-color</td> </tr>
+-- <tr> <td>`error_color`</td> <td>`error_color`</td> <td>`error_bg_color`</td> <td></td> <td>destructive Button bg</td> </tr>
+-- <tr> <td>`error_bg_color`</td> <td>`error_bg_color`</td> <td>`error_color`</td> <td></td> <td>destructive Button bg</td> </tr>
+-- <tr> <td>`error_fg_color`</td> <td>`error_fg_color`</td> <td>`theme_selected_fg_color`</td> <td></td> <td>destructive Button fg</td> </tr>
+-- <tr> <td>`warning_color`</td> <td>`warning_color`</td> <td>`warning_bg_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`warning_bg_color`</td> <td>`warning_bg_color`</td> <td>`warning_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`warning_fg_color`</td> <td>`warning_fg_color`</td> <td>`theme_selected_fg_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`success_color`</td> <td>`success_color`</td> <td>`success_bg_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`success_bg_color`</td> <td>`success_bg_color`</td> <td>`success_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`success_fg_color`</td> <td>`success_fg_color`</td> <td>`theme_selected_fg_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`tooltip_bg_color`</td> <td>`theme_tooltip_bg_color`</td> <td>`theme_bg_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`tooltip_fg_color`</td> <td>`theme_tooltip_fg_color`</td> <td>`theme_fg_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`osd_bg_color`</td> <td>`osd_bg`</td> <td>`theme_tooltip_bg_color`</td> <td>`theme_bg_color`</td> <td></td> </tr>
+-- <tr> <td>`osd_fg_color`</td> <td>`osd_fg`</td> <td>`theme_tooltip_fg_color`</td> <td>`theme_fg_color`</td> <td></td> </tr>
+-- <tr> <td>`osd_border_color`</td> <td>`osd_borders_color`</td> <td>`osd_fg_color`</td> <td></td> <td></td> </tr>
+-- <tr> <td>`wm_bg_color`</td> <td>`wm_bg`</td> <td>`menubar_bg_color`</td> <td>`theme_bg_color`</td> <td>HeaderBar bg</td> </tr>
+-- <tr> <td>`wm_border_focused_color`</td> <td>`wm_border_focused`</td> <td>`theme_selected_bg_color`</td> <td></td> <td>ToggleButton bg</td> </tr>
+-- <tr> <td>`wm_border_unfocused_color`</td> <td>`wm_border_unfocused`</td> <td>`wm_border`</td> <td>`menubar_bg_color`</td> <!--<td>`theme_bg_color`</td>--> <td>HeaderBar bg</td> </tr>
+-- <tr> <td>`wm_title_focused_color`</td> <td>`wm_title_focused`</td> <td>`wm_title`</td> <td>`theme_selected_fg_color`</td> <td>ToggleButton fg</td> </tr>
+-- <tr> <td>`wm_title_unfocused_color`</td> <td>`wm_title_unfocused`</td> <td>`wm_unfocused_title`</td> <td>`menubar_fg_color`</td> <!--<td>`theme_fg_color`</td>--> <td>HeaderBar fg</td> </tr>
+-- <tr> <td>`wm_icons_focused_color`</td> <td>`wm_icons_focused`</td> <td>`wm_title_focused`</td> <td>`theme_selected_fg_color`</td> <td>ToggleButton fg</td> </tr>
+-- <tr> <td>`wm_icons_unfocused_color`</td> <td>`wm_icons_unfocused`</td> <td>`wm_title_unfocused`</td> <td>`menubar_fg_color`</td> <!--<td>`theme_fg_color`</td>--> <td>HeaderBar fg</td> </tr>
+-- </table>
+--
+-- @staticfct beautiful.gtk.get_theme_variables
+
 --- The default font.
 -- @beautiful beautiful.font
 
@@ -155,6 +205,7 @@ end
 -- See https://developer.gnome.org/pango/stable/pango-Fonts.html#PangoFontDescription.
 -- @tparam string|lgi.Pango.FontDescription name The name of the font.
 -- @treturn lgi.Pango.FontDescription
+-- @staticfct beautiful.get_font
 function beautiful.get_font(name)
     return load_font(name).description
 end
@@ -165,6 +216,7 @@ end
 -- @tparam string|Pango.FontDescription name The base font.
 -- @tparam string merge Attributes that should be merged, e.g. "bold".
 -- @treturn lgi.Pango.FontDescription
+-- @staticfct beautiful.get_merged_font
 function beautiful.get_merged_font(name, merge)
     local font = beautiful.get_font(name)
     merge = Pango.FontDescription.from_string(merge)
@@ -175,7 +227,8 @@ end
 
 --- Get the height of a font.
 --
--- @param name Name of the font
+-- @param name Name of the font.
+-- @staticfct beautiful.get_font_height
 function beautiful.get_font_height(name)
     return load_font(name).height
 end
@@ -208,6 +261,7 @@ end
 --   the theme file (which should return a table) or directly a table
 --   containing all the theme values.
 -- @treturn true|nil True if successful, nil in case of error.
+-- @staticfct beautiful.init
 function beautiful.init(config)
     if config then
         local state, t_theme = nil, nil
@@ -258,6 +312,7 @@ end
 --- Get the current theme.
 --
 -- @treturn table The current theme table.
+-- @staticfct beautiful.get
 function beautiful.get()
     return theme
 end

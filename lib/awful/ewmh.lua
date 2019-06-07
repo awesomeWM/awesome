@@ -54,6 +54,7 @@ local ewmh = {
 --- Update a client's settings when its geometry changes, skipping signals
 -- resulting from calls within.
 local repair_geometry_lock = false
+
 local function repair_geometry(window)
     if repair_geometry_lock then return end
     repair_geometry_lock = true
@@ -166,6 +167,7 @@ end
 -- @see generic_activate_filters
 -- @see contextual_activate_filters
 -- @see remove_activate_filter
+-- @staticfct awful.ewmh.add_activate_filter
 function ewmh.add_activate_filter(f, context)
     if not context then
         table.insert(ewmh.generic_activate_filters, f)
@@ -185,6 +187,7 @@ end
 -- @see generic_activate_filters
 -- @see contextual_activate_filters
 -- @see add_activate_filter
+-- @staticfct awful.ewmh.remove_activate_filter
 function ewmh.remove_activate_filter(f, context)
     local tab = context and (ewmh.contextual_activate_filters[context] or {})
         or ewmh.generic_activate_filters

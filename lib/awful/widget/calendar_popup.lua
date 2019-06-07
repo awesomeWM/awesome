@@ -203,6 +203,7 @@ end
 -- @tparam string position Two-character position of the calendar in the screen
 -- @tparam screen screen Screen where to display the calendar
 -- @treturn wibox The wibox calendar
+-- @method call_calendar
 function calendar_popup:call_calendar(offset, position, screen)
     local inc_offset = offset or 0
     local pos = position or self.position
@@ -230,7 +231,8 @@ function calendar_popup:call_calendar(offset, position, screen)
     return self
 end
 
---- Toggle calendar visibility
+--- Toggle calendar visibility.
+-- @method toggle
 function calendar_popup:toggle()
     self:call_calendar(0)
     self.visible = not self.visible
@@ -247,6 +249,7 @@ end
 -- @tparam[opt={}] table args Additional options
 -- @tparam[opt=true] bool args.on_hover Show popup during mouse hover
 -- @treturn wibox The wibox calendar
+-- @method attach
 function calendar_popup:attach(widget, position, args)
     position = position or "tr"
     args = args or {}

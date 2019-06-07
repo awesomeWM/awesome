@@ -191,17 +191,17 @@
 /** Get the number of instances.
  *
  * @return The number of screen objects alive.
- * @function instances
+ * @staticfct instances
  */
 
 /* Set a __index metamethod for all screen instances.
  * @tparam function cb The meta-method
- * @function set_index_miss_handler
+ * @staticfct set_index_miss_handler
  */
 
 /* Set a __newindex metamethod for all screen instances.
  * @tparam function cb The meta-method
- * @function set_newindex_miss_handler
+ * @staticfct set_newindex_miss_handler
  */
 
 DO_ARRAY(xcb_randr_output_t, randr_output, DO_NOTHING);
@@ -1090,7 +1090,7 @@ luaA_screen_module_index(lua_State *L)
  * for s in screen do
  *     print("Oh, wow, we have screen " .. tostring(s))
  * end
- * @function screen
+ * @staticfct screen
  */
 static int
 luaA_screen_module_call(lua_State *L)
@@ -1147,7 +1147,7 @@ luaA_screen_get_workarea(lua_State *L, screen_t *s)
 /** Get the number of screens.
  *
  * @return The screen count, at least 1.
- * @function count
+ * @staticfct count
  */
 static int
 luaA_screen_count(lua_State *L)

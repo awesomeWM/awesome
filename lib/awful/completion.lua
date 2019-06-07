@@ -32,6 +32,7 @@ local bashcomp_src = "@SYSCONFDIR@/bash_completion"
 --- Enable programmable bash completion in awful.completion.bash at the price of
 -- a slight overhead.
 -- @param src The bash completion source file, /etc/bash_completion by default.
+-- @staticfct awful.completion.bashcomp_load
 function completion.bashcomp_load(src)
     if src then bashcomp_src = src end
     local c, err = io.popen("/usr/bin/env bash -c 'source " .. bashcomp_src .. "; complete -p'")
@@ -70,6 +71,7 @@ completion.default_shell = nil
 -- @treturn string The new command.
 -- @treturn number The new cursor position.
 -- @treturn table The table with all matches.
+-- @staticfct awful.completion.shell
 function completion.shell(command, cur_pos, ncomp, shell)
     local wstart = 1
     local wend = 1
@@ -192,6 +194,7 @@ end
 -- @param ncomp The number of yet requested completion using current text.
 -- @param keywords The keywords table uised for completion.
 -- @return The new match, the new cursor position, the table of all matches.
+-- @staticfct awful.completion.generic
 function completion.generic(text, cur_pos, ncomp, keywords) -- luacheck: no unused args
     -- The keywords table may be empty
     if #keywords == 0 then

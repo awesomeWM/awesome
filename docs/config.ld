@@ -56,6 +56,9 @@ tparam_alias('screen_or_idx', 'screen|int')
 new_type("constructorfct", "Constructors", false, "Parameters")
 -- Hack to get the functions on top of the signals and properties
 new_type("function", "Functions", false, "Parameters")
+-- For "classes", use an explicit type for static functions. This allows
+-- @function and its implicit cousin to be banned in the CI.
+new_type("staticfct", "Static module functions", false, "Parameters")
 -- Documentation for objects properties
 new_type("property", "Object properties", false, "Type")
 -- Documentation for objects deprecated properties
@@ -141,6 +144,7 @@ file = {
         '../lib/wibox/container/init.lua',
         '../lib/naughty/constants.lua',
         '../lib/naughty/dbus.lua',
+        '../lib/beautiful/gtk.lua',
 
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',
@@ -189,7 +193,23 @@ local coreclassmap = {
     mouse  = "mouse<span class='listplusign'> and awful.mouse</span>",
 }
 
+-- Add the full module name in front.
+local add_mod = {
+    ["function"]   = true,
+    constructorfct = true,
+    staticfct      = true,
+    deprecated     = true,
+}
+
+-- Add the arguments.
+local add_args = {
+    constructorfct = true,
+    staticfct      = true,
+}
+
 custom_display_name_handler = function(item, default_handler)
+    local ret = default_handler(item)
+
     -- Remove the "namespace" from the signals and properties
     if no_prefix[item.type] then
         local name = item.name:match("%.([^.]+)$")
@@ -201,15 +221,22 @@ custom_display_name_handler = function(item, default_handler)
         return coreclassmap[item.name]
     end
 
+    -- Undocumented API to make the libraries and classmod "function" section
+    -- more consistent. Right now some have their full awful.foo.bar while other
+    -- have "just" `bar`. Given we use constructors from metatables, we have no
+    -- choice but to use the full function name. It also makes copy/paste easier.
+    if add_mod[item.type] and (not ret:find(".", 1, true)) and (not ret:find(":", 1, true)) then
+        ret = item.module.name .. "." .. ret
+    end
+
     if item.type == "deprecated" or item.type == "deprecatedproperty" then
-        return default_handler(item) .. "<i class=\"deprecated_label\"> [deprecated]</i>"
+        return ret .. "<i class=\"deprecated_label\"> [deprecated]</i>"
     end
 
     if item.type == "method" then
         return render_methods(item)
     end
 
-    local ret = default_handler(item)
 
     -- Get rid of the "module:" in front of method names. It is either wrong or
     -- just redundant.
@@ -221,17 +248,8 @@ custom_display_name_handler = function(item, default_handler)
         return ret:gsub("^module", item.module.name)
     end
 
-    -- Undocumented API to make the libraries and classmod "function" section
-    -- more consistent. Right now some have their full awful.foo.bar while other
-    -- have "just" `bar`. Given we use constructors from metatables, we have no
-    -- choice but to use the full function name. It also makes copy/paste easier.
-    if (item.type == "function" or item.type == "constructorfct")
-      and (not ret:find(".", 1, true)) and (not ret:find(":", 1, true)) then
-        ret = item.module.name .. "." .. ret
-    end
-
     -- It isn't there by default.
-    if item.type == "constructorfct" then
+    if add_args[item.type] then
         ret = ret .. " " .. item.args
     end
 

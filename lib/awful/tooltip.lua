@@ -276,20 +276,13 @@ function tooltip:set_align(value)
 end
 
 --- The shape of the tooltip window.
--- If the shape require some parameters, use `set_shape`.
 --
 -- @DOC_awful_tooltip_shape_EXAMPLE@
 --
 -- @property shape
 -- @see gears.shape
--- @see set_shape
 -- @see beautiful.tooltip_shape
 
---- Set the tooltip shape.
--- All other arguments will be passed to the shape function.
--- @tparam gears.shape s The shape
--- @see shape
--- @see gears.shape
 function tooltip:set_shape(s)
     self.backgroundbox:set_shape(s)
 end
@@ -520,7 +513,7 @@ end
 -- @tparam tooltip self The tooltip.
 -- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
--- @function add_to_object
+-- @method add_to_object
 function tooltip:add_to_object(obj)
     if not obj then return end
 
@@ -533,7 +526,7 @@ end
 -- @tparam tooltip self The tooltip.
 -- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
--- @function remove_from_object
+-- @method remove_from_object
 function tooltip:remove_from_object(obj)
     obj:disconnect_signal("mouse::enter", self.show)
     obj:disconnect_signal("mouse::leave", self.hide)

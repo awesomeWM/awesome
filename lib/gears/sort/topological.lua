@@ -18,6 +18,7 @@ end
 --- Ensure that `node` appears after all `dependencies`.
 -- @param node The node that edges are added to.
 -- @tparam table dependencies List of nodes that have to appear before `node`.
+-- @method append
 function tsort:append(node, dependencies)
     add_node(self, node)
     for _, dep in ipairs(dependencies) do
@@ -29,6 +30,7 @@ end
 --- Ensure that `node` appears before all `subordinates`.
 -- @param node The node that edges are added to.
 -- @tparam table subordinates List of nodes that have to appear after `node`.
+-- @method prepend
 function tsort:prepend(node, subordinates)
     for _, dep in ipairs(subordinates) do
         self:append(dep, { node })
@@ -63,6 +65,7 @@ end
 --- Create a copy of this topological sort.
 -- This is useful to backup it before adding elements that can potentially
 -- have circular dependencies and thus render the original useless.
+-- @method clone
 function tsort:clone()
     local new = tsort.topological()
 
@@ -75,6 +78,7 @@ end
 --- Remove a node from the topological map.
 --
 -- @param node The node
+-- @method remove
 function tsort:remove(node)
     self._edges[node] = nil
     for _, deps in pairs(self._edges) do
@@ -86,6 +90,7 @@ end
 -- @treturn[1] table A sorted list of nodes
 -- @treturn[2] nil
 -- @return[2] A node around which a loop exists
+-- @method sort
 function tsort:sort()
     local result, state = {}, {}
     for node in pairs(self._edges) do
@@ -104,7 +109,7 @@ end
 --
 --@DOC_text_gears_sort_topological_EXAMPLE@
 --
--- @function gears.sort.topological
+-- @constructorfct gears.sort.topological
 
 function tsort.topological()
     return setmetatable({

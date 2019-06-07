@@ -3,7 +3,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @module awful.key
+-- @classmod awful.key
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -59,6 +59,7 @@ capi.awesome.connect_signal("xkb::map_changed"  , function() conversion = nil en
 -- @tparam table mod A modified table. Valid modifiers are: Any, Mod1,
 --   Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
 -- @tparam string k The key
+-- @staticfct awful.key.execute
 function key.execute(mod, k)
     local modmap = generate_conversion_map()
     local active = capi.awesome._active_modifiers
@@ -111,6 +112,7 @@ end
 -- @tparam table data User data for key,
 -- for example {description="select next tag", group="tag"}.
 -- @treturn table A table with one or several key objects.
+-- @constructorfct awful.key
 function key.new(mod, _key, press, release, data)
     if type(release)=='table' then
         data=release
@@ -145,6 +147,7 @@ end
 -- @param _key The key object.
 -- @param pressed_mod The modifiers to compare with.
 -- @param pressed_key The key to compare with.
+-- @staticfct awful.key.match
 function key.match(_key, pressed_mod, pressed_key)
     -- First, compare key.
     if pressed_key ~= _key.key then return false end

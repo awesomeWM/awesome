@@ -3,7 +3,7 @@
 --
 -- @author Yauhen Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2015 Yauhen Kirylau
--- @submodule beautiful
+-- @module beautiful
 ----------------------------------------------------------------------------
 
 local cairo = require("lgi").cairo
@@ -19,6 +19,7 @@ local theme_assets = {}
 -- @tparam number size Size.
 -- @tparam color fg Background color.
 -- @return Image with the square.
+-- @staticfct beautiful.theme_assets.taglist_squares_sel
 function theme_assets.taglist_squares_sel(size, fg)
     local img = cairo.ImageSurface(cairo.Format.ARGB32, size, size)
     local cr = cairo.Context(img)
@@ -31,6 +32,7 @@ end
 -- @tparam number size Size.
 -- @tparam color fg Background color.
 -- @return Image with the square.
+-- @staticfct beautiful.theme_assets.taglist_squares_unsel
 function theme_assets.taglist_squares_unsel(size, fg)
     local img = cairo.ImageSurface(cairo.Format.ARGB32, size, size)
     local cr = cairo.Context(img)
@@ -84,6 +86,7 @@ end
 -- @tparam color bg Background color.
 -- @tparam color fg Main foreground color.
 -- @tparam color alt_fg Accent foreground color.
+-- @staticfct beautiful.theme_assets.gen_awesome_name
 function theme_assets.gen_awesome_name(cr, height, bg, fg, alt_fg)
     local ls = height/10 -- letter_size
     local letter_line = ls/18
@@ -152,6 +155,7 @@ end
 -- @tparam number height Height.
 -- @tparam color bg Background color.
 -- @tparam color fg Foreground color.
+-- @staticfct beautiful.theme_assets.gen_logo
 function theme_assets.gen_logo(cr, width, height, bg, fg)
     local ls = math.min(width, height)
 
@@ -174,6 +178,7 @@ end
 -- @tparam color bg Background color.
 -- @tparam color fg Background color.
 -- @return Image with the logo.
+-- @staticfct beautiful.theme_assets.awesome_icon
 function theme_assets.awesome_icon(size, bg, fg)
     local img = cairo.ImageSurface(cairo.Format.ARGB32, size, size)
     local cr = cairo.Context(img)
@@ -187,6 +192,7 @@ end
 -- @tparam color alt_fg Accent foreground color.
 -- @tparam screen s Screen (to get wallpaper size).
 -- @return Wallpaper image.
+-- @staticfct beautiful.theme_assets.wallpaper
 function theme_assets.wallpaper(bg, fg, alt_fg, s)
     s = s or screen.primary
     local height = s.geometry.height
@@ -215,6 +221,7 @@ end
 -- @tparam string postfix `nil`, `"hover"` or `"press"`.
 -- @tparam string toggle_state `nil`, `"active"` or `"inactive"`.
 -- @treturn table Beautiful theme table with the images recolored.
+-- @staticfct beautiful.theme_assets.recolor_titlebar
 function theme_assets.recolor_titlebar(theme, color, state, postfix, toggle_state)
     if postfix then postfix='_'..postfix end
     if toggle_state then toggle_state='_'..toggle_state end
@@ -266,6 +273,7 @@ end
 -- @tparam table theme Beautiful theme table
 -- @tparam color color Icons' color.
 -- @treturn table Beautiful theme table with the images recolored.
+-- @staticfct beautiful.theme_assets.recolor_layout
 function theme_assets.recolor_layout(theme, color)
     for _, layout_name in ipairs({
         'layout_fairh',

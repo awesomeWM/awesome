@@ -32,10 +32,6 @@
 -- calling :set_matrix() on it, because this function uses a cache and your
 -- changes could thus have unintended side effects. Use @{create_pattern_uncached}
 -- if you need to modify the returned pattern.
--- @see create_pattern_uncached, create_solid_pattern, create_png_pattern,
---   create_linear_pattern, create_radial_pattern
--- @tparam string col The string describing the pattern.
--- @return a cairo pattern object
 --
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
@@ -65,6 +61,7 @@ local pattern_cache
 -- @param col The color to parse
 -- @treturn table 4 values representing color in RGBA format (each of them in
 -- [0, 1] range) or nil if input is incorrect.
+-- @staticfct gears.color.parse_color
 -- @usage -- This will return 0, 1, 0, 1
 -- gears.color.parse_color("#00ff00ff")
 function color.parse_color(col)
@@ -123,6 +120,7 @@ end
 --
 -- @param col The color for the pattern
 -- @return A cairo pattern object
+-- @staticfct gears.color.create_solid_pattern
 function color.create_solid_pattern(col)
     if col == nil then
         col = "#000000"
@@ -136,6 +134,7 @@ end
 --
 -- @param file The filename of the file
 -- @return a cairo pattern object
+-- @staticfct gears.color.create_png_pattern
 function color.create_png_pattern(file)
     if type(file) == "table" then
         file = file.file
@@ -192,6 +191,7 @@ end
 -- For the explanation of `<stops>`, see `color.create_pattern`.
 -- @tparam string|table arg The argument describing the pattern.
 -- @return a cairo pattern object
+-- @staticfct gears.color.create_linear_pattern
 function color.create_linear_pattern(arg)
     local pat
 
@@ -217,6 +217,7 @@ end
 -- For the explanation of `<stops>`, see `color.create_pattern`.
 -- @tparam string|table arg The argument describing the pattern
 -- @return a cairo pattern object
+-- @staticfct gears.color.create_radial_pattern
 function color.create_radial_pattern(arg)
     local pat
 
@@ -249,6 +250,7 @@ color.types = {
 -- @see create_pattern
 -- @param col The string describing the pattern.
 -- @return a cairo pattern object
+-- @staticfct gears.color.create_pattern_uncached
 function color.create_pattern_uncached(col)
     -- If it already is a cairo pattern, just leave it as that
     if cairo.Pattern:is_type_of(col) then
@@ -273,6 +275,7 @@ end
 
 --- Create a pattern from a given string, same as @{gears.color}.
 -- @see gears.color
+-- @staticfct gears.color.create_pattern
 function color.create_pattern(col)
     if cairo.Pattern:is_type_of(col) then
         return col
@@ -285,6 +288,7 @@ end
 -- operator OVER) doesn't influence the visual result.
 -- @param col An argument that `create_pattern` accepts.
 -- @return The pattern if it is surely opaque, else nil
+-- @staticfct gears.color.create_opaque_pattern
 function color.create_opaque_pattern(col)
     local pattern = color.create_pattern(col)
     local kind = pattern:get_type()
@@ -335,6 +339,7 @@ end
 -- @param image Image or path to it.
 -- @param new_color New color.
 -- @return Recolored image.
+-- @staticfct gears.color.recolor_image
 function color.recolor_image(image, new_color)
     if type(image) == 'string' then
         image = surface.duplicate_surface(image)
@@ -349,6 +354,7 @@ end
 -- @param check_color The color to check.
 -- @tparam string fallback The color to return if the first is invalid. (default: black)
 -- @treturn string color if it is valid, else fallback.
+-- @staticfct gears.color.ensure_pango_color
 function color.ensure_pango_color(check_color, fallback)
     check_color = tostring(check_color)
     -- Pango markup supports alpha, PangoColor does not. Thus, check for this.

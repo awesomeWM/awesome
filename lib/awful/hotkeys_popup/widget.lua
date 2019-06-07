@@ -490,6 +490,7 @@ function widget.new(args)
     -- @tparam[opt] table show_args Additional arguments.
     -- @tparam[opt=true] boolean show_args.show_awesome_keys Show AwesomeWM hotkeys.
     -- When set to `false` only app-specific hotkeys will be shown.
+    -- @method show_help
     function widget_instance:show_help(c, s, show_args)
         show_args = show_args or {}
         local show_awesome_keys = show_args.show_awesome_keys ~= false
@@ -549,6 +550,7 @@ function widget.new(args)
     --- Add hotkey descriptions for third-party applications.
     -- @tparam table hotkeys Table with bindings,
     -- see `awful.hotkeys_popup.key.vim` as an example.
+    -- @method add_hotkeys
     function widget_instance:add_hotkeys(hotkeys)
         for group, bindings in pairs(hotkeys) do
             for _, binding in ipairs(bindings) do
@@ -571,6 +573,7 @@ function widget.new(args)
     -- @tparam string group hotkeys group name,
     -- @tparam table data rule data for the group
     -- see `awful.hotkeys_popup.key.vim` as an example.
+    -- @method add_group_rules
     function widget_instance:add_group_rules(group, data)
         self.group_rules[group] = data
     end
@@ -591,6 +594,7 @@ end
 -- @tparam[opt] table args Additional arguments.
 -- @tparam[opt=true] boolean args.show_awesome_keys Show AwesomeWM hotkeys.
 -- When set to `false` only app-specific hotkeys will be shown.
+-- @staticfct awful.hotkeys_popup.widget.show_help
 function widget.show_help(...)
     return get_default_widget():show_help(...)
 end
@@ -599,6 +603,7 @@ end
 -- (default widget instance will be used).
 -- @tparam table hotkeys Table with bindings,
 -- see `awful.hotkeys_popup.key.vim` as an example.
+-- @staticfct awful.hotkeys_popup.widget.add_hotkeys
 function widget.add_hotkeys(...)
     return get_default_widget():add_hotkeys(...)
 end
@@ -608,6 +613,7 @@ end
 -- @tparam string group rule group name,
 -- @tparam table data rule data for the group
 -- see `awful.hotkeys_popup.key.vim` as an example.
+-- @staticfct awful.hotkeys_popup.widget.add_group_rules
 function widget.add_group_rules(group, data)
     return get_default_widget():add_group_rules(group, data)
 end

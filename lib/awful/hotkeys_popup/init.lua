@@ -24,7 +24,7 @@ local hotkeys_popup = {
 -- @tparam[opt] screen s The screen.
 -- @tparam[opt=true] boolean show_args.show_awesome_keys Show AwesomeWM hotkeys.
 -- When set to `false` only app-specific hotkeys will be shown.
--- @function awful.hotkeys_popup.show_help
+-- @staticfct awful.hotkeys_popup.show_help
 -- @see awful.hotkeys_popup.widget.show_help
 
 hotkeys_popup.show_help = hotkeys_popup.widget.show_help

@@ -88,20 +88,29 @@ local function do_fair(p, orientation)
     end
 end
 
---- Horizontal fair layout.
+-- Horizontal fair layout.
 -- @param screen The screen to arrange.
 fair.horizontal = {}
 fair.horizontal.name = "fairh"
+
 function fair.horizontal.arrange(p)
     return do_fair(p, "east")
 end
 
---- Vertical fair layout.
+-- Vertical fair layout.
 -- @param screen The screen to arrange.
 fair.name = "fairv"
 function fair.arrange(p)
     return do_fair(p, "south")
 end
+
+--- The fair layout.
+-- Try to give all clients the same size.
+-- @clientlayout awful.layout.suit.fair
+
+--- The horizontal fair layout.
+-- Try to give all clients the same size.
+-- @clientlayout awful.layout.suit.fair.horizontal
 
 return fair
 

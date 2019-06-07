@@ -72,7 +72,7 @@ function mouse.client_under_pointer()
 end
 
 --- Move a client.
--- @function awful.mouse.client.move
+-- @staticfct awful.mouse.client.move
 -- @param c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
 -- @param finished_cb Deprecated, do not use
@@ -125,7 +125,7 @@ function mouse.client.dragtotag.border(c)
 end
 
 --- Move the wibox under the cursor.
--- @function awful.mouse.wibox.move
+-- @staticfct awful.mouse.wibox.move
 --@tparam wibox w The wibox to move, or none to use that under the pointer
 function mouse.wibox.move(w)
     w = w or mouse.current_wibox
@@ -183,7 +183,7 @@ function mouse.client.corner(c, corner)
 end
 
 --- Resize a client.
--- @function awful.mouse.client.resize
+-- @staticfct awful.mouse.client.resize
 -- @param c The client to resize, or the focused one by default.
 -- @tparam string corner The corner to grab on resize. Auto detected by default.
 -- @tparam[opt={}] table args A set of `awful.placement` arguments
@@ -417,7 +417,7 @@ end)
 -- @treturn integer table.y The vertical position
 -- @treturn table table.buttons Table containing the status of buttons, e.g. field [1] is true
 --  when button 1 is pressed.
--- @function mouse.coords
+-- @staticfct mouse.coords
 
 
 return mouse

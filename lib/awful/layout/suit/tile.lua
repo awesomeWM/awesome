@@ -43,6 +43,7 @@ local tile = {}
 -- @see gears.surface
 
 --- Jump mouse cursor to the client's corner when resizing it.
+-- @field awful.layout.suit.tile.resize_jump_to_corner
 tile.resize_jump_to_corner = true
 
 local function mouse_resize_handler(c, _, _, _, orientation)

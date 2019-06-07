@@ -234,6 +234,7 @@ end
 -- @see awful.popup.preferred_positions
 -- @see awful.popup.preferred_anchors
 -- @treturn table The new geometry
+-- @method move_next_to
 function popup:move_next_to(obj)
     if self._private.is_relative == false then return end
 
@@ -256,6 +257,7 @@ end
 --
 -- @tparam widget widget The widget
 -- @tparam[opt=1] number button The button index
+-- @method bind_to_widget
 function popup:bind_to_widget(widget, button)
     if not self._private.button_for_widget then
         self._private.button_for_widget = {}
@@ -267,6 +269,7 @@ end
 
 --- Unbind the popup from a widget button.
 -- @tparam widget widget The widget
+-- @method unbind_to_widget
 function popup:unbind_to_widget(widget)
     widget:disconnect_signal("button::press", self._private.show_fct)
 end

@@ -21,7 +21,8 @@ local gears = {geometry = {rectangle = {} } }
 -- @tparam number geom.height The rectangle height
 -- @tparam number x X coordinate of point
 -- @tparam number y Y coordinate of point
--- @treturn number The squared distance of the rectangle to the provided point
+-- @treturn number The squared distance of the rectangle to the provided point.
+-- @staticfct gears.geometry.rectangle.get_square_distance
 function gears.geometry.rectangle.get_square_distance(geom, x, y)
     local dist_x, dist_y = 0, 0
     if x < geom.x then
@@ -42,6 +43,7 @@ end
 -- @tparam number x The x coordinate
 -- @tparam number y The y coordinate
 -- @return The key from the closest geometry.
+-- @staticfct gears.geometry.rectangle.get_closest_by_coord
 function gears.geometry.rectangle.get_closest_by_coord(list, x, y)
     local dist = math.huge
     local ret = nil
@@ -66,6 +68,7 @@ end
 -- @tparam number y The y coordinate
 -- @return The key from the closest geometry. In case no result is found, *nil*
 --  is returned.
+-- @staticfct gears.geometry.rectangle.get_by_coord
 function gears.geometry.rectangle.get_by_coord(list, x, y)
     for k, geometry in pairs(list) do
         if x >= geometry.x and x < geometry.x + geometry.width
@@ -126,6 +129,7 @@ end
 -- @tparam table recttbl A table of rectangle specifications.
 -- @tparam table cur The current rectangle.
 -- @return The index for the rectangle in recttbl closer to cur in the given direction. nil if none found.
+-- @staticfct gears.geometry.rectangle.get_in_direction
 function gears.geometry.rectangle.get_in_direction(dir, recttbl, cur)
     local dist, dist_min
     local target = nil
@@ -151,6 +155,7 @@ end
 -- @param a The area.
 -- @param b The other area.
 -- @return True if they intersect, false otherwise.
+-- @staticfct gears.geometry.rectangle.area_intersect_area
 function gears.geometry.rectangle.area_intersect_area(a, b)
     return (b.x < a.x + a.width
             and b.x + b.width > a.x
@@ -170,6 +175,7 @@ end
 -- @tparam number b.width The rectangle width
 -- @tparam number b.height The rectangle height
 -- @treturn table The intersect area.
+-- @staticfct gears.geometry.rectangle.get_intersection
 function gears.geometry.rectangle.get_intersection(a, b)
     local g = {}
     g.x = math.max(a.x, b.x)
@@ -191,6 +197,7 @@ end
 -- @tparam number elem.width The rectangle width
 -- @tparam number elem.height The rectangle height
 -- @return The new area list.
+-- @staticfct gears.geometry.rectangle.area_remove
 function gears.geometry.rectangle.area_remove(areas, elem)
     for i = #areas, 1, -1 do
         -- Check if the 'elem' intersect

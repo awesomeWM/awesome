@@ -50,7 +50,8 @@ end
 -- global variable.
 -- @param s The screen to set the wallpaper on or nil for all screens
 -- @return[1] The available geometry (table with entries width and height)
--- @return[1] A cairo context that the wallpaper should be drawn to
+-- @return[1] A cairo context that the wallpaper should be drawn to.
+-- @staticfct gears.wallpaper.prepare_context
 function wallpaper.prepare_context(s)
     s = get_screen(s)
 
@@ -109,6 +110,7 @@ end
 -- @param pattern The wallpaper that should be set. This can be a cairo surface,
 --   a description for gears.color or a cairo pattern.
 -- @see gears.color
+-- @staticfct gears.wallpaper.set
 function wallpaper.set(pattern)
     if cairo.Surface:is_type_of(pattern) then
         pattern = cairo.Pattern.create_for_surface(pattern)
@@ -130,6 +132,7 @@ end
 --   gears.color. The default is black.
 -- @param scale The scale factor for the wallpaper. Default is 1 (original size).
 -- @see gears.color
+-- @staticfct gears.wallpaper.centered
 function wallpaper.centered(surf, s, background, scale)
     local geom, cr = wallpaper.prepare_context(s)
     local original_surf = surf
@@ -169,6 +172,7 @@ end
 -- @param s The screen whose wallpaper should be set. Can be nil, in which case
 --   all screens are set.
 -- @param offset This can be set to a table with entries x and y.
+-- @staticfct gears.wallpaper.tiled
 function wallpaper.tiled(surf, s, offset)
     local _, cr = wallpaper.prepare_context(s)
 
@@ -198,6 +202,7 @@ end
 -- @param ignore_aspect If this is true, the image's aspect ratio is ignored.
 --   The default is to honor the aspect ratio.
 -- @param offset This can be set to a table with entries x and y.
+-- @staticfct gears.wallpaper.maximized
 function wallpaper.maximized(surf, s, ignore_aspect, offset)
     local geom, cr = wallpaper.prepare_context(s)
     local original_surf = surf
@@ -238,6 +243,7 @@ end
 -- @param background The background color that should be used. Gets handled via
 --   gears.color. The default is black.
 -- @see gears.color
+-- @staticfct gears.wallpaper.fit
 function wallpaper.fit(surf, s, background)
     local geom, cr = wallpaper.prepare_context(s)
     local original_surf = surf

@@ -22,6 +22,7 @@ local capi =
 local floating = {}
 
 --- Jump mouse cursor to the client's corner when resizing it.
+-- @field awful.layout.suit.floating.resize_jump_to_corner
 floating.resize_jump_to_corner = true
 
 function floating.mouse_resize_handler(c, corner, x, y)
@@ -103,7 +104,7 @@ function floating.arrange()
 end
 
 --- The floating layout.
--- @clientlayout awful.layout.suit.
+-- @clientlayout awful.layout.suit.floating
 
 floating.name = "floating"
 

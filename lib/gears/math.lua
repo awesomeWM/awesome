@@ -37,10 +37,9 @@ end
 -- For example, if we consider a set with value { 10, 15, 34 },
 -- it will return a table containing 2^n set:
 -- { }, { 10 }, { 15 }, { 34 }, { 10, 15 }, { 10, 34 }, etc.
--- @class function
--- @name subsets
 -- @param set A set.
 -- @return A table with all subset.
+-- @staticfct gears.math.subsets
 function gmath.subsets(set)
     local mask = {}
     local ret = {}
@@ -56,11 +55,10 @@ function gmath.subsets(set)
 end
 
 --- Make i cycle.
--- @class function
--- @name cycle
 -- @param t A length. Must be greater than zero.
 -- @param i An absolute index to fit into #t.
 -- @return An integer in (1, t) or nil if t is less than or equal to zero.
+-- @staticfct gears.math.cycle
 function gmath.cycle(t, i)
     if t < 1 then return end
     i = i % t
@@ -71,10 +69,9 @@ function gmath.cycle(t, i)
 end
 
 --- Round a number to an integer.
--- @class function
--- @name round
 -- @tparam number x
 -- @treturn integer
+-- @staticfct gears.math.round
 function gmath.round(x)
     return math.floor(x + 0.5)
 end

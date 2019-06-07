@@ -18,12 +18,12 @@ local base = {}
 
 -- {{{ Functions on widgets
 
---- Functions available on all widgets.
+-- Functions available on all widgets.
 base.widget = {}
 
 --- Set/get a widget's buttons.
 -- @tab _buttons The table of buttons that is bound to the widget.
--- @function buttons
+-- @method buttons
 function base.widget:buttons(_buttons)
     if _buttons then
         self._private.widget_buttons = _buttons
@@ -33,7 +33,7 @@ end
 
 --- Set a widget's visibility.
 -- @tparam boolean b Whether the widget is visible.
--- @function set_visible
+-- @method set_visible
 function base.widget:set_visible(b)
     if b ~= self._private.visible then
         self._private.visible = b
@@ -45,7 +45,7 @@ end
 
 --- Is the widget visible?
 -- @treturn boolean
--- @function get_visible
+-- @method get_visible
 function base.widget:get_visible()
     return self._private.visible or false
 end
@@ -53,7 +53,7 @@ end
 --- Set a widget's opacity.
 -- @tparam number o The opacity to use (a number from 0 (transparent) to 1
 -- (opaque)).
--- @function set_opacity
+-- @method set_opacity
 function base.widget:set_opacity(o)
     if o ~= self._private.opacity then
         self._private.opacity = o
@@ -63,7 +63,7 @@ end
 
 --- Get the widget's opacity.
 -- @treturn number The opacity (between 0 (transparent) and 1 (opaque)).
--- @function get_opacity
+-- @method get_opacity
 function base.widget:get_opacity()
     return self._private.opacity
 end
@@ -72,7 +72,7 @@ end
 -- @tparam[opt] number width With `nil` the default mechanism of calling the
 --   `:fit` method is used.
 -- @see fit_widget
--- @function set_forced_width
+-- @method set_forced_width
 function base.widget:set_forced_width(width)
     if width ~= self._private.forced_width then
         self._private.forced_width = width
@@ -88,7 +88,7 @@ end
 -- actual size is during a `mouse::enter`, `mouse::leave` or button event.
 -- @treturn[opt] number The forced width (nil if automatic).
 -- @see fit_widget
--- @function get_forced_width
+-- @method get_forced_width
 function base.widget:get_forced_width()
     return self._private.forced_width
 end
@@ -97,7 +97,7 @@ end
 -- @tparam[opt] number height With `nil` the default mechanism of calling the
 --   `:fit` method is used.
 -- @see fit_widget
--- @function set_height
+-- @method set_height
 function base.widget:set_forced_height(height)
     if height ~= self._private.forced_height then
         self._private.forced_height = height
@@ -112,7 +112,7 @@ end
 -- If there is no forced width/height, then the only way to get the widget's
 -- actual size is during a `mouse::enter`, `mouse::leave` or button event.
 -- @treturn[opt] number The forced height (nil if automatic).
--- @function get_forced_height
+-- @method get_forced_height
 function base.widget:get_forced_height()
     return self._private.forced_height
 end
@@ -121,7 +121,7 @@ end
 --
 -- This method should be re-implemented by the relevant widgets.
 -- @treturn table The children
--- @function get_children
+-- @method get_children
 function base.widget:get_children()
     return {}
 end
@@ -131,7 +131,7 @@ end
 -- The default implementation does nothing, this must be re-implemented by
 -- all layout and container widgets.
 -- @tab children A table composed of valid widgets.
--- @function set_children
+-- @method set_children
 function base.widget:set_children(children) -- luacheck: no unused
     -- Nothing on purpose
 end
@@ -151,7 +151,7 @@ end
 -- *Warning*: This method it prone to stack overflow if the widget, or any of
 -- its children, contains (directly or indirectly) itself.
 -- @treturn table The children
--- @function get_all_children
+-- @method get_all_children
 function base.widget:get_all_children()
     local ret = {}
     digg_children(ret, self)
@@ -175,7 +175,7 @@ end
 --
 -- @tparam string signal_name
 -- @param ... Other arguments
--- @function emit_signal_recursive
+-- @method emit_signal_recursive
 function base.widget:emit_signal_recursive(signal_name, ...)
     -- This is a convenience wrapper, the real implementation is in the
     -- hierarchy.
@@ -190,7 +190,7 @@ end
 -- @treturn number The index.
 -- @treturn widget The parent widget.
 -- @treturn table The path between "self" and "widget".
--- @function index
+-- @method index
 function base.widget:index(widget, recursive, ...)
     local widgets = self:get_children()
     for idx, w in ipairs(widgets) do
@@ -261,7 +261,7 @@ end
 --
 -- This gives only tight bounds if no rotations by non-multiples of 90° are
 -- used.
--- @function wibox.widget.base.rect_to_device_geometry
+-- @staticfct wibox.widget.base.rect_to_device_geometry
 function base.rect_to_device_geometry(cr, x, y, width, height)
     return matrix.transform_rectangle(cr.matrix, x, y, width, height)
 end
@@ -278,7 +278,7 @@ end
 -- @tparam number height The available height for the widget.
 -- @treturn number The width that the widget wants to use.
 -- @treturn number The height that the widget wants to use.
--- @function wibox.widget.base.fit_widget
+-- @staticfct wibox.widget.base.fit_widget
 function base.fit_widget(parent, context, widget, width, height)
     record_dependency(parent, widget)
 
@@ -326,7 +326,7 @@ end
 -- @tparam number width The available width for the widget.
 -- @tparam number height The available height for the widget.
 -- @treturn[opt] table The result from the widget's `:layout` callback.
--- @function wibox.widget.base.layout_widget
+-- @staticfct wibox.widget.base.layout_widget
 function base.layout_widget(parent, context, widget, width, height)
     record_dependency(parent, widget)
 
@@ -346,7 +346,7 @@ end
 --- Handle a button event on a widget.
 --
 -- This is used internally and should not be called directly.
--- @function wibox.widget.base.handle_button
+-- @staticfct wibox.widget.base.handle_button
 function base.handle_button(event, widget, x, y, button, modifiers, geometry)
     x = x or y -- luacheck: no unused
     local function is_any(mod)
@@ -395,7 +395,7 @@ end
 -- @tparam number height The height of the widget in its own coordinate system.
 --   That is, after applying the transformation matrix.
 -- @treturn table An opaque object that can be returned from `:layout()`.
--- @function wibox.widget.base.place_widget_via_matrix
+-- @staticfct wibox.widget.base.place_widget_via_matrix
 function base.place_widget_via_matrix(widget, mat, width, height)
     return {
         _widget = widget,
@@ -415,7 +415,7 @@ end
 -- @tparam number height The height of the widget in its own coordinate system.
 --   That is, after applying the transformation matrix.
 -- @treturn table An opaque object that can be returned from `:layout()`.
--- @function wibox.widget.base.place_widget_at
+-- @staticfct wibox.widget.base.place_widget_at
 function base.place_widget_at(widget, x, y, width, height)
     return base.place_widget_via_matrix(widget, matrix.create_translate(x, y), width, height)
 end
@@ -535,7 +535,7 @@ end
 --
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html).
 -- @tab args A table containing the widget's disposition.
--- @function setup
+-- @method setup
 function base.widget:setup(args)
     local f,ids = self.set_widget or self.add or self.set_first,{}
     local w, id = drill(ids, args)
@@ -562,7 +562,7 @@ end
 --
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html).
 -- @tab args A table containing the widgets disposition.
--- @function wibox.widget.base.make_widget_declarative
+-- @constructorfct wibox.widget.base.make_widget_declarative
 function base.make_widget_declarative(args)
     local ids = {}
 
@@ -608,6 +608,7 @@ end
 -- @param wdg The value.
 -- @param[opt=nil] ... Arguments passed to the contructor (if any).
 -- @treturn The new widget.
+-- @constructorfct wibox.widget.base.make_widget_from_value
 function base.make_widget_from_value(wdg, ...)
     local is_function, t = is_callable(wdg)
 
@@ -635,7 +636,7 @@ end
 --   and setter methods.
 -- @tparam[opt=nil] table args.class The widget class
 -- @see fit_widget
--- @function wibox.widget.base.make_widget
+-- @constructorfct wibox.widget.base.make_widget
 function base.make_widget(proxy, widget_name, args)
     args = args or {}
     local ret = object {
@@ -714,7 +715,7 @@ function base.make_widget(proxy, widget_name, args)
 end
 
 --- Generate an empty widget which takes no space and displays nothing.
--- @function wibox.widget.base.empty_widget
+-- @constructorfct wibox.widget.base.empty_widget
 function base.empty_widget()
     return base.make_widget()
 end
@@ -722,7 +723,7 @@ end
 --- Do some sanity checking on a widget.
 --
 -- This function raises an error if the widget is not valid.
--- @function wibox.widget.base.check_widget
+-- @staticfct wibox.widget.base.check_widget
 function base.check_widget(widget)
     assert(type(widget) == "table", "Type should be table, but is " .. tostring(type(widget)))
     assert(widget.is_widget, "Argument is not a widget!")

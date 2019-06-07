@@ -99,6 +99,7 @@ end
 
 --- Eval Lua code.
 -- @return The return value of Lua code.
+-- @staticfct awful.util.eval
 function util.eval(s)
     return assert(load(s))()
 end
@@ -129,6 +130,7 @@ end
 -- @param path The file path.
 -- @return A function if everything is alright, a string with the error
 -- otherwise.
+-- @staticfct awful.util.checkfile
 function util.checkfile(path)
     local f, e = loadfile(path)
     -- Return function if function, otherwise return error.
@@ -140,6 +142,7 @@ end
 -- It checks if the configuration file is valid, and then restart if it's ok.
 -- If it's not ok, the error will be returned.
 -- @return Never return if awesome restart, or return a string error.
+-- @staticfct awful.util.restart
 function util.restart()
     local c = util.checkfile(capi.awesome.conffile)
 
@@ -225,6 +228,7 @@ end
 -- @param dirs Table of dirs to search, otherwise { '/usr/share/pixmaps/' }
 -- @tparam[opt] string size The size. If this is specified, subdirectories `x`
 --   of the dirs are searched first.
+-- @staticfct awful.util.geticonpath
 function util.geticonpath(iconname, exts, dirs, size)
     exts = exts or { 'png', 'gif' }
     dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }

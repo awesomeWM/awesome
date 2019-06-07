@@ -4,19 +4,25 @@
 -- List of menubar keybindings:
 -- ---
 --
---  *  "Left"  | "C-j" select an item on the left
---  *  "Right" | "C-k" select an item on the right
---  *  "Backspace"     exit the current category if we are in any
---  *  "Escape"        exit the current directory or exit menubar
---  *  "Home"          select the first item
---  *  "End"           select the last
---  *  "Return"        execute the entry
---  *  "C-Return"      execute the command with awful.spawn
---  *  "C-M-Return"    execute the command in a terminal
+-- <table class='widget_list' border=1>
+-- <tr style='font-weight: bold;'>
+--  <th align='center'>Keybinding</th>
+--  <th align='center'>Description</th>
+-- </tr>                                                                                    </td></tr>
+--  <tr><td><kbd>Left</kbd><kbd>C-j</kbd></td><td> select an item on the left                 </td></tr>
+--  <tr><td><kbd>Right</kbd><kbd>C-k</kbd></td><td> select an item on the right                </td></tr>
+--  <tr><td><kbd>Backspace    </kbd></td><td> exit the current category if we are in any </td></tr>
+--  <tr><td><kbd>Escape       </kbd></td><td> exit the current directory or exit menubar </td></tr>
+--  <tr><td><kbd>Home         </kbd></td><td> select the first item                      </td></tr>
+--  <tr><td><kbd>End          </kbd></td><td> select the last                            </td></tr>
+--  <tr><td><kbd>Return       </kbd></td><td> execute the entry                          </td></tr>
+--  <tr><td><kbd>C-Return     </kbd></td><td> execute the command with awful.spawn       </td></tr>
+--  <tr><td><kbd>C-M-Return   </kbd></td><td> execute the command in a terminal          </td></tr>
+-- </table>
 --
 -- @author Alexander Yakushev &lt;yakushev.alex@gmail.com&gt;
 -- @copyright 2011-2012 Alexander Yakushev
--- @module menubar
+-- @popupmod menubar
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -362,6 +368,7 @@ end
 
 --- Refresh menubar's cache by reloading .desktop files.
 -- @tparam[opt] screen scr Screen.
+-- @staticfct menubar.refresh
 function menubar.refresh(scr)
     scr = get_screen(scr or awful.screen.focused() or 1)
     menubar.menu_gen.generate(function(entries)
@@ -418,6 +425,7 @@ end
 
 --- Show the menubar on the given screen.
 -- @param[opt] scr Screen.
+-- @staticfct menubar.show
 function menubar.show(scr)
     scr = get_screen(scr or awful.screen.focused() or 1)
     local fg_color = theme.menubar_fg_normal or theme.menu_fg_normal or theme.fg_normal
@@ -492,6 +500,7 @@ function menubar.show(scr)
 end
 
 --- Hide the menubar.
+-- @staticfct menubar.hide
 function menubar.hide()
     if instance then
         instance.wibox.visible = false

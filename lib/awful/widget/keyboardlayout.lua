@@ -135,6 +135,7 @@ end
 -- xkb_symbols pattern "vendor/file(section):group_idx".
 -- @tparam string group_names The string awesome.xkb_get_group_names() returns.
 -- @treturn table An array of tables whose keys are vendor, file, section, and group_idx.
+-- @staticfct awful.keyboardlayout.get_groups_from_group_names
 function keyboardlayout.get_groups_from_group_names(group_names)
     if group_names == nil then
         return nil

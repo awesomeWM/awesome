@@ -2,8 +2,7 @@
 -- Align a client to the vertical center of the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments") --DOC_HEADER
--- @name center_vertical --DOC_HEADER
--- @class function --DOC_HEADER
+-- @staticfct awful.placement.center_vertical --DOC_HEADER
 
 screen[1]._resize {width = 128, height = 96} --DOC_HIDE
 local awful = {placement = require("awful.placement")} --DOC_HIDE
