@@ -199,6 +199,7 @@ local add_mod = {
     constructorfct = true,
     staticfct      = true,
     deprecated     = true,
+    field          = true,
 }
 
 -- Add the arguments.
@@ -225,8 +226,12 @@ custom_display_name_handler = function(item, default_handler)
     -- more consistent. Right now some have their full awful.foo.bar while other
     -- have "just" `bar`. Given we use constructors from metatables, we have no
     -- choice but to use the full function name. It also makes copy/paste easier.
-    if add_mod[item.type] and (not ret:find(".", 1, true)) and (not ret:find(":", 1, true)) then
-        ret = item.module.name .. "." .. ret
+    if add_mod[item.type] then
+        if (not ret:find(".", 1, true)) and (not ret:find(":", 1, true))  then
+            ret = item.module.name .. "." .. ret
+        elseif item.type == "field" and ret:sub(1, #item.module.name) ~= item.module.name then
+            ret = item.module.name .. "." .. ret
+        end
     end
 
     if item.type == "deprecated" or item.type == "deprecatedproperty" then
