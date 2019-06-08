@@ -22,12 +22,15 @@ local arcchart = { mt = {} }
 
 --- The progressbar border background color.
 -- @beautiful beautiful.arcchart_border_color
+-- @param color
 
 --- The progressbar foreground color.
 -- @beautiful beautiful.arcchart_color
+-- @param color
 
 --- The progressbar border width.
 -- @beautiful beautiful.arcchart_border_width
+-- @param number
 
 --- The padding between the outline and the progressbar.
 -- @beautiful beautiful.arcchart_paddings
@@ -233,6 +236,7 @@ end
 --- The border background color.
 --@DOC_wibox_container_arcchart_border_color_EXAMPLE@
 -- @property border_color
+-- @param color
 
 --- The arcchart values foreground colors.
 --@DOC_wibox_container_arcchart_color_EXAMPLE@
@@ -246,9 +250,11 @@ end
 
 --- The minimum value.
 -- @property min_value
+-- @param number
 
 --- The maximum value.
 -- @property max_value
+-- @param number
 
 --- The radial background.
 --@DOC_wibox_container_arcchart_bg_EXAMPLE@

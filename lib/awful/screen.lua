@@ -248,7 +248,7 @@ function screen.preferred(c)
 end
 
 --- The defaults arguments for `awful.screen.focused`.
--- @tfield[opt=nil] table awful.screen.default_focused_args
+-- @tfield[opt={}] table awful.screen.default_focused_args
 
 --- Get the focused screen.
 --
@@ -537,7 +537,7 @@ end
 
 --- The number of pixels per inch of the screen.
 -- @property dpi
--- @treturn number the DPI value.
+-- @param number the DPI value.
 
 local xft_dpi, fallback_dpi
 

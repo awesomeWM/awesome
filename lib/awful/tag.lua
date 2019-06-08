@@ -742,7 +742,7 @@ end
 --         -- awful.layout.suit.corner.se,
 --     }
 --
--- @field awful.tag.layouts
+-- @tfield table awful.tag.layouts
 
 --- The tag client layout.
 --

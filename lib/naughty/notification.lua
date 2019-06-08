@@ -163,6 +163,7 @@ local notification = {}
 --- Widget shape.
 --@DOC_naughty_shape_EXAMPLE@
 -- @property shape
+-- @param gears.shape
 
 --- Widget opacity.
 -- @property opacity

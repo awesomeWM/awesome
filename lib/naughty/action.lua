@@ -41,7 +41,7 @@ local action = {}
 
 --- The action icon.
 -- @property icon
--- @param gears.surface
+-- @tparam gears.surface|string icon
 
 --- The notification.
 -- @property notification

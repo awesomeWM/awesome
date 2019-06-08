@@ -89,34 +89,44 @@ local active_font
 
 --- The default font.
 -- @beautiful beautiful.font
+-- @param string
 
 -- The default background color.
 -- @beautiful beautiful.bg_normal
+-- @param color
 
 -- The default focused element background color.
 -- @beautiful beautiful.bg_focus
+-- @param color
 
 -- The default urgent element background color.
 -- @beautiful beautiful.bg_urgent
+-- @param color
 
 -- The default minimized element background color.
 -- @beautiful beautiful.bg_minimize
+-- @param color
 
 -- The system tray background color.
 -- Please note that only solid colors are currently supported.
 -- @beautiful beautiful.bg_systray
+-- @param color
 
 -- The default focused element foreground (text) color.
 -- @beautiful beautiful.fg_normal
+-- @param color
 
 -- The default focused element foreground (text) color.
 -- @beautiful beautiful.fg_focus
+-- @param color
 
 -- The default urgent element foreground (text) color.
 -- @beautiful beautiful.fg_urgent
+-- @param color
 
 -- The default minimized element foreground (text) color.
 -- @beautiful beautiful.fg_minimize
+-- @param color
 
 --- The gap between clients.
 -- @beautiful beautiful.useless_gap
@@ -124,31 +134,39 @@ local active_font
 
 --- The client border width.
 -- @beautiful beautiful.border_width
+-- @param number
 
 --- The default clients border color.
 -- Note that only solid colors are supported.
 -- @beautiful beautiful.border_normal
+-- @param color
 
 --- The focused client border color.
 -- Note that only solid colors are supported.
 -- @beautiful beautiful.border_focus
+-- @param color
 
 --- The marked clients border color.
 -- Note that only solid colors are supported.
 -- @beautiful beautiful.border_marked
+-- @param color
 
 --- The wallpaper path.
 -- @beautiful beautiful.wallpaper
+-- @tparam string|gears.surface wallpaper
 
 -- The icon theme name.
 -- It has to be a directory in `/usr/share/icons` or an XDG icon folder.
 -- @beautiful beautiful.icon_theme
+-- @param string
 
 --- The Awesome icon path.
 -- @beautiful beautiful.awesome_icon
+-- @tparam string|gears.surface icon
 
 --- The current theme path (if any)
 -- @tfield string beautiful.theme_path
+-- @param string
 
 --- Load a font from a string or a font description.
 --

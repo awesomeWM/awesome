@@ -20,6 +20,7 @@ local textbox = { mt = {} }
 
 --- The textbox font.
 -- @beautiful beautiful.font
+-- @param string
 
 --- Set the DPI of a Pango layout
 local function setup_dpi(box, dpi)

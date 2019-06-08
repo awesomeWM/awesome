@@ -48,9 +48,11 @@ end
 
 --- Menubar normal text color.
 -- @beautiful beautiful.menubar_fg_normal
+-- @param color
 
 --- Menubar normal background color.
 -- @beautiful beautiful.menubar_bg_normal
+-- @param color
 
 --- Menubar border width.
 -- @beautiful beautiful.menubar_border_width
@@ -58,12 +60,15 @@ end
 
 --- Menubar border color.
 -- @beautiful beautiful.menubar_border_color
+-- @param color
 
 --- Menubar selected item text color.
 -- @beautiful beautiful.menubar_fg_normal
+-- @param color
 
 --- Menubar selected item background color.
 -- @beautiful beautiful.menubar_bg_normal
+-- @param color
 
 
 -- menubar

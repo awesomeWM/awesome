@@ -291,6 +291,7 @@ end
 -- widget will get all the space that is left. If this is false, the last widget
 -- won't be handled specially and there can be space left unused.
 -- @property fill_space
+-- @param boolean
 
 function fixed:fill_space(val)
     if self._private.fill_space ~= val then

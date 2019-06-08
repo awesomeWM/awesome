@@ -49,12 +49,15 @@ local widget = {
 }
 
 --- Don't show hotkeys without descriptions.
+-- @tfield boolean widget.hide_without_description
+-- @param boolean
 widget.hide_without_description = true
 
 --- Merge hotkey records into one if they have the same modifiers and
 -- description.
+-- @tfield boolean widget.merge_duplicates
+-- @param boolean
 widget.merge_duplicates = true
-
 
 --- Hotkeys widget background color.
 -- @beautiful beautiful.hotkeys_bg

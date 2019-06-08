@@ -217,10 +217,12 @@
 
 --- The default background color.
 -- @beautiful beautiful.bg_normal
+-- @param color
 -- @see bg
 
 --- The default foreground (text) color.
 -- @beautiful beautiful.fg_normal
+-- @param color
 -- @see fg
 
 --- Set a declarative widget hierarchy description.
@@ -232,6 +234,7 @@
 -- @param c The background to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
 -- @property bg
+-- @param color
 -- @see gears.color
 
 --- The background image of the drawable.
@@ -245,6 +248,7 @@
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
 -- @property fg
+-- @param color
 -- @see gears.color
 
 --- Find a widget by a point.

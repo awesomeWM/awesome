@@ -62,6 +62,7 @@ end
 --- Set the strategy to use for the constraining. Valid values are 'max',
 -- 'min' or 'exact'. Throws an error on invalid values.
 -- @property strategy
+-- @tparam string strategy Either 'max', 'min' or 'exact'
 
 function constraint:set_strategy(val)
     local func = {

@@ -142,6 +142,7 @@ end
 --- Set the layout's first widget.
 -- This is the widget that is at the left/top
 -- @property first
+-- @param widget
 
 function align:set_first(widget)
     if self._private.first == widget then
@@ -153,6 +154,7 @@ end
 
 --- Set the layout's second widget. This is the centered one.
 -- @property second
+-- @param widget
 
 function align:set_second(widget)
     if self._private.second == widget then
@@ -165,6 +167,7 @@ end
 --- Set the layout's third widget.
 -- This is the widget that is at the right/bottom
 -- @property third
+-- @param widget
 
 function align:set_third(widget)
     if self._private.third == widget then
@@ -184,6 +187,7 @@ end
 -- This can be used to replace all 3 widgets at once.
 -- @treturn table a list of all widgets
 -- @property children
+-- @param table
 
 function align:get_children()
     return gtable.from_sparse {self._private.first, self._private.second, self._private.third}

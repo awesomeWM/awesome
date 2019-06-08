@@ -24,12 +24,15 @@ local radialprogressbar = { mt = {} }
 
 --- The progressbar border background color.
 -- @beautiful beautiful.radialprogressbar_border_color
+-- @param color
 
 --- The progressbar foreground color.
 -- @beautiful beautiful.radialprogressbar_color
+-- @param color
 
 --- The progressbar border width.
 -- @beautiful beautiful.radialprogressbar_border_width
+-- @param number
 
 --- The padding between the outline and the progressbar.
 -- @beautiful beautiful.radialprogressbar_paddings
@@ -190,10 +193,12 @@ end
 --- The border background color.
 --@DOC_wibox_container_radialprogressbar_border_color_EXAMPLE@
 -- @property border_color
+-- @param color
 
 --- The border foreground color.
 --@DOC_wibox_container_radialprogressbar_color_EXAMPLE@
 -- @property color
+-- @param color
 
 --- The border width.
 --@DOC_wibox_container_radialprogressbar_border_width_EXAMPLE@
@@ -202,9 +207,11 @@ end
 
 --- The minimum value.
 -- @property min_value
+-- @param number
 
 --- The maximum value.
 -- @property max_value
+-- @param number
 
 for _, prop in ipairs {"max_value", "min_value", "border_color", "color",
     "border_width", "paddings"} do

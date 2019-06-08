@@ -314,6 +314,7 @@ end
 -- @DOC_text_awful_keygrabber_timeout_EXAMPLE@
 --
 -- @property timeout
+-- @param number
 -- @see gears.timer
 -- @see timeout_callback
 
@@ -393,6 +394,7 @@ end
 -- @DOC_text_awful_keygrabber_root_keybindings_EXAMPLE@
 --
 -- @property root_keybindings
+-- @param table
 -- @see export_keybindings
 -- @see keybindings
 

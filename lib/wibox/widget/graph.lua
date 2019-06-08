@@ -97,12 +97,15 @@ local graph = { mt = {} }
 
 --- The graph background color.
 -- @beautiful beautiful.graph_bg
+-- @param color
 
 --- The graph foreground color.
 -- @beautiful beautiful.graph_fg
+-- @param color
 
 --- The graph border color.
 -- @beautiful beautiful.graph_border_color
+-- @param color
 
 local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",

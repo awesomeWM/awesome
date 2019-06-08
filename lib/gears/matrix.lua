@@ -217,6 +217,7 @@ matrix_mt.__mul = matrix.multiply
 matrix_mt.__tostring = matrix.tostring
 
 --- A constant for the identity matrix.
+-- @param matrix
 matrix.identity = matrix.create(1, 0, 0, 1, 0, 0)
 
 return matrix

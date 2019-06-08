@@ -87,7 +87,7 @@ local separator = {}
 
 --- The separator border color.
 -- @beautiful beautiful.separator_border_color
--- @param gears.color
+-- @param color
 -- @see border_color
 
 --- The separator border width.

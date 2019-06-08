@@ -50,6 +50,7 @@ end
 
 --- The icon used for sub-menus.
 -- @beautiful beautiful.menu_submenu_icon
+-- @tparam string|gears.surface menu_submenu_icon
 
 --- The menu text font.
 -- @beautiful beautiful.menu_font

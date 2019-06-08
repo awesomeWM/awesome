@@ -21,29 +21,37 @@ local checkbox = {}
 
 --- The outer (unchecked area) border width.
 -- @beautiful beautiful.checkbox_border_width
+-- @param number
 
 --- The outer (unchecked area) background color, pattern or gradient.
 -- @beautiful beautiful.checkbox_bg
+-- @param color
 
 --- The outer (unchecked area) border color.
 -- @beautiful beautiful.checkbox_border_color
+-- @param color
 
 --- The checked part border color.
 -- @beautiful beautiful.checkbox_check_border_color
+-- @param color
 
 --- The checked part border width.
 -- @beautiful beautiful.checkbox_check_border_width
+-- @param number
 
 --- The checked part filling color.
 -- @beautiful beautiful.checkbox_check_color
+-- @param number
 
 --- The outer (unchecked area) shape.
 -- @beautiful beautiful.checkbox_shape
+-- @tparam gears.shape shape
 -- @see gears.shape
 
 --- The checked part shape.
 -- If none is set, then the `shape` property will be used.
 -- @beautiful beautiful.checkbox_check_shape
+-- @tparam gears.shape shape
 -- @see gears.shape
 
 --- The padding between the outline and the progressbar.
@@ -59,35 +67,44 @@ local checkbox = {}
 -- filling color. Note that `check_color` and `border_color` have priority
 -- over this property.
 -- @beautiful beautiful.checkbox_color
+-- @param color
 
 --- The outer (unchecked area) border width.
 -- @property border_width
+-- @param number
 
 --- The outer (unchecked area) background color, pattern or gradient.
 --@DOC_wibox_widget_checkbox_bg_EXAMPLE@
 -- @property bg
+-- @param color
 
 --- The outer (unchecked area) border color.
 -- @property border_color
+-- @param color
 
 --- The checked part border color.
 -- @property check_border_color
+-- @param color
 
 --- The checked part border width.
 -- @property check_border_width
+-- @param number
 
 --- The checked part filling color.
 -- @property check_color
+-- @param color
 
 --- The outer (unchecked area) shape.
 --@DOC_wibox_widget_checkbox_shape_EXAMPLE@
 -- @property shape
+-- @tparam gears.shape shape
 -- @see gears.shape
 
 --- The checked part shape.
 -- If none is set, then the `shape` property will be used.
 --@DOC_wibox_widget_checkbox_check_shape_EXAMPLE@
 -- @property check_shape
+-- @tparam gears.shape shape
 -- @see gears.shape
 
 --- The padding between the outline and the progressbar.
@@ -103,6 +120,7 @@ local checkbox = {}
 -- filling color. Note that `check_color` and `border_color` have priority
 -- over this property.
 -- @property color
+-- @param color
 
 local function outline_workarea(self, width, height)
     local offset = (self._private.border_width or
@@ -209,9 +227,6 @@ for _, prop in ipairs {"border_width", "bg", "border_color", "check_border_color
         return self._private[prop] or beautiful["checkbox_"..prop]
     end
 end
-
---- The checkbox color.
--- @property color
 
 function checkbox:set_paddings(val)
     self._private.paddings = type(val) == "number" and {

@@ -31,6 +31,7 @@ local util = {}
 util.table = {}
 
 --- The default shell used when spawing processes.
+-- @param string
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
 --- Execute a system command and road the output.

@@ -32,6 +32,7 @@ local utils = {}
 -- Options section
 
 --- Terminal which applications that need terminal would open in.
+-- @param[opt="xterm"] string
 utils.terminal = 'xterm'
 
 --- The default icon for applications that don't provide any icon in
@@ -39,6 +40,7 @@ utils.terminal = 'xterm'
 local default_icon = nil
 
 --- Name of the WM for the OnlyShowIn entry in the .desktop file.
+-- @param[opt="awesome"] string
 utils.wm_name = "awesome"
 
 -- Maps keys in desktop entries to suitable getter function.

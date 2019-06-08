@@ -119,7 +119,7 @@ end
 -- is trimmed.
 --
 -- @property clip_shape
--- @tparam function clip_shape A `gears_shape` compatible shape function
+-- @tparam gears.shape clip_shape A `gears_shape` compatible shape function
 -- @see gears.shape
 -- @see set_clip_shape
 
