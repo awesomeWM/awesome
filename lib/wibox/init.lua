@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox
+-- @popupmod wibox
 ---------------------------------------------------------------------------
 
 local capi = {
@@ -65,6 +65,7 @@ end
 
 --- Create a widget that reflects the current state of this wibox.
 -- @treturn widget A new widget.
+-- @method to_widget
 function wibox:to_widget()
     local bw = self.border_width or beautiful.border_width or 0
     return wibox.widget {
@@ -88,6 +89,7 @@ end
 --- Save a screenshot of the wibox to `path`.
 -- @tparam string path The path.
 -- @tparam[opt=nil] table context A widget context.
+-- @method save_to_svg
 function wibox:save_to_svg(path, context)
     wibox.widget.draw_to_svg_file(
         self:to_widget(), path, self:geometry().width, self:geometry().height, context
@@ -251,7 +253,7 @@ end
 -- @tparam[opt=nil] table args
 --@DOC_wibox_constructor_COMMON@
 -- @treturn wibox The new wibox
--- @function .wibox
+-- @constructorfct wibox
 
 local function new(args)
     args = args or {}
@@ -350,7 +352,7 @@ end
 --- Redraw a wibox. You should never have to call this explicitely because it is
 -- automatically called when needed.
 -- @param wibox
--- @function draw
+-- @method draw
 
 function wibox.mt:__call(...)
     return new(...)

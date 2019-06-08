@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Aleksey Fedotov &lt;lexa@cfotr.com&gt;
 -- @copyright 2015 Aleksey Fedotov
--- @classmod awful.widget.keyboardlayout
+-- @widgetmod awful.widget.keyboardlayout
 ---------------------------------------------------------------------------
 
 local capi = {awesome = awesome}
@@ -135,6 +135,7 @@ end
 -- xkb_symbols pattern "vendor/file(section):group_idx".
 -- @tparam string group_names The string awesome.xkb_get_group_names() returns.
 -- @treturn table An array of tables whose keys are vendor, file, section, and group_idx.
+-- @staticfct awful.keyboardlayout.get_groups_from_group_names
 function keyboardlayout.get_groups_from_group_names(group_names)
     if group_names == nil then
         return nil
@@ -252,7 +253,11 @@ local function update_layout(self)
     update_status(self)
 end
 
---- Create a keyboard layout widget. It shows current keyboard layout name in a textbox.
+--- Create a keyboard layout widget.
+--
+-- It shows current keyboard layout name in a textbox.
+--
+-- @constructorfct awful.widget.keyboardlayout
 -- @return A keyboard layout widget.
 function keyboardlayout.new()
     local widget = textbox()

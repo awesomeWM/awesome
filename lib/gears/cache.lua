@@ -37,6 +37,7 @@ end
 -- garbage-collected at any time, but might be useful to keep.
 -- @param creation_cb Callback that is used for creating missing cache entries.
 -- @return A new cache object.
+-- @constructorfct gears.cache
 function cache.new(creation_cb)
     return setmetatable({
         _cache = setmetatable({}, { __mode = "v" }),

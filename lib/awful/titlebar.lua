@@ -9,7 +9,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
--- @classmod awful.titlebar
+-- @popupmod awful.titlebar
 ---------------------------------------------------------------------------
 
 local error = error
@@ -38,9 +38,11 @@ local titlebar = {
 
 --- Show tooltips when hover on titlebar buttons.
 -- @tfield[opt=true] boolean awful.titlebar.enable_tooltip
+-- @param boolean
 
 --- Title to display if client name is not set.
 -- @field[opt='\<unknown\>'] awful.titlebar.fallback_name
+-- @tparam[opt='\<unknown\>'] string fallback_name
 
 
 --- The titlebar foreground (text) color.
@@ -55,7 +57,7 @@ local titlebar = {
 
 --- The titlebar background image image.
 -- @beautiful beautiful.titlebar_bgimage_normal
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- The titlebar foreground (text) color.
@@ -70,7 +72,7 @@ local titlebar = {
 
 --- The titlebar background image image.
 -- @beautiful beautiful.titlebar_bgimage
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- The focused titlebar foreground (text) color.
@@ -85,354 +87,353 @@ local titlebar = {
 
 --- The focused titlebar background image image.
 -- @beautiful beautiful.titlebar_bgimage_focus
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_normal.
 -- @beautiful beautiful.titlebar_floating_button_normal
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_normal.
 -- @beautiful beautiful.titlebar_maximized_button_normal
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- minimize_button_normal.
 -- @beautiful beautiful.titlebar_minimize_button_normal
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- minimize_button_normal_hover.
 -- @beautiful beautiful.titlebar_minimize_button_normal_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- minimize_button_normal_press.
 -- @beautiful beautiful.titlebar_minimize_button_normal_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- close_button_normal.
 -- @beautiful beautiful.titlebar_close_button_normal
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- close_button_normal_hover.
 -- @beautiful beautiful.titlebar_close_button_normal_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- close_button_normal_press.
 -- @beautiful beautiful.titlebar_close_button_normal_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_normal.
 -- @beautiful beautiful.titlebar_ontop_button_normal
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_normal.
 -- @beautiful beautiful.titlebar_sticky_button_normal
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_focus.
 -- @beautiful beautiful.titlebar_floating_button_focus
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_focus.
 -- @beautiful beautiful.titlebar_maximized_button_focus
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- minimize_button_focus.
 -- @beautiful beautiful.titlebar_minimize_button_focus
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- minimize_button_focus_hover.
 -- @beautiful beautiful.titlebar_minimize_button_focus_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- minimize_button_focus_press.
 -- @beautiful beautiful.titlebar_minimize_button_focus_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- close_button_focus.
 -- @beautiful beautiful.titlebar_close_button_focus
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- close_button_focus_hover.
 -- @beautiful beautiful.titlebar_close_button_focus_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- close_button_focus_press.
 -- @beautiful beautiful.titlebar_close_button_focus_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_focus.
 -- @beautiful beautiful.titlebar_ontop_button_focus
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_focus.
 -- @beautiful beautiful.titlebar_sticky_button_focus
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_normal_active.
 -- @beautiful beautiful.titlebar_floating_button_normal_active
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_normal_active_hover.
 -- @beautiful beautiful.titlebar_floating_button_normal_active_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_normal_active_press.
 -- @beautiful beautiful.titlebar_floating_button_normal_active_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_normal_active.
 -- @beautiful beautiful.titlebar_maximized_button_normal_active
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_normal_active_hover.
 -- @beautiful beautiful.titlebar_maximized_button_normal_active_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_normal_active_press.
 -- @beautiful beautiful.titlebar_maximized_button_normal_active_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_normal_active.
 -- @beautiful beautiful.titlebar_ontop_button_normal_active
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_normal_active_hover.
 -- @beautiful beautiful.titlebar_ontop_button_normal_active_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_normal_active_press.
 -- @beautiful beautiful.titlebar_ontop_button_normal_active_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_normal_active.
 -- @beautiful beautiful.titlebar_sticky_button_normal_active
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_normal_active_hover.
 -- @beautiful beautiful.titlebar_sticky_button_normal_active_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_normal_active_press.
 -- @beautiful beautiful.titlebar_sticky_button_normal_active_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_focus_active.
 -- @beautiful beautiful.titlebar_floating_button_focus_active
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_focus_active_hover.
 -- @beautiful beautiful.titlebar_floating_button_focus_active_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_focus_active_press.
 -- @beautiful beautiful.titlebar_floating_button_focus_active_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_focus_active.
 -- @beautiful beautiful.titlebar_maximized_button_focus_active
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_focus_active_hover.
 -- @beautiful beautiful.titlebar_maximized_button_focus_active_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_focus_active_press.
 -- @beautiful beautiful.titlebar_maximized_button_focus_active_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_focus_active.
 -- @beautiful beautiful.titlebar_ontop_button_focus_active
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_focus_active_hover.
 -- @beautiful beautiful.titlebar_ontop_button_focus_active_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_focus_active_press.
 -- @beautiful beautiful.titlebar_ontop_button_focus_active_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_focus_active.
 -- @beautiful beautiful.titlebar_sticky_button_focus_active
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_focus_active_hover.
 -- @beautiful beautiful.titlebar_sticky_button_focus_active_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_focus_active_press.
 -- @beautiful beautiful.titlebar_sticky_button_focus_active_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_normal_inactive.
 -- @beautiful beautiful.titlebar_floating_button_normal_inactive
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_normal_inactive_hover.
 -- @beautiful beautiful.titlebar_floating_button_normal_inactive_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_normal_inactive_press.
 -- @beautiful beautiful.titlebar_floating_button_normal_inactive_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_normal_inactive.
 -- @beautiful beautiful.titlebar_maximized_button_normal_inactive
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_normal_inactive_hover.
 -- @beautiful beautiful.titlebar_maximized_button_normal_inactive_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_normal_inactive_press.
 -- @beautiful beautiful.titlebar_maximized_button_normal_inactive_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_normal_inactive.
 -- @beautiful beautiful.titlebar_ontop_button_normal_inactive
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_normal_inactive_hover.
 -- @beautiful beautiful.titlebar_ontop_button_normal_inactive_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_normal_inactive_press.
 -- @beautiful beautiful.titlebar_ontop_button_normal_inactive_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_normal_inactive.
 -- @beautiful beautiful.titlebar_sticky_button_normal_inactive
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_normal_inactive_hover.
 -- @beautiful beautiful.titlebar_sticky_button_normal_inactive_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_normal_inactive_press.
 -- @beautiful beautiful.titlebar_sticky_button_normal_inactive_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_focus_inactive.
 -- @beautiful beautiful.titlebar_floating_button_focus_inactive
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_focus_inactive_hover.
 -- @beautiful beautiful.titlebar_floating_button_focus_inactive_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- floating_button_focus_inactive_press.
 -- @beautiful beautiful.titlebar_floating_button_focus_inactive_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_focus_inactive.
 -- @beautiful beautiful.titlebar_maximized_button_focus_inactive
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_focus_inactive_hover.
 -- @beautiful beautiful.titlebar_maximized_button_focus_inactive_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- maximized_button_focus_inactive_press.
 -- @beautiful beautiful.titlebar_maximized_button_focus_inactive_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_focus_inactive.
 -- @beautiful beautiful.titlebar_ontop_button_focus_inactive
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_focus_inactive_hover.
 -- @beautiful beautiful.titlebar_ontop_button_focus_inactive_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- ontop_button_focus_inactive_press.
 -- @beautiful beautiful.titlebar_ontop_button_focus_inactive_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_focus_inactive.
 -- @beautiful beautiful.titlebar_sticky_button_focus_inactive
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_focus_inactive_hover.
 -- @beautiful beautiful.titlebar_sticky_button_focus_inactive_hover
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- sticky_button_focus_inactive_press.
 -- @beautiful beautiful.titlebar_sticky_button_focus_inactive_press
--- @param surface
+-- @tparam gears.surface|string path
 -- @see gears.surface
 
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @param args An array containing the widgets disposition
--- @name setup
--- @class function
+-- @method setup
 
 
 local all_titlebars = setmetatable({}, { __mode = 'k' })
@@ -502,7 +503,7 @@ end
 -- @tparam[opt=top] string args.fg_normal
 -- @tparam[opt=top] string args.fg_focus
 -- @tparam[opt=top] string args.font
--- @function awful.titlebar
+-- @constructorfct awful.titlebar
 local function new(c, args)
     args = args or {}
     local position = args.position or "top"
@@ -564,6 +565,7 @@ end
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
 --   "right", "top", "bottom". Default is "top".
+-- @staticfct awful.titlebar.show
 function titlebar.show(c, position)
     position = position or "top"
     if load_titlebars(c, true, position) then return end
@@ -577,6 +579,7 @@ end
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
 --   "right", "top", "bottom". Default is "top".
+-- @staticfct awful.titlebar.hide
 function titlebar.hide(c, position)
     position = position or "top"
     get_titlebar_function(c, position)(c, 0)
@@ -586,6 +589,7 @@ end
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
 --   "right", "top", "bottom". Default is "top".
+-- @staticfct awful.titlebar.toggle
 function titlebar.toggle(c, position)
     position = position or "top"
     if load_titlebars(c, true, position) then return end
@@ -602,6 +606,7 @@ end
 -- This way, you can e.g. modify the font that is used.
 -- @param c The client for which a titlewidget should be created.
 -- @return The title widget.
+-- @staticfct awful.titlebar.widget.titlewidget
 function titlebar.widget.titlewidget(c)
     local ret = textbox()
     local function update()
@@ -618,6 +623,7 @@ end
 -- available. This way, you can e.g. disallow resizes.
 -- @param c The client for which an icon widget should be created.
 -- @return The icon widget.
+-- @staticfct awful.titlebar.widget.iconwidget
 function titlebar.widget.iconwidget(c)
     return clienticon(c)
 end
@@ -635,6 +641,7 @@ end
 -- @param selector A function that selects the image that should be displayed.
 -- @param action Function that is called when the button is clicked.
 -- @return The widget
+-- @staticfct awful.titlebar.widget.button
 function titlebar.widget.button(c, name, selector, action)
     local ret = imagebox()
 
@@ -718,6 +725,7 @@ end
 
 --- Create a new float button for a client.
 -- @param c The client for which the button is wanted.
+-- @staticfct awful.titlebar.widget.floatingbutton
 function titlebar.widget.floatingbutton(c)
     local widget = titlebar.widget.button(c, "floating", aclient.object.get_floating, aclient.floating.toggle)
     c:connect_signal("property::floating", widget.update)
@@ -726,6 +734,7 @@ end
 
 --- Create a new maximize button for a client.
 -- @param c The client for which the button is wanted.
+-- @staticfct awful.titlebar.widget.maximizedbutton
 function titlebar.widget.maximizedbutton(c)
     local widget = titlebar.widget.button(c, "maximized", function(cl)
         return cl.maximized
@@ -738,6 +747,7 @@ end
 
 --- Create a new minimize button for a client.
 -- @param c The client for which the button is wanted.
+-- @staticfct awful.titlebar.widget.minimizebutton
 function titlebar.widget.minimizebutton(c)
     local widget = titlebar.widget.button(c, "minimize",
                                           function() return "" end,
@@ -748,12 +758,14 @@ end
 
 --- Create a new closing button for a client.
 -- @param c The client for which the button is wanted.
+-- @staticfct awful.titlebar.widget.closebutton
 function titlebar.widget.closebutton(c)
     return titlebar.widget.button(c, "close", function() return "" end, function(cl) cl:kill() end)
 end
 
 --- Create a new ontop button for a client.
 -- @param c The client for which the button is wanted.
+-- @staticfct awful.titlebar.widget.ontopbutton
 function titlebar.widget.ontopbutton(c)
     local widget = titlebar.widget.button(c, "ontop",
                                           function(cl) return cl.ontop end,
@@ -764,6 +776,7 @@ end
 
 --- Create a new sticky button for a client.
 -- @param c The client for which the button is wanted.
+-- @staticfct awful.titlebar.widget.stickybutton
 function titlebar.widget.stickybutton(c)
     local widget = titlebar.widget.button(c, "sticky",
                                           function(cl) return cl.sticky end,

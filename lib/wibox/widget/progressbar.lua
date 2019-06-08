@@ -17,7 +17,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @classmod wibox.widget.progressbar
+-- @widgetmod wibox.widget.progressbar
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -41,6 +41,7 @@ local progressbar = { mt = {} }
 
 --- The progressbar border width.
 -- @property border_width
+-- @param number
 
 --- The progressbar inner border color.
 -- If the value is nil, no border will be drawn.
@@ -51,6 +52,7 @@ local progressbar = { mt = {} }
 
 --- The progressbar inner border width.
 -- @property bar_border_width
+-- @param number
 
 --- The progressbar foreground color.
 --
@@ -114,29 +116,37 @@ local progressbar = { mt = {} }
 
 --- The progressbar background color.
 -- @beautiful beautiful.progressbar_bg
+-- @param color
 
 --- The progressbar foreground color.
 -- @beautiful beautiful.progressbar_fg
+-- @param color
 
 --- The progressbar shape.
 -- @beautiful beautiful.progressbar_shape
+-- @tparam gears.shape shape
 -- @see gears.shape
 
 --- The progressbar border color.
 -- @beautiful beautiful.progressbar_border_color
+-- @param color
 
 --- The progressbar outer border width.
 -- @beautiful beautiful.progressbar_border_width
+-- @param number
 
 --- The progressbar inner shape.
 -- @beautiful beautiful.progressbar_bar_shape
+-- @tparam gears.shape shape
 -- @see gears.shape
 
 --- The progressbar bar border width.
 -- @beautiful beautiful.progressbar_bar_border_width
+-- @param number
 
 --- The progressbar bar border color.
 -- @beautiful beautiful.progressbar_bar_border_color
+-- @param color
 
 --- The progressbar margins.
 -- Note that if the `clip` is disabled, this allows the background to be smaller
@@ -368,7 +378,9 @@ function progressbar:fit(_, width, height)
 end
 
 --- Set the progressbar value.
--- @param value The progress bar value between 0 and 1.
+-- @property value
+-- @param number The progress bar value between 0 and 1.
+
 function progressbar:set_value(value)
     value = value or 0
 
@@ -425,7 +437,7 @@ end
 -- @param args Standard widget() arguments. You should add width and height
 -- key to set progressbar geometry.
 -- @return A progressbar widget.
--- @function wibox.widget.progressbar
+-- @constructorfct wibox.widget.progressbar
 function progressbar.new(args)
     args = args or {}
 

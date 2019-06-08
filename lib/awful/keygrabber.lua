@@ -60,7 +60,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2012 dodo
 -- @copyright 2017 Emmanuel Lepage Vallee
--- @classmod awful.keygrabber
+-- @coreclassmod awful.keygrabber
 ---------------------------------------------------------------------------
 
 local ipairs = ipairs
@@ -314,6 +314,7 @@ end
 -- @DOC_text_awful_keygrabber_timeout_EXAMPLE@
 --
 -- @property timeout
+-- @param number
 -- @see gears.timer
 -- @see timeout_callback
 
@@ -393,6 +394,7 @@ end
 -- @DOC_text_awful_keygrabber_root_keybindings_EXAMPLE@
 --
 -- @property root_keybindings
+-- @param table
 -- @see export_keybindings
 -- @see keybindings
 
@@ -463,6 +465,7 @@ end
 -- Note that only a single keygrabber can be started at any one time. If another
 -- keygrabber (or this one) is currently running. This method returns false.
 --
+-- @method start
 -- @treturn boolean If the keygrabber was successfully started.
 function keygrabber:start()
     if self.grabber or keygrab.current_instance then
@@ -514,7 +517,7 @@ function keygrabber:start()
 end
 
 --- Stop the keygrabber.
--- @function keygrabber:stop
+-- @method stop
 function keygrabber:stop(_stop_key, _stop_mods) -- (at)function disables ldoc params
     keygrab.stop(self.grabber)
 
@@ -534,6 +537,7 @@ end
 --
 -- Those keybindings will automatically start the keygrabbing when hit.
 --
+-- @method add_keybinding
 -- @tparam table mods A table with modifier keys, such as `shift`, `mod4`, `mod1` (alt) or
 --  `control`.
 -- @tparam string key The key name, such as `left` or `f`
@@ -661,7 +665,7 @@ end
 -- @tparam[opt=false] boolean args.autostart Start the grabbing immediately
 -- @tparam[opt=false] boolean args.mask_modkeys Do not call the callbacks on
 --  modifier keys (like `Control` or `Mod4`) events.
--- @function awful.keygrabber
+-- @constructorfct awful.keygrabber
 function keygrab.run_with_keybindings(args)
     args = args or {}
 
@@ -722,17 +726,6 @@ function keygrab.run_with_keybindings(args)
     return ret
 end
 
---- Run a grabbing function.
---
--- Calling this is equivalent to `keygrabber.run`.
---
--- @param g The key grabber callback that will get the key events until it
---   will be deleted or a new grabber is added.
--- @return the given callback `g`.
---
--- @deprecated awful.keygrabber.run
--- @see keygrabber.run
-
 --- A lower level API to interact with the keygrabber directly.
 --
 -- Grab keyboard input and read pressed keys, calling the least callback
@@ -749,7 +742,7 @@ end
 --
 -- Here is the content of the modifier table:
 --
--- <table>
+-- <table class='widget_list' border=1>
 --  <tr style='font-weight: bold;'>
 --   <th align='center'>Modifier name </th>
 --   <th align='center'>Key name</th>
@@ -784,7 +777,7 @@ end
 --     end
 --   end)
 -- end
--- @function awful.keygrabber.run
+-- @deprecated awful.keygrabber.run
 function keygrab.run(g)
     -- Remove the grabber if it is in the stack.
     keygrab.stop(g)
@@ -806,7 +799,7 @@ end
 local signals = {}
 
 --- Connect to a signal for all keygrabbers at once.
--- @function awful.keygrabber.connect_signal
+-- @staticfct awful.keygrabber.connect_signal
 -- @tparam string name The signal name.
 -- @tparam function callback The callback.
 function keygrab.connect_signal(name, callback)
@@ -819,7 +812,7 @@ function keygrab.connect_signal(name, callback)
 end
 
 --- Disconnect to a signal for all keygrabbers at once.
--- @function awful.keygrabber.disconnect_signal
+-- @staticfct awful.keygrabber.disconnect_signal
 -- @tparam string name The signal name.
 -- @tparam function callback The callback.
 function keygrab.disconnect_signal(name, callback)
@@ -839,7 +832,7 @@ end
 -- `my_keygrabber:emit_signal(name, ...)`. This function works on the whole
 -- keygrabber module, not one of its instance.
 --
--- @function awful.keygrabber.emit_signal
+-- @staticfct awful.keygrabber.emit_signal
 -- @tparam string name The signal name.
 -- @param ... Other arguments for the callbacks.
 function keygrab.emit_signal(name, ...)

@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2016 Uli Schlachter
--- @module gears.protected_call
+-- @utillib gears.protected_call
 ---------------------------------------------------------------------------
 
 local gdebug = require("gears.debug")
@@ -43,6 +43,7 @@ end
 -- @tparam function func The function to call
 -- @param ... Arguments to the function
 -- @return The result of the given function, or nothing if an error occurred.
+-- @staticfct gears.protected_call
 function protected_call.call(func, ...)
     return do_pcall(func, ...)
 end

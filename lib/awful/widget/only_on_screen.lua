@@ -4,7 +4,7 @@
 --
 -- @author Uli Schlachter
 -- @copyright 2017 Uli Schlachter
--- @classmod awful.widget.only_on_screen
+-- @containermod awful.widget.only_on_screen
 ---------------------------------------------------------------------------
 
 local type = type
@@ -63,15 +63,10 @@ function only_on_screen:get_widget()
     return self._private.widget
 end
 
---- Get the number of children element
--- @treturn table The children
 function only_on_screen:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function only_on_screen:set_children(children)
     self:set_widget(children[1])
 end
@@ -96,7 +91,7 @@ end
 -- @param[opt] widget The widget to display.
 -- @param[opt] s The screen to display on.
 -- @treturn table A new only_on_screen container
--- @function wibox.container.only_on_screen
+-- @constructorfct awful.widget.only_on_screen
 local function new(widget, s)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

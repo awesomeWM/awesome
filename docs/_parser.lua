@@ -68,17 +68,37 @@ local function path_to_module(path)
     error("Cannot figure out module for " .. tostring(path))
 end
 
+local modtypes = {
+    classmod     = true,
+    widgetmod    = true,
+    containermod = true,
+    layoutmod    = true,
+    coreclassmod = true,
+    popupmod     = true,
+}
+
+local libtypes = {
+    module    = true,
+    submodule = true,
+    utillib   = true,
+    themelib  = true,
+}
+
 function module.path_to_html(path)
     local mod = path_to_module(path):gsub(".init", "")
     local f = assert(io.open(path))
     while true do
         local line = f:read()
         if not line then break end
-        if line:match("@classmod") then
+
+        local tag = line:gmatch("@([^ ]+) ")() or ""
+
+        if modtypes[tag] then
             f:close()
             return "../classes/".. mod ..".html#"
         end
-        if line:match("@module") or line:match("@submodule") then
+
+        if libtypes[tag] then
             f:close()
             return "../libraries/".. mod ..".html#"
         end

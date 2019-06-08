@@ -6,19 +6,23 @@
 -- @return The index
 -- @return The parent layout
 -- @return The path between self and widget
--- @function index
+-- @method index
+
+--- Get or set the children elements.
+-- @property children
+-- @tparam table The children
 
 --- Get all direct and indirect children widgets.
 -- This will scan all containers recursively to find widgets
 -- Warning: This method it prone to stack overflow id the widget, or any of its
 -- children, contain (directly or indirectly) itself.
--- @treturn table The children
--- @function get_all_children
+-- @property all_children
+-- @tparam table The children
 
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @param args An array containing the widgets disposition
--- @function setup
+-- @method setup
 
 --- Force a widget height.
 -- @property forced_height
@@ -38,14 +42,14 @@
 
 --- Set/get a widget's buttons.
 -- @param _buttons The table of buttons that should bind to the widget.
--- @function buttons
+-- @method buttons
 
 --- Emit a signal and ensure all parent widgets in the hierarchies also
 -- forward the signal. This is useful to track signals when there is a dynamic
 -- set of containers and layouts wrapping the widget.
 -- @tparam string signal_name
 -- @param ... Other arguments
--- @function emit_signal_recursive
+-- @method emit_signal_recursive
 
 --- When the layout (size) change.
 -- This signal is emitted when the previous results of `:layout()` and `:fit()`

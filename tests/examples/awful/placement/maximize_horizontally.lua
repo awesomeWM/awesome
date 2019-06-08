@@ -2,8 +2,7 @@
 -- Horizontally maximize the drawable in the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments") --DOC_HEADER
--- @name maximize_horizontally --DOC_HEADER
--- @class function --DOC_HEADER
+-- @staticfct awful.placement.maximize_horizontally --DOC_HEADER
 
 screen[1]._resize {width = 128, height = 96} --DOC_HIDE
 local placement = require("awful.placement") --DOC_HIDE

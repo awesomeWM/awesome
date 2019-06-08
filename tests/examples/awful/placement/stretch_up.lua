@@ -3,8 +3,7 @@
 -- @tparam drawable d A drawable (like `client` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments --DOC_HEADER
 -- @treturn table The new geometry --DOC_HEADER
--- @name stretch_up --DOC_HEADER
--- @class function --DOC_HEADER
+-- @staticfct awful.placement.stretch_up --DOC_HEADER
 
 screen[1]._resize {width = 128, height = 96} --DOC_HIDE
 local placement = require("awful.placement") --DOC_HIDE

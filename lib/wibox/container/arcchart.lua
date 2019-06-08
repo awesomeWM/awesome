@@ -7,7 +7,7 @@
 --@DOC_wibox_container_defaults_arcchart_EXAMPLE@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2013 Emmanuel Lepage Vallee
--- @classmod wibox.container.arcchart
+-- @containermod wibox.container.arcchart
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -22,12 +22,15 @@ local arcchart = { mt = {} }
 
 --- The progressbar border background color.
 -- @beautiful beautiful.arcchart_border_color
+-- @param color
 
 --- The progressbar foreground color.
 -- @beautiful beautiful.arcchart_color
+-- @param color
 
 --- The progressbar border width.
 -- @beautiful beautiful.arcchart_border_width
+-- @param number
 
 --- The padding between the outline and the progressbar.
 -- @beautiful beautiful.arcchart_paddings
@@ -197,21 +200,17 @@ function arcchart:set_widget(widget)
     self:emit_signal("widget::layout_changed")
 end
 
---- Get the children elements.
--- @treturn table The children
 function arcchart:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function arcchart:set_children(children)
     self._private.widget = children and children[1]
     self:emit_signal("widget::layout_changed")
 end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
+-- @method reset
 function arcchart:reset()
     self:set_widget(nil)
 end
@@ -237,6 +236,7 @@ end
 --- The border background color.
 --@DOC_wibox_container_arcchart_border_color_EXAMPLE@
 -- @property border_color
+-- @param color
 
 --- The arcchart values foreground colors.
 --@DOC_wibox_container_arcchart_color_EXAMPLE@
@@ -250,9 +250,11 @@ end
 
 --- The minimum value.
 -- @property min_value
+-- @param number
 
 --- The maximum value.
 -- @property max_value
+-- @param number
 
 --- The radial background.
 --@DOC_wibox_container_arcchart_bg_EXAMPLE@
@@ -320,7 +322,7 @@ end
 
 --- Returns a new arcchart layout.
 -- @param[opt] widget The widget to display.
--- @function wibox.container.arcchart
+-- @constructorfct wibox.container.arcchart
 local function new(widget)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,

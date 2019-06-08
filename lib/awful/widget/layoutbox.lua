@@ -3,7 +3,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @classmod awful.widget.layoutbox
+-- @widgetmod awful.widget.layoutbox
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -44,6 +44,7 @@ end
 -- symbol of the current tag.
 -- @param screen The screen number that the layout will be represented for.
 -- @return An imagebox widget configured as a layoutbox.
+-- @constructorfct awful.widget.layoutbox
 function layoutbox.new(screen)
     screen = get_screen(screen or 1)
 

@@ -9,7 +9,7 @@
 -- ))
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
--- @classmod awful.widget.button
+-- @widgetmod awful.widget.button
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -24,6 +24,7 @@ local button = { mt = {} }
 --- Create a button widget. When clicked, the image is deplaced to make it like
 -- a real button.
 --
+-- @constructorfct awful.widget.button
 -- @param args Widget arguments. "image" is the image to display.
 -- @return A textbox widget configured as a button.
 function button.new(args)

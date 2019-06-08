@@ -811,7 +811,8 @@ end
 --   or `wibox`)
 -- @tparam[opt={}] table args The arguments
 -- @treturn table The new geometry
--- @treturn string The corner name
+-- @treturn string The corner name.
+-- @staticfct awful.placement.closest_corner
 function placement.closest_corner(d, args)
     args = add_context(args, "closest_corner")
     d = d or capi.client.focus
@@ -855,6 +856,7 @@ end
 -- @tparam[opt={}] table args The arguments
 -- @tparam[opt=client's screen] integer args.screen The screen.
 -- @treturn table The new client geometry.
+-- @staticfct awful.placement.no_offscreen
 function placement.no_offscreen(c, args)
 
     --compatibility with the old API
@@ -897,6 +899,7 @@ end
 -- @param c The client.
 -- @tparam[opt={}] table args Other arguments
 -- @treturn table The new geometry
+-- @staticfct awful.placement.no_overlap
 function placement.no_overlap(c, args)
     c = c or capi.client.focus
     args = add_context(args, "no_overlap")
@@ -969,6 +972,7 @@ end
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments
 -- @treturn table The new geometry
+-- @staticfct awful.placement.under_mouse
 function placement.under_mouse(d, args)
     args = add_context(args, "under_mouse")
     d = d or capi.client.focus
@@ -993,6 +997,7 @@ end
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments
 -- @treturn table The new geometry
+-- @staticfct awful.placement.next_to_mouse
 function placement.next_to_mouse(d, args)
     if type(args) == "number" then
         gdebug.deprecate(
@@ -1042,6 +1047,7 @@ end
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments
 -- @treturn table The new geometry
+-- @staticfct awful.placement.resize_to_mouse
 function placement.resize_to_mouse(d, args)
     d    = d or capi.client.focus
     args = add_context(args, "resize_to_mouse")
@@ -1119,6 +1125,7 @@ end
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments
 -- @treturn table The new geometry
+-- @staticfct awful.placement.align
 function placement.align(d, args)
     args = add_context(args, "align")
     d    = d or capi.client.focus
@@ -1193,6 +1200,7 @@ end
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
 -- @tparam[opt={}] table args The arguments
 -- @treturn table The new geometry
+-- @staticfct awful.placement.stretch
 function placement.stretch(d, args)
     args = add_context(args, "stretch")
 
@@ -1265,6 +1273,7 @@ end
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
 -- @tparam[opt={}] table args The arguments
 -- @treturn table The new geometry
+-- @staticfct awful.placement.maximize
 function placement.maximize(d, args)
     args = add_context(args, "maximize")
     d    = d or capi.client.focus
@@ -1318,6 +1327,7 @@ end
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
 -- @tparam[opt={}] table args The arguments
 -- @treturn table The new geometry
+-- @staticfct awful.placement.scale
 function placement.scale(d, args)
     args = add_context(args, "scale_to_percent")
     d    = d or capi.client.focus
@@ -1400,6 +1410,7 @@ end
 -- @treturn table The new geometry
 -- @treturn string The choosen position ("left", "right", "top" or "bottom")
 -- @treturn string The choosen anchor ("front", "middle" or "back")
+-- @staticfct awful.placement.next_to
 function placement.next_to(d, args)
     args = add_context(args, "next_to")
     d    = d or capi.client.focus
@@ -1527,6 +1538,7 @@ end
 -- @tparam[opt=client.focus] drawable d A drawable (like `client` or `wibox`)
 -- @tparam[opt={}] table args The arguments
 -- @treturn boolean If the geometry was restored
+-- @staticfct awful.placement.restore
 function placement.restore(d, args)
     if not args or not args.context then return false end
     d = d or capi.client.focus

@@ -35,7 +35,8 @@ end
 -- @param default The default value to return on error; when nil, then a surface
 -- in an error state is returned.
 -- @return The loaded surface, or the replacement default
--- @return An error message, or nil on success
+-- @return An error message, or nil on success.
+-- @staticfct load_uncached_silently
 function surface.load_uncached_silently(_surface, default)
     -- On nil, return some sane default
     if not _surface then
@@ -71,7 +72,8 @@ end
 -- in an error state is returned.
 -- @return The loaded surface, or the replacement default, or nil if called with
 -- nil.
--- @return An error message, or nil on success
+-- @return An error message, or nil on success.
+-- @staticfct load_silently
 function surface.load_silently(_surface, default)
     if type(_surface) == "string" then
         local cache = surface_cache[_surface]
@@ -106,6 +108,7 @@ end
 -- via `gears.debug.print_error`.
 -- @param _surface The surface to load or nil
 -- @return The loaded surface, or nil
+-- @staticfct load_uncached
 function surface.load_uncached(_surface)
     return do_load_and_handle_errors(_surface, surface.load_uncached_silently)
 end
@@ -114,7 +117,8 @@ end
 -- This is usually needed for loading images by file name. Errors are handled
 -- via `gears.debug.print_error`.
 -- @param _surface The surface to load or nil
--- @return The loaded surface, or nil
+-- @return The loaded surface, or nil.
+-- @staticfct gears.surface
 function surface.load(_surface)
     return do_load_and_handle_errors(_surface, surface.load_silently)
 end
@@ -125,7 +129,8 @@ end
 
 --- Get the size of a cairo surface
 -- @param surf The surface you are interested in
--- @return The surface's width and height
+-- @return The surface's width and height.
+-- @staticfct get_size
 function surface.get_size(surf)
     local cr = cairo.Context(surf)
     local x, y, w, h = cr:clip_extents()
@@ -142,6 +147,7 @@ end
 -- surface.
 -- @param s Source surface.
 -- @return The surface's duplicate.
+-- @staticfct duplicate_surface
 function surface.duplicate_surface(s)
     s = surface.load(s)
 
@@ -166,6 +172,7 @@ end
 -- @param[opt=white] shape_color The shape color or pattern
 -- @param[opt=transparent] bg_color The surface background color
 -- @treturn cairo.surface the new surface
+-- @staticfct load_from_shape
 function surface.load_from_shape(width, height, shape, shape_color, bg_color, ...)
     color = color or require("gears.color")
 
@@ -191,7 +198,8 @@ end
 -- @param draw A wibox or a client
 -- @param shape or gears.shape function or a custom function with a context,
 --   width and height as parameter.
--- @param[opt] Any additional parameters will be passed to the shape function
+-- @param[opt] Any additional parameters will be passed to the shape function.
+-- @staticfct apply_shape_bounding
 function surface.apply_shape_bounding(draw, shape, ...)
   local geo = draw:geometry()
 
@@ -224,13 +232,15 @@ end
 --- Create an SVG file with this widget content.
 -- This is dynamic, so the SVG will be updated along with the widget content.
 -- because of this, the painting may happen hover multiple event loop cycles.
--- @deprecated wibox.widget.draw_to_svg_file
+-- @deprecated draw_to_svg_file
 -- @tparam widget widget A widget
 -- @tparam string path The output file path
 -- @tparam number width The surface width
 -- @tparam number height The surface height
 -- @return The cairo surface
--- @return The hierarchy
+-- @return The hierarchy.
+-- @see wibox.widget.draw_to_svg_file
+-- @see wibox.widget.draw_to_image_surface
 function surface.widget_to_svg(widget, path, width, height)
     gdebug.deprecate("Use wibox.widget.draw_to_svg_file instead of "..
         "gears.surface.render_to_svg", {deprecated_in=5})
@@ -243,13 +253,15 @@ end
 --- Create a cairo surface with this widget content.
 -- This is dynamic, so the SVG will be updated along with the widget content.
 -- because of this, the painting may happen hover multiple event loop cycles.
--- @deprecated wibox.widget.draw_to_image_surface
+-- @deprecated draw_to_image_surface
 -- @tparam widget widget A widget
 -- @tparam number width The surface width
 -- @tparam number height The surface height
 -- @param[opt=cairo.Format.ARGB32] format The surface format
 -- @return The cairo surface
--- @return The hierarchy
+-- @return The hierarchy.
+-- @see wibox.widget.draw_to_svg_file
+-- @see wibox.widget.draw_to_image_surface
 function surface.widget_to_surface(widget, width, height, format)
     gdebug.deprecate("Use wibox.widget.draw_to_image_surface instead of "..
         "gears.surface.render_to_surface", {deprecated_in=5})

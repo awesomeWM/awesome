@@ -5,7 +5,7 @@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2016 Emmanuel Lepage Vallee
--- @classmod awful.wibar
+-- @popupmod awful.wibar
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -217,11 +217,6 @@ local function set_position(wb, position, skip_reattach)
     end
 end
 
---- Stretch the wibar.
---
--- @property stretch
--- @param[opt=true] boolean
-
 local function get_stretch(w)
     return w._stretch
 end
@@ -233,7 +228,8 @@ local function set_stretch(w, value)
 end
 
 --- Remove a wibar.
--- @function remove
+-- @method remove
+
 local function remove(self)
     self.visible = false
 
@@ -344,7 +340,7 @@ end
 -- @tparam string args.stretch If the wibar need to be stretched to fill the screen.
 --@DOC_wibox_constructor_COMMON@
 -- @return The new wibar
--- @function awful.wibar
+-- @constructorfct awful.wibar
 function awfulwibar.new(args)
     args = args or {}
     local position = args.position or "top"

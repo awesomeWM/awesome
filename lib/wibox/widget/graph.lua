@@ -13,7 +13,7 @@
 --@DOC_wibox_widget_defaults_graph_EXAMPLE@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @classmod wibox.widget.graph
+-- @widgetmod wibox.widget.graph
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -97,12 +97,15 @@ local graph = { mt = {} }
 
 --- The graph background color.
 -- @beautiful beautiful.graph_bg
+-- @param color
 
 --- The graph foreground color.
 -- @beautiful beautiful.graph_fg
+-- @param color
 
 --- The graph border color.
 -- @beautiful beautiful.graph_border_color
+-- @param color
 
 local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
@@ -231,6 +234,7 @@ end
 
 --- Add a value to the graph
 --
+-- @method add_value
 -- @param value The value to be added to the graph
 -- @param group The stack color group index.
 function graph:add_value(value, group)
@@ -265,6 +269,7 @@ function graph:add_value(value, group)
 end
 
 --- Clear the graph.
+-- @method clear
 function graph:clear()
     self._private.values = {}
     self:emit_signal("widget::redraw_needed")
@@ -272,7 +277,9 @@ function graph:clear()
 end
 
 --- Set the graph height.
--- @param height The height to set.
+-- @property height
+-- @param number The height to set.
+
 function graph:set_height(height)
     if height >= 5 then
         self._private.height = height
@@ -282,7 +289,9 @@ function graph:set_height(height)
 end
 
 --- Set the graph width.
--- @param width The width to set.
+-- @property width
+-- @param number The width to set.
+
 function graph:set_width(width)
     if width >= 5 then
         self._private.width = width
@@ -313,7 +322,7 @@ end
 -- @param args Standard widget() arguments. You should add width and height
 -- key to set graph geometry.
 -- @return A new graph widget.
--- @function wibox.widget.graph
+-- @constructorfct wibox.widget.graph
 function graph.new(args)
     args = args or {}
 

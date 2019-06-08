@@ -20,6 +20,7 @@ local matrix_mt = {}
 -- @tparam number x0 The x0 transformation part.
 -- @tparam number y0 The y0 transformation part.
 -- @return A new matrix describing the given transformation.
+-- @constructorfct create
 function matrix.create(xx, yx, xy, yy, x0, y0)
     return setmetatable({
         xx = xx, xy = xy, x0 = x0,
@@ -31,6 +32,7 @@ end
 -- @tparam number x The translation in x direction.
 -- @tparam number y The translation in y direction.
 -- @return A new matrix describing the given transformation.
+-- @constructorfct create_translate
 function matrix.create_translate(x, y)
     return matrix.create(1, 0, 0, 1, x, y)
 end
@@ -39,6 +41,7 @@ end
 -- @tparam number sx The scaling in x direction.
 -- @tparam number sy The scaling in y direction.
 -- @return A new matrix describing the given transformation.
+-- @constructorfct create_scale
 function matrix.create_scale(sx, sy)
     return matrix.create(sx, 0, 0, sy, 0, 0)
 end
@@ -46,6 +49,7 @@ end
 --- Create a new rotation matrix
 -- @tparam number angle The angle of the rotation in radians.
 -- @return A new matrix describing the given transformation.
+-- @constructorfct create_rotate
 function matrix.create_rotate(angle)
     local c, s = math.cos(angle), math.sin(angle)
     return matrix.create(c, s, -s, c, 0, 0)
@@ -56,6 +60,7 @@ end
 -- @tparam number y The vertical rotation point
 -- @tparam number angle The angle of the rotation in radians.
 -- @return A new matrix describing the given transformation.
+-- @constructorfct create_rotate_at
 function matrix.create_rotate_at(x, y, angle)
     return   matrix.create_translate( -x, -y )
            * matrix.create_rotate   ( angle  )
@@ -212,6 +217,7 @@ matrix_mt.__mul = matrix.multiply
 matrix_mt.__tostring = matrix.tostring
 
 --- A constant for the identity matrix.
+-- @param matrix
 matrix.identity = matrix.create(1, 0, 0, 1, 0, 0)
 
 return matrix

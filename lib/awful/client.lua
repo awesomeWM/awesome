@@ -164,7 +164,7 @@ end
 --- Jump to the given client.
 -- Takes care of focussing the screen, the right tag, etc.
 --
--- @function client.jump_to
+-- @method jump_to
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
@@ -239,7 +239,7 @@ end
 --- Get a client by its relative index to another client.
 -- If no client is passed, the focused client will be used.
 --
--- @function awful.client.next
+-- @staticfct awful.client.next
 -- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
 -- @client[opt] sel The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
@@ -274,7 +274,7 @@ function client.next(i, sel, stacked)
 end
 
 --- Swap a client with another client in the given direction.
--- @function awful.client.swap.bydirection
+-- @staticfct awful.client.swap.bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt=focused] c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
@@ -295,8 +295,9 @@ function client.swap.bydirection(dir, c, stacked)
     end
 end
 
---- Swap a client with another client in the given direction. Swaps across screens.
--- @function awful.client.swap.global_bydirection
+--- Swap a client with another client in the given direction.
+-- Swaps across screens.
+-- @staticfct awful.client.swap.global_bydirection
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt] sel The client.
 function client.swap.global_bydirection(dir, sel)
@@ -329,7 +330,7 @@ function client.swap.global_bydirection(dir, sel)
 end
 
 --- Swap a client by its relative index.
--- @function awful.client.swap.byidx
+-- @staticfct awful.client.swap.byidx
 -- @param i The index.
 -- @client[opt] c The client, otherwise focused one is used.
 function client.swap.byidx(i, c)
@@ -342,7 +343,7 @@ end
 
 --- Cycle clients.
 --
--- @function awful.client.cycle
+-- @staticfct awful.client.cycle
 -- @param clockwise True to cycle clients clockwise.
 -- @param[opt] s The screen where to cycle clients.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
@@ -409,7 +410,7 @@ function client.moveresize(x, y, w, h, c)
 end
 
 --- Move/resize a client relative to current coordinates.
--- @function client.relative_move
+-- @method relative_move
 -- @see geometry
 -- @tparam[opt=c.x] number x The relative x coordinate.
 -- @tparam[opt=c.y] number y The relative y coordinate.
@@ -435,7 +436,7 @@ function client.movetotag(target, c)
 end
 
 --- Move a client to a tag.
--- @function client.move_to_tag
+-- @method move_to_tag
 -- @tparam tag target The tag to move the client to.
 function client.object.move_to_tag(self, target)
     local s = target.screen
@@ -460,7 +461,7 @@ function client.toggletag(target, c)
 end
 
 --- Toggle a tag on a client.
--- @function client.toggle_tag
+-- @method toggle_tag
 -- @tparam tag target The tag to move the client to.
 function client.object.toggle_tag(self, target)
     -- Check that tag and client screen are identical
@@ -496,7 +497,7 @@ function client.movetoscreen(c, s)
 end
 
 --- Move a client to a screen. Default is next screen, cycling.
--- @function client.move_to_screen
+-- @method move_to_screen
 -- @tparam[opt=c.screen.index+1] screen s The screen, default to current + 1.
 -- @see screen
 -- @see request::activate
@@ -524,7 +525,7 @@ function client.object.move_to_screen(self, s)
 end
 
 --- Tag a client with the set of current tags.
--- @function client.to_selected_tags
+-- @method to_selected_tags
 -- @see screen.selected_tags
 function client.object.to_selected_tags(self)
     local tags = {}
@@ -625,7 +626,7 @@ function client.togglemarked(c)
 end
 
 --- Return the marked clients and empty the marked table.
--- @function awful.client.getmarked
+-- @deprecated awful.client.getmarked
 -- @return A table with all marked clients.
 function client.getmarked()
     local copy = gtable.clone(client.data.marked, false)
@@ -886,7 +887,7 @@ end
 
 
 --- Restore (=unminimize) a random client.
--- @function awful.client.restore
+-- @staticfct awful.client.restore
 -- @param s The screen to use.
 -- @return The restored client if some client was restored, otherwise nil.
 function client.restore(s)
@@ -907,7 +908,7 @@ function client.restore(s)
     return nil
 end
 
---- Normalize a set of numbers to 1
+--- Normalize a set of numbers to 1.
 -- @param set the set of numbers to normalize
 -- @param num the number of numbers to normalize
 local function normalize(set, num)
@@ -1204,7 +1205,7 @@ end
 
 --- Set a client property to be persistent across restarts (via X properties).
 --
--- @function awful.client.property.persist
+-- @staticfct awful.client.property.persist
 -- @param prop The property name.
 -- @param kind The type (used for register_xproperty).
 --   One of "string", "number" or "boolean".
@@ -1221,16 +1222,17 @@ function client.property.persist(prop, kind)
     end
 end
 
----
--- Returns an iterator to cycle through, starting from the client in focus or
--- the given index, all clients that match a given criteria.
+--- Returns an iterator to cycle through clients.
+--
+-- Starting from the client in focus or the given index, all clients that match
+-- a given criteria.
 --
 -- @param filter a function that returns true to indicate a positive match
 -- @param start  what index to start iterating from.  Defaults to using the
 --   index of the currently focused client.
 -- @param s which screen to use.  nil means all screens.
 --
--- @function awful.client.iterate
+-- @staticfct awful.client.iterate
 -- @usage -- un-minimize all urxvt instances
 -- local urxvt = function (c)
 --   return awful.rules.match(c, {class = "URxvt"})
@@ -1300,7 +1302,7 @@ function client.get_transient_for_matching(c, matcher)
 end
 
 --- Get a matching transient_for client (if any).
--- @function client.get_transient_for_matching
+-- @method get_transient_for_matching
 -- @tparam function matcher A function that should return true, if
 --   a matching parent client is found.
 -- @treturn client.client|nil The matching parent client or nil.
@@ -1328,7 +1330,7 @@ function client.is_transient_for(c, c2)
 end
 
 --- Is a client transient for another one?
--- @function client.is_transient_for
+-- @method is_transient_for
 -- @client c2 The parent client to check.
 -- @treturn client.client|nil The parent client or nil.
 function client.object.is_transient_for(self, c2)
@@ -1387,7 +1389,7 @@ do
     -- See `awful.client.focus.history.enable_tracking` to enable it again.
     -- @treturn int The internal value of `disabled_count` (calls to this
     --   function without calling `awful.client.focus.history.enable_tracking`).
-    -- @function awful.client.focus.history.disable_tracking
+    -- @staticfct awful.client.focus.history.disable_tracking
     function client.focus.history.disable_tracking()
         disabled_count = disabled_count + 1
         if disabled_count == 1 then
@@ -1401,7 +1403,7 @@ do
     -- This is the default, but can be disabled
     -- through `awful.client.focus.history.disable_tracking`.
     -- @treturn boolean True if history tracking has been enabled.
-    -- @function awful.client.focus.history.enable_tracking
+    -- @staticfct awful.client.focus.history.enable_tracking
     function client.focus.history.enable_tracking()
         assert(disabled_count > 0)
         disabled_count = disabled_count - 1
@@ -1414,7 +1416,7 @@ do
     --- Is history tracking enabled?
     -- @treturn bool True if history tracking is enabled.
     -- @treturn int The number of times that tracking has been disabled.
-    -- @function awful.client.focus.history.is_enabled
+    -- @staticfct awful.client.focus.history.is_enabled
     function client.focus.history.is_enabled()
         return disabled_count == 0, disabled_count
     end
@@ -1431,6 +1433,8 @@ object.properties(capi.client, {
     getter_fallback = client.property.get,
     setter_fallback = client.property.set,
 })
+
+--@DOC_object_COMMON@
 
 return client
 

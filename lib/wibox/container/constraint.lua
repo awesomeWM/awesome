@@ -3,7 +3,7 @@
 --@DOC_wibox_container_defaults_constraint_EXAMPLE@
 -- @author Lukáš Hrázký
 -- @copyright 2012 Lukáš Hrázký
--- @classmod wibox.container.constraint
+-- @containermod wibox.container.constraint
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -51,15 +51,10 @@ function constraint:get_widget()
     return self._private.widget
 end
 
---- Get the number of children element
--- @treturn table The children
 function constraint:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function constraint:set_children(children)
     self:set_widget(children[1])
 end
@@ -67,6 +62,7 @@ end
 --- Set the strategy to use for the constraining. Valid values are 'max',
 -- 'min' or 'exact'. Throws an error on invalid values.
 -- @property strategy
+-- @tparam string strategy Either 'max', 'min' or 'exact'
 
 function constraint:set_strategy(val)
     local func = {
@@ -121,6 +117,7 @@ end
 
 --- Reset this layout. The widget will be unreferenced, strategy set to "max"
 -- and the constraints set to nil.
+-- @method reset
 function constraint:reset()
     self._private.width = nil
     self._private.height = nil
@@ -140,7 +137,7 @@ end
 -- @param[opt] width The maximum width of the widget. nil for no limit.
 -- @param[opt] height The maximum height of the widget. nil for no limit.
 -- @treturn table A new constraint container
--- @function wibox.container.constraint
+-- @constructorfct wibox.container.constraint
 local function new(widget, strategy, width, height)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

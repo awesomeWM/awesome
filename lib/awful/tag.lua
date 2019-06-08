@@ -218,8 +218,8 @@ function tag.move(new_index, target_tag)
     tag.object.set_index(target_tag, new_index)
 end
 
---- Swap 2 tags
--- @function tag.swap
+--- Swap 2 tags.
+-- @method swap
 -- @param tag2 The second tag
 -- @see client.swap
 function tag.object.swap(self, tag2)
@@ -259,7 +259,7 @@ end
 --        layout = awful.layout.suit.max,
 --    })
 --
--- @function awful.tag.add
+-- @constructorfct awful.tag.add
 -- @param name The tag name, a string
 -- @param props The tags inital properties, a table
 -- @return The created tag
@@ -296,7 +296,7 @@ function tag.add(name, props)
 end
 
 --- Create a set of tags and attach it to a screen.
--- @function awful.tag.new
+-- @staticfct awful.tag.new
 -- @param names The tag name, in a table
 -- @param screen The tag screen, or 1 if not set.
 -- @param layout The layout or layout table to set for this tags by default.
@@ -322,7 +322,7 @@ function tag.new(names, screen, layout)
 end
 
 --- Find a suitable fallback tag.
--- @function awful.tag.find_fallback
+-- @staticfct awful.tag.find_fallback
 -- @param screen The screen to look for a tag on. [awful.screen.focused()]
 -- @param invalids A table of tags we consider unacceptable. [selectedlist(scr)]
 function tag.find_fallback(screen, invalids)
@@ -340,7 +340,7 @@ end
 --
 --    mouse.screen.selected_tag:delete()
 --
--- @function tag.delete
+-- @method delete
 -- @see awful.tag.add
 -- @see awful.tag.find_fallback
 -- @tparam[opt=awful.tag.find_fallback()] tag fallback_tag Tag to assign
@@ -429,7 +429,7 @@ function tag.delete(target_tag, fallback_tag)
 end
 
 --- Update the tag history.
--- @function awful.tag.history.update
+-- @staticfct awful.tag.history.update
 -- @param obj Screen object.
 function tag.history.update(obj)
     local s = get_screen(obj)
@@ -470,7 +470,7 @@ function tag.history.update(obj)
 end
 
 --- Revert tag history.
--- @function awful.tag.history.restore
+-- @staticfct awful.tag.history.restore
 -- @param screen The screen.
 -- @param idx Index in history. Defaults to "previous" which is a special index
 -- toggling between last two selected sets of tags. Number (eg 1) will go back
@@ -522,6 +522,7 @@ end
 -- @tparam screen s The screen of the tag
 -- @tparam string name The name of the tag
 -- @return The tag found, or `nil`
+-- @staticfct awful.tag.find_by_name
 -- @usage -- For the current screen
 -- local t = awful.tag.find_by_name(awful.screen.focused(), "name")
 --
@@ -696,7 +697,7 @@ function tag.setmwfact(mwfact, t)
 end
 
 --- Increase master width factor.
--- @function awful.tag.incmwfact
+-- @staticfct awful.tag.incmwfact
 -- @see master_width_factor
 -- @param add Value to add to master width factor.
 -- @param t The tag to modify, if null tag.selected() is used.
@@ -741,7 +742,7 @@ end
 --         -- awful.layout.suit.corner.se,
 --     }
 --
--- @field awful.tag.layouts
+-- @tfield table awful.tag.layouts
 
 --- The tag client layout.
 --
@@ -972,7 +973,7 @@ function tag.setgap(useless_gap, t)
 end
 
 --- Increase the spacing between clients
--- @function awful.tag.incgap
+-- @staticfct awful.tag.incgap
 -- @see gap
 -- @param add Value to add to the spacing between clients
 -- @param t The tag to modify, if null tag.selected() is used.
@@ -1079,7 +1080,7 @@ end
 
 --- Toggle size fill policy for the master client(s)
 -- between "expand" and "master_width_factor".
--- @function awful.tag.togglemfpol
+-- @staticfct awful.tag.togglemfpol
 -- @see master_fill_policy
 -- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.togglemfpol(t)
@@ -1160,7 +1161,7 @@ function tag.getnmaster(t)
 end
 
 --- Increase the number of master windows.
--- @function awful.tag.incnmaster
+-- @staticfct awful.tag.incnmaster
 -- @see master_count
 -- @param add Value to add to number of master windows.
 -- @param[opt] t The tag to modify, if null tag.selected() is used.
@@ -1278,7 +1279,7 @@ function tag.getncol(t)
 end
 
 --- Increase number of column windows.
--- @function awful.tag.incncol
+-- @staticfct awful.tag.incncol
 -- @param add Value to add to number of column windows.
 -- @param[opt] t The tag to modify, if null tag.selected() is used.
 -- @tparam[opt=false] boolean sensible Limit column_count based on the number
@@ -1309,7 +1310,7 @@ function tag.incncol(add, t, sensible)
 end
 
 --- View no tag.
--- @function awful.tag.viewnone
+-- @staticfct awful.tag.viewnone
 -- @tparam[opt] int|screen screen The screen.
 function tag.viewnone(screen)
     screen = screen or ascreen.focused()
@@ -1322,7 +1323,7 @@ end
 --- View a tag by its taglist index.
 --
 -- This is equivalent to `screen.tags[i]:view_only()`
--- @function awful.tag.viewidx
+-- @staticfct awful.tag.viewidx
 -- @see screen.tags
 -- @param i The **relative** index to see.
 -- @param[opt] screen The screen.
@@ -1357,21 +1358,21 @@ function tag.getidx(query_tag)
 end
 
 --- View next tag. This is the same as tag.viewidx(1).
--- @function awful.tag.viewnext
+-- @staticfct awful.tag.viewnext
 -- @param screen The screen.
 function tag.viewnext(screen)
     return tag.viewidx(1, screen)
 end
 
 --- View previous tag. This is the same a tag.viewidx(-1).
--- @function awful.tag.viewprev
+-- @staticfct awful.tag.viewprev
 -- @param screen The screen.
 function tag.viewprev(screen)
     return tag.viewidx(-1, screen)
 end
 
 --- View only a tag.
--- @function tag.view_only
+-- @method view_only
 -- @see selected
 function tag.object.view_only(self)
     local tags = self.screen.tags
@@ -1404,7 +1405,7 @@ end
 -- selected. The tags already selected do not count. To do nothing if one or
 -- more of the tags are already selected, set `maximum` to zero.
 --
--- @function awful.tag.viewmore
+-- @staticfct awful.tag.viewmore
 -- @param tags A table with tags to view only.
 -- @param[opt] screen The screen of the tags.
 -- @tparam[opt=#tags] number maximum The maximum number of tags to select.
@@ -1437,7 +1438,7 @@ function tag.viewmore(tags, screen, maximum)
 end
 
 --- Toggle selection of a tag
--- @function awful.tag.viewtoggle
+-- @staticfct awful.tag.viewtoggle
 -- @see selected
 -- @tparam tag t Tag to be toggled
 function tag.viewtoggle(t)
@@ -1530,7 +1531,7 @@ end
 --- Add a signal to all attached tags and all tags that will be attached in the
 -- future. When a tag is detached from the screen, its signal is removed.
 --
--- @function awful.tag.attached_connect_signal
+-- @staticfct awful.tag.attached_connect_signal
 -- @screen screen The screen concerned, or all if nil.
 -- @tparam[opt] string signal The signal name.
 -- @tparam[opt] function Callback
@@ -1684,6 +1685,8 @@ object.properties(capi.tag, {
     getter_fallback = tag.getproperty,
     setter_fallback = tag.setproperty,
 })
+
+--@DOC_object_COMMON@
 
 return setmetatable(tag, tag.mt)
 

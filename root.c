@@ -22,7 +22,7 @@
 /** awesome root window API
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @module root
+ * @coreclassmod root
  */
 
 #include "globalconf.h"
@@ -223,7 +223,7 @@ _string_to_key_code(const char *s)
  * "Shift". Here is a list of the "real" key names matching the modifiers in
  * `fake_input`:
  *
- * <table>
+ * <table class='widget_list' border=1>
  *  <tr style='font-weight: bold;'>
  *   <th align='center'>Modifier name </th>
  *   <th align='center'>Key name</th>
@@ -266,7 +266,7 @@ _string_to_key_code(const char *s)
  *  coordinates relatives.
  * @param x In case of a motion event, this is the X coordinate.
  * @param y In case of a motion event, this is the Y coordinate.
- * @function fake_input
+ * @staticfct fake_input
  */
 static int
 luaA_root_fake_input(lua_State *L)
@@ -334,7 +334,7 @@ luaA_root_fake_input(lua_State *L)
  *
  * @tparam table|nil keys_array An array of key binding objects, or nothing.
  * @return The array of key bindings objects of this client.
- * @function keys
+ * @staticfct keys
  */
 static int
 luaA_root_keys(lua_State *L)
@@ -374,7 +374,7 @@ luaA_root_keys(lua_State *L)
  *
  * @param button_table An array of mouse button bindings objects, or nothing.
  * @return The array of mouse button bindings objects.
- * @function buttons
+ * @staticfct buttons
  */
 static int
 luaA_root_buttons(lua_State *L)
@@ -413,7 +413,7 @@ luaA_root_buttons(lua_State *L)
  *@DOC_cursor_c_COMMON@
  *
  * @param cursor_name A X cursor name.
- * @function cursor
+ * @staticfct cursor
  */
 static int
 luaA_root_cursor(lua_State *L)
@@ -439,7 +439,7 @@ luaA_root_cursor(lua_State *L)
 /** Get the drawins attached to a screen.
  *
  * @return A table with all drawins.
- * @function drawins
+ * @staticfct drawins
  */
 static int
 luaA_root_drawins(lua_State *L)
@@ -459,7 +459,7 @@ luaA_root_drawins(lua_State *L)
  *
  * @param pattern A cairo pattern as light userdata
  * @return A cairo surface or nothing.
- * @function wallpaper
+ * @staticfct wallpaper
  */
 static int
 luaA_root_wallpaper(lua_State *L)
@@ -484,7 +484,7 @@ luaA_root_wallpaper(lua_State *L)
  *
  * @return Width of the root window.
  * @return height of the root window.
- * @function size
+ * @staticfct size
  */
 static int
 luaA_root_size(lua_State *L)
@@ -498,7 +498,7 @@ luaA_root_size(lua_State *L)
  *
  * @return Width of the root window, in millimeters.
  * @return height of the root window, in millimeters.
- * @function size_mm
+ * @staticfct size_mm
  */
 static int
 luaA_root_size_mm(lua_State *L)
@@ -510,7 +510,7 @@ luaA_root_size_mm(lua_State *L)
 
 /** Get the attached tags.
  * @return A table with all tags.
- * @function tags
+ * @staticfct tags
  */
 static int
 luaA_root_tags(lua_State *L)

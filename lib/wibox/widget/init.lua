@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.widget
+-- @module wibox.widget
 ---------------------------------------------------------------------------
 
 local cairo = require("lgi").cairo
@@ -37,6 +37,7 @@ setmetatable(widget, {
 -- @tparam number width The width of the widget
 -- @tparam number height The height of the widget
 -- @tparam[opt={dpi=96}] table context The context information to give to the widget.
+-- @staticfct wibox.widget.draw_to_cairo_context
 function widget.draw_to_cairo_context(wdg, cr, width, height, context)
     local function no_op() end
     context = context or {dpi=96}
@@ -50,6 +51,7 @@ end
 -- @tparam number width The surface width
 -- @tparam number height The surface height
 -- @tparam[opt={dpi=96}] table context The context information to give to the widget.
+-- @staticfct wibox.widget.draw_to_svg_file
 function widget.draw_to_svg_file(wdg, path, width, height, context)
     local img = cairo.SvgSurface.create(path, width, height)
     local cr = cairo.Context(img)
@@ -64,6 +66,7 @@ end
 -- @param[opt=cairo.Format.ARGB32] format The surface format
 -- @tparam[opt={dpi=96}] table context The context information to give to the widget.
 -- @return The cairo surface
+-- @staticfct wibox.widget.draw_to_image_surface
 function widget.draw_to_image_surface(wdg, width, height, format, context)
     local img = cairo.ImageSurface(format or cairo.Format.ARGB32, width, height)
     local cr = cairo.Context(img)

@@ -34,7 +34,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
--- @classmod awful.widget.taglist
+-- @widgetmod awful.widget.taglist
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -153,7 +153,7 @@ taglist.filter, taglist.source = {}, {}
 -- This will be the fallback for state specific shapes.
 -- To get a shape for the whole taglist, use `wibox.container.background`.
 -- @beautiful beautiful.taglist_shape
--- @param[opt=rectangle] gears.shape
+-- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 -- @see beautiful.taglist_shape_empty
 -- @see beautiful.taglist_shape_focus
@@ -172,7 +172,7 @@ taglist.filter, taglist.source = {}, {}
 
 --- The shape used for the empty elements.
 -- @beautiful beautiful.taglist_shape_empty
--- @param[opt=rectangle] gears.shape
+-- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The shape used for the empty elements border width.
@@ -187,7 +187,7 @@ taglist.filter, taglist.source = {}, {}
 
 --- The shape used for the selected elements.
 -- @beautiful beautiful.taglist_shape_focus
--- @param[opt=rectangle] gears.shape
+-- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The shape used for the selected elements border width.
@@ -202,7 +202,7 @@ taglist.filter, taglist.source = {}, {}
 
 --- The shape used for the urgent elements.
 -- @beautiful beautiful.taglist_shape_urgent
--- @param[opt=rectangle] gears.shape
+-- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The shape used for the urgent elements border width.
@@ -217,7 +217,7 @@ taglist.filter, taglist.source = {}, {}
 
 --- The shape used for the volatile elements.
 -- @beautiful beautiful.taglist_shape_volatile
--- @param[opt=rectangle] gears.shape
+-- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The shape used for the volatile elements border width.
@@ -462,7 +462,7 @@ end
 -- @param style **DEPRECATED** use args.style
 -- @param update_function **DEPRECATED** use args.update_function
 -- @param base_widget **DEPRECATED** use args.base_widget
--- @function awful.widget.taglist
+-- @constructorfct awful.widget.taglist
 function taglist.new(args, filter, buttons, style, update_function, base_widget)
 
     local screen = nil

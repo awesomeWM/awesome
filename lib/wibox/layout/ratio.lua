@@ -6,7 +6,7 @@
 --@DOC_wibox_layout_defaults_ratio_EXAMPLE@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
--- @classmod wibox.layout.ratio
+-- @layoutmod wibox.layout.ratio
 ---------------------------------------------------------------------------
 
 local base  = require("wibox.widget.base" )
@@ -38,7 +38,7 @@ local ratio = {}
 -- @property spacing
 -- @tparam number spacing Spacing between widgets.
 
--- Compute the sum of all ratio (ideally, it should be 1)
+-- Compute the sum of all ratio (ideally, it should be 1).
 local function gen_sum(self, i_s, i_e)
     local sum, new_w = 0,0
 
@@ -201,12 +201,13 @@ function ratio:layout(context, width, height)
     return result
 end
 
---- Increase the ratio of "widget"
+--- Increase the ratio of "widget".
 -- If the increment produce an invalid ratio (not between 0 and 1), the method
 -- do nothing.
 --
 --@DOC_wibox_layout_ratio_inc_ratio_EXAMPLE@
 --
+-- @method inc_ratio
 -- @tparam number index The widget index to change
 -- @tparam number increment An floating point value between -1 and 1 where the
 --   end result is within 0 and 1
@@ -221,9 +222,11 @@ function ratio:inc_ratio(index, increment)
     self:set_ratio(index, self._private.ratios[index] + increment)
 end
 
---- Increment the ratio of the first instance of `widget`
+--- Increment the ratio of the first instance of `widget`.
 -- If the increment produce an invalid ratio (not between 0 and 1), the method
 -- do nothing.
+--
+-- @method inc_widget_ratio
 -- @param widget The widget to ajust
 -- @tparam number increment An floating point value between -1 and 1 where the
 --   end result is within 0 and 1
@@ -235,7 +238,9 @@ function ratio:inc_widget_ratio(widget, increment)
     self:inc_ratio(index, increment)
 end
 
---- Set the ratio of the widget at position `index`
+--- Set the ratio of the widget at position `index`.
+--
+-- @method set_ratio
 -- @tparam number index The index of the widget to change
 -- @tparam number percent An floating point value between 0 and 1
 function ratio:set_ratio(index, percent)
@@ -263,6 +268,8 @@ function ratio:set_ratio(index, percent)
 end
 
 --- Get the ratio at `index`.
+--
+-- @method get_ratio
 -- @tparam number index The widget index to query
 -- @treturn number The index (between 0 and 1)
 function ratio:get_ratio(index)
@@ -271,6 +278,8 @@ function ratio:get_ratio(index)
 end
 
 --- Set the ratio of `widget` to `percent`.
+--
+-- @method set_widget_ratio
 -- @tparam widget widget The widget to ajust.
 -- @tparam number percent A floating point value between 0 and 1.
 function ratio:set_widget_ratio(widget, percent)
@@ -284,6 +293,7 @@ end
 --
 --@DOC_wibox_layout_ratio_ajust_ratio_EXAMPLE@
 --
+-- @method ajust_ratio
 -- @tparam number index The index of the widget to change
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
@@ -323,7 +333,9 @@ function ratio:ajust_ratio(index, before, itself, after)
     self:emit_signal("widget::layout_changed")
 end
 
---- Update all widgets to match a set of a ratio
+--- Update all widgets to match a set of a ratio.
+--
+-- @method ajust_widget_ratio
 -- @param widget The widget to ajust
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
@@ -333,8 +345,10 @@ function ratio:ajust_widget_ratio(widget, before, itself, after)
     self:ajust_ratio(index, before, itself, after)
 end
 
---- Add some widgets to the given fixed layout
+--- Add some widgets to the given fixed layout.
+--
 -- **Signal:** widget::added The argument are the widgets
+-- @method add
 -- @tparam widget ... Widgets that should be added (must at least be one)
 function ratio:add(...)
     -- No table.pack in Lua 5.1 :-(
@@ -350,8 +364,10 @@ function ratio:add(...)
     self:emit_signal("widget::added", ...)
 end
 
---- Remove a widget from the layout
+--- Remove a widget from the layout.
+--
 -- **Signal:** widget::removed The arguments are the widget and the index
+-- @method remove
 -- @tparam number index The widget index to remove
 -- @treturn boolean index If the operation is successful
 function ratio:remove(index)
@@ -370,8 +386,10 @@ function ratio:remove(index)
     return true
 end
 
---- Insert a new widget in the layout at position `index`
+--- Insert a new widget in the layout at position `index`.
 -- **Signal:** widget::inserted The arguments are the widget and the index
+--
+-- @method insert
 -- @tparam number index The position
 -- @param widget The widget
 function ratio:insert(index, widget)
@@ -437,15 +455,17 @@ local function get_layout(dir, widget1, ...)
     return ret
 end
 
---- Returns a new horizontal ratio layout. A ratio layout shares the available space
+--- Returns a new horizontal ratio layout. A ratio layout shares the available space.
 -- equally among all widgets. Widgets can be added via :add(widget).
+-- @constructorfct wibox.layout.ratio.horizontal
 -- @tparam widget ... Widgets that should be added to the layout.
 function ratio.horizontal(...)
     return get_layout("horizontal", ...)
 end
 
---- Returns a new vertical ratio layout. A ratio layout shares the available space
+--- Returns a new vertical ratio layout. A ratio layout shares the available space.
 -- equally among all widgets. Widgets can be added via :add(widget).
+-- @constructorfct wibox.layout.ratio.vertical
 -- @tparam widget ... Widgets that should be added to the layout.
 function ratio.vertical(...)
     return get_layout("vertical", ...)

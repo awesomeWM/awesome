@@ -5,7 +5,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author dodo
 -- @copyright 2008, 2011 Damien Leone, Julien Danjou, dodo
--- @module awful.menu
+-- @popupmod awful.menu
 --------------------------------------------------------------------------------
 
 local wibox = require("wibox")
@@ -50,6 +50,7 @@ end
 
 --- The icon used for sub-menus.
 -- @beautiful beautiful.menu_submenu_icon
+-- @tparam string|gears.surface menu_submenu_icon
 
 --- The menu text font.
 -- @beautiful beautiful.menu_font
@@ -358,6 +359,7 @@ end
 --- Show a menu.
 -- @param args The arguments
 -- @param args.coords Menu position defaulting to mouse.coords()
+-- @method show
 function menu:show(args)
     args = args or {}
     local coords = args.coords or nil
@@ -371,6 +373,7 @@ function menu:show(args)
 end
 
 --- Hide a menu popup.
+-- @method hide
 function menu:hide()
     -- Remove items from screen
     for i = 1, #self.items do
@@ -389,6 +392,7 @@ end
 --- Toggle menu visibility.
 -- @param args The arguments
 -- @param args.coords Menu position {x,y}
+-- @method toggle
 function menu:toggle(args)
     if self.wibox.visible then
         self:hide()
@@ -397,7 +401,8 @@ function menu:toggle(args)
     end
 end
 
---- Update menu content
+--- Update menu content.
+-- @method update
 function menu:update()
     if self.wibox.visible then
         self:show({ coords = { x = self.x, y = self.y } })
@@ -407,6 +412,7 @@ end
 
 --- Get the elder parent so for example when you kill
 -- it, it will destroy the whole family.
+-- @method get_root
 function menu:get_root()
     return self.parent and menu.get_root(self.parent) or self
 end
@@ -417,6 +423,7 @@ end
 -- @param args.new (Default: awful.menu.entry) The menu entry constructor.
 -- @param[opt] args.theme The menu entry theme.
 -- @param[opt] index The index where the new entry will inserted.
+-- @method add
 function menu:add(args, index)
     if not args then return end
     local theme = load_theme(args.theme or {}, self.theme)
@@ -470,8 +477,9 @@ function menu:add(args, index)
     return item
 end
 
---- Delete menu entry at given position
--- @param num The position in the table of the menu entry to be deleted; can be also the menu entry itself
+--- Delete menu entry at given position.
+-- @param num The position in the table of the menu entry to be deleted; can be also the menu entry itself.
+-- @method delete
 function menu:delete(num)
     if type(num) == "table" then
         num = gtable.hasitem(self.items, num)
@@ -511,6 +519,7 @@ end
 --   returning `true` or `false` to indicate whether the client should be
 --   included in the menu.
 -- @return The menu.
+-- @constructorfct awful.menu.clients
 function menu.clients(args, item_args, filter)
     local cls_t = {}
     for c in client_iterate(filter or function() return true end) do
@@ -553,6 +562,7 @@ local clients_menu = nil
 --   returning `true` or `false` to indicate whether the client should be
 --   included in the menu.
 -- @return The menu.
+-- @constructorfct awful.menu.client_list
 function menu.client_list(args, item_args, filter)
     if clients_menu and clients_menu.wibox.visible then
         clients_menu:hide()
@@ -565,10 +575,11 @@ end
 
 --------------------------------------------------------------------------------
 
---- Default awful.menu.entry constructor
+--- Default awful.menu.entry constructor.
 -- @param parent The parent menu (TODO: This is apparently unused)
 -- @param args the item params
 -- @return table with 'widget', 'cmd', 'akey' and all the properties the user wants to change
+-- @constructorfct awful.menu.entry
 function menu.entry(parent, args) -- luacheck: no unused args
     args = args or {}
     args.text = args[1] or args.text or ""
@@ -668,6 +679,7 @@ end
 -- * Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
 --
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
+-- @constructorfct awful.menu
 -- @usage -- The following function builds and shows a menu of clients that match
 -- -- a particular rule.
 -- -- Bound to a key, it can be used to select from dozens of terminals open on

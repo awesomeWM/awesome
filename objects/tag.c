@@ -180,7 +180,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @classmod tag
+ * @coreclassmod tag
  */
 
 #include "tag.h"
@@ -240,17 +240,17 @@
 /** Get the number of instances.
  *
  * @return The number of tag objects alive.
- * @function instances
+ * @staticfct instances
  */
 
 /* Set a __index metamethod for all tag instances.
  * @tparam function cb The meta-method
- * @function set_index_miss_handler
+ * @staticfct set_index_miss_handler
  */
 
 /* Set a __newindex metamethod for all tag instances.
  * @tparam function cb The meta-method
- * @function set_newindex_miss_handler
+ * @staticfct set_newindex_miss_handler
  */
 
 
@@ -408,10 +408,10 @@ luaA_tag_new(lua_State *L)
 
 /** Get or set the clients attached to this tag.
  *
- * @param clients_table None or a table of clients to set as being tagged with
+ * @tparam[opt=nil] table clients_table None or a table of clients to set as being tagged with
  *  this tag.
  * @return A table with the clients attached to this tags.
- * @function clients
+ * @method clients
  */
 static int
 luaA_tag_clients(lua_State *L)

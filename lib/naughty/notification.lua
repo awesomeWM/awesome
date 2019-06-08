@@ -13,7 +13,7 @@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2008 koniu
 -- @copyright 2017 Emmanuel Lepage Vallee
--- @classmod naughty.notification
+-- @coreclassmod naughty.notification
 ---------------------------------------------------------------------------
 local gobject = require("gears.object")
 local gtable  = require("gears.table")
@@ -163,6 +163,7 @@ local notification = {}
 --- Widget shape.
 --@DOC_naughty_shape_EXAMPLE@
 -- @property shape
+-- @param gears.shape
 
 --- Widget opacity.
 -- @property opacity
@@ -240,6 +241,7 @@ local notification = {}
 
 --- Destroy notification by notification object.
 --
+-- @method destroy
 -- @tparam string reason One of the reasons from `notification_closed_reason`
 -- @tparam[opt=false] boolean keep_visible If true, keep the notification visible
 -- @return True if the popup was successfully destroyed, false otherwise
@@ -261,6 +263,7 @@ function notification:destroy(reason, keep_visible)
 end
 
 --- Set new notification timeout.
+-- @method reset_timeout
 -- @tparam number new_timeout Time in seconds after which notification disappears.
 function notification:reset_timeout(new_timeout)
     if self.timer then self.timer:stop() end
@@ -449,7 +452,7 @@ end
 -- @usage naughty.notify({ title = "Achtung!", message = "You're idling", timeout = 0 })
 -- @treturn ?table The notification object, or nil in case a notification was
 --   not displayed.
--- @function naughty.notification
+-- @constructorfct naughty.notification
 local function create(args)
     if cst.config.notify_callback then
         args = cst.config.notify_callback(args)
@@ -542,5 +545,7 @@ function notification._gen_next_id()
     counter = counter+1
     return counter
 end
+
+--@DOC_object_COMMON@
 
 return setmetatable(notification, {__call = function(_, ...) return create(...) end})

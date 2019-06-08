@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.widget.systray
+-- @widgetmod wibox.widget.systray
 ---------------------------------------------------------------------------
 
 local wbase = require("wibox.widget.base")
@@ -116,7 +116,9 @@ end
 --- Set the size of a single icon.
 -- If this is set to nil, then the size is picked dynamically based on the
 -- available space. Otherwise, any single icon has a size of `size`x`size`.
+-- @property base_size
 -- @tparam integer|nil size The base size
+
 function systray:set_base_size(size)
     base_size = get_args(self, size)
     if instance then
@@ -125,7 +127,9 @@ function systray:set_base_size(size)
 end
 
 --- Decide between horizontal or vertical display.
+-- @property horizontal
 -- @tparam boolean horiz Use horizontal mode?
+
 function systray:set_horizontal(horiz)
     horizontal = get_args(self, horiz)
     if instance then
@@ -134,7 +138,9 @@ function systray:set_horizontal(horiz)
 end
 
 --- Should the systray icons be displayed in reverse order?
--- @tparam boolean rev Display in reverse order
+-- @property reverse
+-- @tparam boolean rev Display in reverse order.
+
 function systray:set_reverse(rev)
     reverse = get_args(self, rev)
     if instance then
@@ -146,7 +152,9 @@ end
 -- This can either be a screen, in which case the systray will be displayed on
 -- exactly that screen, or the string `"primary"`, in which case it will be
 -- visible on the primary screen. The default value is "primary".
+-- @property screen
 -- @tparam screen|"primary" s The screen to display on.
+
 function systray:set_screen(s)
     display_on_screen = get_args(self, s)
     if instance then
@@ -158,7 +166,7 @@ end
 -- Note that this widget can only exist once.
 -- @tparam boolean revers Show in the opposite direction
 -- @treturn table The new `systray` widget
--- @function wibox.widget.systray
+-- @constructorfct wibox.widget.systray
 
 local function new(revers)
     local ret = wbase.make_widget(nil, nil, {enable_properties = true})

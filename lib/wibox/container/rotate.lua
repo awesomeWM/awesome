@@ -4,7 +4,7 @@
 --@DOC_wibox_container_defaults_rotate_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.container.rotate
+-- @containermod wibox.container.rotate
 ---------------------------------------------------------------------------
 
 local error = error
@@ -74,20 +74,16 @@ function rotate:get_widget()
     return self._private.widget
 end
 
---- Get the number of children element
--- @treturn table The children
 function rotate:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function rotate:set_children(children)
     self:set_widget(children[1])
 end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
+-- @method reset
 function rotate:reset()
     self._private.direction = nil
     self:set_widget(nil)
@@ -125,7 +121,7 @@ function rotate:set_direction(dir)
     self:emit_signal("widget::layout_changed")
 end
 
---- Get the direction of this rotating layout
+-- Get the direction of this rotating layout
 function rotate:get_direction()
     return self._private.direction or "north"
 end
@@ -137,7 +133,7 @@ end
 -- @param[opt] widget The widget to display.
 -- @param[opt] dir The direction to rotate to.
 -- @treturn table A new rotate container.
--- @function wibox.container.rotate
+-- @constructorfct wibox.container.rotate
 local function new(widget, dir)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

@@ -3,7 +3,7 @@
 --@DOC_wibox_widget_defaults_imagebox_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.widget.imagebox
+-- @widgetmod wibox.widget.imagebox
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -119,7 +119,7 @@ end
 -- is trimmed.
 --
 -- @property clip_shape
--- @param clip_shape A `gears_shape` compatible shape function
+-- @tparam gears.shape clip_shape A `gears_shape` compatible shape function
 -- @see gears.shape
 -- @see set_clip_shape
 
@@ -129,7 +129,8 @@ end
 --
 -- Any other parameters will be passed to the clip shape function
 --
--- @param clip_shape A `gears_shape` compatible shape function
+-- @tparam function clip_shape A `gears_shape` compatible shape function.
+-- @method set_clip_shape
 -- @see gears.shape
 -- @see clip_shape
 function imagebox:set_clip_shape(clip_shape, ...)
@@ -156,7 +157,7 @@ end
 --   to fit into the available space.
 -- @param clip_shape A `gears.shape` compatible function
 -- @treturn table A new `imagebox`
--- @function wibox.widget.imagebox
+-- @constructorfct wibox.widget.imagebox
 local function new(image, resize_allowed, clip_shape)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

@@ -30,7 +30,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @classmod button
+ * @coreclassmod button
  */
 
 #include "button.h"
@@ -45,17 +45,17 @@
 
 /** Get the number of instances.
  * @treturn int The number of button objects alive.
- * @function instances
+ * @staticfct instances
  */
 
 /** Set a __index metamethod for all button instances.
  * @tparam function cb The meta-method
- * @function set_index_miss_handler
+ * @staticfct set_index_miss_handler
  */
 
 /** Set a __newindex metamethod for all button instances.
  * @tparam function cb The meta-method
- * @function set_newindex_miss_handler
+ * @staticfct set_newindex_miss_handler
  */
 
 /** When bound mouse button + modifiers are pressed.

@@ -73,7 +73,7 @@ layout.layouts = {
 --    awful.layout.suit.corner.sw,
 --    awful.layout.suit.corner.se,
 --
--- @field layout.layouts
+-- @field awful.layout.layouts
 
 --- Return the tag layout index (from `awful.layout.layouts`).
 --
@@ -82,6 +82,7 @@ layout.layouts = {
 --
 -- @tparam tag t The tag.
 -- @treturn nil|number The layout index.
+-- @staticfct awful.layout.get_tag_layout_index
 function layout.get_tag_layout_index(t)
     return gtable.hasitem(layout.layouts, t.layout)
 end
@@ -95,6 +96,7 @@ local delayed_arrange = {}
 --- Get the current layout.
 -- @param screen The screen.
 -- @return The layout function.
+-- @staticfct awful.layout.get
 function layout.get(screen)
     screen = screen or capi.mouse.screen
     local t = get_screen(screen).selected_tag
@@ -105,6 +107,7 @@ end
 -- @param i Relative index.
 -- @param s The screen.
 -- @param[opt] layouts A table of layouts.
+-- @staticfct awful.layout.inc
 function layout.inc(i, s, layouts)
     if type(i) == "table" then
         -- Older versions of this function had arguments (layouts, i, s), but
@@ -150,6 +153,7 @@ end
 --- Set the layout function of the current tag.
 -- @param _layout Layout name.
 -- @tparam[opt=mouse.screen.selected_tag] tag t The tag to modify.
+-- @staticfct awful.layout.set
 function layout.set(_layout, t)
     t = t or capi.mouse.screen.selected_tag
     t.layout = _layout
@@ -168,6 +172,7 @@ end
 -- @treturn table A table with the workarea (x, y, width, height), the screen
 --   geometry (x, y, width, height), the clients, the screen and sometime, a
 --   "geometries" table with client as keys and geometry as value
+-- @staticfct awful.layout.parameters
 function layout.parameters(t, screen)
     screen = get_screen(screen)
     t = t or screen.selected_tag
@@ -210,6 +215,7 @@ end
 
 --- Arrange a screen using its current layout.
 -- @param screen The screen to arrange.
+-- @staticfct awful.layout.arrange
 function layout.arrange(screen)
     screen = get_screen(screen)
     if not screen or delayed_arrange[screen] then return end
@@ -250,6 +256,7 @@ end
 --- Get the current layout name.
 -- @param _layout The layout.
 -- @return The layout name.
+-- @staticfct awful.layout.getname
 function layout.getname(_layout)
     _layout = _layout or layout.get()
     return _layout.name
@@ -318,6 +325,7 @@ capi.client.connect_signal("list", function()
 -- @tparam client c The client
 -- @tparam string context The context
 -- @tparam table hints Additional hints
+-- @signalhandler awful.layout.move_handler
 function layout.move_handler(c, context, hints) --luacheck: no unused args
     -- Quit if it isn't a mouse.move on a tiled layout, that's handled elsewhere
     if c.floating then return end

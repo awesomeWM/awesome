@@ -33,7 +33,7 @@
  *
  * @tparam string name The name of the X11 property.
  * @tparam string type One of "string", "number" or "boolean".
- * @function register_xproperty
+ * @staticfct register_xproperty
  */
 
 #define _GNU_SOURCE
@@ -216,7 +216,7 @@ composite_manager_running(void)
 
 /** Quit awesome.
  * @tparam[opt=0] integer code The exit code to use when exiting.
- * @function quit
+ * @staticfct quit
  */
 static int
 luaA_quit(lua_State *L)
@@ -233,7 +233,7 @@ luaA_quit(lua_State *L)
  * awesome.
  *
  * @param cmd The command line to execute.
- * @function exec
+ * @staticfct exec
  */
 static int
 luaA_exec(lua_State *L)
@@ -247,7 +247,7 @@ luaA_exec(lua_State *L)
 }
 
 /** Restart awesome.
- * @function restart
+ * @staticfct restart
  */
 static int
 luaA_restart(lua_State *L)
@@ -262,7 +262,7 @@ luaA_restart(lua_State *L)
  * @tparam integer sig Signal number.
  *   See `awesome.unix_signal` for a list of signals.
  * @treturn boolean true if the signal was successfully sent, else false
- * @function kill
+ * @staticfct kill
  */
 static int
 luaA_kill(lua_State *L)
@@ -277,7 +277,7 @@ luaA_kill(lua_State *L)
 
 /** Synchronize with the X11 server. This is needed in the test suite to avoid
  * some race conditions. You should never need to use this function.
- * @function sync
+ * @staticfct sync
  */
 static int
 luaA_sync(lua_State *L)
@@ -291,7 +291,7 @@ luaA_sync(lua_State *L)
  * @param pixbuf The pixbuf as a light user datum.
  * @param path The pixbuf origin path
  * @return A cairo surface as light user datum.
- * @function pixbuf_to_surface
+ * @staticfct pixbuf_to_surface
  */
 static int
 luaA_pixbuf_to_surface(lua_State *L)
@@ -310,7 +310,7 @@ luaA_pixbuf_to_surface(lua_State *L)
  * @return[1] A cairo surface as light user datum.
  * @return[2] nil
  * @treturn[2] string Error message
- * @function load_image
+ * @staticfct load_image
  */
 static int
 luaA_load_image(lua_State *L)
@@ -340,7 +340,7 @@ luaA_load_image(lua_State *L)
  * smaller size is picked. The default is 0 pixels, ie. the smallest icon.
  *
  * @param size The size of the icons in pixels.
- * @function set_preferred_icon_size
+ * @staticfct set_preferred_icon_size
  */
 static int
 luaA_set_preferred_icon_size(lua_State *L)
@@ -674,7 +674,7 @@ luaA_awesome_index(lua_State *L)
  *
  * @param name A string with the event name.
  * @param func The function to call.
- * @function connect_signal
+ * @staticfct connect_signal
  */
 static int
 luaA_awesome_connect_signal(lua_State *L)
@@ -689,7 +689,7 @@ luaA_awesome_connect_signal(lua_State *L)
  *
  * @param name A string with the event name.
  * @param func The function to call.
- * @function disconnect_signal
+ * @staticfct disconnect_signal
  */
 static int
 luaA_awesome_disconnect_signal(lua_State *L)
@@ -706,7 +706,7 @@ luaA_awesome_disconnect_signal(lua_State *L)
  *
  * @param name A string with the event name.
  * @param ... The signal arguments.
- * @function emit_signal
+ * @staticfct emit_signal
  */
 static int
 luaA_awesome_emit_signal(lua_State *L)

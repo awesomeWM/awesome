@@ -27,7 +27,7 @@
 -- @author Benjamin Petrenko
 -- @author Yauheni Kirylau
 -- @copyright 2015, 2016 Benjamin Petrenko, Yauheni Kirylau
--- @classmod awful.widget.watch
+-- @widgetmod awful.widget.watch
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -64,6 +64,7 @@ local watch = { mt = {} }
 --
 -- @return The widget used by this watch.
 -- @return Its gears.timer.
+-- @constructorfct awful.widget.watch
 function watch.new(command, timeout, callback, base_widget)
     timeout = timeout or 5
     base_widget = base_widget or textbox()

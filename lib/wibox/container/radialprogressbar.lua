@@ -8,7 +8,7 @@
 --@DOC_wibox_container_defaults_radialprogressbar_EXAMPLE@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2013 Emmanuel Lepage Vallee
--- @classmod wibox.container.radialprogressbar
+-- @containermod wibox.container.radialprogressbar
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -24,12 +24,15 @@ local radialprogressbar = { mt = {} }
 
 --- The progressbar border background color.
 -- @beautiful beautiful.radialprogressbar_border_color
+-- @param color
 
 --- The progressbar foreground color.
 -- @beautiful beautiful.radialprogressbar_color
+-- @param color
 
 --- The progressbar border width.
 -- @beautiful beautiful.radialprogressbar_border_width
+-- @param number
 
 --- The padding between the outline and the progressbar.
 -- @beautiful beautiful.radialprogressbar_paddings
@@ -134,21 +137,17 @@ function radialprogressbar:set_widget(widget)
     self:emit_signal("widget::layout_changed")
 end
 
---- Get the children elements
--- @treturn table The children
 function radialprogressbar:get_children()
     return {self._private.widget}
 end
 
---- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function radialprogressbar:set_children(children)
     self._private.widget = children and children[1]
     self:emit_signal("widget::layout_changed")
 end
 
 --- Reset this container.
+-- @method reset
 function radialprogressbar:reset()
     self:set_widget(nil)
 end
@@ -194,10 +193,12 @@ end
 --- The border background color.
 --@DOC_wibox_container_radialprogressbar_border_color_EXAMPLE@
 -- @property border_color
+-- @param color
 
 --- The border foreground color.
 --@DOC_wibox_container_radialprogressbar_color_EXAMPLE@
 -- @property color
+-- @param color
 
 --- The border width.
 --@DOC_wibox_container_radialprogressbar_border_width_EXAMPLE@
@@ -206,9 +207,11 @@ end
 
 --- The minimum value.
 -- @property min_value
+-- @param number
 
 --- The maximum value.
 -- @property max_value
+-- @param number
 
 for _, prop in ipairs {"max_value", "min_value", "border_color", "color",
     "border_width", "paddings"} do
@@ -237,7 +240,7 @@ end
 --- Returns a new radialprogressbar layout. A radialprogressbar layout
 -- radialprogressbars a given widget. Use `.widget` to set the widget.
 -- @param[opt] widget The widget to display.
--- @function wibox.container.radialprogressbar
+-- @constructorfct wibox.container.radialprogressbar
 local function new(widget)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,

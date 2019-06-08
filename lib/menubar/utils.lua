@@ -32,6 +32,7 @@ local utils = {}
 -- Options section
 
 --- Terminal which applications that need terminal would open in.
+-- @param[opt="xterm"] string
 utils.terminal = 'xterm'
 
 --- The default icon for applications that don't provide any icon in
@@ -39,6 +40,7 @@ utils.terminal = 'xterm'
 local default_icon = nil
 
 --- Name of the WM for the OnlyShowIn entry in the .desktop file.
+-- @param[opt="awesome"] string
 utils.wm_name = "awesome"
 
 -- Maps keys in desktop entries to suitable getter function.
@@ -131,6 +133,7 @@ local all_icon_sizes = {
 local supported_icon_file_exts = { png = 1, xpm = 2, svg = 3 }
 
 local icon_lookup_path = nil
+
 --- Get a list of icon lookup paths.
 -- @treturn table A list of directories, without trailing slash.
 local function get_icon_lookup_path()
@@ -198,6 +201,7 @@ end
 
 --- Remove CR newline from the end of the string.
 -- @param s string to trim
+-- @staticfct menubar.utils.rtrim
 function utils.rtrim(s)
     if not s then return end
     if string.byte(s, #s) == 13 then
@@ -209,6 +213,7 @@ end
 --- Lookup an icon in different folders of the filesystem.
 -- @tparam string icon_file Short or full name of the icon.
 -- @treturn string|boolean Full name of the icon, or false on failure.
+-- @staticfct menubar.utils.lookup_icon_uncached
 function utils.lookup_icon_uncached(icon_file)
     if not icon_file or icon_file == "" then
         return false
@@ -244,6 +249,7 @@ local lookup_icon_cache = {}
 --- Lookup an icon in different folders of the filesystem (cached).
 -- @param icon Short or full name of the icon.
 -- @return full name of the icon.
+-- @staticfct menubar.utils.lookup_icon
 function utils.lookup_icon(icon)
     if not lookup_icon_cache[icon] and lookup_icon_cache[icon] ~= false then
         lookup_icon_cache[icon] = utils.lookup_icon_uncached(icon)
@@ -254,6 +260,7 @@ end
 --- Parse a .desktop file.
 -- @param file The .desktop file.
 -- @return A table with file entries.
+-- @staticfct menubar.utils.parse_desktop_file
 function utils.parse_desktop_file(file)
     local program = { show = true, file = file }
 
@@ -350,6 +357,7 @@ end
 -- @tparam function callback Will be fired when all the files were parsed
 -- with the resulting list of menu entries as argument.
 -- @tparam table callback.programs Paths of found .desktop files.
+-- @staticfct menubar.utils.parse_dir
 function utils.parse_dir(dir_path, callback)
 
     local function get_readable_path(file)
@@ -413,6 +421,7 @@ end
 -- @tparam str text Text.
 -- @tparam number|screen s Screen
 -- @treturn int Text width.
+-- @staticfct menubar.utils.compute_text_width
 function utils.compute_text_width(text, s)
     local w, _ = w_textbox(gstring.xml_escape(text)):get_preferred_size(s)
     return w

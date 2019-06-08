@@ -22,7 +22,7 @@
 --
 -- @author getzze
 -- @copyright 2017 getzze
--- @classmod awful.widget.calendar_popup
+-- @popupmod awful.widget.calendar_popup
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -203,6 +203,7 @@ end
 -- @tparam string position Two-character position of the calendar in the screen
 -- @tparam screen screen Screen where to display the calendar
 -- @treturn wibox The wibox calendar
+-- @method call_calendar
 function calendar_popup:call_calendar(offset, position, screen)
     local inc_offset = offset or 0
     local pos = position or self.position
@@ -230,7 +231,8 @@ function calendar_popup:call_calendar(offset, position, screen)
     return self
 end
 
---- Toggle calendar visibility
+--- Toggle calendar visibility.
+-- @method toggle
 function calendar_popup:toggle()
     self:call_calendar(0)
     self.visible = not self.visible
@@ -247,6 +249,7 @@ end
 -- @tparam[opt={}] table args Additional options
 -- @tparam[opt=true] bool args.on_hover Show popup during mouse hover
 -- @treturn wibox The wibox calendar
+-- @method attach
 function calendar_popup:attach(widget, position, args)
     position = position or "tr"
     args = args or {}
@@ -371,7 +374,7 @@ end
 -- @tparam table args.style_normal Cell style for the normal day cells (see `cell_properties`)
 -- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
--- @function awful.widget.calendar_popup.month
+-- @constructorfct awful.widget.calendar_popup.month
 function calendar_popup.month(args)
     return get_cal_wibox("month", args)
 end
@@ -407,7 +410,7 @@ end
 -- @tparam table args.style_normal Cell style for the normal day cells (see `cell_properties`)
 -- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
--- @function awful.widget.calendar_popup.year
+-- @constructorfct awful.widget.calendar_popup.year
 function calendar_popup.year(args)
     return get_cal_wibox("year", args)
 end

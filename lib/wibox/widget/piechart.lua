@@ -7,7 +7,7 @@
 --@DOC_wibox_widget_defaults_piechart_EXAMPLE@
 -- @author Emmanuel Lepage Valle
 -- @copyright 2012 Emmanuel Lepage Vallee
--- @classmod wibox.widget.piechart
+-- @widgetmod wibox.widget.piechart
 ---------------------------------------------------------------------------
 
 local color     = require( "gears.color"       )
@@ -217,6 +217,10 @@ function piechart:get_data()
     end
     return list
 end
+
+--- Create a new piechart.
+-- @constructorfct wibox.widget.piechart
+-- @tparam table data_list The data.
 
 local function new(data_list)
 

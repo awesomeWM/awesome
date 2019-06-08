@@ -20,7 +20,7 @@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2010, 2018 Emmanuel Lepage Vallee
--- @classmod awful.widget.layoutlist
+-- @widgetmod awful.widget.layoutlist
 ----------------------------------------------------------------------------
 
 local capi     = {screen = screen, tag = tag}
@@ -382,7 +382,7 @@ end
 -- @tparam string|pattern args.style.shape_border_width_selected
 -- @tparam string|pattern args.style.shape_border_color_selected
 -- @treturn widget The action widget.
--- @function awful.widget.layoutlist
+-- @constructorfct awful.widget.layoutlist
 
 local is_connected, instances = false, setmetatable({}, {__mode = "v"})
 

@@ -36,7 +36,7 @@
 /**
  * Switch keyboard layout.
  *
- * @function xkb_set_layout_group
+ * @staticfct xkb_set_layout_group
  * @tparam integer num keyboard layout number, integer from 0 to 3
  */
 int
@@ -56,7 +56,7 @@ luaA_xkb_set_layout_group(lua_State *L)
 /**
  * Get current layout number.
  *
- * @function xkb_get_layout_group
+ * @staticfct xkb_get_layout_group
  * @treturn integer num Current layout number, integer from 0 to 3.
  */
 int
@@ -87,7 +87,7 @@ luaA_xkb_get_layout_group(lua_State *L)
 /**
  * Get layout short names.
  *
- * @function xkb_get_group_names
+ * @staticfct xkb_get_group_names
  * @treturn string A string describing the current layout settings,
  *   e.g.: 'pc+us+de:2+inet(evdev)+group(alt_shift_toggle)+ctrl(nocaps)'
  */

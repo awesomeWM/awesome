@@ -38,7 +38,7 @@
 /** Get the selection (clipboard) content.
  *
  * @return A string with the selection (clipboard) content.
- * @function selection
+ * @staticfct  selection
  */
 
 static xcb_window_t selection_window = XCB_NONE;

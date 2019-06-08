@@ -134,6 +134,7 @@ local crules = gmatcher()
 -- @client c The client.
 -- @tab rule The rule to check.
 -- @treturn bool True if it matches, false otherwise.
+-- @staticfct awful.rules.match
 function rules.match(c, rule)
     return crules:_match(c, rule)
 end
@@ -142,6 +143,7 @@ end
 -- @client c The client.
 -- @tab rule The rule to check.
 -- @treturn bool True if at least one rule is matched, false otherwise.
+-- @staticfct awful.rules.match_any
 function rules.match_any(c, rule)
     return crules:_match_any(c, rule)
 end
@@ -151,6 +153,7 @@ end
 -- @tab entry Rule entry (with keys `rule`, `rule_any`, `except` and/or
 --   `except_any`).
 -- @treturn bool
+-- @staticfct awful.rules.matches
 function rules.matches(c, entry)
     return crules:matches_rule(c, entry)
 end
@@ -160,6 +163,7 @@ end
 -- @tab _rules The rules to check. List with "rule", "rule_any", "except" and
 --   "except_any" keys.
 -- @treturn table The list of matched rules.
+-- @staticfct awful.rules.matching_rules
 function rules.matching_rules(c, _rules)
     return crules:matching_rules(c, _rules)
 end
@@ -169,13 +173,15 @@ end
 -- @tab _rules The rules to check. List of tables with `rule`, `rule_any`,
 --   `except` and `except_any` keys.
 -- @treturn bool True if at least one rule is matched, false otherwise.
+-- @staticfct awful.rules.matches_list
 function rules.matches_list(c, _rules)
     return crules:matches_rules(c, _rules)
 end
 
 --- Remove a source.
 -- @tparam string name The source name.
--- @treturn boolean If the source was removed,
+-- @treturn boolean If the source was removed.
+-- @staticfct awful.rules.remove_rule_source
 function rules.remove_rule_source(name)
     return crules:remove_matching_source(name)
 end
@@ -183,6 +189,7 @@ end
 
 --- Apply awful.rules.rules to a client.
 -- @client c The client.
+-- @staticfct awful.rules.apply
 function rules.apply(c)
     return crules:apply(c)
 end
@@ -226,7 +233,7 @@ end
 -- @tparam[opt={}] table precede A list of names of sources this source have a
 --  priority over.
 -- @treturn boolean Returns false if a dependency conflict was found.
--- @function awful.rules.add_rule_source
+-- @staticfct awful.rules.add_rule_source
 
 function rules.add_rule_source(name, cb, ...)
     local function callback(_, ...)
@@ -519,7 +526,7 @@ end
 -- @client c The client.
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
--- @function awful.rules.execute
+-- @staticfct awful.rules.execute
 
 crules._execute = function(_, c, props, callbacks)
     -- This has to be done first, as it will impact geometry related props.

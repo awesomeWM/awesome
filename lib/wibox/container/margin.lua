@@ -3,7 +3,7 @@
 --@DOC_wibox_container_defaults_margin_EXAMPLE@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @classmod wibox.container.margin
+-- @containermod wibox.container.margin
 ---------------------------------------------------------------------------
 
 local pairs = pairs
@@ -80,15 +80,10 @@ function margin:get_widget()
     return self._private.widget
 end
 
--- Get the number of children element
--- @treturn table The children
 function margin:get_children()
     return {self._private.widget}
 end
 
--- Replace the layout children
--- This layout only accept one children, all others will be ignored
--- @tparam table children A table composed of valid widgets
 function margin:set_children(children)
     self:set_widget(children[1])
 end
@@ -136,7 +131,7 @@ function margin:get_color()
 end
 
 --- Draw the margin even if the content size is 0x0 (default: true)
--- @function draw_empty
+-- @method draw_empty
 -- @tparam boolean draw_empty Draw nothing is content is 0x0 or draw the margin anyway
 
 function margin:set_draw_empty(draw_empty)
@@ -150,6 +145,7 @@ end
 
 --- Reset this layout. The widget will be unreferenced, the margins set to 0
 -- and the color erased
+-- @method reset
 function margin:reset()
     self:set_widget(nil)
     self:set_margins(0)
@@ -194,7 +190,7 @@ end
 -- @param[opt] color A color for the margins.
 -- @param[opt] draw_empty whether or not to draw the margin when the content is empty
 -- @treturn table A new margin container
--- @function wibox.container.margin
+-- @constructorfct wibox.container.margin
 local function new(widget, left, right, top, bottom, color, draw_empty)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

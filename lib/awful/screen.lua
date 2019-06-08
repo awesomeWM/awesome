@@ -57,7 +57,7 @@ function screen.getdistance_sq(s, x, y)
 end
 
 --- Get the square distance between a `screen` and a point.
--- @function screen.get_square_distance
+-- @method get_square_distance
 -- @tparam number x X coordinate of point
 -- @tparam number y Y coordinate of point
 -- @treturn number The squared distance of the screen to the provided point.
@@ -69,7 +69,7 @@ end
 --
 -- The number returned can be used as an index into the global
 -- `screen` table/object.
--- @function awful.screen.getbycoord
+-- @staticfct awful.screen.getbycoord
 -- @tparam number x The x coordinate
 -- @tparam number y The y coordinate
 -- @treturn ?number The screen index
@@ -86,7 +86,7 @@ end
 --
 -- This moves the mouse pointer to the last known position on the new screen,
 -- or keeps its position relative to the current focused screen.
--- @function awful.screen.focus
+-- @staticfct awful.screen.focus
 -- @screen _screen Screen number (defaults / falls back to mouse.screen).
 function screen.focus(_screen)
     client = client or require("awful.client")
@@ -128,7 +128,7 @@ end
 -- This gets the next screen relative to this one in
 -- the specified direction.
 --
--- @function screen:get_next_in_direction
+-- @method get_next_in_direction
 -- @param self Screen.
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 function screen.object.get_next_in_direction(self, dir)
@@ -149,7 +149,7 @@ end
 --
 -- This moves the mouse pointer to the last known position on the new screen,
 -- or keeps its position relative to the current focused screen.
--- @function awful.screen.focus_bydirection
+-- @staticfct awful.screen.focus_bydirection
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @param _screen Screen.
 function screen.focus_bydirection(dir, _screen)
@@ -166,7 +166,7 @@ end
 -- This moves the mouse pointer to the last known position on the new screen,
 -- or keeps its position relative to the current focused screen.
 --
--- @function awful.screen.focus_relative
+-- @staticfct awful.screen.focus_relative
 -- @tparam int offset Value to add to the current focused screen index. 1 to
 --   focus the next one, -1 to focus the previous one.
 function screen.focus_relative(offset)
@@ -242,19 +242,20 @@ end
 -- focused screen by default.
 -- @tparam client c A client.
 -- @treturn screen The preferred screen.
+-- @staticfct awful.screen.preferred
 function screen.preferred(c)
     return capi.awesome.startup and c.screen or screen.focused()
 end
 
 --- The defaults arguments for `awful.screen.focused`.
--- @tfield[opt=nil] table awful.screen.default_focused_args
+-- @tfield[opt={}] table awful.screen.default_focused_args
 
 --- Get the focused screen.
 --
 -- It is possible to set `awful.screen.default_focused_args` to override the
 -- default settings.
 --
--- @function awful.screen.focused
+-- @staticfct awful.screen.focused
 -- @tparam[opt] table args
 -- @tparam[opt=false] boolean args.client Use the client screen instead of the
 --   mouse screen.
@@ -272,7 +273,7 @@ end
 --
 -- This method computes the different variants of the "usable" screen geometry.
 --
--- @function screen.get_bounding_geometry
+-- @staticfct screen.get_bounding_geometry
 -- @tparam[opt={}] table args The arguments
 -- @tparam[opt=false] boolean args.honor_padding Whether to honor the screen's padding.
 -- @tparam[opt=false] boolean args.honor_workarea Whether to honor the screen's workarea.
@@ -341,7 +342,7 @@ end
 --
 -- This is used by `screen.clients` internally (with `stacked=true`).
 --
--- @function screen:get_clients
+-- @method get_clients
 -- @tparam[opt=true] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table The clients list.
 function screen.object.get_clients(s, stacked)
@@ -388,7 +389,7 @@ end
 --
 -- This is used by `all_clients` internally (with `stacked=true`).
 --
--- @function screen:get_all_clients
+-- @method get_all_clients
 -- @tparam[opt=true] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table The clients list.
 function screen.object.get_all_clients(s, stacked)
@@ -410,7 +411,7 @@ end
 --
 -- This is used by `tiles_clients` internally (with `stacked=true`).
 --
--- @function screen:get_tiled_clients
+-- @method get_tiled_clients
 -- @tparam[opt=true] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table The clients list.
 function screen.object.get_tiled_clients(s, stacked)
@@ -430,7 +431,7 @@ end
 
 --- Call a function for each existing and created-in-the-future screen.
 --
--- @function awful.screen.connect_for_each_screen
+-- @staticfct awful.screen.connect_for_each_screen
 -- @tparam function func The function to call.
 -- @screen func.screen The screen.
 function screen.connect_for_each_screen(func)
@@ -441,7 +442,7 @@ function screen.connect_for_each_screen(func)
 end
 
 --- Undo the effect of connect_for_each_screen.
--- @function awful.screen.disconnect_for_each_screen
+-- @staticfct awful.screen.disconnect_for_each_screen
 -- @tparam function func The function that should no longer be called.
 function screen.disconnect_for_each_screen(func)
     capi.screen.disconnect_signal("added", func)
@@ -525,6 +526,7 @@ end
 -- defaulting to 96.
 --
 -- @tparam boolean enabled Enable or disable automatic DPI support.
+-- @staticfct awful.screen.set_auto_dpi_enabled
 function screen.set_auto_dpi_enabled(enabled)
     for s in capi.screen do
         s.data.dpi_cache = nil
@@ -535,7 +537,7 @@ end
 
 --- The number of pixels per inch of the screen.
 -- @property dpi
--- @treturn number the DPI value.
+-- @param number the DPI value.
 
 local xft_dpi, fallback_dpi
 
@@ -660,6 +662,8 @@ object.properties(capi.screen, {
     setter_class = screen.object,
     auto_emit    = true,
 })
+
+--@DOC_object_COMMON@
 
 return screen
 

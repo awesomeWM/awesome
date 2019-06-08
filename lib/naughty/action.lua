@@ -14,7 +14,7 @@ local gobject = require("gears.object")
 local action = {}
 
 --- Create a new action.
--- @function naughty.action
+-- @constructorfct naughty.action
 -- @tparam table args The arguments.
 -- @tparam string args.name The name.
 -- @tparam string args.position The position.
@@ -41,7 +41,7 @@ local action = {}
 
 --- The action icon.
 -- @property icon
--- @param gears.surface
+-- @tparam gears.surface|string icon
 
 --- The notification.
 -- @property notification
@@ -123,5 +123,7 @@ local function new(_, args)
 
     return ret
 end
+
+--@DOC_object_COMMON@
 
 return setmetatable(action, {__call = new})

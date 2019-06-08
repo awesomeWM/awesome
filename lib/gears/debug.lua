@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
--- @module gears.debug
+-- @utillib gears.debug
 ---------------------------------------------------------------------------
 
 local tostring = tostring
@@ -49,6 +49,7 @@ end
 -- @param tag The name of the value.
 -- @tparam[opt] int depth Depth of recursion.
 -- @return string A string that contains the expanded value of data.
+-- @staticfct gears.debug.dump_return
 function debug.dump_return(data, tag, depth)
     return dump_raw(data, nil, tag, depth)
 end
@@ -57,23 +58,27 @@ end
 -- @param data Table to print.
 -- @param tag The name of the table.
 -- @tparam[opt] int depth Depth of recursion.
+-- @staticfct gears.debug.dump
 function debug.dump(data, tag, depth)
     print(debug.dump_return(data, tag, depth))
 end
 
 --- Print an warning message
--- @tparam string message The warning message to print
+-- @tparam string message The warning message to print.
+-- @staticfct gears.debug.print_warning
 function debug.print_warning(message)
     io.stderr:write(os.date("%Y-%m-%d %T W: awesome: ") .. tostring(message) .. "\n")
 end
 
 --- Print an error message
--- @tparam string message The error message to print
+-- @tparam string message The error message to print.
+-- @staticfct gears.debug.print_error
 function debug.print_error(message)
     io.stderr:write(os.date("%Y-%m-%d %T E: awesome: ") .. tostring(message) .. "\n")
 end
 
 local displayed_deprecations = {}
+
 --- Display a deprecation notice, but only once per traceback.
 --
 -- This function also emits the `debug::deprecate` signal on the `awesome`
@@ -84,6 +89,7 @@ local displayed_deprecations = {}
 -- @tparam boolean args.raw Print the message as-is without the automatic context
 -- @tparam integer args.deprecated_in Print the message only when Awesome's
 --   version is equal to or greater than deprecated_in.
+-- @staticfct gears.debug.deprecate
 function debug.deprecate(see, args)
     args = args or {}
     if args.deprecated_in then
@@ -124,6 +130,7 @@ end
 -- @tparam string old_name The old class name
 -- @tparam string new_name The new class name
 -- @treturn table A proxy class.
+-- @staticfct gears.debug.deprecate_class
 function debug.deprecate_class(fallback, old_name, new_name)
     local message = old_name.." has been renamed to "..new_name
 

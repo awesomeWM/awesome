@@ -426,7 +426,7 @@ spawn_child_exited(pid_t pid, int status)
  * @treturn[1] integer stdout, if `stdout` is true.
  * @treturn[1] integer stderr, if `stderr` is true.
  * @treturn[2] string An error string if an error occurred.
- * @function spawn
+ * @staticfct spawn
  */
 int
 luaA_spawn(lua_State *L)

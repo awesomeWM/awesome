@@ -6,7 +6,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @copyright 2018 Aire-One
--- @classmod awful.widget.prompt
+-- @widgetmod awful.widget.prompt
 ---------------------------------------------------------------------------
 
 --- The prompt foreground color.
@@ -113,7 +113,7 @@ end
 --   for the matching modifiers + key. See @{awful.prompt.run} for details.
 -- @return An instance of prompt widget, inherits from
 --   `wibox.container.background`.
--- @function awful.widget.prompt
+-- @constructorfct awful.widget.prompt
 function widgetprompt.new(args)
     args = args or {}
     local promptbox = background()

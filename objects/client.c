@@ -84,7 +84,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @classmod client
+ * @coreclassmod client
  */
 
 #include "objects/client.h"
@@ -919,30 +919,30 @@
  *
  * @param struts A table with new strut values, or none.
  * @return A table with strut values.
- * @function struts
+ * @method struts
  */
 
 /** Get or set mouse buttons bindings for a client.
  *
  * @param buttons_table An array of mouse button bindings objects, or nothing.
  * @return A table with all buttons.
- * @function buttons
+ * @method buttons
  */
 
 /** Get the number of instances.
  *
  * @return The number of client objects alive.
- * @function instances
+ * @staticfct instances
  */
 
 /* Set a __index metamethod for all client instances.
  * @tparam function cb The meta-method
- * @function set_index_miss_handler
+ * @staticfct set_index_miss_handler
  */
 
 /* Set a __newindex metamethod for all client instances.
  * @tparam function cb The meta-method
- * @function set_newindex_miss_handler
+ * @staticfct set_newindex_miss_handler
  */
 
 typedef enum {
@@ -2426,7 +2426,7 @@ client_kill(client_t *c)
  * @tparam[opt] boolean stacked Return clients in stacking order? (ordered from
  *   top to bottom).
  * @treturn table A table with clients.
- * @function get
+ * @staticfct get
  */
 static int
 luaA_client_get(lua_State *L)
@@ -2467,7 +2467,7 @@ luaA_client_get(lua_State *L)
 /** Check if a client is visible on its screen.
  *
  * @return A boolean value, true if the client is visible, false otherwise.
- * @function isvisible
+ * @method isvisible
  */
 static int
 luaA_client_isvisible(lua_State *L)
@@ -2577,7 +2577,7 @@ out:
 
 /** Kill a client.
  *
- * @function kill
+ * @method kill
  */
 static int
 luaA_client_kill(lua_State *L)
@@ -2589,7 +2589,7 @@ luaA_client_kill(lua_State *L)
 
 /** Swap a client with another one in global client list.
  * @client c A client to swap with.
- * @function swap
+ * @method swap
  */
 static int
 luaA_client_swap(lua_State *L)
@@ -2639,7 +2639,7 @@ luaA_client_swap(lua_State *L)
  * @tparam table tags_table A table with tags to set, or `nil` to get the
  *   current tags.
  * @treturn table A table with all tags.
- * @function tags
+ * @method tags
  */
 static int
 luaA_client_tags(lua_State *L)
@@ -2708,7 +2708,7 @@ luaA_client_get_first_tag(lua_State *L, client_t *c)
 
 /** Raise a client on top of others which are on the same layer.
  *
- * @function raise
+ * @method raise
  */
 static int
 luaA_client_raise(lua_State *L)
@@ -2729,7 +2729,7 @@ luaA_client_raise(lua_State *L)
 
 /** Lower a client on bottom of others which are on the same layer.
  *
- * @function lower
+ * @method lower
  */
 static int
 luaA_client_lower(lua_State *L)
@@ -2756,7 +2756,7 @@ luaA_client_lower(lua_State *L)
 
 /** Stop managing a client.
  *
- * @function unmanage
+ * @method unmanage
  */
 static int
 luaA_client_unmanage(lua_State *L)
@@ -2986,7 +2986,7 @@ HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
  *
  * @tparam table|nil geo A table with new coordinates, or nil.
  * @treturn table A table with client geometry and coordinates.
- * @function geometry
+ * @method geometry
  */
 static int
 luaA_client_geometry(lua_State *L)
@@ -3023,7 +3023,7 @@ luaA_client_geometry(lua_State *L)
  * @param height Desired height of client
  * @return Actual width of client
  * @return Actual height of client
- * @function apply_size_hints
+ * @method apply_size_hints
  */
 static int
 luaA_client_apply_size_hints(lua_State *L)
@@ -3640,7 +3640,7 @@ luaA_client_set_shape_input(lua_State *L, client_t *c)
  *
  * @param keys_table An array of key bindings objects, or nothing.
  * @return A table with all keys.
- * @function keys
+ * @method keys
  */
 static int
 luaA_client_keys(lua_State *L)
@@ -3690,7 +3690,7 @@ luaA_client_get_icon_sizes(lua_State *L, client_t *c)
  * @tparam interger index The index in the list of icons to get.
  * @treturn surface A lightuserdata for a cairo surface. This reference must be
  * destroyed!
- * @function get_icon
+ * @method get_icon
  */
 static int
 luaA_client_get_some_icon(lua_State *L)

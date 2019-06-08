@@ -39,7 +39,7 @@
 --
 -- @author Sébastien Gross &lt;seb•ɱɩɲʋʃ•awesome•ɑƬ•chezwam•ɖɵʈ•org&gt;
 -- @copyright 2009 Sébastien Gross
--- @classmod awful.tooltip
+-- @popupmod awful.tooltip
 -------------------------------------------------------------------------
 
 local timer = require("gears.timer")
@@ -86,27 +86,34 @@ local offset = {
 
 --- The tooltip border color.
 -- @beautiful beautiful.tooltip_border_color
+-- @param color
 
 --- The tooltip background color.
 -- @beautiful beautiful.tooltip_bg
+-- @param color
 
 --- The tooltip foregound (text) color.
 -- @beautiful beautiful.tooltip_fg
+-- @param color
 
 --- The tooltip font.
 -- @beautiful beautiful.tooltip_font
+-- @param string
 
 --- The tooltip border width.
 -- @beautiful beautiful.tooltip_border_width
+-- @param number
 
 --- The tooltip opacity.
 -- @beautiful beautiful.tooltip_opacity
+-- @param number opacity Between 0 and 1
 
 --- The default tooltip shape.
--- The default shape for all tooltips is a rectangle. However, by setting this variable
--- they can default to rounded rectangle or stretched octogons.
+-- The default shape for all tooltips is a rectangle. However, by setting
+-- this variable they can default to rounded rectangle or stretched octogons.
 -- @beautiful beautiful.tooltip_shape
--- @tparam[opt=gears.shape.rectangle] function shape A `gears.shape` compatible function
+-- @tparam[opt=gears.shape.rectangle] gears.shape shape A `gears.shape`
+--  compatible function
 -- @see shape
 -- @see gears.shape
 
@@ -251,6 +258,7 @@ end
 -- * top
 --
 -- @property align
+-- @param string
 -- @see beautiful.tooltip_align
 -- @see mode
 -- @see preferred_positions
@@ -276,20 +284,14 @@ function tooltip:set_align(value)
 end
 
 --- The shape of the tooltip window.
--- If the shape require some parameters, use `set_shape`.
 --
 -- @DOC_awful_tooltip_shape_EXAMPLE@
 --
 -- @property shape
+-- @tparam gears.shape shape
 -- @see gears.shape
--- @see set_shape
 -- @see beautiful.tooltip_shape
 
---- Set the tooltip shape.
--- All other arguments will be passed to the shape function.
--- @tparam gears.shape s The shape
--- @see shape
--- @see gears.shape
 function tooltip:set_shape(s)
     self.backgroundbox:set_shape(s)
 end
@@ -473,6 +475,7 @@ end
 -- @DOC_awful_tooltip_border_color_EXAMPLE@
 --
 -- @property border_color
+-- @param color
 -- @param gears.color
 
 function tooltip:set_border_color(val)
@@ -520,7 +523,7 @@ end
 -- @tparam tooltip self The tooltip.
 -- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
--- @function add_to_object
+-- @method add_to_object
 function tooltip:add_to_object(obj)
     if not obj then return end
 
@@ -533,7 +536,7 @@ end
 -- @tparam tooltip self The tooltip.
 -- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
--- @function remove_from_object
+-- @method remove_from_object
 function tooltip:remove_from_object(obj)
     obj:disconnect_signal("mouse::enter", self.show)
     obj:disconnect_signal("mouse::leave", self.hide)
@@ -577,7 +580,7 @@ end
 -- @see text
 -- @see markup
 -- @see align
--- @function awful.tooltip
+-- @constructorfct awful.tooltip
 function tooltip.new(args)
     -- gears.object, properties are linked to set_/get_ functions
     local self = object {

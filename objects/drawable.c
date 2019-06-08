@@ -27,7 +27,7 @@
  *
  * @author Uli Schlachter &lt;psychon@znc.in&gt;
  * @copyright 2012 Uli Schlachter
- * @classmod drawable
+ * @coreclassmod drawable
  */
 
 #include "drawable.h"
@@ -39,7 +39,7 @@
 /** Drawable object.
  *
  * @field surface The drawable's cairo surface.
- * @function drawable
+ * @staticfct drawable
  */
 
 /**
@@ -89,17 +89,17 @@
 /** Get the number of instances.
  *
  * @return The number of drawable objects alive.
- * @function instances
+ * @staticfct instances
  */
 
 /** Set a __index metamethod for all drawable instances.
  * @tparam function cb The meta-method
- * @function set_index_miss_handler
+ * @staticfct set_index_miss_handler
  */
 
 /** Set a __newindex metamethod for all drawable instances.
  * @tparam function cb The meta-method
- * @function set_newindex_miss_handler
+ * @staticfct set_newindex_miss_handler
  */
 
 static lua_class_t drawable_class;
@@ -188,7 +188,7 @@ luaA_drawable_get_surface(lua_State *L, drawable_t *drawable)
 /** Refresh a drawable's content. This has to be called whenever some drawing to
  * the drawable's surface has been done and should become visible.
  *
- * @function refresh
+ * @method refresh
  */
 static int
 luaA_drawable_refresh(lua_State *L)
@@ -203,7 +203,7 @@ luaA_drawable_refresh(lua_State *L)
 /** Get drawable geometry. The geometry consists of x, y, width and height.
  *
  * @treturn table A table with drawable coordinates and geometry.
- * @function geometry
+ * @method geometry
  */
 static int
 luaA_drawable_geometry(lua_State *L)

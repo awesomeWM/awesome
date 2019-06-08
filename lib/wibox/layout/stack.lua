@@ -11,7 +11,7 @@
 --@DOC_wibox_layout_defaults_stack_EXAMPLE@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
--- @classmod wibox.layout.stack
+-- @layoutmod wibox.layout.stack
 ---------------------------------------------------------------------------
 
 local base  = require("wibox.widget.base" )
@@ -24,32 +24,28 @@ local stack = {mt={}}
 
 --@DOC_fixed_COMMON@
 
---- Add some widgets to the given stack layout
+--- Add some widgets to the given stack layout.
 -- @param layout The layout you are modifying.
 -- @tparam widget ... Widgets that should be added (must at least be one)
--- @name add
--- @class function
+-- @method add
 
 --- Remove a widget from the layout
 -- @tparam index The widget index to remove
 -- @treturn boolean index If the operation is successful
--- @name remove
--- @class function
+-- @method remove
 
---- Insert a new widget in the layout at position `index`
+--- Insert a new widget in the layout at position `index`.
 -- @tparam number index The position
 -- @param widget The widget
 -- @treturn boolean If the operation is successful
--- @name insert
--- @class function
+-- @method insert
 
---- Remove one or more widgets from the layout
+--- Remove one or more widgets from the layout.
 -- The last parameter can be a boolean, forcing a recursive seach of the
 -- widget(s) to remove.
 -- @param widget ... Widgets that should be removed (must at least be one)
 -- @treturn boolean If the operation is successful
--- @name remove_widgets
--- @class function
+-- @method remove_widgets
 
 --- Add spacing around the widget, similar to the margin container.
 --@DOC_wibox_layout_stack_spacing_EXAMPLE@
@@ -86,7 +82,7 @@ function stack:fit(context, orig_width, orig_height)
     return math.min(max_w, orig_width), math.min(max_h, orig_height)
 end
 
---- If only the first stack widget is drawn
+--- If only the first stack widget is drawn.
 -- @property top_only
 
 function stack:get_top_only()
@@ -97,7 +93,8 @@ function stack:set_top_only(top_only)
     self._private.top_only = top_only
 end
 
---- Raise a widget at `index` to the top of the stack
+--- Raise a widget at `index` to the top of the stack.
+-- @method raise
 -- @tparam number index the widget index to raise
 function stack:raise(index)
     if (not index) or self._private.widgets[index] then return end
@@ -109,7 +106,8 @@ function stack:raise(index)
     self:emit_signal("widget::layout_changed")
 end
 
---- Raise the first instance of `widget`
+--- Raise the first instance of `widget`.
+-- @method raise_widget
 -- @param widget The widget to raise
 -- @tparam[opt=false] boolean recursive Also look deeper in the hierarchy to
 --   find the widget
@@ -158,7 +156,7 @@ function stack:set_vertical_offset(value)
 end
 
 --- Create a new stack layout.
--- @function wibox.layout.stack
+-- @constructorfct wibox.layout.stack
 -- @treturn widget A new stack layout
 
 local function new(...)

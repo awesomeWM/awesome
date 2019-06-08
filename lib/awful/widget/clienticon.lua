@@ -1,7 +1,7 @@
 --- Container showing the icon of a client.
 -- @author Uli Schlachter
 -- @copyright 2017 Uli Schlachter
--- @classmod awful.widget.clienticon
+-- @widgetmod awful.widget.clienticon
 
 local base = require("wibox.widget.base")
 local surface = require("gears.surface")
@@ -99,7 +99,7 @@ end
 --- Returns a new clienticon.
 -- @tparam client c The client whose icon should be displayed.
 -- @treturn widget A new `widget`
--- @function awful.widget.clienticon
+-- @constructorfct awful.widget.clienticon
 local function new(c)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 

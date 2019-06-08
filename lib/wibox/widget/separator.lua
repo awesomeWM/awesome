@@ -19,7 +19,7 @@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2014, 2017 Emmanuel Lepage Vallee
--- @classmod wibox.widget.separator
+-- @widgetmod wibox.widget.separator
 ---------------------------------------------------------------------------
 local beautiful = require( "beautiful"         )
 local base      = require( "wibox.widget.base" )
@@ -87,7 +87,7 @@ local separator = {}
 
 --- The separator border color.
 -- @beautiful beautiful.separator_border_color
--- @param gears.color
+-- @param color
 -- @see border_color
 
 --- The separator border width.
@@ -184,6 +184,10 @@ for _, prop in ipairs {"orientation", "color", "thickness", "span_ratio",
         return self._private[prop] or beautiful["separator_"..prop]
     end
 end
+
+--- Create a new separator.
+-- @constructorfct wibox.widget.separator
+-- @tparam table args The arguments (all properties are available).
 
 local function new(args)
     local ret = base.make_widget(nil, nil, {

@@ -42,7 +42,7 @@
  *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
- * @classmod screen
+ * @coreclassmod screen
  */
 
 #include "objects/screen.h"
@@ -191,17 +191,17 @@
 /** Get the number of instances.
  *
  * @return The number of screen objects alive.
- * @function instances
+ * @staticfct instances
  */
 
 /* Set a __index metamethod for all screen instances.
  * @tparam function cb The meta-method
- * @function set_index_miss_handler
+ * @staticfct set_index_miss_handler
  */
 
 /* Set a __newindex metamethod for all screen instances.
  * @tparam function cb The meta-method
- * @function set_newindex_miss_handler
+ * @staticfct set_newindex_miss_handler
  */
 
 DO_ARRAY(xcb_randr_output_t, randr_output, DO_NOTHING);
@@ -1090,7 +1090,7 @@ luaA_screen_module_index(lua_State *L)
  * for s in screen do
  *     print("Oh, wow, we have screen " .. tostring(s))
  * end
- * @function screen
+ * @staticfct screen
  */
 static int
 luaA_screen_module_call(lua_State *L)
@@ -1147,7 +1147,7 @@ luaA_screen_get_workarea(lua_State *L, screen_t *s)
 /** Get the number of screens.
  *
  * @return The screen count, at least 1.
- * @function count
+ * @staticfct count
  */
 static int
 luaA_screen_count(lua_State *L)
@@ -1173,7 +1173,7 @@ luaA_screen_count(lua_State *L)
  * @tparam integer width width for screen.
  * @tparam integer height height for screen.
  * @return The new screen.
- * @function fake_add
+ * @constructorfct fake_add
  */
 static int
 luaA_screen_fake_add(lua_State *L)
@@ -1199,7 +1199,7 @@ luaA_screen_fake_add(lua_State *L)
 }
 
 /** Remove a screen.
- * @function fake_remove
+ * @method fake_remove
  */
 static int
 luaA_screen_fake_remove(lua_State *L)
@@ -1231,7 +1231,7 @@ luaA_screen_fake_remove(lua_State *L)
  * @tparam integer y The new Y-coordinate for screen.
  * @tparam integer width The new width for screen.
  * @tparam integer height The new height for screen.
- * @function fake_resize
+ * @method fake_resize
  */
 static int
 luaA_screen_fake_resize(lua_State *L)
@@ -1258,7 +1258,7 @@ luaA_screen_fake_resize(lua_State *L)
 
 /** Swap a screen with another one in global screen list.
  * @client s A screen to swap with.
- * @function swap
+ * @method swap
  */
 static int
 luaA_screen_swap(lua_State *L)

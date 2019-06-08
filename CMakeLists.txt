@@ -286,9 +286,6 @@ if(GENERATE_DOC)
     # Copy the images to the build directory
     file(COPY ${SOURCE_DIR}/docs/images DESTINATION ${BUILD_DIR}/doc)
 
-    # Copy the aliases to the build directory
-    file(COPY ${SOURCE_DIR}/docs/aliases DESTINATION ${BUILD_DIR}/docs)
-
     # Copy ldoc files.
     configure_file(${SOURCE_DIR}/docs/ldoc.css ${BUILD_DIR}/docs COPYONLY)
     configure_file(${SOURCE_DIR}/docs/ldoc.ltp ${BUILD_DIR}/docs COPYONLY)

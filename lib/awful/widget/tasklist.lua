@@ -70,7 +70,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
--- @classmod awful.widget.tasklist
+-- @widgetmod awful.widget.tasklist
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -518,7 +518,7 @@ end
 -- @param style **DEPRECATED** use args.style
 -- @param update_function **DEPRECATED** use args.update_function
 -- @param base_widget **DEPRECATED** use args.base_widget
--- @function awful.tasklist
+-- @constructorfct awful.widget.tasklist
 function tasklist.new(args, filter, buttons, style, update_function, base_widget)
     local screen = nil
 
