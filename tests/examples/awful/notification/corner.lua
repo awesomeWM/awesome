@@ -8,6 +8,7 @@ for _, pos in ipairs {
     "bottom_left",
     "bottom_middle",
     "bottom_right",
+    "middle",
 } do
     naughty.notify {
         title    = pos,

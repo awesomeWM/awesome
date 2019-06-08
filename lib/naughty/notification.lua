@@ -105,6 +105,7 @@ local notification = {}
 -- * *bottom_right*
 -- * *top_middle*
 -- * *bottom_middle*
+-- * *middle*
 --
 --@DOC_awful_notification_corner_EXAMPLE@
 --
@@ -414,7 +415,7 @@ end
 -- @tparam[opt=focused] integer|screen args.screen Target screen for the notification.
 -- @string[opt="top_right"] args.position Corner of the workarea displaying the popups.
 --   Values: `"top_right"`, `"top_left"`, `"bottom_left"`,
---   `"bottom_right"`, `"top_middle"`, `"bottom_middle"`.
+--   `"bottom_right"`, `"top_middle"`, `"bottom_middle"`, `"middle"`.
 -- @bool[opt=true] args.ontop Boolean forcing popups to display on top.
 -- @int[opt=`beautiful.notification_height` or auto] args.height Popup height.
 -- @int[opt=`beautiful.notification_width` or auto] args.width Popup width.

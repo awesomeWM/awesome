@@ -54,14 +54,37 @@ screen.connect_for_each_screen(function(s)
         bottom_left = {},
         bottom_middle = {},
         bottom_right = {},
+        middle = {},
     }
 end)
+
+--- Sum heights of notifications at position
+--
+-- @param s Screen to use
+-- @param position top_right | top_left | bottom_right | bottom_left
+--   | top_middle | bottom_middle | middle
+-- @param[opt] idx Index of last notification
+-- @return Height of notification stack with spacing
+local function get_total_heights(s, position, idx)
+    local sum = 0
+    local notifications = current_notifications[s][position]
+    idx = idx or #notifications
+    for i = 1, idx, 1 do
+        local n = notifications[i]
+
+        -- `n` will not nil when there is too many notifications to fit in `s`
+        if n then
+            sum = sum + n.height + naughty.config.spacing
+        end
+    end
+    return sum
+end
 
 --- Evaluate desired position of the notification by index - internal
 --
 -- @param s Screen to use
 -- @param position top_right | top_left | bottom_right | bottom_left
---   | top_middle | bottom_middle
+--   | top_middle | bottom_middle | middle
 -- @param idx Index of the notification
 -- @param[opt] width Popup width.
 -- @param height Popup height
@@ -83,21 +106,16 @@ local function get_offset(s, position, idx, width, height)
     end
 
     -- calculate existing popups' height
-    local existing = 0
-    for i = 1, idx-1, 1 do
-        local n = current_notifications[s][position][i]
-
-        -- `n` will not nil when there is too many notifications to fit in `s`
-        if n then
-            existing = existing + n.height + naughty.config.spacing
-        end
-    end
+    local existing = get_total_heights(s, position, idx-1)
 
     -- calculate y
     if position:match("top") then
         v.y = ws.y + naughty.config.padding + existing
-    else
+    elseif position:match("bottom") then
         v.y = ws.y + ws.height - (naughty.config.padding + height + existing)
+    else
+        local total = get_total_heights(s, position)
+        v.y = ws.y + (ws.height - total) / 2 + naughty.config.padding + existing
     end
 
     -- Find old notification to replace in case there is not enough room.
