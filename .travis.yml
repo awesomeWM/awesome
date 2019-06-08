@@ -303,6 +303,7 @@ script:
         i=$((i+1))
         travis_fold_start "test_commit_${commit}_.$i.$n"
         echo "Testing commit $commit"
+        git reset --hard # Some files are updated when compiling...
         git checkout "$commit"
         git --no-pager show --stat
 
