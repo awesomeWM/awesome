@@ -165,6 +165,21 @@ file = {
     }
 }
 
+-- Wrap the module name for the CSS highlight.
+local function wrap_modname(str, item)
+    if (not item.module) or str:sub(1, #item.module.name+1) ~= item.module.name.."." then return str end
+
+    return "<span class='function_modname'>"..item.module.name..".</span>"
+        .. str:sub(#item.module.name+2, 9999)
+end
+
+-- Wrap the arguments for the CSS highlight.
+local function wrap_args(item)
+    if not item.args then return "" end
+    return "<span class='function_args'>"..item.args.."</span>"
+end
+
+
 -- Mimics the ldoc built-in method style, but better.
 --
 -- This custom renderer exists because using ldoc built-in method detection
@@ -177,7 +192,7 @@ local function render_methods(item)
         ret = ":"..ret
     end
 
-    return ret .. (item.args and " "..item.args or "")
+    return ret .. " " .. wrap_args(item)
 end
 
 -- Parse the magic parameters to type concention in something the template eats.
@@ -210,7 +225,6 @@ local function sanitize_type(item, ldoc)
     -- It has to be set, otherwise the table will have different col count.
     item.display_type = "<span class='summary_type'>N/A</span>"
 end
-
 local no_prefix = {
     property = true, signal = true, clientruleproperty = true,
     deprecatedproperty = true,
@@ -284,7 +298,7 @@ custom_display_name_handler = function(item, default_handler)
     end
 
     if item.type == "method" then
-        return render_methods(item)
+        ret = render_methods(item)
     end
 
 
@@ -300,8 +314,11 @@ custom_display_name_handler = function(item, default_handler)
 
     -- It isn't there by default.
     if add_args[item.type] then
-        ret = ret .. " " .. item.args
+        ret = ret .. " " .. wrap_args(item)
     end
+
+    -- Beautify.
+    ret = wrap_modname(ret, item)
 
     return ret
 end

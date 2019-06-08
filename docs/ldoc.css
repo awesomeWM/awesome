@@ -309,6 +309,12 @@ td.summarytype {
     text-align: right;
 }
 
+table.function_list .function_args /*.function_modname*/ {
+    color: #94b1ff;
+    text-decoration: underline;
+    text-decoration-color: #bbd3ff;
+}
+
 dl.function {
     margin-right: 15px;
     margin-left: 15px;
