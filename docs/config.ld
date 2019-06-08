@@ -60,9 +60,9 @@ new_type("function", "Functions", false, "Parameters")
 -- @function and its implicit cousin to be banned in the CI.
 new_type("staticfct", "Static module functions", false, "Parameters")
 -- Documentation for objects properties
-new_type("property", "Object properties", false, "Type")
+new_type("property", "Object properties", false, "Type constraints")
 -- Documentation for objects deprecated properties
-new_type("deprecatedproperty", "Deprecated object properties", false, "Type")
+new_type("deprecatedproperty", "Deprecated object properties", false, "Type constraints")
 -- Use a custom type for the methods to bypass the faulty ldoc built-in detection.
 -- (yes, the space after Methods *is* on purpose to avoid clashing with ldoc
 --  internal "methods" concept)
@@ -72,7 +72,7 @@ new_type("signal", "Signals", false, "Arguments")
 -- New type for signals connections
 new_type("signalhandler", "Request handlers", false, "Arguments")
 -- Allow objects to define a set of beautiful properties affecting them
-new_type("beautiful", "Theme variables", false, "Type")
+new_type("beautiful", "Theme variables", false, "Type constraints")
 -- Put deprecated methods in their own section
 new_type("deprecated", "Deprecated functions", false, "Parameters")
 -- For the legacy stateless layout related functions
@@ -180,6 +180,37 @@ local function render_methods(item)
     return ret .. (item.args and " "..item.args or "")
 end
 
+-- Parse the magic parameters to type concention in something the template eats.
+local function sanitize_type(item, ldoc)
+
+    for parm in ldoc.modules.iter(item.params) do
+        local t = item:type_of_param(parm)
+
+        -- Remove the value.
+        t = t:gsub("(\\[[^\\]]])","")
+        t = t:gsub("?","")
+
+        -- Add " or " between alternatives
+        t = t:gsub("|"," <i>or</i> ")
+
+        -- Fallback.
+        t = t == "" and parm or t
+        t = t == "" and "N/A" or t
+
+        item.display_type = "<span class='summary_type'>"..t.."</span>"
+
+        -- There is no value in repeating the type a second time.
+        if item.params.map[parm] == "" then
+            item.hide_params = true
+        end
+
+        if t ~= "N/A" then return end
+    end
+
+    -- It has to be set, otherwise the table will have different col count.
+    item.display_type = "<span class='summary_type'>N/A</span>"
+end
+
 local no_prefix = {
     property = true, signal = true, clientruleproperty = true,
     deprecatedproperty = true,
@@ -208,8 +239,22 @@ local add_args = {
     staticfct      = true,
 }
 
+-- Add a type column to the summary and type field in the description.
+local display_type = {
+    property           = true,
+    beautiful          = true,
+    field              = true,
+    deprecatedproperty = true,
+}
+
 custom_display_name_handler = function(item, default_handler)
     local ret = default_handler(item)
+
+    -- Edit the input so the template is notified.
+    if display_type[item.type] then
+        -- Punch a hole in the sandbox and inject the `ldoc` object.
+        item.sanitize_type = sanitize_type
+    end
 
     -- Remove the "namespace" from the signals and properties
     if no_prefix[item.type] then

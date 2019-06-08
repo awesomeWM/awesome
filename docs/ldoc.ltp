@@ -127,8 +127,15 @@
 <h2><a href="#$(no_spaces(kind))">$(kind)</a></h2>
 <table class="function_list">
 #  for item in items() do
+#   local dn = display_name(item)
+#   if item.sanitize_type then item.sanitize_type(item, ldoc) end
 	<tr>
-	<td class="name" $(nowrap)><a href="#$(item.name)">$(display_name(item))</a></td>
+#   if item.display_type then
+	<td class="shortname" $(nowrap)><a href="#$(item.name)">$(dn)</a></td>
+	<td class="summarytype" nowrap>$(item.display_type)</td>
+#   else
+	<td class="name" $(nowrap)><a href="#$(item.name)">$(dn)</a></td>
+#   end
 	<td class="summary">$(M(item.summary,item))</td>
 	</tr>
 #  end -- for items
@@ -165,6 +172,9 @@
     <dt>
     <a name = "$(item.name)"></a>
     <strong>$(display_name(item))</strong>
+#   if item.display_type then
+    <span class="proptype">($(item.display_type))</span>
+#   end
 #   if ldoc.prettify_files and ldoc.is_file_prettified[item.module.file.filename] then
     <a style="float:right;" href="$(ldoc.source_ref(item))">line $(item.lineno)</a>
 #  end
@@ -187,7 +197,7 @@
 #    end -- iter tags
 #   end
 
-#  if show_parms and item.params and #item.params > 0 then
+#  if show_parms and item.params and #item.params > 0 and not item.hide_params then
 #    local subnames = module.kinds:type_of(item).subnames
 #    if subnames then
     <h3>$(subnames):</h3>

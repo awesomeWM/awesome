@@ -290,6 +290,25 @@ table.module_list td.summary, table.function_list td.summary {
     border-left-width: 0px;
 }
 
+table.function_list td.shortname {
+    background-color: white;
+    border-right-width: 0px;
+}
+
+.proptype {
+    padding-right: 20px;
+    float: right;
+}
+
+td.summarytype {
+    background-color: white;
+    color: #a4c7ff;
+    font-size: 85%;
+    border-left: none;
+    border-right: none;
+    text-align: right;
+}
+
 dl.function {
     margin-right: 15px;
     margin-left: 15px;
