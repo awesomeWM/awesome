@@ -42,7 +42,7 @@ local function fmax(p, fs)
 end
 
 --- Maximized layout.
--- @clientlayout awful.layout.suit.max.name
+-- @clientlayout awful.layout.suit.max
 max.name = "max"
 function max.arrange(p)
     return fmax(p, false)
