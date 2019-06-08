@@ -214,12 +214,20 @@ local notification = {}
 -- @see shape
 
 --- Function to run on left click.
--- @property run
+--
+-- Use the signals rather than this.
+--
+-- @deprecatedproperty run
 -- @param function
+-- @see destroyed
 
 --- Function to run when notification is destroyed.
--- @property destroy
+--
+-- Use the signals rather than this.
+--
+-- @deprecatedproperty destroy
 -- @param function
+-- @see destroyed
 
 --- Table with any of the above parameters.
 -- args will override ones defined
