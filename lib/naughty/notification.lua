@@ -199,11 +199,11 @@ local notification = {}
 --@DOC_naughty_shape_EXAMPLE@
 --
 -- @property shape
--- @param gears.shape
+-- @tparam gears.shape shape
 
 --- Widget opacity.
 -- @property opacity
--- @param number From 0 to 1
+-- @tparam number opacity Between 0 to 1.
 
 --- Widget margin.
 --

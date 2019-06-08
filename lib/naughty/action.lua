@@ -6,7 +6,7 @@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2019 Emmanuel Lepage Vallee
--- @classmod naughty.action
+-- @coreclassmod naughty.action
 ---------------------------------------------------------------------------
 local gtable  = require("gears.table" )
 local gobject = require("gears.object")
@@ -101,6 +101,10 @@ for _, prop in ipairs { "name", "icon", "notification", "icon_only" } do
 end
 
 --- Execute this action.
+--
+-- This only emits the `invoked` signal.
+--
+-- @method invoke
 function action:invoke()
     assert(self._private.notification,
         "Cannot invoke an action without a notification")
