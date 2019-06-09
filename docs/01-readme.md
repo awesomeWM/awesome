@@ -10,7 +10,7 @@ After extracting the dist tarball, run:
 
     make
 
-This will create a build directory, run cmake in it and build Awesome.
+This will create a build directory, run `cmake` in it and build Awesome.
 
 After building is finished, you can either install via `make install`:
 
@@ -25,7 +25,7 @@ or by auto-generating a .deb or .rpm package, for easy removal later on:
     sudo rpm -Uvh awesome-x.y.z.rpm
 
 NOTE: Awesome uses [`cmake`](https://cmake.org) to build. In case you want to
-pass arguments to cmake, please use the `CMAKE_ARGS` environment variable. For
+pass arguments to `cmake`, please use the `CMAKE_ARGS` environment variable. For
 instance:
 
     CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/opt/awesome" make
@@ -108,7 +108,7 @@ Additionally, the following optional dependencies exist:
 ## Running Awesome
 
 You can directly select Awesome from your display manager. If not, you can
-add the following line to your .xinitrc to start Awesome using startx
+add the following line to your `.xinitrc` to start Awesome using `startx`
 or to `.xsession` to start Awesome using your display manager:
 
     exec awesome
@@ -142,9 +142,9 @@ You can call `awesome` with `gdb` like this:
 
     DISPLAY=:2 gdb awesome
 
-Then in gdb set any args and run it:
+Then in `gdb` set any arguments and run it:
 
-    (gdb) set arg --replace
+    (gdb) set args --replace
     (gdb) run
 
 ## Asking questions
