@@ -310,10 +310,17 @@ custom_display_name_handler = function(item, default_handler)
     -- just redundant.
     ret = ret:gsub("([^:]*)(:[^:])","%2")
 
+    -- This will happen when @section(s) are manually added. Another useless
+    -- attempt by ldoc at making magic. This ignore the case where the `.` in
+    -- the module name matches too much simply because it doesn't happen.
+    if item.module then
+        ret = ret:gsub(":("..item.module.name..".)", ":")
+    end
+
     -- Undocumented API to get rid of `module.rounded_rect` rather than
     -- `gears.shape.rounded_rect`
     if ret:sub(1, 7) == "module." and module then
-        return ret:gsub("^module", item.module.name)
+        ret =  ret:gsub("^module", item.module.name)
     end
 
     -- It isn't there by default.
