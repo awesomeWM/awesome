@@ -179,6 +179,6 @@ Online documentation is available [here](https://awesomewm.org/apidoc/).
 
 ## License
 
-The project is licensed under GNU General Publice License v2 or later.
+The project is licensed under GNU General Public License v2 or later.
 You can read it online at ([v2](http://www.gnu.org/licenses/gpl-2.0.html)
 or [v3](http://www.gnu.org/licenses/gpl.html)).
