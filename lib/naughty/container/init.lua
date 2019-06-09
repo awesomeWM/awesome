@@ -1,10 +1,9 @@
 ---------------------------------------------------------------------------
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
--- @copyright 2017 Emmanuel Lepage Vallee
--- @module naughty.layout
+-- @copyright 2019 Emmanuel Lepage Vallee
+-- @module naughty.container
 ---------------------------------------------------------------------------
 
 return {
-    legacy = require( "naughty.layout.legacy" );
-    box    = require( "naughty.layout.box"    );
+    background = require( "naughty.container.background" );
 }

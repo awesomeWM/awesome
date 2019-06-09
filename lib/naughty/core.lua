@@ -122,6 +122,10 @@ gtable.crush(naughty, require("naughty.constants"))
 -- @property active
 -- @param table
 
+--- True when there is a handler connected to `request::display`.
+-- @property has_display_handler
+-- @param boolean
+
 local properties = {
     suspended         = false,
     expiration_paused = false
@@ -346,6 +350,10 @@ function naughty.get_active()
     return naughty._active
 end
 
+function naughty.get_has_display_handler()
+    return conns["request::display"] and #conns["request::display"] > 0 or false
+end
+
 --- Set new notification timeout.
 --
 -- This function is deprecated, use `notification:reset_timeout(new_timeout)`.
@@ -454,7 +462,7 @@ end
 
 --- Emitted when a notification has to be displayed.
 --
--- To add an handler, use:
+-- To add a handler, use:
 --
 --    naughty.connect_signal("request::display", function(notification, args)
 --        -- do something

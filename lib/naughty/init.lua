@@ -10,7 +10,11 @@ if dbus then
 end
 
 naughty.action = require("naughty.action")
+naughty.list = require("naughty.list")
 naughty.layout = require("naughty.layout")
+naughty.widget = require("naughty.widget")
+naughty.container = require("naughty.container")
+naughty.action = require("naughty.action")
 naughty.notification = require("naughty.notification")
 
 return naughty

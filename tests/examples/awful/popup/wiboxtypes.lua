@@ -5,6 +5,7 @@
 require("_date")
 local awful     = require("awful")
 local gears     = require("gears")
+local naughty   = require("naughty")
 local wibox     = require("wibox")
 local beautiful = require("beautiful") --DOC_HIDE
 local look      = require("_default_look")
@@ -136,6 +137,7 @@ local function create_info(text, x, y, width, height)
                 text = text,
                 align = "center",
                 ellipsize = "none",
+                wrap = "word",
                 widget = wibox.widget.textbox
             },
             margins = 10,
@@ -170,17 +172,29 @@ local function create_line(x1, y1, x2, y2)
     }, {x=x1, y=y1})
 end
 
-create_info("awful.wibar", 200, 50, 100, 30)
+naughty.connect_signal("request::display", function(n)
+    naughty.layout.box {notification = n}
+end)
+
+naughty.notification {
+    title    = "A notification",
+    message  = "With a message! ....",
+    position = "top_middle",
+}
+
+create_info("awful.wibar", 100, 50, 100, 30)
 create_info("awful.titlebar", 250, 350, 100, 30)
 create_info("awful.tooltip", 30, 130, 100, 30)
 create_info("awful.popup", 450, 240, 100, 30)
+create_info("naughty.layout.box", 255, 110, 130, 30)
 create_info("Standard `wibox`", 420, 420, 130, 30)
 
-create_line(250, 10, 250, 55)
+create_line(150, 10, 150, 55)
 create_line(75, 100, 75, 135)
 create_line(545, 432, 575, 432)
 create_line(500, 165, 500, 245)
 create_line(390, 250, 450, 250)
 create_line(190, 365, 255, 365)
+create_line(320, 60, 320, 110)
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

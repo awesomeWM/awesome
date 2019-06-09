@@ -6,7 +6,7 @@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2019 Emmanuel Lepage Vallee
--- @classmod naughty.action
+-- @coreclassmod naughty.action
 ---------------------------------------------------------------------------
 local gtable  = require("gears.table" )
 local gobject = require("gears.object")
@@ -42,6 +42,10 @@ local action = {}
 --- The action icon.
 -- @property icon
 -- @tparam gears.surface|string icon
+
+--- If the action should hide the label and only display the icon.
+-- @property icon_only
+-- @param[opt=false] boolean
 
 --- The notification.
 -- @property notification
@@ -80,7 +84,7 @@ function action:set_position(value)
     --TODO make sure the position is unique
 end
 
-for _, prop in ipairs { "name", "icon", "notification" } do
+for _, prop in ipairs { "name", "icon", "notification", "icon_only" } do
     action["get_"..prop] = function(self)
         return self._private[prop]
     end
@@ -97,6 +101,10 @@ for _, prop in ipairs { "name", "icon", "notification" } do
 end
 
 --- Execute this action.
+--
+-- This only emits the `invoked` signal.
+--
+-- @method invoke
 function action:invoke()
     assert(self._private.notification,
         "Cannot invoke an action without a notification")

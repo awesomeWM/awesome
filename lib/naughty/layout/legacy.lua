@@ -13,6 +13,11 @@
 --
 --@DOC_naughty_actions_EXAMPLE@
 --
+-- Use the `naughty.notification.position` property to control where the popup
+-- is located.
+--
+--@DOC_awful_notification_corner_EXAMPLE@
+--
 -- @author koniu &lt;gkusnierz@gmail.com&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2008 koniu
@@ -279,23 +284,10 @@ end
 
 naughty.connect_signal("destroyed", cleanup)
 
---- The default notification GUI handler.
---
--- To disable this handler, use:
---
---    naughty.disconnect_signal(
---        "request::display", naughty.default_notification_handler
---    )
---
--- It looks like:
---
---@DOC_naughty_actions_EXAMPLE@
---
--- @tparam table notification The `naughty.notification` object.
--- @tparam table args Any arguments passed to the `naughty.notify` function,
---  including, but not limited to all `naughty.notification` properties.
--- @signalhandler naughty.default_notification_handler
 function naughty.default_notification_handler(notification, args)
+    -- This is a fallback for users whose config doesn't have the newer
+    -- `request::display` section.
+    if naughty.has_display_handler then return end
 
     -- If request::display is called more than once, simply make sure the wibox
     -- is visible.
@@ -415,8 +407,14 @@ function naughty.default_notification_handler(notification, args)
             local action_width = w + 2 * margin
 
             actionmarginbox:buttons(gtable.join(
-                button({ }, 1, function() action:invoke() end),
-                button({ }, 3, function() action:invoke() end)
+                button({ }, 1, function()
+                    action:invoke()
+                    notification:destroy()
+                end),
+                button({ }, 3, function()
+                    action:invoke()
+                    notification:destroy()
+                end)
             ))
             actionslayout:add(actionmarginbox)
 
@@ -561,4 +559,4 @@ function naughty.default_notification_handler(notification, args)
     end
 end
 
-naughty.connect_signal("request::display", naughty.default_notification_handler)
+naughty.connect_signal("request::fallback", naughty.default_notification_handler)

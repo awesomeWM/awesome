@@ -28,6 +28,15 @@ configurable rules.
 
 @DOC_layout_WIDGET_LIST@
 
+### Other
+
+Notifications also have their own widgets.
+
+<img src="../images/AUTOGEN_wibox_nwidget_default.svg" />
+
+More information about the notification widgets can be found on the
+`naughty.notification` documentation page.
+
 ### The different type of widget boxes (Wibox)
 
 The Awesome API uses the word "wibox" (widget box) to describe an area of the
@@ -53,6 +62,9 @@ positioning, relative positioning, and manual positioning.
 
 The `awful.tooltip` is a very simple `wibox` that allows to display text next
 to an object such as the mouse.
+
+The `naughty.layout.box` allows to provide custom widgets to use within the
+notifications.
 
 Finally, the `awful.titlebar`, while not technically a real `wibox`, acts
 exactly the same way and allows to attach widgets on each side of clients.
@@ -424,3 +436,27 @@ Code:
 
     s.mywibox : setup (three_circle)
 
+### Instantiation rules
+
+Whenever it can, Awesome tries to be asynchronous. This can take various form
+depending on the situation. For example, the `connect_signal` method allows to
+execute code when an event arrives. `awful.screen.connect_for_each_screen` also
+allows to instantiate various elements when a new screen is added. In the later
+case, it is why some widgets are added as properties to other objects instead of
+being global variables like in previous versions of Awesome.
+
+However, there is a case where this isn't enough and another abstract widget has
+to be used. This concept is called the `widget_template` and is an optional
+property of many widgets such as the `awful.widget.taglist`,
+`awful.widget.tasklist` and `naughty.layout.box`. These templates are a
+**table** using the exact same syntax as the declarative widgets, but without
+the `wibox.widget` prefix in front of the curly braces. These templates
+represents future widgets that will be created by their parent widget. This is
+necessary for three reasons:
+
+ * The widget must create many instances of the template at different points in
+   time.
+ * The widget data is only partially available and other fields must be set
+   at a later time (by the parent widget).
+ * The code is highly redundant and some of the logic is delegated to the parent
+   widget to simplify everything.
