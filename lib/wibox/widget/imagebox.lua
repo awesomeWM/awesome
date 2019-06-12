@@ -21,6 +21,11 @@ function imagebox:draw(_, cr, width, height)
     if not self._private.image then return end
     if width == 0 or height == 0 then return end
 
+    -- Set the clip
+    if self._private.clip_shape then
+        cr:clip(self._private.clip_shape(cr, width, height, unpack(self._private.clip_args)))
+    end
+
     if not self._private.resize_forbidden then
         -- Let's scale the image so that it fits into (width, height)
         local w = self._private.image:get_width()
@@ -30,11 +35,6 @@ function imagebox:draw(_, cr, width, height)
         if aspect > aspect_h then aspect = aspect_h end
 
         cr:scale(aspect, aspect)
-    end
-
-    -- Set the clip
-    if self._private.clip_shape then
-        cr:clip(self._private.clip_shape(cr, width, height, unpack(self._private.clip_args)))
     end
 
     cr:set_source_surface(self._private.image, 0, 0)
