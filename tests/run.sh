@@ -23,16 +23,19 @@ Usage: $0 [OPTION]... [FILE]...
 Options:
   -v: verbose mode
   -W: warnings become errors
+  -m: Use --screen off
   -h: show this help
 EOF
     exit "$1"
 }
 fail_on_warning=
+manual_screens=
 verbose=${VERBOSE:-0}
-while getopts vWh opt; do
+while getopts vWmh opt; do
     case $opt in
         v) verbose=1 ;;
         W) fail_on_warning=1 ;;
+        m) manual_screens=" --screen off" ;;
         h) usage 0 ;;
         *) usage 64 ;;
     esac
@@ -105,7 +108,9 @@ fi
 
 # Add test dir (for _runner.lua).
 # shellcheck disable=SC2206
-awesome_options=($AWESOME_OPTIONS --search lib --search "$this_dir")
+awesome_options=($AWESOME_OPTIONS $manual_screens --search lib --search "$this_dir")
+
+awesome_options+=(--screen off)
 
 # Cleanup on errors / aborting.
 cleanup() {
@@ -172,6 +177,7 @@ fi
 # Start awesome.
 start_awesome() {
     cd "$build_dir"
+
     # Kill awesome after $TEST_TIMEOUT seconds (e.g. for errors during test setup).
     # SOURCE_DIRECTORY is used by .luacov.
     DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" \

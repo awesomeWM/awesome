@@ -50,14 +50,14 @@ addons:
 
 jobs:
   include:
-    - env: LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls
+    - env: LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls MANUAL_SCREENS=1
       addons:
         apt:
           packages:
             - *BASE_PACKAGES
             - liblua5.2-dev
             - lua5.2
-    - env: LUA=5.3 LUANAME=lua5.3 DO_COVERAGE=codecov
+    - env: LUA=5.3 LUANAME=lua5.3 DO_COVERAGE=codecov MANUAL_SCREENS=1
       addons:
         apt:
           packages:
@@ -229,7 +229,8 @@ install:
       return 0
     }
 script:
-  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true -D DO_COVERAGE=$DO_COVERAGE -D CMAKE_C_FLAGS=-Werror"
+  - if [ "$MANUAL_SCREENS" != "1" ]; then export MANUAL_SCREENS=0; fi
+  - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -D LUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -D STRICT_TESTS=true -D DO_COVERAGE=$DO_COVERAGE -D TEST_MANUAL_SCREENS=$MANUAL_SCREENS -D CMAKE_C_FLAGS=-Werror"
   - |
     if [ "$EMPTY_THEME_WHILE_LOADING" = 1 ]; then
       # Break beautiful so that trying to access the theme before beautiful.init() causes an error
