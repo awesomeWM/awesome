@@ -1,5 +1,6 @@
 dist: xenial
 language: c
+cache: ccache
 
 # Build only master and stable branches.  Other branches go through PRs.
 branches:
