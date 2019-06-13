@@ -46,6 +46,8 @@ OPTIONS
     Add a directory to the library search path.
 *-a*, *--no-argb*::
     Don't use ARGB visuals.
+*-m*, *--screen*:: 'off' or 'on'::
+    Use "off" to execute rc.lua before creating the screens.
 *-r*, *--replace*::
     Replace an existing window manager.
 
