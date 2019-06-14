@@ -229,6 +229,10 @@ install:
       travis_fold_end
       return 0
     }
+
+before_script:
+  - ccache --zero-stats
+
 script:
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -DLUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -DSTRICT_TESTS=true -D DO_COVERAGE=$DO_COVERAGE -D CMAKE_C_FLAGS=-Werror"
   - |
@@ -334,3 +338,6 @@ after_success:
       test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
       luacov-coveralls --verbose --merge
     fi
+
+before_cache:
+  - ccache -s
