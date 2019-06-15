@@ -21,7 +21,7 @@ end
 --
 -- @param obj An object that should have a .screen property.
 local function check_focus(obj)
-    if not obj.screen.valid then return end
+    if (not obj.screen) or not obj.screen.valid then return end
     -- When no visible client has the focus...
     if not client.focus or not client.focus:isvisible() then
         local c = aclient.focus.history.get(screen[obj.screen], 0, filter_sticky)

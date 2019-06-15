@@ -99,6 +99,9 @@ local delayed_arrange = {}
 -- @staticfct awful.layout.get
 function layout.get(screen)
     screen = screen or capi.mouse.screen
+
+    if not screen then return nil end
+
     local t = get_screen(screen).selected_tag
     return tag.getproperty(t, "layout") or layout.suit.floating
 end
@@ -308,7 +311,7 @@ capi.screen.connect_signal("padding", layout.arrange)
 
 capi.client.connect_signal("focus", function(c)
     local screen = c.screen
-    if layout.get(screen).need_focus_update then
+    if screen and layout.get(screen).need_focus_update then
         layout.arrange(screen)
     end
 end)
