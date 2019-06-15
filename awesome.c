@@ -912,8 +912,14 @@ main(int argc, char **argv)
     ewmh_init_lua();
 
     /* Parse and run configuration file before adding the screens */
-    if (globalconf.no_auto_screen && !luaA_parserc(&xdg, confpath))
-        fatal("couldn't find any rc file");
+    if (globalconf.no_auto_screen)
+    {
+        /* Disable automatic screen creation, awful.screen has a fallback */
+        globalconf.ignore_screens = true;
+
+        if(!luaA_parserc(&xdg, confpath))
+            fatal("couldn't find any rc file");
+    }
 
     /* init screens information */
     screen_scan();
