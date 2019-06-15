@@ -190,7 +190,7 @@ install:
           # Install gcovr (once).
           (
             pyenv shell 3.7
-            pip install --quiet --user gcovr
+            pip install --quiet --user git+https://github.com/gcovr/gcovr@master#egg=gcovr
             ~/.local/bin/gcovr --version
           )
         fi
