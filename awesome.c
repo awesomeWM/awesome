@@ -131,6 +131,8 @@ awesome_atexit(bool restart)
     /* Close Lua */
     lua_close(L);
 
+    screen_cleanup();
+
     /* X11 is a great protocol. There is a save-set so that reparenting WMs
      * don't kill clients when they shut down. However, when a focused windows
      * is saved, the focus will move to its parent with revert-to none.
