@@ -397,6 +397,8 @@ end
 -- @treturn table An opaque object that can be returned from `:layout()`.
 -- @staticfct wibox.widget.base.place_widget_via_matrix
 function base.place_widget_via_matrix(widget, mat, width, height)
+    assert(width >= 0, "A widget's width cannot be negative: " ..  tostring(width))
+    assert(height >= 0, "A widget's height cannot be negative: " ..  tostring(height))
     return {
         _widget = widget,
         _width = width,
