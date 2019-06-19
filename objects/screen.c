@@ -378,6 +378,7 @@ typedef struct viewport_t
     int y;
     int width;
     int height;
+    int id;
     struct viewport_t *next;
     screen_t *screen;
     screen_output_array_t outputs;
@@ -385,6 +386,7 @@ typedef struct viewport_t
 
 static viewport_t *first_screen_viewport = NULL;
 static viewport_t *last_screen_viewport = NULL;
+static int screen_area_gid = 1;
 
 static void
 luaA_viewport_get_outputs(lua_State *L, viewport_t *a)
@@ -458,6 +460,11 @@ luaA_viewports(lua_State *L)
         luaA_viewport_get_outputs(L, a);
         lua_settable(L, -3);
 
+        /* Add an identifier to better detect when screens are removed */
+        lua_pushstring(L, "id");
+        lua_pushinteger(L, a->id);
+        lua_settable(L, -3);
+
         lua_rawseti(L, -2, count++);
     } while ((a = a->next));
 
@@ -499,6 +506,7 @@ viewport_add(lua_State *L, int x, int y, int w, int h)
     node->y      = y;
     node->width  = w;
     node->height = h;
+    node->id     = screen_area_gid++;
     node->next   = NULL;
     node->screen = NULL;
     node->marked = true;
