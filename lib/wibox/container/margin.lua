@@ -44,7 +44,12 @@ function margin:layout(_, width, height)
         local w = self._private.right
         local h = self._private.bottom
 
-        return { base.place_widget_at(self._private.widget, x, y, width - x - w, height - y - h) }
+        local resulting_width = width - x - w
+        local resulting_height = height - y - h
+
+        if resulting_width > 0 and resulting_height > 0 then
+            return { base.place_widget_at(self._private.widget, x, y, resulting_width, resulting_height) }
+        end
     end
 end
 
