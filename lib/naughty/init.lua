@@ -6,7 +6,7 @@
 
 local naughty = require("naughty.core")
 local gdebug = require("gears.debug")
-local capi = {awesome = awesome}
+local capi = {awesome = awesome, screen = screen}
 if dbus then
     naughty.dbus = require("naughty.dbus")
 end
@@ -31,7 +31,7 @@ naughty.notification = require("naughty.notification")
 --    screen.connect_signal("scanned", function() foobar() end)
 --
 local function screen_fallback()
-    if screen.count() == 0 then
+    if capi.screen.count() == 0 then
         gdebug.print_warning("An error occurred before a scrren was added")
 
         -- Private API to scan for screens now.
@@ -44,10 +44,11 @@ local function screen_fallback()
         if #viewports > 0 then
             for _, viewport in ipairs(viewports) do
                 local geo = viewport.geometry
-                screen.fake_add(geo.x, geo.y, geo.width, geo.height)
+                local s = capi.screen.fake_add(geo.x, geo.y, geo.width, geo.height)
+                s.outputs = viewport.outputs
             end
         else
-            screen.fake_add(0, 0, 640, 480)
+            capi.screen.fake_add(0, 0, 640, 480)
         end
     end
 end

@@ -130,8 +130,16 @@
  * Each viewport in the list corresponds to a **physical** screen rectangle, which
  * is **not** the `viewports` property of the `screen` objects.
  *
+ * Each entry in the `viewports` entry has the following keys:
+ *
+ * * `geometry` *(table)*: A table with an `x`, `y`, `width` and `height` keys.
+ * * `outputs` *(table)*: All outputs sharing this viewport.
+ * * `maximum_dpi` *(number)*: The DPI of the most dense output.
+ * * `minimum_dpi` *(number)*: The DPI of the least dense output.
+ * * `preferred_dpi` *(number)*: The optimal DPI.
+ *
  * @signal property::viewports
- * @tparam table viewports
+ * @tparam table viewports A table containing all physical viewports.
  * @see automatic_factory
  */
 
@@ -200,24 +208,6 @@
  * @property index
  * @param integer
  * @see screen
- */
-
-/**
- * If RANDR information is available, a list of outputs
- *   for this screen and their size in mm.
- *
- * Please note that the table content may vary.
- *
- * **Signal:**
- *
- *  * *property::outputs*
- *
- * **Immutable:** true
- * @property outputs
- * @param table
- * @tfield table table.name A table with the screen name as key (like `eDP1` on a laptop)
- * @tfield integer table.name.mm_width The screen physical width
- * @tfield integer table.name.mm_height The screen physical height
  */
 
 /**
@@ -413,6 +403,10 @@ luaA_viewport_get_outputs(lua_State *L, viewport_t *a)
         lua_pushstring(L, output->name);
         lua_settable(L, -3);
 
+        lua_pushstring(L, "viewport_id");
+        lua_pushinteger(L, a->id);
+        lua_settable(L, -3);
+
         /* Add to the outputs */
         lua_rawseti(L, -2, count++);
     }
@@ -482,7 +476,7 @@ viewports_notify(lua_State *L)
 
     luaA_viewports(L);
 
-    luaA_class_emit_signal(L, &screen_class, "property::viewports", 1);
+    luaA_class_emit_signal(L, &screen_class, "property::_viewports", 1);
 }
 
 static viewport_t *
@@ -1084,7 +1078,7 @@ screen_modified(screen_t *existing_screen, screen_t *other_screen)
 
         if(outputs_changed) {
             luaA_object_push(L, existing_screen);
-            luaA_object_emit_signal(L, -1, "property::outputs", 0);
+            luaA_object_emit_signal(L, -1, "property::_outputs", 0);
             lua_pop(L, 1);
         }
     }
@@ -1795,7 +1789,7 @@ screen_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_screen_get_index,
                             NULL);
-    luaA_class_add_property(&screen_class, "outputs",
+    luaA_class_add_property(&screen_class, "_outputs",
                             NULL,
                             (lua_class_propfunc_t) luaA_screen_get_outputs,
                             NULL);

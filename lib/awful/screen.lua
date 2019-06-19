@@ -13,6 +13,7 @@ local capi =
     screen = screen,
     client = client,
     awesome = awesome,
+    root = root,
 }
 local gdebug = require("gears.debug")
 local gmath = require("gears.math")
@@ -260,6 +261,58 @@ function screen.object.set_padding(self, padding)
     end
 end
 
+--- A list of outputs for this screen with their size in mm.
+--
+-- Please note that the table content may vary. In some case, it might also be
+-- empty.
+--
+-- An easy way to check if a screen is the laptop screen is usually:
+--
+--    if s.outputs["LVDS-1"] then
+--        -- do something
+--    end
+--
+-- **Signal:**
+--
+--  * *property::outputs*
+--
+-- **Immutable:** true
+-- @property outputs
+-- @param table
+-- @tfield table table.name A table with the screen name as key (like `eDP1` on a laptop)
+-- @tfield integer table.mm_width The screen physical width.
+-- @tfield integer table.mm_height The screen physical height.
+-- @tfield integer table.name The output name.
+-- @tfield integer table.viewport_id The identifier of the viewport this output
+--  corresponds to.
+
+function screen.object.get_outputs(s)
+    local ret = {}
+
+    local outputs = s._custom_outputs
+        or (s.data.viewport and s.data.viewport.outputs or s._outputs)
+
+    -- The reason this exists is because output with name as keys is very
+    -- convenient for quick name lookup by the users, but inconvenient in
+    -- the lower layers since knowing the output count (using #) is better.
+    for k, v in ipairs(outputs) do
+        ret[v.name or k] = v
+    end
+
+    return ret
+end
+
+function screen.object.set_outputs(self, outputs)
+    self._custom_outputs = outputs
+    self:emit_signal("property::outputs", screen.object.get_outputs(self))
+end
+
+capi.screen.connect_signal("property::_outputs", function(s)
+    if not s._custom_outputs then
+        s:emit_signal("property::outputs", screen.object.get_outputs(s))
+    end
+end)
+
 --- Get the preferred screen in the context of a client.
 --
 -- This is exactly the same as `awful.screen.focused` except that it avoids
@@ -486,7 +539,7 @@ end
 function screen.object.get_tags(s, unordered)
     local tags = {}
 
-    for _, t in ipairs(root.tags()) do
+    for _, t in ipairs(capi.root.tags()) do
         if get_screen(t.screen) == s then
             table.insert(tags, t)
         end
@@ -560,75 +613,32 @@ function screen.set_auto_dpi_enabled(enabled)
     data.autodpi = enabled
 end
 
-
 --- The number of pixels per inch of the screen.
+--
+-- The default DPI comes from the X11 server. In most case, it will be 96. If
+-- `autodpi` is set to `true` on the screen, it will use the least dense dpi
+-- from the screen outputs. Most of the time, screens only have a single output,
+-- however it will have two (or more) when "clone mode" is used (eg, when a
+-- screen is duplicated on a projector).
+--
 -- @property dpi
 -- @param number the DPI value.
 
-local xft_dpi, fallback_dpi
+--- The lowest density DPI from all of the (physical) outputs.
+-- @property minimum_dpi
+-- @param number the DPI value.
 
-local function get_fallback()
-    local mm_per_inch = 25.4
+--- The highest density DPI from all of the (physical) outputs.
+-- @property maximum_dpi
+-- @param number the DPI value.
 
-    -- Following Keith Packard's whitepaper on Xft,
-    -- https://keithp.com/~keithp/talks/xtc2001/paper/xft.html#sec-editing
-    -- the proper fallback for Xft.dpi is the vertical DPI reported by
-    -- the X server. This will generally be 96 on Xorg, unless the user
-    -- has configured it differently
-    if root and not fallback_dpi then
-        local _, h = root.size()
-        local _, hmm = root.size_mm()
-        fallback_dpi = hmm ~= 0 and h * mm_per_inch / hmm
-    end
-
-    return fallback_dpi or 96
-end
-
-function screen.object.get_dpi(s)
-    local mm_per_inch = 25.4
-
-    if s.data.dpi or s.data.dpi_cache then
-        return s.data.dpi or s.data.dpi_cache
-    end
-
-    -- Xft.dpi is explicit user configuration, so honor it
-    if not xft_dpi and awesome and awesome.xrdb_get_value then
-        xft_dpi = tonumber(awesome.xrdb_get_value("", "Xft.dpi")) or false
-    end
-
-    if xft_dpi then
-        s.data.dpi_cache = xft_dpi
-        return s.data.dpi_cache
-    end
-
-    if not data.autodpi then
-        s.data.dpi_cache = get_fallback()
-        return s.data.dpi_cache
-    end
-
-    -- Try to compute DPI based on outputs (use the minimum)
-    local dpi = nil
-    local geo = s.geometry
-    for _, o in pairs(s.outputs) do
-        -- Ignore outputs with width/height 0
-        if o.mm_width ~= 0 and o.mm_height ~= 0 then
-            local dpix = geo.width * mm_per_inch / o.mm_width
-            local dpiy = geo.height * mm_per_inch / o.mm_height
-            dpi = math.min(dpix, dpiy, dpi or dpix)
-        end
-    end
-    if dpi then
-        s.data.dpi_cache = dpi
-        return dpi
-    end
-
-    s.data.dpi_cache = get_fallback()
-    return s.data.dpi_cache
-end
-
-function screen.object.set_dpi(s, dpi)
-    s.data.dpi = dpi
-end
+--- The preferred DPI from all of the (physical) outputs.
+--
+-- This is computed by normalizing all output to fill the area, then picking
+-- the lowest of the resulting virtual DPIs.
+--
+-- @property preferred_dpi
+-- @param number the DPI value.
 
 --- Emitted when a new screen is added.
 --
@@ -651,6 +661,177 @@ end
 --
 -- @signal request::wallpaper
 -- @tparam screen s The screen object.
+
+--- When a new (physical) screen area has been added.
+--
+-- Important: This only exists when Awesome is started with `--screen off`.
+-- Please also note that this doesn't mean it will appear when a screen is
+-- physically plugged. Depending on the configuration a tool like `arandr` or
+-- the `xrandr` command is needed.
+--
+-- The default handler will create a screen that fills the area.
+--
+-- To disconnect the default handler, use:
+--
+--    screen.disconnect_signal(
+--        "request::create", awful.screen.create_screen_handler
+--    )
+--
+-- @signal request::create
+-- @tparam table viewport
+-- @tparam table viewport.geometry A table with `x`, `y`, `width` and `height`
+--  keys.
+-- @tparam table viewport.outputs A table with the monitor name and possibly the
+--  `mm_width` and `mm_height` values if they are available.
+-- @tparam number viewport.id An identifier for this viewport (by pixel
+--  resolution). It
+--  will not change when outputs are modified, but will change when the
+--  resolution changes. Note that if it fully disappear, the next time an
+--  viewport with the same resolution appears, it will have a different `id`.
+-- @tparam number viewport.minimum_dpi The least dense DPI.
+-- @tparam number viewport.maximum_dpi The most dense DPI.
+-- @tparam number viewport.preferred_dpi The relative least dense DPI.
+-- @tparam table args
+-- @tparam string args.context Why was this signal sent.
+-- @see outputs
+-- @see awful.screen.create_screen_handler
+
+--- When a physical monitor viewport has been removed.
+--
+-- Important: This only exists when Awesome is started with `--screen off`.
+--
+-- If you replace the default handler, it is up to you to find the screen(s)
+-- associated with this viewport.
+--
+-- To disconnect the default handler, use:
+--
+--    screen.disconnect_signal(
+--        "request::remove", awful.screen.remove_screen_handler
+--    )
+--
+-- @signal request::remove
+-- @tparam table viewport
+-- @tparam table viewport.geometry A table with `x`, `y`, `width` and `height`
+--  keys.
+-- @tparam table viewport.outputs A table with the monitor name and possibly the
+--  `mm_width` and `mm_height` values if they are available.
+-- @tparam number viewport.id An identifier for this viewport (by pixel
+--  resolution). It will not change when outputs are modified, but will change
+--  when the resolution changes. Note that if it fully disappear, the next time
+--  an viewport with the same resolution appears, it will have a different `id`.
+-- @tparam number viewport.minimum_dpi The least dense DPI.
+-- @tparam number viewport.maximum_dpi The most dense DPI.
+-- @tparam number viewport.preferred_dpi The relative least dense DPI.
+-- @tparam table args
+-- @tparam string args.context Why was this signal sent.
+-- @see awful.screen.remove_screen_handler
+
+--- When a physical viewport resolution has changed or it has been replaced.
+--
+-- Important: This only exists when Awesome is started with `--screen off`.
+--
+-- Note that given the viewports are not the same, the `id` wont be the same.
+-- Also note that if multiple new viewports fit within a single "old" viewport,
+-- the resized screen will be the one with the largest total overlapping
+-- viewport (`intersection.width*intersection.height`), regardless of the
+-- outputs names.
+--
+-- To disconnect the default handler, use:
+--
+--    screen.disconnect_signal(
+--        "request::resize", awful.screen.resize_screen_handler
+--    )
+--
+-- @signal request::resize
+-- @tparam table old_viewport
+-- @tparam table old_viewport.geometry A table with `x`, `y`, `width` and
+--  `height` keys.
+-- @tparam table old_viewport.outputs A table with the monitor name and
+--  possibly the `mm_width` and `mm_height` values if they are available.
+-- @tparam number old_viewport.id An identifier for this viewport (by pixel
+--  resolution). It will not change when outputs are modified, but will change
+--  when the resolution changes. Note that if it fully disappear, the next
+--  time an viewport with the same resolution appears, it will have a different
+--  `id`.
+-- @tparam number old_viewport.minimum_dpi The least dense DPI.
+-- @tparam number old_viewport.maximum_dpi The most dense DPI.
+-- @tparam number old_viewport.preferred_dpi The relative least dense DPI.
+-- @tparam table new_viewport
+-- @tparam table new_viewport.geometry A table with `x`, `y`, `width` and
+--  `height` keys.
+-- @tparam table new_viewport.outputs A table with the monitor name and
+--  possibly the
+--  `mm_width` and `mm_height` values if they are available.
+-- @tparam number new_viewport.id An identifier for this viewport (by pixel
+--  resolution). It will not change when outputs are modified, but will change
+--  when the  resolution changes. Note that if it fully disappear, the next time
+--  an viewport with the same resolution appears, it will have a different `id`.
+-- @tparam number new_viewport.minimum_dpi The least dense DPI.
+-- @tparam number new_viewport.maximum_dpi The most dense DPI.
+-- @tparam number new_viewport.preferred_dpi The relative least dense DPI.
+-- @tparam table args
+-- @tparam string args.context Why was this signal sent.
+-- @see awful.screen.resize_screen_handler
+
+--- Default handler for `request::create`.
+--
+-- Important: This only exists when Awesome is started with `--screen off`.
+--
+-- A simplified implementation looks like:
+--
+--    function(viewport --[[, args]])
+--        local geo = viewport.geometry
+--        local s = screen.fake_add(geo.x, geo.y, geo.width, geo.height)
+--    end
+--
+-- If you implement this by hand, you must also implement handler for the
+-- `request::remove` and `request::resize`.
+--
+-- @signalhandler awful.screen.create_screen_handler
+-- @see request::create
+
+--- Default handler for `request::remove`.
+--
+-- Important: This only exists when Awesome is started with `--screen off`.
+--
+-- A simplified version of the logic is:
+--
+--    function (viewport --[[, args]])
+--        local geo = viewport.geometry
+--        for s in screen do
+--            if gears.geometry.rectangle.are_equal(geo, s.geometry) then
+--                s:fake_remove()
+--                return
+--            end
+--        end
+--    end
+--
+-- @signalhandler awful.screen.remove_screen_handler
+-- @see request::remove
+
+--- Default handler for `request::resize`.
+--
+-- Important: This only exists when Awesome is started with `--screen off`.
+--
+-- A simplified version of the logic is:
+--
+--    function (old_viewport, new_viewport --[[, args]])
+--        local old_geo, new_geo = old_viewport.geometry, new_viewport.geometry
+--        for s in screen do
+--            local sgeo = new_viewport.geometry
+--            if gears.geometry.rectangle.are_equal(old_geo, s.geometry) then
+--                s:fake_resize(
+--                    sgeo.x, sgeo.y, sgeo.width, sgeo.height
+--                )
+--            end
+--        end
+--    end
+--
+-- @signalhandler awful.screen.resize_screen_handler
+-- @see request::resize
+
+-- Add the DPI properties.
+require("awful.screen.dpi")(screen, data)
 
 -- Set the wallpaper(s) and create the bar(s) for new screens
 capi.screen.connect_signal("added", function(s)
@@ -676,30 +857,6 @@ end)
 capi.screen.connect_signal("request::wallpaper::connected", function(new_handler)
     for s in capi.screen do
         new_handler(s)
-    end
-end)
-
--- Create some screens when none exist. This can happen when AwesomeWM is
--- started with `--screen off` and no handler is used.
-capi.screen.connect_signal("scanned", function()
-    if capi.screen.count() == 0 then
-        -- Private API to scan for screens now.
-        if #capi.screen._viewports() == 0 then
-            capi.screen._scan_quiet()
-        end
-
-        local viewports = capi.screen._viewports()
-
-        if #viewports > 0 then
-            for _, area in ipairs(viewports) do
-                local geo = area.geometry
-                capi.screen.fake_add(geo.x, geo.y, geo.width, geo.height)
-            end
-        else
-            capi.screen.fake_add(0, 0, 640, 480)
-        end
-
-        assert(capi.screen.count() > 0, "Creating screens failed")
     end
 end)
 
