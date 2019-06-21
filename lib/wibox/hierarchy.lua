@@ -304,8 +304,8 @@ end
 
 --- Does the given cairo context have an empty clip (aka "no drawing possible")?
 local function empty_clip(cr)
-    local _, _, width, height = cr:clip_extents()
-    return width == 0 or height == 0
+    local x1, y1, x2, y2 = cr:clip_extents()
+    return x2 - x1 == 0 or y2 - y1 == 0
 end
 
 --- Draw a hierarchy to some cairo context.
