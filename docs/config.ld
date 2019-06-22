@@ -265,6 +265,15 @@ local display_type = {
     deprecatedproperty = true,
 }
 
+-- Show return values.
+local show_return = {
+    ["function"]   = true,
+    constructorfct = true,
+    staticfct      = true,
+    method         = true,
+    deprecated     = true,
+}
+
 custom_display_name_handler = function(item, default_handler)
     local ret = default_handler(item)
 
@@ -272,6 +281,12 @@ custom_display_name_handler = function(item, default_handler)
     if display_type[item.type] then
         -- Punch a hole in the sandbox and inject the `ldoc` object.
         item.sanitize_type = sanitize_type
+    end
+
+    -- LDoc hardcode the "Returns" section for "function" only, fix that.
+    if show_return[item.type] and item.tags["return"] then
+        item.ret = item.tags["return"]
+        item:build_return_groups()
     end
 
     -- Remove the "namespace" from the signals and properties
