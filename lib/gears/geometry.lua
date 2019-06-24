@@ -151,6 +151,20 @@ function gears.geometry.rectangle.get_in_direction(dir, recttbl, cur)
     return target
 end
 
+--- Return true if the area are exactly identical.
+--
+-- The areas are table with a `x`, `y`, `width` and `height` keys.
+--
+-- @tparam table a The area.
+-- @tparam table b The other area.
+-- @treturn boolean If the areas are identical.
+function gears.geometry.rectangle.are_equal(a, b)
+    for _, v in ipairs {"x", "y", "width", "height"} do
+        if a[v] ~= b[v] then return false end
+    end
+    return true
+end
+
 --- Check if an area intersect another area.
 -- @param a The area.
 -- @param b The other area.
