@@ -228,7 +228,7 @@ local function iter_scr(_, _, s)
     end
 end
 
-function screen._areas()
+function screen._viewports()
     return {}
 end
 
