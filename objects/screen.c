@@ -1644,6 +1644,11 @@ luaA_screen_fake_add(lua_State *L)
     luaA_class_emit_signal(L, &screen_class, "list", 0);
     luaA_object_push(L, s);
 
+    foreach(c, globalconf.clients) {
+        screen_client_moveto(*c, screen_getbycoord(
+                    (*c)->geometry.x, (*c)->geometry.y), false);
+    }
+
     return 1;
 }
 
@@ -1701,6 +1706,11 @@ luaA_screen_fake_resize(lua_State *L)
 
     luaA_pusharea(L, old_geometry);
     luaA_object_emit_signal(L, 1, "property::geometry", 1);
+
+    /* Note: calling `screen_client_moveto` from here will create more issues
+     * than it would fix. Keep in mind that it means `c.screen` will be wrong
+     * until Lua it `fake_add` fixes it.
+     */
 
     return 0;
 }
