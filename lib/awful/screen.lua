@@ -584,6 +584,106 @@ function screen.object.get_selected_tag(s)
     return screen.object.get_selected_tags(s)[1]
 end
 
+local function normalize(ratios, size)
+    local sum = 0
+
+    for _, r in ipairs(ratios) do
+        sum = sum + r
+    end
+
+    -- Avoid to mutate the input.
+    local ret = {}
+    local sum2 = 0
+
+    for k, r in ipairs(ratios) do
+        ret[k] = (r*100)/sum
+        ret[k] = math.floor(size*ret[k]*0.01)
+        sum2 = sum2 + ret[k]
+    end
+
+    -- Ratios are random float number. Pixels cannot be divided. This adds the
+    -- remaining pixels to the end. A better approach would be to redistribute
+    -- them based on the ratios. However, nobody will notice.
+    ret[#ret] = ret[#ret] + (size - sum2)
+
+    return ret
+end
+
+--- Split the screen into multiple screens.
+--
+-- This is useful to turn ultrawide monitors into something more useful without
+-- fancy client layouts:
+--
+-- @DOC_awful_screen_split1_EXAMPLE@
+--
+-- It can also be used to turn a vertical "side" screen into 2 smaller screens:
+--
+-- @DOC_awful_screen_split2_EXAMPLE@
+--
+-- @tparam[opt] table ratios The different ratios to split into. If none is
+--  provided, it is split in half.
+-- @tparam[opt] string mode Either "vertical" or "horizontal". If none is
+--  specified, it will split along the longest axis.
+-- @method split
+function screen.object.split(s, ratios, mode, _geo)
+    s = get_screen(s)
+
+    _geo = _geo or s.geometry
+    ratios = ratios or {50,50}
+
+    -- In practice, this is almost always what the user wants.
+    mode = mode or (
+        _geo.height > _geo.width and "vertical" or "horizontal"
+    )
+
+    assert(mode == "horizontal" or mode == "vertical")
+
+    assert((not s) or s.valid)
+    assert(#ratios >= 2)
+
+    local sizes, ret = normalize(
+        ratios, mode == "horizontal" and _geo.width or _geo.height
+    ), {}
+
+    assert(#sizes >=2)
+
+    if s then
+        if mode == "horizontal" then
+            s:fake_resize(_geo.x, _geo.y, sizes[1], _geo.height)
+        else
+            s:fake_resize(_geo.x, _geo.y, _geo.width, sizes[1])
+        end
+        table.insert(ret, s)
+    end
+
+    local pos = _geo[mode == "horizontal" and "x" or "y"]
+        + (s and sizes[1] or 0)
+
+    for k=2, #sizes do
+        local ns
+
+        if mode == "horizontal" then
+            ns = capi.screen.fake_add(pos, _geo.y, sizes[k], _geo.height)
+        else
+            ns = capi.screen.fake_add(_geo.x, pos, _geo.width, sizes[k])
+        end
+
+        table.insert(ret, ns)
+
+        if s then
+            ns.data.viewport = s.data.viewport
+
+            if not ns.data.viewport then
+                ns.outputs = s.outputs
+            end
+        end
+
+        pos = pos + sizes[k]
+    end
+
+    return ret
+end
+
 --- Enable the automatic calculation of the screen DPI (experimental).
 --
 -- This will cause many elements such as the font and some widgets to be scaled
