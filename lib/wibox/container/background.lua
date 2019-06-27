@@ -22,6 +22,61 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 
 local background = { mt = {} }
 
+-- The Cairo SVG backend doesn't support surface as patterns correctly.
+-- The result is both glitchy and blocky. It is also impossible to introspect.
+-- Calling this function replace the normal code path is a "less correct", but
+-- more widely compatible version.
+function background._use_fallback_algorithm()
+    background.before_draw_children = function(self, _, cr, width, height)
+        local bw    = self._private.shape_border_width or 0
+        local shape = self._private.shape or gshape.rectangle
+
+        if bw > 0 then
+            cr:translate(bw, bw)
+            width, height = width - 2*bw, height - 2*bw
+        end
+
+        shape(cr, width, height)
+
+        if bw > 0 then
+            cr:save() --Save to avoid messing with the original source
+            cr:set_line_width(bw)
+            cr:set_source(color(self._private.shape_border_color or self._private.foreground or beautiful.fg_normal))
+            cr:stroke_preserve()
+            cr:restore()
+        end
+
+        if self._private.background then
+            cr:save() --Save to avoid messing with the original source
+            cr:set_source(self._private.background)
+            cr:fill_preserve()
+            cr:restore()
+        end
+
+        cr:translate(-bw, -bw)
+        cr:clip()
+
+        if self._private.foreground then
+            cr:set_source(self._private.foreground)
+        end
+    end
+    background.after_draw_children = function(self, _, cr, width, height)
+        local bw    = self._private.shape_border_width or 0
+        local shape = self._private.shape or gshape.rectangle
+
+        if bw > 0 then
+            cr:save()
+            cr:translate(bw, bw)
+            width, height = width - 2*bw, height - 2*bw
+            shape(cr, width, height)
+            cr:set_line_width(bw)
+            cr:set_source(color(self._private.shape_border_color or self._private.foreground or beautiful.fg_normal))
+            cr:stroke()
+            cr:restore()
+        end
+    end
+end
+
 -- Make sure a surface pattern is freed *now*
 local function dispose_pattern(pattern)
     local status, s = pattern:get_surface()
