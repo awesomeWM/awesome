@@ -49,6 +49,7 @@ if ! cmp --silent "${file_stdout}" "${expected_output}"
 then
     echo "Expected text from ${expected_output}, but got:"
     diff -u "${expected_output}" "${file_stdout}" || true
+    cp "${file_stdout}" "${expected_output}"
     exit 1
 fi
 
