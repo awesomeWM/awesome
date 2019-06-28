@@ -29,6 +29,7 @@
 # local iter = ldoc.modules.iter
 # local function M(txt,item) return ldoc.markup(txt,item,ldoc.plain) end
 # local nowrap = ldoc.wrap and '' or 'nowrap'
+# local html_space = function(s) return s:gsub(" ", "%%20") end
 
 <!-- Menu -->
 
@@ -305,7 +306,7 @@
 <table class="module_list">
 # for m in mods() do
 	<tr>
-		<td class="name"  $(nowrap)><a href="$(no_spaces(kind))/$(m.name).html">$(m.name)</a></td>
+		<td class="name"  $(nowrap)><a href="$(html_space(kind))/$(m.name).html">$(m.name)</a></td>
 		<td class="summary">$(M(ldoc.strip_header(m.summary),m))</td>
 	</tr>
 #  end -- for modules
