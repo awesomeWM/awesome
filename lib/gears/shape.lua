@@ -141,6 +141,13 @@ function module.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
         cr:line_to(0, height)
     end
 
+    -- Close the path
+    -- If arc was drawn at top left then the end point would be (0, rad)
+    if tl then
+        cr:line_to(0, rad)
+    else
+        cr:line_to(0, 0)
+    end
     cr:close_path()
 end
 
