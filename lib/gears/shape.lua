@@ -113,6 +113,10 @@ function module.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
         rad = height / 2
     end
 
+    -- In case there is already some other path on the cairo context:
+    -- Make sure the close_path() below goes to the right position.
+    cr:new_sub_path()
+
     -- Top left
     if tl then
         cr:arc( rad, rad, rad, math.pi, 3*(math.pi/2))
@@ -431,6 +435,10 @@ function module.pie(cr, width, height, start_angle, end_angle, radius)
     radius = radius or math.floor(math.min(width, height)/2)
     start_angle, end_angle = start_angle or 0, end_angle or math.pi/2
 
+    -- In case there is already some other path on the cairo context:
+    -- Make sure the close_path() below goes to the right position.
+    cr:new_sub_path()
+
     -- If the shape is a circle, then avoid the lines
     if math.abs(start_angle + end_angle - 2*math.pi) <= 0.01  then
         cr:arc(width/2, height/2, radius, 0, 2*math.pi)
@@ -464,6 +472,10 @@ end
 function module.arc(cr, width, height, thickness, start_angle, end_angle, start_rounded, end_rounded)
     start_angle = start_angle or 0
     end_angle   = end_angle   or math.pi/2
+
+    -- In case there is already some other path on the cairo context:
+    -- Make sure the close_path() below goes to the right position.
+    cr:new_sub_path()
 
     -- This shape is a partial circle
     local radius = math.min(width, height)/2
