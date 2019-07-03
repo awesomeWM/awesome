@@ -350,6 +350,8 @@ function hierarchy:draw(context, cr)
         cr:clip()
         call(widget.draw)
         cr:restore()
+        -- Clear any path that the widget might have left
+        cr:new_path()
 
         -- Draw its children (We already clipped to the draw extents above)
         call(widget.before_draw_children)
@@ -359,6 +361,8 @@ function hierarchy:draw(context, cr)
             call(widget.after_draw_child, i, wi:get_widget())
         end
         call(widget.after_draw_children)
+        -- Clear any path that the widget might have left
+        cr:new_path()
 
         -- Apply opacity
         if opacity ~= 1 then
