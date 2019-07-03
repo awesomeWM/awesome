@@ -79,7 +79,7 @@ c2:tags(tags[1]) --DOC_HIDE
 
             -- Add support for hover colors and an index label
             create_callback = function(self, c3, index, objects) --luacheck: no unused args
-                self:get_children_by_id("index_role")[1].markup = "<b> "..index.." </b>"
+                self:get_children_by_id("index_role")[1].markup = "<b> "..c3.index.." </b>"
 
                 self:connect_signal("mouse::enter", function()
                     if self.bg ~= "#ff0000" then
@@ -94,7 +94,7 @@ c2:tags(tags[1]) --DOC_HIDE
                 end)
             end,
             update_callback = function(self, c3, index, objects) --luacheck: no unused args
-                self:get_children_by_id("index_role")[1].markup = "<b> "..index.." </b>"
+                self:get_children_by_id("index_role")[1].markup = "<b> "..c3.index.." </b>"
             end,
         },
         buttons = taglist_buttons
