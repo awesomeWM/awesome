@@ -78,110 +78,111 @@ end
 -- Repeat testing 3 times.
 for _, _ in ipairs{1, 2, 3} do
 
--- The first 100x100 window should be placed at the top left corner.
-add_client {
-    geometry = function(wa)
-        return {
-            width       = 100,
-            height      = 100,
-            expected_x  = wa.x,
-            expected_y  = wa.y
-        }
-    end
-}
+    -- The first 100x100 window should be placed at the top left corner.
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x,
+                expected_y  = wa.y
+            }
+        end
+    }
 
--- The second 100x100 window should be placed to the right of the first window.
--- Note that this assumption fails if the screen is in the portrait orientation
--- (e.g., the test succeeds with a 600x703 screen and fails with 600x704).
-add_client {
-    geometry = function(wa)
-        return {
-            width       = 100,
-            height      = 100,
-            expected_x  = wa.x + 100 + 2*border_width,
-            expected_y  = wa.y
-        }
-    end
-}
+    -- The second 100x100 window should be placed to the right of the first
+    -- window.  Note that this assumption fails if the screen is in the portrait
+    -- orientation (e.g., the test succeeds with a 600x703 screen and fails with
+    -- 600x704).
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
 
--- The wide window should be placed below the two 100x100 windows.
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 50,
-            height      = 100,
-            expected_x  = wa.x,
-            expected_y  = wa.y + tb_height + 2*border_width + 100
-        }
-    end
-}
+    -- The wide window should be placed below the two 100x100 windows.
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = wa.width - 50,
+                height      = 100,
+                expected_x  = wa.x,
+                expected_y  = wa.y + tb_height + 2*border_width + 100
+            }
+        end
+    }
 
--- The first large window which does not completely fit in any free area should
--- be placed at the bottom left corner (no_overlap should place it below the
--- wide window, and then no_offscreen should shift it up so that it would be
--- completely inside the workarea).
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 10,
-            height      = wa.height - 50,
-            expected_x  = wa.x,
-            expected_y  = wa.y + 50 - 2*border_width - tb_height
-        }
-    end
-}
+    -- The first large window which does not completely fit in any free area
+    -- should be placed at the bottom left corner (no_overlap should place it
+    -- below the wide window, and then no_offscreen should shift it up so that
+    -- it would be completely inside the workarea).
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = wa.width - 10,
+                height      = wa.height - 50,
+                expected_x  = wa.x,
+                expected_y  = wa.y + 50 - 2*border_width - tb_height
+            }
+        end
+    }
 
--- The second large window should be placed at the top right corner.
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 10,
-            height      = wa.height - 50,
-            expected_x  = wa.x + 10 - 2*border_width,
-            expected_y  = wa.y
-        }
-    end
-}
+    -- The second large window should be placed at the top right corner.
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = wa.width - 10,
+                height      = wa.height - 50,
+                expected_x  = wa.x + 10 - 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
 
--- The third large window should be placed at the bottom right corner.
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 10,
-            height      = wa.height - 50,
-            expected_x  = wa.x + 10 - 2*border_width,
-            expected_y  = wa.y + 50 - 2*border_width - tb_height
-        }
-    end
-}
+    -- The third large window should be placed at the bottom right corner.
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = wa.width - 10,
+                height      = wa.height - 50,
+                expected_x  = wa.x + 10 - 2*border_width,
+                expected_y  = wa.y + 50 - 2*border_width - tb_height
+            }
+        end
+    }
 
--- The fourth large window should be placed at the top left corner (the whole
--- workarea is occupied now).
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 50,
-            height      = wa.height - 50,
-            expected_x  = wa.x,
-            expected_y  = wa.y
-        }
-    end
-}
+    -- The fourth large window should be placed at the top left corner (the
+    -- whole workarea is occupied now).
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = wa.width - 50,
+                height      = wa.height - 50,
+                expected_x  = wa.x,
+                expected_y  = wa.y
+            }
+        end
+    }
 
--- Kill test clients to prepare for the next iteration.
-table.insert(tests, function(count)
-    if count <= 1 then
-        for _, data in ipairs(client_data) do
-            if data.c then
-                data.c:kill()
-                data.c = nil
+    -- Kill test clients to prepare for the next iteration.
+    table.insert(tests, function(count)
+        if count <= 1 then
+            for _, data in ipairs(client_data) do
+                if data.c then
+                    data.c:kill()
+                    data.c = nil
+                end
             end
         end
-    end
-    if #client.get() == 0 then
-        return true
-    end
-end)
+        if #client.get() == 0 then
+            return true
+        end
+    end)
 
 end
 
