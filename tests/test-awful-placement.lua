@@ -44,14 +44,15 @@ local function default_test(c, geometry)
     return true
 end
 
-local client_count = 0
 local client_data = {}
 local function add_client(args)
-    client_count = client_count + 1
-    local client_index = client_count
+    local data = {}
+    table.insert(client_data, data)
+    local client_index = #client_data
     table.insert(tests, function(count)
         local name = string.format("client%010d", client_index)
         if count <= 1 then
+            data.prev_client_count = #client.get()
             local geometry = args.geometry(mouse.screen.workarea)
             test_client(class, name, nil, nil, nil, {
                 size = {
@@ -59,10 +60,9 @@ local function add_client(args)
                     height = geometry.height
                 }
             })
-            client_data[client_index] = { geometry = geometry }
+            data.geometry = geometry
             return nil
-        elseif #client.get() >= client_index then
-            local data = client_data[client_index]
+        elseif #client.get() > data.prev_client_count then
             local c = data.c
             if not c then
                 c = client.get()[1]
@@ -74,6 +74,9 @@ local function add_client(args)
         end
     end)
 end
+
+-- Repeat testing 3 times.
+for _, _ in ipairs{1, 2, 3} do
 
 -- The first 100x100 window should be placed at the top left corner.
 add_client {
@@ -164,6 +167,23 @@ add_client {
         }
     end
 }
+
+-- Kill test clients to prepare for the next iteration.
+table.insert(tests, function(count)
+    if count <= 1 then
+        for _, data in ipairs(client_data) do
+            if data.c then
+                data.c:kill()
+                data.c = nil
+            end
+        end
+    end
+    if #client.get() == 0 then
+        return true
+    end
+end)
+
+end
 
 runner.run_steps(tests)
 
