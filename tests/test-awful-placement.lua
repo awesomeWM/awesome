@@ -105,6 +105,50 @@ for _, _ in ipairs{1, 2, 3} do
         end
     }
 
+    -- Hide last client.
+    do
+        local data = client_data[#client_data]
+        table.insert(tests, function()
+            data.c.hidden = true
+            return true
+        end)
+    end
+
+    -- Another 100x100 client should be placed to the right of the first client
+    -- (the hidden client should be ignored during placement).
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- Minimize last client.
+    do
+        local data = client_data[#client_data]
+        table.insert(tests, function()
+            data.c.minimized = true
+            return true
+        end)
+    end
+
+    -- Another 100x100 client should be placed to the right of the first client
+    -- (the minimized client should be ignored during placement).
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
     -- The wide window should be placed below the two 100x100 windows.
     add_client {
         geometry = function(wa)
