@@ -78,7 +78,7 @@ end
 -- Repeat testing 3 times.
 for _, _ in ipairs{1, 2, 3} do
 
-    -- The first 100x100 window should be placed at the top left corner.
+    -- The first 100x100 client should be placed at the top left corner.
     add_client {
         geometry = function(wa)
             return {
@@ -93,8 +93,8 @@ for _, _ in ipairs{1, 2, 3} do
     -- Remember the first client data for the current iteration.
     local first_client_data = client_data[#client_data]
 
-    -- The second 100x100 window should be placed to the right of the first
-    -- window.  Note that this assumption fails if the screen is in the portrait
+    -- The second 100x100 client should be placed to the right of the first
+    -- client.  Note that this assumption fails if the screen is in the portrait
     -- orientation (e.g., the test succeeds with a 600x703 screen and fails with
     -- 600x704).
     add_client {
@@ -200,7 +200,7 @@ for _, _ in ipairs{1, 2, 3} do
         end
     }
 
-    -- The wide window should be placed below the two 100x100 windows.
+    -- The wide client should be placed below the two 100x100 client.
     add_client {
         geometry = function(wa)
             return {
@@ -212,9 +212,9 @@ for _, _ in ipairs{1, 2, 3} do
         end
     }
 
-    -- The first large window which does not completely fit in any free area
+    -- The first large client which does not completely fit in any free area
     -- should be placed at the bottom left corner (no_overlap should place it
-    -- below the wide window, and then no_offscreen should shift it up so that
+    -- below the wide client, and then no_offscreen should shift it up so that
     -- it would be completely inside the workarea).
     add_client {
         geometry = function(wa)
@@ -227,7 +227,7 @@ for _, _ in ipairs{1, 2, 3} do
         end
     }
 
-    -- The second large window should be placed at the top right corner.
+    -- The second large client should be placed at the top right corner.
     add_client {
         geometry = function(wa)
             return {
@@ -239,7 +239,7 @@ for _, _ in ipairs{1, 2, 3} do
         end
     }
 
-    -- The third large window should be placed at the bottom right corner.
+    -- The third large client should be placed at the bottom right corner.
     add_client {
         geometry = function(wa)
             return {
@@ -251,7 +251,7 @@ for _, _ in ipairs{1, 2, 3} do
         end
     }
 
-    -- The fourth large window should be placed at the top left corner (the
+    -- The fourth large client should be placed at the top left corner (the
     -- whole workarea is occupied now).
     add_client {
         geometry = function(wa)
