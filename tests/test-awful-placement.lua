@@ -54,7 +54,7 @@ local function add_client(args)
         if count <= 1 then
             data.prev_client_count = #client.get()
             local geometry = args.geometry(mouse.screen.workarea)
-            test_client(class, name, nil, nil, nil, {
+            test_client(class, name, args.sn_rules, nil, nil, {
                 size = {
                     width = geometry.width,
                     height = geometry.height
@@ -75,11 +75,40 @@ local function add_client(args)
     end)
 end
 
--- Repeat testing 3 times.
-for _, _ in ipairs{1, 2, 3} do
+-- Repeat testing 3 times, placing clients on different tags:
+--
+--   - Iteration 1 places clients on the tag 1, which is selected.
+--
+--   - Iteration 2 places clients on the tag 2, which is unselected; the
+--     selected tag 1 remains empty.
+--
+--   - Iteration 3 places clients on the tag 3, which is unselected; the
+--     selected tag 1 contains some clients.
+--
+for _, tag_num in ipairs{1, 2, 3} do
+
+    local sn_rules
+    if tag_num > 1 then
+        sn_rules = { tag = root.tags()[tag_num] }
+    end
+
+    -- Put a 100x100 client on the tag 1 before iteration 3.
+    if tag_num == 3 then
+        add_client {
+            geometry = function(wa)
+                return {
+                    width       = 100,
+                    height      = 100,
+                    expected_x  = wa.x,
+                    expected_y  = wa.y
+                }
+            end
+        }
+    end
 
     -- The first 100x100 client should be placed at the top left corner.
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = 100,
@@ -98,6 +127,7 @@ for _, _ in ipairs{1, 2, 3} do
     -- orientation (e.g., the test succeeds with a 600x703 screen and fails with
     -- 600x704).
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = 100,
@@ -120,6 +150,7 @@ for _, _ in ipairs{1, 2, 3} do
     -- Another 100x100 client should be placed to the right of the first client
     -- (the hidden client should be ignored during placement).
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = 100,
@@ -142,6 +173,7 @@ for _, _ in ipairs{1, 2, 3} do
     -- Another 100x100 client should be placed to the right of the first client
     -- (the minimized client should be ignored during placement).
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = 100,
@@ -165,6 +197,7 @@ for _, _ in ipairs{1, 2, 3} do
     -- Another 100x100 client should be placed to the right of the first client
     -- (the sticky client should be taken into account during placement).
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = 100,
@@ -190,6 +223,7 @@ for _, _ in ipairs{1, 2, 3} do
     -- (the sticky client should be taken into account during placement even if
     -- that client seems to be on an unselected tag).
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = 100,
@@ -202,6 +236,7 @@ for _, _ in ipairs{1, 2, 3} do
 
     -- The wide client should be placed below the two 100x100 client.
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = wa.width - 50,
@@ -217,6 +252,7 @@ for _, _ in ipairs{1, 2, 3} do
     -- below the wide client, and then no_offscreen should shift it up so that
     -- it would be completely inside the workarea).
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = wa.width - 10,
@@ -229,6 +265,7 @@ for _, _ in ipairs{1, 2, 3} do
 
     -- The second large client should be placed at the top right corner.
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = wa.width - 10,
@@ -241,6 +278,7 @@ for _, _ in ipairs{1, 2, 3} do
 
     -- The third large client should be placed at the bottom right corner.
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = wa.width - 10,
@@ -254,6 +292,7 @@ for _, _ in ipairs{1, 2, 3} do
     -- The fourth large client should be placed at the top left corner (the
     -- whole workarea is occupied now).
     add_client {
+        sn_rules = sn_rules,
         geometry = function(wa)
             return {
                 width       = wa.width - 50,
