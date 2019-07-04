@@ -90,6 +90,9 @@ for _, _ in ipairs{1, 2, 3} do
         end
     }
 
+    -- Remember the first client data for the current iteration.
+    local first_client_data = client_data[#client_data]
+
     -- The second 100x100 window should be placed to the right of the first
     -- window.  Note that this assumption fails if the screen is in the portrait
     -- orientation (e.g., the test succeeds with a 600x703 screen and fails with
@@ -138,6 +141,54 @@ for _, _ in ipairs{1, 2, 3} do
 
     -- Another 100x100 client should be placed to the right of the first client
     -- (the minimized client should be ignored during placement).
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- Hide last client, and make the first client sticky.
+    do
+        local data = client_data[#client_data]
+        table.insert(tests, function()
+            data.c.hidden = true
+            first_client_data.c.sticky = true
+            return true
+        end)
+    end
+
+    -- Another 100x100 client should be placed to the right of the first client
+    -- (the sticky client should be taken into account during placement).
+    add_client {
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- Hide last client, and put the first client on the tag 9 (because the
+    -- first client is sticky, it should remain visible).
+    do
+        local data = client_data[#client_data]
+        table.insert(tests, function()
+            data.c.hidden = true
+            first_client_data.c:tags{ root.tags()[9] }
+            return true
+        end)
+    end
+
+    -- Another 100x100 client should be placed to the right of the first client
+    -- (the sticky client should be taken into account during placement even if
+    -- that client seems to be on an unselected tag).
     add_client {
         geometry = function(wa)
             return {
