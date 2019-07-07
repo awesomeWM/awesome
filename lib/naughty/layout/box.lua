@@ -120,14 +120,14 @@ end
 --                    layout  = wibox.layout.fixed.vertical,
 --                },
 --                margins = beautiful.notification_margin,
---                widget  = wibox.container.margins,
+--                widget  = wibox.container.margin,
 --            },
 --            id     = "background_role",
 --            widget = naughty.container.background,
 --        },
 --        strategy = "max",
 --        width    = width(beautiful.notification_max_width
---            or beautiful.xresources.apply_dpi(500)
+--            or beautiful.xresources.apply_dpi(500)),
 --        widget   = wibox.container.constraint,
 --    }
 --
