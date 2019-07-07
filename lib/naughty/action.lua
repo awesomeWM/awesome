@@ -44,6 +44,9 @@ local action = {}
 -- @tparam gears.surface|string icon
 
 --- If the action should hide the label and only display the icon.
+--
+-- @DOC_wibox_nwidget_actionlist_icon_only_EXAMPLE@
+--
 -- @property icon_only
 -- @param[opt=false] boolean
 
@@ -125,9 +128,12 @@ local function new(_, args)
         position     = args.position,
         icon         = args.icon,
         notification = args.notification,
+        icon_only    = args.icon_only or false,
     }
 
     rawset(ret, "_private", default)
+
+    gtable.crush(ret, args)
 
     return ret
 end
