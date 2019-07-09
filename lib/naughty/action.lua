@@ -103,6 +103,16 @@ for _, prop in ipairs { "name", "icon", "notification", "icon_only" } do
     end
 end
 
+local set_notif = action.set_notification
+
+function action.set_notification(self, value)
+    local old = self._private.notification
+    set_notif(self, value)
+    if old then
+        old:emit_signal("property::actions")
+    end
+end
+
 --- Execute this action.
 --
 -- This only emits the `invoked` signal.
