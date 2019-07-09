@@ -165,6 +165,35 @@ capi.screen.connect_signal("removed", function(scr)
     naughty.notifications[scr] = nil
 end)
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
+local function remove_from_index(n)
+    for _, positions in pairs(naughty.notifications) do
+        for _, ns in pairs(positions) do
+            for k, n2 in ipairs(ns) do
+                if n2 == n then
+                    table.remove(ns, k)
+                    return
+                end
+            end
+        end
+    end
+end
+
+-- When id or screen are set after the object is created, update the indexing.
+local function update_index(n)
+    -- Find the only index and remove it (there's an useless loop, but it's small).
+    remove_from_index(n)
+
+    -- Add to the index again
+    local s = get_screen(n.screen or n.preset.screen or screen.focused())
+    naughty.notifications[s] = naughty.notifications[s] or {}
+    table.insert(naughty.notifications[s][n.position], n)
+end
+
+
 --- Notification state.
 --
 -- This function is deprecated, use `naughty.suspended`.
@@ -406,7 +435,7 @@ local function cleanup(self, reason)
     local scr = self.screen
 
     assert(naughty.notifications[scr][self.position][self.idx] == self)
-    table.remove(naughty.notifications[scr][self.position], self.idx)
+    remove_from_index(self)
 
     -- Update all indices
     for k, n in ipairs(naughty.notifications[scr][self.position]) do
@@ -432,10 +461,6 @@ local function cleanup(self, reason)
 end
 
 naughty.connect_signal("destroyed", cleanup)
-
-local function get_screen(s)
-    return s and capi.screen[s]
-end
 
 -- Proxy the global suspension state on all notification objects
 local function get_suspended(self)
@@ -482,7 +507,6 @@ end
 
 -- Register a new notification object.
 local function register(notification, args)
-
     -- Add the some more properties
     rawset(notification, "get_suspended", get_suspended)
 
@@ -610,6 +634,9 @@ function naughty.notify(args)
 
     return nnotif(args)
 end
+
+naughty.connect_signal("property::screen"  , update_index)
+naughty.connect_signal("property::position", update_index)
 
 return setmetatable(naughty, {__index = index_miss, __newindex = set_index_miss})
 
