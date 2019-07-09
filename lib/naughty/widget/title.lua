@@ -41,9 +41,9 @@ function title:set_notification(notif)
     if self._private.notification == notif then return end
 
     if self._private.notification then
-        self._private.notification:disconnect_signal("poperty::message",
+        self._private.notification:disconnect_signal("property::message",
             self._private.title_changed_callback)
-        self._private.notification:disconnect_signal("poperty::fg",
+        self._private.notification:disconnect_signal("property::fg",
             self._private.title_changed_callback)
     end
 
@@ -52,8 +52,8 @@ function title:set_notification(notif)
     self._private.notification = notif
     self._private.title_changed_callback()
 
-    notif:connect_signal("poperty::title", self._private.title_changed_callback)
-    notif:connect_signal("poperty::fg"   , self._private.title_changed_callback)
+    notif:connect_signal("property::title", self._private.title_changed_callback)
+    notif:connect_signal("property::fg"   , self._private.title_changed_callback)
 end
 
 --- Create a new naughty.widget.title.

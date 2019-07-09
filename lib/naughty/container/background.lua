@@ -48,13 +48,13 @@ function background:set_notification(notif)
     if self._private.notification == notif then return end
 
     if self._private.notification then
-        self._private.notification:disconnect_signal("poperty::bg",
+        self._private.notification:disconnect_signal("property::bg",
             self._private.background_changed_callback)
-        self._private.notification:disconnect_signal("poperty::border_width",
+        self._private.notification:disconnect_signal("property::border_width",
             self._private.background_changed_callback)
-        self._private.notification:disconnect_signal("poperty::border_color",
+        self._private.notification:disconnect_signal("property::border_color",
             self._private.background_changed_callback)
-        self._private.notification:disconnect_signal("poperty::shape",
+        self._private.notification:disconnect_signal("property::shape",
             self._private.background_changed_callback)
     end
 
@@ -62,10 +62,10 @@ function background:set_notification(notif)
 
     self._private.notification = notif
 
-    notif:connect_signal("poperty::bg"          , self._private.background_changed_callback)
-    notif:connect_signal("poperty::border_width", self._private.background_changed_callback)
-    notif:connect_signal("poperty::border_color", self._private.background_changed_callback)
-    notif:connect_signal("poperty::shape"       , self._private.background_changed_callback)
+    notif:connect_signal("property::bg"          , self._private.background_changed_callback)
+    notif:connect_signal("property::border_width", self._private.background_changed_callback)
+    notif:connect_signal("property::border_color", self._private.background_changed_callback)
+    notif:connect_signal("property::shape"       , self._private.background_changed_callback)
 end
 
 --- Create a new naughty.container.background.

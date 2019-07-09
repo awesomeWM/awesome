@@ -89,7 +89,7 @@ function icon:set_notification(notif)
 
     self._private.notification = notif
 
-    notif:connect_signal("poperty::icon", self._private.icon_changed_callback)
+    notif:connect_signal("property::icon", self._private.icon_changed_callback)
 end
 
 local valid_strategies = {
