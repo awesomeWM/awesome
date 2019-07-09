@@ -30,6 +30,7 @@
 # local function M(txt,item) return ldoc.markup(txt,item,ldoc.plain) end
 # local nowrap = ldoc.wrap and '' or 'nowrap'
 # local html_space = function(s) return s:gsub(" ", "%%20") end
+# local no_underscores = function(s) return s:gsub("_", " ") end
 
 <!-- Menu -->
 
@@ -68,7 +69,7 @@
 # local this_mod = module and module.name
 # for kind, mods, type in ldoc.kinds() do
 #  if ldoc.allowed_in_contents(type,module) then
-<h2>$(kind)</h2>
+<h2>$(no_underscores(kind))</h2>
 <ul class="$(kind=='Topics' and '' or 'nowrap')">
 #  for mod in mods() do local name = display_name(mod)
 #   if mod.name == this_mod then

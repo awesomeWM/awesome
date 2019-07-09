@@ -100,12 +100,12 @@ sort_modules=true
 
 -- Add more project level (left side index) types.
 new_type("widgetmod"   , "Widgets"   , true)
-new_type("containermod", "Widget containers", true)
-new_type("layoutmod"   , "Widget layouts"   , true)
-new_type("coreclassmod", "Core components"  , true)
-new_type("popupmod"    , "Popups and bars"  , true)
-new_type("utillib"     , "Utility libraries", true)
-new_type("themelib"    , "Theme related libraries", true)
+new_type("containermod", "Widget_containers", true)
+new_type("layoutmod"   , "Widget_layouts"   , true)
+new_type("coreclassmod", "Core_components"  , true)
+new_type("popupmod"    , "Popups_and_bars"  , true)
+new_type("utillib"     , "Utility_libraries", true)
+new_type("themelib"    , "Theme_related_libraries", true)
 
 file = {
     -- C parts of libraries
