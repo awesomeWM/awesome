@@ -78,11 +78,11 @@ local active_font
 -- <tr> <td>`osd_border_color`</td> <td>`osd_borders_color`</td> <td>`osd_fg_color`</td> <td></td> <td></td> </tr>
 -- <tr> <td>`wm_bg_color`</td> <td>`wm_bg`</td> <td>`menubar_bg_color`</td> <td>`theme_bg_color`</td> <td>HeaderBar bg</td> </tr>
 -- <tr> <td>`wm_border_focused_color`</td> <td>`wm_border_focused`</td> <td>`theme_selected_bg_color`</td> <td></td> <td>ToggleButton bg</td> </tr>
--- <tr> <td>`wm_border_unfocused_color`</td> <td>`wm_border_unfocused`</td> <td>`wm_border`</td> <td>`menubar_bg_color`</td> <!--<td>`theme_bg_color`</td>--> <td>HeaderBar bg</td> </tr>
+-- <tr> <td>`wm_border_unfocused_color`</td> <td>`wm_border_unfocused`</td> <td>`wm_border`</td> <td>`menubar_bg_color`</td><td>HeaderBar bg</td> </tr>
 -- <tr> <td>`wm_title_focused_color`</td> <td>`wm_title_focused`</td> <td>`wm_title`</td> <td>`theme_selected_fg_color`</td> <td>ToggleButton fg</td> </tr>
--- <tr> <td>`wm_title_unfocused_color`</td> <td>`wm_title_unfocused`</td> <td>`wm_unfocused_title`</td> <td>`menubar_fg_color`</td> <!--<td>`theme_fg_color`</td>--> <td>HeaderBar fg</td> </tr>
+-- <tr> <td>`wm_title_unfocused_color`</td> <td>`wm_title_unfocused`</td> <td>`wm_unfocused_title`</td> <td>`menubar_fg_color`</td><td>HeaderBar fg</td> </tr>
 -- <tr> <td>`wm_icons_focused_color`</td> <td>`wm_icons_focused`</td> <td>`wm_title_focused`</td> <td>`theme_selected_fg_color`</td> <td>ToggleButton fg</td> </tr>
--- <tr> <td>`wm_icons_unfocused_color`</td> <td>`wm_icons_unfocused`</td> <td>`wm_title_unfocused`</td> <td>`menubar_fg_color`</td> <!--<td>`theme_fg_color`</td>--> <td>HeaderBar fg</td> </tr>
+-- <tr> <td>`wm_icons_unfocused_color`</td> <td>`wm_icons_unfocused`</td> <td>`wm_title_unfocused`</td> <td>`menubar_fg_color`</td> <td>HeaderBar fg</td> </tr>
 -- </table>
 --
 -- @staticfct beautiful.gtk.get_theme_variables
