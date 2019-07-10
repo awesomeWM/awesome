@@ -580,6 +580,8 @@ local function create(args)
 
     gtable.crush(n, notification, true)
 
+    n.id = n.id or notification._gen_next_id()
+
     -- Allow extensions to create override the preset with custom data
     naughty.emit_signal("request::preset", n, args)
 
@@ -596,8 +598,6 @@ local function create(args)
     if n._private.timeout then
         n:set_timeout(n._private.timeout or n.preset.timeout)
     end
-
-    n.id = notification._gen_next_id()
 
     return n
 end

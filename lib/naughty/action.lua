@@ -44,6 +44,9 @@ local action = {}
 -- @tparam gears.surface|string icon
 
 --- If the action should hide the label and only display the icon.
+--
+-- @DOC_wibox_nwidget_actionlist_icon_only_EXAMPLE@
+--
 -- @property icon_only
 -- @param[opt=false] boolean
 
@@ -100,6 +103,16 @@ for _, prop in ipairs { "name", "icon", "notification", "icon_only" } do
     end
 end
 
+local set_notif = action.set_notification
+
+function action.set_notification(self, value)
+    local old = self._private.notification
+    set_notif(self, value)
+    if old then
+        old:emit_signal("property::actions")
+    end
+end
+
 --- Execute this action.
 --
 -- This only emits the `invoked` signal.
@@ -125,9 +138,12 @@ local function new(_, args)
         position     = args.position,
         icon         = args.icon,
         notification = args.notification,
+        icon_only    = args.icon_only or false,
     }
 
     rawset(ret, "_private", default)
+
+    gtable.crush(ret, args)
 
     return ret
 end

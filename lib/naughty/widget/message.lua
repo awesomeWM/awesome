@@ -41,9 +41,9 @@ function message:set_notification(notif)
     if self._private.notification == notif then return end
 
     if self._private.notification then
-        self._private.notification:disconnect_signal("poperty::message",
+        self._private.notification:disconnect_signal("property::message",
             self._private.message_changed_callback)
-        self._private.notification:disconnect_signal("poperty::fg",
+        self._private.notification:disconnect_signal("property::fg",
             self._private.message_changed_callback)
     end
 
@@ -51,8 +51,8 @@ function message:set_notification(notif)
 
     self._private.notification = notif
 
-    notif:connect_signal("poperty::message", self._private.message_changed_callback)
-    notif:connect_signal("poperty::fg"     , self._private.message_changed_callback)
+    notif:connect_signal("property::message", self._private.message_changed_callback)
+    notif:connect_signal("property::fg"     , self._private.message_changed_callback)
 end
 
 --- Create a new naughty.widget.message.

@@ -266,14 +266,27 @@ local function set_escaped_text(self)
     if self.size_info then update_size(self) end
 end
 
+local function seek_and_destroy(n)
+    for _, positions in pairs(current_notifications) do
+         for _, pos in pairs(positions) do
+            for k, n2 in ipairs(pos) do
+                if n == n2 then
+                    table.remove(pos, k)
+                    return
+                end
+            end
+         end
+    end
+end
+
 local function cleanup(self, _ --[[reason]], keep_visible)
     -- It is not a legacy notification
     if not self.box then return end
 
     local scr = self.screen
 
-    assert(current_notifications[scr][self.position][self.idx] == self)
-    table.remove(current_notifications[scr][self.position], self.idx)
+    -- Brute force find it, the position could have been replaced.
+    seek_and_destroy(self)
 
     if (not keep_visible) or (not scr) then
         self.box.visible = false
