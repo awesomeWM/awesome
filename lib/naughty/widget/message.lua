@@ -70,6 +70,7 @@ local function new(args)
 
     function tb._private.message_changed_callback()
         tb:set_markup(markup(tb._private.notification, tb))
+        tb._private.notification:reset_timeout()
     end
 
     if args.notification then
