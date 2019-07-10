@@ -44,25 +44,25 @@ local function default_test(c, geometry)
     return true
 end
 
-local client_count = 0
 local client_data = {}
 local function add_client(args)
-    client_count = client_count + 1
-    local client_index = client_count
+    local data = {}
+    table.insert(client_data, data)
+    local client_index = #client_data
     table.insert(tests, function(count)
         local name = string.format("client%010d", client_index)
         if count <= 1 then
+            data.prev_client_count = #client.get()
             local geometry = args.geometry(mouse.screen.workarea)
-            test_client(class, name, nil, nil, nil, {
+            test_client(class, name, args.sn_rules, nil, nil, {
                 size = {
                     width = geometry.width,
                     height = geometry.height
                 }
             })
-            client_data[client_index] = { geometry = geometry }
+            data.geometry = geometry
             return nil
-        elseif #client.get() >= client_index then
-            local data = client_data[client_index]
+        elseif #client.get() > data.prev_client_count then
             local c = data.c
             if not c then
                 c = client.get()[1]
@@ -75,95 +75,250 @@ local function add_client(args)
     end)
 end
 
--- The first 100x100 window should be placed at the top left corner.
-add_client {
-    geometry = function(wa)
-        return {
-            width       = 100,
-            height      = 100,
-            expected_x  = wa.x,
-            expected_y  = wa.y
-        }
-    end
-}
+-- Repeat testing 3 times, placing clients on different tags:
+--
+--   - Iteration 1 places clients on the tag 1, which is selected.
+--
+--   - Iteration 2 places clients on the tag 2, which is unselected; the
+--     selected tag 1 remains empty.
+--
+--   - Iteration 3 places clients on the tag 3, which is unselected; the
+--     selected tag 1 contains some clients.
+--
+for _, tag_num in ipairs{1, 2, 3} do
 
--- The second 100x100 window should be placed to the right of the first window.
--- Note that this assumption fails if the screen is in the portrait orientation
--- (e.g., the test succeeds with a 600x703 screen and fails with 600x704).
-add_client {
-    geometry = function(wa)
-        return {
-            width       = 100,
-            height      = 100,
-            expected_x  = wa.x + 100 + 2*border_width,
-            expected_y  = wa.y
-        }
+    local sn_rules
+    if tag_num > 1 then
+        sn_rules = { tag = root.tags()[tag_num] }
     end
-}
 
--- The wide window should be placed below the two 100x100 windows.
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 50,
-            height      = 100,
-            expected_x  = wa.x,
-            expected_y  = wa.y + tb_height + 2*border_width + 100
+    -- Put a 100x100 client on the tag 1 before iteration 3.
+    if tag_num == 3 then
+        add_client {
+            geometry = function(wa)
+                return {
+                    width       = 100,
+                    height      = 100,
+                    expected_x  = wa.x,
+                    expected_y  = wa.y
+                }
+            end
         }
     end
-}
 
--- The first large window which does not completely fit in any free area should
--- be placed at the bottom left corner (no_overlap should place it below the
--- wide window, and then no_offscreen should shift it up so that it would be
--- completely inside the workarea).
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 10,
-            height      = wa.height - 50,
-            expected_x  = wa.x,
-            expected_y  = wa.y + 50 - 2*border_width - tb_height
-        }
-    end
-}
+    -- The first 100x100 client should be placed at the top left corner.
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x,
+                expected_y  = wa.y
+            }
+        end
+    }
 
--- The second large window should be placed at the top right corner.
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 10,
-            height      = wa.height - 50,
-            expected_x  = wa.x + 10 - 2*border_width,
-            expected_y  = wa.y
-        }
-    end
-}
+    -- Remember the first client data for the current iteration.
+    local first_client_data = client_data[#client_data]
 
--- The third large window should be placed at the bottom right corner.
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 10,
-            height      = wa.height - 50,
-            expected_x  = wa.x + 10 - 2*border_width,
-            expected_y  = wa.y + 50 - 2*border_width - tb_height
-        }
-    end
-}
+    -- The second 100x100 client should be placed to the right of the first
+    -- client.  Note that this assumption fails if the screen is in the portrait
+    -- orientation (e.g., the test succeeds with a 600x703 screen and fails with
+    -- 600x704).
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
 
--- The fourth large window should be placed at the top left corner (the whole
--- workarea is occupied now).
-add_client {
-    geometry = function(wa)
-        return {
-            width       = wa.width - 50,
-            height      = wa.height - 50,
-            expected_x  = wa.x,
-            expected_y  = wa.y
-        }
+    -- Hide last client.
+    do
+        local data = client_data[#client_data]
+        table.insert(tests, function()
+            data.c.hidden = true
+            return true
+        end)
     end
-}
+
+    -- Another 100x100 client should be placed to the right of the first client
+    -- (the hidden client should be ignored during placement).
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- Minimize last client.
+    do
+        local data = client_data[#client_data]
+        table.insert(tests, function()
+            data.c.minimized = true
+            return true
+        end)
+    end
+
+    -- Another 100x100 client should be placed to the right of the first client
+    -- (the minimized client should be ignored during placement).
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- Hide last client, and make the first client sticky.
+    do
+        local data = client_data[#client_data]
+        table.insert(tests, function()
+            data.c.hidden = true
+            first_client_data.c.sticky = true
+            return true
+        end)
+    end
+
+    -- Another 100x100 client should be placed to the right of the first client
+    -- (the sticky client should be taken into account during placement).
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- Hide last client, and put the first client on the tag 9 (because the
+    -- first client is sticky, it should remain visible).
+    do
+        local data = client_data[#client_data]
+        table.insert(tests, function()
+            data.c.hidden = true
+            first_client_data.c:tags{ root.tags()[9] }
+            return true
+        end)
+    end
+
+    -- Another 100x100 client should be placed to the right of the first client
+    -- (the sticky client should be taken into account during placement even if
+    -- that client seems to be on an unselected tag).
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = 100,
+                height      = 100,
+                expected_x  = wa.x + 100 + 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- The wide client should be placed below the two 100x100 client.
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = wa.width - 50,
+                height      = 100,
+                expected_x  = wa.x,
+                expected_y  = wa.y + tb_height + 2*border_width + 100
+            }
+        end
+    }
+
+    -- The first large client which does not completely fit in any free area
+    -- should be placed at the bottom left corner (no_overlap should place it
+    -- below the wide client, and then no_offscreen should shift it up so that
+    -- it would be completely inside the workarea).
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = wa.width - 10,
+                height      = wa.height - 50,
+                expected_x  = wa.x,
+                expected_y  = wa.y + 50 - 2*border_width - tb_height
+            }
+        end
+    }
+
+    -- The second large client should be placed at the top right corner.
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = wa.width - 10,
+                height      = wa.height - 50,
+                expected_x  = wa.x + 10 - 2*border_width,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- The third large client should be placed at the bottom right corner.
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = wa.width - 10,
+                height      = wa.height - 50,
+                expected_x  = wa.x + 10 - 2*border_width,
+                expected_y  = wa.y + 50 - 2*border_width - tb_height
+            }
+        end
+    }
+
+    -- The fourth large client should be placed at the top left corner (the
+    -- whole workarea is occupied now).
+    add_client {
+        sn_rules = sn_rules,
+        geometry = function(wa)
+            return {
+                width       = wa.width - 50,
+                height      = wa.height - 50,
+                expected_x  = wa.x,
+                expected_y  = wa.y
+            }
+        end
+    }
+
+    -- Kill test clients to prepare for the next iteration.
+    table.insert(tests, function(count)
+        if count <= 1 then
+            for _, data in ipairs(client_data) do
+                if data.c then
+                    data.c:kill()
+                    data.c = nil
+                end
+            end
+        end
+        if #client.get() == 0 then
+            return true
+        end
+    end)
+
+end
 
 runner.run_steps(tests)
 

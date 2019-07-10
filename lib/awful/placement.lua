@@ -894,6 +894,39 @@ function placement.no_offscreen(c, args)
     return fix_new_geometry(geometry, args, true)
 end
 
+-- Check whether the client is on at least one of selected tags (similar to
+-- `c:isvisible()`, but without checks for the hidden or minimized state).
+local function client_on_selected_tags(c)
+    if c.sticky then
+        return true
+    else
+        for _, t in pairs(c:tags()) do
+            if t.selected then
+                return true
+            end
+        end
+        return false
+    end
+end
+
+-- Check whether the client would be visible if the specified set of tags is
+-- selected (using the same set of conditions as `c:isvisible()`, but checking
+-- against the specified tags instead of currently selected ones).
+local function client_visible_on_tags(c, tags)
+    if c.hidden or c.minimized then
+        return false
+    elseif c.sticky then
+        return true
+    else
+        for _, t in pairs(c:tags()) do
+            if gtable.hasitem(tags, t) then
+                return true
+            end
+        end
+        return false
+    end
+end
+
 --- Place the client where there's place available with minimum overlap.
 --@DOC_awful_placement_no_overlap_EXAMPLE@
 -- @param c The client.
@@ -905,8 +938,22 @@ function placement.no_overlap(c, args)
     args = add_context(args, "no_overlap")
     local geometry = geometry_common(c, args)
     local screen   = get_screen(c.screen or a_screen.getbycoord(geometry.x, geometry.y))
-    local cls = client.visible(screen)
-    local curlay = layout.get()
+    local cls, curlay
+    if client_on_selected_tags(c) then
+        cls = client.visible(screen)
+        curlay = layout.get()
+    else
+        -- When placing a client on unselected tags, place it as if all tags of
+        -- that client are selected.
+        local tags = c:tags()
+        cls = {}
+        for _, other_c in pairs(capi.client.get(screen)) do
+            if client_visible_on_tags(other_c, tags) then
+                table.insert(cls, other_c)
+            end
+        end
+        curlay = tags[1] and tags[1].layout
+    end
     local areas = { screen.workarea }
     for _, cl in pairs(cls) do
         if cl ~= c
