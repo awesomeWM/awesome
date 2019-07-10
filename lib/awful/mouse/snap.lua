@@ -14,6 +14,7 @@ local beautiful = require("beautiful")
 local color     = require("gears.color")
 local shape     = require("gears.shape")
 local cairo     = require("lgi").cairo
+local alayout   = require("awful.layout")
 
 local capi = {
     root = root,
@@ -104,6 +105,10 @@ end
 local current_snap, current_axis = nil
 
 local function detect_areasnap(c, distance)
+    if (not c.floating) and alayout.get(c.screen) ~= alayout.suit.floating then
+        return
+    end
+
     local old_snap = current_snap
     local v, h = detect_screen_edges(c, distance)
 
