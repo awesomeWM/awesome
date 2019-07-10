@@ -882,6 +882,8 @@ end
 --    function(viewport --[[, args]])
 --        local geo = viewport.geometry
 --        local s = screen.fake_add(geo.x, geo.y, geo.width, geo.height)
+--        s:emit_signal("request::desktop_decoration")
+--        s:emit_signal("request::wallpaper")
 --    end
 --
 -- If you implement this by hand, you must also implement handler for the
@@ -934,9 +936,15 @@ end
 require("awful.screen.dpi")(screen, data)
 
 -- Set the wallpaper(s) and create the bar(s) for new screens
+
 capi.screen.connect_signal("added", function(s)
+    -- If it was emited from here when screens are created with fake_add,
+    -- the Lua code would not have an opportunity to polutate the screen
+    -- metadata. Thus, the DPI may be wrong when setting the wallpaper.
+    --if capi.screen.automatic_factory then
     s:emit_signal("request::desktop_decoration")
     s:emit_signal("request::wallpaper")
+    --end
 end)
 
 -- Resize the wallpaper(s)
@@ -948,15 +956,19 @@ end
 
 -- Create the bar for existing screens when an handler is added
 capi.screen.connect_signal("request::desktop_decoration::connected", function(new_handler)
-    for s in capi.screen do
-        new_handler(s)
+    if capi.screen.automatic_factory then
+        for s in capi.screen do
+            new_handler(s)
+        end
     end
 end)
 
 -- Set the wallpaper when an handler is added.
 capi.screen.connect_signal("request::wallpaper::connected", function(new_handler)
-    for s in capi.screen do
-        new_handler(s)
+    if capi.screen.automatic_factory then
+        for s in capi.screen do
+            new_handler(s)
+        end
     end
 end)
 

@@ -156,6 +156,9 @@ function module.create_screen_handler(viewport)
     )
 
     update_screen_viewport(s)
+
+    --s:emit_signal("request::desktop_decoration")
+    --s:emit_signal("request::wallpaper")
 end
 
 function module.remove_screen_handler(viewport)
