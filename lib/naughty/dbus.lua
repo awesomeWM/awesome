@@ -236,6 +236,9 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
                 if k == "destroy" then k = "destroy_cb" end
                 notification[k] = v
             end
+
+            -- Even if no property changed, restart the timeout.
+            notification:reset_timeout()
         else
             notification = nnotif(args)
         end
