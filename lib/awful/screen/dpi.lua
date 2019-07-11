@@ -160,6 +160,9 @@ function module.create_screen_handler(viewport)
 
     s:emit_signal("request::desktop_decoration")
     s:emit_signal("request::wallpaper")
+
+    -- Will call all `connect_for_each_screen`.
+    s:emit_signal("added")
 end
 
 function module.remove_screen_handler(viewport)

@@ -937,11 +937,12 @@ require("awful.screen.dpi")(screen, data)
 
 -- Set the wallpaper(s) and create the bar(s) for new screens
 
-capi.screen.connect_signal("added", function(s)
+capi.screen.connect_signal("_added", function(s)
     -- If it was emited from here when screens are created with fake_add,
     -- the Lua code would not have an opportunity to polutate the screen
     -- metadata. Thus, the DPI may be wrong when setting the wallpaper.
     if s._managed ~= "Lua" then
+        s:emit_signal("added")
         s:emit_signal("request::desktop_decoration")
         s:emit_signal("request::wallpaper")
     end
