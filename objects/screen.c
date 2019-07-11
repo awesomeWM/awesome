@@ -590,6 +590,7 @@ screen_add(lua_State *L, screen_array_t *screens)
     luaA_object_ref(L, -1);
     screen_array_append(screens, new_screen);
     new_screen->xid = XCB_NONE;
+    new_screen->lifecycle = SCREEN_LIFECYCLE_USER;
     return new_screen;
 }
 
@@ -667,6 +668,7 @@ screen_scan_randr_monitors(lua_State *L, screen_array_t *screens)
             continue;
 
         new_screen = screen_add(L, screens);
+        new_screen->lifecycle |= SCREEN_LIFECYCLE_C;
         viewport->screen = new_screen;
         new_screen->viewport = viewport;
         new_screen->geometry.x = monitor_iter.data->x;
@@ -767,6 +769,7 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
 
         /* Prepare the new screen */
         screen_t *new_screen = screen_add(L, screens);
+        new_screen->lifecycle |= SCREEN_LIFECYCLE_C;
         viewport->screen = new_screen;
         new_screen->viewport = viewport;
         new_screen->geometry.x = crtc_info_r->x;
@@ -906,6 +909,7 @@ screen_scan_xinerama(lua_State *L, screen_array_t *screens)
         screen_t *s = screen_add(L, screens);
         viewport->screen = s;
         s->viewport = viewport;
+        s->lifecycle |= SCREEN_LIFECYCLE_C;
         s->geometry.x = xsi[screen].x_org;
         s->geometry.y = xsi[screen].y_org;
         s->geometry.width = xsi[screen].width;
@@ -931,6 +935,7 @@ static void screen_scan_x11(lua_State *L, screen_array_t *screens)
 
     screen_t *s = screen_add(L, screens);
     viewport->screen = s;
+    s->lifecycle |= SCREEN_LIFECYCLE_C;
     s->viewport = viewport;
     s->geometry.x = 0;
     s->geometry.y = 0;
@@ -1134,9 +1139,11 @@ screen_refresh(gpointer unused)
     for(int i = 0; i < globalconf.screens.len; i++) {
         screen_t *old_screen = globalconf.screens.tab[i];
         bool found = old_screen->xid == FAKE_SCREEN_XID;
+
         foreach(new_screen, new_screens)
             found |= (*new_screen)->xid == old_screen->xid;
-        if(!found) {
+
+        if(old_screen->lifecycle & SCREEN_LIFECYCLE_C && !found) {
             screen_array_take(&globalconf.screens, i);
             i--;
 
@@ -1587,6 +1594,19 @@ luaA_screen_get_outputs(lua_State *L, screen_t *s)
 }
 
 static int
+luaA_screen_get_managed(lua_State *L, screen_t *s)
+{
+    if (s->lifecycle & SCREEN_LIFECYCLE_LUA)
+        lua_pushstring(L, "Lua");
+    else if (s->lifecycle & SCREEN_LIFECYCLE_C)
+        lua_pushstring(L, "C");
+    else
+        lua_pushstring(L, "none");
+
+    return 1;
+}
+
+static int
 luaA_screen_get_workarea(lua_State *L, screen_t *s)
 {
     luaA_pusharea(L, s->workarea);
@@ -1631,9 +1651,22 @@ luaA_screen_fake_add(lua_State *L)
     int y = luaL_checkinteger(L, 2);
     int width = luaL_checkinteger(L, 3);
     int height = luaL_checkinteger(L, 4);
+
+    /* If the screen is managed by internal Lua code */
+    bool managed = false;
+
+    /* Allow undocumented arguments for internal use only */
+    if(lua_istable(L, 5)) {
+        lua_getfield(L, 5, "_managed");
+        managed = lua_isboolean(L, 6) && luaA_checkboolean(L, 6);
+
+        lua_pop(L, 1);
+    }
+
     screen_t *s;
 
     s = screen_add(L, &globalconf.screens);
+    s->lifecycle |= managed ? SCREEN_LIFECYCLE_LUA : SCREEN_LIFECYCLE_USER;
     s->geometry.x = x;
     s->geometry.y = y;
     s->geometry.width = width;
@@ -1802,6 +1835,10 @@ screen_class_setup(lua_State *L)
     luaA_class_add_property(&screen_class, "_outputs",
                             NULL,
                             (lua_class_propfunc_t) luaA_screen_get_outputs,
+                            NULL);
+    luaA_class_add_property(&screen_class, "_managed",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_screen_get_managed,
                             NULL);
     luaA_class_add_property(&screen_class, "workarea",
                             NULL,
