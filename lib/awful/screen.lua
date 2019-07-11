@@ -941,10 +941,10 @@ capi.screen.connect_signal("added", function(s)
     -- If it was emited from here when screens are created with fake_add,
     -- the Lua code would not have an opportunity to polutate the screen
     -- metadata. Thus, the DPI may be wrong when setting the wallpaper.
-    --if capi.screen.automatic_factory then
-    s:emit_signal("request::desktop_decoration")
-    s:emit_signal("request::wallpaper")
-    --end
+    if s._managed ~= "Lua" then
+        s:emit_signal("request::desktop_decoration")
+        s:emit_signal("request::wallpaper")
+    end
 end)
 
 -- Resize the wallpaper(s)

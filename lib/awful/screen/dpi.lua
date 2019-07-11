@@ -152,13 +152,14 @@ function module.create_screen_handler(viewport)
         geo.x,
         geo.y,
         geo.width,
-        geo.height
+        geo.height,
+        {_managed = true}
     )
 
     update_screen_viewport(s)
 
-    --s:emit_signal("request::desktop_decoration")
-    --s:emit_signal("request::wallpaper")
+    s:emit_signal("request::desktop_decoration")
+    s:emit_signal("request::wallpaper")
 end
 
 function module.remove_screen_handler(viewport)
