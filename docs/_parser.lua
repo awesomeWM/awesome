@@ -69,19 +69,19 @@ local function path_to_module(path)
 end
 
 local modtypes = {
-    classmod     = true,
-    widgetmod    = true,
-    containermod = true,
-    layoutmod    = true,
-    coreclassmod = true,
-    popupmod     = true,
+    classmod     = "classes",
+    widgetmod    = "widgets",
+    containermod = "widget_containers",
+    layoutmod    = "widget_layouts",
+    coreclassmod = "core_components",
+    popupmod     = "popups_and_bars",
+    module       = "libraries",
+    submodule    = "libraries",
+    utillib      = "utility_libraries",
+    themelib     = "theme_related_libraries",
 }
 
 local libtypes = {
-    module    = true,
-    submodule = true,
-    utillib   = true,
-    themelib  = true,
 }
 
 function module.path_to_html(path)
@@ -95,12 +95,7 @@ function module.path_to_html(path)
 
         if modtypes[tag] then
             f:close()
-            return "../classes/".. mod ..".html#"
-        end
-
-        if libtypes[tag] then
-            f:close()
-            return "../libraries/".. mod ..".html#"
+            return "../"..modtypes[tag].."/".. mod ..".html#"
         end
     end
     f:close()

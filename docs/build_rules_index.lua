@@ -9,7 +9,7 @@ local matcher, matcher2 = "(.*)", ".*"
 -- merged into one documentation page (aka, awful.client doesn't have content
 -- anymore). This override the path so the parser doesn't have to be aware of it
 function parser.path_to_html()
-    return "../classes/client.html#client."
+    return "../core_components/client.html#"
 end
 
 local clientruleproperty = parser.parse_files(files, "clientruleproperty", matcher, matcher2)

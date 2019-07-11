@@ -4,11 +4,16 @@
 # Ldoc wont parse the HTML content and discount tables are disabled, so here is
 # some raw HTML
 function(add_to_table name namespace group current_table new_table)
+    set(URI_PATH "${group}")
+
+    if(NOT ${URI_PATH} STREQUAL "widget")
+        set(URI_PATH "widget_${group}")
+    endif()
 
     set(${new_table} "${current_table}\n\
 <tr>\n\
  <td>
-  <a href='../classes/${namespace}${name}.html'>${namespace}${name}</a>
+  <a href='../${URI_PATH}s/${namespace}${name}.html'>${namespace}${name}</a>
  </td>\n\
  <td><img src='../images/AUTOGEN_wibox_${group}_defaults_${name}.svg' /></td>\n\
 </tr>\n\
