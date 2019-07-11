@@ -235,10 +235,6 @@ local notification = {}
 -- @property preset
 -- @param table
 
---- Replace the notification with the given ID.
--- @property replaces_id
--- @param number
-
 --- Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.
@@ -394,8 +390,8 @@ local properties = {
     "width"   , "font"    , "icon"    , "icon_size"     ,
     "fg"      , "bg"      , "height"  , "border_color"  ,
     "shape"   , "opacity" , "margin"  , "ignore_suspend",
-    "destroy" , "preset"  , "callback", "replaces_id"   ,
-    "actions" , "run"     , "id"      , "ignore"        ,
+    "destroy" , "preset"  , "callback", "actions"       ,
+    "run"     , "id"      , "ignore",
 }
 
 for _, prop in ipairs(properties) do
@@ -496,7 +492,6 @@ end
 -- @tparam[opt] table args.preset Table with any of the above parameters.
 --   Note: Any parameters specified directly in args will override ones defined
 --   in the preset.
--- @tparam[opt] int args.replaces_id Replace the notification with the given ID.
 -- @tparam[opt] func args.callback Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.
