@@ -74,8 +74,7 @@ local notification = {}
 -- This is the equivalent to a PID as allows external applications to select
 -- notifications.
 -- @property id
--- @param string
--- @see title
+-- @param number
 
 --- Text of the notification.
 --
