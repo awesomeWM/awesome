@@ -235,10 +235,6 @@ local notification = {}
 -- @property preset
 -- @param table
 
---- Replace the notification with the given ID.
--- @property replaces_id
--- @param number
-
 --- Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.
@@ -270,6 +266,14 @@ local notification = {}
 -- @property is_expired
 -- @param boolean
 -- @see naughty.expiration_paused
+
+--- If the timeout needs to be reset when a property changes.
+--
+-- By default it fallsback to `naughty.auto_reset_timeout`, which itself is
+-- true by default.
+--
+-- @property auto_reset_timeout
+-- @tparam[opt=true] boolean auto_reset_timeout
 
 --- Emitted when the notification is destroyed.
 -- @signal destroyed
@@ -394,8 +398,8 @@ local properties = {
     "width"   , "font"    , "icon"    , "icon_size"     ,
     "fg"      , "bg"      , "height"  , "border_color"  ,
     "shape"   , "opacity" , "margin"  , "ignore_suspend",
-    "destroy" , "preset"  , "callback", "replaces_id"   ,
-    "actions" , "run"     , "id"      , "ignore"        ,
+    "destroy" , "preset"  , "callback", "actions"       ,
+    "run"     , "id"      , "ignore"  , "auto_reset_timeout"
 }
 
 for _, prop in ipairs(properties) do
@@ -412,6 +416,17 @@ for _, prop in ipairs(properties) do
     notification["set_"..prop] = notification["set_"..prop] or function(self, value)
         self._private[prop] = value
         self:emit_signal("property::"..prop, value)
+
+        -- When a notification is updated over dbus or by setting a property,
+        -- it is usually convenient to reset the timeout.
+        local reset = ((not self.suspended)
+            and self.auto_reset_timeout ~= false
+            and naughty.auto_reset_timeout)
+
+        if reset then
+            self:reset_timeout()
+        end
+
         return
     end
 
@@ -496,7 +511,6 @@ end
 -- @tparam[opt] table args.preset Table with any of the above parameters.
 --   Note: Any parameters specified directly in args will override ones defined
 --   in the preset.
--- @tparam[opt] int args.replaces_id Replace the notification with the given ID.
 -- @tparam[opt] func args.callback Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.

@@ -126,9 +126,18 @@ gtable.crush(naughty, require("naughty.constants"))
 -- @property has_display_handler
 -- @param boolean
 
+--- If the timeout needs to be reset when a property changes.
+--
+-- This is the global variant of the `naughty.notification` `auto_reset_timeout`
+-- property.
+--
+-- @property auto_reset_timeout
+-- @tparam[opt=true] boolean auto_reset_timeout
+
 local properties = {
     suspended         = false,
-    expiration_paused = false
+    expiration_paused = false,
+    auto_reset_timeout= true,
 }
 
 --TODO v5 Deprecate the public `naughty.notifications` (to make it private)
