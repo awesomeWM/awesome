@@ -19,6 +19,7 @@
 local imagebox = require("wibox.widget.imagebox")
 local gtable  = require("gears.table")
 local beautiful = require("beautiful")
+local gsurface = require("gears.surface")
 local dpi = require("beautiful.xresources").apply_dpi
 
 local icon = {}
@@ -85,7 +86,11 @@ function icon:set_notification(notif)
             self._private.icon_changed_callback)
     end
 
-    self:set_image(notif.icon)
+    local icn = gsurface.load_silently(notif.icon)
+
+    if icn then
+        self:set_image(icn)
+    end
 
     self._private.notification = notif
 
@@ -141,7 +146,11 @@ local function new(args)
     gtable.crush(tb, icon, true)
 
     function tb._private.icon_changed_callback()
-        tb:set_image(tb._private.notification.icon)
+        local icn = gsurface.load_silently(tb._private.notification.icon)
+
+        if icn then
+            tb:set_image()
+        end
     end
 
     if args.notification then
