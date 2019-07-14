@@ -134,10 +134,36 @@ gtable.crush(naughty, require("naughty.constants"))
 -- @property auto_reset_timeout
 -- @tparam[opt=true] boolean auto_reset_timeout
 
+--- Enable or disable naughty ability to claim to support animations.
+--
+-- When this is true, applications which query `naughty` feature support
+-- will see that animations are supported. Note that there is *very little*
+-- support for this and enabled it will cause bugs.
+--
+-- @property image_animations_enabled
+-- @param[opt=false] boolean
+
+--- Enable or disable the persistent notifications.
+--
+-- This is very annoying when using `naughty.layout.box` popups, but tolerable
+-- when using `naughty.list.notifications`.
+--
+-- Note that enabling this **does nothing** in `naughty` itself. The timeouts
+-- are still honored and notifications still destroyed. It is the user
+-- responsibility to disable the dismiss timer. However, this tells the
+-- applications that notification persistence is supported so they might
+-- stop using systray icons for the sake of displaying or other changes like
+-- that.
+--
+-- @property persistence_enabled
+-- @param[opt=false] boolean
+
 local properties = {
-    suspended         = false,
-    expiration_paused = false,
-    auto_reset_timeout= true,
+    suspended                = false,
+    expiration_paused        = false,
+    auto_reset_timeout       = true,
+    image_animations_enabled = false,
+    persistence_enabled      = false,
 }
 
 --TODO v5 Deprecate the public `naughty.notifications` (to make it private)
@@ -514,6 +540,18 @@ end
 --  including, but not limited to, all `naughty.notification` properties.
 -- @signal request::preset
 
+--- Emitted when an action requires an icon it doesn't know.
+--
+-- The implementation should look in the icon theme for an action icon or
+-- provide something natively.
+--
+-- If an icon is found, the handler must set the `icon` property on the `action`
+-- object to a path or a `gears.surface`.
+--
+-- @signal request::icon
+-- @tparam naughty.action action The action.
+-- @tparam string icon_name The icon name.
+
 -- Register a new notification object.
 local function register(notification, args)
     -- Add the some more properties
@@ -564,6 +602,8 @@ local function set_index_miss(_, key, value)
         if not value then
             resume()
         end
+
+        naughty.emit_signal("property::"..key)
     else
         rawset(naughty, key, value)
     end
