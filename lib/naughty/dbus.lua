@@ -141,9 +141,12 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
             return
         end
     end
+
     if appname ~= "" then
-        args.appname = appname
+        args.appname  = appname --TODO v6 Remove this.
+        args.app_name = appname
     end
+
     local preset = args.preset or cst.config.defaults
     local notification
     if actions then

@@ -407,6 +407,31 @@ local notification = {}
 -- @property clients
 -- @param table
 
+--- The maximum popup width.
+--
+-- Some notifications have overlong message, cap them to this width. Note that
+-- this is ignored by `naughty.list.notifications` because it delegate this
+-- decision to the layout.
+--
+-- @property[opt=500] max_width
+-- @param number
+
+--- The application name specified by the notification.
+--
+-- This can be anything. It is usually less relevant than the `clients`
+-- property, but can sometime to specified for remote or headless notifications.
+-- In these case, it helps to triage and detect the notification from the rules.
+-- @property app_name
+-- @param string
+
+--- The widget template used to represent the notification.
+--
+-- Some notifications, such as chat messages or music applications are better
+-- off with a specialized notification widget.
+--
+-- @property widget_template
+-- @param table
+
 --FIXME remove the screen attribute, let the handlers decide
 -- document all handler extra properties
 
@@ -526,7 +551,8 @@ local properties = {
     "shape"   , "opacity" , "margin"  , "ignore_suspend",
     "destroy" , "preset"  , "callback", "actions"       ,
     "run"     , "id"      , "ignore"  , "auto_reset_timeout",
-    "urgency" , "image"   , "images"  ,
+    "urgency" , "image"   , "images"  , "widget_template",
+    "max_width", "app_name",
 }
 
 for _, prop in ipairs(properties) do

@@ -17,6 +17,7 @@ local popup      = require("awful.popup")
 local awcommon   = require("awful.widget.common")
 local placement  = require("awful.placement")
 local abutton    = require("awful.button")
+local dpi        = require("beautiful").xresources.apply_dpi
 
 local default_widget = require("naughty.widget._default")
 
@@ -136,8 +137,12 @@ end
 
 local function generate_widget(args, n)
     local w = wibox.widget.base.make_widget_from_value(
-        args.widget_template or default_widget
+        args.widget_template or (n and n.widget_template) or default_widget
     )
+
+    if w.set_width then
+        w:set_width(n.max_width or beautiful.notification_max_width or dpi(500))
+    end
 
     -- Call `:set_notification` on all children
     awcommon._set_common_property(w, "notification", n or args.notification)
@@ -224,7 +229,7 @@ local function new(args)
     new_args = args and setmetatable(new_args, {__index = args}) or new_args
 
     -- Generate the box before the popup is created to avoid the size changing
-    new_args.widget = generate_widget(new_args)
+    new_args.widget = generate_widget(new_args, new_args.notification)
 
     local ret = popup(new_args)
     ret._private.args = new_args
