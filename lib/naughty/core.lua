@@ -224,7 +224,9 @@ local function update_index(n)
     remove_from_index(n)
 
     -- Add to the index again
-    local s = get_screen(n.screen or n.preset.screen or screen.focused())
+    local s = get_screen(n.screen
+        or (n.preset and n.preset.screen)
+        or screen.focused())
     naughty.notifications[s] = naughty.notifications[s] or {}
     table.insert(naughty.notifications[s][n.position], n)
 end
@@ -399,6 +401,11 @@ function naughty.get_has_display_handler()
     return conns["request::display"] and #conns["request::display"] > 0 or false
 end
 
+-- Presets are "deprecated" when notification rules are used.
+function naughty.get__has_preset_handler()
+    return conns["request::preset"] and #conns["request::preset"] > 0 or false
+end
+
 --- Set new notification timeout.
 --
 -- This function is deprecated, use `notification:reset_timeout(new_timeout)`.
@@ -545,7 +552,9 @@ local function register(notification, args)
     rawset(notification, "get_suspended", get_suspended)
 
     --TODO v5 uncouple the notifications and the screen
-    local s = get_screen(args.screen or notification.preset.screen or screen.focused())
+    local s = get_screen(args.screen
+        or (notification.preset and notification.preset.screen)
+        or screen.focused())
 
     -- insert the notification to the table
     table.insert(naughty._active, notification)
@@ -560,7 +569,7 @@ local function register(notification, args)
         naughty.emit_signal("added", notification, args)
     end
 
-    assert(rawget(notification, "preset"))
+    assert(rawget(notification, "preset") or naughty._has_preset_handler)
 
     naughty.emit_signal("property::active")
 

@@ -12,7 +12,6 @@ local pairs = pairs
 local type = type
 local string = string
 local capi = { awesome = awesome }
-local gtable = require("gears.table")
 local gsurface = require("gears.surface")
 local gdebug  = require("gears.debug")
 local protected_call = require("gears.protected_call")
@@ -56,11 +55,7 @@ local urgency = {
 -- @tfield table 2 normal urgency
 -- @tfield table 3 critical urgency
 -- @table config.mapping
-dbus.config.mapping = {
-    {{urgency = urgency.low}, cst.config.presets.low},
-    {{urgency = urgency.normal}, cst.config.presets.normal},
-    {{urgency = urgency.critical}, cst.config.presets.critical}
-}
+dbus.config.mapping = cst.mapping
 
 local function sendActionInvoked(notificationId, action)
     if bus_connection then
@@ -148,14 +143,6 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
     end
     if appname ~= "" then
         args.appname = appname
-    end
-    for _, obj in pairs(dbus.config.mapping) do
-        local filter, preset = obj[1], obj[2]
-        if (not filter.urgency or filter.urgency == hints.urgency) and
-        (not filter.category or filter.category == hints.category) and
-        (not filter.appname or filter.appname == appname) then
-            args.preset = gtable.join(args.preset, preset)
-        end
     end
     local preset = args.preset or cst.config.defaults
     local notification

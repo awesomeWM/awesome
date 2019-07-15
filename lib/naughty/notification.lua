@@ -653,6 +653,33 @@ local function convert_actions(actions)
     end
 end
 
+-- The old API used monkey-patched variable presets.
+--
+-- Monkey-patched anything is always an issue and prevent module from safely
+-- doing anything without stepping on each other foot. In the background,
+-- presets were selected with a rule-like API anyway.
+local function select_legacy_preset(n, args)
+    for _, obj in pairs(cst.config.mapping) do
+        local filter, preset = obj[1], obj[2]
+        if (not filter.urgency or filter.urgency == args.urgency) and
+        (not filter.category or filter.category == args.category) and
+        (not filter.appname or filter.appname == args.appname) then
+            args.preset = gtable.join(args.preset or {}, preset)
+        end
+    end
+
+    -- gather variables together
+    rawset(n, "preset", gtable.join(
+        cst.config.defaults or {},
+        args.preset or cst.config.presets.normal or {},
+        rawget(n, "preset") or {}
+    ))
+
+    for k, v in pairs(n.preset) do
+        n._private[k] = v
+    end
+end
+
 --- Create a notification.
 --
 -- @tab args The argument table containing any of the arguments below.
@@ -734,20 +761,15 @@ local function create(args)
 
     -- Avoid modifying the original table
     local private = {}
+    rawset(n, "_private", private)
 
-    -- gather variables together
-    rawset(n, "preset", gtable.join(
-        cst.config.defaults or {},
-        args.preset or cst.config.presets.normal or {},
-        rawget(n, "preset") or {}
-    ))
+    -- Allow extensions to create override the preset with custom data
+    if not naughty._has_preset_handler then
+        select_legacy_preset(n, args)
+    end
 
     if is_old_action then
         convert_actions(args.actions)
-    end
-
-    for k, v in pairs(n.preset) do
-        private[k] = v
     end
 
     for k, v in pairs(args) do
@@ -767,27 +789,30 @@ local function create(args)
     -- It's an automatic property
     n.is_expired = false
 
-    rawset(n, "_private", private)
-
     gtable.crush(n, notification, true)
 
     n.id = n.id or notification._gen_next_id()
 
-    -- Allow extensions to create override the preset with custom data
-    naughty.emit_signal("request::preset", n, args)
-
     -- Register the notification before requesting a widget
     n:emit_signal("new", args)
 
+    -- The rules are attached to this.
+    if naughty._has_preset_handler then
+        naughty.emit_signal("request::preset", n, args)
+    end
+
     -- Let all listeners handle the actual visual aspects
-    if (not n.ignore) and (not n.preset.ignore) then
+    if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) then
         naughty.emit_signal("request::display" , n, args)
         naughty.emit_signal("request::fallback", n, args)
     end
 
     -- Because otherwise the setter logic would not be executed
     if n._private.timeout then
-        n:set_timeout(n._private.timeout or n.preset.timeout)
+        n:set_timeout(n._private.timeout
+            or (n.preset and n.preset.timeout)
+            or cst.config.timeout
+        )
     end
 
     return n

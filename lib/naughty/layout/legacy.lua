@@ -309,7 +309,7 @@ function naughty.default_notification_handler(notification, args)
         return
     end
 
-    local preset = notification.preset
+    local preset = notification.preset or {}
     local text   = args.message or args.text or preset.message or preset.text
     local title  = args.title or preset.title
     local s      = get_screen(args.screen or preset.screen or screen.focused())

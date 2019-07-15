@@ -48,6 +48,21 @@ ret.config.presets = {
     },
 }
 
+ret.config._urgency = {
+    low      = "\0",
+    normal   = "\1",
+    critical = "\2"
+}
+
+ret.config.mapping = {
+    {{urgency = ret.config._urgency.low     }, ret.config.presets.low}, --compat
+    {{urgency = ret.config._urgency.normal  }, ret.config.presets.normal}, --compat
+    {{urgency = ret.config._urgency.critical}, ret.config.presets.critical}, --compat
+    {{urgency = "low"     }, ret.config.presets.low},
+    {{urgency = "normal"  }, ret.config.presets.normal},
+    {{urgency = "critical"}, ret.config.presets.critical},
+}
+
 ret.config.defaults = {
     timeout      = 5,
     text         = "",

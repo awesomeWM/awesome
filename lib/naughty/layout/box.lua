@@ -148,8 +148,7 @@ end
 local function init(self, notification)
     local args = self._private.args
 
-    local preset = notification.preset
-    assert(preset)
+    local preset = notification.preset or {}
 
     local position = args.position or notification.position or
         beautiful.notification_position or preset.position or "top_right"
