@@ -457,6 +457,8 @@ function notification:set_id(new_id)
 end
 
 function notification:set_timeout(timeout)
+    timeout = timeout or 0
+
     local die = function (reason)
         if reason == cst.notification_closed_reason.expired then
             self.is_expired = true
