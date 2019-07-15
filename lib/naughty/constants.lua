@@ -55,7 +55,8 @@ ret.config.defaults = {
     ontop        = true,
     margin       = dpi(5),
     border_width = dpi(1),
-    position     = "top_right"
+    position     = "top_right",
+    urgency      = "normal",
 }
 
 ret.notification_closed_reason = {
