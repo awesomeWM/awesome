@@ -719,6 +719,69 @@ table.insert(steps, function()
     return true
 end)
 
+-- Test adding actions, resident mode and action sharing.
+table.insert(steps, function()
+    local n1 = naughty.notification {
+        title    = "foo",
+        message  = "bar",
+        timeout  = 25000,
+        resident = true,
+        actions  = { naughty.action { name = "a1" } }
+    }
+
+    local n2 = naughty.notification {
+        title    = "foo",
+        message  = "bar",
+        resident = true,
+        timeout  = 25000,
+        actions  = { naughty.action { name = "a2" } }
+    }
+
+    local is_called = {}
+
+    n1:connect_signal("invoked", function() is_called[1] = true end)
+    n2:connect_signal("invoked", function() is_called[2] = true end)
+
+    n1.actions[1]:invoke(n1)
+    n2.actions[1]:invoke(n2)
+
+    assert(is_called[1])
+    assert(is_called[2])
+    assert(not n1._private.is_destroyed)
+    assert(not n2._private.is_destroyed)
+
+    local shared_a = naughty.action { name = "a3" }
+
+    n1:append_actions {shared_a}
+    n2:append_actions {shared_a}
+
+    n1:connect_signal("invoked", function() is_called[3] = true end)
+    n2:connect_signal("invoked", function() is_called[4] = true end)
+
+    assert(n1.actions[2] == shared_a)
+    assert(n2.actions[2] == shared_a)
+
+    shared_a:invoke(n1)
+
+    assert(is_called[3])
+    assert(not is_called[4])
+    assert(not n1._private.is_destroyed)
+    assert(not n2._private.is_destroyed)
+
+    n1.resident = false
+    n2.resident = false
+
+    shared_a:invoke(n1)
+
+    assert(n1._private.is_destroyed)
+    assert(not n2._private.is_destroyed)
+
+    shared_a:invoke(n2)
+    assert(n2._private.is_destroyed)
+
+    return true
+end)
+
 -- Now check if the old deprecated (but still supported) APIs don't have errors.
 table.insert(steps, function()
     -- Tests are (by default) not allowed to call deprecated APIs
