@@ -641,6 +641,34 @@ function notification.get_clients(self)
     return self._private.clients
 end
 
+function notification.set_actions(self, new_actions)
+    for _, a in ipairs(self._private.actions or {}) do
+        a:disconnect_signal("_changed", self._private.action_cb )
+        a:disconnect_signal("invoked" , self._private.invoked_cb)
+    end
+
+    -- Clone so `append_actions` doesn't add unwanted actions to other
+    -- notifications.
+    self._private.actions = gtable.clone(new_actions, false)
+
+    for _, a in ipairs(self._private.actions or {}) do
+        a:connect_signal("_changed", self._private.action_cb )
+        a:connect_signal("invoked" , self._private.invoked_cb)
+    end
+
+    self:emit_signal("property::actions", new_actions)
+
+    -- When a notification is updated over dbus or by setting a property,
+    -- it is usually convenient to reset the timeout.
+    local reset = ((not self.suspended)
+        and self.auto_reset_timeout ~= false
+        and naughty.auto_reset_timeout)
+
+    if reset then
+        self:reset_timeout()
+    end
+end
+
 --TODO v6: remove this
 local function convert_actions(actions)
     gdebug.deprecate(
@@ -808,20 +836,33 @@ local function create(args)
         private[k] = v
     end
 
-    -- notif.actions should not be nil to allow cheching if there is actions
-    -- using the shorthand `if #notif.actions > 0 then`
-    private.actions = private.actions or {}
-
-    -- Make sure the action are for this notification. Sharing actions with
-    -- multiple notification is not supported.
-    for _, a in ipairs(private.actions) do
-        a.notification = n
-    end
-
     -- It's an automatic property
     n.is_expired = false
 
     gtable.crush(n, notification, true)
+
+    -- Always emit property::actions when any of the action change to allow
+    -- some widgets to be updated without over complicated built-in tracking
+    -- of all options.
+    function n._private.action_cb() n:emit_signal("property::actions") end
+
+    -- Listen to action press and destroy non-resident notifications.
+    function n._private.invoked_cb(a, notif)
+        if (not notif) or notif == n then
+            n:emit_signal("invoked", a)
+
+            if not n.resident then
+                n:destroy(cst.notification_closed_reason.dismissed_by_user)
+            end
+        end
+    end
+
+    -- notif.actions should not be nil to allow checking if there is actions
+    -- using the shorthand `if #notif.actions > 0 then`
+    private.actions = {}
+    if args.actions then
+        notification.set_actions(n, args.actions)
+    end
 
     n.id = n.id or notification._gen_next_id()
 

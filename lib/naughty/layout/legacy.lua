@@ -430,12 +430,10 @@ function naughty.default_notification_handler(notification, args)
 
             actionmarginbox:buttons(gtable.join(
                 button({ }, 1, function()
-                    action:invoke()
-                    notification:destroy()
+                    action:invoke(notification)
                 end),
                 button({ }, 3, function()
-                    action:invoke()
-                    notification:destroy()
+                    action:invoke(notification)
                 end)
             ))
             actionslayout:add(actionmarginbox)

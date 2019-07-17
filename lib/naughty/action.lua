@@ -2,7 +2,8 @@
 --- A notification action.
 --
 -- A notification can have multiple actions to chose from. This module allows
--- to manage such actions.
+-- to manage such actions. An action object can be shared by multiple
+-- notifications.
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2019 Emmanuel Lepage Vallee
@@ -29,8 +30,8 @@ local action = {}
 
 -- If the action is selected.
 --
--- Only a single action can be selected per notification. It will be applied
--- when `my_notification:apply()` is called.
+-- Only a single action can be selected per notification. This is useful to
+-- implement keyboard navigation.
 --
 -- @property selected
 -- @param boolean
@@ -50,10 +51,6 @@ local action = {}
 -- @property icon_only
 -- @param[opt=false] boolean
 
---- The notification.
--- @property notification
--- @tparam naughty.notification notification
-
 --- When a notification is invoked.
 -- @signal invoked
 
@@ -64,10 +61,7 @@ end
 function action:set_selected(value)
     self._private.selected = value
     self:emit_signal("property::selected", value)
-
-    if self._private.notification then
-        self._private.notification:emit_signal("property::actions")
-    end
+    self:emit_signal("_changed")
 
     --TODO deselect other actions from the same notification
 end
@@ -79,15 +73,12 @@ end
 function action:set_position(value)
     self._private.position = value
     self:emit_signal("property::position", value)
-
-    if self._private.notification then
-        self._private.notification:emit_signal("property::actions")
-    end
+    self:emit_signal("_changed")
 
     --TODO make sure the position is unique
 end
 
-for _, prop in ipairs { "name", "icon", "notification", "icon_only" } do
+for _, prop in ipairs { "name", "icon", "icon_only" } do
     action["get_"..prop] = function(self)
         return self._private[prop]
     end
@@ -95,22 +86,18 @@ for _, prop in ipairs { "name", "icon", "notification", "icon_only" } do
     action["set_"..prop] = function(self, value)
         self._private[prop] = value
         self:emit_signal("property::"..prop, value)
-
-        -- Make sure widgets with as an actionlist is updated.
-        if self._private.notification then
-            self._private.notification:emit_signal("property::actions")
-        end
+        self:emit_signal("_changed")
     end
 end
 
-local set_notif = action.set_notification
-
-function action.set_notification(self, value)
-    local old = self._private.notification
-    set_notif(self, value)
-    if old then
-        old:emit_signal("property::actions")
-    end
+--TODO v4.5, remove this.
+function action.set_notification()
+    -- It didn't work because it prevented actions defined in the rules to be
+    -- in multiple notifications at once.
+    assert(
+        false,
+        "Setting a notification object was a bad idea and is now forbidden"
+    )
 end
 
 --- Execute this action.
@@ -118,11 +105,12 @@ end
 -- This only emits the `invoked` signal.
 --
 -- @method invoke
-function action:invoke()
-    assert(self._private.notification,
-        "Cannot invoke an action without a notification")
-
-    self:emit_signal("invoked")
+-- @tparam[opt={}] naughty.notification notif A notification object on which
+--  the action was invoked. If a notification is shared by many object (like
+--  a "mute" or "snooze" action added to all notification), calling `:invoke()`
+--  without adding the `notif` context will cause unexpected results.
+function action:invoke(notif)
+    self:emit_signal("invoked", notif)
 end
 
 local function new(_, args)
