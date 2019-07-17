@@ -874,6 +874,21 @@ table.insert(steps, function()
     return true
 end)
 
+-- Test the error popup.
+table.insert(steps, function()
+    local got = nil
+
+    naughty.connect_signal("request::display_error", function(err)
+        got = err
+    end)
+
+    awesome.emit_signal("debug::error", "foo")
+
+    assert(got == "foo")
+
+    return true
+end)
+
 -- Now check if the old deprecated (but still supported) APIs don't have errors.
 table.insert(steps, function()
     -- Tests are (by default) not allowed to call deprecated APIs
