@@ -674,6 +674,9 @@ table.insert(steps, function()
     assert(n.actions[2].name == "five" )
     assert(n.actions[3].name == "six"  )
 
+    n:destroy()
+    assert(#active == 0)
+
     return true
 end)
 
@@ -811,6 +814,52 @@ table.insert(steps, function()
     assert(    gtable.hasitem(naughty.dbus._capabilities, "icon-static"))
     assert(not gtable.hasitem(naughty.dbus._capabilities, "icon-multi" ))
     assert(not gtable.hasitem(naughty.dbus._capabilities, "persistence"))
+
+    return true
+end)
+
+local icon_requests = {}
+
+-- Check if the action icon support is detected.
+table.insert(steps, function()
+    assert(#active == 0)
+
+    naughty.connect_signal("request::icon", function(a, icon_name)
+        icon_requests[icon_name] = a
+
+        a.icon = icon_name == "list-add" and small_icon or big_icon
+    end)
+
+    local hints = {
+        ["action-icons"] = GLib.Variant("b", true),
+    }
+
+    send_notify("Awesome test", 0, "", "title", "message body",
+        { "list-add", "add", "list-remove", "remove" }, hints, 25000)
+
+    return true
+end)
+
+table.insert(steps, function()
+    if #active ~= 1 then return end
+
+    local n = active[1]
+
+    assert(n._private.freedesktop_hints)
+    assert(n._private.freedesktop_hints["action-icons"] == true)
+
+    assert(icon_requests["list-add"   ] == n.actions[1])
+    assert(icon_requests["list-remove"] == n.actions[2])
+
+    assert(n.actions[1].icon == small_icon)
+    assert(n.actions[2].icon == big_icon  )
+
+    assert(type(n.actions[1].position) == "number")
+    assert(type(n.actions[2].position) == "number")
+    assert(n.actions[1].position == 1)
+    assert(n.actions[2].position == 2)
+
+    n:destroy()
 
     return true
 end)
