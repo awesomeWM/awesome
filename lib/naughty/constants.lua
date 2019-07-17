@@ -81,7 +81,7 @@ ret.notification_closed_reason = {
     dismissedByUser      = 2, --TODO v5 remove this undocumented legacy constant
     dismissed_by_user    = 2,
     dismissedByCommand   = 3, --TODO v5 remove this undocumented legacy constant
-    dismissed_by_vommand = 3,
+    dismissed_by_command = 3,
     undefined            = 4
 }
 
