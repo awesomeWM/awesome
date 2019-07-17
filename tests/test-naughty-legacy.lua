@@ -3,6 +3,7 @@
 local spawn     = require("awful.spawn")
 local naughty   = require("naughty"    )
 local gdebug    = require("gears.debug")
+local gtable    = require("gears.table")
 local cairo     = require("lgi"        ).cairo
 local beautiful = require("beautiful")
 local Gio       = require("lgi"        ).Gio
@@ -778,6 +779,38 @@ table.insert(steps, function()
 
     shared_a:invoke(n2)
     assert(n2._private.is_destroyed)
+
+    return true
+end)
+
+-- Test that exposing support for animations and persistence are exposed to DBus.
+table.insert(steps, function()
+    assert(not naughty.persistence_enabled)
+    assert(not naughty.image_animations_enabled)
+
+    assert(gtable.hasitem(naughty.dbus._capabilities, "icon-static"))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "icon-multi"))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "persistence"))
+
+    naughty.persistence_enabled      = true
+    naughty.image_animations_enabled = true
+
+    assert(naughty.persistence_enabled)
+    assert(naughty.image_animations_enabled)
+
+    assert(gtable.hasitem(naughty.dbus._capabilities, "icon-multi"))
+    assert(gtable.hasitem(naughty.dbus._capabilities, "persistence"))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "icon-static"))
+
+    naughty.persistence_enabled      = false
+    naughty.image_animations_enabled = false
+
+    assert(not naughty.persistence_enabled)
+    assert(not naughty.image_animations_enabled)
+
+    assert(    gtable.hasitem(naughty.dbus._capabilities, "icon-static"))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "icon-multi" ))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "persistence"))
 
     return true
 end)
