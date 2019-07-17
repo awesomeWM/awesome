@@ -669,6 +669,21 @@ function notification.set_actions(self, new_actions)
     end
 end
 
+--- Add more actions to the notification.
+-- @method append_actions
+-- @tparam table new_actions
+
+function notification:append_actions(new_actions)
+    self._private.actions = self._private.actions or {}
+
+    for _, a in ipairs(new_actions or {}) do
+        a:connect_signal("_changed", self._private.action_cb )
+        a:connect_signal("invoked" , self._private.invoked_cb)
+        table.insert(self._private.actions, a)
+    end
+
+end
+
 --TODO v6: remove this
 local function convert_actions(actions)
     gdebug.deprecate(
