@@ -556,6 +556,16 @@ table.insert(steps, function()
     assert(n2.box.width +2*n2.box.border_width <= wa.width )
     assert(n2.box.height+2*n2.box.border_width <= wa.height)
 
+    -- Check with client icons.
+    assert(not n1.icon)
+
+    n1._private.clients = {{icon= big_icon, type = "normal"}}
+    assert(n1.icon == big_icon)
+    assert(n1.box.width +2*n1.box.border_width <= wa.width )
+    assert(n1.box.height+2*n1.box.border_width <= wa.height)
+    assert(n2.box.width +2*n2.box.border_width <= wa.width )
+    assert(n2.box.height+2*n2.box.border_width <= wa.height)
+
     n1:destroy()
     n2:destroy()
 
