@@ -49,7 +49,8 @@ sudo apt build-dep awesome
 git clone https://github.com/awesomewm/awesome
 cd awesome
 make package
-sudo apt install *.deb
+cd build
+sudo dpkg -i *.deb
 ```
 
 
