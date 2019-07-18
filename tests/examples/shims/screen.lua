@@ -1,4 +1,5 @@
 local gears_obj = require("gears.object")
+local gears_tab = require("gears.table")
 
 local screen, meta = awesome._shim_fake_class()
 screen._count, screen._deleted = 0, {}
@@ -19,7 +20,7 @@ local function create_screen(args)
     }
 
     function s._resize(args2)
-        local old  = s.geometry
+        local old  = gears_tab.clone(s.geometry)
         geo.x      = args2.x      or geo.x
         geo.y      = args2.y      or geo.y
         geo.width  = args2.width  or geo.width

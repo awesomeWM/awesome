@@ -35,9 +35,18 @@ local function new_drawin(_, args)
     ret.data.drawable.surface  = cairo.ImageSurface(cairo.Format.ARGB32, 0, 0)
     ret.data.drawable.geometry = ret.geometry
     ret.data.drawable.refresh  = function() end
+    ret.data._struts           = { top = 0, right = 0, left = 0, bottom = 0 }
 
-    for _, k in pairs{ "buttons", "struts", "get_xproperty", "set_xproperty" } do
+    for _, k in pairs{ "buttons", "get_xproperty", "set_xproperty" } do
         ret[k] = function() end
+    end
+
+    function ret:struts(new)
+        for k, v in pairs(new or {}) do
+            ret.data._struts[k] = v
+        end
+
+        return ret.data._struts
     end
 
     local md = setmetatable(ret, {
