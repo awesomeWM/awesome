@@ -101,6 +101,27 @@ function client.gen_fake(args)
         --TODO
     end
 
+    function ret:kill()
+        local old_tags = ret:tags() or {}
+
+        for k, c in ipairs(clients) do
+            if c == ret then
+                ret:emit_signal("unmanaged", c)
+                ret.valid = false
+                table.remove(clients, k)
+                break
+            end
+        end
+
+        ret._tags = {}
+
+        for _, t in ipairs(old_tags) do
+            ret:emit_signal("untagged", t)
+            t:emit_signal("property::tags")
+        end
+
+        assert(not ret.valid)
+    end
     titlebar_meta(ret)
 
     function ret:tags(new) --FIXME
