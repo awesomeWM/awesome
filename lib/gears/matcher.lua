@@ -217,6 +217,22 @@ function matcher:add_property_matcher(name, f)
     self:emit_signal("property_matcher::added", name, f)
 end
 
+--- Add a special setter for a property.
+--
+-- This is useful to add more properties to object which only make sense within
+-- the context of a rule.
+--
+-- @method add_property_setter
+-- @tparam string name The property name.
+-- @tparam function f The setter function.
+function matcher:add_property_setter(name, f)
+    assert(not self._private.prop_setters[name], name .. " already has a matcher")
+
+    self._private.prop_setters[name] = f
+
+    self:emit_signal("property_setter::added", name, f)
+end
+
 local function default_rules_callback(self, o, props, callbacks, rules)
     for _, entry in ipairs(self:matching_rules(o, rules)) do
         gtable.crush(props, entry.properties or {})
@@ -377,7 +393,9 @@ function matcher:_execute(o, props, callbacks)
             value = value(o, props)
         end
 
-        if type(o[property]) == "function" then
+        if self._private.prop_setters[property] then
+            self._private.prop_setters[property](o, value)
+        elseif type(o[property]) == "function" then
             o[property](o, value)
         else
             o[property] = value
@@ -435,7 +453,9 @@ local module = {}
 local function new()
     local ret = gobject()
 
-    rawset(ret, "_private", { rules = {}, prop_matchers = {} })
+    rawset(ret, "_private", {
+        rules = {}, prop_matchers = {}, prop_setters = {}
+    })
 
     -- Contains the sources.
     -- The elements are ordered "first in, first executed". Thus, the higher the
