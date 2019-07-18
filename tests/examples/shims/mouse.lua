@@ -62,6 +62,13 @@ return setmetatable(mouse, {
                 forced_screen = nil
             end
 
+            for s in screen do
+                if coords.x > s.geometry.x and coords.x < s.geometry.x +s.geometry.width
+                  and coords.y > s.geometry.y and coords.y < s.geometry.y +s.geometry.height then
+                    return s
+                end
+            end
+
             -- Using capi.mouse.screen is *not* supported when there is zero
             -- screen. Nearly all the code uses `mouse.screen` as its ultimate
             -- fallback. Having no screens is tolerated during early

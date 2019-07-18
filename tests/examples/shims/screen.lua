@@ -35,12 +35,6 @@ local function create_screen(args)
 
     local wa = args.workarea_sides or 10
 
-    -- This will happen if `clear()` is called
-    if mouse and (screen.count() > 0 and not mouse.screen) then
-        screen[s] = s
-        mouse.screen = s
-    end
-
     return setmetatable(s,{ __index = function(_, key)
             assert(s.valid)
 
