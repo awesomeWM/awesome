@@ -129,6 +129,7 @@ end
 -- @tparam table entry Rule entry (with keys `rule`, `rule_any`, `except` and/or
 --   `except_any`).
 -- @treturn boolean If `o` matches `entry`.
+-- @method matches_rule
 function matcher:matches_rule(o, entry)
     local match = self:_match(o, entry.rule) or self:_match_any(o, entry.rule_any)
     return match
@@ -146,6 +147,7 @@ end
 --  "except" and "except_any" keys. If no rules are provided, one is selected at
 --  random. Unless more rule sources are added, there is only one to begin with.
 -- @treturn table The list of matched rules.
+-- @method matching_rules
 function matcher:matching_rules(o, rules)
     rules = rules or select(2, next(self._matching_rules))
 
@@ -169,6 +171,7 @@ end
 -- @tparam table rules The rules to check. List of tables with `rule`,
 --  `rule_any`, `except` and `except_any` keys.
 -- @treturn boolean True if at least one rule is matched, false otherwise.
+-- @method matches_rules
 function matcher:matches_rules(o, rules)
     for _, entry in ipairs(rules) do
         if self:matches_rule(o, entry) then
@@ -253,6 +256,7 @@ end
 -- @tparam[opt={}] table precede A list of names of sources this source has a
 --  priority over.
 -- @treturn boolean Returns false if a dependency conflict was found.
+-- @method add_matching_rules
 function matcher:add_matching_rules(name, rules, depends_on, precede)
     local function matching_fct(_self, c, props, callbacks)
         default_rules_callback(_self, c, props, callbacks, rules)
@@ -280,6 +284,7 @@ end
 -- @tparam[opt={}] table precede A list of names of sources this source has a
 --  priority over.
 -- @treturn boolean Returns false if a dependency conflict was found.
+-- @method add_matching_function
 function matcher:add_matching_function(name, callback, depends_on, precede)
     depends_on = depends_on  or {}
     precede    = precede or {}
@@ -342,6 +347,7 @@ end
 --
 -- @tparam string name The source name.
 -- @treturn boolean If the source has been removed.
+-- @method remove_matching_source
 function matcher:remove_matching_source(name)
     self._rule_source_sort:remove(name)
 
@@ -365,6 +371,7 @@ end
 -- and rules.
 --
 -- @param o The object.
+-- @method apply
 function matcher:apply(o)
     local callbacks, props = {}, {}
     for _, v in ipairs(self._matching_source) do
@@ -447,7 +454,7 @@ end
 local module = {}
 
 --- Create a new rule solver object.
--- @function gears.matcher
+-- @constructorfct gears.matcher
 -- @return A new rule solver object.
 
 local function new()
