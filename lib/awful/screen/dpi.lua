@@ -197,10 +197,44 @@ function module._get_xft_dpi()
     return xft_dpi
 end
 
+-- Some of them may be present twice or a giant viewport may exist which
+-- encompasses everything.
+local function deduplicate_viewports(vps)
+    local min_x, min_y, max_x, max_y = math.huge, math.huge, 0, 0
+
+    -- Sort the viewports by `x`.
+    for _, vp in ipairs(vps) do
+        local geo = vp.geometry
+        min_x = math.min(min_x, geo.x)
+        max_x = math.max(max_x, geo.x+geo.width)
+        min_y = math.min(min_y, geo.y)
+        max_y = math.max(max_y, geo.y+geo.height)
+    end
+
+    -- Remove the "encompass everything" viewport (if any).
+    if #vps > 1 then
+        for k, vp in ipairs(vps) do
+            local geo = vp.geometry
+            if geo.x == min_x and geo.y == min_y
+            and geo.x+geo.width == max_x and geo.y+geo.height == max_y then
+                table.remove(vps, k)
+                break
+            end
+        end
+    end
+
+    --TODO when the rules are added, mark the viewports that are embedded into
+    -- each other so the rules can decide to use the smaller or larger viewport
+    -- when creating the screen. This happens a lot then connecting to
+    -- projectors when doing presentations.
+
+    return vps
+end
+
 -- Provide a way for the tests to replace `capi.screen._viewports`.
 function module._get_viewports()
     assert(type(capi.screen._viewports()) == "table")
-    return capi.screen._viewports()
+    return deduplicate_viewports(capi.screen._viewports())
 end
 
 local function get_dpi(s)
