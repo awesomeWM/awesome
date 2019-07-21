@@ -740,6 +740,26 @@ end
 -- @property preferred_dpi
 -- @param number the DPI value.
 
+--- The maximum diagonal size in millimeters.
+--
+-- @property mm_maximum_size
+-- @param number
+
+--- The minimum diagonal size in millimeters.
+--
+-- @property mm_minimum_size
+-- @param number
+
+--- The maximum diagonal size in inches.
+--
+-- @property inch_maximum_size
+-- @param number
+
+--- The minimum diagonal size in inches.
+--
+-- @property inch_minimum_size
+-- @param number
+
 --- Emitted when a new screen is added.
 --
 -- The handler(s) of this signal are responsible of adding elements such as

@@ -48,29 +48,65 @@ local function dpi_for_output(viewport, output)
 end
 
 local function dpis_for_outputs(viewport)
-    local max, min = 0, math.huge
+    local max_dpi, min_dpi, max_size, min_size = 0, math.huge, 0, math.huge
 
     for _, o in pairs(viewport.outputs) do
         local dpi = dpi_for_output(viewport, o)
         o.dpi = dpi
-        max = math.max(max, dpi)
-        min = math.min(min, dpi)
+
+        max_dpi = math.max(max_dpi, dpi)
+        min_dpi = math.min(min_dpi, dpi)
+
+        -- Compute the diagonal size.
+        if o.mm_width and o.mm_height then
+            o.mm_size   = math.sqrt(o.mm_width^2 + o.mm_height^2)
+            o.inch_size = o.mm_size/mm_per_inch
+            max_size    = math.max(max_size, o.mm_size)
+            min_size    = math.min(min_size, o.mm_size)
+        end
     end
 
     -- When there is no output.
-    if min == math.huge then
-        min = get_fallback_dpi()
-        max = min
+    if min_dpi == math.huge then
+        min_dpi = get_fallback_dpi()
+        max_dpi = min_dpi
     end
 
     --TODO Some output may have a lower resolution than the viewport, so their
     -- DPI is currently wrong. Once fixed, the preferred DPI can become
     -- different from the minimum one.
-    local pref = min
+    local pref_dpi = min_dpi
 
-    viewport.minimum_dpi, viewport.maximum_dpi, viewport.preferred_dpi = min, max, pref
+    viewport.minimum_dpi   = min_dpi
+    viewport.maximum_dpi   = max_dpi
+    viewport.preferred_dpi = pref_dpi
 
-    return max, min, pref
+    -- Guess the diagonal size using the DPI.
+    if min_size == math.huge then
+        for _, o in pairs(viewport.outputs) do
+            local geo = o.geometry
+            if geo then
+                o.mm_size = math.sqrt(geo.width^2 + geo.height^2)/o.dpi
+                max_size  = math.max(max_size, o.mm_size)
+                min_size  = math.min(min_size, o.mm_size)
+            end
+        end
+
+        -- In case there is no output information.
+        if min_size == math.huge then
+            local geo  = viewport.geometry
+            local size = math.sqrt(geo.width^2 + geo.height^2)/max_dpi
+
+            max_size, min_size = size, size
+        end
+    end
+
+    viewport.mm_minimum_size   = min_size
+    viewport.mm_maximum_size   = max_size
+    viewport.inch_minimum_size = min_size/mm_per_inch
+    viewport.inch_maximum_size = max_size/mm_per_inch
+
+    return max_dpi, min_dpi, pref_dpi
 end
 
 local function update_outputs(old_viewport, new_viewport)
@@ -360,15 +396,19 @@ return function(screen, d)
     ascreen.object.set_dpi = set_dpi
     ascreen.object.get_dpi = get_dpi
 
-    for _, prop in ipairs {"minimum", "maximum", "preferred" } do
-        screen.object["get_"..prop.."_dpi"] = function(s)
+    for _, prop in ipairs {"minimum_dpi"       , "maximum_dpi"       ,
+                           "mm_maximum_width"  , "mm_minimum_width"  ,
+                           "inch_maximum_width", "inch_minimum_width",
+                           "preferred_dpi"                           } do
+
+        screen.object["get_"..prop] = function(s)
             if not s.data.viewport then
                 update_screen_viewport(s)
             end
 
             local a = s.data.viewport or {}
 
-            return a[prop.."_dpi"] or nil
+            return a[prop] or nil
         end
     end
 end
