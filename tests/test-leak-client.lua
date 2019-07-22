@@ -4,8 +4,9 @@ local awful = require("awful")
 local wibox = require("wibox")
 local gtable = require("gears.table")
 
--- "Enable" titlebars (so that the titlebar can prevent garbage collection)
-client.connect_signal("manage", function (c)
+-- Create a titlebar and return a table with references to its member widgets.
+local function create_titlebar(c)
+    local parts = {}
     local buttons = gtable.join(
         awful.button({ }, 1, function()
             client.focus = c
@@ -20,25 +21,39 @@ client.connect_signal("manage", function (c)
     )
 
     -- Widgets that are aligned to the left
-    local left_layout = wibox.layout.fixed.horizontal(awful.titlebar.widget.iconwidget(c))
+    parts.icon = awful.titlebar.widget.iconwidget(c)
+    local left_layout = wibox.layout.fixed.horizontal(parts.icon)
     left_layout:buttons(buttons)
 
     -- The title goes in the middle
-    local title = awful.titlebar.widget.titlewidget(c)
-    title:set_align("center")
-    local middle_layout = wibox.layout.flex.horizontal(title)
+    parts.title = awful.titlebar.widget.titlewidget(c)
+    parts.title:set_align("center")
+    local middle_layout = wibox.layout.flex.horizontal(parts.title)
     middle_layout:buttons(buttons)
+
+    parts.floating_button  = awful.titlebar.widget.floatingbutton(c)
+    parts.maximized_button = awful.titlebar.widget.maximizedbutton(c)
+    parts.sticky_button    = awful.titlebar.widget.stickybutton(c)
+    parts.ontop_button     = awful.titlebar.widget.ontopbutton(c)
+    parts.close_button     = awful.titlebar.widget.closebutton(c)
 
     awful.titlebar(c):set_widget(wibox.layout.align.horizontal(
         left_layout,
         middle_layout,
         wibox.layout.fixed.horizontal(
-            awful.titlebar.widget.floatingbutton(c),
-            awful.titlebar.widget.maximizedbutton(c),
-            awful.titlebar.widget.stickybutton(c),
-            awful.titlebar.widget.ontopbutton(c),
-            awful.titlebar.widget.closebutton(c)
+            parts.floating_button,
+            parts.maximized_button,
+            parts.sticky_button,
+            parts.ontop_button,
+            parts.close_button
             )), { position = "bottom"})
+
+    return parts
+end
+
+-- "Enable" titlebars (so that the titlebar can prevent garbage collection)
+client.connect_signal("manage", function (c)
+    create_titlebar(c)
 end)
 
 -- We tell the garbage collector when to work, disable it
@@ -49,6 +64,7 @@ collectgarbage("stop")
 -- closes it and the last one checks that the client object is GC'able.
 local objs = nil
 local second_call = false
+local state
 local steps = {
     function(count)
         if count == 1 then
@@ -76,6 +92,55 @@ local steps = {
             collectgarbage("collect")
             assert(#objs == 0)
             return true
+        end
+    end,
+
+    -- Test that titlebar widgets are GC'able even when the corresponding client
+    -- still exists.
+    function(count)
+        if count == 1 then
+            awful.spawn("xterm")
+            state = 1
+        elseif state == 1 then
+            local c = client.get()[1]
+            if c then
+                -- Create the titlebar and store references to its widgets in a
+                -- weak table.
+                objs = setmetatable({}, { __mode = "v" })
+                gtable.crush(objs, create_titlebar(c))
+                state = 2
+            end
+        elseif state == 2 then
+            local c = client.get()[1]
+
+            -- Recreate the titlebar; at this point old titlebar widgets should
+            -- become unreferenced, except for some delayed calls.
+            create_titlebar(c)
+
+            -- Wait for one iteration so that delayed calls would complete and
+            -- release remaining references to widgets.
+            state = 3
+        elseif state == 3 then
+            -- Check that old titlebar widgets have been destroyed.
+            for _ = 1, 10 do
+                collectgarbage("collect")
+            end
+            local num_objs = 0
+            for k in pairs(objs) do
+                if num_objs == 0 then
+                    print("Error: titlebar widgets remaining after GC:")
+                end
+                num_objs = num_objs + 1
+                print(k)
+            end
+            assert(num_objs == 0)
+
+            client.get()[1]:kill()
+            state = 4
+        elseif state == 4 then
+            if #client.get() == 0 then
+                return true
+            end
         end
     end,
 }
