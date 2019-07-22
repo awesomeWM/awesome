@@ -72,6 +72,10 @@ ret.config.defaults = {
     border_width = dpi(1),
     position     = "top_right",
     urgency      = "normal",
+    message      = "",
+    title        = "",
+    app_name     = "",
+    ignore       = false,
 }
 
 ret.notification_closed_reason = {
