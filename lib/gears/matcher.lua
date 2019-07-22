@@ -25,6 +25,8 @@
 --
 -- @DOC_text_gears_matcher_default_EXAMPLE@
 --
+-- @DOC_text_gears_matcher_types_EXAMPLE@
+--
 -- More examples are available in `awful.rules`.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
@@ -101,27 +103,61 @@ function matcher:_match(o, rule)
     return true
 end
 
+local function field_matcher(self, o, field, value)
+    local pm = self._private.prop_matchers[field]
+
+    if pm and pm(o, value, field) then
+        return true
+    elseif o[field] == value then
+        return true
+    elseif type(o[field]) == "string" and o[field]:match(value) then
+        return true
+    end
+
+    return false
+end
+
 -- Check if an object matches any part of a rule.
 -- @param o The object.
--- #tparam table rule The rule to check.
+-- #tparam table rule The rule _match_anyto check.
 -- @treturn boolean True if at least one rule is matched, false otherwise.
 function matcher:_match_any(o, rule)
     if not rule then return false end
     for field, values in pairs(rule) do
         if o[field] then
             for _, value in ipairs(values) do
-                local pm = self._private.prop_matchers[field]
-                if pm and pm(o, value, field) then
-                    return true
-                elseif o[field] == value then
-                    return true
-                elseif type(o[field]) == "string" and o[field]:match(value) then
-                    return true
-                end
+                if field_matcher(self, o, field, value) then return true end
             end
         end
     end
+
     return false
+end
+
+-- Check if an object matches at least one of every part of a rule.
+--
+-- @param o The object.
+-- @tparam table rule The rule _match_anyto check.
+-- @tparam boolean multi If the entries are table of choices.
+-- @treturn boolean True if all rules are matched.
+function matcher:_match_every(o, rule)
+    if not rule then return true end
+
+    for field, values in pairs(rule) do
+        local found = false
+        for _, value in ipairs(values) do
+            if not field_matcher(self, o, field, value) then
+                found = true
+                break
+            end
+        end
+
+        if not found then
+            return false
+        end
+    end
+
+    return true
 end
 
 --- Does a given rule entry match an object?
@@ -133,8 +169,9 @@ end
 function matcher:matches_rule(o, entry)
     local match = self:_match(o, entry.rule) or self:_match_any(o, entry.rule_any)
     return match
-        and (not self:_match(o, entry.except))
-        and (not self:_match_any(o, entry.except_any))
+        and self:_match_every     (o, entry.rule_every)
+        and (not self:_match      (o, entry.except    ))
+        and (not self:_match_any  (o, entry.except_any))
 end
 
 --- Get list of matching rules for an object.
