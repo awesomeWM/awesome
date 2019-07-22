@@ -17,6 +17,7 @@ local popup      = require("awful.popup")
 local awcommon   = require("awful.widget.common")
 local placement  = require("awful.placement")
 local abutton    = require("awful.button")
+local gpcall     = require("gears.protected_call")
 local dpi        = require("beautiful").xresources.apply_dpi
 
 local default_widget = require("naughty.widget._default")
@@ -136,9 +137,24 @@ end
 -- @param widget
 
 local function generate_widget(args, n)
-    local w = wibox.widget.base.make_widget_from_value(
+    local w = gpcall(wibox.widget.base.make_widget_from_value,
         args.widget_template or (n and n.widget_template) or default_widget
     )
+
+    -- This will happen if the user-provided widget_template is invalid and/or
+    -- got unexpected notifications.
+    if not w then
+        w = gpcall(wibox.widget.base.make_widget_from_value, default_widget)
+
+        -- In case this happens in an error message itself, make sure the
+        -- private error popup code knowns it and can revert to the fallback
+        -- popup.
+        if not w then
+            n._private.widget_template_failed = true
+        end
+
+        return nil
+    end
 
     if w.set_width then
         w:set_width(n.max_width or beautiful.notification_max_width or dpi(500))
@@ -230,6 +246,9 @@ local function new(args)
 
     -- Generate the box before the popup is created to avoid the size changing
     new_args.widget = generate_widget(new_args, new_args.notification)
+
+    -- It failed, request::fallback will be used, there is nothing left to do.
+    if not new_args.widget then return nil end
 
     local ret = popup(new_args)
     ret._private.args = new_args

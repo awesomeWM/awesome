@@ -308,7 +308,9 @@ end
 function naughty.default_notification_handler(notification, args)
     -- This is a fallback for users whose config doesn't have the newer
     -- `request::display` section.
-    if naughty.has_display_handler then return end
+    if naughty.has_display_handler and not notification._private.widget_template_failed then
+        return
+    end
 
     -- If request::display is called more than once, simply make sure the wibox
     -- is visible.
