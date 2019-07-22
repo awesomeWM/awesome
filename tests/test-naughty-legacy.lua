@@ -8,6 +8,8 @@ local cairo     = require("lgi"        ).cairo
 local beautiful = require("beautiful")
 local Gio       = require("lgi"        ).Gio
 local GLib      = require("lgi"        ).GLib
+local gpcall    = require("gears.protected_call")
+local dwidget   = require("naughty.widget._default")
 
 -- This module test deprecated APIs
 require("gears.debug").deprecate = function() end
@@ -996,6 +998,82 @@ table.insert(steps, function()
     -- Finish by testing disconnect_signal
     naughty.disconnect_signal("destroyed", destroyed_callback)
     naughty.disconnect_signal("added", added_callback)
+
+    return true
+end)
+
+-- Add a "new API" handler.
+local current_template, had_error, handler_called = nil
+
+table.insert(steps, function()
+    assert(naughty.has_display_handler == false)
+
+    naughty.connect_signal("request::display", function(n)
+        handler_called = true
+
+        naughty.layout.box {
+            notification    = n,
+            widget_template = current_template
+        }
+    end)
+
+    return true
+end)
+
+-- Make sure the legacy popup is used when the new APIs fails.
+table.insert(steps, function()
+    assert(naughty.has_display_handler == true)
+
+    function gpcall._error_handler()
+        had_error = true
+    end
+
+    local n = naughty.notification {
+        title   = nil,
+        message = nil,
+        timeout = 25000,
+    }
+
+    assert(handler_called)
+    assert(not had_error)
+    assert(not n._private.widget_template_failed)
+    assert(not n.box)
+
+    n:destroy()
+    handler_called = false
+
+    -- Try with a broken template.
+    current_template = {widget = function() assert(false) end}
+
+    n = naughty.notification {
+        title   = "foo",
+        message = "bar",
+        timeout = 25000,
+    }
+
+    assert(handler_called)
+    assert(had_error)
+    assert(not n.box)
+
+    handler_called = false
+    had_error      = false
+
+    -- Break the default template
+    assert(dwidget.widget)
+    dwidget.widget = nil
+    dwidget.layout = function() assert(false) end
+    table.remove(dwidget, 1)
+
+    n = naughty.notification {
+        title   = "foo",
+        message = "bar",
+        timeout = 25000,
+    }
+
+    assert(handler_called)
+    assert(n._private.widget_template_failed)
+    assert(had_error)
+    assert(n.box)
 
     return true
 end)
