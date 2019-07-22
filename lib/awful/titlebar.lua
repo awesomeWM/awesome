@@ -13,6 +13,8 @@
 ---------------------------------------------------------------------------
 
 local error = error
+local pairs = pairs
+local table = table
 local type = type
 local gmath = require("gears.math")
 local abutton = require("awful.button")
@@ -601,6 +603,33 @@ function titlebar.toggle(c, position)
     end
 end
 
+local instances = {}
+
+-- Do the equivalent of
+--     c:connect_signal(signal, widget.update)
+-- without keeping a strong reference to the widget.
+local function update_on_signal(c, signal, widget)
+    local sig_instances = instances[signal]
+    if sig_instances == nil then
+        sig_instances = setmetatable({}, { __mode = "k" })
+        instances[signal] = sig_instances
+        capi.client.connect_signal(signal, function(cl)
+            local widgets = sig_instances[cl]
+            if widgets then
+                for _, w in pairs(widgets) do
+                    w.update()
+                end
+            end
+        end)
+    end
+    local widgets = sig_instances[c]
+    if widgets == nil then
+        widgets = setmetatable({}, { __mode = "v" })
+        sig_instances[c] = widgets
+    end
+    table.insert(widgets, widget)
+end
+
 --- Create a new titlewidget. A title widget displays the name of a client.
 -- Please note that this returns a textbox and all of textbox' API is available.
 -- This way, you can e.g. modify the font that is used.
@@ -612,7 +641,8 @@ function titlebar.widget.titlewidget(c)
     local function update()
         ret:set_text(c.name or titlebar.fallback_name)
     end
-    c:connect_signal("property::name", update)
+    ret.update = update
+    update_on_signal(c, "property::name", ret)
     update()
 
     return ret
@@ -717,8 +747,8 @@ function titlebar.widget.button(c, name, selector, action)
 
     -- We do magic based on whether a client is focused above, so we need to
     -- connect to the corresponding signal here.
-    c:connect_signal("focus", update)
-    c:connect_signal("unfocus", update)
+    update_on_signal(c, "focus", ret)
+    update_on_signal(c, "unfocus", ret)
 
     return ret
 end
@@ -728,7 +758,7 @@ end
 -- @staticfct awful.titlebar.widget.floatingbutton
 function titlebar.widget.floatingbutton(c)
     local widget = titlebar.widget.button(c, "floating", aclient.object.get_floating, aclient.floating.toggle)
-    c:connect_signal("property::floating", widget.update)
+    update_on_signal(c, "property::floating", widget)
     return widget
 end
 
@@ -741,7 +771,7 @@ function titlebar.widget.maximizedbutton(c)
     end, function(cl, state)
         cl.maximized = not state
     end)
-    c:connect_signal("property::maximized", widget.update)
+    update_on_signal(c, "property::maximized", widget)
     return widget
 end
 
@@ -752,7 +782,7 @@ function titlebar.widget.minimizebutton(c)
     local widget = titlebar.widget.button(c, "minimize",
                                           function() return "" end,
                                           function(cl) cl.minimized = not cl.minimized end)
-    c:connect_signal("property::minimized", widget.update)
+    update_on_signal(c, "property::minimized", widget)
     return widget
 end
 
@@ -770,7 +800,7 @@ function titlebar.widget.ontopbutton(c)
     local widget = titlebar.widget.button(c, "ontop",
                                           function(cl) return cl.ontop end,
                                           function(cl, state) cl.ontop = not state end)
-    c:connect_signal("property::ontop", widget.update)
+    update_on_signal(c, "property::ontop", widget)
     return widget
 end
 
@@ -781,7 +811,7 @@ function titlebar.widget.stickybutton(c)
     local widget = titlebar.widget.button(c, "sticky",
                                           function(cl) return cl.sticky end,
                                           function(cl, state) cl.sticky = not state end)
-    c:connect_signal("property::sticky", widget.update)
+    update_on_signal(c, "property::sticky", widget)
     return widget
 end
 
