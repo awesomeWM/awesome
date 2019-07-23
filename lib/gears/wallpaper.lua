@@ -66,10 +66,12 @@ function wallpaper.prepare_context(s)
 
         -- Set the wallpaper (delayed)
         timer.delayed_call(function()
-            local paper = pending_wallpaper
-            pending_wallpaper = nil
-            wallpaper.set(paper.surface)
-            paper.surface:finish()
+            if pending_wallpaper then
+                local paper = pending_wallpaper
+                pending_wallpaper = nil
+                wallpaper.set(paper.surface)
+                paper.surface:finish()
+            end
         end)
     elseif root_width > pending_wallpaper.width or root_height > pending_wallpaper.height then
         -- The root window was resized while a wallpaper is pending
