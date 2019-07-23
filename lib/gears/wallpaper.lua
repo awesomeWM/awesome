@@ -40,6 +40,19 @@ end
 -- Information about a pending wallpaper change, see prepare_context()
 local pending_wallpaper = nil
 
+local pending_wallpaper_callback = nil
+pending_wallpaper_callback = function(calls)
+    calls = calls or 1
+    if pending_wallpaper then
+        local paper = pending_wallpaper
+        pending_wallpaper = nil
+        wallpaper.set(paper.surface)
+        paper.surface:finish()
+    elseif calls <= 3 then
+        timer.delayed_call(pending_wallpaper_callback, calls + 1)
+    end
+end
+
 local function get_screen(s)
     return s and screen[s]
 end
@@ -65,14 +78,7 @@ function wallpaper.prepare_context(s)
         target = source:create_similar(cairo.Content.COLOR, root_width, root_height)
 
         -- Set the wallpaper (delayed)
-        timer.delayed_call(function()
-            if pending_wallpaper then
-                local paper = pending_wallpaper
-                pending_wallpaper = nil
-                wallpaper.set(paper.surface)
-                paper.surface:finish()
-            end
-        end)
+        timer.delayed_call(pending_wallpaper_callback)
     elseif root_width > pending_wallpaper.width or root_height > pending_wallpaper.height then
         -- The root window was resized while a wallpaper is pending
         source = pending_wallpaper.surface
