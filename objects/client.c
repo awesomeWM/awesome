@@ -1345,13 +1345,6 @@ client_focus_refresh(void)
 }
 
 static void
-client_border_refresh(void)
-{
-    foreach(c, globalconf.clients)
-        window_border_refresh((window_t *) *c);
-}
-
-static void
 client_geometry_refresh(void)
 {
     bool ignored_enterleave = false;
@@ -1413,8 +1406,8 @@ client_geometry_refresh(void)
         }
 
         xcb_configure_window(globalconf.connection, c->frame_window,
-                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height });
+                XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT | XCB_CONFIG_WINDOW_BORDER_WIDTH,
+                (uint32_t[]) { geometry.x, geometry.y, geometry.width, geometry.height, c->border_width });
         xcb_configure_window(globalconf.connection, c->window,
                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
                 (uint32_t[]) { real_geometry.x, real_geometry.y, real_geometry.width, real_geometry.height });
@@ -1434,7 +1427,6 @@ void
 client_refresh(void)
 {
     client_geometry_refresh();
-    client_border_refresh();
     client_focus_refresh();
 }
 
@@ -2372,6 +2364,7 @@ client_unmanage(client_t *c, bool window_valid)
     if (c->nofocus_window != XCB_NONE)
         window_array_append(&globalconf.destroy_later_windows, c->nofocus_window);
     window_array_append(&globalconf.destroy_later_windows, c->frame_window);
+    window_cancel_border_refresh((window_t *) c);
 
     if(window_valid)
     {

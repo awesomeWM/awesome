@@ -169,17 +169,33 @@ luaA_window_get_opacity(lua_State *L, window_t *window)
     return 1;
 }
 
-void
-window_border_refresh(window_t *window)
+static gboolean
+window_border_update_callback(gpointer user_data)
 {
-    if(!window->border_need_update)
-        return;
-    window->border_need_update = false;
+    window_t *window = user_data;
+    assert(window->border_update_id != 0);
+    window->border_update_id = 0;
     xwindow_set_border_color(window_get(window), &window->border_color);
     if(window->window)
         xcb_configure_window(globalconf.connection, window_get(window),
                              XCB_CONFIG_WINDOW_BORDER_WIDTH,
                              (uint32_t[]) { window->border_width });
+    return G_SOURCE_REMOVE;
+}
+
+void
+window_cancel_border_refresh(window_t *window)
+{
+    if(window->border_update_id != 0)
+        g_source_remove(window->border_update_id);
+    window->border_update_id = 0;
+}
+
+static void
+window_schedule_border_update(window_t *window)
+{
+    if(window->border_update_id == 0)
+        window->border_update_id = g_idle_add(window_border_update_callback, window);
 }
 
 /** Set the window border color.
@@ -196,7 +212,7 @@ luaA_window_set_border_color(lua_State *L, window_t *window)
     if(color_name &&
        color_init_reply(color_init_unchecked(&window->border_color, color_name, len, globalconf.visual)))
     {
-        window->border_need_update = true;
+        window_schedule_border_update(window);
         luaA_object_emit_signal(L, -3, "property::border_color", 0);
     }
 
@@ -217,8 +233,8 @@ window_set_border_width(lua_State *L, int idx, int width)
     if(width == window->border_width || width < 0)
         return;
 
-    window->border_need_update = true;
     window->border_width = width;
+    window_schedule_border_update(window);
 
     if(window->border_width_callback)
         (*window->border_width_callback)(window, old_width, width);

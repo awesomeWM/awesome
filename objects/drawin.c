@@ -176,6 +176,7 @@ drawin_wipe(drawin_t *w)
 {
     /* The drawin must already be unmapped, else it
      * couldn't be garbage collected -> no unmap needed */
+    window_cancel_border_refresh((window_t *) w);
     if(w->geometry_dirty_id != 0)
     {
         g_source_remove(w->geometry_dirty_id);
@@ -254,15 +255,6 @@ drawin_set_geometry_dirty(drawin_t *w)
     if (w->geometry_dirty_id != 0)
         return;
     w->geometry_dirty_id = g_idle_add(drawin_apply_moveresize_callback, w);
-}
-
-void
-drawin_refresh(void)
-{
-    foreach(item, globalconf.drawins)
-    {
-        window_border_refresh((window_t *) *item);
-    }
 }
 
 /** Get all drawins into a table.
