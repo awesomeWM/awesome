@@ -151,7 +151,7 @@ typedef struct
         /** Focused client */
         client_t *client;
         /** Is there a focus change pending? */
-        bool need_update;
+        guint source_id;
         /** When nothing has the input focus, this window actually is focused */
         xcb_window_t window_no_focus;
     } focus;

@@ -956,6 +956,7 @@ static area_t titlebar_get_area(client_t *c, client_titlebar_t bar);
 static drawable_t *titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar);
 static void client_resize_do(client_t *c, area_t geometry);
 static void client_set_maximized_common(lua_State *L, int cidx, bool s, const char* type, const int val);
+static bool client_unban_internal(client_t *c);
 
 /** Collect a client.
  * \param L The Lua VM state.
@@ -1167,7 +1168,7 @@ static void
 client_unfocus(client_t *c)
 {
     client_unfocus_internal(c);
-    globalconf.focus.need_update = true;
+    client_focus_need_update();
 }
 
 /** Check if client supports atom a protocol in WM_PROTOCOL.
@@ -1292,7 +1293,7 @@ client_focus(client_t *c)
         return;
 
     if(client_focus_update(c))
-        globalconf.focus.need_update = true;
+        client_focus_need_update();
 }
 
 static xcb_window_t
@@ -1309,19 +1310,16 @@ client_get_nofocus_window(client_t *c)
     return c->nofocus_window;
 }
 
-void
-client_focus_refresh(void)
+static void
+client_focus_refresh_internal(void)
 {
     client_t *c = globalconf.focus.client;
     xcb_window_t win = globalconf.focus.window_no_focus;
 
-    if(!globalconf.focus.need_update)
-        return;
-
     if(c && client_on_selected_tags(c))
     {
         /* Make sure this window is unbanned and e.g. not minimized */
-        client_unban(c);
+        client_unban_internal(c);
         /* Sets focus on window - using xcb_set_input_focus or WM_TAKE_FOCUS */
         if(!c->nofocus)
             win = c->window;
@@ -1339,9 +1337,32 @@ client_focus_refresh(void)
      */
     xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
                         win, globalconf.timestamp);
+}
 
-    /* Do this last, because client_unban() might set it to true */
-    globalconf.focus.need_update = false;
+void
+client_focus_refresh(void)
+{
+    if (globalconf.focus.source_id == 0)
+        return;
+    g_source_remove(globalconf.focus.source_id);
+    globalconf.focus.source_id = 0;
+    client_focus_refresh_internal();
+}
+
+static gboolean
+client_focus_refresh_callback(gpointer unused)
+{
+    assert(globalconf.focus.source_id != 0);
+    globalconf.focus.source_id = 0;
+    client_focus_refresh_internal();
+    return G_SOURCE_REMOVE;
+}
+
+void
+client_focus_need_update(void)
+{
+    if (globalconf.focus.source_id == 0)
+        globalconf.focus.source_id = g_idle_add(client_focus_refresh_callback, NULL);
 }
 
 static void
@@ -1427,7 +1448,6 @@ void
 client_refresh(void)
 {
     client_geometry_refresh();
-    client_focus_refresh();
 }
 
 void
@@ -2260,8 +2280,8 @@ client_set_ontop(lua_State *L, int cidx, bool s)
 /** Unban a client and move it back into the viewport.
  * \param c The client.
  */
-void
-client_unban(client_t *c)
+static bool
+client_unban_internal(client_t *c)
 {
     lua_State *L = globalconf_get_lua_State();
     if(c->isbanned)
@@ -2279,8 +2299,19 @@ client_unban(client_t *c)
         lua_pop(L, 1);
 
         if (globalconf.focus.client == c)
-            globalconf.focus.need_update = true;
+            return true;
     }
+    return false;
+}
+
+/** Unban a client and move it back into the viewport.
+ * \param c The client.
+ */
+void
+client_unban(client_t *c)
+{
+    if (client_unban_internal(c))
+        client_focus_need_update();
 }
 
 /** Unmanage a client.
