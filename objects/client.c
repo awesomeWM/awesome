@@ -1450,8 +1450,8 @@ client_refresh(void)
     client_geometry_refresh();
 }
 
-void
-client_destroy_later(void)
+static gboolean
+client_destroy_later_callback(gpointer unused)
 {
     bool ignored_enterleave = false;
     foreach(window, globalconf.destroy_later_windows)
@@ -1467,6 +1467,8 @@ client_destroy_later(void)
 
     /* Everything's done, clear the list */
     globalconf.destroy_later_windows.len = 0;
+
+    return G_SOURCE_REMOVE;
 }
 
 static void
@@ -2395,6 +2397,7 @@ client_unmanage(client_t *c, bool window_valid)
     if (c->nofocus_window != XCB_NONE)
         window_array_append(&globalconf.destroy_later_windows, c->nofocus_window);
     window_array_append(&globalconf.destroy_later_windows, c->frame_window);
+    g_idle_add_full(G_PRIORITY_LOW, client_destroy_later_callback, NULL, NULL);
     window_cancel_border_refresh((window_t *) c);
 
     if(window_valid)
