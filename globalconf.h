@@ -189,7 +189,7 @@ typedef struct
     /** Our default color map */
     xcb_colormap_t default_cmap;
     /** Do we have to reban clients? */
-    bool need_lazy_banning;
+    guint banning_update_id;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */

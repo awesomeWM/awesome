@@ -41,7 +41,6 @@ awesome_refresh(void)
 {
     luaA_emit_refresh();
     client_refresh();
-    banning_refresh();
     stack_refresh();
     client_destroy_later();
     return xcb_flush(globalconf.connection);

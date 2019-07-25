@@ -23,34 +23,13 @@
 #include "globalconf.h"
 #include "objects/client.h"
 
-/** Reban windows following current selected tags.
- */
-void
-banning_need_update(void)
-{
-    /* We update the complete banning only once per main loop to avoid
-     * excessive updates...  */
-    globalconf.need_lazy_banning = true;
-
-    /* But if a client will be banned in our next update we unfocus it now. */
-    foreach(_c, globalconf.clients)
-    {
-        client_t *c = *_c;
-
-        if(!client_isvisible(c))
-            client_ban_unfocus(c);
-    }
-}
-
 /** Check all clients if they need to rebanned
  */
-void
-banning_refresh(void)
+static gboolean
+banning_refresh(gpointer unused)
 {
-    if (!globalconf.need_lazy_banning)
-        return;
-
-    globalconf.need_lazy_banning = false;
+    assert(globalconf.banning_update_id != 0);
+    globalconf.banning_update_id = 0;
 
     foreach(c, globalconf.clients)
         if(client_isvisible(*c))
@@ -61,6 +40,28 @@ banning_refresh(void)
     foreach(c, globalconf.clients)
         if(!client_isvisible(*c))
             client_ban(*c);
+
+    return G_SOURCE_REMOVE;
+}
+
+/** Reban windows following current selected tags.
+ */
+void
+banning_need_update(void)
+{
+    /* We update the complete banning only once per main loop to avoid
+     * excessive updates...  */
+    if (globalconf.banning_update_id == 0)
+        globalconf.banning_update_id = g_idle_add(banning_refresh, NULL);
+
+    /* But if a client will be banned in our next update we unfocus it now. */
+    foreach(_c, globalconf.clients)
+    {
+        client_t *c = *_c;
+
+        if(!client_isvisible(c))
+            client_ban_unfocus(c);
+    }
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
