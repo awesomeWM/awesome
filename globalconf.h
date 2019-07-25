@@ -190,6 +190,8 @@ typedef struct
     xcb_colormap_t default_cmap;
     /** Do we have to reban clients? */
     guint banning_update_id;
+    /** Do we have to update the stacking order? */
+    guint stacking_update_id;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */
