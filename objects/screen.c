@@ -594,6 +594,15 @@ screen_add(lua_State *L, screen_array_t *screens)
     return new_screen;
 }
 
+static void
+screen_wipe(screen_t *c)
+{
+    if (c->name) {
+        free(c->name);
+        c->name = NULL;
+    }
+}
+
 /* Monitors were introduced in RandR 1.5 */
 #ifdef XCB_RANDR_GET_MONITORS
 
@@ -1516,7 +1525,9 @@ luaA_screen_module_index(lua_State *L)
         }
 
         foreach(screen, globalconf.screens)
-            if ((*screen)->viewport)
+            if ((*screen)->name && A_STREQ(name, (*screen)->name))
+                return luaA_object_push(L, *screen);
+            else if ((*screen)->viewport)
                 foreach(output, (*screen)->viewport->outputs)
                     if(A_STREQ(output->name, name))
                         return luaA_object_push(L, *screen);
@@ -1610,6 +1621,33 @@ static int
 luaA_screen_get_workarea(lua_State *L, screen_t *s)
 {
     luaA_pusharea(L, s->workarea);
+    return 1;
+}
+
+static int
+luaA_screen_set_name(lua_State *L, screen_t *s)
+{
+    const char *buf = luaL_checkstring(L, -1);
+
+    if (s->name)
+        free(s->name);
+
+    s->name = a_strdup(buf);
+
+    return 0;
+}
+
+static int
+luaA_screen_get_name(lua_State *L, screen_t *s)
+{
+    lua_pushstring(L, s->name ? s->name : "screen");
+
+    /* Fallback to "screen1", "screen2", etc if no name is set */
+    if (!s->name) {
+        lua_pushinteger(L, screen_get_index(s));
+        lua_concat(L, 2);
+    }
+
     return 1;
 }
 
@@ -1820,7 +1858,7 @@ screen_class_setup(lua_State *L)
 
     luaA_class_setup(L, &screen_class, "screen", NULL,
                      (lua_class_allocator_t) screen_new,
-                     (lua_class_collector_t) NULL,
+                     (lua_class_collector_t) screen_wipe,
                      (lua_class_checker_t) screen_checker,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      screen_methods, screen_meta);
@@ -1844,6 +1882,10 @@ screen_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_screen_get_workarea,
                             NULL);
+    luaA_class_add_property(&screen_class, "name",
+                            (lua_class_propfunc_t) luaA_screen_set_name,
+                            (lua_class_propfunc_t) luaA_screen_get_name,
+                            (lua_class_propfunc_t) luaA_screen_set_name);
 }
 
 /* @DOC_cobject_COMMON@ */
