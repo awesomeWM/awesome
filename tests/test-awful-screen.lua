@@ -68,6 +68,12 @@ local steps = {
     -- Make sure the error code still works when all screens are gone.
     function()
         while screen.count() > 0 do
+            -- Before removing them, check if `name` works.
+            assert(screen[1].name == "screen1")
+            screen[1].name = "foo"
+            assert(screen[1].name == "foo")
+            assert(screen.foo == screen[1])
+
             screen[1]:fake_remove()
         end
 
