@@ -76,41 +76,47 @@ local matcher = {}
 -- @tparam table gears.matcher The matcher.
 -- @see remove_matching_source
 
+local function default_matcher(a, b)
+    return a == b or (type(a) == "string" and a:match(b))
+end
+
+local function greater_matcher(a, b)
+    return a > b
+end
+
+local function lesser_matcher(a, b)
+    return a < b
+end
+
 -- Check if an object matches a rule.
 -- @param o The object.
 -- #tparam table rule The rule to check.
 -- @treturn boolean True if it matches, false otherwise.
-function matcher:_match(o, rule)
+-- @method _match
+function matcher:_match(o, rule, matcher_f)
     if not rule then return false end
+
+    matcher_f = matcher_f or default_matcher
+
     for field, value in pairs(rule) do
         local pm = self._private.prop_matchers[field]
-        if pm then
-            if not pm(o, value, field) then
-                return false
-            end
-        elseif o[field] ~= nil then
-            if type(o[field]) == "string" then
-                if not o[field]:match(value) and o[field] ~= value then
-                    return false
-                end
-            elseif o[field] ~= value then
-                return false
-            end
-        else
+        if pm and pm(o, value, field) then
+            return true
+        elseif not matcher_f(o[field], value) then
             return false
         end
     end
     return true
 end
 
-local function field_matcher(self, o, field, value)
+local function field_matcher(self, o, field, value, matcher_f)
+    matcher_f = matcher_f or default_matcher
+
     local pm = self._private.prop_matchers[field]
 
     if pm and pm(o, value, field) then
         return true
-    elseif o[field] == value then
-        return true
-    elseif type(o[field]) == "string" and o[field]:match(value) then
+    elseif matcher_f(o[field] , value) then
         return true
     end
 
@@ -121,12 +127,21 @@ end
 -- @param o The object.
 -- #tparam table rule The rule _match_anyto check.
 -- @treturn boolean True if at least one rule is matched, false otherwise.
+-- @method _match_any
 function matcher:_match_any(o, rule)
     if not rule then return false end
     for field, values in pairs(rule) do
         if o[field] then
+
+            -- Special case, "all"
+            if type(values) == "boolean" and values then
+                return true
+            end
+
             for _, value in ipairs(values) do
-                if field_matcher(self, o, field, value) then return true end
+                if field_matcher(self, o, field, value) then
+                    return true
+                end
             end
         end
     end
@@ -140,6 +155,7 @@ end
 -- @tparam table rule The rule _match_anyto check.
 -- @tparam boolean multi If the entries are table of choices.
 -- @treturn boolean True if all rules are matched.
+-- @method _match_every
 function matcher:_match_every(o, rule)
     if not rule then return true end
 
@@ -168,10 +184,26 @@ end
 -- @method matches_rule
 function matcher:matches_rule(o, entry)
     local match = self:_match(o, entry.rule) or self:_match_any(o, entry.rule_any)
-    return match
-        and self:_match_every     (o, entry.rule_every)
-        and (not self:_match      (o, entry.except    ))
-        and (not self:_match_any  (o, entry.except_any))
+
+    -- If there was `rule` or `rule_any` and they failed to match, look no further.
+    if (not match) and (entry.rule or entry.rule_any) then return false end
+
+    if not self:_match_every(o, entry.rule_every) then return false end
+
+    -- Negative matching.
+    if entry.except and self:_match(o, entry.except) then return false end
+    if entry.except_any and self:_match_any(o, entry.except_any) then return false end
+
+    -- Other operators.
+    if entry.rule_greater and not self:_match(o, entry.rule_greater, greater_matcher) then
+        return false
+    end
+
+    if entry.rule_lesser and not self:_match(o, entry.rule_lesser, lesser_matcher) then
+        return false
+    end
+
+    return true
 end
 
 --- Get list of matching rules for an object.
