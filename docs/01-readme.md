@@ -104,6 +104,8 @@ Additionally, the following optional dependencies exist:
 - [GTK+ >= 3.10](https://www.gtk.org/) for `./themes/gtk/`
 - [xcb-errors](https://gitlab.freedesktop.org/xorg/lib/libxcb-errors) for
   pretty-printing of X11 errors
+- [libRSVG](https://wiki.gnome.org/action/show/Projects/LibRsvg) for displaying
+  SVG files without scaling artifacts
 
 ## Running Awesome
 
