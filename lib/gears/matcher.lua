@@ -25,6 +25,8 @@
 --
 -- @DOC_text_gears_matcher_default_EXAMPLE@
 --
+-- This example shows the different matching sections:
+--
 -- @DOC_text_gears_matcher_types_EXAMPLE@
 --
 -- More examples are available in `awful.rules`.
