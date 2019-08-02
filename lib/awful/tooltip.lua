@@ -172,8 +172,8 @@ local function show(self)
     if self._private.visible then return end
     if self.timer then
         if not self.timer.started then
-            self:timer_function()
             self.timer:start()
+            self:timer_function()
         end
     end
     set_geometry(self)
