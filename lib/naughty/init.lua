@@ -20,9 +20,13 @@ naughty.notification = require("naughty.notification")
 
 -- Handle runtime errors during startup
 if capi.awesome.startup_errors then
-    naughty.emit_signal(
-        "request::display_error", capi.awesome.startup_errors, true
-    )
+    -- Wait until `rc.lua` is executed before creating the notifications.
+    -- Otherwise nothing is handling them (yet).
+    awesome.connect_signal("startup", function()
+        naughty.emit_signal(
+            "request::display_error", capi.awesome.startup_errors, true
+        )
+    end)
 end
 
 -- Handle runtime errors after startup
