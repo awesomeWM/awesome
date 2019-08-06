@@ -215,12 +215,21 @@ end
 --
 -- @param o The object.
 -- @tparam[opt=nil] table rules The rules to check. List with "rule", "rule_any",
---  "except" and "except_any" keys. If no rules are provided, one is selected at
---  random. Unless more rule sources are added, there is only one to begin with.
--- @treturn table The list of matched rules.
+--  "except" and "except_any" keys. If no rules are provided, all rules
+--  registered with a source will be matched.
 -- @method matching_rules
 function matcher:matching_rules(o, rules)
-    rules = rules or select(2, next(self._matching_rules))
+
+    -- Match all sources.
+    if not rules then
+        local ret = {}
+
+        for _, r in pairs(self._matching_rules) do
+            gtable.merge(ret, self:matching_rules(o, r))
+        end
+
+        return ret
+    end
 
     local result = {}
 
