@@ -808,6 +808,7 @@ main(int argc, char **argv)
     /* Grab server */
     xcb_grab_server(globalconf.connection);
 
+#ifndef WITH_WAYLAND
     {
         const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
         xcb_void_cookie_t cookie;
@@ -819,6 +820,7 @@ main(int argc, char **argv)
         if (xcb_request_check(globalconf.connection, cookie))
             fatal("another window manager is already running (can't select SubstructureRedirect)");
     }
+#endif
 
     /* Prefetch the maximum request length */
     xcb_prefetch_maximum_request_length(globalconf.connection);
