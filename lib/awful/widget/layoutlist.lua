@@ -118,8 +118,12 @@ function module.source.default_layouts()
     return alayout.layouts
 end
 
+-- Keep the object for each layout. This avoid creating little new tables in
+-- each update, which is painful for the GC.
+local l_cache = setmetatable({}, {__mode = "k"})
+
 local function reload_cache(self)
-    self._private.cache = {}
+    self._private.cache = setmetatable({}, {__mode = "v"})
 
     local show_text = (not self._private.style.disable_name) and
         (not beautiful.layoutlist_disable_name)
@@ -134,18 +138,22 @@ local function reload_cache(self)
 
     for _, l in ipairs(ls or {}) do
         local icn_path, icon = beautiful["layout_" .. (l.name or "")]
-        if icn_path then
+        if icn_path and show_icon then
             icon = surface.load(icn_path)
         end
 
-        table.insert(self._private.cache, {
-            icon         = show_icon and icon   or nil,
-            name         = show_text and l.name or nil,
+        l_cache[l] = l_cache[l] or {
             layout       = l,
-            screen       = s,
             callback     = function() alayout.set(l) end,
             style        = self._private.style,
-        })
+        }
+
+        -- Update the entry.
+        l_cache[l].icon   = show_icon and icon   or nil
+        l_cache[l].name   = show_text and l.name or nil
+        l_cache[l].screen = s
+
+        table.insert(self._private.cache, l_cache[l])
     end
 end
 
