@@ -56,22 +56,17 @@
       <entry name="not_grabbed" value="1" summary="A client attempted to release the mouse when it was not acquired"/>
     </enum>
 
-    <enum name="button_state">
-      <entry name="released" value="0"/>
-      <entry name="pressed" value="1"/>
-    </enum>
-
     <event name="mouse_moved">
       <description summary="notify the client that the mouse has moved"/>
       <arg name="x" type="int"/>
       <arg name="y" type="int"/>
+      <arg name="button" type="uint"/>
     </event>
 
     <event name="mouse_button">
       <description summary="notify the client that a mouse button was pressed"/>
       <arg name="x" type="int"/>
       <arg name="y" type="int"/>
-      <arg name="pressed" type="uint" enum="button_state"/>
       <arg name="button" type="uint"/>
     </event>
 

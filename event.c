@@ -126,9 +126,13 @@ event_handle_mousegrabber(int x, int y, uint16_t mask)
         {
             warn("Stopping mousegrabber.");
             luaA_mousegrabber_stop(L);
-        } else {
+        }
+        else
+        {
             if(!lua_isboolean(L, -1) || !lua_toboolean(L, -1))
+            {
                 luaA_mousegrabber_stop(L);
+            }
             lua_pop(L, 1);  /* pop returned value */
         }
         return true;
@@ -1088,6 +1092,21 @@ should_ignore(xcb_generic_event_t *event)
 
     return false;
 }
+
+#ifdef WITH_WAYLAND
+void event_mouse_moved(void *data, struct zway_cooler_mousegrabber *mousegrabber,
+        int32_t x, int32_t y, uint32_t button)
+{
+    uint16_t mask = button << 8;
+    event_handle_mousegrabber(x, y, mask);
+}
+
+void event_mouse_button(void *data, struct zway_cooler_mousegrabber *mousegrabber,
+        int32_t x, int32_t y, uint32_t button)
+{
+    event_handle_mousegrabber(x, y, button);
+}
+#endif
 
 void event_handle(xcb_generic_event_t *event)
 {

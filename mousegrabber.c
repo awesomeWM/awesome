@@ -33,6 +33,11 @@
 #include <unistd.h>
 #include <stdbool.h>
 
+#ifdef WITH_WAYLAND
+#include "way-cooler-mousegrabber-unstable-v1.h"
+#endif
+
+#ifndef WITH_WAYLAND
 /** Grab the mouse.
  * \param cursor The cursor to use while grabbing.
  * \return True if mouse was grabbed.
@@ -63,6 +68,7 @@ mousegrabber_grab(xcb_cursor_t cursor)
     }
     return false;
 }
+#endif
 
 /** Handle mouse motion events.
  * \param L Lua stack to push the pointer motion.
@@ -97,22 +103,47 @@ luaA_mousegrabber_run(lua_State *L)
     if(globalconf.mousegrabber != LUA_REFNIL)
         luaL_error(L, "mousegrabber already running");
 
+    bool mouse_grabbed = false;
+    luaA_registerfct(L, 1, &globalconf.mousegrabber);
+#ifdef WITH_WAYLAND
+    const char *cursor_name = luaL_checkstring(L, 2);
+    zway_cooler_mousegrabber_grab_mouse(globalconf.wl_mousegrabber, cursor_name);
+    wl_display_roundtrip(globalconf.wl_display);
+    const struct wl_interface *interface = NULL;
+    int err = wl_display_get_protocol_error(globalconf.wl_display,
+            &interface, NULL);
+    if (interface && strcmp(interface->name,  zway_cooler_mousegrabber_interface.name) == 0)
+    {
+        switch ((enum zway_cooler_mousegrabber_error)err) {
+        case ZWAY_COOLER_MOUSEGRABBER_ERROR_ALREADY_GRABBED:
+            break;
+        case ZWAY_COOLER_MOUSEGRABBER_ERROR_NOT_GRABBED:
+            fatal("Unexpected error from compositor's mouse grabber protocol");
+            break;
+        }
+    }
+    else
+    {
+        mouse_grabbed = true;
+    }
+
+#else
     uint16_t cfont = xcursor_font_fromstr(luaL_checkstring(L, 2));
 
     if(cfont)
     {
         xcb_cursor_t cursor = xcursor_new(globalconf.cursor_ctx, cfont);
 
-        luaA_registerfct(L, 1, &globalconf.mousegrabber);
-
-        if(!mousegrabber_grab(cursor))
-        {
-            luaA_unregister(L, &globalconf.mousegrabber);
-            luaL_error(L, "unable to grab mouse pointer");
-        }
+        mouse_grabbed = mousegrabber_grab(cursor)
     }
     else
         luaA_warn(L, "invalid cursor");
+#endif
+    if(!mouse_grabbed)
+    {
+        luaA_unregister(L, &globalconf.mousegrabber);
+        luaL_error(L, "unable to grab mouse pointer");
+    }
 
     return 0;
 }
@@ -124,7 +155,11 @@ luaA_mousegrabber_run(lua_State *L)
 int
 luaA_mousegrabber_stop(lua_State *L)
 {
+#ifdef WITH_WAYLAND
+    zway_cooler_mousegrabber_release_mouse(globalconf.wl_mousegrabber);
+#else
     xcb_ungrab_pointer(globalconf.connection, XCB_CURRENT_TIME);
+#endif
     luaA_unregister(L, &globalconf.mousegrabber);
     return 0;
 }
