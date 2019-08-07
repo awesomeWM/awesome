@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<protocol name="way_cooler_mousegrabber_unstable_v1">
+  <copyright>
+    Copyright © 2019 Preston Carpenter
+
+    Permission to use, copy, modify, distribute, and sell this
+    software and its documentation for any purpose is hereby granted
+    without fee, provided that the above copyright notice appear in
+    all copies and that both that copyright notice and this permission
+    notice appear in supporting documentation, and that the name of
+    the copyright holders not be used in advertising or publicity
+    pertaining to distribution of the software without specific,
+    written prior permission.  The copyright holders make no
+    representations about the suitability of this software for any
+    purpose.  It is provided "as is" without express or implied
+    warranty.
+
+    THE COPYRIGHT HOLDERS DISCLAIM ALL WARRANTIES WITH REGARD TO THIS
+    SOFTWARE, INCLUDING ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND
+    FITNESS, IN NO EVENT SHALL THE COPYRIGHT HOLDERS BE LIABLE FOR ANY
+    SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES
+    WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN
+    AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTIOUS ACTION,
+    ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF
+    THIS SOFTWARE.
+  </copyright>
+  <interface name="zway_cooler_keybindings" version="1">
+    <description summary="exclusively capture keys from other clients">
+      This interface allows clients to register a list of keys that will never
+      be sent to other clients.
+
+      When these keys are part of keyboard events the relevant event will
+      instead be sent to the client that bounds to this interface.
+      
+      This is intended for general keybindings, not for lock screens or other
+      clients that already have surfaces to accept input for.
+    </description>
+
+    <enum name="key_state">
+      <description summary="physical key state">
+	Describes the physical state of a key that produced the key event.
+      </description>
+      <entry name="released" value="0" summary="key is not pressed"/>
+      <entry name="pressed" value="1" summary="key is pressed"/>
+    </enum>
+
+    <request name="register_key">
+      <description summary="register a key for capturing"/>
+      <arg name="key" type="uint" summary="key to capture"/>
+      <arg name="modifiers" type="uint" summary="A bit field describing modifiers"/>
+    </request>
+
+    <request name="clear_keys">
+      <description summary="Clear all registered keys from capturing"/>
+    </request>
+
+    <event name="key">
+      <description summary="key event">
+	A key was pressed or released.
+	The time argument is a timestamp with millisecond
+	granularity, with an undefined base.
+      </description>
+      <arg name="time" type="uint" summary="timestamp with millisecond granularity"/>
+      <arg name="key" type="uint" summary="key that produced the event"/>
+      <arg name="state" type="uint" enum="key_state" summary="physical state of the key"/>
+      <arg name="mods" type="uint" summary="depressed, latched, or locked modifiers"/>
+    </event>
+
+  </interface>
+</protocol>

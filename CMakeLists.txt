@@ -50,6 +50,7 @@ set(AWE_DOC_FILES
     ${SOURCE_DIR}/LICENSE)
 
 set(AWE_SRCS
+    ${AWE_SRCS}
     ${BUILD_DIR}/awesome.c
     ${BUILD_DIR}/banning.c
     ${BUILD_DIR}/color.c

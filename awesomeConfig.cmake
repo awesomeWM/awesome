@@ -224,6 +224,24 @@ if(WITH_WAYLAND)
     else()
         autoDisable(WITH_WAYLAND "Wayland not found")
     endif()
+
+    set(protos
+        "/usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml"
+        "../protocols/way-cooler-keybindings-unstable-v1.xml"
+        "../protocols/way-cooler-mousegrabber-unstable-v1.xml"
+        "../protocols/wlr-layer-shell-unstable-v1.xml")
+    a_find_program(WAYLAND_SCANNER_EXECUTABLE wayland-scanner TRUE)
+    foreach(proto ${protos})
+        get_filename_component(proto_name ${proto} NAME_WE)
+        execute_process(COMMAND sh -c "${WAYLAND_SCANNER_EXECUTABLE} private-code ${proto} ${proto_name}.c 2>&1"
+            OUTPUT_VARIABLE WAYLAND_SCANNER_RESULT)
+        execute_process(COMMAND sh -c "${WAYLAND_SCANNER_EXECUTABLE} client-header ${proto} ${proto_name}.h 2>&1"
+            OUTPUT_VARIABLE WAYLAND_SCANNER_RESULT)
+        if(NOT WAYLAND_SCANNER_RESULT STREQUAL "")
+            message(FATAL_ERROR "Could not generate ${proto_name}: ${WAYLAND_SCANNER_RESULT}")
+        endif()
+        list(APPEND AWE_SRCS ${proto_name}.c)
+    endforeach()
 endif()
 
 if(WITH_XCB_ERRORS)
