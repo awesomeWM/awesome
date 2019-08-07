@@ -327,7 +327,7 @@ function layoutlist:set_widget_template(widget_template)
     self._private.widget_template = widget_template
 
     -- Remove the existing instances
-    self._private.data = {}
+    self._private.data = setmetatable({}, { __mode = 'k' })
 
     -- Prevent a race condition when the constructor loop to initialize the
     -- arguments.
@@ -403,7 +403,7 @@ local function new(_, args)
     ret._private.style   = args.style or {}
     ret._private.buttons = args.buttons
     ret._private.source  = args.source
-    ret._private.data = {}
+    ret._private.data = setmetatable({}, { __mode = 'k' })
 
     reload_cache(ret)
 
