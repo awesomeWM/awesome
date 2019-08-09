@@ -42,12 +42,10 @@ void client_destroy_later(void);
 static inline int
 awesome_refresh(void)
 {
-#ifdef WITH_WAYLAND
-    if (globalconf.wl_display)
+    if (globalconf.wl_display != NULL)
     {
         wl_display_roundtrip(globalconf.wl_display);
     }
-#endif
     luaA_emit_refresh();
     drawin_refresh();
     client_refresh();
@@ -61,12 +59,10 @@ void event_init(void);
 void event_handle(xcb_generic_event_t *);
 void event_drawable_under_mouse(lua_State *, int);
 
-#ifdef WITH_WAYLAND
 void event_mouse_button(void *data, struct zway_cooler_mousegrabber *mousegrabber,
         int32_t x, int32_t y, uint32_t button);
 void event_mouse_moved(void *data, struct zway_cooler_mousegrabber *mousegrabber,
         int32_t x, int32_t y, uint32_t button);
-#endif
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -71,8 +71,6 @@ static float main_loop_iteration_limit = 0.1;
 /** A pipe that is used to asynchronously handle SIGCHLD */
 static int sigchld_pipe[2];
 
-#ifdef WITH_WAYLAND
-
 static struct zway_cooler_mousegrabber_listener mousegrabber_listener =
 {
     .mouse_moved = event_mouse_moved,
@@ -111,7 +109,6 @@ static const struct wl_registry_listener wl_registry_listener =
 {
     .global = awesome_handle_global
 };
-#endif
 
 /* Initialise various random number generators */
 static void
@@ -614,7 +611,6 @@ exit_help(int exit_code)
     exit(exit_code);
 }
 
-#ifdef WITH_WAYLAND
 /* Instance of an event source that we use to integrate the wayland event queue
  * with GLib's MainLoop.
  */
@@ -678,7 +674,6 @@ static GSourceFuncs interface_funcs =
 		.check = interface_check,
 		.dispatch = interface_dispatch,
 };
-#endif
 
 /** Hello, this is main.
  * \param argc Who knows.
@@ -916,9 +911,10 @@ main(int argc, char **argv)
     /* Grab server */
     xcb_grab_server(globalconf.connection);
 
-#ifdef WITH_WAYLAND
+    if (getenv("WAYLAND_DISPLAY") != NULL)
     {
         struct wl_display *display = wl_display_connect(NULL);
+        printf("%p\n", display);
         globalconf.wl_display = display;
         if (globalconf.wl_display == NULL)
         {
@@ -947,7 +943,7 @@ main(int argc, char **argv)
 
         g_source_attach(source, NULL);
     }
-#else
+    else /* X11 mode */
     {
         const uint32_t select_input_val = XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT;
         xcb_void_cookie_t cookie;
@@ -959,7 +955,6 @@ main(int argc, char **argv)
         if (xcb_request_check(globalconf.connection, cookie))
             fatal("another window manager is already running (can't select SubstructureRedirect)");
     }
-#endif
 
     /* Prefetch the maximum request length */
     xcb_prefetch_maximum_request_length(globalconf.connection);

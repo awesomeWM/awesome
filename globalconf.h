@@ -42,9 +42,7 @@
 #include "common/xembed.h"
 #include "common/buffer.h"
 
-#ifdef WITH_WAYLAND
 #include "way-cooler-mousegrabber-unstable-v1.h"
-#endif
 
 #define ROOT_WINDOW_EVENT_MASK \
     (const uint32_t []) { \
@@ -228,7 +226,7 @@ typedef struct
     xcb_generic_event_t *pending_event;
     /** The exit code that main() will return with */
     int exit_code;
-#ifdef WITH_WAYLAND
+
     struct wl_display *wl_display;
     struct wl_registry *wl_registry;
     struct wl_compositor *wl_compositor;
@@ -236,7 +234,6 @@ typedef struct
     struct wl_seat *wl_seat;
 
     struct zway_cooler_mousegrabber *wl_mousegrabber;
-#endif
 } awesome_t;
 
 extern awesome_t globalconf;

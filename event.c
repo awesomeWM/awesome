@@ -1093,7 +1093,6 @@ should_ignore(xcb_generic_event_t *event)
     return false;
 }
 
-#ifdef WITH_WAYLAND
 void event_mouse_moved(void *data, struct zway_cooler_mousegrabber *mousegrabber,
         int32_t x, int32_t y, uint32_t button)
 {
@@ -1106,7 +1105,6 @@ void event_mouse_button(void *data, struct zway_cooler_mousegrabber *mousegrabbe
 {
     event_handle_mousegrabber(x, y, button);
 }
-#endif
 
 void event_handle(xcb_generic_event_t *event)
 {

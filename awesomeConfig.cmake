@@ -8,7 +8,6 @@ set(CODENAME "Too long")
 
 include(AutoOption.cmake)
 
-autoOption(WITH_WAYLAND, "Build to be used with Way Cooler")
 autoOption(WITH_DBUS "build with D-BUS")
 autoOption(GENERATE_MANPAGES "generate manpages")
 option(COMPRESS_MANPAGES "compress manpages" ON)
@@ -216,33 +215,29 @@ if(WITH_DBUS)
     endif()
 endif()
 
-if(WITH_WAYLAND)
-    pkg_check_modules(WAYLAND wayland-client)
-    if (WAYLAND_FOUND)
-        set(AWESOME_OPTIONAL_LDFLAGS ${AWESOME_OPTIONAL_LDFLAGS} ${WAYLAND_LDFLAGS})
-        set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${WAYLAND_INCLUDE_DIRS})
-    else()
-        autoDisable(WITH_WAYLAND "Wayland not found")
-    endif()
-
-    set(protos
-        "/usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml"
-        "../protocols/way-cooler-keybindings-unstable-v1.xml"
-        "../protocols/way-cooler-mousegrabber-unstable-v1.xml"
-        "../protocols/wlr-layer-shell-unstable-v1.xml")
-    a_find_program(WAYLAND_SCANNER_EXECUTABLE wayland-scanner TRUE)
-    foreach(proto ${protos})
-        get_filename_component(proto_name ${proto} NAME_WE)
-        execute_process(COMMAND sh -c "${WAYLAND_SCANNER_EXECUTABLE} private-code ${proto} ${proto_name}.c 2>&1"
-            OUTPUT_VARIABLE WAYLAND_SCANNER_RESULT)
-        execute_process(COMMAND sh -c "${WAYLAND_SCANNER_EXECUTABLE} client-header ${proto} ${proto_name}.h 2>&1"
-            OUTPUT_VARIABLE WAYLAND_SCANNER_RESULT)
-        if(NOT WAYLAND_SCANNER_RESULT STREQUAL "")
-            message(FATAL_ERROR "Could not generate ${proto_name}: ${WAYLAND_SCANNER_RESULT}")
-        endif()
-        list(APPEND AWE_SRCS ${proto_name}.c)
-    endforeach()
+pkg_check_modules(WAYLAND wayland-client)
+if (WAYLAND_FOUND)
+    set(AWESOME_OPTIONAL_LDFLAGS ${AWESOME_OPTIONAL_LDFLAGS} ${WAYLAND_LDFLAGS})
+    set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${WAYLAND_INCLUDE_DIRS})
 endif()
+
+set(protos
+    "/usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml"
+    "../protocols/way-cooler-keybindings-unstable-v1.xml"
+    "../protocols/way-cooler-mousegrabber-unstable-v1.xml"
+    "../protocols/wlr-layer-shell-unstable-v1.xml")
+a_find_program(WAYLAND_SCANNER_EXECUTABLE wayland-scanner TRUE)
+foreach(proto ${protos})
+    get_filename_component(proto_name ${proto} NAME_WE)
+    execute_process(COMMAND sh -c "${WAYLAND_SCANNER_EXECUTABLE} private-code ${proto} ${proto_name}.c 2>&1"
+        OUTPUT_VARIABLE WAYLAND_SCANNER_RESULT)
+    execute_process(COMMAND sh -c "${WAYLAND_SCANNER_EXECUTABLE} client-header ${proto} ${proto_name}.h 2>&1"
+        OUTPUT_VARIABLE WAYLAND_SCANNER_RESULT)
+    if(NOT WAYLAND_SCANNER_RESULT STREQUAL "")
+        message(FATAL_ERROR "Could not generate ${proto_name}: ${WAYLAND_SCANNER_RESULT}")
+    endif()
+    list(APPEND AWE_SRCS ${proto_name}.c)
+endforeach()
 
 if(WITH_XCB_ERRORS)
     pkg_check_modules(XCB_ERRORS xcb-errors)
