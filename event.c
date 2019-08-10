@@ -108,38 +108,6 @@ event_button_match(xcb_button_press_event_t *ev, button_t *b, void *data)
 DO_EVENT_HOOK_CALLBACK(button_t, button, XCB_BUTTON, button_array_t, event_button_match)
 DO_EVENT_HOOK_CALLBACK(keyb_t, key, XCB_KEY, key_array_t, event_key_match)
 
-/** Handle an event with mouse grabber if needed
- * \param x The x coordinate.
- * \param y The y coordinate.
- * \param mask The mask buttons.
- * \return True if the event was handled.
- */
-static bool
-event_handle_mousegrabber(int x, int y, uint16_t mask)
-{
-    if(globalconf.mousegrabber != LUA_REFNIL)
-    {
-        lua_State *L = globalconf_get_lua_State();
-        mousegrabber_handleevent(L, x, y, mask);
-        lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.mousegrabber);
-        if(!luaA_dofunction(L, 1, 1))
-        {
-            warn("Stopping mousegrabber.");
-            luaA_mousegrabber_stop(L);
-        }
-        else
-        {
-            if(!lua_isboolean(L, -1) || !lua_toboolean(L, -1))
-            {
-                luaA_mousegrabber_stop(L);
-            }
-            lua_pop(L, 1);  /* pop returned value */
-        }
-        return true;
-    }
-    return false;
-}
-
 /** Emit a button signal.
  * The top of the lua stack has to be the object on which to emit the event.
  * \param L The Lua VM state.
@@ -191,7 +159,7 @@ event_handle_button(xcb_button_press_event_t *ev)
             state |= change;
         else
             state &= ~change;
-        if(event_handle_mousegrabber(ev->root_x, ev->root_y, state))
+        if(mousegrabber_handleevent(L, ev->root_x, ev->root_y, state))
             return;
     }
 
@@ -542,7 +510,7 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
 
     globalconf.timestamp = ev->time;
 
-    if(event_handle_mousegrabber(ev->root_x, ev->root_y, ev->state))
+    if(mousegrabber_handleevent(L,ev->root_x, ev->root_y, ev->state))
         return;
 
     if((c = client_getbyframewin(ev->event)))
@@ -1091,19 +1059,6 @@ should_ignore(xcb_generic_event_t *event)
     }
 
     return false;
-}
-
-void event_mouse_moved(void *data, struct zway_cooler_mousegrabber *mousegrabber,
-        int32_t x, int32_t y, uint32_t button)
-{
-    uint16_t mask = button << 8;
-    event_handle_mousegrabber(x, y, mask);
-}
-
-void event_mouse_button(void *data, struct zway_cooler_mousegrabber *mousegrabber,
-        int32_t x, int32_t y, uint32_t button)
-{
-    event_handle_mousegrabber(x, y, button);
 }
 
 void event_handle(xcb_generic_event_t *event)

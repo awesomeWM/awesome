@@ -223,9 +223,9 @@ endif()
 
 set(protos
     "/usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml"
-    "../protocols/way-cooler-keybindings-unstable-v1.xml"
-    "../protocols/way-cooler-mousegrabber-unstable-v1.xml"
-    "../protocols/wlr-layer-shell-unstable-v1.xml")
+    "../wayland/protocols/way-cooler-keybindings-unstable-v1.xml"
+    "../wayland/protocols/way-cooler-mousegrabber-unstable-v1.xml"
+    "../wayland/protocols/wlr-layer-shell-unstable-v1.xml")
 a_find_program(WAYLAND_SCANNER_EXECUTABLE wayland-scanner TRUE)
 foreach(proto ${protos})
     get_filename_component(proto_name ${proto} NAME_WE)
@@ -328,7 +328,11 @@ file(GLOB awesome_c_configure_files RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/common/*.c
     ${SOURCE_DIR}/common/*.h
     ${SOURCE_DIR}/objects/*.c
-    ${SOURCE_DIR}/objects/*.h)
+    ${SOURCE_DIR}/objects/*.h
+    ${SOURCE_DIR}/wayland/*.c
+    ${SOURCE_DIR}/wayland/*.h
+    ${SOURCE_DIR}/x11/*.c
+    ${SOURCE_DIR}/x11/*.h)
 
 file(GLOB_RECURSE awesome_lua_configure_files RELATIVE ${SOURCE_DIR}
     ${SOURCE_DIR}/lib/*.lua)

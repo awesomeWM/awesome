@@ -227,12 +227,14 @@ typedef struct
     /** The exit code that main() will return with */
     int exit_code;
 
+    /* Wayland globals */
     struct wl_display *wl_display;
     struct wl_registry *wl_registry;
     struct wl_compositor *wl_compositor;
     struct wl_shm *wl_shm;
     struct wl_seat *wl_seat;
 
+    /* Awesome-specific Wayland globals */
     struct zway_cooler_mousegrabber *wl_mousegrabber;
 } awesome_t;
 

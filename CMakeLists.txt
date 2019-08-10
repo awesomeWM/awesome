@@ -94,7 +94,11 @@ set(AWE_SRCS
     ${BUILD_DIR}/objects/selection_watcher.c
     ${BUILD_DIR}/objects/tag.c
     ${BUILD_DIR}/objects/selection_getter.c
-    ${BUILD_DIR}/objects/window.c)
+    ${BUILD_DIR}/objects/window.c
+    ${BUILD_DIR}/wayland/mousegrabber.c
+    ${BUILD_DIR}/wayland/globals.c
+    ${BUILD_DIR}/x11/mousegrabber.c
+    ${BUILD_DIR}/x11/globals.c)
 
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awesome.1.txt

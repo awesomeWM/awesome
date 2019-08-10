@@ -1,7 +1,5 @@
 /*
- * mousegrabber.h - mouse pointer grabbing header
- *
- * Copyright © 2008 Julien Danjou <julien@danjou.info>
+ * Copyright © 2019 Preston Carpenter <APragmaticPlace@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,20 +18,13 @@
  */
 
 #include <stdbool.h>
-#include <lua.h>
-#include <xcb/xcb.h>
 
-#ifndef AWESOME_MOUSEGRABBER_H
-#define AWESOME_MOUSEGRABBER_H
+#ifndef AWESOME_X11_MOUSEGRABBER_H
+#define AWESOME_X11_MOUSEGRABBER_H
 
-struct mousegrabber_impl
-{
-    bool (*grab_mouse)(const char *cursor_name);
-    void (*release_mouse)(void);
-};
+bool x11_grab_mouse(const char *cursor);
 
-int luaA_mousegrabber_stop(lua_State *);
-bool mousegrabber_handleevent(lua_State *, int, int, uint16_t);
+void x11_release_mouse(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
