@@ -25,6 +25,7 @@
  * @coreclassmod root
  */
 
+#include "root.h"
 #include "globalconf.h"
 
 #include "common/atoms.h"
@@ -38,6 +39,8 @@
 #include <xcb/xtest.h>
 #include <xcb/xcb_aux.h>
 #include <cairo-xcb.h>
+
+struct root_impl root_impl;
 
 static void
 root_set_wallpaper_pixmap(xcb_connection_t *c, xcb_pixmap_t p)
@@ -353,8 +356,7 @@ luaA_root_keys(lua_State *L)
         while(lua_next(L, 1))
             key_array_append(&globalconf.keys, luaA_object_ref_class(L, -1, &key_class));
 
-        xcb_screen_t *s = globalconf.screen;
-        xwindow_grabkeys(s->root, &globalconf.keys);
+        root_impl.grab_keys();
 
         return 1;
     }

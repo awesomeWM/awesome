@@ -19,9 +19,11 @@
 
 #include <lua.h>
 
-#include "globalconf.h"
 #include <mousegrabber.h>
+
 #include "wayland/mousegrabber.h"
+#include "globalconf.h"
+#include "way-cooler-mousegrabber-unstable-v1.h"
 
 static void event_mouse_moved(void *data, struct zway_cooler_mousegrabber *mousegrabber,
         int32_t x, int32_t y, uint32_t button)

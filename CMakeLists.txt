@@ -97,8 +97,10 @@ set(AWE_SRCS
     ${BUILD_DIR}/objects/window.c
     ${BUILD_DIR}/wayland/mousegrabber.c
     ${BUILD_DIR}/wayland/globals.c
+    ${BUILD_DIR}/wayland/root.c
     ${BUILD_DIR}/x11/mousegrabber.c
-    ${BUILD_DIR}/x11/globals.c)
+    ${BUILD_DIR}/x11/globals.c
+    ${BUILD_DIR}/x11/root.c)
 
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awesome.1.txt

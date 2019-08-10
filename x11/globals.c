@@ -19,12 +19,16 @@
 
 #include <stdbool.h>
 
-#include "globalconf.h"
 #include <mousegrabber.h>
+#include <root.h>
+
+#include "globalconf.h"
+#include "x11/root.h"
 #include "x11/mousegrabber.h"
 #include "x11/globals.h"
 
 extern struct mousegrabber_impl mousegrabber_impl;
+extern struct root_impl root_impl;
 
 void init_x11(void)
 {
@@ -41,6 +45,9 @@ void init_x11(void)
     mousegrabber_impl = (struct mousegrabber_impl){
         .grab_mouse = x11_grab_mouse,
         .release_mouse = x11_release_mouse,
+    };
+    root_impl = (struct root_impl){
+        .grab_keys = x11_grab_keys,
     };
 }
 

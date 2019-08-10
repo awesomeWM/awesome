@@ -17,16 +17,23 @@
  *
  */
 
-#include "globalconf.h"
 #include <mousegrabber.h>
-#include "wayland/mousegrabber.h"
-#include "way-cooler-mousegrabber-unstable-v1.h"
+#include <root.h>
+
 #include "wayland/globals.h"
+#include "globalconf.h"
+
+#include "wayland/mousegrabber.h"
+#include "wayland/root.h"
+
+#include "way-cooler-mousegrabber-unstable-v1.h"
+#include "way-cooler-keybindings-unstable-v1.h"
 
 #include <glib-unix.h>
 #include <wayland-client.h>
 
 extern struct mousegrabber_impl mousegrabber_impl;
+extern struct root_impl root_impl;
 
 /* Instance of an event source that we use to integrate the wayland event queue
  * with GLib's MainLoop.
@@ -142,6 +149,14 @@ static void awesome_handle_global(void *data, struct wl_registry *registry,
                 &mousegrabber_listener, NULL);
         wl_display_roundtrip(globalconf.wl_display);
     }
+    else if (strcmp(interface, zway_cooler_keybindings_interface.name) == 0)
+    {
+        globalconf.wl_keybindings = wl_registry_bind(registry, name,
+                &zway_cooler_keybindings_interface, version);
+        zway_cooler_keybindings_add_listener(globalconf.wl_keybindings,
+                &keybindings_listener, NULL);
+
+    }
 }
 
 static void setup_wayland_globals(struct wl_display *display,
@@ -174,6 +189,9 @@ void init_wayland(void)
     mousegrabber_impl = (struct mousegrabber_impl){
         .grab_mouse = wayland_grab_mouse,
         .release_mouse = wayland_release_mouse,
+    };
+    root_impl = (struct root_impl){
+        .grab_keys = wayland_grab_keys,
     };
 }
 

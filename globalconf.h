@@ -236,6 +236,7 @@ typedef struct
 
     /* Awesome-specific Wayland globals */
     struct zway_cooler_mousegrabber *wl_mousegrabber;
+    struct zway_cooler_keybindings *wl_keybindings;
 } awesome_t;
 
 extern awesome_t globalconf;
