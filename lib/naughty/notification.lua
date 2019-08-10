@@ -15,12 +15,13 @@
 -- @copyright 2017 Emmanuel Lepage Vallee
 -- @coreclassmod naughty.notification
 ---------------------------------------------------------------------------
-local gobject = require("gears.object")
-local gtable  = require("gears.table")
-local timer   = require("gears.timer")
-local cst     = require("naughty.constants")
-local naughty = require("naughty.core")
-local gdebug  = require("gears.debug")
+local gobject  = require("gears.object")
+local gtable   = require("gears.table")
+local gsurface = require("gears.surface")
+local timer    = require("gears.timer")
+local cst      = require("naughty.constants")
+local naughty  = require("naughty.core")
+local gdebug   = require("gears.debug")
 
 local notification = {}
 
@@ -74,8 +75,7 @@ local notification = {}
 -- This is the equivalent to a PID as allows external applications to select
 -- notifications.
 -- @property id
--- @param string
--- @see title
+-- @param number
 
 --- Text of the notification.
 --
@@ -95,6 +95,72 @@ local notification = {}
 --   Set 0 for no timeout.
 -- @property timeout
 -- @param number
+
+--- The notification urgency level.
+--
+-- The default urgency levels are:
+--
+-- * low
+-- * normal
+-- * critical
+--
+-- @property urgency
+-- @param string
+
+--- The notification category.
+--
+-- The category should be named using the `x-vendor.class.name` naming scheme or
+-- use one of the default categories:
+--
+-- <table class='widget_list' border=1>
+--  <tr style='font-weight: bold;'>
+--   <th align='center'>Name</th>
+--   <th align='center'>Description</th>
+--  </tr>
+-- <tr><td><b>device</b></td><td>A generic device-related notification that
+--  doesn't fit into any other category.</td></tr>
+-- <tr><td><b>device.added</b></td><td>A device, such as a USB device, was added to the system.</td></tr>
+-- <tr><td><b>device.error</b></td><td>A device had some kind of error.</td></tr>
+-- <tr><td><b>device.removed</b></td><td>A device, such as a USB device, was removed from the system.</td></tr>
+-- <tr><td><b>email</b></td><td>A generic e-mail-related notification that doesn't fit into
+--  any other category.</td></tr>
+-- <tr><td><b>email.arrived</b></td><td>A new e-mail notification.</td></tr>
+-- <tr><td><b>email.bounced</b></td><td>A notification stating that an e-mail has bounced.</td></tr>
+-- <tr><td><b>im</b></td><td>A generic instant message-related notification that doesn't fit into
+--  any other category.</td></tr>
+-- <tr><td><b>im.error</b></td><td>An instant message error notification.</td></tr>
+-- <tr><td><b>im.received</b></td><td>A received instant message notification.</td></tr>
+-- <tr><td><b>network</b></td><td>A generic network notification that doesn't fit into any other
+--  category.</td></tr>
+-- <tr><td><b>network.connected</b></td><td>A network connection notification, such as successful
+--  sign-on to a network service. <br />
+--  This should not be confused with device.added for new network devices.</td></tr>
+-- <tr><td><b>network.disconnected</b></td><td>A network disconnected notification. This should not
+--  be confused with <br />
+--  device.removed for disconnected network devices.</td></tr>
+-- <tr><td><b>network.error</b></td><td>A network-related or connection-related error.</td></tr>
+-- <tr><td><b>presence</b></td><td>A generic presence change notification that doesn't fit into any
+--  other category, <br />
+--  such as going away or idle.</td></tr>
+-- <tr><td><b>presence.offline</b></td><td>An offline presence change notification.</td></tr>
+-- <tr><td><b>presence.online</b></td><td>An online presence change notification.</td></tr>
+-- <tr><td><b>transfer</b></td><td>A generic file transfer or download notification that doesn't
+--  fit into any other category.</td></tr>
+-- <tr><td><b>transfer.complete</b></td><td>A file transfer or download complete notification.</td></tr>
+-- <tr><td><b>transfer.error</b></td><td>A file transfer or download error.</td></tr>
+-- </table>
+--
+-- @property category
+-- @tparam string|nil category
+
+--- True if the notification should be kept when an action is pressed.
+--
+-- By default, invoking an action will destroy the notification. Some actions,
+-- like the "Snooze" action of alarm clock, will cause the notification to
+-- be updated with a date further in the future.
+--
+-- @property resident
+-- @param[opt=false] boolean
 
 --- Delay in seconds after which hovered popup disappears.
 -- @property hover_timeout
@@ -144,13 +210,58 @@ local notification = {}
 -- @property font
 -- @param string
 
---- Path to icon.
+--- "All in one" way to access the default image or icon.
+--
+-- A notification can provide a combination of an icon, a static image, or if
+-- enabled, a looping animation. Add to that the ability to import the icon
+-- information from the client or from a `.desktop` file, there is multiple
+-- conflicting sources of "icons".
+--
+-- On the other hand, the vast majority of notifications don't multiple or
+-- ambiguous sources of icons. This property will pick the first of the
+-- following.
+--
+-- * The `image`.
+-- * The `app_icon`.
+-- * The `icon` from a client with `normal` type.
+-- * The `icon` of a client with `dialog` type.
+--
 -- @property icon
 -- @tparam string|surface icon
+-- @see app_icon
+-- @see image
 
 --- Desired icon size in px.
 -- @property icon_size
 -- @param number
+
+--- The icon provided in the `app_icon` field of the DBus notification.
+--
+-- This should always be either the URI (path) to an icon or a valid XDG
+-- icon name to be fetched from the theme.
+--
+-- @property app_icon
+-- @param string
+
+--- The notification image.
+--
+-- This is usually provided as a `gears.surface` object. The image is used
+-- instead of the `app_icon` by notification assets which are auto-generated
+-- or stored elsewhere than the filesystem (databases, web, Android phones, etc).
+--
+-- @property image
+-- @tparam string|surface image
+
+--- The notification (animated) images.
+--
+-- Note that calling this without first setting
+-- `naughty.image_animations_enabled` to true will throw an exception.
+--
+-- Also note that there is *zero* support for this anywhere else in `naughty`
+-- and very, very few applications support this.
+--
+-- @property images
+-- @tparam nil|table images
 
 --- Foreground color.
 --
@@ -285,10 +396,44 @@ local notification = {}
 -- @property ignore_suspend If set to true this notification
 --   will be shown even if notifications are suspended via `naughty.suspend`.
 
+--- A list of clients associated with this notification.
+--
+-- When used with DBus notifications, this returns all clients sharing the PID
+-- of the notification sender. Note that this is highly unreliable.
+-- Applications that use a different process to send the notification or
+-- applications (and scripts) calling the `notify-send` command wont have any
+-- client.
+--
+-- @property clients
+-- @param table
+
+--- The maximum popup width.
+--
+-- Some notifications have overlong message, cap them to this width. Note that
+-- this is ignored by `naughty.list.notifications` because it delegate this
+-- decision to the layout.
+--
+-- @property[opt=500] max_width
+-- @param number
+
+--- The application name specified by the notification.
+--
+-- This can be anything. It is usually less relevant than the `clients`
+-- property, but can sometime to specified for remote or headless notifications.
+-- In these case, it helps to triage and detect the notification from the rules.
+-- @property app_name
+-- @param string
+
+--- The widget template used to represent the notification.
+--
+-- Some notifications, such as chat messages or music applications are better
+-- off with a specialized notification widget.
+--
+-- @property widget_template
+-- @param table
+
 --FIXME remove the screen attribute, let the handlers decide
 -- document all handler extra properties
-
---FIXME add methods such as persist
 
 --- Destroy notification by notification object.
 --
@@ -319,7 +464,11 @@ end
 function notification:reset_timeout(new_timeout)
     if self.timer then self.timer:stop() end
 
-    self.timeout = new_timeout or self.timeout
+    -- Do not set `self.timeout` to `self.timeout` since that would create the
+    -- timer before the constructor ends.
+    if new_timeout and self.timer then
+        self.timeout = new_timeout or self.timeout
+    end
 
     if self.timer and not self.timer.started then
         self.timer:start()
@@ -333,6 +482,8 @@ function notification:set_id(new_id)
 end
 
 function notification:set_timeout(timeout)
+    timeout = timeout or 0
+
     local die = function (reason)
         if reason == cst.notification_closed_reason.expired then
             self.is_expired = true
@@ -399,7 +550,9 @@ local properties = {
     "fg"      , "bg"      , "height"  , "border_color"  ,
     "shape"   , "opacity" , "margin"  , "ignore_suspend",
     "destroy" , "preset"  , "callback", "actions"       ,
-    "run"     , "id"      , "ignore"  , "auto_reset_timeout"
+    "run"     , "id"      , "ignore"  , "auto_reset_timeout",
+    "urgency" , "image"   , "images"  , "widget_template",
+    "max_width", "app_name",
 }
 
 for _, prop in ipairs(properties) do
@@ -426,8 +579,107 @@ for _, prop in ipairs(properties) do
         if reset then
             self:reset_timeout()
         end
+    end
 
-        return
+end
+
+local hints_default = {
+    urgency  = "normal",
+    resident = false,
+}
+
+for _, prop in ipairs { "category", "resident" } do
+    notification["get_"..prop] = notification["get_"..prop] or function(self)
+        return self._private[prop] or (
+            self._private.freedesktop_hints and self._private.freedesktop_hints[prop]
+        ) or hints_default[prop]
+    end
+
+    notification["set_"..prop] = notification["set_"..prop] or function(self, value)
+        self._private[prop] = value
+        self:emit_signal("property::"..prop, value)
+    end
+end
+
+function notification.get_icon(self)
+    if self._private.icon then
+        return self._private.icon == "" and nil or self._private.icon
+    elseif self.image and self.image ~= "" then
+        return self.image
+    elseif self._private.app_icon and self._private.app_icon ~= "" then
+        return self._private.app_icon
+    end
+
+    local clients = notification.get_clients(self)
+
+    for _, c in ipairs(clients) do
+        if c.type == "normal" then
+            self._private.icon = gsurface(c.icon)
+            return self._private.icon
+        end
+    end
+
+    for _, c in ipairs(clients) do
+        if c.type == "dialog" then
+            self._private.icon = gsurface(c.icon)
+            return self._private.icon
+        end
+    end
+
+    return nil
+end
+
+function notification.get_clients(self)
+    -- Clients from the future don't send notification, it's useless to reload
+    -- the list over and over.
+    if self._private.clients then return self._private.clients end
+
+    if not self._private._unique_sender then return {} end
+
+    self._private.clients = require("naughty.dbus").get_clients(self)
+
+    return self._private.clients
+end
+
+function notification.set_actions(self, new_actions)
+    for _, a in ipairs(self._private.actions or {}) do
+        a:disconnect_signal("_changed", self._private.action_cb )
+        a:disconnect_signal("invoked" , self._private.invoked_cb)
+    end
+
+    -- Clone so `append_actions` doesn't add unwanted actions to other
+    -- notifications.
+    self._private.actions = gtable.clone(new_actions, false)
+
+    for _, a in ipairs(self._private.actions or {}) do
+        a:connect_signal("_changed", self._private.action_cb )
+        a:connect_signal("invoked" , self._private.invoked_cb)
+    end
+
+    self:emit_signal("property::actions", new_actions)
+
+    -- When a notification is updated over dbus or by setting a property,
+    -- it is usually convenient to reset the timeout.
+    local reset = ((not self.suspended)
+        and self.auto_reset_timeout ~= false
+        and naughty.auto_reset_timeout)
+
+    if reset then
+        self:reset_timeout()
+    end
+end
+
+--- Add more actions to the notification.
+-- @method append_actions
+-- @tparam table new_actions
+
+function notification:append_actions(new_actions)
+    self._private.actions = self._private.actions or {}
+
+    for _, a in ipairs(new_actions or {}) do
+        a:connect_signal("_changed", self._private.action_cb )
+        a:connect_signal("invoked" , self._private.invoked_cb)
+        table.insert(self._private.actions, a)
     end
 
 end
@@ -473,6 +725,33 @@ local function convert_actions(actions)
     for old_idx, a in pairs(new_actions) do
         actions[a.position] = a
         actions[ old_idx  ] = nil
+    end
+end
+
+-- The old API used monkey-patched variable presets.
+--
+-- Monkey-patched anything is always an issue and prevent module from safely
+-- doing anything without stepping on each other foot. In the background,
+-- presets were selected with a rule-like API anyway.
+local function select_legacy_preset(n, args)
+    for _, obj in pairs(cst.config.mapping) do
+        local filter, preset = obj[1], obj[2]
+        if (not filter.urgency or filter.urgency == args.urgency) and
+        (not filter.category or filter.category == args.category) and
+        (not filter.appname or filter.appname == args.appname) then
+            args.preset = gtable.join(args.preset or {}, preset)
+        end
+    end
+
+    -- gather variables together
+    rawset(n, "preset", gtable.join(
+        cst.config.defaults or {},
+        args.preset or cst.config.presets.normal or {},
+        rawget(n, "preset") or {}
+    ))
+
+    for k, v in pairs(n.preset) do
+        n._private[k] = v
     end
 end
 
@@ -557,60 +836,71 @@ local function create(args)
 
     -- Avoid modifying the original table
     local private = {}
+    rawset(n, "_private", private)
 
-    -- gather variables together
-    rawset(n, "preset", gtable.join(
-        cst.config.defaults or {},
-        args.preset or cst.config.presets.normal or {},
-        rawget(n, "preset") or {}
-    ))
+    -- Allow extensions to create override the preset with custom data
+    if not naughty._has_preset_handler then
+        select_legacy_preset(n, args)
+    end
 
     if is_old_action then
         convert_actions(args.actions)
-    end
-
-    for k, v in pairs(n.preset) do
-        private[k] = v
     end
 
     for k, v in pairs(args) do
         private[k] = v
     end
 
-    -- notif.actions should not be nil to allow cheching if there is actions
-    -- using the shorthand `if #notif.actions > 0 then`
-    private.actions = private.actions or {}
-
-    -- Make sure the action are for this notification. Sharing actions with
-    -- multiple notification is not supported.
-    for _, a in ipairs(private.actions) do
-        a.notification = n
-    end
-
     -- It's an automatic property
     n.is_expired = false
 
-    rawset(n, "_private", private)
-
     gtable.crush(n, notification, true)
 
-    n.id = n.id or notification._gen_next_id()
+    -- Always emit property::actions when any of the action change to allow
+    -- some widgets to be updated without over complicated built-in tracking
+    -- of all options.
+    function n._private.action_cb() n:emit_signal("property::actions") end
 
-    -- Allow extensions to create override the preset with custom data
-    naughty.emit_signal("request::preset", n, args)
+    -- Listen to action press and destroy non-resident notifications.
+    function n._private.invoked_cb(a, notif)
+        if (not notif) or notif == n then
+            n:emit_signal("invoked", a)
+
+            if not n.resident then
+                n:destroy(cst.notification_closed_reason.dismissed_by_user)
+            end
+        end
+    end
+
+    -- notif.actions should not be nil to allow checking if there is actions
+    -- using the shorthand `if #notif.actions > 0 then`
+    private.actions = {}
+    if args.actions then
+        notification.set_actions(n, args.actions)
+    end
+
+    n.id = n.id or notification._gen_next_id()
 
     -- Register the notification before requesting a widget
     n:emit_signal("new", args)
 
+    -- The rules are attached to this.
+    if naughty._has_preset_handler then
+        naughty.emit_signal("request::preset", n, args)
+    end
+
     -- Let all listeners handle the actual visual aspects
-    if (not n.ignore) and (not n.preset.ignore) then
+    if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) then
         naughty.emit_signal("request::display" , n, args)
         naughty.emit_signal("request::fallback", n, args)
     end
 
     -- Because otherwise the setter logic would not be executed
     if n._private.timeout then
-        n:set_timeout(n._private.timeout or n.preset.timeout)
+        n:set_timeout(n._private.timeout
+            or (n.preset and n.preset.timeout)
+            or cst.config.timeout
+        )
     end
 
     return n

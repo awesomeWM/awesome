@@ -3,10 +3,13 @@
 local spawn     = require("awful.spawn")
 local naughty   = require("naughty"    )
 local gdebug    = require("gears.debug")
+local gtable    = require("gears.table")
 local cairo     = require("lgi"        ).cairo
 local beautiful = require("beautiful")
 local Gio       = require("lgi"        ).Gio
 local GLib      = require("lgi"        ).GLib
+local gpcall    = require("gears.protected_call")
+local dwidget   = require("naughty.widget._default")
 
 -- This module test deprecated APIs
 require("gears.debug").deprecate = function() end
@@ -555,6 +558,16 @@ table.insert(steps, function()
     assert(n2.box.width +2*n2.box.border_width <= wa.width )
     assert(n2.box.height+2*n2.box.border_width <= wa.height)
 
+    -- Check with client icons.
+    assert(not n1.icon)
+
+    n1._private.clients = {{icon= big_icon, type = "normal"}}
+    assert(n1.icon == big_icon)
+    assert(n1.box.width +2*n1.box.border_width <= wa.width )
+    assert(n1.box.height+2*n1.box.border_width <= wa.height)
+    assert(n2.box.width +2*n2.box.border_width <= wa.width )
+    assert(n2.box.height+2*n2.box.border_width <= wa.height)
+
     n1:destroy()
     n2:destroy()
 
@@ -673,6 +686,9 @@ table.insert(steps, function()
     assert(n.actions[2].name == "five" )
     assert(n.actions[3].name == "six"  )
 
+    n:destroy()
+    assert(#active == 0)
+
     return true
 end)
 
@@ -715,6 +731,162 @@ table.insert(steps, function()
 
     --TODO test what happens when updating a destroyed notification
     -- There is currently no API to resurrect notifications.
+
+    return true
+end)
+
+-- Test adding actions, resident mode and action sharing.
+table.insert(steps, function()
+    local n1 = naughty.notification {
+        title    = "foo",
+        message  = "bar",
+        timeout  = 25000,
+        resident = true,
+        actions  = { naughty.action { name = "a1" } }
+    }
+
+    local n2 = naughty.notification {
+        title    = "foo",
+        message  = "bar",
+        resident = true,
+        timeout  = 25000,
+        actions  = { naughty.action { name = "a2" } }
+    }
+
+    local is_called = {}
+
+    n1:connect_signal("invoked", function() is_called[1] = true end)
+    n2:connect_signal("invoked", function() is_called[2] = true end)
+
+    n1.actions[1]:invoke(n1)
+    n2.actions[1]:invoke(n2)
+
+    assert(is_called[1])
+    assert(is_called[2])
+    assert(not n1._private.is_destroyed)
+    assert(not n2._private.is_destroyed)
+
+    local shared_a = naughty.action { name = "a3" }
+
+    n1:append_actions {shared_a}
+    n2:append_actions {shared_a}
+
+    n1:connect_signal("invoked", function() is_called[3] = true end)
+    n2:connect_signal("invoked", function() is_called[4] = true end)
+
+    assert(n1.actions[2] == shared_a)
+    assert(n2.actions[2] == shared_a)
+
+    shared_a:invoke(n1)
+
+    assert(is_called[3])
+    assert(not is_called[4])
+    assert(not n1._private.is_destroyed)
+    assert(not n2._private.is_destroyed)
+
+    n1.resident = false
+    n2.resident = false
+
+    shared_a:invoke(n1)
+
+    assert(n1._private.is_destroyed)
+    assert(not n2._private.is_destroyed)
+
+    shared_a:invoke(n2)
+    assert(n2._private.is_destroyed)
+
+    return true
+end)
+
+-- Test that exposing support for animations and persistence are exposed to DBus.
+table.insert(steps, function()
+    assert(not naughty.persistence_enabled)
+    assert(not naughty.image_animations_enabled)
+
+    assert(gtable.hasitem(naughty.dbus._capabilities, "icon-static"))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "icon-multi"))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "persistence"))
+
+    naughty.persistence_enabled      = true
+    naughty.image_animations_enabled = true
+
+    assert(naughty.persistence_enabled)
+    assert(naughty.image_animations_enabled)
+
+    assert(gtable.hasitem(naughty.dbus._capabilities, "icon-multi"))
+    assert(gtable.hasitem(naughty.dbus._capabilities, "persistence"))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "icon-static"))
+
+    naughty.persistence_enabled      = false
+    naughty.image_animations_enabled = false
+
+    assert(not naughty.persistence_enabled)
+    assert(not naughty.image_animations_enabled)
+
+    assert(    gtable.hasitem(naughty.dbus._capabilities, "icon-static"))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "icon-multi" ))
+    assert(not gtable.hasitem(naughty.dbus._capabilities, "persistence"))
+
+    return true
+end)
+
+local icon_requests = {}
+
+-- Check if the action icon support is detected.
+table.insert(steps, function()
+    assert(#active == 0)
+
+    naughty.connect_signal("request::icon", function(a, icon_name)
+        icon_requests[icon_name] = a
+
+        a.icon = icon_name == "list-add" and small_icon or big_icon
+    end)
+
+    local hints = {
+        ["action-icons"] = GLib.Variant("b", true),
+    }
+
+    send_notify("Awesome test", 0, "", "title", "message body",
+        { "list-add", "add", "list-remove", "remove" }, hints, 25000)
+
+    return true
+end)
+
+table.insert(steps, function()
+    if #active ~= 1 then return end
+
+    local n = active[1]
+
+    assert(n._private.freedesktop_hints)
+    assert(n._private.freedesktop_hints["action-icons"] == true)
+
+    assert(icon_requests["list-add"   ] == n.actions[1])
+    assert(icon_requests["list-remove"] == n.actions[2])
+
+    assert(n.actions[1].icon == small_icon)
+    assert(n.actions[2].icon == big_icon  )
+
+    assert(type(n.actions[1].position) == "number")
+    assert(type(n.actions[2].position) == "number")
+    assert(n.actions[1].position == 1)
+    assert(n.actions[2].position == 2)
+
+    n:destroy()
+
+    return true
+end)
+
+-- Test the error popup.
+table.insert(steps, function()
+    local got = nil
+
+    naughty.connect_signal("request::display_error", function(err)
+        got = err
+    end)
+
+    awesome.emit_signal("debug::error", "foo")
+
+    assert(got == "foo")
 
     return true
 end)
@@ -826,6 +998,82 @@ table.insert(steps, function()
     -- Finish by testing disconnect_signal
     naughty.disconnect_signal("destroyed", destroyed_callback)
     naughty.disconnect_signal("added", added_callback)
+
+    return true
+end)
+
+-- Add a "new API" handler.
+local current_template, had_error, handler_called = nil
+
+table.insert(steps, function()
+    assert(naughty.has_display_handler == false)
+
+    naughty.connect_signal("request::display", function(n)
+        handler_called = true
+
+        naughty.layout.box {
+            notification    = n,
+            widget_template = current_template
+        }
+    end)
+
+    return true
+end)
+
+-- Make sure the legacy popup is used when the new APIs fails.
+table.insert(steps, function()
+    assert(naughty.has_display_handler == true)
+
+    function gpcall._error_handler()
+        had_error = true
+    end
+
+    local n = naughty.notification {
+        title   = nil,
+        message = nil,
+        timeout = 25000,
+    }
+
+    assert(handler_called)
+    assert(not had_error)
+    assert(not n._private.widget_template_failed)
+    assert(not n.box)
+
+    n:destroy()
+    handler_called = false
+
+    -- Try with a broken template.
+    current_template = {widget = function() assert(false) end}
+
+    n = naughty.notification {
+        title   = "foo",
+        message = "bar",
+        timeout = 25000,
+    }
+
+    assert(handler_called)
+    assert(had_error)
+    assert(not n.box)
+
+    handler_called = false
+    had_error      = false
+
+    -- Break the default template
+    assert(dwidget.widget)
+    dwidget.widget = nil
+    dwidget.layout = function() assert(false) end
+    table.remove(dwidget, 1)
+
+    n = naughty.notification {
+        title   = "foo",
+        message = "bar",
+        timeout = 25000,
+    }
+
+    assert(handler_called)
+    assert(n._private.widget_template_failed)
+    assert(had_error)
+    assert(n.box)
 
     return true
 end)

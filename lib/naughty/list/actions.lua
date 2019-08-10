@@ -117,10 +117,6 @@ local module = {}
 -- @tparam gears.surface|string action_bgimage_selected
 -- @see gears.surface
 
-local default_buttons = gtable.join(
-    abutton({ }, 1, function(a) a:invoke() end)
-)
-
 local props = {"shape_border_color", "bg_image" , "fg",
                "shape_border_width", "underline", "bg",
                "shape",              "icon_size",     }
@@ -176,7 +172,7 @@ local function update(self)
 
     awcommon.list_update(
         self._private.layout,
-        default_buttons,
+        self._private.default_buttons,
         function(o) return wb_label(o, self) end,
         self._private.data,
         self._private.notification.actions,
@@ -273,7 +269,7 @@ end
 --- Create an action list.
 --
 -- @tparam table args
--- @tparam naughty.notification args.notification The notification/
+-- @tparam naughty.notification args.notification The notification.
 -- @tparam widget args.base_layout The action layout.
 -- @tparam table args.style Override the beautiful values.
 -- @tparam boolean args.style.underline_normal
@@ -311,6 +307,10 @@ local function new(_, args)
     wdg._private.style = wdg._private.style or {}
 
     update_style(wdg)
+
+    wdg._private.default_buttons = gtable.join(
+        abutton({ }, 1, function(a) a:invoke(args.notification) end)
+    )
 
     return wdg
 end

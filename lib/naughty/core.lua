@@ -14,9 +14,10 @@
 
 -- Package environment
 local capi = { screen = screen }
-local gdebug = require("gears.debug")
-local screen = require("awful.screen")
-local gtable = require("gears.table")
+local gdebug  = require("gears.debug")
+local screen  = require("awful.screen")
+local gtable  = require("gears.table")
+local gobject = require("gears.object")
 
 local naughty = {}
 
@@ -134,10 +135,36 @@ gtable.crush(naughty, require("naughty.constants"))
 -- @property auto_reset_timeout
 -- @tparam[opt=true] boolean auto_reset_timeout
 
+--- Enable or disable naughty ability to claim to support animations.
+--
+-- When this is true, applications which query `naughty` feature support
+-- will see that animations are supported. Note that there is *very little*
+-- support for this and enabled it will cause bugs.
+--
+-- @property image_animations_enabled
+-- @param[opt=false] boolean
+
+--- Enable or disable the persistent notifications.
+--
+-- This is very annoying when using `naughty.layout.box` popups, but tolerable
+-- when using `naughty.list.notifications`.
+--
+-- Note that enabling this **does nothing** in `naughty` itself. The timeouts
+-- are still honored and notifications still destroyed. It is the user
+-- responsibility to disable the dismiss timer. However, this tells the
+-- applications that notification persistence is supported so they might
+-- stop using systray icons for the sake of displaying or other changes like
+-- that.
+--
+-- @property persistence_enabled
+-- @param[opt=false] boolean
+
 local properties = {
-    suspended         = false,
-    expiration_paused = false,
-    auto_reset_timeout= true,
+    suspended                = false,
+    expiration_paused        = false,
+    auto_reset_timeout       = true,
+    image_animations_enabled = false,
+    persistence_enabled      = false,
 }
 
 --TODO v5 Deprecate the public `naughty.notifications` (to make it private)
@@ -197,7 +224,9 @@ local function update_index(n)
     remove_from_index(n)
 
     -- Add to the index again
-    local s = get_screen(n.screen or n.preset.screen or screen.focused())
+    local s = get_screen(n.screen
+        or (n.preset and n.preset.screen)
+        or screen.focused())
     naughty.notifications[s] = naughty.notifications[s] or {}
     table.insert(naughty.notifications[s][n.position], n)
 end
@@ -223,7 +252,7 @@ function naughty.suspend()
     properties.suspended = true
 end
 
-local conns = {}
+local conns = gobject._setup_class_signals(naughty)
 
 --- Connect a global signal on the notification engine.
 --
@@ -235,41 +264,21 @@ local conns = {}
 --
 -- @tparam string name The name of the signal
 -- @tparam function func The function to attach
+-- @staticfct naughty.connect_signal
 -- @usage naughty.connect_signal("added", function(notif)
 --    -- do something
 -- end)
--- @staticfct naughty.connect_signal
-function naughty.connect_signal(name, func)
-    assert(name)
-    conns[name] = conns[name] or {}
-    table.insert(conns[name], func)
-end
 
 --- Emit a notification signal.
 -- @tparam string name The signal name.
 -- @param ... The signal callback arguments
 -- @staticfct naughty.emit_signal
-function naughty.emit_signal(name, ...)
-    assert(name)
-    for _, func in pairs(conns[name] or {}) do
-        func(...)
-    end
-end
 
 --- Disconnect a signal from a source.
 -- @tparam string name The name of the signal
 -- @tparam function func The attached function
--- @treturn boolean If the disconnection was successful
 -- @staticfct naughty.disconnect_signal
-function naughty.disconnect_signal(name, func)
-    for k, v in ipairs(conns[name] or {}) do
-        if v == func then
-            table.remove(conns[name], k)
-            return true
-        end
-    end
-    return false
-end
+-- @treturn boolean If the disconnection was successful
 
 local function resume()
     properties.suspended = false
@@ -392,6 +401,11 @@ function naughty.get_has_display_handler()
     return conns["request::display"] and #conns["request::display"] > 0 or false
 end
 
+-- Presets are "deprecated" when notification rules are used.
+function naughty.get__has_preset_handler()
+    return conns["request::preset"] and #conns["request::preset"] > 0 or false
+end
+
 --- Set new notification timeout.
 --
 -- This function is deprecated, use `notification:reset_timeout(new_timeout)`.
@@ -486,6 +500,12 @@ function naughty.set_expiration_paused(p)
     end
 end
 
+--- Emitted when an error occurred and requires attention.
+-- @signal request::display_error
+-- @tparam string message The error message.
+-- @tparam boolean startup If the error occurred during the initial loading of
+--  rc.lua (and thus caused the fallback to kick in).
+
 --- Emitted when a notification is created.
 -- @signal added
 -- @tparam naughty.notification notification The notification object
@@ -514,13 +534,27 @@ end
 --  including, but not limited to, all `naughty.notification` properties.
 -- @signal request::preset
 
+--- Emitted when an action requires an icon it doesn't know.
+--
+-- The implementation should look in the icon theme for an action icon or
+-- provide something natively.
+--
+-- If an icon is found, the handler must set the `icon` property on the `action`
+-- object to a path or a `gears.surface`.
+--
+-- @signal request::icon
+-- @tparam naughty.action action The action.
+-- @tparam string icon_name The icon name.
+
 -- Register a new notification object.
 local function register(notification, args)
     -- Add the some more properties
     rawset(notification, "get_suspended", get_suspended)
 
     --TODO v5 uncouple the notifications and the screen
-    local s = get_screen(args.screen or notification.preset.screen or screen.focused())
+    local s = get_screen(args.screen
+        or (notification.preset and notification.preset.screen)
+        or screen.focused())
 
     -- insert the notification to the table
     table.insert(naughty._active, notification)
@@ -535,7 +569,7 @@ local function register(notification, args)
         naughty.emit_signal("added", notification, args)
     end
 
-    assert(rawget(notification, "preset"))
+    assert(rawget(notification, "preset") or naughty._has_preset_handler)
 
     naughty.emit_signal("property::active")
 
@@ -564,6 +598,8 @@ local function set_index_miss(_, key, value)
         if not value then
             resume()
         end
+
+        naughty.emit_signal("property::"..key)
     else
         rawset(naughty, key, value)
     end

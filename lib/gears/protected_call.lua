@@ -12,11 +12,11 @@ local xpcall = xpcall
 
 local protected_call = {}
 
-local function error_handler(err)
+function protected_call._error_handler(err)
     gdebug.print_error(traceback("Error during a protected call: " .. tostring(err), 2))
 end
 
-local function handle_result(success, ...)
+function protected_call._handle_result(success, ...)
     if success then
         return ...
     end
@@ -27,13 +27,13 @@ if not select(2, xpcall(function(a) return a end, error, true)) then
     -- Lua 5.1 doesn't support arguments in xpcall :-(
     do_pcall = function(func, ...)
         local args = { ... }
-        return handle_result(xpcall(function()
+        return protected_call._handle_result(xpcall(function()
             return func(unpack(args))
-        end, error_handler))
+        end, protected_call._error_handler))
     end
 else
     do_pcall = function(func, ...)
-        return handle_result(xpcall(func, error_handler, ...))
+        return protected_call._handle_result(xpcall(func, protected_call._error_handler, ...))
     end
 end
 

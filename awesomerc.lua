@@ -20,34 +20,15 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 require("awful.hotkeys_popup.keys")
 
 -- {{{ Error handling
--- @DOC_ERROR_HANDLING@
 -- Check if awesome encountered an error during startup and fell back to
 -- another config (This code will only ever execute for the fallback config)
-if awesome.startup_errors then
+naughty.connect_signal("request::display_error", function(message, startup)
     naughty.notification {
-        preset  = naughty.config.presets.critical,
-        title   = "Oops, there were errors during startup!",
-        message = awesome.startup_errors
+        urgency = "critical",
+        title   = "Oops, an error happened"..(startup and " during startup!" or "!"),
+        message = message
     }
-end
-
--- Handle runtime errors after startup
-do
-    local in_error = false
-    awesome.connect_signal("debug::error", function (err)
-        -- Make sure we don't go into an endless error loop
-        if in_error then return end
-        in_error = true
-
-        naughty.notification {
-            preset  = naughty.config.presets.critical,
-            title   = "Oops, an error happened!",
-            message = tostring(err)
-        }
-
-        in_error = false
-    end)
-end
+end)
 -- }}}
 
 -- {{{ Variable definitions

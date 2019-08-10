@@ -48,6 +48,21 @@ ret.config.presets = {
     },
 }
 
+ret.config._urgency = {
+    low      = "\0",
+    normal   = "\1",
+    critical = "\2"
+}
+
+ret.config.mapping = {
+    {{urgency = ret.config._urgency.low     }, ret.config.presets.low}, --compat
+    {{urgency = ret.config._urgency.normal  }, ret.config.presets.normal}, --compat
+    {{urgency = ret.config._urgency.critical}, ret.config.presets.critical}, --compat
+    {{urgency = "low"     }, ret.config.presets.low},
+    {{urgency = "normal"  }, ret.config.presets.normal},
+    {{urgency = "critical"}, ret.config.presets.critical},
+}
+
 ret.config.defaults = {
     timeout      = 5,
     text         = "",
@@ -55,7 +70,12 @@ ret.config.defaults = {
     ontop        = true,
     margin       = dpi(5),
     border_width = dpi(1),
-    position     = "top_right"
+    position     = "top_right",
+    urgency      = "normal",
+    message      = "",
+    title        = "",
+    app_name     = "",
+    ignore       = false,
 }
 
 ret.notification_closed_reason = {
@@ -65,7 +85,7 @@ ret.notification_closed_reason = {
     dismissedByUser      = 2, --TODO v5 remove this undocumented legacy constant
     dismissed_by_user    = 2,
     dismissedByCommand   = 3, --TODO v5 remove this undocumented legacy constant
-    dismissed_by_vommand = 3,
+    dismissed_by_command = 3,
     undefined            = 4
 }
 

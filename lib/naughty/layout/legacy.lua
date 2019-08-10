@@ -297,10 +297,20 @@ end
 
 naughty.connect_signal("destroyed", cleanup)
 
+-- Don't copy paste the list of fallback, it is hard to spot mistakes.
+local function get_value(notification, args, preset, prop)
+    return notification[prop] -- set by the rules
+        or args[prop] -- magic and undocumented, but used by the legacy API
+        or preset[prop] --deprecated
+        or beautiful["notification_"..prop] -- from the theme
+end
+
 function naughty.default_notification_handler(notification, args)
     -- This is a fallback for users whose config doesn't have the newer
     -- `request::display` section.
-    if naughty.has_display_handler then return end
+    if naughty.has_display_handler and not notification._private.widget_template_failed then
+        return
+    end
 
     -- If request::display is called more than once, simply make sure the wibox
     -- is visible.
@@ -309,10 +319,15 @@ function naughty.default_notification_handler(notification, args)
         return
     end
 
-    local preset = notification.preset
-    local text   = args.message or args.text or preset.message or preset.text
-    local title  = args.title or preset.title
-    local s      = get_screen(args.screen or preset.screen or screen.focused())
+    local preset = notification.preset or {}
+
+    local title  = get_value(notification, args, preset, "title"  )
+    local text   = get_value(notification, args, preset, "message")
+        or args.text or preset.text
+
+    local s      = get_screen(
+        get_value(notification, args, preset, "screen") or screen.focused()
+    )
 
     if not s then
         local err = "naughty.notify: there is no screen available to display the following notification:"
@@ -321,45 +336,41 @@ function naughty.default_notification_handler(notification, args)
         return
     end
 
-    local timeout       = args.timeout or preset.timeout
-    local icon          = args.icon or preset.icon
-    local icon_size     = args.icon_size or preset.icon_size
-        or beautiful.notification_icon_size
-    local ontop         = args.ontop or preset.ontop
-    local hover_timeout = args.hover_timeout or preset.hover_timeout
-    local position      = args.position or preset.position
-    local actions       = args.actions
-    local destroy_cb    = args.destroy
+    local timeout       = get_value(notification, args, preset, "timeout"      )
+    local icon          = get_value(notification, args, preset, "icon"         )
+    local icon_size     = get_value(notification, args, preset, "icon_size"    )
+    local ontop         = get_value(notification, args, preset, "ontop"        )
+    local hover_timeout = get_value(notification, args, preset, "hover_timeout")
+    local position      = get_value(notification, args, preset, "position"     )
+
+    local actions    = notification.actions or args.actions
+    local destroy_cb = args.destroy
 
     notification.screen     = s
     notification.destroy_cb = destroy_cb
     notification.timeout    = timeout
 
     -- beautiful
-    local font = args.font or preset.font or beautiful.notification_font or
-        beautiful.font or capi.awesome.font
-    local fg = args.fg or preset.fg or
-        beautiful.notification_fg or beautiful.fg_normal or '#ffffff'
-    local bg = args.bg or preset.bg or
-        beautiful.notification_bg or beautiful.bg_normal or '#535d6c'
-    local border_color = args.border_color or preset.border_color or
-        beautiful.notification_border_color or beautiful.bg_focus or '#535d6c'
-    local border_width = args.border_width or preset.border_width or
-        beautiful.notification_border_width
-    local shape = args.shape or preset.shape or
-        beautiful.notification_shape
-    local width = args.width or preset.width or
-        beautiful.notification_width
-    local height = args.height or preset.height or
-        beautiful.notification_height
-    local max_width = args.max_width or preset.max_width or
-        beautiful.notification_max_width
-    local max_height = args.max_height or preset.max_height or
-        beautiful.notification_max_height
-    local margin = args.margin or preset.margin or
-        beautiful.notification_margin
-    local opacity = args.opacity or preset.opacity or
-        beautiful.notification_opacity
+    local font         = get_value(notification, args, preset, "font"        )
+        or beautiful.font      or capi.awesome.font
+
+    local fg           = get_value(notification, args, preset, "fg"          )
+        or beautiful.fg_normal or '#ffffff'
+
+    local bg           = get_value(notification, args, preset, "bg"          )
+        or beautiful.bg_normal or '#535d6c'
+
+    local border_color = get_value(notification, args, preset, "border_color")
+        or beautiful.bg_focus  or '#535d6c'
+
+    local border_width = get_value(notification, args, preset, "border_width")
+    local shape        = get_value(notification, args, preset, "shape"       )
+    local width        = get_value(notification, args, preset, "width"       )
+    local height       = get_value(notification, args, preset, "height"      )
+    local max_width    = get_value(notification, args, preset, "max_width"   )
+    local max_height   = get_value(notification, args, preset, "max_height"  )
+    local margin       = get_value(notification, args, preset, "margin"      )
+    local opacity      = get_value(notification, args, preset, "opacity"     )
 
     notification.position = position
 
@@ -421,12 +432,10 @@ function naughty.default_notification_handler(notification, args)
 
             actionmarginbox:buttons(gtable.join(
                 button({ }, 1, function()
-                    action:invoke()
-                    notification:destroy()
+                    action:invoke(notification)
                 end),
                 button({ }, 3, function()
-                    action:invoke()
-                    notification:destroy()
+                    action:invoke(notification)
                 end)
             ))
             actionslayout:add(actionmarginbox)
