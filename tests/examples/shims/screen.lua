@@ -78,7 +78,7 @@ end
 
 function screen._get_extents()
     local xmax, ymax
-    for _, v in ipairs(screen) do
+    for v in screen do
         if not xmax or v.geometry.x+v.geometry.width > xmax.geometry.x+xmax.geometry.width then
             xmax = v
         end

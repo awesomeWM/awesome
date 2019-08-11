@@ -35,8 +35,8 @@ local function draw_mouse(x, y)
 end
 
 -- Print an outline for the screens
-if not screen.no_outline then
-    for _, s in ipairs(screen) do
+if not rawget(screen, "no_outline") then
+    for s in screen do
         cr:save()
         -- Draw the screen outline
         cr:set_source(color("#00000044"))
