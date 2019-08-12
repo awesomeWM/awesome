@@ -684,7 +684,7 @@ end
 -- -- a particular rule.
 -- -- Bound to a key, it can be used to select from dozens of terminals open on
 -- -- several tags.
--- -- When using @{rules.match_any} instead of @{rules.match},
+-- -- When using @{awful.rules.match_any} instead of @{awful.rules.match},
 -- -- a menu of clients with different classes could be build.
 --
 -- function terminal_menu ()
