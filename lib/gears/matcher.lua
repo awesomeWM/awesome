@@ -25,6 +25,10 @@
 --
 -- @DOC_text_gears_matcher_default_EXAMPLE@
 --
+-- This example shows the different matching sections:
+--
+-- @DOC_text_gears_matcher_types_EXAMPLE@
+--
 -- More examples are available in `awful.rules`.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
@@ -35,50 +39,143 @@
 local gtable = require("gears.table")
 local gsort = require("gears.sort")
 local gdebug = require("gears.debug")
+local gobject = require("gears.object")
 local protected_call = require("gears.protected_call")
 
 local matcher = {}
+
+--- A rule has been added to a set of matching rules.
+-- @signal rule::appended
+-- @tparam table gears.matcher The matcher.
+-- @tparam table rule The rule.
+-- @tparam table source The matching rules source name.
+-- @tparam table content The matching rules source content.
+-- @see append_rule
+-- @see append_rules
+
+--- A rule has been removed to a set of matching rules.
+-- @signal rule::removed
+-- @tparam table gears.matcher The matcher.
+-- @tparam table rule The rule.
+-- @tparam table source The matching rules source name.
+-- @tparam table content The matching rules source content.
+-- @see remove_rule
+
+--- A matching source function has been added.
+-- @signal matching_function::added
+-- @tparam table gears.matcher The matcher.
+-- @tparam function callback The callback.
+-- @see add_matching_function
+
+--- A matching source table has been added.
+-- @signal matching_rules::added
+-- @tparam table gears.matcher The matcher.
+-- @tparam function callback The callback.
+-- @see add_matching_rules
+
+--- A matching source function has been removed.
+-- @signal matching_source::removed
+-- @tparam table gears.matcher The matcher.
+-- @see remove_matching_source
+
+local function default_matcher(a, b)
+    return a == b or (type(a) == "string" and a:match(b))
+end
+
+local function greater_matcher(a, b)
+    return a > b
+end
+
+local function lesser_matcher(a, b)
+    return a < b
+end
 
 -- Check if an object matches a rule.
 -- @param o The object.
 -- #tparam table rule The rule to check.
 -- @treturn boolean True if it matches, false otherwise.
-function matcher:_match(o, rule)
+-- @method _match
+function matcher:_match(o, rule, matcher_f)
     if not rule then return false end
+
+    matcher_f = matcher_f or default_matcher
+
     for field, value in pairs(rule) do
-        if o[field] then
-            if type(o[field]) == "string" then
-                if not o[field]:match(value) and o[field] ~= value then
-                    return false
-                end
-            elseif o[field] ~= value then
-                return false
-            end
-        else
+        local pm = self._private.prop_matchers[field]
+        if pm and pm(o, value, field) then
+            return true
+        elseif not matcher_f(o[field], value) then
             return false
         end
     end
     return true
 end
 
+local function field_matcher(self, o, field, value, matcher_f)
+    matcher_f = matcher_f or default_matcher
+
+    local pm = self._private.prop_matchers[field]
+
+    if pm and pm(o, value, field) then
+        return true
+    elseif matcher_f(o[field] , value) then
+        return true
+    end
+
+    return false
+end
+
 -- Check if an object matches any part of a rule.
 -- @param o The object.
--- #tparam table rule The rule to check.
+-- #tparam table rule The rule _match_anyto check.
 -- @treturn boolean True if at least one rule is matched, false otherwise.
+-- @method _match_any
 function matcher:_match_any(o, rule)
     if not rule then return false end
     for field, values in pairs(rule) do
         if o[field] then
+
+            -- Special case, "all"
+            if type(values) == "boolean" and values then
+                return true
+            end
+
             for _, value in ipairs(values) do
-                if o[field] == value then
-                    return true
-                elseif type(o[field]) == "string" and o[field]:match(value) then
+                if field_matcher(self, o, field, value) then
                     return true
                 end
             end
         end
     end
+
     return false
+end
+
+-- Check if an object matches at least one of every part of a rule.
+--
+-- @param o The object.
+-- @tparam table rule The rule _match_anyto check.
+-- @tparam boolean multi If the entries are table of choices.
+-- @treturn boolean True if all rules are matched.
+-- @method _match_every
+function matcher:_match_every(o, rule)
+    if not rule then return true end
+
+    for field, values in pairs(rule) do
+        local found = false
+        for _, value in ipairs(values) do
+            if not field_matcher(self, o, field, value) then
+                found = true
+                break
+            end
+        end
+
+        if not found then
+            return false
+        end
+    end
+
+    return true
 end
 
 --- Does a given rule entry match an object?
@@ -86,11 +183,29 @@ end
 -- @tparam table entry Rule entry (with keys `rule`, `rule_any`, `except` and/or
 --   `except_any`).
 -- @treturn boolean If `o` matches `entry`.
+-- @method matches_rule
 function matcher:matches_rule(o, entry)
     local match = self:_match(o, entry.rule) or self:_match_any(o, entry.rule_any)
-    return match
-        and (not self:_match(o, entry.except))
-        and (not self:_match_any(o, entry.except_any))
+
+    -- If there was `rule` or `rule_any` and they failed to match, look no further.
+    if (not match) and (entry.rule or entry.rule_any) then return false end
+
+    if not self:_match_every(o, entry.rule_every) then return false end
+
+    -- Negative matching.
+    if entry.except and self:_match(o, entry.except) then return false end
+    if entry.except_any and self:_match_any(o, entry.except_any) then return false end
+
+    -- Other operators.
+    if entry.rule_greater and not self:_match(o, entry.rule_greater, greater_matcher) then
+        return false
+    end
+
+    if entry.rule_lesser and not self:_match(o, entry.rule_lesser, lesser_matcher) then
+        return false
+    end
+
+    return true
 end
 
 --- Get list of matching rules for an object.
@@ -100,10 +215,29 @@ end
 --
 -- @param o The object.
 -- @tparam[opt=nil] table rules The rules to check. List with "rule", "rule_any",
---  "except" and "except_any" keys.
--- @treturn table The list of matched rules.
+--  "except" and "except_any" keys. If no rules are provided, all rules
+--  registered with a source will be matched.
+-- @method matching_rules
 function matcher:matching_rules(o, rules)
+
+    -- Match all sources.
+    if not rules then
+        local ret = {}
+
+        for _, r in pairs(self._matching_rules) do
+            gtable.merge(ret, self:matching_rules(o, r))
+        end
+
+        return ret
+    end
+
     local result = {}
+
+    if not rules then
+        gdebug.print_warning("This matcher has no rule source")
+        return result
+    end
+
     for _, entry in ipairs(rules) do
         if self:matches_rule(o, entry) then
             table.insert(result, entry)
@@ -117,6 +251,7 @@ end
 -- @tparam table rules The rules to check. List of tables with `rule`,
 --  `rule_any`, `except` and `except_any` keys.
 -- @treturn boolean True if at least one rule is matched, false otherwise.
+-- @method matches_rules
 function matcher:matches_rules(o, rules)
     for _, entry in ipairs(rules) do
         if self:matches_rule(o, entry) then
@@ -124,6 +259,61 @@ function matcher:matches_rules(o, rules)
         end
     end
     return false
+end
+
+--- Assign a function to match an object property against a value.
+--
+-- The default matcher uses the `==` operator for all types. It also uses the
+-- `:match()` method for string and allows pattern matching. If the value is a
+-- function, then that function is called with the object and the current
+-- properties to be applied. If the function returns true, the match is
+-- accepted.
+--
+-- Custom property matcher are useful when objects are compared. This avoids
+-- having to implement custom metatable for everything.
+--
+-- The `f` function receives 3 arguments:
+--
+-- * The object to match against (anything)
+-- * The value to compare
+-- * The property/field name.
+--
+-- It should return `true` if it matches and `false` otherwise.
+--
+-- @tparam string name The property name.
+-- @tparam function f The matching function.
+-- @method add_property_matcher
+-- @usage -- Manually match the screen in various ways.
+-- matcher:add_property_matcher("screen", function(c, value)
+--    return c.screen == value
+--        or screen[c.screen] == value
+--        or c.screen.outputs[value] ~= nil
+--        or value == "any"
+--        or (value == "primary" and c.screen == screen.primary)
+-- end)
+--
+function matcher:add_property_matcher(name, f)
+    assert(not self._private.prop_matchers[name], name .. " already has a matcher")
+
+    self._private.prop_matchers[name] = f
+
+    self:emit_signal("property_matcher::added", name, f)
+end
+
+--- Add a special setter for a property.
+--
+-- This is useful to add more properties to object which only make sense within
+-- the context of a rule.
+--
+-- @method add_property_setter
+-- @tparam string name The property name.
+-- @tparam function f The setter function.
+function matcher:add_property_setter(name, f)
+    assert(not self._private.prop_setters[name], name .. " already has a matcher")
+
+    self._private.prop_setters[name] = f
+
+    self:emit_signal("property_setter::added", name, f)
 end
 
 local function default_rules_callback(self, o, props, callbacks, rules)
@@ -146,12 +336,15 @@ end
 -- @tparam[opt={}] table precede A list of names of sources this source has a
 --  priority over.
 -- @treturn boolean Returns false if a dependency conflict was found.
+-- @method add_matching_rules
 function matcher:add_matching_rules(name, rules, depends_on, precede)
     local function matching_fct(_self, c, props, callbacks)
         default_rules_callback(_self, c, props, callbacks, rules)
     end
 
     self._matching_rules[name] = rules
+
+    self:emit_signal("matching_rules::added", rules)
 
     return self:add_matching_function(name, matching_fct, depends_on, precede)
 end
@@ -171,6 +364,7 @@ end
 -- @tparam[opt={}] table precede A list of names of sources this source has a
 --  priority over.
 -- @treturn boolean Returns false if a dependency conflict was found.
+-- @method add_matching_function
 function matcher:add_matching_function(name, callback, depends_on, precede)
     depends_on = depends_on  or {}
     precede    = precede or {}
@@ -221,6 +415,8 @@ function matcher:add_matching_function(name, callback, depends_on, precede)
         end
     end
 
+    self:emit_signal("matching_function::added", callback)
+
     return true
 end
 
@@ -231,15 +427,18 @@ end
 --
 -- @tparam string name The source name.
 -- @treturn boolean If the source has been removed.
+-- @method remove_matching_source
 function matcher:remove_matching_source(name)
     self._rule_source_sort:remove(name)
 
     for k, v in ipairs(self._matching_source) do
         if v.name == name then
+            self:emit_signal("matching_source::removed", v)
             table.remove(self._matching_source, k)
             return true
         end
     end
+
 
     self._matching_rules[name] = nil
 
@@ -252,6 +451,7 @@ end
 -- and rules.
 --
 -- @param o The object.
+-- @method apply
 function matcher:apply(o)
     local callbacks, props = {}, {}
     for _, v in ipairs(self._matching_source) do
@@ -280,7 +480,9 @@ function matcher:_execute(o, props, callbacks)
             value = value(o, props)
         end
 
-        if type(o[property]) == "function" then
+        if self._private.prop_setters[property] then
+            self._private.prop_setters[property](o, value)
+        elseif type(o[property]) == "function" then
             o[property](o, value)
         else
             o[property] = value
@@ -288,14 +490,59 @@ function matcher:_execute(o, props, callbacks)
     end
 end
 
+--- Add a new rule to the default set.
+-- @tparam string source The source name.
+-- @tparam table rule A valid rule.
+-- @method append_rule
+function matcher:append_rule(source, rule)
+    if not self._matching_rules[source] then
+        self:add_matching_rules(source, {}, {}, {})
+    end
+    table.insert(self._matching_rules[source], rule)
+    self:emit_signal("rule::appended", rule, source, self._matching_rules[source])
+end
+
+--- Add a new rules to the default set.
+-- @tparam string source The source name.
+-- @tparam table rules A table with rules.
+-- @method append_rules
+function matcher:append_rules(source, rules)
+    for _, rule in ipairs(rules) do
+        self:append_rule(source, rule)
+    end
+end
+
+--- Remove a new rule to the default set.
+-- @tparam string source The source name.
+-- @tparam string|table rule An existing rule or its `id`.
+-- @treturn boolean If the rule was removed.
+-- @method remove_rule
+function matcher:remove_rule(source, rule)
+    if not self._matching_rules[source] then return end
+
+    for k, v in ipairs(self._matching_rules[source]) do
+        if v == rule or v.id == rule then
+            table.remove(self._matching_rules[source], k)
+            self:emit_signal("rule::removed", rule, source, self._matching_rules[source])
+            return true
+        end
+    end
+
+    return false
+end
+
 local module = {}
 
 --- Create a new rule solver object.
--- @function gears.matcher
+-- @constructorfct gears.matcher
 -- @return A new rule solver object.
 
 local function new()
-    local ret = {}
+    local ret = gobject()
+
+    rawset(ret, "_private", {
+        rules = {}, prop_matchers = {}, prop_setters = {}
+    })
 
     -- Contains the sources.
     -- The elements are ordered "first in, first executed". Thus, the higher the
