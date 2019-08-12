@@ -35,6 +35,7 @@
 #include "luaa.h"
 #include "systray.h"
 #include "xkb.h"
+#include "root.h"
 #include "objects/screen.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
@@ -47,6 +48,8 @@
 #include <xcb/xcb_event.h>
 #include <xcb/xkb.h>
 #include <xcb/xfixes.h>
+
+extern struct root_impl root_impl;
 
 #define DO_EVENT_HOOK_CALLBACK(type, xcbtype, xcbeventprefix, arraytype, match) \
     static void \
@@ -89,16 +92,6 @@
     }
 
 static bool
-event_key_match(xcb_key_press_event_t *ev, keyb_t *k, void *data)
-{
-    assert(data);
-    xcb_keysym_t keysym = *(xcb_keysym_t *) data;
-    return (((k->keycode && ev->detail == k->keycode)
-             || (k->keysym && keysym == k->keysym))
-            && (k->modifiers == XCB_BUTTON_MASK_ANY || k->modifiers == ev->state));
-}
-
-static bool
 event_button_match(xcb_button_press_event_t *ev, button_t *b, void *data)
 {
     return ((!b->button || ev->detail == b->button)
@@ -106,7 +99,6 @@ event_button_match(xcb_button_press_event_t *ev, button_t *b, void *data)
 }
 
 DO_EVENT_HOOK_CALLBACK(button_t, button, XCB_BUTTON, button_array_t, event_button_match)
-DO_EVENT_HOOK_CALLBACK(keyb_t, key, XCB_KEY, key_array_t, event_key_match)
 
 /** Emit a button signal.
  * The top of the lua stack has to be the object on which to emit the event.
@@ -725,34 +717,30 @@ static void
 event_handle_key(xcb_key_press_event_t *ev)
 {
     lua_State *L = globalconf_get_lua_State();
-    globalconf.timestamp = ev->time;
 
-    if(globalconf.keygrabber != LUA_REFNIL)
+    bool pressed = ev->response_type == XCB_KEY_PRESS;
+
+    /* get keysym ignoring all modifiers */
+    xcb_keysym_t keysym =
+        xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
+    client_t *c;
+    key_array_t *key_array;
+    bool pushed_to_stack;
+    if((c = client_getbywin(ev->event)) || (c = client_getbynofocuswin(ev->event)))
     {
-        if(keygrabber_handlekpress(L, ev))
-        {
-            lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.keygrabber);
-
-            if(!luaA_dofunction(L, 3, 0))
-            {
-                warn("Stopping keygrabber.");
-                luaA_keygrabber_stop(L);
-            }
-        }
+        luaA_object_push(L, c);
+        key_array = &c->keys;
+        pushed_to_stack = true;
     }
     else
     {
-        /* get keysym ignoring all modifiers */
-        xcb_keysym_t keysym = xcb_key_symbols_get_keysym(globalconf.keysyms, ev->detail, 0);
-        client_t *c;
-        if((c = client_getbywin(ev->event)) || (c = client_getbynofocuswin(ev->event)))
-        {
-            luaA_object_push(L, c);
-            event_key_callback(ev, &c->keys, L, -1, 1, &keysym);
-        }
-        else
-            event_key_callback(ev, &globalconf.keys, L, 0, 0, &keysym);
+        key_array = &globalconf.keys;
+        pushed_to_stack = false;
     }
+
+    root_handle_key(key_array, pushed_to_stack, ev->time,
+            ev->detail, ev->state, keysym, pressed, &root_impl);
+
 }
 
 /** The map request event handler.

@@ -77,35 +77,31 @@ is_control(char *buf)
  * \return True if a key was successfully retrieved, false otherwise.
  */
 bool
-keygrabber_handlekpress(lua_State *L, xcb_key_press_event_t *e)
+keygrabber_handlekpress(uint32_t keycode, bool pressed, uint16_t state)
 {
+    lua_State *L = globalconf_get_lua_State();
+
     /* convert keysym to string */
     char buf[MAX(MB_LEN_MAX, 32)];
 
     /* snprintf-like return value could be used here, but that should not be
      * necessary, as we have buffer big enough */
-    xkb_state_key_get_utf8(globalconf.xkb_state, e->detail, buf, countof(buf) );
+    xkb_state_key_get_utf8(globalconf.xkb_state, keycode, buf, countof(buf) );
 
     if (is_control(buf))
     {
         /* Use text names for control characters, ignoring all modifiers. */
-        xcb_keysym_t keysym = xcb_key_symbols_get_keysym(globalconf.keysyms,
-                                                         e->detail, 0);
+        xcb_keysym_t keysym =
+            xcb_key_symbols_get_keysym(globalconf.keysyms, keycode, 0);
         xkb_keysym_get_name(keysym, buf, countof(buf));
     }
 
-    luaA_pushmodifiers(L, e->state);
+    luaA_pushmodifiers(L, state);
     lua_pushstring(L, buf);
 
-    switch(e->response_type)
-    {
-      case XCB_KEY_PRESS:
-        lua_pushliteral(L, "press");
-        break;
-      case XCB_KEY_RELEASE:
-        lua_pushliteral(L, "release");
-        break;
-    }
+    if (pressed) lua_pushliteral(L, "press");
+    else lua_pushliteral(L, "release");
+
     return true;
 }
 

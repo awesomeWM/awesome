@@ -25,6 +25,8 @@
  * @coreclassmod root
  */
 
+#include <stdbool.h>
+
 #include "root.h"
 #include "globalconf.h"
 
@@ -32,10 +34,13 @@
 #include "common/xcursor.h"
 #include "common/xutil.h"
 #include "objects/button.h"
+#include "keygrabber.h"
 #include "xwindow.h"
 
 #include "math.h"
 
+#include <xcb/xcb.h>
+#include <xcb/xkb.h>
 #include <xcb/xtest.h>
 #include <xcb/xcb_aux.h>
 #include <cairo-xcb.h>
@@ -525,6 +530,74 @@ luaA_root_tags(lua_State *L)
     }
 
     return 1;
+}
+
+static bool
+event_key_match(xcb_keycode_t keycode, uint16_t mods, keyb_t *k, xcb_keysym_t keysym)
+{
+    return (((k->keycode && keycode == k->keycode)
+                    || (k->keysym && keysym == k->keysym))
+            && (k->modifiers == XCB_BUTTON_MASK_ANY || k->modifiers == mods));
+}
+
+static void emit_key_signals(key_array_t *arr, bool pressed,
+        xcb_keycode_t keycode, uint16_t mods,
+        int oud, int nargs, xcb_keysym_t keysym)
+{
+    lua_State *L = globalconf_get_lua_State();
+
+    int abs_oud = oud < 0 ? ((lua_gettop(L) + 1) + oud) : oud;
+    int item_matching = 0;
+    foreach(item, *arr)
+    {
+        if (event_key_match(keycode, mods, *item, keysym))
+        {
+            if (oud) luaA_object_push_item(L, abs_oud, *item);
+            else luaA_object_push(L, *item);
+            item_matching++;
+        }
+    }
+    for(; item_matching > 0; item_matching--)
+    {
+        const char *event;
+        if (pressed) event = "press";
+        else event = "release";
+        for(int i = 0; i < nargs; i++)
+            lua_pushvalue(L, - nargs - item_matching);
+        luaA_object_emit_signal(L, - nargs - 1, event, nargs);
+        lua_pop(L, 1);
+    }
+    lua_pop(L, nargs);
+}
+
+void root_handle_key(key_array_t *keys, bool pushed_to_stack,
+        uint32_t timestamp, uint32_t keycode, uint16_t state,
+        bool pressed, xcb_keysym_t keysym, struct root_impl *root)
+{
+    lua_State *L = globalconf_get_lua_State();
+    globalconf.timestamp = timestamp;
+
+    if(globalconf.keygrabber != LUA_REFNIL)
+    {
+        if(keygrabber_handlekpress(keycode, pressed, state))
+        {
+            lua_rawgeti(L, LUA_REGISTRYINDEX, globalconf.keygrabber);
+
+            if(!luaA_dofunction(L, 3, 0))
+            {
+                warn("Stopping keygrabber.");
+                luaA_keygrabber_stop(L);
+            }
+        }
+        if (pushed_to_stack) {
+            lua_pop(L, pushed_to_stack);
+        }
+    }
+    else
+    {
+        emit_key_signals(keys, pressed, keycode, state,
+                -pushed_to_stack, pushed_to_stack, keysym);
+    }
 }
 
 const struct luaL_Reg awesome_root_lib[] =

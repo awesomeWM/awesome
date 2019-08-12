@@ -16,6 +16,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
  */
+
+#include <xcb/xcb.h>
+#include <xcb/xkb.h>
+
+#include "objects/key.h"
+
 #ifndef AWESOME_ROOT_H
 #define AWESOME_ROOT_H
 
@@ -23,6 +29,10 @@ struct root_impl
 {
     void (*grab_keys)(void);
 };
+
+void root_handle_key(key_array_t *arr, bool pushed_to_stack,
+		uint32_t timestamp, uint32_t keycode, uint16_t state,
+        bool pressed, xcb_keysym_t keysym, struct root_impl *root);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
