@@ -739,7 +739,7 @@ event_handle_key(xcb_key_press_event_t *ev)
     }
 
     root_handle_key(key_array, pushed_to_stack, ev->time,
-            ev->detail, ev->state, keysym, pressed, &root_impl);
+            ev->detail, ev->state, pressed, keysym, &root_impl);
 
 }
 

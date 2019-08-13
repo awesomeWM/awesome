@@ -155,7 +155,6 @@ static void awesome_handle_global(void *data, struct wl_registry *registry,
                 &zway_cooler_keybindings_interface, version);
         zway_cooler_keybindings_add_listener(globalconf.wl_keybindings,
                 &keybindings_listener, NULL);
-
     }
 }
 

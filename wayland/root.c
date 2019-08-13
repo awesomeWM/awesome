@@ -18,16 +18,27 @@
  */
 
 #include "globalconf.h"
+#include <root.h>
 #include "common/array.h"
 #include "wayland/root.h"
 #include "way-cooler-keybindings-unstable-v1.h"
 
 #include <xcb/xcb.h>
 
+extern struct root_impl root_impl;
+
 static void on_key(void *data, struct zway_cooler_keybindings *keybindings,
-        uint32_t time, uint32_t key, uint32_t state, uint32_t mods)
+        uint32_t time, uint32_t keycode, uint32_t state, uint32_t mods)
 {
-    // TODO
+    /* get keysym ignoring all modifiers */
+    xcb_keysym_t keysym =
+        xcb_key_symbols_get_keysym(globalconf.keysyms, keycode, 0);
+    bool pressed = state == ZWAY_COOLER_KEYBINDINGS_KEY_STATE_PRESSED;
+
+    // TODO Check if intersects client, like in X11, and emit proper signals.
+
+    root_handle_key(&globalconf.keys, false, time, keycode, mods,
+            pressed, keysym, &root_impl);
 }
 
 struct zway_cooler_keybindings_listener keybindings_listener =

@@ -563,7 +563,9 @@ static void emit_key_signals(key_array_t *arr, bool pressed,
         if (pressed) event = "press";
         else event = "release";
         for(int i = 0; i < nargs; i++)
+        {
             lua_pushvalue(L, - nargs - item_matching);
+        }
         luaA_object_emit_signal(L, - nargs - 1, event, nargs);
         lua_pop(L, 1);
     }
@@ -589,7 +591,8 @@ void root_handle_key(key_array_t *keys, bool pushed_to_stack,
                 luaA_keygrabber_stop(L);
             }
         }
-        if (pushed_to_stack) {
+        if (pushed_to_stack)
+        {
             lua_pop(L, pushed_to_stack);
         }
     }
