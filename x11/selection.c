@@ -31,6 +31,7 @@
 #include "common/atoms.h"
 #include "event.h"
 #include "xwindow.h"
+#include "awesome.h"
 
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_event.h>

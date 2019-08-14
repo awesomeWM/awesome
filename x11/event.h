@@ -23,9 +23,9 @@
 #define AWESOME_EVENT_H
 
 #include "banning.h"
-#include "globalconf.h"
 #include "stack.h"
 
+#include <lua.h>
 #include <xcb/xcb.h>
 
 /* objects/drawin.c */
@@ -35,22 +35,6 @@ void drawin_refresh(void);
 void client_refresh(void);
 void client_focus_refresh(void);
 void client_destroy_later(void);
-
-static inline int
-awesome_refresh(void)
-{
-    if (globalconf.wl_display != NULL)
-    {
-        wl_display_roundtrip(globalconf.wl_display);
-    }
-    luaA_emit_refresh();
-    drawin_refresh();
-    client_refresh();
-    banning_refresh();
-    stack_refresh();
-    client_destroy_later();
-    return xcb_flush(globalconf.connection);
-}
 
 void event_init(void);
 void event_handle(xcb_generic_event_t *);

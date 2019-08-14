@@ -23,7 +23,12 @@
 #define AWESOME_AWESOME_H
 
 #include <stdbool.h>
+#include <stddef.h>
+#include <wayland-client.h>
 
+#include "globalconf.h"
+
+int awesome_refresh(void);
 void awesome_restart(void);
 void awesome_atexit(bool restart);
 

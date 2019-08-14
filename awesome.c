@@ -539,6 +539,22 @@ awesome_restart(void)
     fatal("execv() failed: %s", strerror(errno));
 }
 
+int awesome_refresh(void)
+{
+    if (globalconf.wl_display != NULL)
+    {
+        wl_display_roundtrip(globalconf.wl_display);
+    }
+    luaA_emit_refresh();
+    drawin_refresh();
+    client_refresh();
+    banning_refresh();
+    stack_refresh();
+    client_destroy_later();
+    return xcb_flush(globalconf.connection);
+}
+
+
 /** Function to restart awesome on some signals.
  * \param data currently unused
  */
