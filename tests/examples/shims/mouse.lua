@@ -61,7 +61,14 @@ return setmetatable(mouse, {
             if forced_screen and screen._deleted[forced_screen] then
                 forced_screen = nil
             end
-            return screen[1]
+
+            -- Using capi.mouse.screen is *not* supported when there is zero
+            -- screen. Nearly all the code uses `mouse.screen` as its ultimate
+            -- fallback. Having no screens is tolerated during early
+            -- initialization and that's it.
+            return screen.count() > 0 and screen[1] or assert(
+                false, "Calling `mouse.screen` without screens isn't supported"
+            )
         end
         local h = rawget(mouse,"_i_handler")
         if h then
