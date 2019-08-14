@@ -34,6 +34,7 @@ function client.gen_fake(args)
     ret.border_width = 1
     ret.icon_sizes = {{16,16}}
     ret.name = "Example Client"
+    ret.data._struts = { top = 0, right = 0, left = 0, bottom = 0 }
 
     -- This is a hack because there's a `:is_transient_for(c2)` method
     -- and a `transient_for` property. It will cause a stack overflow
@@ -140,6 +141,14 @@ function client.gen_fake(args)
         end
 
         return {}
+    end
+
+    function ret:struts(new)
+        for k, v in pairs(new or {}) do
+            ret.data._struts[k] = v
+        end
+
+        return ret.data._struts
     end
 
     -- Record the geometry
