@@ -90,15 +90,16 @@
 #include "objects/client.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
-#include "event.h"
-#include "ewmh.h"
 #include "objects/drawable.h"
 #include "objects/screen.h"
 #include "objects/tag.h"
-#include "property.h"
 #include "spawn.h"
 #include "systray.h"
-#include "xwindow.h"
+
+#include "x11/event.h"
+#include "x11/ewmh.h"
+#include "x11/property.h"
+#include "x11/xwindow.h"
 
 #include "math.h"
 

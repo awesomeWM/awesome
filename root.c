@@ -35,8 +35,6 @@
 #include "common/xutil.h"
 #include "objects/button.h"
 #include "keygrabber.h"
-#include "xwindow.h"
-
 #include "math.h"
 
 #include <xcb/xcb.h>

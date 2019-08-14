@@ -31,11 +31,11 @@
 #include "ewmh.h"
 #include "objects/client.h"
 #include "keygrabber.h"
-#include "mousegrabber.h"
+#include <mousegrabber.h>
 #include "luaa.h"
 #include "systray.h"
 #include "xkb.h"
-#include "root.h"
+#include <root.h>
 #include "objects/screen.h"
 #include "common/atoms.h"
 #include "common/xutil.h"

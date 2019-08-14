@@ -47,7 +47,6 @@
 #include "common/backtrace.h"
 #include "common/version.h"
 #include "config.h"
-#include "event.h"
 #include "objects/client.h"
 #include "objects/drawable.h"
 #include "objects/drawin.h"
@@ -57,12 +56,13 @@
 #include "objects/selection_transfer.h"
 #include "objects/selection_watcher.h"
 #include "objects/tag.h"
-#include "property.h"
-#include "selection.h"
 #include "spawn.h"
 #include "systray.h"
 #include "xkb.h"
 #include "xrdb.h"
+
+#include "x11/property.h"
+#include "x11/selection.h"
 
 #include <lua.h>
 #include <lauxlib.h>

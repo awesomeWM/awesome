@@ -25,9 +25,10 @@
 
 #include "xkb.h"
 #include "globalconf.h"
-#include "xwindow.h"
 #include "objects/client.h"
 #include "common/atoms.h"
+
+#include "x11/xwindow.h"
 
 #include <xcb/xkb.h>
 #include <xkbcommon/xkbcommon.h>

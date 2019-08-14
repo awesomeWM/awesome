@@ -22,12 +22,13 @@
 #include "property.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
-#include "ewmh.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
 #include "objects/selection_getter.h"
 #include "objects/selection_transfer.h"
-#include "xwindow.h"
+
+#include "x11/ewmh.h"
+#include "x11/xwindow.h"
 
 #include <xcb/xcb_atom.h>
 

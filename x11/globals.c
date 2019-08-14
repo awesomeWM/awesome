@@ -23,9 +23,9 @@
 #include <root.h>
 
 #include "globalconf.h"
-#include "x11/root.h"
-#include "x11/mousegrabber.h"
-#include "x11/globals.h"
+#include "root.h"
+#include "mousegrabber.h"
+#include "globals.h"
 
 extern struct mousegrabber_impl mousegrabber_impl;
 extern struct root_impl root_impl;

@@ -21,10 +21,10 @@
 #include <stdbool.h>
 #include <lua.h>
 
-#include "x11/mousegrabber.h"
+#include "../mousegrabber.h"
+#include "mousegrabber.h"
 #include "globalconf.h"
 #include "common/xcursor.h"
-#include <mousegrabber.h>
 
 bool x11_grab_mouse(const char *cursor_name)
 {

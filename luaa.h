@@ -310,6 +310,8 @@ luaA_registerfct(lua_State *L, int idx, int *fct)
     return luaA_register(L, idx, fct);
 }
 
+void luaA_emit_refresh(void);
+
 typedef bool luaA_config_callback(const char *);
 
 void luaA_init(xdgHandle *, string_array_t *);

@@ -27,6 +27,7 @@
 
 #include "config.h"
 #include "dbus.h"
+#include "globalconf.h"
 
 #include <glib.h>
 
@@ -36,7 +37,6 @@
 #include <unistd.h>
 #include <fcntl.h>
 
-#include "event.h"
 #include "luaa.h"
 
 static DBusConnection *dbus_connection_session = NULL;

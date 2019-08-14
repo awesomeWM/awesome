@@ -187,8 +187,9 @@
 #include "screen.h"
 #include "banning.h"
 #include "client.h"
-#include "ewmh.h"
 #include "luaa.h"
+
+#include "x11/ewmh.h"
 
 /**
  * @signal request::select

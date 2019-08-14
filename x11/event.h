@@ -28,9 +28,6 @@
 
 #include <xcb/xcb.h>
 
-/* luaa.c */
-void luaA_emit_refresh(void);
-
 /* objects/drawin.c */
 void drawin_refresh(void);
 

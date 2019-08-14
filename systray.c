@@ -23,8 +23,9 @@
 #include "common/atoms.h"
 #include "common/xutil.h"
 #include "objects/drawin.h"
-#include "xwindow.h"
 #include "globalconf.h"
+
+#include "x11/xwindow.h"
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>

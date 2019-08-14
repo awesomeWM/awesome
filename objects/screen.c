@@ -49,7 +49,6 @@
 #include "banning.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
-#include "event.h"
 
 #include <stdio.h>
 

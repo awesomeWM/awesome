@@ -56,20 +56,15 @@ set(AWE_SRCS
     ${BUILD_DIR}/color.c
     ${BUILD_DIR}/dbus.c
     ${BUILD_DIR}/draw.c
-    ${BUILD_DIR}/event.c
-    ${BUILD_DIR}/ewmh.c
     ${BUILD_DIR}/keygrabber.c
     ${BUILD_DIR}/luaa.c
     ${BUILD_DIR}/mouse.c
     ${BUILD_DIR}/mousegrabber.c
-    ${BUILD_DIR}/property.c
     ${BUILD_DIR}/root.c
-    ${BUILD_DIR}/selection.c
     ${BUILD_DIR}/spawn.c
     ${BUILD_DIR}/stack.c
     ${BUILD_DIR}/strut.c
     ${BUILD_DIR}/systray.c
-    ${BUILD_DIR}/xwindow.c
     ${BUILD_DIR}/xkb.c
     ${BUILD_DIR}/xrdb.c
     ${BUILD_DIR}/common/atoms.c
@@ -100,7 +95,12 @@ set(AWE_SRCS
     ${BUILD_DIR}/wayland/root.c
     ${BUILD_DIR}/x11/mousegrabber.c
     ${BUILD_DIR}/x11/globals.c
-    ${BUILD_DIR}/x11/root.c)
+    ${BUILD_DIR}/x11/root.c
+    ${BUILD_DIR}/x11/event.c
+    ${BUILD_DIR}/x11/ewmh.c
+    ${BUILD_DIR}/x11/property.c
+    ${BUILD_DIR}/x11/selection.c
+    ${BUILD_DIR}/x11/xwindow.c)
 
 set(AWE_MAN_SRCS
     ${SOURCE_DIR}/manpages/awesome.1.txt

@@ -20,9 +20,10 @@
  */
 
 #include "stack.h"
-#include "ewmh.h"
 #include "objects/client.h"
 #include "objects/drawin.h"
+
+#include "x11/ewmh.h"
 
 void
 stack_client_remove(client_t *c)

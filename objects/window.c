@@ -51,13 +51,14 @@
  * @signal property::type
  */
 
-#include "objects/window.h"
 #include "common/atoms.h"
 #include "common/xutil.h"
-#include "ewmh.h"
+#include "objects/window.h"
 #include "objects/screen.h"
-#include "property.h"
-#include "xwindow.h"
+
+#include "x11/property.h"
+#include "x11/ewmh.h"
+#include "x11/xwindow.h"
 
 LUA_CLASS_FUNCS(window, window_class)
 

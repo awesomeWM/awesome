@@ -28,15 +28,11 @@
 #include "common/xutil.h"
 #include "xkb.h"
 #include "dbus.h"
-#include "event.h"
-#include "ewmh.h"
 #include "globalconf.h"
 #include "objects/client.h"
 #include "objects/screen.h"
 #include "spawn.h"
 #include "systray.h"
-#include "xwindow.h"
-#include "x11/globals.h"
 #include "wayland/globals.h"
 
 #include <getopt.h>
@@ -56,6 +52,11 @@
 #include <xcb/xtest.h>
 #include <xcb/shape.h>
 #include <xcb/xfixes.h>
+
+#include "x11/event.h"
+#include "x11/ewmh.h"
+#include "x11/globals.h"
+#include "x11/xwindow.h"
 
 #include <glib-unix.h>
 

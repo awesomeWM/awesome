@@ -34,12 +34,13 @@
 #include "common/atoms.h"
 #include "common/xcursor.h"
 #include "common/xutil.h"
-#include "event.h"
-#include "ewmh.h"
 #include "objects/client.h"
 #include "objects/screen.h"
 #include "systray.h"
-#include "xwindow.h"
+
+#include "x11/event.h"
+#include "x11/ewmh.h"
+#include "x11/xwindow.h"
 
 #include "math.h"
 
