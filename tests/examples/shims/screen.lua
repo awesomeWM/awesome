@@ -35,7 +35,8 @@ local function create_screen(args)
     local wa = args.workarea_sides or 10
 
     -- This will happen if `clear()` is called
-    if mouse and not mouse.screen then
+    if mouse and (screen.count() > 0 and not mouse.screen) then
+        screen[s] = s
         mouse.screen = s
     end
 
