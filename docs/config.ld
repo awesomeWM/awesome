@@ -114,7 +114,7 @@ file = {
     '../mouse.c',
     '../mousegrabber.c',
     '../root.c',
-    '../selection.c',
+    '../x11/selection.c',
     '../spawn.c',
     '../xkb.c',
     '../common/luaobject.c',
