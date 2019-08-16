@@ -47,6 +47,8 @@
 #include <cairo-xcb.h>
 #include <xcb/shape.h>
 
+extern struct drawable_impl drawable_impl;
+
 /** Drawin object.
  *
  * @field border_width Border width.
@@ -309,7 +311,7 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
                               int16_t x, int16_t y,
                               uint16_t w, uint16_t h)
 {
-    if (!drawin->drawable || !drawin->drawable->pixmap || !drawin->drawable->refreshed)
+    if (!drawin->drawable || !drawable_impl.get_pixmap(drawin->drawable) || !drawin->drawable->refreshed)
         return;
 
     /* Make sure it really has the size it should have */
@@ -317,7 +319,7 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
 
     /* Make cairo do all pending drawing */
     cairo_surface_flush(drawin->drawable->surface);
-    xcb_copy_area(globalconf.connection, drawin->drawable->pixmap,
+    xcb_copy_area(globalconf.connection, drawable_impl.get_pixmap(drawin->drawable),
                   drawin->window, globalconf.gc, x, y, x, y,
                   w, h);
 }

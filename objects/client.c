@@ -107,6 +107,8 @@
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
 
+extern struct drawable_impl drawable_impl;
+
 /** Client class.
  *
  * This table allow to add more dynamic properties to the clients. For example,
@@ -2865,9 +2867,10 @@ client_get_drawable(client_t *c, int x, int y)
 static void
 client_refresh_titlebar_partial(client_t *c, client_titlebar_t bar, int16_t x, int16_t y, uint16_t width, uint16_t height)
 {
-    if(c->titlebar[bar].drawable == NULL
-            || c->titlebar[bar].drawable->pixmap == XCB_NONE
-            || !c->titlebar[bar].drawable->refreshed)
+    struct drawable_t *drawable = c->titlebar[bar].drawable;
+    if(drawable == NULL
+            || drawable_impl.get_pixmap(drawable) == XCB_NONE
+            || drawable->refreshed)
         return;
 
     /* Is the titlebar part of the area that should get redrawn? */
@@ -2878,9 +2881,10 @@ client_refresh_titlebar_partial(client_t *c, client_titlebar_t bar, int16_t x, i
         return;
 
     /* Redraw the affected parts */
-    cairo_surface_flush(c->titlebar[bar].drawable->surface);
-    xcb_copy_area(globalconf.connection, c->titlebar[bar].drawable->pixmap, c->frame_window,
-            globalconf.gc, x - area.x, y - area.y, x, y, width, height);
+    cairo_surface_flush(drawable->surface);
+    xcb_copy_area(globalconf.connection, drawable_impl.get_pixmap(drawable),
+            c->frame_window, globalconf.gc, x - area.x, y - area.y,
+            x, y, width, height);
 }
 
 #define HANDLE_TITLEBAR_REFRESH(name, index)                                                \

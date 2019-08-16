@@ -104,6 +104,8 @@
 
 static lua_class_t drawable_class;
 
+struct drawable_impl drawable_impl;
+
 LUA_OBJECT_FUNCS(drawable_class, drawable_t, drawable)
 
 drawable_t *
@@ -114,7 +116,7 @@ drawable_allocator(lua_State *L, drawable_refresh_callback *callback, void *data
     d->refresh_data = data;
     d->refreshed = false;
     d->surface = NULL;
-    d->pixmap = XCB_NONE;
+    drawable_impl.drawable_allocate(d);
     return d;
 }
 
@@ -123,17 +125,16 @@ drawable_unset_surface(drawable_t *d)
 {
     cairo_surface_finish(d->surface);
     cairo_surface_destroy(d->surface);
-    if (d->pixmap)
-        xcb_free_pixmap(globalconf.connection, d->pixmap);
+    drawable_impl.drawable_unset_surface(d);
     d->refreshed = false;
     d->surface = NULL;
-    d->pixmap = XCB_NONE;
 }
 
 static void
 drawable_wipe(drawable_t *d)
 {
     drawable_unset_surface(d);
+    drawable_impl.drawable_cleanup(d);
 }
 
 void
@@ -148,12 +149,7 @@ drawable_set_geometry(lua_State *L, int didx, area_t geom)
         drawable_unset_surface(d);
     if (size_changed && geom.width > 0 && geom.height > 0)
     {
-        d->pixmap = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection, globalconf.default_depth, d->pixmap,
-                          globalconf.screen->root, geom.width, geom.height);
-        d->surface = cairo_xcb_surface_create(globalconf.connection,
-                                              d->pixmap, globalconf.visual,
-                                              geom.width, geom.height);
+        drawable_impl.drawable_allocate_buffer(d);
         luaA_object_emit_signal(L, didx, "property::surface", 0);
     }
 

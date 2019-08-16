@@ -19,14 +19,17 @@
 
 #include <stdbool.h>
 
+#include "objects/drawable.h"
 #include <mousegrabber.h>
 #include <root.h>
 
 #include "globalconf.h"
-#include "root.h"
-#include "mousegrabber.h"
-#include "globals.h"
+#include "x11/drawable.h"
+#include "x11/root.h"
+#include "x11/mousegrabber.h"
+#include "x11/globals.h"
 
+extern struct drawable_impl drawable_impl;
 extern struct mousegrabber_impl mousegrabber_impl;
 extern struct root_impl root_impl;
 
@@ -42,6 +45,13 @@ void init_x11(void)
     if (xcb_request_check(globalconf.connection, cookie))
         fatal("another window manager is already running (can't select SubstructureRedirect)");
 
+    drawable_impl = (struct drawable_impl){
+        .get_pixmap = x11_get_pixmap,
+        .drawable_allocate = x11_drawable_allocate,
+        .drawable_unset_surface = x11_drawable_unset_surface,
+        .drawable_allocate_buffer = x11_drawable_create_pixmap,
+        .drawable_cleanup = x11_drawable_cleanup,
+    };
     mousegrabber_impl = (struct mousegrabber_impl){
         .grab_mouse = x11_grab_mouse,
         .release_mouse = x11_release_mouse,

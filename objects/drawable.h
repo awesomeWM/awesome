@@ -28,12 +28,25 @@
 
 typedef void drawable_refresh_callback(void *);
 
+struct drawable_t;
+
+struct drawable_impl
+{
+    xcb_pixmap_t (*get_pixmap)(struct drawable_t *drawable);
+
+    /* Drawable private functions */
+    void (*drawable_allocate)(struct drawable_t *drawable);
+    void (*drawable_unset_surface)(struct drawable_t *drawable);
+    void (*drawable_allocate_buffer)(struct drawable_t *drawable);
+    void (*drawable_cleanup)(struct drawable_t *drawable);
+};
+
 /** drawable type */
 struct drawable_t
 {
     LUA_OBJECT_HEADER
-    /** The pixmap we are drawing to. */
-    xcb_pixmap_t pixmap;
+    /* XXX This data should only be cast from drawable_impl functions */
+    void *impl_data;
     /** Surface for drawing. */
     cairo_surface_t *surface;
     /** The geometry of the drawable (in root window coordinates). */
