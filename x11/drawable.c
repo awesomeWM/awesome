@@ -1,5 +1,7 @@
 /*
- * Copyright © 2019 Preston Carpenter <APragmaticPlace@gmail.com>
+ * Copyright © 2008-2009 Julien Danjou <julien@danjou.info>
+ * Copyright © 2010-2012 Uli Schlachter <psychon@znc.in>
+ * Copyright ©      2019 Preston Carpenter <APragmaticPlace@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

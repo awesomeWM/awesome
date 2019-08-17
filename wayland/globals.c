@@ -23,15 +23,20 @@
 #include "wayland/globals.h"
 #include "globalconf.h"
 
+#include "wayland/drawin.h"
+#include "wayland/drawable.h"
 #include "wayland/mousegrabber.h"
 #include "wayland/root.h"
 
 #include "way-cooler-mousegrabber-unstable-v1.h"
 #include "way-cooler-keybindings-unstable-v1.h"
+#include "wlr-layer-shell-unstable-v1.h"
 
 #include <glib-unix.h>
 #include <wayland-client.h>
 
+extern struct drawin_impl drawin_impl;
+extern struct drawable_impl drawable_impl;
 extern struct mousegrabber_impl mousegrabber_impl;
 extern struct root_impl root_impl;
 
@@ -156,6 +161,11 @@ static void awesome_handle_global(void *data, struct wl_registry *registry,
         zway_cooler_keybindings_add_listener(globalconf.wl_keybindings,
                 &keybindings_listener, NULL);
     }
+    else if (strcmp(interface, zwlr_layer_shell_v1_interface.name) == 0)
+    {
+        globalconf.layer_shell = wl_registry_bind(registry, name,
+                &zwlr_layer_shell_v1_interface, version);
+    }
 }
 
 static void setup_wayland_globals(struct wl_display *display,
@@ -185,6 +195,32 @@ void init_wayland(void)
 
     setup_glib_listeners(globalconf.wl_display);
 
+    drawin_impl = (struct drawin_impl){
+        .get_xcb_window = wayland_get_xcb_window,
+        .get_drawin_by_window = wayland_get_drawin_by_window,
+        .drawin_cleanup = wayland_drawin_cleanup,
+        .drawin_allocate = wayland_drawin_allocate,
+        .drawin_moveresize = wayland_drawin_moveresize,
+        .drawin_refresh = wayland_drawin_refresh,
+        .drawin_map = wayland_drawin_map,
+        .drawin_unmap = wayland_drawin_unmap,
+        .drawin_get_opacity = wayland_drawin_get_opacity,
+        .drawin_set_cursor = wayland_drawin_set_cursor,
+        .drawin_systray_kickout = wayland_drawin_systray_kickout,
+        .drawin_get_shape_bounding = wayland_drawin_get_shape_bounding,
+        .drawin_get_shape_clip = wayland_drawin_get_shape_clip,
+        .drawin_get_shape_input = wayland_drawin_get_shape_input,
+        .drawin_set_shape_bounding = wayland_drawin_set_shape_bounding,
+        .drawin_set_shape_clip = wayland_drawin_set_shape_clip,
+        .drawin_set_shape_input = wayland_drawin_set_shape_input,
+    };
+    drawable_impl = (struct drawable_impl){
+        .get_pixmap = wayland_get_pixmap,
+        .drawable_allocate = wayland_drawable_allocate,
+        .drawable_unset_surface = wayland_drawable_unset_surface,
+        .drawable_allocate_buffer = wayland_drawable_create_buffer,
+        .drawable_cleanup = wayland_drawable_cleanup,
+    };
     mousegrabber_impl = (struct mousegrabber_impl){
         .grab_mouse = wayland_grab_mouse,
         .release_mouse = wayland_release_mouse,

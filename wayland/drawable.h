@@ -1,7 +1,5 @@
 /*
- * Copyright © 2007-2009 Julien Danjou <julien@danjou.info>
- * Copyright © 2010-2012 Uli Schlachter <psychon@znc.in>
- * Copyright ©      2019 Preston Carpenter <APragmaticPlace@gmail.com>
+ * Copyright © 2019 Preston Carpenter <APragmaticPlace@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,26 +17,26 @@
  *
  */
 
-#ifndef AWESOME_X11_DRAWABLE_H
-#define AWESOME_X11_DRAWABLE_H
-
-#include <xcb/xcb_atom.h>
-#include <xcb/xcb_aux.h>
+#ifndef AWESOME_WAYLAND_DRAWABLE_H
+#define AWESOME_WAYLAND_DRAWABLE_H
 
 #include "objects/drawable.h"
 
-struct x11_drawable
+struct wayland_drawable
 {
-	xcb_pixmap_t pixmap;
+    struct wl_surface *wl_surface;
+    struct wl_buffer *buffer;
+    void *shm_data;
+	size_t shm_size;
 };
 
-xcb_pixmap_t x11_get_pixmap(struct drawable_t *drawable);
+xcb_pixmap_t wayland_get_pixmap(struct drawable_t *drawable);
 
-void x11_drawable_allocate(struct drawable_t *drawable);
-void x11_drawable_cleanup(struct drawable_t *drawable);
-void x11_drawable_unset_surface(struct drawable_t *drawable);
-void x11_drawable_wipe(struct drawable_t *drawable);
-void x11_drawable_create_pixmap(struct drawable_t *drawable);
+void wayland_drawable_allocate(struct drawable_t *drawable);
+void wayland_drawable_cleanup(struct drawable_t *drawable);
+void wayland_drawable_unset_surface(struct drawable_t *drawable);
+void wayland_drawable_wipe(struct drawable_t *drawable);
+void wayland_drawable_create_buffer(struct drawable_t *drawable);
 
-#endif  // AWESOME_X11_DRAWABLE_H
+#endif // AWESOME_WAYLAND_DRAWABLE_H
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

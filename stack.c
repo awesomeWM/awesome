@@ -168,6 +168,10 @@ stack_refresh()
     if(!need_stack_refresh)
         return;
 
+    // FIXME
+    if (globalconf.wl_display != NULL)
+        return;
+
     xcb_window_t next = XCB_NONE;
 
     /* stack desktop windows */

@@ -221,6 +221,8 @@ if (WAYLAND_FOUND)
     set(AWESOME_OPTIONAL_INCLUDE_DIRS ${AWESOME_OPTIONAL_INCLUDE_DIRS} ${WAYLAND_INCLUDE_DIRS})
 endif()
 
+set(AWESOME_OPTIONAL_LDFLAGS ${AWESOME_OPTIONAL_LDFLAGS} -lrt)
+
 set(protos
     "/usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml"
     "../wayland/protocols/way-cooler-keybindings-unstable-v1.xml"

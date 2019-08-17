@@ -233,6 +233,7 @@ typedef struct
     struct wl_compositor *wl_compositor;
     struct wl_shm *wl_shm;
     struct wl_seat *wl_seat;
+    struct zwlr_layer_shell_v1 *layer_shell;
 
     /* Awesome-specific Wayland globals */
     struct zway_cooler_mousegrabber *wl_mousegrabber;
