@@ -33,6 +33,8 @@
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 
+extern struct drawin_impl drawin_impl;
+
 /** Initialize systray information in X.
  */
 void
@@ -369,10 +371,13 @@ luaA_systray(lua_State *L)
         }
 
         if(globalconf.systray.parent != w)
+        {
+            xcb_window_t window = drawin_impl.get_xcb_window(w);
             xcb_reparent_window(globalconf.connection,
                                 globalconf.systray.window,
-                                w->window,
+                                window,
                                 x, y);
+        }
         else
         {
             uint32_t config_vals[2] = { x, y };

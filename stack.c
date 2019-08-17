@@ -25,6 +25,8 @@
 
 #include "x11/ewmh.h"
 
+extern struct drawin_impl drawin_impl;
+
 void
 stack_client_remove(client_t *c)
 {
@@ -178,8 +180,10 @@ stack_refresh()
     foreach(drawin, globalconf.drawins)
         if(!(*drawin)->ontop)
         {
-            stack_window_above((*drawin)->window, next);
-            next = (*drawin)->window;
+            xcb_window_t window = drawin_impl.get_xcb_window(*drawin);
+            stack_window_above(window, next);
+            window = drawin_impl.get_xcb_window(*drawin);
+            next = window;
         }
 
     /* then stack clients */
@@ -192,8 +196,9 @@ stack_refresh()
     foreach(drawin, globalconf.drawins)
         if((*drawin)->ontop)
         {
-            stack_window_above((*drawin)->window, next);
-            next = (*drawin)->window;
+            xcb_window_t window = drawin_impl.get_xcb_window(*drawin);
+            stack_window_above(window, next);
+            next = window;
         }
 
     need_stack_refresh = false;

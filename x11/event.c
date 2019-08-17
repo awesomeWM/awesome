@@ -50,6 +50,7 @@
 #include <xcb/xfixes.h>
 
 extern struct root_impl root_impl;
+extern struct drawin_impl drawin_impl;
 
 #define DO_EVENT_HOOK_CALLBACK(type, xcbtype, xcbeventprefix, arraytype, match) \
     static void \
@@ -161,12 +162,12 @@ event_handle_button(xcb_button_press_event_t *ev)
      * drop them */
     ev->state &= 0x00ff;
 
-    if((drawin = drawin_getbywin(ev->event))
-       || (drawin = drawin_getbywin(ev->child)))
+    if((drawin = drawin_impl.get_drawin_by_window(ev->event))
+        || (drawin = drawin_impl.get_drawin_by_window(ev->child)))
     {
         /* If the drawin is child, then x,y are
          * relative to root window */
-        if(drawin->window == ev->child)
+        if(drawin_impl.get_xcb_window(drawin) == ev->child)
         {
             ev->event_x -= drawin->geometry.x + drawin->border_width;
             ev->event_y -= drawin->geometry.y + drawin->border_width;
@@ -527,7 +528,7 @@ event_handle_motionnotify(xcb_motion_notify_event_t *ev)
         lua_pop(L, 1);
     }
 
-    if((w = drawin_getbywin(ev->event)))
+    if((w = drawin_impl.get_drawin_by_window(ev->event)))
     {
         luaA_object_push(L, w);
         luaA_object_push_item(L, -1, w->drawable);
@@ -617,7 +618,8 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
      * "outside of the actual client window".
      */
 
-    if(ev->detail != XCB_NOTIFY_DETAIL_INFERIOR && (drawin = drawin_getbywin(ev->event)))
+    if(ev->detail != XCB_NOTIFY_DETAIL_INFERIOR
+            && (drawin = drawin_impl.get_drawin_by_window(ev->event)))
     {
         luaA_object_push(L, drawin);
         luaA_object_push_item(L, -1, drawin->drawable);
@@ -702,10 +704,10 @@ event_handle_expose(xcb_expose_event_t *ev)
     drawin_t *drawin;
     client_t *client;
 
-    if((drawin = drawin_getbywin(ev->window)))
-        drawin_refresh_pixmap_partial(drawin,
-                                      ev->x, ev->y,
-                                      ev->width, ev->height);
+    if((drawin = drawin_impl.get_drawin_by_window(ev->window)))
+        drawin_impl.drawin_refresh(drawin,
+                ev->x, ev->y,
+                ev->width, ev->height);
     if ((client = client_getbyframewin(ev->window)))
         client_refresh_partial(client, ev->x, ev->y, ev->width, ev->height);
 }

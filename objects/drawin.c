@@ -49,6 +49,8 @@
 
 extern struct drawable_impl drawable_impl;
 
+struct drawin_impl drawin_impl;
+
 /** Drawin object.
  *
  * @field border_width Border width.
@@ -154,18 +156,7 @@ LUA_OBJECT_FUNCS(drawin_class, drawin_t, drawin)
 static void
 drawin_systray_kickout(drawin_t *w)
 {
-    if(globalconf.systray.parent == w)
-    {
-        /* Who! Check that we're not deleting a drawin with a systray, because it
-         * may be its parent. If so, we reparent to root before, otherwise it will
-         * hurt very much. */
-        xcb_reparent_window(globalconf.connection,
-                            globalconf.systray.window,
-                            globalconf.screen->root,
-                            -512, -512);
-
-        globalconf.systray.parent = NULL;
-    }
+    drawin_impl.drawin_systray_kickout(w);
 }
 
 void
@@ -180,13 +171,7 @@ drawin_wipe(drawin_t *w)
     /* The drawin must already be unmapped, else it
      * couldn't be garbage collected -> no unmap needed */
     p_delete(&w->cursor);
-    if(w->window)
-    {
-        /* Make sure we don't accidentally kill the systray window */
-        drawin_systray_kickout(w);
-        xcb_destroy_window(globalconf.connection, w->window);
-        w->window = XCB_NONE;
-    }
+    drawin_impl.drawin_cleanup(w);
     /* No unref needed because we are being garbage collected */
     w->drawable = NULL;
 }
@@ -206,28 +191,17 @@ drawin_update_drawing(lua_State *L, int widx)
 static inline void
 drawin_refresh_pixmap(drawin_t *w)
 {
-    drawin_refresh_pixmap_partial(w, 0, 0, w->geometry.width, w->geometry.height);
+    drawin_impl.drawin_refresh(w, 0, 0, w->geometry.width, w->geometry.height);
 }
 
-static void
+void
 drawin_apply_moveresize(drawin_t *w)
 {
     if (!w->geometry_dirty)
         return;
 
     w->geometry_dirty = false;
-    client_ignore_enterleave_events();
-    xcb_configure_window(globalconf.connection, w->window,
-                         XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
-                         | XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
-                         (const uint32_t [])
-                         {
-                             w->geometry.x,
-                             w->geometry.y,
-                             w->geometry.width,
-                             w->geometry.height
-                         });
-    client_restore_enterleave_events();
+    drawin_impl.drawin_moveresize(w);
 }
 
 void
@@ -299,30 +273,6 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
     }
 }
 
-/** Refresh the window content by copying its pixmap data to its window.
- * \param drawin The drawin to refresh.
- * \param x The copy starting point x component.
- * \param y The copy starting point y component.
- * \param w The copy width from the x component.
- * \param h The copy height from the y component.
- */
-void
-drawin_refresh_pixmap_partial(drawin_t *drawin,
-                              int16_t x, int16_t y,
-                              uint16_t w, uint16_t h)
-{
-    if (!drawin->drawable || !drawable_impl.get_pixmap(drawin->drawable) || !drawin->drawable->refreshed)
-        return;
-
-    /* Make sure it really has the size it should have */
-    drawin_apply_moveresize(drawin);
-
-    /* Make cairo do all pending drawing */
-    cairo_surface_flush(drawin->drawable->surface);
-    xcb_copy_area(globalconf.connection, drawable_impl.get_pixmap(drawin->drawable),
-                  drawin->window, globalconf.gc, x, y, x, y,
-                  w, h);
-}
 
 static void
 drawin_map(lua_State *L, int widx)
@@ -333,7 +283,7 @@ drawin_map(lua_State *L, int widx)
     /* Activate BMA */
     client_ignore_enterleave_events();
     /* Map the drawin */
-    xcb_map_window(globalconf.connection, drawin->window);
+    drawin_impl.drawin_map(drawin);
     /* Deactivate BMA */
     client_restore_enterleave_events();
     /* Stack this drawin correctly */
@@ -348,26 +298,13 @@ drawin_map(lua_State *L, int widx)
 static void
 drawin_unmap(drawin_t *drawin)
 {
-    xcb_unmap_window(globalconf.connection, drawin->window);
+    drawin_impl.drawin_unmap(drawin);
     foreach(item, globalconf.drawins)
         if(*item == drawin)
         {
             drawin_array_remove(&globalconf.drawins, item);
             break;
         }
-}
-
-/** Get a drawin by its window.
- * \param win The window id.
- * \return A drawin if found, NULL otherwise.
- */
-drawin_t *
-drawin_getbywin(xcb_window_t win)
-{
-    foreach(w, globalconf.drawins)
-        if((*w)->window == win)
-            return *w;
-    return NULL;
 }
 
 /** Set a drawin visible or not.
@@ -415,7 +352,6 @@ drawin_set_visible(lua_State *L, int udx, bool v)
 static drawin_t *
 drawin_allocator(lua_State *L)
 {
-    xcb_screen_t *s = globalconf.screen;
     drawin_t *w = drawin_new(L);
 
     w->visible = false;
@@ -430,34 +366,7 @@ drawin_allocator(lua_State *L)
     drawable_allocator(L, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
     w->drawable = luaA_object_ref_item(L, -2, -1);
 
-    w->window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, globalconf.default_depth, w->window, s->root,
-                      w->geometry.x, w->geometry.y,
-                      w->geometry.width, w->geometry.height,
-                      w->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
-                      XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
-                      | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP
-                      | XCB_CW_CURSOR,
-                      (const uint32_t [])
-                      {
-                          w->border_color.pixel,
-                          XCB_GRAVITY_NORTH_WEST,
-                          1,
-                          XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT
-                          | XCB_EVENT_MASK_SUBSTRUCTURE_NOTIFY | XCB_EVENT_MASK_ENTER_WINDOW
-                          | XCB_EVENT_MASK_LEAVE_WINDOW | XCB_EVENT_MASK_STRUCTURE_NOTIFY
-                          | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_BUTTON_PRESS
-                          | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_EXPOSURE
-                          | XCB_EVENT_MASK_PROPERTY_CHANGE,
-                          globalconf.default_cmap,
-                          xcursor_new(globalconf.cursor_ctx, xcursor_font_fromstr(w->cursor))
-                      });
-    xwindow_set_class_instance(w->window);
-    xwindow_set_name_static(w->window, "Awesome drawin");
-
-    /* Set the right properties */
-    ewmh_update_window_type(w->window, window_translate_type(w->type));
-    ewmh_update_strut(w->window, &w->strut);
+    drawin_impl.drawin_allocate(w);
 
     return w;
 }
@@ -609,15 +518,8 @@ luaA_drawin_set_cursor(lua_State *L, drawin_t *drawin)
     const char *buf = luaL_checkstring(L, -1);
     if(buf)
     {
-        uint16_t cursor_font = xcursor_font_fromstr(buf);
-        if(cursor_font)
-        {
-            xcb_cursor_t cursor = xcursor_new(globalconf.cursor_ctx, cursor_font);
-            p_delete(&drawin->cursor);
-            drawin->cursor = a_strdup(buf);
-            xwindow_set_cursor(drawin->window, cursor);
-            luaA_object_emit_signal(L, -3, "property::cursor", 0);
-        }
+        drawin_impl.drawin_set_cursor(drawin, buf);
+        luaA_object_emit_signal(L, -3, "property::cursor", 0);
     }
     return 0;
 }
@@ -654,7 +556,7 @@ luaA_drawin_get_drawable(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_get_shape_bounding(lua_State *L, drawin_t *drawin)
 {
-    cairo_surface_t *surf = xwindow_get_shape(drawin->window, XCB_SHAPE_SK_BOUNDING);
+    cairo_surface_t *surf = drawin_impl.drawin_get_shape_bounding(drawin);
     if (!surf)
         return 0;
     /* lua has to make sure to free the ref or we have a leak */
@@ -677,10 +579,7 @@ luaA_drawin_set_shape_bounding(lua_State *L, drawin_t *drawin)
     /* The drawin might have been resized to a larger size. Apply that. */
     drawin_apply_moveresize(drawin);
 
-    xwindow_set_shape(drawin->window,
-            drawin->geometry.width + 2*drawin->border_width,
-            drawin->geometry.height + 2*drawin->border_width,
-            XCB_SHAPE_SK_BOUNDING, surf, -drawin->border_width);
+    drawin_impl.drawin_set_shape_bounding(drawin, surf);
     luaA_object_emit_signal(L, -3, "property::shape_bounding", 0);
     return 0;
 }
@@ -693,7 +592,7 @@ luaA_drawin_set_shape_bounding(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_get_shape_clip(lua_State *L, drawin_t *drawin)
 {
-    cairo_surface_t *surf = xwindow_get_shape(drawin->window, XCB_SHAPE_SK_CLIP);
+    cairo_surface_t *surf = drawin_impl.drawin_get_shape_clip(drawin);
     if (!surf)
         return 0;
     /* lua has to make sure to free the ref or we have a leak */
@@ -716,8 +615,7 @@ luaA_drawin_set_shape_clip(lua_State *L, drawin_t *drawin)
     /* The drawin might have been resized to a larger size. Apply that. */
     drawin_apply_moveresize(drawin);
 
-    xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.height,
-            XCB_SHAPE_SK_CLIP, surf, 0);
+    drawin_impl.drawin_set_shape_clip(drawin, surf);
     luaA_object_emit_signal(L, -3, "property::shape_clip", 0);
     return 0;
 }
@@ -730,7 +628,7 @@ luaA_drawin_set_shape_clip(lua_State *L, drawin_t *drawin)
 static int
 luaA_drawin_get_shape_input(lua_State *L, drawin_t *drawin)
 {
-    cairo_surface_t *surf = xwindow_get_shape(drawin->window, XCB_SHAPE_SK_INPUT);
+    cairo_surface_t *surf = drawin_impl.drawin_get_shape_input(drawin);
     if (!surf)
         return 0;
     /* lua has to make sure to free the ref or we have a leak */
@@ -753,10 +651,7 @@ luaA_drawin_set_shape_input(lua_State *L, drawin_t *drawin)
     /* The drawin might have been resized to a larger size. Apply that. */
     drawin_apply_moveresize(drawin);
 
-    xwindow_set_shape(drawin->window,
-            drawin->geometry.width + 2*drawin->border_width,
-            drawin->geometry.height + 2*drawin->border_width,
-            XCB_SHAPE_SK_INPUT, surf, -drawin->border_width);
+    drawin_impl.drawin_set_shape_input(drawin, surf);
     luaA_object_emit_signal(L, -3, "property::shape_input", 0);
     return 0;
 }

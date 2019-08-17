@@ -32,6 +32,8 @@
 
 #include <xcb/xcb_atom.h>
 
+extern struct drawin_impl drawin_impl;
+
 #define HANDLE_TEXT_PROPERTY(funcname, atom, setfunc) \
     xcb_get_property_cookie_t \
     property_get_##funcname(client_t *c) \
@@ -397,12 +399,12 @@ property_handle_net_wm_opacity(uint8_t state,
                                xcb_window_t window)
 {
     lua_State *L = globalconf_get_lua_State();
-    drawin_t *drawin = drawin_getbywin(window);
+    drawin_t *drawin = drawin_impl.get_drawin_by_window(window);
 
     if(drawin)
     {
         luaA_object_push(L, drawin);
-        window_set_opacity(L, -1, xwindow_get_opacity(drawin->window));
+        window_set_opacity(L, -1, drawin_impl.drawin_get_opacity(drawin));
         lua_pop(L, -1);
     }
     else
@@ -447,7 +449,7 @@ property_handle_propertynotify_xproperty(xcb_property_notify_event_t *ev)
     {
         obj = client_getbywin(ev->window);
         if(!obj)
-            obj = drawin_getbywin(ev->window);
+            obj = drawin_impl.get_drawin_by_window(ev->window);
         if(!obj)
             return;
     } else

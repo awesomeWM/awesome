@@ -19,16 +19,19 @@
 
 #include <stdbool.h>
 
+#include "objects/drawin.h"
 #include "objects/drawable.h"
 #include <mousegrabber.h>
 #include <root.h>
 
 #include "globalconf.h"
+#include "x11/drawin.h"
 #include "x11/drawable.h"
 #include "x11/root.h"
 #include "x11/mousegrabber.h"
 #include "x11/globals.h"
 
+extern struct drawin_impl drawin_impl;
 extern struct drawable_impl drawable_impl;
 extern struct mousegrabber_impl mousegrabber_impl;
 extern struct root_impl root_impl;
@@ -45,6 +48,25 @@ void init_x11(void)
     if (xcb_request_check(globalconf.connection, cookie))
         fatal("another window manager is already running (can't select SubstructureRedirect)");
 
+    drawin_impl = (struct drawin_impl){
+        .get_xcb_window = x11_get_xcb_window,
+        .get_drawin_by_window = x11_get_drawin_by_window,
+        .drawin_cleanup = x11_drawin_cleanup,
+        .drawin_allocate = x11_drawin_allocate,
+        .drawin_moveresize = x11_drawin_moveresize,
+        .drawin_refresh = x11_drawin_refresh,
+        .drawin_map = x11_drawin_map,
+        .drawin_unmap = x11_drawin_unmap,
+        .drawin_get_opacity = x11_drawin_get_opacity,
+        .drawin_set_cursor = x11_drawin_set_cursor,
+        .drawin_systray_kickout = x11_drawin_systray_kickout,
+        .drawin_get_shape_bounding = x11_drawin_get_shape_bounding,
+        .drawin_get_shape_clip = x11_drawin_get_shape_clip,
+        .drawin_get_shape_input = x11_drawin_get_shape_input,
+        .drawin_set_shape_bounding = x11_drawin_set_shape_bounding,
+        .drawin_set_shape_clip = x11_drawin_set_shape_clip,
+        .drawin_set_shape_input = x11_drawin_set_shape_input,
+    };
     drawable_impl = (struct drawable_impl){
         .get_pixmap = x11_get_pixmap,
         .drawable_allocate = x11_drawable_allocate,

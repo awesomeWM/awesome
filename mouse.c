@@ -70,6 +70,8 @@
 #include "objects/drawin.h"
 #include "objects/screen.h"
 
+extern struct drawin_impl drawin_impl;
+
 static int miss_index_handler    = LUA_REFNIL;
 static int miss_newindex_handler = LUA_REFNIL;
 
@@ -288,7 +290,7 @@ luaA_mouse_object_under_pointer(lua_State *L)
     drawin_t *drawin;
     client_t *client;
 
-    if((drawin = drawin_getbywin(child)))
+    if((drawin = drawin_impl.get_drawin_by_window(child)))
         return luaA_object_push(L, drawin);
 
     if((client = client_getbyframewin(child)))
