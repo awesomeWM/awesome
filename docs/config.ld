@@ -93,7 +93,9 @@ new_type("rulecomponent", "Rule components", false, "Type")
 -- Filter functions for the taglist/tasklist/layoutlist
 new_type("filterfunction", "List filters", false)
 -- Extra client properties available only in awful.rules/spawn constructs
-new_type("clientruleproperty", "Extra properties available in awful.rules and awful.spawn", false, "Type")
+new_type("clientruleproperty", "Extra properties available in the rules", false, "Type")
+-- Extra *matching* properties for rules.
+new_type("matchingproperty", "Extra matching properties used in rules", false, "Type")
 
 -- Simulate the default "params" parser format, except the optional "[]" section
 -- needs a space.
