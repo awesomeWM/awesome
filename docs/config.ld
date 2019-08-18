@@ -427,7 +427,8 @@ sort_modules=true
 -- Add more project level (left side index) types.
 new_type("coreclassmod", "Core_components"  , true)
 new_type("inputmodule" , "Input handling"   , true)
-new_type("widgetmod"   , "Widgets"   , true)
+new_type("ruleslib"    , "Declarative_rules", true)
+new_type("widgetmod"   , "Widgets"          , true)
 new_type("containermod", "Widget_containers", true)
 new_type("layoutmod"   , "Widget_layouts"   , true)
 new_type("popupmod"    , "Popups_and_bars"  , true)
@@ -753,6 +754,8 @@ local display_type = {
     beautiful          = true,
     field              = true,
     deprecatedproperty = true,
+    clientruleproperty = true,
+    matchingproperty   = true,
 }
 
 -- Show return values.
