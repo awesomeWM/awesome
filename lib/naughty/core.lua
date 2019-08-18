@@ -276,32 +276,6 @@ end
 
 local conns = gobject._setup_class_signals(naughty)
 
---- Connect a global signal on the notification engine.
---
--- Functions connected to this signal source will be executed when any
--- notification object emits the signal.
---
--- It is also used for some generic notification signals such as
--- `request::display`.
---
--- @tparam string name The name of the signal
--- @tparam function func The function to attach
--- @staticfct naughty.connect_signal
--- @usage naughty.connect_signal("added", function(notif)
---    -- do something
--- end)
-
---- Emit a notification signal.
--- @tparam string name The signal name.
--- @param ... The signal callback arguments
--- @staticfct naughty.emit_signal
-
---- Disconnect a signal from a source.
--- @tparam string name The name of the signal
--- @tparam function func The attached function
--- @staticfct naughty.disconnect_signal
--- @treturn boolean If the disconnection was successful
-
 local function resume()
     properties.suspended = false
     for _, v in pairs(naughty.notifications.suspended) do
@@ -740,6 +714,8 @@ end
 
 naughty.connect_signal("property::screen"  , update_index)
 naughty.connect_signal("property::position", update_index)
+
+--@DOC_signals_COMMON@
 
 return setmetatable(naughty, {__index = index_miss, __newindex = set_index_miss})
 
