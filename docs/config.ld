@@ -756,6 +756,7 @@ local display_type = {
     deprecatedproperty = true,
     clientruleproperty = true,
     matchingproperty   = true,
+    rulecomponent      = true,
 }
 
 -- Show return values.
