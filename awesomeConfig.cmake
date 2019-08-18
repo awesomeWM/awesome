@@ -382,21 +382,25 @@ add_custom_command(
             ${SOURCE_DIR}/docs/_parser.lua
 )
 
-add_custom_command(
-        OUTPUT ${BUILD_DIR}/docs/common/rules_index.ldoc
+foreach(RULE_TYPE client tag screen notification)
+    add_custom_command(
+        OUTPUT ${BUILD_DIR}/docs/common/${RULE_TYPE}_rules_index.ldoc
         COMMAND lua ${SOURCE_DIR}/docs/build_rules_index.lua
-            ${BUILD_DIR}/docs/common/rules_index.ldoc
+            ${BUILD_DIR}/docs/common/${RULE_TYPE}_rules_index.ldoc
+            ${RULE_TYPE}
 
         # Cheap trick until the ldoc `configure_file` is ported to be a build
         # step rather than part of cmake.
-        COMMAND ${CMAKE_COMMAND} -E copy ${BUILD_DIR}/docs/common/rules_index.ldoc
-            ${SOURCE_DIR}/docs/common/rules_index.ldoc
+        COMMAND ${CMAKE_COMMAND} -E
+            copy ${BUILD_DIR}/docs/common/${RULE_TYPE}_rules_index.ldoc
+                 ${SOURCE_DIR}/docs/common/${RULE_TYPE}_rules_index.ldoc
 
         DEPENDS
             lgi-check-run
             ${SOURCE_DIR}/docs/build_rules_index.lua
             ${SOURCE_DIR}/docs/_parser.lua
-)
+    )
+endforeach()
 
 add_custom_command(
         OUTPUT ${BUILD_DIR}/awesomerc.lua ${BUILD_DIR}/docs/05-awesomerc.md
@@ -423,7 +427,10 @@ add_custom_target(generate_awesomerc DEPENDS
     ${BUILD_DIR}/docs/06-appearance.md
     ${SOURCE_DIR}/docs/05-awesomerc.md.lua
     ${SOURCE_DIR}/docs/build_rules_index.lua
-    ${BUILD_DIR}/docs/common/rules_index.ldoc
+    ${BUILD_DIR}/docs/common/client_rules_index.ldoc
+    ${BUILD_DIR}/docs/common/tag_rules_index.ldoc
+    ${BUILD_DIR}/docs/common/screen_rules_index.ldoc
+    ${BUILD_DIR}/docs/common/notification_rules_index.ldoc
     ${SOURCE_DIR}/docs/sample_theme.lua
     ${SOURCE_DIR}/docs/sample_files.lua
     ${SOURCE_DIR}/awesomerc.lua
