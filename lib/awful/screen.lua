@@ -174,6 +174,30 @@ function screen.focus_relative(offset)
                                    screen.focused().index + offset))
 end
 
+--- The area where clients can be tiled.
+--
+-- This property holds the (read only) area where clients can be tiled. Use
+-- the `padding` property, `wibox.struts` and `client.struts` to modify this
+-- area.
+--
+-- @DOC_screen_tiling_area_EXAMPLE@
+--
+-- @property tiling_area
+-- @tparam table tiling_area
+-- @tparam number tiling_area.x
+-- @tparam number tiling_area.y
+-- @tparam number tiling_area.width
+-- @tparam number tiling_area.height
+-- @see padding
+-- @see get_bounding_geometry
+
+function screen.object.get_tiling_area(s)
+    return s:get_bounding_geometry {
+        honor_padding  = true,
+        honor_workarea = true,
+    }
+end
+
 --- Get or set the screen padding.
 --
 -- @deprecated awful.screen.padding
@@ -198,6 +222,8 @@ end
 -- **Signal:**
 --
 -- * *property::padding*
+--
+-- @DOC_screen_padding_EXAMPLE@
 --
 -- @property padding
 -- @param table
