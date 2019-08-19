@@ -1,0 +1,27 @@
+
+
+--- Connect a global signal on the module.
+--
+-- Functions connected to this signal source will be executed when any
+-- module object emits the signal.
+--
+-- It is also used for some generic module signals such as
+-- `request::display`.
+--
+-- @tparam string name The name of the signal
+-- @tparam function func The function to attach
+-- @function naughty.connect_signal
+-- @usage naughty.connect_signal("added", function(notif)
+--    -- do something
+-- end)
+
+--- Emit a module signal.
+-- @tparam string name The signal name.
+-- @param ... The signal callback arguments
+-- @function naughty.emit_signal
+
+--- Disconnect a signal from a source.
+-- @tparam string name The name of the signal
+-- @tparam function func The attached function
+-- @function naughty.disconnect_signal
+-- @treturn boolean If the disconnection was successful
