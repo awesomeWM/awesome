@@ -108,6 +108,9 @@
  *  * *property::geometry*
  *
  * **Immutable:** true
+ *
+ * @DOC_screen_geometry_EXAMPLE@
+ *
  * @property geometry
  * @param table
  * @tfield integer table.x The horizontal position
@@ -177,6 +180,8 @@
  * **Signal:**
  *
  *  * *property::workarea*
+ *
+ * @DOC_screen_workarea_EXAMPLE@
  *
  * @property workarea
  * @see client.struts

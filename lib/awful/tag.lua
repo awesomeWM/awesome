@@ -746,7 +746,7 @@ end
 
 --- The tag client layout.
 --
--- This property hold the layout. A layout can be either stateless or stateful.
+-- This property holds the layout. A layout can be either stateless or stateful.
 -- Stateless layouts are used by default by Awesome. They tile clients without
 -- any other overhead. They take an ordered list of clients and place them on
 -- the screen. Stateful layouts create an object instance for each tags and
@@ -772,6 +772,12 @@ end
 -- `is_dynamic = true` property. If they don't, `awful.tag` will create a new
 -- instance everytime the layout is set. If they do, the instance will be
 -- cached and re-used.
+--
+--
+-- The client organized by the layout will fill the screen `tiling_area`
+-- section:
+--
+-- @DOC_screen_taglayout_EXAMPLE@
 --
 -- **Signal:**
 --
