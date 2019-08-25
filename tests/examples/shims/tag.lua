@@ -16,15 +16,19 @@ local function new_tag(_, args)
     awesome._forward_class(ret, tag)
 
     ret.data = {}
-    ret.name = args.name or "test"
+    ret.name = tostring(args.name) or "test"
     ret.activated = true
     ret.selected = not has_selected_tag(args.screen)
 
     function ret:clients(_) --TODO handle new
         local list = {}
         for _, c in ipairs(client.get()) do
-            if c.screen == (ret.screen or screen[1]) then
-                table.insert(list, c)
+            if #c:tags() > 0 then
+                for _, t in ipairs(c:tags()) do
+                    if t == ret then
+                        table.insert(list, c)
+                    end
+                end
             end
         end
 

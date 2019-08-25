@@ -75,6 +75,10 @@ function awesome.pixbuf_to_surface(_, path)
     return awesome.load_image(path)
 end
 
+function awesome.xrdb_get_value()
+    return nil
+end
+
 -- Always show deprecated messages
 awesome.version = "v9999"
 

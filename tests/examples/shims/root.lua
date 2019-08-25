@@ -8,12 +8,22 @@ function root:tags()
     return root._tags
 end
 
-function root:size() --TODO use the screens
-    return 0, 0
+function root.size()
+    local geo = {x1 = math.huge, y1 = math.huge, x2 = 0, y2 = 0}
+
+    for s in screen do
+        geo.x1 = math.min( geo.x1, s.geometry.x                   )
+        geo.y1 = math.min( geo.y1, s.geometry.y                   )
+        geo.x2 = math.max( geo.x2, s.geometry.x+s.geometry.width  )
+        geo.y2 = math.max( geo.y2, s.geometry.y+s.geometry.height )
+    end
+
+    return math.max(0, geo.x2-geo.x1), math.max(0, geo.y2 - geo.y1)
 end
 
-function root:size_mm()
-    return 0, 0
+function root.size_mm()
+    local w, h = root.size()
+    return (w/96)*25.4, (h/96)*25.4
 end
 
 function root.cursor() end

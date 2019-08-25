@@ -53,20 +53,42 @@ function mouse.push_history()
     mouse.history = {}
 end
 
+local forced_screen = nil
+
 return setmetatable(mouse, {
     __index = function(self, key)
         if key == "screen" then
-            return screen[1]
+            if forced_screen and screen._deleted[forced_screen] then
+                forced_screen = nil
+            end
+
+            for s in screen do
+                if coords.x > s.geometry.x and coords.x < s.geometry.x +s.geometry.width
+                  and coords.y > s.geometry.y and coords.y < s.geometry.y +s.geometry.height then
+                    return s
+                end
+            end
+
+            -- Using capi.mouse.screen is *not* supported when there is zero
+            -- screen. Nearly all the code uses `mouse.screen` as its ultimate
+            -- fallback. Having no screens is tolerated during early
+            -- initialization and that's it.
+            return screen.count() > 0 and screen[1] or assert(
+                false, "Calling `mouse.screen` without screens isn't supported"
+            )
         end
         local h = rawget(mouse,"_i_handler")
         if h then
             return h(self, key)
         end
     end,
-    __newindex = function(...)
+    __newindex = function(_, k, v)
         local h = rawget(mouse,"_ni_handler")
-        if h then
-            h(...)
+        if k == "screen" then
+            -- This will assert if the screen is invalid
+            forced_screen = v and screen[v] or nil
+        elseif h then
+            h(_, k, v)
         end
     end,
 })
