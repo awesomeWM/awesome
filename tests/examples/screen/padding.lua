@@ -34,5 +34,5 @@ end --DOC_HIDE
 return { --DOC_HIDE
     factor                = 2    , --DOC_HIDE
     show_boxes            = false, --DOC_HIDE
-    highlight_tiling_area = true , --DOC_HIDE
+    highlight_padding_area = true , --DOC_HIDE
 } --DOC_HIDE

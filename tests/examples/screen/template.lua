@@ -79,6 +79,7 @@ local colors = {
     geometry    = "#000000",
     workarea    = "#0000ff",
     tiling_area = "#ff0000",
+    padding_area= "#ff0000",
 }
 
 local function draw_area(_, rect, name, offset, highlight)
@@ -94,6 +95,17 @@ local function draw_area(_, rect, name, offset, highlight)
 
     cr:set_source(color(colors[name].."44"))
     cr:stroke()
+end
+
+local function draw_bounding_area(_, rect, hole, name, offset)
+    draw_area(_, rect, name, offset, true)
+
+    local x, y = hole.x*factor+offset, hole.y*factor+offset
+    cr:set_operator(cairo.Operator.CLEAR)
+    cr:rectangle(x, y, hole.width*factor, hole.height*factor)
+    cr:set_source_rgb(1, 1, 1)
+    cr:fill()
+    cr:set_operator(cairo.Operator.OVER)
 end
 
 local function compute_ruler(_, rect, name)
@@ -314,6 +326,10 @@ for k=1, screen.count() do
     draw_area(s, s.workarea, "workarea", (k-1)*10, args.highlight_workarea)
 
     -- The padding.
+    if args.highlight_padding_area then
+        draw_bounding_area(s, s.workarea, s.tiling_area, "padding_area", (k-1)*10)
+    end
+
     draw_area(s, s.tiling_area, "tiling_area", (k-1)*10, args.highlight_tiling_area)
 
     -- Draw the ruler.
