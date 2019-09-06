@@ -121,6 +121,30 @@ describe("gears.geometry", function()
         end)
     end)
 
+    describe("rectangle.are_equal", function()
+
+        it("with equality", function()
+            assert.are_equal(true, geo.rectangle.are_equal(
+                {x=0, y=0, width=10, height=10},
+                {x=0, y=0, width=10, height=10}
+            ))
+        end)
+
+        it("without equality", function()
+            assert.are_equal(false, geo.rectangle.are_equal(
+                {x=0, y=0, width=1, height=1},
+                {x=2, y=2, width=1, height=1}
+            ))
+        end)
+
+        it("with intersection", function()
+            assert.are_equal(false, geo.rectangle.are_equal(
+                {x=0, y=0, width=1, height=1},
+                {x=0, y=0, width=2, height=2}
+            ))
+        end)
+    end)
+
     describe("rectangle.area_remove", function()
         -- TODO perhaps it would be better to compare against a cairo.region
         -- than to have this overly specific tests?
