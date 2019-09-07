@@ -20,6 +20,7 @@ local capi = {
     mouse        = mouse,
     mousegrabber = mousegrabber,
     root         = root,
+    awesome      = awesome,
 }
 
 local slider = {mt={}}
@@ -462,15 +463,17 @@ local function mouse_press(self, x, y, button_id, _, geo)
     local matrix = matrix_from_device:translate(-wgeo.x, -wgeo.y)
 
     capi.mousegrabber.run(function(mouse)
-        local relative_x, relative_y = matrix:transform_point(mouse.x, mouse.y)
+        local lx, ly = matrix:transform_point(mouse.x, mouse.y)
         if not mouse.buttons[1] then
-            local fw = geo.drawable:find_widgets(mouse.x, mouse.y)
-            self:emit_signal("button::release", relative_x, relative_y, 1, {}, fw)
+            self:emit_signal("button::release", lx, ly, 1,
+                capi.awesome._active_modifiers,
+                capi.mouse.current_widget_geometry
+            )
             return false
         end
 
         -- Calculate the point relative to the widget
-        move_handle(self, width, relative_x, relative_y)
+        move_handle(self, width, lx, ly)
 
         return true
     end,"fleur")
