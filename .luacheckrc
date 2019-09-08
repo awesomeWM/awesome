@@ -49,4 +49,7 @@ globals = {
 -- Enable cache (uses .luacheckcache relative to this rc file).
 cache = true
 
+-- Do not enable colors to make the Travis CI output more readable.
+color = false
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
