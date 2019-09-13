@@ -65,15 +65,14 @@ if not has_cmd_notify then
     require("gears.debug").print_warning("Did not find notify-send, skipping some tests")
 end
 
-local active, destroyed, reasons, counter = {}, {}, {}, 0
+local active, destroyed, reasons, added_counter = {}, {}, {}, 0
 
 local default_width, default_height = 0, 0
 
 local function added_callback(n)
     table.insert(active, n)
-    counter = counter + 1
+    added_counter = added_counter + 1
 end
-
 naughty.connect_signal("added", added_callback)
 
 local function destroyed_callback(n, reason)
@@ -94,6 +93,7 @@ local function destroyed_callback(n, reason)
 
     table.insert(destroyed, n)
 end
+naughty.connect_signal("destroyed", destroyed_callback)
 
 -- Test vertical overlapping
 local function test_overlap()
@@ -145,12 +145,12 @@ table.insert(steps, function()
 
     n:destroy()
 
-    -- This one doesn't count.
-    active, destroyed, reasons, counter = {}, {}, {}, 0
+    assert(added_counter == 1)
+    added_counter = 0
+
     return true
 end)
 
-naughty.connect_signal("destroyed", destroyed_callback)
 
 if has_cmd_notify then
     table.insert(steps, function()
@@ -216,7 +216,7 @@ if has_cmd_notify then
 
     -- Test automatic expiration.
     table.insert(steps, function()
-        if counter ~= 3 then return end
+        if added_counter ~= 3 then return end
 
         return true
     end)
@@ -241,7 +241,7 @@ if has_cmd_notify then
 
     -- Test disabling automatic expiration.
     table.insert(steps, function()
-        if counter ~= 4 then return end
+        if added_counter ~= 4 then return end
 
         -- It should not expire by itself, so that should always be true
         assert(#active == 1)
@@ -277,7 +277,7 @@ if has_cmd_notify then
 
     -- Test the urgency level and default preset.
     table.insert(steps, function()
-        if counter ~= 7 then return end
+        if added_counter ~= 7 then return end
 
         while #active > 0 do
             active[1]:destroy()
@@ -305,7 +305,7 @@ if has_cmd_notify then
     table.insert(steps, function()
         local wa = mouse.screen.workarea
         local max_notif = math.floor(wa.height/default_height)
-        if counter ~= 7 + max_notif then return end
+        if added_counter ~= 7 + max_notif then return end
 
         assert(#active == max_notif)
 
@@ -324,7 +324,7 @@ if has_cmd_notify then
     table.insert(steps, function()
         local wa = mouse.screen.workarea
         local max_notif = math.floor(wa.height/default_height)
-        if counter ~= 7 + max_notif + 5 then return end
+        if added_counter ~= 7 + max_notif + 5 then return end
 
         -- The other should have been hidden
         assert(#active == max_notif)
