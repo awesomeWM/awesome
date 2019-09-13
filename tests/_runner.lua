@@ -91,14 +91,15 @@ end
 -- success/failure, but can also return nothing if it needs to be called again
 -- later.
 function runner.run_steps(steps, options)
+    options = gtable.crush({
+        kill_clients=true,
+        wait_per_step=2,  -- how long to wait per step in seconds.
+    }, options or {})
     -- Setup timer/timeout to limit waiting for signal and quitting awesome.
     local t = timer({timeout=0})
-    local wait=20
+    local wait=options.wait_per_step / 0.1
     local step=1
     local step_count=0
-    options = options or {
-        kill_clients=true,
-    }
     runner.run_direct()
 
     if options.kill_clients then
@@ -128,7 +129,7 @@ function runner.run_steps(steps, options)
                 -- Next step.
                 step = step+1
                 step_count = 0
-                wait = 20
+                wait = options.wait_per_step / 0.1
                 t.timeout = 0
                 t:again()
             else

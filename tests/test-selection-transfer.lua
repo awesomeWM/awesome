@@ -57,13 +57,7 @@ local selection_object
 local selection_released
 local continue
 
-local function wait_a_bit(count)
-    if continue or count == 5 then
-        return true
-    end
-end
-
-runner.run_steps{
+runner.run_steps({
     function()
         -- Get the selection
         local s = assert(selection.acquire{ selection = "CLIPBOARD" },
@@ -175,14 +169,6 @@ runner.run_steps{
         return true
     end,
 
-    -- The large data transfer above transfers 3 * 2^25 bytes of data. That's
-    -- 96 MiB and takes a while.
-    wait_a_bit,
-    wait_a_bit,
-    wait_a_bit,
-    wait_a_bit,
-    wait_a_bit,
-
     function()
         -- Wait for the previous test to succeed
         if not continue then return end
@@ -222,6 +208,10 @@ runner.run_steps{
         assert(selection_released)
         return true
     end,
-}
+}, {
+    -- Use a larger step timeout for the large data transfer, which
+    -- transfers 3 * 2^25 bytes of data (96 MiB), and takes a while.
+    wait_per_step = 10,
+})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
