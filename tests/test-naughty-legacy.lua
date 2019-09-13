@@ -127,7 +127,7 @@ local function test_overlap()
     end
 end
 
--- Set the default size.
+-- Test default size, and title/message.
 table.insert(steps, function()
 
     local n = naughty.notification {
@@ -142,6 +142,55 @@ table.insert(steps, function()
 
     assert(default_width  > 0)
     assert(default_height > 0)
+
+    -- Test title/message behavior.
+    assert(n.textbox:get_markup() == "<b>title</b>\nmessage", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "title\nmessage", n.textbox:get_text())
+
+    n.title = nil
+    assert(n.textbox:get_markup() == "message", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "message", n.textbox:get_text())
+    n.title = ""
+    assert(n.textbox:get_markup() == "message", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "message", n.textbox:get_text())
+
+    n.message = "<i>only</i> message"
+    assert(n.textbox:get_markup() == "<i>only</i> message", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "only message", n.textbox:get_text())
+
+    n.message = nil
+    assert(n.textbox:get_markup() == "", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "", n.textbox:get_text())
+    n.message = ""
+    assert(n.textbox:get_markup() == "", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "", n.textbox:get_text())
+
+    -- Only title (with markup).
+    n.title = "<i>only</i> title"
+    assert(n.textbox:get_markup() == "<b>&lt;i&gt;only&lt;/i&gt; title</b>", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "<i>only</i> title", n.textbox:get_text())
+
+    -- Markup with only interpreting "<br>".
+    n.title = ""
+    n.message = "<3"
+    assert(n.textbox:get_markup() == "&lt;3", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "<3", n.textbox:get_text())
+    n.title = ">3"
+    assert(n.textbox:get_markup() == "<b>&gt;3</b>\n&lt;3", n.textbox:get_markup())
+    assert(n.textbox:get_text() == ">3\n<3", n.textbox:get_text())
+    n.message = nil
+    assert(n.textbox:get_markup() == "<b>&gt;3</b>", n.textbox:get_markup())
+    assert(n.textbox:get_text() == ">3", n.textbox:get_text())
+
+    -- Invalid utf8.
+    local invalid_title = "title" .. string.char(0x80) .. "X"
+    local invalid_message = "message" .. string.char(0x80) .. "X"
+    n.title = invalid_title
+    n.message = invalid_message
+    assert(n.textbox:get_markup() == nil, n.textbox:get_markup())
+    local expected_text = invalid_title .. "\n" .. invalid_message
+    expected_text = expected_text:gsub(string.char(0x80), string.char(0xff))
+    assert(n.textbox:get_text() == expected_text, n.textbox:get_text())
 
     n:destroy()
 
