@@ -101,10 +101,8 @@ runner.run_steps{
     end,
 
     function()
-        -- Wait for the test to succeed
-        if not continue then
-            return
-        end
+        -- Wait for the previous test to succeed
+        if not continue then return end
         continue = false
 
         -- Now test piece-wise selection transfers
@@ -141,10 +139,8 @@ runner.run_steps{
     end,
 
     function()
-        -- Wait for the test to succeed
-        if not continue then
-            return
-        end
+        -- Wait for the previous test to succeed
+        if not continue then return end
         continue = false
 
         -- Now test a huge transfer
@@ -188,10 +184,8 @@ runner.run_steps{
     wait_a_bit,
 
     function()
-        -- Wait for the test to succeed
-        if not continue then
-            return
-        end
+        -- Wait for the previous test to succeed
+        if not continue then return end
         continue = false
 
         -- Now test that :release() works
@@ -207,10 +201,8 @@ runner.run_steps{
     end,
 
     function()
-        -- Wait for the test to succeed
-        if not continue then
-            return
-        end
+        -- Wait for the previous test to succeed
+        if not continue then return end
         continue = false
 
         -- Test for "release" signal when we lose selection
@@ -225,9 +217,7 @@ runner.run_steps{
 
     function()
         -- Wait for the previous test to succeed
-        if not continue then
-            return
-        end
+        if not continue then return end
         continue = false
         assert(selection_released)
         return true
