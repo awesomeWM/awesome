@@ -79,8 +79,8 @@ export TEST_PAUSE_ON_ERRORS  # Used in tests/_runner.lua.
 XEPHYR=Xephyr
 XVFB=Xvfb
 AWESOME=$build_dir/awesome
-if ! [ -x "$AWESOME" ]; then
-    echo "$AWESOME is not executable." >&2
+if ! $AWESOME --version; then
+    echo "$AWESOME cannot be run." >&2
     exit 1
 fi
 AWESOME_CLIENT="$source_dir/utils/awesome-client"
