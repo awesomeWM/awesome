@@ -57,13 +57,7 @@ local selection_object
 local selection_released
 local continue
 
-local function wait_a_bit(count)
-    if continue or count == 5 then
-        return true
-    end
-end
-
-runner.run_steps{
+runner.run_steps({
     function()
         -- Get the selection
         local s = assert(selection.acquire{ selection = "CLIPBOARD" },
@@ -101,10 +95,8 @@ runner.run_steps{
     end,
 
     function()
-        -- Wait for the test to succeed
-        if not continue then
-            return
-        end
+        -- Wait for the previous test to succeed
+        if not continue then return end
         continue = false
 
         -- Now test piece-wise selection transfers
@@ -141,10 +133,8 @@ runner.run_steps{
     end,
 
     function()
-        -- Wait for the test to succeed
-        if not continue then
-            return
-        end
+        -- Wait for the previous test to succeed
+        if not continue then return end
         continue = false
 
         -- Now test a huge transfer
@@ -179,19 +169,9 @@ runner.run_steps{
         return true
     end,
 
-    -- The large data transfer above transfers 3 * 2^25 bytes of data. That's
-    -- 96 MiB and takes a while.
-    wait_a_bit,
-    wait_a_bit,
-    wait_a_bit,
-    wait_a_bit,
-    wait_a_bit,
-
     function()
-        -- Wait for the test to succeed
-        if not continue then
-            return
-        end
+        -- Wait for the previous test to succeed
+        if not continue then return end
         continue = false
 
         -- Now test that :release() works
@@ -207,10 +187,8 @@ runner.run_steps{
     end,
 
     function()
-        -- Wait for the test to succeed
-        if not continue then
-            return
-        end
+        -- Wait for the previous test to succeed
+        if not continue then return end
         continue = false
 
         -- Test for "release" signal when we lose selection
@@ -225,13 +203,15 @@ runner.run_steps{
 
     function()
         -- Wait for the previous test to succeed
-        if not continue then
-            return
-        end
+        if not continue then return end
         continue = false
         assert(selection_released)
         return true
     end,
-}
+}, {
+    -- Use a larger step timeout for the large data transfer, which
+    -- transfers 3 * 2^25 bytes of data (96 MiB), and takes a while.
+    wait_per_step = 10,
+})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
