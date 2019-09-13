@@ -657,9 +657,9 @@ table.insert(steps, function()
 
     local n = active[1]
 
-    n:connect_signal("property::title"  , function() name_u    = true end)
-    n:connect_signal("property::message", function() message_u = true end)
-    n:connect_signal("property::actions", function() actions_u = true end)
+    n:connect_signal("property::title"  , function(_, val) name_u    = val end)
+    n:connect_signal("property::message", function(_, val) message_u = val end)
+    n:connect_signal("property::actions", function(_, val) actions_u = val end)
 
     send_notify("Awesome test", nid, "", "updated title", "updated message body",
         { "1", "four", "2", "five", "3", "six" }, {}, 25000)
@@ -688,6 +688,10 @@ table.insert(steps, function()
 
     n:destroy()
     assert(#active == 0)
+
+    assert(name_u == "updated title", name_u)
+    assert(message_u == "updated message body", name_u)
+    assert(#actions_u == 3)
 
     return true
 end)
@@ -1077,7 +1081,5 @@ table.insert(steps, function()
 
     return true
 end)
-
--- Test many screens.
 
 require("_runner").run_steps(steps)
