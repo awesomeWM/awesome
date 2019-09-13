@@ -17,7 +17,7 @@ local function check_done()
 end
 
 local err = spawn.with_line_callback(
-    { os.getenv("build_dir") ..  "/test-gravity" },
+    { "./test-gravity" },
     {
         exit = function(what, code)
             assert(what == "exit", what)
