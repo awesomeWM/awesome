@@ -109,12 +109,12 @@ function runner.run_steps(steps, options)
     end
 
     t:connect_signal("timeout", function() timer.delayed_call(function()
-        io.flush()  -- for "tail -f".
+        local step_func = steps[step]
         step_count = step_count + 1
         local step_as_string = step..'/'..#steps..' (@'..step_count..')'
-        runner.verbose(string.format('Running step %s..\n', step_as_string))
 
-        local step_func = steps[step]
+        io.flush()  -- for "tail -f".
+        runner.verbose(string.format('Running step %s..\n', step_as_string))
 
         -- Call the current step's function.
         local success, result = xpcall(function()
@@ -153,7 +153,6 @@ function runner.run_steps(steps, options)
                     t.timeout = 0.1
                     t:again()
                 else
-                    require("gears.debug").dump(debug.getinfo(step_func))
                     runner.done("timeout waiting for signal in step "
                                 ..step_as_string..".")
                     t:stop()
