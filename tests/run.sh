@@ -106,7 +106,6 @@ fi
 # Add test dir (for _runner.lua).
 # shellcheck disable=SC2206
 awesome_options=($AWESOME_OPTIONS --search lib --search "$this_dir")
-export XDG_CONFIG_HOME="$build_dir"
 
 # Cleanup on errors / aborting.
 cleanup() {
@@ -178,6 +177,7 @@ start_awesome() {
     DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" \
         AWESOME_THEMES_PATH="$AWESOME_THEMES_PATH" \
         AWESOME_ICON_PATH="$AWESOME_ICON_PATH" \
+        XDG_CONFIG_HOME="$build_dir" \
         timeout "$TEST_TIMEOUT" "$AWESOME" -c "$RC_FILE" "${awesome_options[@]}" > "$awesome_log" 2>&1 &
     awesome_pid=$!
     cd - >/dev/null
