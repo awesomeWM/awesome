@@ -2365,8 +2365,7 @@ client_unmanage(client_t *c, bool window_valid)
     if(window_valid)
     {
         xcb_unmap_window(globalconf.connection, c->window);
-        xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
-                c->geometry.x, c->geometry.y);
+        client_reparent_to_root(c);
     }
 
     if (c->nofocus_window != XCB_NONE)
@@ -2390,6 +2389,30 @@ client_unmanage(client_t *c, bool window_valid)
     c->window = XCB_NONE;
 
     luaA_object_unref(L, c);
+}
+
+void
+client_reparent_to_root(client_t *c)
+{
+    int16_t x = c->geometry.x;
+    int16_t y = c->geometry.y;
+
+    /* Move the window inversely for its gravity */
+    if(c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY)
+    {
+        int16_t diff_x = 0, diff_y = 0;
+        uint16_t bw = c->border_width;
+        xwindow_translate_for_gravity(c->size_hints.win_gravity,
+                                      bw + c->titlebar[CLIENT_TITLEBAR_LEFT].size,
+                                      bw + c->titlebar[CLIENT_TITLEBAR_TOP].size,
+                                      bw + c->titlebar[CLIENT_TITLEBAR_RIGHT].size,
+                                      bw + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size,
+                                      &diff_x, &diff_y);
+        x -= diff_x;
+        y -= diff_y;
+    }
+
+    xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root, x, y);
 }
 
 /** Kill a client via a WM_DELETE_WINDOW request or KillClient if not
