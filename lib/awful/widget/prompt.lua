@@ -23,6 +23,7 @@ local setmetatable = setmetatable
 
 local completion = require("awful.completion")
 local gfs = require("gears.filesystem")
+local gdebug = require("gears.debug")
 local spawn = require("awful.spawn")
 local prompt = require("awful.prompt")
 local beautiful = require("beautiful")
@@ -53,7 +54,7 @@ local function run(promptbox)
         changed_callback     = promptbox.changed_callback,
         keypressed_callback  = promptbox.keypressed_callback,
         keyreleased_callback = promptbox.keyreleased_callback,
-        hook                 = promptbox.hook
+        hooks                = promptbox.hooks
     }
 end
 
@@ -109,7 +110,7 @@ end
 --   with mod table, key and command as arguments when a key was pressed.
 -- @tparam[opt] function args.keyreleased_callback The callback function to call
 --   with mod table, key and command as arguments when a key was pressed.
--- @tparam[opt] table args.hook Similar to @{awful.key}. It will call a function
+-- @tparam[opt] table args.hooks Similar to @{awful.key}. It will call a function
 --   for the matching modifiers + key. See @{awful.prompt.run} for details.
 -- @return An instance of prompt widget, inherits from
 --   `wibox.container.background`.
@@ -141,7 +142,15 @@ function widgetprompt.new(args)
     promptbox.changed_callback = args.changed_callback or nil
     promptbox.keypressed_callback = args.keypressed_callback or nil
     promptbox.keyreleased_callback = args.keyreleased_callback or nil
-    promptbox.hook = args.hook or nil
+
+    if args.hook and not args.hooks then
+        gdebug.deprecate("Use `args.hooks` instead of `args.hook`",
+            {deprecated_in=5})
+
+        args.hooks = args.hook
+    end
+
+    promptbox.hooks = args.hooks or nil
     return promptbox
 end
 
