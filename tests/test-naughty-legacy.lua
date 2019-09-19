@@ -65,15 +65,14 @@ if not has_cmd_notify then
     require("gears.debug").print_warning("Did not find notify-send, skipping some tests")
 end
 
-local active, destroyed, reasons, counter = {}, {}, {}, 0
+local active, destroyed, reasons, added_counter = {}, {}, {}, 0
 
 local default_width, default_height = 0, 0
 
 local function added_callback(n)
     table.insert(active, n)
-    counter = counter + 1
+    added_counter = added_counter + 1
 end
-
 naughty.connect_signal("added", added_callback)
 
 local function destroyed_callback(n, reason)
@@ -94,6 +93,7 @@ local function destroyed_callback(n, reason)
 
     table.insert(destroyed, n)
 end
+naughty.connect_signal("destroyed", destroyed_callback)
 
 -- Test vertical overlapping
 local function test_overlap()
@@ -127,7 +127,7 @@ local function test_overlap()
     end
 end
 
--- Set the default size.
+-- Test default size, and title/message.
 table.insert(steps, function()
 
     local n = naughty.notification {
@@ -143,14 +143,63 @@ table.insert(steps, function()
     assert(default_width  > 0)
     assert(default_height > 0)
 
+    -- Test title/message behavior.
+    assert(n.textbox:get_markup() == "<b>title</b>\nmessage", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "title\nmessage", n.textbox:get_text())
+
+    n.title = nil
+    assert(n.textbox:get_markup() == "message", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "message", n.textbox:get_text())
+    n.title = ""
+    assert(n.textbox:get_markup() == "message", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "message", n.textbox:get_text())
+
+    n.message = "<i>only</i> message"
+    assert(n.textbox:get_markup() == "<i>only</i> message", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "only message", n.textbox:get_text())
+
+    n.message = nil
+    assert(n.textbox:get_markup() == "", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "", n.textbox:get_text())
+    n.message = ""
+    assert(n.textbox:get_markup() == "", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "", n.textbox:get_text())
+
+    -- Only title (with markup).
+    n.title = "<i>only</i> title"
+    assert(n.textbox:get_markup() == "<b>&lt;i&gt;only&lt;/i&gt; title</b>", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "<i>only</i> title", n.textbox:get_text())
+
+    -- Markup with only interpreting "<br>".
+    n.title = ""
+    n.message = "<3"
+    assert(n.textbox:get_markup() == "&lt;3", n.textbox:get_markup())
+    assert(n.textbox:get_text() == "<3", n.textbox:get_text())
+    n.title = ">3"
+    assert(n.textbox:get_markup() == "<b>&gt;3</b>\n&lt;3", n.textbox:get_markup())
+    assert(n.textbox:get_text() == ">3\n<3", n.textbox:get_text())
+    n.message = nil
+    assert(n.textbox:get_markup() == "<b>&gt;3</b>", n.textbox:get_markup())
+    assert(n.textbox:get_text() == ">3", n.textbox:get_text())
+
+    -- Invalid utf8.
+    local invalid_title = "title" .. string.char(0x80) .. "X"
+    local invalid_message = "message" .. string.char(0x80) .. "X"
+    n.title = invalid_title
+    n.message = invalid_message
+    assert(n.textbox:get_markup() == nil, n.textbox:get_markup())
+    local expected_text = invalid_title .. "\n" .. invalid_message
+    expected_text = expected_text:gsub(string.char(0x80), string.char(0xff))
+    assert(n.textbox:get_text() == expected_text, n.textbox:get_text())
+
     n:destroy()
 
-    -- This one doesn't count.
-    active, destroyed, reasons, counter = {}, {}, {}, 0
+    assert(added_counter == 1)
+    added_counter = 0
+
     return true
 end)
 
-naughty.connect_signal("destroyed", destroyed_callback)
 
 if has_cmd_notify then
     table.insert(steps, function()
@@ -216,7 +265,7 @@ if has_cmd_notify then
 
     -- Test automatic expiration.
     table.insert(steps, function()
-        if counter ~= 3 then return end
+        if added_counter ~= 3 then return end
 
         return true
     end)
@@ -241,7 +290,7 @@ if has_cmd_notify then
 
     -- Test disabling automatic expiration.
     table.insert(steps, function()
-        if counter ~= 4 then return end
+        if added_counter ~= 4 then return end
 
         -- It should not expire by itself, so that should always be true
         assert(#active == 1)
@@ -277,7 +326,7 @@ if has_cmd_notify then
 
     -- Test the urgency level and default preset.
     table.insert(steps, function()
-        if counter ~= 7 then return end
+        if added_counter ~= 7 then return end
 
         while #active > 0 do
             active[1]:destroy()
@@ -305,7 +354,7 @@ if has_cmd_notify then
     table.insert(steps, function()
         local wa = mouse.screen.workarea
         local max_notif = math.floor(wa.height/default_height)
-        if counter ~= 7 + max_notif then return end
+        if added_counter ~= 7 + max_notif then return end
 
         assert(#active == max_notif)
 
@@ -324,7 +373,7 @@ if has_cmd_notify then
     table.insert(steps, function()
         local wa = mouse.screen.workarea
         local max_notif = math.floor(wa.height/default_height)
-        if counter ~= 7 + max_notif + 5 then return end
+        if added_counter ~= 7 + max_notif + 5 then return end
 
         -- The other should have been hidden
         assert(#active == max_notif)
