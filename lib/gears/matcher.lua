@@ -512,7 +512,7 @@ function matcher:append_rules(source, rules)
     end
 end
 
---- Remove a new rule to the default set.
+--- Remove a new rule from the default set.
 -- @tparam string source The source name.
 -- @tparam string|table rule An existing rule or its `id`.
 -- @treturn boolean If the rule was removed.
