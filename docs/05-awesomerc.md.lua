@@ -28,35 +28,6 @@ Here are the modules that we import:
 
 ]]
 
-sections.DOC_ERROR_HANDLING = [[
-Awesome is a window managing framework. It allows its users great (ultimate?)
-flexibility. However, it also allows the user to write invalid code. Here's a
-non-exhaustive list of possible errors:
-
- * Syntax: There is an `awesome -k` option available in the command line to
-   check the configuration file. Awesome cannot start with an invalid `rc.lua`
- * Invalid APIs and type errors: Lua is a dynamic language. It doesn't have much
-   support for static/compile time checks. There is the `luacheck` utility to
-   help find some categories of errors. Those errors will cause Awesome to
-   "drop" the current call stack and start over. Note that if it cannot
-   reach the end of the `rc.lua` without errors, it will fall back to the
-   original file.
- * Invalid logic: It is possible to write fully valid code that will render
-   Awesome unusable (like an infinite loop or blocking commands). In that case,
-   the best way to debug this is either using `print()` or using `gdb`. For
-   this, see the [Debugging tips Readme section](../documentation/01-readme.md.html)
- * Deprecated APIs: The Awesome API is not frozen for eternity. After a decade
-   of development and recent changes to enforce consistency, it hasn't
-   changed much. This doesn't mean it won't change in the future. Whenever
-   possible, changes won't cause errors but will instead print a deprecation
-   message in the Awesome logs. These logs are placed in various places
-   depending on the distribution. By default, Awesome will print errors on
-  `stderr` and `stdout`.
-
-
-]]
-
-
 sections.DOC_LOAD_THEME = [[
 To create custom themes, the easiest way is to copy the `default` theme folder
 from `/usr/share/awesome/themes/` into `~/.config/awesome` and modify it.
