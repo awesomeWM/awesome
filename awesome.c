@@ -921,7 +921,7 @@ main(int argc, char **argv)
     xutil_ungrab_server(globalconf.connection);
 
     /* get the current wallpaper, from now on we are informed when it changes */
-    root_update_wallpaper();
+    root_impl.update_wallpaper();
 
     /* init lua */
     luaA_init(&xdg, &searchpath);

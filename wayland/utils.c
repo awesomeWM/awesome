@@ -52,10 +52,10 @@ static int anon_file(void)
 }
 
 void wayland_setup_buffer(area_t geo, struct wl_buffer **out_buffer,
-		int *out_stride, void **out_shm_data, size_t *shm_size)
+        int *out_stride, void **out_shm_data, size_t *shm_size)
 {
     assert(out_buffer);
-	assert(out_stride);
+    assert(out_stride);
     assert(out_shm_data);
     assert(shm_size);
 
@@ -77,10 +77,10 @@ void wayland_setup_buffer(area_t geo, struct wl_buffer **out_buffer,
         fatal("Could not resize shared memory file");
 
     *out_shm_data = mmap(NULL, *shm_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (*out_shm_data == MAP_FAILED)
+    if (*out_shm_data == MAP_FAILED)
         fatal("mmap failed");
 
-	struct wl_shm_pool *pool = wl_shm_create_pool(globalconf.wl_shm, fd, *shm_size);
+    struct wl_shm_pool *pool = wl_shm_create_pool(globalconf.wl_shm, fd, *shm_size);
     assert(pool);
 
     *out_buffer = wl_shm_pool_create_buffer(pool, 0,

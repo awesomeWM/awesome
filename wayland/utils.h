@@ -25,7 +25,7 @@
 #include "draw.h"
 
 void wayland_setup_buffer(area_t geo, struct wl_buffer **out_buffer,
-		int *out_stride, void **out_shm_data, size_t *shm_size);
+        int *out_stride, void **out_shm_data, size_t *shm_size);
 
 #endif // AWESOME_WAYLAND_UTILS_H
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

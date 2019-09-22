@@ -41,13 +41,6 @@
 
 struct root_impl root_impl;
 
-
-void
-root_update_wallpaper(void)
-{
-    root_impl.update_wallpaper();
-}
-
 static xcb_keycode_t
 _string_to_key_code(const char *s)
 {
