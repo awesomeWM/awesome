@@ -26,6 +26,7 @@
 #include "common/backtrace.h"
 #include "common/version.h"
 #include "common/xutil.h"
+#include "root.h"
 #include "xkb.h"
 #include "dbus.h"
 #include "globalconf.h"

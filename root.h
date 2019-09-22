@@ -30,6 +30,8 @@ struct root_impl
     void (*grab_keys)(void);
 };
 
+void root_update_wallpaper(void);
+
 void root_handle_key(key_array_t *arr, bool pushed_to_stack,
 		uint32_t timestamp, uint32_t keycode, uint16_t state,
         bool pressed, xcb_keysym_t keysym, struct root_impl *root);

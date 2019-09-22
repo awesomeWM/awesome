@@ -19,6 +19,7 @@
  *
  */
 
+#include <root.h>
 #include "property.h"
 #include "common/atoms.h"
 #include "common/xutil.h"

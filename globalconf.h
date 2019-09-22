@@ -249,8 +249,5 @@ static inline lua_State *globalconf_get_lua_State(void) {
     return globalconf.L.real_L_dont_use_directly;
 }
 
-/* Defined in root.c */
-void root_update_wallpaper(void);
-
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
