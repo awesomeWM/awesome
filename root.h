@@ -17,8 +17,10 @@
  *
  */
 
+#include <stdbool.h>
 #include <xcb/xcb.h>
 #include <xcb/xkb.h>
+#include <cairo/cairo.h>
 
 #include "objects/key.h"
 
@@ -27,6 +29,8 @@
 
 struct root_impl
 {
+	int (*set_wallpaper)(cairo_pattern_t *pattern);
+	void (*update_wallpaper)(void);
     void (*grab_keys)(void);
 };
 

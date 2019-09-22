@@ -79,6 +79,8 @@ void init_x11(void)
         .release_mouse = x11_release_mouse,
     };
     root_impl = (struct root_impl){
+        .set_wallpaper = x11_set_wallpaper,
+        .update_wallpaper = x11_update_wallpaper,
         .grab_keys = x11_grab_keys,
     };
 }

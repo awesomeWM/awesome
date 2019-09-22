@@ -20,6 +20,11 @@
 #ifndef AWESOME_X11_ROOT_H
 #define AWESOME_X11_ROOT_H
 
+#include <cairo/cairo.h>
+
+int x11_set_wallpaper(cairo_pattern_t *pattern);
+void x11_update_wallpaper(void);
+
 void x11_grab_keys(void);
 
 #endif
