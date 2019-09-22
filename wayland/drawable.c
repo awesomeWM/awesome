@@ -19,74 +19,13 @@
 
 #include "drawable.h"
 
-#include <stdlib.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <errno.h>
-#include <sys/mman.h>
+#include "wayland/utils.h"
 
 #include <wayland-client.h>
 
 #include "wlr-layer-shell-unstable-v1.h"
 #include "globalconf.h"
 
-const char *anon_prefix = "/wayland-";
-
-static int anon_file(void)
-{
-    char name[32] = {0};
-    strncpy(name, anon_prefix, sizeof(name));
-    for (char *cursor = name + strlen(anon_prefix);
-         cursor < name + sizeof(name) - 1;
-         cursor++)
-    {
-        long int num = random();
-        char c = (num % 26) + 65;
-        *cursor = c;
-    }
-    name[31] = '\0';
-    int fd = shm_open(name, O_RDWR | O_CREAT | O_EXCL, 0600);
-    shm_unlink(name);
-    return fd;
-}
-
-static void setup_buffer(area_t geo, int stride, struct wl_buffer **out_buffer,
-        void **out_shm_data, size_t *size)
-{
-    assert(out_buffer);
-    assert(out_shm_data);
-    assert(size);
-
-    if (*out_shm_data != NULL) {
-        munmap(*out_shm_data, *size);
-        *out_shm_data = NULL;
-        *size = 0;
-    }
-
-    *size = stride * geo.height;
-    if (*size == 0)
-        return;
-
-    int fd = anon_file();
-    if (fd < 0)
-        fatal("Could not allocate any wl_shm_pools buffers");
-    if (ftruncate(fd, *size) < 0)
-        fatal("Could not resize shared memory file");
-
-    *out_shm_data = mmap(NULL, *size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (*out_shm_data == MAP_FAILED)
-        fatal("mmap failed");
-
-	struct wl_shm_pool *pool = wl_shm_create_pool(globalconf.wl_shm, fd, *size);
-    assert(pool);
-
-    *out_buffer = wl_shm_pool_create_buffer(pool, 0,
-            geo.width, geo.height, stride, WL_SHM_FORMAT_ARGB8888);
-    assert(*out_buffer);
-
-    wl_shm_pool_destroy(pool);
-    close(fd);
-}
 
 xcb_pixmap_t wayland_get_pixmap(struct drawable_t *drawable)
 {
@@ -120,13 +59,11 @@ void wayland_drawable_create_buffer(struct drawable_t *drawable)
 
     if (drawable->geometry.width == 0 || drawable->geometry.height == 0)
         return;
-    int stride = cairo_format_stride_for_width(CAIRO_FORMAT_ARGB32,
-            drawable->geometry.width);
 
+    int stride = 0;
     wayland_drawable_unset_surface(drawable);
-    setup_buffer(drawable->geometry, stride,
-            &wayland_drawable->buffer, &wayland_drawable->shm_data,
-            &wayland_drawable->shm_size);
+    wayland_setup_buffer(drawable->geometry, &wayland_drawable->buffer,
+            &stride, &wayland_drawable->shm_data, &wayland_drawable->shm_size);
 
     drawable->surface =
         cairo_image_surface_create_for_data(wayland_drawable->shm_data,

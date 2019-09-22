@@ -17,19 +17,15 @@
  *
  */
 
-#include "way-cooler-keybindings-unstable-v1.h"
+#ifndef AWESOME_WAYLAND_UTILS_H
+#define AWESOME_WAYLAND_UTILS_H
 
-#ifndef AWESOME_WAYLAND_ROOT_H
-#define AWESOME_WAYLAND_ROOT_H
+#include <wayland-client.h>
 
-#include <cairo/cairo.h>
+#include "draw.h"
 
-extern struct zway_cooler_keybindings_listener keybindings_listener;
+void wayland_setup_buffer(area_t geo, struct wl_buffer **out_buffer,
+		int *out_stride, void **out_shm_data, size_t *shm_size);
 
-int wayland_set_wallpaper(cairo_pattern_t *pattern);
-void wayland_update_wallpaper(void);
-
-void wayland_grab_keys(void);
-
-#endif
+#endif // AWESOME_WAYLAND_UTILS_H
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

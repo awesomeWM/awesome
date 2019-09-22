@@ -226,6 +226,8 @@ void init_wayland(void)
         .release_mouse = wayland_release_mouse,
     };
     root_impl = (struct root_impl){
+        .set_wallpaper = wayland_set_wallpaper,
+        .update_wallpaper = wayland_update_wallpaper,
         .grab_keys = wayland_grab_keys,
     };
 }
