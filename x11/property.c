@@ -34,6 +34,7 @@
 #include <xcb/xcb_atom.h>
 
 extern struct drawin_impl drawin_impl;
+extern struct root_impl root_impl;
 
 #define HANDLE_TEXT_PROPERTY(funcname, atom, setfunc) \
     xcb_get_property_cookie_t \
@@ -425,7 +426,7 @@ property_handle_xrootpmap_id(uint8_t state,
                              xcb_window_t window)
 {
     lua_State *L = globalconf_get_lua_State();
-    root_update_wallpaper();
+    root_impl.update_wallpaper();
     signal_object_emit(L, &global_signals, "wallpaper_changed", 0);
 }
 

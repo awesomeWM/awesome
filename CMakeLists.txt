@@ -105,6 +105,7 @@ set(AWE_SRCS
     ${BUILD_DIR}/x11/ewmh.c
     ${BUILD_DIR}/x11/property.c
     ${BUILD_DIR}/x11/selection.c
+    ${BUILD_DIR}/x11/screen.c
     ${BUILD_DIR}/x11/xwindow.c)
 
 set(AWE_MAN_SRCS

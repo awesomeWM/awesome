@@ -22,13 +22,35 @@
 #ifndef AWESOME_SCREEN_H
 #define AWESOME_SCREEN_H
 
+#include <stdbool.h>
+
 #include "globalconf.h"
 #include "draw.h"
 #include "common/array.h"
 #include "common/luaclass.h"
 
-typedef struct screen_output_t screen_output_t;
-ARRAY_TYPE(screen_output_t, screen_output)
+struct screen_impl
+{
+    void (*new_screen)(screen_t *screen);
+    void (*wipe_screen)(screen_t *screen);
+    // Clean up all screens
+    void (*cleanup_screens)(void);
+    void (*mark_fake_screen)(screen_t *screen);
+    void (*scan_screens)(void);
+    void (*get_screens)(lua_State *L, screen_array_t *screens);
+
+    int (*viewport_get_outputs)(lua_State *L, void *viewport);
+    int (*get_viewports)(lua_State *L);
+    int (*get_outputs)(lua_State *L, screen_t *s);
+
+    screen_t *(*update_primary)(void);
+    screen_t *(*screen_by_name)(char *name);
+
+    bool (*outputs_changed)(screen_t *existing, screen_t *other);
+    bool (*does_screen_exist)(screen_t *screen, screen_array_t screens);
+    bool (*is_fake_screen)(screen_t *screen);
+    bool (*is_same_screen)(screen_t *left, screen_t *right);
+};
 
 /** Different ways to manage screens */
 typedef enum {
@@ -40,6 +62,9 @@ typedef enum {
 struct a_screen
 {
     LUA_OBJECT_HEADER
+    /* XXX This data should only be cast from screen_impl functions */
+    void *impl_data;
+    /** Is this screen still valid and may be used? */
     bool valid;
     /** Who manages the screen lifecycle */
     screen_lifecycle_t lifecycle;
@@ -50,12 +75,14 @@ struct a_screen
     /** The name of the screen */
     char *name;
     /** Opaque pointer to the viewport */
-    struct viewport_t *viewport;
-    /** Some XID identifying this screen */
-    uint32_t xid;
+    void *viewport;
 };
 ARRAY_FUNCS(screen_t *, screen, DO_NOTHING)
 
+int luaA_viewports(lua_State *L);
+screen_t *screen_add(lua_State *L, screen_array_t *screens);
+void screen_added(lua_State *L, screen_t *screen);
+void screen_deduplicate(lua_State *L, screen_array_t *screens);
 void screen_class_setup(lua_State *L);
 void screen_scan(void);
 screen_t *screen_getbycoord(int, int);

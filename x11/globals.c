@@ -29,12 +29,14 @@
 #include "x11/drawable.h"
 #include "x11/root.h"
 #include "x11/mousegrabber.h"
+#include "x11/screen.h"
 #include "x11/globals.h"
 
 extern struct drawin_impl drawin_impl;
 extern struct drawable_impl drawable_impl;
 extern struct mousegrabber_impl mousegrabber_impl;
 extern struct root_impl root_impl;
+extern struct screen_impl screen_impl;
 
 void init_x11(void)
 {
@@ -82,6 +84,23 @@ void init_x11(void)
         .set_wallpaper = x11_set_wallpaper,
         .update_wallpaper = x11_update_wallpaper,
         .grab_keys = x11_grab_keys,
+    };
+    screen_impl = (struct screen_impl){
+        .new_screen = x11_new_screen,
+        .wipe_screen = x11_wipe_screen,
+        .cleanup_screens = x11_cleanup_screens,
+        .mark_fake_screen = x11_mark_fake_screen,
+        .scan_screens = x11_scan_screens,
+        .get_screens = x11_get_screens,
+        .viewport_get_outputs = x11_viewport_get_outputs,
+        .get_viewports = x11_get_viewports,
+        .get_outputs = x11_get_outputs,
+        .update_primary = x11_update_primary,
+        .screen_by_name = x11_screen_by_name,
+        .outputs_changed = x11_outputs_changed,
+        .does_screen_exist = x11_does_screen_exist,
+        .is_fake_screen = x11_is_fake_screen,
+        .is_same_screen = x11_is_same_screen,
     };
 }
 
