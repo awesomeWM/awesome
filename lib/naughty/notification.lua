@@ -467,7 +467,7 @@ function notification:reset_timeout(new_timeout)
     -- Do not set `self.timeout` to `self.timeout` since that would create the
     -- timer before the constructor ends.
     if new_timeout and self.timer then
-        self.timeout = new_timeout or self.timeout
+        self.timeout = new_timeout
     end
 
     if self.timer and not self.timer.started then

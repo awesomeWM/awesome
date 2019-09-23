@@ -200,14 +200,6 @@ function client.gen_fake(args)
         return ret.data._struts
     end
 
-    function ret:struts(new)
-        for k, v in pairs(new or {}) do
-            ret.data._struts[k] = v
-        end
-
-        return ret.data._struts
-    end
-
     -- Set a dummy one for now since set_screen will corrupt it.
     ret._old_geo = {}
 
