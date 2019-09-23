@@ -139,7 +139,7 @@ gtable.crush(naughty, require("naughty.constants"))
 --
 -- When this is true, applications which query `naughty` feature support
 -- will see that animations are supported. Note that there is *very little*
--- support for this and enabled it will cause bugs.
+-- support for this and enabling it will cause bugs.
 --
 -- @property image_animations_enabled
 -- @param[opt=false] boolean

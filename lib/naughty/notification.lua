@@ -419,7 +419,7 @@ local notification = {}
 --- The application name specified by the notification.
 --
 -- This can be anything. It is usually less relevant than the `clients`
--- property, but can sometime to specified for remote or headless notifications.
+-- property, but can sometime be specified for remote or headless notifications.
 -- In these case, it helps to triage and detect the notification from the rules.
 -- @property app_name
 -- @param string
