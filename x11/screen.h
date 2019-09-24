@@ -99,7 +99,7 @@ struct x11_screen
     uint32_t xid;
 };
 
-void x11_new_screen(screen_t *screen);
+void x11_new_screen(screen_t *screen, void *data);
 void x11_wipe_screen(screen_t *screen);
 void x11_cleanup_screens(void);
 void x11_mark_fake_screen(screen_t *screen);

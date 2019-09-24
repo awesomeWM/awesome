@@ -27,6 +27,9 @@
 #include "wayland/drawable.h"
 #include "wayland/mousegrabber.h"
 #include "wayland/root.h"
+#include "wayland/screen.h"
+
+#include "objects/screen.h"
 
 #include "way-cooler-mousegrabber-unstable-v1.h"
 #include "way-cooler-keybindings-unstable-v1.h"
@@ -39,6 +42,7 @@ extern struct drawin_impl drawin_impl;
 extern struct drawable_impl drawable_impl;
 extern struct mousegrabber_impl mousegrabber_impl;
 extern struct root_impl root_impl;
+extern struct screen_impl screen_impl;
 
 /* Instance of an event source that we use to integrate the wayland event queue
  * with GLib's MainLoop.
@@ -119,7 +123,6 @@ static void setup_glib_listeners(struct wl_display *display)
 
     interface_source = (struct InterfaceEventSource *)source;
     interface_source->display = display;
-    wl_display_roundtrip(interface_source->display);
 
     interface_source->fd_tag = g_source_add_unix_fd(
             source, wl_display_get_fd(display), G_IO_IN | G_IO_ERR | G_IO_HUP);
@@ -146,6 +149,14 @@ static void awesome_handle_global(void *data, struct wl_registry *registry,
         globalconf.wl_shm = wl_registry_bind(registry, name,
                 &wl_shm_interface, version);
     }
+    else if (strcmp(interface, wl_output_interface.name) == 0)
+    {
+        struct wl_output *wl_output =
+            wl_registry_bind(registry, name, &wl_output_interface, version);
+
+        lua_State *L = globalconf_get_lua_State();
+        screen_add(L, &globalconf.screens, wl_output);
+    }
     else if (strcmp(interface, zway_cooler_mousegrabber_interface.name) == 0)
     {
         globalconf.wl_mousegrabber = wl_registry_bind(registry, name,
@@ -168,20 +179,6 @@ static void awesome_handle_global(void *data, struct wl_registry *registry,
     }
 }
 
-static void setup_wayland_globals(struct wl_display *display,
-        struct wl_registry * registry)
-{
-    wl_registry_add_listener(globalconf.wl_registry, &wl_registry_listener, NULL);
-    wl_display_roundtrip(display);
-
-    assert(globalconf.wl_compositor && globalconf.wl_shm && globalconf.wl_seat);
-
-    if (globalconf.wl_mousegrabber == NULL)
-    {
-        fatal("Expected compositor to advertise Way Cooler mousegrabber protocol");
-    }
-}
-
 void init_wayland(void)
 {
     globalconf.wl_display = wl_display_connect(NULL);
@@ -189,11 +186,6 @@ void init_wayland(void)
     {
         fatal("Unable to connect to Wayland compositor");
     }
-    globalconf.wl_registry = wl_display_get_registry(globalconf.wl_display);
-
-    setup_wayland_globals(globalconf.wl_display, globalconf.wl_registry);
-
-    setup_glib_listeners(globalconf.wl_display);
 
     drawin_impl = (struct drawin_impl){
         .get_xcb_window = wayland_get_xcb_window,
@@ -230,6 +222,24 @@ void init_wayland(void)
         .update_wallpaper = wayland_update_wallpaper,
         .grab_keys = wayland_grab_keys,
     };
+    screen_impl = (struct screen_impl){
+        .new_screen = wayland_new_screen,
+        .wipe_screen = wayland_wipe_screen,
+        .mark_fake_screen = wayland_mark_fake_screen,
+        .scan_screens = wayland_scan_screens,
+        .get_screens = wayland_get_screens,
+        .get_outputs = wayland_get_outputs,
+        .update_primary = wayland_update_primary,
+        .screen_by_name = wayland_screen_by_name,
+        .outputs_changed = wayland_outputs_changed,
+        .does_screen_exist = wayland_does_screen_exist,
+        .is_fake_screen = wayland_is_fake_screen,
+        .is_same_screen = wayland_is_same_screen,
+    };
+
+    globalconf.wl_registry = wl_display_get_registry(globalconf.wl_display);
+    wl_registry_add_listener(globalconf.wl_registry, &wl_registry_listener, NULL);
+    setup_glib_listeners(globalconf.wl_display);
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

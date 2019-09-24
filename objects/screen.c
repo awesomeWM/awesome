@@ -315,18 +315,18 @@ void screen_deduplicate(lua_State *L, screen_array_t *screens)
     }
 }
 
-
-int luaA_viewports(lua_State *L)
+static int
+luaA_viewports(lua_State *L)
 {
     return screen_impl.get_viewports(L);
 }
 
-screen_t * screen_add(lua_State *L, screen_array_t *screens)
+screen_t *screen_add(lua_State *L, screen_array_t *screens, void *data)
 {
     screen_t *new_screen = screen_new(L);
     luaA_object_ref(L, -1);
     screen_array_append(screens, new_screen);
-    screen_impl.new_screen(new_screen);
+    screen_impl.new_screen(new_screen, data);
     return new_screen;
 }
 
@@ -983,7 +983,7 @@ luaA_screen_fake_add(lua_State *L)
 
     screen_t *s;
 
-    s = screen_add(L, &globalconf.screens);
+    s = screen_add(L, &globalconf.screens, NULL);
     s->lifecycle |= managed ? SCREEN_LIFECYCLE_LUA : SCREEN_LIFECYCLE_USER;
     s->geometry.x = x;
     s->geometry.y = y;

@@ -96,6 +96,7 @@ set(AWE_SRCS
     ${BUILD_DIR}/wayland/mousegrabber.c
     ${BUILD_DIR}/wayland/globals.c
     ${BUILD_DIR}/wayland/root.c
+    ${BUILD_DIR}/wayland/screen.c
     ${BUILD_DIR}/x11/drawin.c
     ${BUILD_DIR}/x11/drawable.c
     ${BUILD_DIR}/x11/mousegrabber.c

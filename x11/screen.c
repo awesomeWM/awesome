@@ -50,7 +50,7 @@ viewports_notify(lua_State *L)
     if (!first_screen_viewport)
         return;
 
-    luaA_viewports(L);
+    x11_get_viewports(L);
 
     luaA_class_emit_signal(L, &screen_class, "property::_viewports", 1);
 }
@@ -231,7 +231,7 @@ screen_scan_randr_monitors(lua_State *L, screen_array_t *screens)
         if (globalconf.ignore_screens)
             continue;
 
-        new_screen = screen_add(L, screens);
+        new_screen = screen_add(L, screens, NULL);
         new_screen->lifecycle |= SCREEN_LIFECYCLE_C;
         viewport->screen = new_screen;
         new_screen->viewport = viewport;
@@ -333,7 +333,7 @@ screen_scan_randr_crtcs(lua_State *L, screen_array_t *screens)
         }
 
         /* Prepare the new screen */
-        screen_t *new_screen = screen_add(L, screens);
+        screen_t *new_screen = screen_add(L, screens, NULL);
         new_screen->lifecycle |= SCREEN_LIFECYCLE_C;
         viewport->screen = new_screen;
         new_screen->viewport = viewport;
@@ -473,7 +473,7 @@ screen_scan_xinerama(lua_State *L, screen_array_t *screens)
         if (globalconf.ignore_screens)
             continue;
 
-        screen_t *s = screen_add(L, screens);
+        screen_t *s = screen_add(L, screens, NULL);
         viewport->screen = s;
         s->viewport = viewport;
         s->lifecycle |= SCREEN_LIFECYCLE_C;
@@ -500,7 +500,7 @@ static void screen_scan_x11(lua_State *L, screen_array_t *screens)
     if (globalconf.ignore_screens)
         return;
 
-    screen_t *s = screen_add(L, screens);
+    screen_t *s = screen_add(L, screens, NULL);
     viewport->screen = s;
     s->lifecycle |= SCREEN_LIFECYCLE_C;
     s->viewport = viewport;
@@ -510,7 +510,7 @@ static void screen_scan_x11(lua_State *L, screen_array_t *screens)
     s->geometry.height = xcb_screen->height_in_pixels;
 }
 
-void x11_new_screen(screen_t *screen)
+void x11_new_screen(screen_t *screen, void *data)
 {
     screen->impl_data = calloc(1, sizeof(struct x11_screen));
     struct x11_screen *x11_screen = screen->impl_data;

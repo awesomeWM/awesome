@@ -31,7 +31,7 @@
 
 struct screen_impl
 {
-    void (*new_screen)(screen_t *screen);
+    void (*new_screen)(screen_t *screen, void *data);
     void (*wipe_screen)(screen_t *screen);
     // Clean up all screens
     void (*cleanup_screens)(void);
@@ -62,7 +62,7 @@ typedef enum {
 struct a_screen
 {
     LUA_OBJECT_HEADER
-    /* XXX This data should only be cast from screen_impl functions */
+    /** XXX This data should only be cast from screen_impl functions */
     void *impl_data;
     /** Is this screen still valid and may be used? */
     bool valid;
@@ -79,8 +79,7 @@ struct a_screen
 };
 ARRAY_FUNCS(screen_t *, screen, DO_NOTHING)
 
-int luaA_viewports(lua_State *L);
-screen_t *screen_add(lua_State *L, screen_array_t *screens);
+screen_t *screen_add(lua_State *L, screen_array_t *screens, void *data);
 void screen_added(lua_State *L, screen_t *screen);
 void screen_deduplicate(lua_State *L, screen_array_t *screens);
 void screen_class_setup(lua_State *L);
