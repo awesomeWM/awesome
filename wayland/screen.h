@@ -36,10 +36,13 @@ struct wayland_screen
 
 void wayland_new_screen(screen_t *screen, void *data);
 void wayland_wipe_screen(screen_t *screen);
+void wayland_cleanup_screens(void);
 void wayland_mark_fake_screen(screen_t *screen);
 void wayland_scan_screens(void);
 void wayland_get_screens(lua_State *L, struct screen_array_t *screens);
 
+int wayland_viewport_get_outputs(lua_State *L, void *viewport);
+int wayland_get_viewports(lua_State *L);
 int wayland_get_outputs(lua_State *L, screen_t *s);
 
 screen_t *wayland_update_primary(void);

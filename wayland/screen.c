@@ -85,6 +85,11 @@ void wayland_wipe_screen(screen_t *screen)
     screen->impl_data = NULL;
 }
 
+void wayland_cleanup_screens(void)
+{
+    // TODO
+}
+
 void wayland_mark_fake_screen(screen_t *screen)
 {
     struct wayland_screen *wayland_screen = screen->impl_data;
@@ -104,6 +109,16 @@ void wayland_scan_screens(void)
 void wayland_get_screens(lua_State *L, screen_array_t *screens)
 {
     fatal("TODO");
+}
+
+int wayland_viewport_get_outputs(lua_State *L, void *viewport)
+{
+    return 0;
+}
+
+int wayland_get_viewports(lua_State *L)
+{
+    return 0;
 }
 
 int wayland_get_outputs(lua_State *L, screen_t *s)

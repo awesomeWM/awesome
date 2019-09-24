@@ -225,9 +225,12 @@ void init_wayland(void)
     screen_impl = (struct screen_impl){
         .new_screen = wayland_new_screen,
         .wipe_screen = wayland_wipe_screen,
+        .cleanup_screens = wayland_cleanup_screens,
         .mark_fake_screen = wayland_mark_fake_screen,
         .scan_screens = wayland_scan_screens,
         .get_screens = wayland_get_screens,
+        .viewport_get_outputs = wayland_viewport_get_outputs,
+        .get_viewports = wayland_get_viewports,
         .get_outputs = wayland_get_outputs,
         .update_primary = wayland_update_primary,
         .screen_by_name = wayland_screen_by_name,
