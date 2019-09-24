@@ -16,14 +16,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  *
  */
+#include "wayland/root.h"
 
 #include "globalconf.h"
 #include <root.h>
 #include "objects/screen.h"
 #include "common/array.h"
-#include "wayland/root.h"
 #include "way-cooler-keybindings-unstable-v1.h"
 #include "wlr-layer-shell-unstable-v1.h"
+#include "wayland/screen.h"
 #include "wayland/utils.h"
 
 #include <wayland-client.h>
@@ -71,42 +72,47 @@ struct zwlr_layer_surface_v1_listener wallpaper_surface_listener =
 
 int wayland_set_wallpaper(cairo_pattern_t *pattern)
 {
-    area_t area = {
-        .width = globalconf.primary_screen->geometry.width,
-        .height = globalconf.primary_screen->geometry.height,
-    };
-    int stride = 0;
+    foreach(screen, globalconf.screens)
+    {
+        struct wayland_screen *wayland_screen = (*screen)->impl_data;
 
-    wayland_setup_buffer(area, &wayland_wallpaper.buffer, &stride,
-            &wayland_wallpaper.shm_data, &wayland_wallpaper.shm_size);
-    wayland_wallpaper.surface =
-        cairo_image_surface_create_for_data(wayland_wallpaper.shm_data,
-                CAIRO_FORMAT_ARGB32, area.width, area.height, stride);
-    wayland_wallpaper.wl_surface =
-        wl_compositor_create_surface(globalconf.wl_compositor);
+        area_t area = {
+            .width = (*screen)->geometry.width,
+            .height = (*screen)->geometry.height,
+        };
+        int stride = 0;
 
-    cairo_t *cr = cairo_create(wayland_wallpaper.surface);
-    /* Paint the pattern to the surface */
-    cairo_set_source(cr, pattern);
-    cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
-    cairo_paint(cr);
-    cairo_destroy(cr);
-    cairo_surface_flush(wayland_wallpaper.surface);
+        wayland_setup_buffer(area, &wayland_wallpaper.buffer, &stride,
+                &wayland_wallpaper.shm_data, &wayland_wallpaper.shm_size);
+        wayland_wallpaper.surface =
+            cairo_image_surface_create_for_data(wayland_wallpaper.shm_data,
+                    CAIRO_FORMAT_ARGB32, area.width, area.height, stride);
+        wayland_wallpaper.wl_surface =
+            wl_compositor_create_surface(globalconf.wl_compositor);
 
-    struct zwlr_layer_shell_v1 *layer_shell = globalconf.layer_shell;
-    wayland_wallpaper.layer_surface =
-        zwlr_layer_shell_v1_get_layer_surface(layer_shell,
-                wayland_wallpaper.wl_surface, NULL,
-                ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, "awesome");
-    zwlr_layer_surface_v1_set_size(wayland_wallpaper.layer_surface,
-            area.width, area.height);
-    zwlr_layer_surface_v1_set_keyboard_interactivity(
-            wayland_wallpaper.layer_surface, false);
-    zwlr_layer_surface_v1_add_listener(wayland_wallpaper.layer_surface,
-            &wallpaper_surface_listener, NULL);
+        cairo_t *cr = cairo_create(wayland_wallpaper.surface);
+        /* Paint the pattern to the surface */
+        cairo_set_source(cr, pattern);
+        cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
+        cairo_paint(cr);
+        cairo_destroy(cr);
+        cairo_surface_flush(wayland_wallpaper.surface);
 
-    wl_surface_commit(wayland_wallpaper.wl_surface);
-    wl_display_roundtrip(globalconf.wl_display);
+        struct zwlr_layer_shell_v1 *layer_shell = globalconf.layer_shell;
+        wayland_wallpaper.layer_surface =
+            zwlr_layer_shell_v1_get_layer_surface(layer_shell,
+                    wayland_wallpaper.wl_surface, wayland_screen->wl_output,
+                    ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, "awesome");
+        zwlr_layer_surface_v1_set_size(wayland_wallpaper.layer_surface,
+                area.width, area.height);
+        zwlr_layer_surface_v1_set_keyboard_interactivity(
+                wayland_wallpaper.layer_surface, false);
+        zwlr_layer_surface_v1_add_listener(wayland_wallpaper.layer_surface,
+                &wallpaper_surface_listener, NULL);
+
+        wl_surface_commit(wayland_wallpaper.wl_surface);
+        wl_display_roundtrip(globalconf.wl_display);
+    }
 
     return true;
 }

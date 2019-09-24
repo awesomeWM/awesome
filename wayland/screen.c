@@ -101,7 +101,7 @@ void wayland_scan_screens(void)
         fatal("Expected compositor to advertise Way Cooler mousegrabber protocol");
 }
 
-void wayland_get_screens(lua_State *L, struct screen_array_t *screens)
+void wayland_get_screens(lua_State *L, screen_array_t *screens)
 {
     fatal("TODO");
 }
@@ -129,8 +129,8 @@ int wayland_get_outputs(lua_State *L, screen_t *s)
 
 screen_t *wayland_update_primary(void)
 {
-    // TODO This will probably be pushed, not pulled, with a custom protocol.
-    fatal("TODO");
+    // XXX This doesn't make sense under Wayland.
+    return NULL;
 }
 
 screen_t *wayland_screen_by_name(char *name)
