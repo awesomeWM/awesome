@@ -22,60 +22,183 @@
 
 #include <stdint.h>
 
-static void on_geometry(void *data, struct wl_output *wl_output,
+#include "xdg-output-unstable-v1.h"
+
+static struct wayland_viewport *first_screen_viewport = NULL;
+static struct wayland_viewport *last_screen_viewport = NULL;
+
+static struct wayland_viewport
+*viewport_dedupe(struct wayland_viewport *new_viewport)
+{
+    for (struct wayland_viewport *viewport = first_screen_viewport;
+         viewport != NULL;
+         viewport = viewport->next)
+    {
+        if (viewport->x == new_viewport->x
+                && viewport-> y == new_viewport->y
+                && viewport->width == new_viewport->width
+                && viewport->height == new_viewport->height)
+        {
+            foreach(output, new_viewport->outputs)
+            {
+                wayland_screen_output_array_append(&viewport->outputs, *output);
+            }
+            free(new_viewport);
+            return viewport;
+        }
+    }
+    if (first_screen_viewport == NULL)
+    {
+        first_screen_viewport = new_viewport;
+        last_screen_viewport = new_viewport;
+    }
+    else
+    {
+        last_screen_viewport->next = new_viewport;
+        last_screen_viewport = new_viewport;
+    }
+    assert(first_screen_viewport && last_screen_viewport);
+    return new_viewport;
+}
+
+static void viewport_clean(void)
+{
+    foreach(screen, globalconf.screens)
+    {
+        (*screen)->viewport = NULL;
+    }
+    for (struct wayland_viewport *viewport = first_screen_viewport;
+         viewport != NULL;
+         viewport = viewport->next)
+    {
+        foreach(output, viewport->outputs)
+        {
+            free(output->name);
+            output->name = NULL;
+        }
+        wayland_screen_output_array_wipe(&viewport->outputs);
+        free(viewport);
+    }
+    first_screen_viewport = last_screen_viewport = NULL;
+}
+
+static void xdg_output_on_logical_position(void *data,
+        struct zxdg_output_v1 *zxdg_output_v1, int32_t x, int32_t y)
+{
+    screen_t *screen = data;
+    struct wayland_viewport *viewport = screen->viewport;
+    viewport->x = x;
+    viewport->y = y;
+}
+
+static void xdg_output_on_logical_size(void *data,
+        struct zxdg_output_v1 *zxdg_output_v1, int32_t width, int32_t height)
+{}
+
+static void xdg_output_on_done(void *data,
+        struct zxdg_output_v1 *zxdg_output_v1)
+{
+    screen_t *screen = data;
+    lua_State *L = globalconf_get_lua_State();
+    viewport_dedupe(screen->viewport);
+    screen_added(L, screen);
+}
+
+static void xdg_output_on_name(void *data,
+        struct zxdg_output_v1 *zxdg_output_v1, const char *name)
+{
+    screen_t *screen = data;
+    struct wayland_viewport *viewport = screen->viewport;
+    struct wayland_screen_output *output = &viewport->outputs.tab[0];
+    output->name = strdup(name);
+}
+
+static void xdg_output_on_description(void *data,
+        struct zxdg_output_v1 *zxdg_output_v1, const char *description)
+{}
+
+struct zxdg_output_v1_listener xdg_output_listener =
+{
+    .logical_position = xdg_output_on_logical_position,
+    .logical_size = xdg_output_on_logical_size,
+    .done = xdg_output_on_done,
+    .name = xdg_output_on_name,
+    .description = xdg_output_on_description,
+};
+
+static void wl_output_on_geometry(void *data, struct wl_output *wl_output,
         int32_t x, int32_t y, int32_t physical_width, int32_t physical_height,
         int32_t subpixel, const char *make, const char *model,
         int32_t transform)
 {
-    struct wayland_screen *wayland_screen = data;
-    wayland_screen->mm_width = physical_width;
-    wayland_screen->mm_height = physical_height;
-
-    screen_t *screen = wayland_screen->screen;
-    screen->geometry.x = x;
-    screen->geometry.y = y;
+    screen_t *screen = data;
+    struct wayland_viewport *viewport = screen->viewport;
+    struct wayland_screen_output *output = &viewport->outputs.tab[0];
+    output->mm_width = physical_width;
+    output->mm_height = physical_height;
 }
 
-static void on_mode(void *data, struct wl_output *wl_output,
+static void wl_output_on_mode(void *data, struct wl_output *wl_output,
         uint32_t flags, int32_t width, int32_t height, int32_t refresh)
 {
-    struct wayland_screen *wayland_screen = data;
-    screen_t *screen = wayland_screen->screen;
-    screen->geometry.width = width;
-    screen->geometry.height = height;
+    screen_t *screen = data;
+    struct wayland_viewport *viewport = screen->viewport;
+    viewport->width = screen->geometry.width = width;
+    viewport->height = screen->geometry.height = height;
 }
 
 // This is for atomic updates, this is not the object being destroyed.
-static void on_done(void *data, struct wl_output *wl_output)
+static void wl_output_on_done(void *data, struct wl_output *wl_output)
 {
-    struct wayland_screen *wayland_screen = data;
-    lua_State *L = globalconf_get_lua_State();
-    screen_added(L, wayland_screen->screen);
+    screen_t *screen = data;
+    struct wayland_screen *wayland_screen = screen->impl_data;
+
+    if (wayland_screen->wl_output != NULL
+            && globalconf.xdg_output_manager != NULL
+            && wayland_screen->xdg_output == NULL)
+    {
+        /* Get the XDG information if the manager is available. Otherwise happen
+           once the manager is added
+         */
+        wayland_screen->xdg_output =
+            zxdg_output_manager_v1_get_xdg_output(globalconf.xdg_output_manager,
+                    wayland_screen->wl_output);
+        // TODO Clean up on destroy
+        zxdg_output_v1_add_listener(wayland_screen->xdg_output,
+                &xdg_output_listener, screen);
+        wl_display_roundtrip(globalconf.wl_display);
+    }
 }
 
-static void on_scale(void *data, struct wl_output *wl_output, int32_t factor)
-{
-    /* Do nothing */
-}
+static void wl_output_on_scale(void *data, struct wl_output *wl_output, int32_t factor)
+{}
 
 static struct wl_output_listener wl_output_listener =
 {
-    .geometry = on_geometry,
-    .mode = on_mode,
-    .done = on_done,
-    .scale = on_scale,
+    .geometry = wl_output_on_geometry,
+    .mode = wl_output_on_mode,
+    .done = wl_output_on_done,
+    .scale = wl_output_on_scale,
 };
 
 void wayland_new_screen(screen_t *screen, void *data)
 {
-    screen->impl_data = calloc(1, sizeof(struct wayland_screen));
+    assert(data);
+    struct wl_output *wl_output = data;
 
+    screen->impl_data = calloc(1, sizeof(struct wayland_screen));
     struct wayland_screen *wayland_screen = screen->impl_data;
     wayland_screen->screen = screen;
-    wayland_screen->wl_output = data;
+    wayland_screen->wl_output = wl_output;
 
-    wl_output_add_listener(wayland_screen->wl_output,
-            &wl_output_listener, wayland_screen);
+    // De-dup later, once we have all the positioning information from XDG.
+    struct wayland_viewport *viewport = calloc(1, sizeof(struct wayland_viewport));
+    screen->viewport = viewport;
+    wayland_screen_output_array_init(&viewport->outputs);
+    struct wayland_screen_output output = {0};
+    wayland_screen_output_array_append(&viewport->outputs, output);
+
+    wl_output_add_listener(wl_output, &wl_output_listener, screen);
     wl_display_roundtrip(globalconf.wl_display);
 }
 
@@ -87,7 +210,7 @@ void wayland_wipe_screen(screen_t *screen)
 
 void wayland_cleanup_screens(void)
 {
-    // TODO
+    viewport_clean();
 }
 
 void wayland_mark_fake_screen(screen_t *screen)
@@ -99,17 +222,21 @@ void wayland_mark_fake_screen(screen_t *screen)
 void wayland_scan_screens(void)
 {
     wl_display_roundtrip(globalconf.wl_display);
-    // NOTE This is the first time we are getting the Wayland globals,
-    // so we have to check this here.
+    /*
+      NOTE This is the first time we are getting the Wayland globals,
+      so we have to check this here.
+
+      XXX We fetch the globals so late because when outputs are advertised they
+      immediately try to make a screen but if we do it too early then Lua isn't
+      initialized and we get segfaults.
+    */
     assert(globalconf.wl_compositor && globalconf.wl_shm && globalconf.wl_seat);
     if (globalconf.wl_mousegrabber == NULL)
         fatal("Expected compositor to advertise Way Cooler mousegrabber protocol");
 }
 
 void wayland_get_screens(lua_State *L, screen_array_t *screens)
-{
-    fatal("TODO");
-}
+{}
 
 int wayland_viewport_get_outputs(lua_State *L, void *viewport)
 {
@@ -123,21 +250,19 @@ int wayland_get_viewports(lua_State *L)
 
 int wayland_get_outputs(lua_State *L, screen_t *s)
 {
-    struct wayland_screen *wayland_screen = s->impl_data;
-    lua_createtable(L, 0, 1/*wayland_screen->outputs.len*/);
-    /* TODO
-    foreach(output, x11_screen->outputs)
-    { */
+    struct wayland_viewport *viewport = s->viewport;
+    lua_createtable(L, 0, viewport->outputs.len);
+    foreach(output, viewport->outputs)
+    {
         lua_createtable(L, 2, 0);
 
-        lua_pushinteger(L, wayland_screen->mm_width);
+        lua_pushinteger(L, output->mm_width);
         lua_setfield(L, -2, "mm_width");
-        lua_pushinteger(L, wayland_screen->mm_height);
+        lua_pushinteger(L, output->mm_height);
         lua_setfield(L, -2, "mm_height");
 
-        // TODO Real name
-        lua_setfield(L, -2, "wayland screen, FIXME");
-  // }
+        lua_setfield(L, -2, output->name);
+    }
     /* The table of tables we created. */
     return 1;
 }

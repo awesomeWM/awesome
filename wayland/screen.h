@@ -24,15 +24,37 @@
 #include "common/luaclass.h"
 #include "objects/screen.h"
 
+#include "xdg-output-unstable-v1.h"
 #include <wayland-client.h>
+
+ARRAY_TYPE(struct wl_output, wl_output);
+
+struct wayland_screen_output
+{
+    char *name;
+    int32_t mm_width, mm_height;
+    wl_output_array_t outputs;
+};
+
+ARRAY_TYPE(struct wayland_screen_output, wayland_screen_output);
+ARRAY_FUNCS(struct wayland_screen_output, wayland_screen_output, DO_NOTHING);
+
+struct wayland_viewport
+{
+    int x, y, width, height;
+    wayland_screen_output_array_t outputs;
+
+    struct wayland_viewport *next;
+};
 
 struct wayland_screen
 {
-    screen_t *screen;
-    /** XXX If NULL, then this is a "fake" screen. */
+    struct zxdg_output_v1 *xdg_output;
     struct wl_output *wl_output;
-    int32_t mm_height, mm_width;
+    screen_t *screen;
 };
+
+extern struct zxdg_output_v1_listener xdg_output_listener;
 
 void wayland_new_screen(screen_t *screen, void *data);
 void wayland_wipe_screen(screen_t *screen);

@@ -227,7 +227,8 @@ set(protos
     "/usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml"
     "../wayland/protocols/way-cooler-keybindings-unstable-v1.xml"
     "../wayland/protocols/way-cooler-mousegrabber-unstable-v1.xml"
-    "../wayland/protocols/wlr-layer-shell-unstable-v1.xml")
+    "../wayland/protocols/wlr-layer-shell-unstable-v1.xml"
+    "../wayland/protocols/xdg-output-unstable-v1.xml")
 a_find_program(WAYLAND_SCANNER_EXECUTABLE wayland-scanner TRUE)
 foreach(proto ${protos})
     get_filename_component(proto_name ${proto} NAME_WE)
