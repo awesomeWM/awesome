@@ -47,7 +47,7 @@ OPTIONS
 *-a*, *--no-argb*::
     Don't use ARGB visuals.
 *-m*, *--screen*:: 'off' or 'on'::
-    Use "off" to execute rc.lua before creating the screens.
+    Use "off" to execute rc.lua before creating screens.
 *-r*, *--replace*::
     Replace an existing window manager.
 
