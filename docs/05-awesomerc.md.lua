@@ -29,6 +29,7 @@ Here are the modules that we import:
 ]]
 
 sections.DOC_ERROR_HANDLING = [[
+
 Awesome is a window managing framework. It allows its users great (ultimate?)
 flexibility. However, it also allows the user to write invalid code. Here's a
 non-exhaustive list of possible errors:
