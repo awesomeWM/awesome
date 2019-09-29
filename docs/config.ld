@@ -137,6 +137,7 @@ file = {
         '../lib/awful/dbus.lua',
         '../lib/awful/init.lua',
         '../lib/awful/remote.lua',
+        '../lib/awful/screen/dpi.lua',
         '../lib/awful/startup_notification.lua',
         '../lib/awful/mouse/drag_to_tag.lua',
         '../lib/gears/init.lua',

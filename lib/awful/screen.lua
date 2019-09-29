@@ -679,6 +679,30 @@ capi.screen.connect_signal("request::wallpaper::connected", function(new_handler
     end
 end)
 
+-- Create some screens when none exist. This can happen when AwesomeWM is
+-- started with `--screen off` and no handler is used.
+capi.screen.connect_signal("scanned", function()
+    if capi.screen.count() == 0 then
+        -- Private API to scan for screens now.
+        if #capi.screen._viewports() == 0 then
+            capi.screen._scan_quiet()
+        end
+
+        local viewports = capi.screen._viewports()
+
+        if #viewports > 0 then
+            for _, area in ipairs(viewports) do
+                local geo = area.geometry
+                capi.screen.fake_add(geo.x, geo.y, geo.width, geo.height)
+            end
+        else
+            capi.screen.fake_add(0, 0, 640, 480)
+        end
+
+        assert(capi.screen.count() > 0, "Creating screens failed")
+    end
+end)
+
 --- When the tag history changed.
 -- @signal tag::history::update
 

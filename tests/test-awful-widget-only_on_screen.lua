@@ -4,8 +4,22 @@ local runner = require("_runner")
 local wibox = require("wibox")
 local awful = require("awful")
 
--- Make sure we have at least two screens to test this on
-screen.fake_add(-100, -100, 50, 50)
+-- Make sure we have at least two screens to test this on.
+local origin_width = screen[1].geometry.width
+screen[1]:fake_resize(
+    screen[1].geometry.x,
+    screen[1].geometry.y,
+    origin_width/2,
+    screen[1].geometry.height
+)
+
+screen.fake_add(
+    screen[1].geometry.x+origin_width/2,
+    screen[1].geometry.y,
+    origin_width/2,
+    screen[1].geometry.height
+)
+
 assert(screen.count() == 2)
 
 -- Each screen gets a wibox displaying our only_on_screen widget
@@ -116,7 +130,12 @@ table.insert(steps, function()
     for s in screen do
         assert(not widget_visible_on(s))
     end
-    screen.fake_add(-100, -100, 50, 50)
+    screen.fake_add(
+        screen[1].geometry.x+origin_width/2,
+        screen[1].geometry.y,
+        origin_width/2,
+        screen[1].geometry.height
+    )
     return true
 end)
 table.insert(steps, function()

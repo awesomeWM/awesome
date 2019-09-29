@@ -258,6 +258,88 @@ function gtable.merge(t, set)
     return t
 end
 
+--- Update the `target` table with entries from the `new` table.
+--
+-- Compared to `gears.table.merge`, this version is intended to work using both
+-- an `identifier` function and a `merger` function. This works only for
+-- indexed tables.
+--
+-- The main use case is when changing the table reference is not possible or
+-- when the `target` contains additional content that must be kept.
+--
+-- Note that calling this function involve a lot of looping and should not be
+-- done often.
+--
+-- @tparam table target The table to modify.
+-- @tparam table new The table which contains the new content.
+-- @tparam function identifier A function which take the table entry (either
+--  from the `target` or `new` table) and return an unique identifier. The
+--  identifier type isn't important as long as `==` works to compare them.
+-- @tparam[opt] function merger A function takes the entry to modify as first
+--  parameter and the new entry as second. The function must return the merged
+--  value. If none is provided, there is no attempt to merge the content.
+-- @treturn table The target table (for daisy chaining).
+-- @treturn table The new entries.
+-- @treturn table The removed entries.
+-- @treturn table The updated entries.
+-- @staticfct gears.table.diff_merge
+-- @usage local output, added, removed, updated = gears.table.diff_merge(
+--     output, input, function(v) return v.id end, gears.table.crush,
+-- )
+function gtable.diff_merge(target, new, identifier, merger)
+    local n_id, o_id, up = {}, {}, {}
+    local add, rem = gtable.clone(new, false), gtable.clone(target, false)
+
+    for _, v in ipairs(target) do
+        o_id[identifier(v)] = v
+    end
+
+    for _, v in ipairs(new) do
+        n_id[identifier(v)] = v
+    end
+
+    for k, v in ipairs(rem) do
+        if n_id[identifier(v)] then
+            rem[k] = nil
+        end
+    end
+
+    for k, v in ipairs(add) do
+        local id  = identifier(v)
+        local old = o_id[id]
+        if old then
+            add[k] = nil
+            if merger then
+                o_id[id] = merger(old, v)
+                table.insert(up, old)
+            end
+        else
+            table.insert(target, v)
+        end
+    end
+
+    for k, v in ipairs(target) do
+        local id  = identifier(v)
+        if o_id[id] then
+            target[k] = o_id[id]
+        end
+    end
+
+    -- Compact.
+    rem, add = gtable.from_sparse(rem), gtable.from_sparse(add)
+
+    for _, v in ipairs(rem) do
+        for k, v2 in ipairs(target) do
+            if v == v2 then
+                table.remove(target, k)
+                break
+            end
+        end
+    end
+
+    return target, add, rem, up
+end
+
 --- Map a function to a table.
 --
 -- The function is applied to each value on the table, returning a modified

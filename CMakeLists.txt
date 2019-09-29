@@ -404,6 +404,12 @@ target_link_libraries(test-gravity
 if(DO_COVERAGE)
     set(TESTS_RUN_ENV DO_COVERAGE=1)
 endif()
+
+# Start AwesomeWM tests with `--screen off`
+if ("${TEST_MANUAL_SCREENS}" MATCHES "1")
+    set(TEST_RUN_ARGS "--W --m")
+endif()
+
 add_custom_target(check-integration
     ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${TESTS_RUN_ENV} ./tests/run.sh \$\${TEST_RUN_ARGS:--W}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}

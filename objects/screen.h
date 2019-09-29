@@ -39,8 +39,8 @@ struct a_screen
     area_t geometry;
     /** Screen workarea */
     area_t workarea;
-    /** The screen outputs informations */
-    screen_output_array_t outputs;
+    /** Opaque pointer to the psysical geometry */
+    struct viewport_t *viewport;
     /** Some XID identifying this screen */
     uint32_t xid;
 };
@@ -57,6 +57,9 @@ void screen_update_primary(void);
 void screen_update_workarea(screen_t *);
 screen_t *screen_get_primary(void);
 void screen_schedule_refresh(void);
+void screen_emit_scanned(void);
+void screen_emit_scanning(void);
+void screen_cleanup(void);
 
 screen_t *luaA_checkscreen(lua_State *, int);
 

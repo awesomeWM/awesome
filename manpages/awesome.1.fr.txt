@@ -47,6 +47,8 @@ OPTIONS
     Ajouter un répertoire au chemin de recherche de bibliothèque.
 *-a*, *--no-argb*::
     N'utilise pas le codage ARGB.
+*-m*, *--screen*:: 'off' ou 'on'::
+    Utiliser "manual" pour exécuter rc.lua avant de créer les écrans.
 *-r*, *--replace*::
     Remplace le gestionnaire de fenêtres existant.
 

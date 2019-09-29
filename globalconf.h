@@ -55,6 +55,7 @@
     }
 
 typedef struct drawable_t drawable_t;
+typedef struct a_screen_area screen_area_t;
 typedef struct drawin_t drawin_t;
 typedef struct a_screen screen_t;
 typedef struct button_t button_t;
@@ -111,6 +112,10 @@ typedef struct
     bool have_randr_15;
     /** Do we have a RandR screen update pending? */
     bool screen_refresh_pending;
+    /** Should screens be created before rc.lua is loaded? */
+    bool no_auto_screen;
+    /** Should the screen be created automatically? */
+    bool ignore_screens;
     /** Check for XTest extension */
     bool have_xtest;
     /** Check for SHAPE extension */
