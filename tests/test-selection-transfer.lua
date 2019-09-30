@@ -14,6 +14,7 @@ local large_transfer_piece_count = 3
 local large_transfer_size = #large_transfer_piece * large_transfer_piece_count
 
 local header = [[
+pcall(require, "luarocks.loader")
 local lgi = require("lgi")
 local Gdk = lgi.Gdk
 local Gtk = lgi.Gtk

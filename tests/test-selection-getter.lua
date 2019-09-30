@@ -9,6 +9,7 @@ local Gio = lgi.Gio
 local GdkPixbuf = lgi.GdkPixbuf
 
 local header = [[
+pcall(require, "luarocks.loader")
 local lgi = require("lgi")
 local Gdk = lgi.Gdk
 local Gtk = lgi.Gtk

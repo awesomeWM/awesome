@@ -1,3 +1,5 @@
+pcall(require, "luarocks.loader")
+
 local gio = require("lgi").Gio
 local gobject = require("lgi").GObject
 local glib = require("lgi").GLib

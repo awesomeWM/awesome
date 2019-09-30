@@ -12,6 +12,7 @@ local exit_yay, exit_snd = nil, nil
 
 local tiny_client = function(class)
     return {"lua", "-e", [[
+pcall(require, "luarocks.loader")
 local lgi = require 'lgi'
 local Gtk = lgi.require('Gtk')
 local class = ']]..class..[['

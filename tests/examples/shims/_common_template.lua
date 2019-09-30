@@ -1,3 +1,5 @@
+pcall(require, "luarocks.loader")
+
 -- luacheck: globals string
 function string.wlen(self)
     return #self

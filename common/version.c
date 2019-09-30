@@ -47,7 +47,8 @@ eprint_version(void)
         lua_pop(L, 1);
 
     /* Either push version number or error message onto stack */
-    (void) luaL_dostring(L, "return require('lgi.version')");
+    (void) luaL_dostring(L, "pcall(require, 'luarocks.loader')\n"
+                            "return require('lgi.version')");
 
 #ifdef WITH_DBUS
     const char *has_dbus = "✔";

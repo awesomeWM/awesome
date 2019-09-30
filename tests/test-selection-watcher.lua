@@ -4,6 +4,7 @@ local runner = require("_runner")
 local spawn = require("awful.spawn")
 
 local header = [[
+pcall(require, "luarocks.loader")
 local lgi = require("lgi")
 local Gdk = lgi.Gdk
 local Gtk = lgi.Gtk

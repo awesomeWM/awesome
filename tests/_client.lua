@@ -4,6 +4,7 @@ local spawn = require("awful.spawn")
 -- It is used to test the `awful.rules`
 
 local test_client_source = [[
+pcall(require, 'luarocks.loader')
 local lgi = require 'lgi'
 local Gdk = lgi.require('Gdk')
 local Gtk = lgi.require('Gtk')
