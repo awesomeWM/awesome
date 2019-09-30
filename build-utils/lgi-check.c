@@ -26,6 +26,7 @@
 #include <stdlib.h>
 
 const char commands[] =
+"pcall(require, 'luarocks.loader')\n"
 "print(string.format('Building for %s.', jit and jit.version or _VERSION))\n"
 "local lgi_version = require('lgi.version')\n"
 "print(string.format('Found lgi %s.', lgi_version))\n"
