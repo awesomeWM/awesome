@@ -1726,6 +1726,9 @@ luaA_screen_fake_add(lua_State *L)
 }
 
 /** Remove a screen.
+ *
+ * @DOC_sequences_screen_fake_remove_EXAMPLE@
+ *
  * @method fake_remove
  */
 static int
@@ -1753,7 +1756,13 @@ luaA_screen_fake_remove(lua_State *L)
     return 0;
 }
 
-/** Fake-resize a screen
+/** Resize a screen.
+ *
+ * Calling this will resize the screen even if it no longer matches the viewport
+ * size.
+ *
+ * @DOC_sequences_screen_fake_resize_EXAMPLE@
+ *
  * @tparam integer x The new X-coordinate for screen.
  * @tparam integer y The new Y-coordinate for screen.
  * @tparam integer width The new width for screen.
@@ -1789,6 +1798,9 @@ luaA_screen_fake_resize(lua_State *L)
 }
 
 /** Swap a screen with another one in global screen list.
+ *
+ * @DOC_sequences_screen_swap_EXAMPLE@
+ *
  * @client s A screen to swap with.
  * @method swap
  */
