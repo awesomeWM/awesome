@@ -621,7 +621,7 @@ main(int argc, char **argv)
     setlocale(LC_CTYPE, "");
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkc:ar",
+    while((opt = getopt_long(argc, argv, "vhkc:arm:",
                              long_options, NULL)) != -1)
         switch(opt)
         {
