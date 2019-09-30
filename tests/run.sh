@@ -255,7 +255,7 @@ for f in $tests; do
     error="$(echo "$error" | grep -vE ".{19} W: awesome: (Can't read color .* from GTK)" || true)"
     if [[ $fail_on_warning ]]; then
         # Filter out ignored warnings.
-        error="$(echo "$error" | grep -vE ".{19} W: awesome: (a_glib_poll|Cannot reliably detect EOF|beautiful: can't get colorscheme from xrdb|Can't read color .* from GTK+3 theme|A notification|Notification)" || true)"
+        error="$(echo "$error" | grep -vE ".{19} W: awesome: (Removing last screen through fake_remove|a_glib_poll|Cannot reliably detect EOF|beautiful: can't get colorscheme from xrdb|Can't read color .* from GTK+3 theme|A notification|Notification)" || true)"
     fi
     if [[ -n "$error" ]]; then
         color_red

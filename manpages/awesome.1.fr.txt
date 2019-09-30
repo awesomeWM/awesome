@@ -48,7 +48,7 @@ OPTIONS
 *-a*, *--no-argb*::
     N'utilise pas le codage ARGB.
 *-m*, *--screen*:: 'off' ou 'on'::
-    Utiliser "manual" pour exécuter rc.lua avant de créer les écrans.
+    Utiliser "off" pour exécuter le fichier rc.lua avant de créer les écrans.
 *-r*, *--replace*::
     Remplace le gestionnaire de fenêtres existant.
 
