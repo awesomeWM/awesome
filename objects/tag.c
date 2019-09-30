@@ -21,12 +21,21 @@
 
 /** awesome tag API
  *
- * Furthermore to the classes described here, one can also use signals as
- * described in @{signals}.
+ * What is a tag?
+ * ==============
+ *
+ * In AwesomeWM, a `tag` is a group of clients. It can either be used as labels
+ * or as more classical workspaces depending on how they are configured.
  *
  * ![Client geometry](../images/tag_props.svg)
  *
- * **Creating tags**:
+ *  * A **tag** can be attached to **multiple clients**
+ *  * A **client** can be attached to **multiple tags**
+ *  * A **tag** can only be in 1 screen *any given time*, but can be moved
+ *  * All **clients** attached to a tag **must be in the same screen as the tag**
+ *
+ * Creating tags
+ * =============
  *
  * The default config initializes tags like this:
  *
@@ -58,7 +67,8 @@
  * Note: the example above sets "First tag" to be selected explicitly,
  * because otherwise you will find yourself without any selected tag.
  *
- * **Accessing tags**:
+ * Accessing tags
+ * ==============
  *
  * To access the "current tags", use
  *
@@ -95,7 +105,8 @@
  *
  *    local t = awful.tag.find_by_name(awful.screen.focused(), "name")
  *
- * **Common shortcuts**:
+ * Common keybindings code
+ * =======================
  *
  * Here is a few useful shortcuts not part of the default `rc.lua`. Add these
  * functions above `-- {{{ Key bindings`:
@@ -209,6 +220,8 @@
 /**
  * Tag name.
  *
+ * @DOC_sequences_tag_name_EXAMPLE@
+ *
  * **Signal:**
  *
  *  * *property::name*
@@ -219,6 +232,8 @@
 
 /**
  * True if the tag is selected to be viewed.
+ *
+ * @DOC_sequences_tag_selected_EXAMPLE@
  *
  * **Signal:**
  *
