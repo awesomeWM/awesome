@@ -82,6 +82,8 @@
  * To get all the clients for a screen use either `screen.clients` or
  * `screen.tiled_clients`.
  *
+ * @DOC_uml_nav_tables_client_EXAMPLE@
+ *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @coreclassmod client
@@ -129,7 +131,7 @@
  * it is only useful when setting or getting these properties require code to
  * executed.
  *
- * @table awful.object
+ * @table awful.client.object
  */
 
 /** AwesomeWM is about to scan for existing clients.

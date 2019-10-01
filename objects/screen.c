@@ -40,6 +40,8 @@
  * Furthermore to the classes described here, one can also use signals as
  * described in @{signals}.
  *
+ * @DOC_uml_nav_tables_screen_EXAMPLE@
+ *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @coreclassmod screen

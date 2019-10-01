@@ -232,15 +232,23 @@ function(run_test test_path namespace escaped_content)
             file(READ "${expected_output_path}" expected_output)
         endif()
 
-        set(TEST_DOC_CONTENT
-            "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}\n${DOC_LINE_PREFIX}**Usage example output**:\n${DOC_LINE_PREFIX}"
-        )
+        if (NOT tmp_content MATCHES "--DOC_RAW_OUTPUT")
+            set(TEST_DOC_CONTENT
+                "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}\n${DOC_LINE_PREFIX}**Usage example output**:\n${DOC_LINE_PREFIX}"
+            )
 
-        # Markdown requires an empty line before and after, and 4 spaces.
-        escape_string(
-            "\n${expected_output}"
-            "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT "    "
-        )
+            # Markdown requires an empty line before and after, and 4 spaces.
+            escape_string(
+                "\n${expected_output}"
+                "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT "    "
+            )
+        else()
+            escape_string(
+                "\n${expected_output}"
+                "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
+            )
+        endif()
+
         set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX}")
     endif()
 
@@ -270,14 +278,31 @@ function(run_test test_path namespace escaped_content)
 
     if(NOT ${OUTPUT_IMAGE_PATH} STREQUAL "")
         file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
-        add_custom_command(
-            COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
-            # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
-            DEPENDS ${template} ${test_path}
-            OUTPUT  ${OUTPUT_IMAGE_PATH}
-            VERBATIM)
+        if(tmp_content MATCHES "--DOC_GEN_OUTPUT")
+            add_custom_command(
+                COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
+                # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
+                DEPENDS ${template} ${test_path}
+                OUTPUT  ${OUTPUT_IMAGE_PATH}
+                OUTPUT  ${expected_output_path}
+                VERBATIM)
+        else()
+            add_custom_command(
+                COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
+                # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
+                DEPENDS ${template} ${test_path}
+                OUTPUT  ${OUTPUT_IMAGE_PATH}
+                VERBATIM)
+        endif()
         set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUT_IMAGE_PATH} ${EXAMPLE_DOC_GENERATED_FILES}
             PARENT_SCOPE)
+    elseif(tmp_content MATCHES "--DOC_GEN_OUTPUT")
+        add_custom_command(
+            COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} "" ${IGNORE_ERRORS}
+            # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
+            DEPENDS ${template} ${test_path}
+            OUTPUT ${expected_output_path}
+            VERBATIM)
     endif()
 
     # Export the outout to the parent scope.
