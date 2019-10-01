@@ -178,10 +178,24 @@ local function wrap_modname(str, item)
         .. str:sub(#item.module.name+2, 9999)
 end
 
+local named_args = {
+    [ "(args)"       ] = true,
+    [ "([args=nil])" ] = true,
+    [ "([args={}])"  ] = true
+}
+
 -- Wrap the arguments for the CSS highlight.
 local function wrap_args(item)
     if not item.args then return "" end
-    return "<span class='function_args'>"..item.args.."</span>"
+
+    -- Display named args with `{}` and ordered args with `()`
+    if named_args[item.args] then
+        return "<span class='function_named_args'><b>{</b>[args]<b>}</b></span>"
+    end
+
+    local new_args = item.args:sub(2, item.args:len()-2)
+
+    return "<span class='function_args'> <b>(</b>"..new_args.."<b>)</b></span>"
 end
 
 
