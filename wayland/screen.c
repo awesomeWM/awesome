@@ -99,6 +99,10 @@ static void xdg_output_on_done(void *data,
         struct zxdg_output_v1 *zxdg_output_v1)
 {
     screen_t *screen = data;
+    struct wayland_screen *wayland_screen = screen->impl_data;
+    if (wayland_screen->configured)
+        return;
+    wayland_screen->configured = true;
     lua_State *L = globalconf_get_lua_State();
     viewport_dedupe(screen->viewport);
     screen_added(L, screen);

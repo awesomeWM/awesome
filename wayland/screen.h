@@ -55,6 +55,7 @@ struct wayland_screen
     struct wl_output *wl_output;
     struct wayland_wallpaper *wallpaper;
     screen_t *screen;
+    bool configured;
 };
 
 extern struct zxdg_output_v1_listener xdg_output_listener;
