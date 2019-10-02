@@ -315,6 +315,25 @@ table.function_list .function_args /*.function_modname*/ {
     text-decoration-color: #bbd3ff;
 }
 
+table.function_list .function_args b {
+    font-weight: 500;
+    color: #95b1ff;
+    text-decoration: underline;
+    text-decoration-color: #bbd3ff;
+}
+
+table.function_list .function_named_args b {
+    color: #b37cff;
+    text-decoration: underline;
+    text-decoration-color: #bbd3ff;
+}
+
+table.function_list .function_named_args {
+    color: #ba97ff;
+    text-decoration: underline;
+    text-decoration-color: #bbd3ff;
+}
+
 dl.function {
     margin-right: 15px;
     margin-left: 15px;

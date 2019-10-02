@@ -260,7 +260,7 @@ end
 -- @tparam gears.color|string args.style.fg_selected
 -- @tparam gears.surface|string args.style.bgimage_normal
 -- @tparam gears.surface|string args.style.bgimage_selected
--- @tparam[opt] table widget_template A custom widget to be used for each
+-- @tparam[opt] table args.widget_template A custom widget to be used for each
 --  notifications.
 -- @treturn widget The notification list widget.
 -- @constructorfct naughty.list.notifications

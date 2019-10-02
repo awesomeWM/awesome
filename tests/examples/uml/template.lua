@@ -6,7 +6,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 
 -- Make the path relative.
-image_path = "../" .. image_path:match("/(images/[^/]+)$")
+local relative_image_path = "../" .. image_path:match("/(images/[^/]+)$")
 
 -- This template generates an HTML table with how other classes are associated
 -- with a given class.
@@ -204,9 +204,10 @@ function module.generate_nav_table(t)
                 assert(entry.class)
                 assert(entry.left.msg and entry.left.card)
                 assert(entry.right.msg and entry.right.card)
-                local path = image_path..counter..".svg"
+                local path = relative_image_path..counter..".svg"
+                local fpath = image_path..counter..".svg"
                 local widget = gen_table_uml(entry, t.class, entry.class, false)
-                wibox.widget.draw_to_svg_file(widget, path, 320, 50)
+                wibox.widget.draw_to_svg_file(widget, fpath, 320, 50)
                 get_table_row(path, entry.class, entry[tab.."_property"])
                 counter = counter + 1
             end
