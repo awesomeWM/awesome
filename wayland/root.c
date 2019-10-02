@@ -33,8 +33,7 @@
 
 extern struct root_impl root_impl;
 
-struct wayland_wallpaper
-{
+struct wayland_wallpaper {
     cairo_surface_t *surface;
     struct wl_surface *wl_surface;
     struct wl_buffer *buffer;
@@ -43,25 +42,36 @@ struct wayland_wallpaper
     size_t shm_size;
 };
 
-// TODO We need a list of them, for multi-head.
-static struct wayland_wallpaper wayland_wallpaper;
+static void
+wayland_wallpaper_cleanup(struct wayland_wallpaper *wayland_wallpaper)
+{
+	zwlr_layer_surface_v1_destroy(wayland_wallpaper->layer_surface);
+    wl_surface_destroy(wayland_wallpaper->wl_surface);
+    cairo_surface_destroy(wayland_wallpaper->surface);
+    free(wayland_wallpaper);
+}
 
 static void wallpaper_surface_configure(void *data,
         struct zwlr_layer_surface_v1 *surface,
         uint32_t serial, uint32_t w, uint32_t h)
 {
+    screen_t *screen = data;
+    struct wayland_screen *wayland_screen = screen->impl_data;
     zwlr_layer_surface_v1_ack_configure(surface, serial);
 
-    wl_surface_attach(wayland_wallpaper.wl_surface,
-            wayland_wallpaper.buffer, 0, 0);
-	wl_surface_commit(wayland_wallpaper.wl_surface);
+    wl_surface_attach(wayland_screen->wallpaper->wl_surface,
+            wayland_screen->wallpaper->buffer, 0, 0);
+	wl_surface_commit(wayland_screen->wallpaper->wl_surface);
 	wl_display_roundtrip(globalconf.wl_display);
 }
 
 static void wallpaper_surface_closed(void *data,
         struct zwlr_layer_surface_v1 *surface)
 {
-	zwlr_layer_surface_v1_destroy(wayland_wallpaper.layer_surface);
+    screen_t *screen = data;
+    struct wayland_screen *wayland_screen = screen->impl_data;
+    wayland_wallpaper_cleanup(wayland_screen->wallpaper);
+    wayland_screen->wallpaper = NULL;
 }
 
 struct zwlr_layer_surface_v1_listener wallpaper_surface_listener =
@@ -75,6 +85,11 @@ int wayland_set_wallpaper(cairo_pattern_t *pattern)
     foreach(screen, globalconf.screens)
     {
         struct wayland_screen *wayland_screen = (*screen)->impl_data;
+        if (wayland_screen->wallpaper != NULL)
+        {
+            wayland_wallpaper_cleanup(wayland_screen->wallpaper);
+        }
+        wayland_screen->wallpaper = calloc(1, sizeof(struct wayland_wallpaper));
 
         area_t area = {
             .width = (*screen)->geometry.width,
@@ -82,35 +97,42 @@ int wayland_set_wallpaper(cairo_pattern_t *pattern)
         };
         int stride = 0;
 
-        wayland_setup_buffer(area, &wayland_wallpaper.buffer, &stride,
-                &wayland_wallpaper.shm_data, &wayland_wallpaper.shm_size);
-        wayland_wallpaper.surface =
-            cairo_image_surface_create_for_data(wayland_wallpaper.shm_data,
-                    CAIRO_FORMAT_ARGB32, area.width, area.height, stride);
-        wayland_wallpaper.wl_surface =
+        wayland_setup_buffer(area,
+                &wayland_screen->wallpaper->buffer,
+                &stride,
+                &wayland_screen->wallpaper->shm_data,
+                &wayland_screen->wallpaper->shm_size);
+        wayland_screen->wallpaper->surface =
+            cairo_image_surface_create_for_data(
+                    wayland_screen->wallpaper->shm_data, CAIRO_FORMAT_ARGB32,
+                            area.width, area.height, stride);
+        wayland_screen->wallpaper->wl_surface =
             wl_compositor_create_surface(globalconf.wl_compositor);
 
-        cairo_t *cr = cairo_create(wayland_wallpaper.surface);
+        cairo_t *cr = cairo_create(wayland_screen->wallpaper->surface);
         /* Paint the pattern to the surface */
         cairo_set_source(cr, pattern);
         cairo_set_operator(cr, CAIRO_OPERATOR_SOURCE);
         cairo_paint(cr);
         cairo_destroy(cr);
-        cairo_surface_flush(wayland_wallpaper.surface);
+        cairo_surface_flush(wayland_screen->wallpaper->surface);
 
         struct zwlr_layer_shell_v1 *layer_shell = globalconf.layer_shell;
-        wayland_wallpaper.layer_surface =
-            zwlr_layer_shell_v1_get_layer_surface(layer_shell,
-                    wayland_wallpaper.wl_surface, wayland_screen->wl_output,
-                    ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND, "awesome");
-        zwlr_layer_surface_v1_set_size(wayland_wallpaper.layer_surface,
+        wayland_screen->wallpaper->layer_surface =
+            zwlr_layer_shell_v1_get_layer_surface(
+                    layer_shell,
+                    wayland_screen->wallpaper->wl_surface,
+                    wayland_screen->wl_output,
+                    ZWLR_LAYER_SHELL_V1_LAYER_BACKGROUND,
+                    "awesome");
+        zwlr_layer_surface_v1_set_size(wayland_screen->wallpaper->layer_surface,
                 area.width, area.height);
         zwlr_layer_surface_v1_set_keyboard_interactivity(
-                wayland_wallpaper.layer_surface, false);
-        zwlr_layer_surface_v1_add_listener(wayland_wallpaper.layer_surface,
-                &wallpaper_surface_listener, NULL);
+                wayland_screen->wallpaper->layer_surface, false);
+        zwlr_layer_surface_v1_add_listener(wayland_screen->wallpaper->layer_surface,
+                &wallpaper_surface_listener, *screen);
 
-        wl_surface_commit(wayland_wallpaper.wl_surface);
+        wl_surface_commit(wayland_screen->wallpaper->wl_surface);
         wl_display_roundtrip(globalconf.wl_display);
     }
 
