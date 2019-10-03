@@ -358,7 +358,7 @@ local function wrap_timeline(w, dot)
             gen_vertical_line { dot = dot or false},
             {
                 w,
-                top     = dot and 5 or 0,
+                top     = 0,
                 bottom  = dot and 5 or 0,
                 left    = 0,
                 widget  = wibox.container.margin
