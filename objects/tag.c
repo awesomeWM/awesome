@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome tag API
+ /** awesome tag API.
  *
  * What is a tag?
  * ==============

@@ -312,7 +312,7 @@ end
 --
 -- @staticfct awful.tag.new
 -- @tparam table names The tag name, in a table
--- @tparam screen|nil screen The tag screen, or 1 if not set.
+-- @tparam[opt=1] screen|number screen The tag screen (defaults to screen 1).
 -- @tparam table layout The layout or layout table to set for this tags by default.
 -- @treturn table A table with all created tags.
 function tag.new(names, screen, layout)
@@ -918,7 +918,7 @@ end
 --
 --        if (not c2) or c2 == c then return end
 --
---        local t = aw_tag.add("Aero", {
+--        local t = awful.tag.add("Aero", {
 --            screen              = c.screen,
 --            volatile            = true,
 --            layout              = awful.layout.suit.tile,

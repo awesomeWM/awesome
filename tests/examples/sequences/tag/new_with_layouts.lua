@@ -20,7 +20,6 @@ module.add_event("Calling awful.tag.new", function() --DOC_HIDE
         awful.layout.suit.spiral.dwindle,
         awful.layout.suit.magnifier,
         awful.layout.suit.corner.nw,
-        awful.layout.suit.max.fullscreen,
     }
 
     --DOC_NEWLINE
