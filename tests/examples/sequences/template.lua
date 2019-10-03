@@ -368,6 +368,14 @@ local function wrap_timeline(w, dot)
         }
 end
 
+local function gen_vertical_space(spacing)
+    return wibox.widget {
+        draw   = function() end,
+        fit    = function() return 1, spacing end,
+        widget = wibox.widget.base.make_widget()
+    }
+end
+
 local function gen_label(text)
     return wibox.widget {
             gen_vertical_line {
@@ -663,6 +671,7 @@ local function gen_timeline(args)
     for _, event in ipairs(history) do
         local ret = event.callback()
         if event.event == "event" then
+            l:add(wrap_timeline(gen_vertical_space(5)))
             l:add(wrap_timeline(wibox.widget {
                 markup = "<u><b>"..event.description.."</b></u>",
                 widget = wibox.widget.textbox
@@ -675,11 +684,7 @@ local function gen_timeline(args)
     end
 
     -- Spacing.
-    l:add(wrap_timeline( wibox.widget {
-        draw   = function() end,
-        fit    = function() return 1, 10 end,
-        widget = wibox.widget.base.make_widget()
-    }))
+    l:add(wrap_timeline(gen_vertical_space(10)))
 
     l:add(gen_label("End"))
 
