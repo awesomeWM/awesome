@@ -50,19 +50,19 @@ eprint_version(void)
     (void) luaL_dostring(L, "return require('lgi.version')");
 
 #ifdef WITH_DBUS
-    const char *has_dbus = "✔";
+    const char *has_dbus = "yes";
 #else
-    const char *has_dbus = "✘";
+    const char *has_dbus = "no";
 #endif
 #ifdef WITH_XCB_ERRORS
-    const char *has_xcb_errors = "✔";
+    const char *has_xcb_errors = "yes";
 #else
-    const char *has_xcb_errors = "✘";
+    const char *has_xcb_errors = "no";
 #endif
 #ifdef HAS_EXECINFO
-    const char *has_execinfo = "✔";
+    const char *has_execinfo = "yes";
 #else
-    const char *has_execinfo = "✘";
+    const char *has_execinfo = "no";
 #endif
 
     printf("awesome %s (%s)\n"
