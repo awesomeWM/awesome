@@ -180,6 +180,7 @@ end
 
 local named_args = {
     [ "(args)"       ] = true,
+    [ "([args])"     ] = true,
     [ "([args=nil])" ] = true,
     [ "([args={}])"  ] = true
 }
@@ -193,7 +194,7 @@ local function wrap_args(item)
         return "<span class='function_named_args'><b>{</b>[args]<b>}</b></span>"
     end
 
-    local new_args = item.args:sub(2, item.args:len()-2)
+    local new_args = item.args:sub(2, item.args:len()-1)
 
     return "<span class='function_args'> <b>(</b>"..new_args.."<b>)</b></span>"
 end
