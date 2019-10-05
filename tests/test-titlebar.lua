@@ -4,6 +4,7 @@ local rules = require("awful.rules")
 local spawn = require("awful.spawn")
 
 local tiny_client_code_template = [[
+pcall(require, 'luarocks.loader')
 local Gtk, class = require('lgi').require('Gtk'), 'client'
 Gtk.init()
 window = Gtk.Window {default_width=100, default_height=100, title='title'}

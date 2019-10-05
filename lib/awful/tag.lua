@@ -143,6 +143,8 @@ end
 
 --- The tag index.
 --
+-- @DOC_sequences_tag_index_EXAMPLE@
+--
 -- The index is the position as shown in the `awful.widget.taglist`.
 --
 -- **Signal:**
@@ -219,6 +221,9 @@ function tag.move(new_index, target_tag)
 end
 
 --- Swap 2 tags.
+--
+-- @DOC_sequences_tag_swap_EXAMPLE@
+--
 -- @method swap
 -- @param tag2 The second tag
 -- @see client.swap
@@ -296,11 +301,20 @@ function tag.add(name, props)
 end
 
 --- Create a set of tags and attach it to a screen.
+--
+-- This is what's performed by the default config:
+--
+-- @DOC_sequences_tag_default_config_EXAMPLE@
+--
+-- It is also possible to set multiple layouts:
+--
+-- @DOC_sequences_tag_new_with_layouts_EXAMPLE@
+--
 -- @staticfct awful.tag.new
--- @param names The tag name, in a table
--- @param screen The tag screen, or 1 if not set.
--- @param layout The layout or layout table to set for this tags by default.
--- @return A table with all created tags.
+-- @tparam table names The tag name, in a table
+-- @tparam[opt=1] screen|number screen The tag screen (defaults to screen 1).
+-- @tparam table layout The layout or layout table to set for this tags by default.
+-- @treturn table A table with all created tags.
 function tag.new(names, screen, layout)
     screen = get_screen(screen or 1)
     -- True if `layout` should be used as the layout of each created tag
@@ -338,7 +352,7 @@ end
 --
 -- To delete the current tag:
 --
---    mouse.screen.selected_tag:delete()
+-- @DOC_sequences_tag_delete_EXAMPLE@
 --
 -- @method delete
 -- @see awful.tag.add
@@ -893,16 +907,33 @@ end
 --- Define if the tag must be deleted when the last client is untagged.
 --
 -- This is useful to create "throw-away" tags for operation like 50/50
--- side-by-side views.
+-- (Windows "Aero Snap) side-by-side views. This keybinding code for this is:
 --
---    local t = awful.tag.add("Temporary", {
---         screen   = client.focus.screen,
---         volatile = true,
---         clients  = {
---             client.focus,
---             awful.client.focus.history.get(client.focus.screen, 1)
---         }
---    }
+--    local function aero_tag()
+--        local c = client.focus
+--
+--        if not c then return end
+--
+--        local c2 = awful.client.focus.history.list[2]
+--
+--        if (not c2) or c2 == c then return end
+--
+--        local t = awful.tag.add("Aero", {
+--            screen              = c.screen,
+--            volatile            = true,
+--            layout              = awful.layout.suit.tile,
+--            master_width_factor = 0.5
+--        })
+--
+--        t:clients({c, c2})
+--
+--        t:view_only()
+--    end
+--
+-- @DOC_sequences_tag_volatile_EXAMPLE@
+--
+-- As you can see, the "Volatile" tag has been automatically discarded while
+-- the "Non-volatile" tag is still there (but with zero clients).
 --
 -- **Signal:**
 --
@@ -910,6 +941,7 @@ end
 --
 -- @property volatile
 -- @param boolean
+-- @see delete
 
 -- Volatile accessors are implicit
 
@@ -1316,6 +1348,9 @@ function tag.incncol(add, t, sensible)
 end
 
 --- View no tag.
+--
+-- @DOC_sequences_tag_viewnone_EXAMPLE@
+--
 -- @staticfct awful.tag.viewnone
 -- @tparam[opt] int|screen screen The screen.
 function tag.viewnone(screen)
@@ -1326,13 +1361,19 @@ function tag.viewnone(screen)
     end
 end
 
---- View a tag by its taglist index.
+--- Select a tag relative to the currently selected one.
+--
+-- Note that this doesn't work well with multiple selection.
+--
+-- @DOC_sequences_tag_viewidx_EXAMPLE@
 --
 -- This is equivalent to `screen.tags[i]:view_only()`
 -- @staticfct awful.tag.viewidx
 -- @see screen.tags
--- @param i The **relative** index to see.
--- @param[opt] screen The screen.
+-- @tparam number i The **relative** index to see.
+-- @tparam[opt] screen screen The screen.
+-- @see awful.tag.viewnext
+-- @see awful.tag.viewprev
 function tag.viewidx(i, screen)
     screen = get_screen(screen or ascreen.focused())
     local tags = screen.tags
@@ -1363,21 +1404,39 @@ function tag.getidx(query_tag)
     return tag.object.get_index(query_tag or ascreen.focused().selected_tag)
 end
 
---- View next tag. This is the same as tag.viewidx(1).
+
+--- View next tag. This is the same as `tag.viewidx(1)`.
+--
+-- Note that this doesn't work well with multiple selection.
+--
+-- @DOC_sequences_tag_viewnext_EXAMPLE@
+--
 -- @staticfct awful.tag.viewnext
--- @param screen The screen.
+-- @tparam screen screen The screen.
+-- @see awful.tag.viewidx
+-- @see awful.tag.viewprev
 function tag.viewnext(screen)
     return tag.viewidx(1, screen)
 end
 
---- View previous tag. This is the same a tag.viewidx(-1).
+--- View previous tag. This is the same a `tag.viewidx(-1)`.
+--
+-- Note that this doesn't work well with multiple selection.
+--
+-- @DOC_sequences_tag_viewprev_EXAMPLE@
+--
 -- @staticfct awful.tag.viewprev
--- @param screen The screen.
+-- @tparam screen screen The screen.
+-- @see awful.tag.viewidx
+-- @see awful.tag.viewnext
 function tag.viewprev(screen)
     return tag.viewidx(-1, screen)
 end
 
 --- View only a tag.
+--
+-- @DOC_sequences_tag_view_only_EXAMPLE@
+--
 -- @method view_only
 -- @see selected
 function tag.object.view_only(self)
@@ -1398,7 +1457,7 @@ end
 --- View only a tag.
 -- @deprecated awful.tag.viewonly
 -- @see tag.view_only
--- @param t The tag object.
+-- @tparam tag t The tag object.
 function tag.viewonly(t)
     gdebug.deprecate("Use t:view_only() instead of awful.tag.viewonly", {deprecated_in=4})
 
@@ -1412,8 +1471,8 @@ end
 -- more of the tags are already selected, set `maximum` to zero.
 --
 -- @staticfct awful.tag.viewmore
--- @param tags A table with tags to view only.
--- @param[opt] screen The screen of the tags.
+-- @tparam table tags A table with tags to view only.
+-- @tparam[opt] screen screen The screen of the tags.
 -- @tparam[opt=#tags] number maximum The maximum number of tags to select.
 function tag.viewmore(tags, screen, maximum)
     maximum = maximum or #tags
