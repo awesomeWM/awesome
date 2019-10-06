@@ -31,7 +31,6 @@ local screen    = require("awful.screen")
 local button    = require("awful.button")
 local beautiful = require("beautiful")
 local surface   = require("gears.surface")
-local gtable    = require("gears.table")
 local wibox     = require("wibox")
 local gfs       = require("gears.filesystem")
 local timer     = require("gears.timer")
@@ -446,14 +445,11 @@ function naughty.default_notification_handler(notification, args)
             local action_height = h + 2 * margin
             local action_width = w + 2 * margin
 
-            actionmarginbox:buttons(gtable.join(
-                button({ }, 1, function()
-                    action:invoke(notification)
-                end),
-                button({ }, 3, function()
-                    action:invoke(notification)
-                end)
-            ))
+            actionmarginbox.buttons = {
+                button({ }, 1, function() action:invoke(notification) end),
+                button({ }, 3, function() action:invoke(notification) end),
+            }
+
             actionslayout:add(actionmarginbox)
 
             actions_total_height = actions_total_height + action_height
@@ -584,10 +580,12 @@ function naughty.default_notification_handler(notification, args)
     notification.box:set_widget(completelayout)
 
     -- Setup the mouse events
-    layout:buttons(gtable.join(button({}, 1, nil, run),
-                                   button({}, 3, nil, function()
-                                        die(naughty.notification_closed_reason.dismissed_by_user)
-                                    end)))
+    layout.buttons = {
+        button({}, 1, nil, run),
+        button({}, 3, nil, function()
+            die(naughty.notification_closed_reason.dismissed_by_user)
+        end),
+    }
 
     -- insert the notification to the table
     table.insert(current_notifications[s][notification.position], notification)

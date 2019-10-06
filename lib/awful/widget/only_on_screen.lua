@@ -51,13 +51,7 @@ end
 -- @property widget
 -- @tparam widget widget The widget
 
-function only_on_screen:set_widget(widget)
-    if widget then
-        base.check_widget(widget)
-    end
-    self._private.widget = widget
-    self:emit_signal("widget::layout_changed")
-end
+only_on_screen.set_widget = base.set_widget_common
 
 function only_on_screen:get_widget()
     return self._private.widget

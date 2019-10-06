@@ -458,10 +458,11 @@ function widget.new(args)
             height = height,
         })
         mywibox:set_widget(pages[1])
-        mywibox:buttons(gtable.join(
-                awful.button({ }, 1, function () widget_obj:hide() end),
-                awful.button({ }, 3, function () widget_obj:hide() end)
-        ))
+
+        mywibox.buttons = {
+            awful.button({ }, 1, function () widget_obj:hide() end),
+            awful.button({ }, 3, function () widget_obj:hide() end)
+        }
 
         function widget_obj.page_next(_self)
             if _self.current_page == #pages then return end

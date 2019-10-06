@@ -254,7 +254,8 @@ function calendar_popup:attach(widget, position, args)
     position = position or "tr"
     args = args or {}
     if args.on_hover == nil then args.on_hover=true end
-    widget:buttons(gears.table.join(
+
+    widget.buttons = {
         abutton({ }, 1, function ()
                               if not self.visible or self._calendar_clicked_on then
                                   self:call_calendar(0, position)
@@ -264,7 +265,8 @@ function calendar_popup:attach(widget, position, args)
                         end),
         abutton({ }, 4, function () self:call_calendar(-1) end),
         abutton({ }, 5, function () self:call_calendar( 1) end)
-    ))
+    }
+
     if args.on_hover then
         widget:connect_signal("mouse::enter", function ()
             if not self._calendar_clicked_on then
@@ -330,18 +332,19 @@ local function get_cal_wibox(caltype, args)
     }
     ret:set_widget(widget)
 
-    ret:buttons(gears.table.join(
-            abutton({ }, 1, function ()
-                ret.visible=false
-                ret._calendar_clicked_on=false
-            end),
-            abutton({ }, 3, function ()
-                ret.visible=false
-                ret._calendar_clicked_on=false
-            end),
-            abutton({ }, 4, function () ret:call_calendar(-1) end),
-            abutton({ }, 5, function () ret:call_calendar( 1) end)
-    ))
+    ret.buttons = {
+        abutton({ }, 1, function ()
+            ret.visible=false
+            ret._calendar_clicked_on=false
+        end),
+        abutton({ }, 3, function ()
+            ret.visible=false
+            ret._calendar_clicked_on=false
+        end),
+        abutton({ }, 4, function () ret:call_calendar(-1) end),
+        abutton({ }, 5, function () ret:call_calendar( 1) end)
+    }
+
     return ret
 end
 

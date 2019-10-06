@@ -70,8 +70,9 @@ function fixed:add(...)
     local args = { n=select('#', ...), ... }
     assert(args.n > 0, "need at least one widget to add")
     for i=1, args.n do
-        base.check_widget(args[i])
-        table.insert(self._private.widgets, args[i])
+        local w = base.make_widget_from_value(args[i])
+        base.check_widget(w)
+        table.insert(self._private.widgets, w)
     end
     self:emit_signal("widget::layout_changed")
 end

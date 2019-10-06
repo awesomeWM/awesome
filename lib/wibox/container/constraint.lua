@@ -42,10 +42,7 @@ end
 -- @property widget
 -- @tparam widget widget The widget
 
-function constraint:set_widget(widget)
-    self._private.widget = widget
-    self:emit_signal("widget::layout_changed")
-end
+constraint.set_widget = base.set_widget_common
 
 function constraint:get_widget()
     return self._private.widget

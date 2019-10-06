@@ -40,6 +40,29 @@ function base.widget:set_visible(b)
     end
 end
 
+--- Add a new `awful.button` to this widget.
+-- @tparam awful.button button The button to add.
+function base.widget:add_button(button)
+    if not button then return end
+
+    -- Simple case
+    if not self._private.buttons then
+        self:set_buttons({button})
+        return
+    end
+
+    -- This could happen if something accidentally uses rawset
+    assert(self._private.buttons_formatted)
+
+    -- an `awful.button` is a tupple of `capi.button`
+    self._private.buttons_formatted = gtable.join(
+        self._private.buttons_formatted,
+        button
+    )
+
+    table.insert(self._private.buttons, button)
+end
+
 --- Is the widget visible?
 -- @treturn boolean
 -- @method get_visible
@@ -153,6 +176,24 @@ function base.widget:get_all_children()
     local ret = {}
     digg_children(ret, self)
     return ret
+end
+
+--- Common implementation of the `:set_widget()` method exposed by many
+-- other widgets.
+--
+-- Use this if your widget has no custom logic when setting the widget.
+--
+-- @usage
+--   rawset(my_custom_widget, "set_widget", wibox.widget.base.set_widget_common)
+function base.set_widget_common(self, widget)
+    local w = widget and base.make_widget_from_value(widget)
+
+    if w then
+        base.check_widget(w)
+    end
+
+    self._private.widget = w
+    self:emit_signal("widget::layout_changed")
 end
 
 --- Emit a signal and ensure all parent widgets in the hierarchies also

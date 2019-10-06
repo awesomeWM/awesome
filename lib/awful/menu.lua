@@ -446,13 +446,14 @@ function menu:add(args, index)
 
 
     -- Create bindings
-    item._background:buttons(gtable.join(
+    item._background.buttons = {
         button({}, 3, function () self:hide() end),
         button({}, 1, function ()
             local num = gtable.hasitem(self.items, item)
             self:item_enter(num, { mouse = true })
             self:exec(num, { exec = true, mouse = true })
-        end )))
+        end)
+    }
 
 
     item._mouse = function ()

@@ -212,7 +212,9 @@ function tooltip:get_wibox()
 
     -- Close the tooltip when clicking it.  This gets done on release, to not
     -- emit the release event on an underlying object, e.g. the titlebar icon.
-    wb:buttons(a_button({}, 1, nil, self.hide))
+    wb.buttons = {
+        a_button({}, 1, nil, self.hide)
+    }
 
     self._private.wibox = wb
 

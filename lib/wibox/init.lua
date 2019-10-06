@@ -39,7 +39,8 @@ local force_forward = {
 --@DOC_wibox_COMMON@
 
 function wibox:set_widget(widget)
-    self._drawable:set_widget(widget)
+    local w = base.make_widget_from_value(widget)
+    self._drawable:set_widget(w)
 end
 
 function wibox:get_widget()
@@ -202,6 +203,7 @@ end
 function wibox:get_children_by_id(name)
     --TODO v5: Move the ID management to the hierarchy.
     if rawget(self, "_by_id") then
+        --TODO v5: Remove this, it's `if` nearly dead code, keep the `elseif`
         return rawget(self, "_by_id")[name]
     elseif self._drawable.widget
       and self._drawable.widget._private
