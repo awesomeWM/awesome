@@ -40,9 +40,13 @@
 -- @property visible
 -- @param boolean
 
---- Set/get a widget's buttons.
--- @param _buttons The table of buttons that should bind to the widget.
--- @method buttons
+--- The widget buttons.
+--
+-- The table contains a list of `awful.button` objects.
+--
+-- @property buttons
+-- @param table
+-- @see awful.button
 
 --- Emit a signal and ensure all parent widgets in the hierarchies also
 -- forward the signal. This is useful to track signals when there is a dynamic

@@ -7,6 +7,7 @@
 local object = require("gears.object")
 local cache = require("gears.cache")
 local matrix = require("gears.matrix")
+local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 local gtable = require("gears.table")
 local setmetatable = setmetatable
@@ -21,15 +22,11 @@ local base = {}
 -- Functions available on all widgets.
 base.widget = {}
 
---- Set/get a widget's buttons.
--- @tab _buttons The table of buttons that is bound to the widget.
--- @method buttons
-function base.widget:buttons(_buttons)
-    if _buttons then
-        self._private.widget_buttons = _buttons
-    end
-    return self._private.widget_buttons
-end
+object.properties._legacy_accessors(base.widget, "buttons", nil, true, function(new_btns)
+    return new_btns[1] and (
+        type(new_btns[1]) == "button" or new_btns[1]._is_capi_button
+    ) or false
+end, true)
 
 --- Set a widget's visibility.
 -- @tparam boolean b Whether the widget is visible.
@@ -367,7 +364,7 @@ function base.handle_button(event, widget, x, y, button, modifiers, geometry)
 
     -- Find all matching button objects.
     local matches = {}
-    for _, v in pairs(widget._private.widget_buttons) do
+    for _, v in pairs(widget._private.buttons_formatted or {}) do
         local match = true
         -- Is it the right button?
         if v.button ~= 0 and v.button ~= button then match = false end
@@ -609,17 +606,22 @@ end
 --
 -- @param wdg The value.
 -- @param[opt=nil] ... Arguments passed to the contructor (if any).
--- @treturn The new widget.
 -- @constructorfct wibox.widget.base.make_widget_from_value
+-- @treturn widget|nil The new widget or `nil` in case of failure.
 function base.make_widget_from_value(wdg, ...)
+    if not wdg then return nil end
+
     local is_function, t = is_callable(wdg)
 
     if is_function then
         wdg = wdg(...)
-    elseif t == "table" and not wdg.is_widget then
-        wdg = base.make_widget_declarative(wdg)
+    elseif t == "table" then
+        wdg = wdg.is_widget and wdg or base.make_widget_declarative(wdg)
     else
-        assert(wdg.is_widget, "The argument is not a function, table, or widget.")
+        gdebug.print_warning(
+            "The argument is not a function, table, or widget."
+        )
+        return nil
     end
 
     return wdg
@@ -655,9 +657,6 @@ function base.make_widget(proxy, widget_name, args)
 
     -- Create a table used to store the widgets internal data.
     rawset(ret, "_private", {})
-
-    -- No buttons yet.
-    ret._private.widget_buttons = {}
 
     -- Widget is visible.
     ret._private.visible = true
@@ -713,6 +712,20 @@ function base.make_widget(proxy, widget_name, args)
     mt.__tostring = function()
         return string.format("%s (%s)", ret.widget_name, orig_string)
     end
+
+    -- Even when properties are disabled, buttons is required for backward
+    -- compatibility.
+    --TODO v6 Remove this
+    if not args.enable_properties then
+        mt.__index = function(_, key)
+            if key == "buttons" then
+                return base.widget.get_buttons(ret)
+            end
+
+            return rawget(ret, key)
+        end
+    end
+
     return setmetatable(ret, mt)
 end
 

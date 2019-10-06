@@ -949,9 +949,9 @@
 
 /** Get or set mouse buttons bindings for a client.
  *
- * @param buttons_table An array of mouse button bindings objects, or nothing.
- * @return A table with all buttons.
- * @method buttons
+ * @property buttons
+ * @param table
+ * @see awful.button
  */
 
 /** Get the number of instances.
@@ -3677,9 +3677,9 @@ luaA_client_set_shape_input(lua_State *L, client_t *c)
 
 /** Get or set keys bindings for a client.
  *
- * @param keys_table An array of key bindings objects, or nothing.
- * @return A table with all keys.
- * @method keys
+ * @property keys
+ * @param table
+ * @see awful.key
  */
 static int
 luaA_client_keys(lua_State *L)
@@ -3813,7 +3813,7 @@ client_class_setup(lua_State *L)
     {
         LUA_OBJECT_META(client)
         LUA_CLASS_META
-        { "keys", luaA_client_keys },
+        { "_keys", luaA_client_keys },
         { "isvisible", luaA_client_isvisible },
         { "geometry", luaA_client_geometry },
         { "apply_size_hints", luaA_client_apply_size_hints },

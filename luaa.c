@@ -80,9 +80,10 @@ extern const struct luaL_Reg awesome_dbus_lib[];
 #endif
 extern const struct luaL_Reg awesome_keygrabber_lib[];
 extern const struct luaL_Reg awesome_mousegrabber_lib[];
-extern const struct luaL_Reg awesome_root_lib[];
 extern const struct luaL_Reg awesome_mouse_methods[];
 extern const struct luaL_Reg awesome_mouse_meta[];
+extern const struct luaL_Reg awesome_root_methods[];
+extern const struct luaL_Reg awesome_root_meta[];
 
 /** A call into the Lua code aborted with an error.
  *
@@ -995,8 +996,7 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
     setup_awesome_signals(L);
 
     /* Export root lib */
-    luaA_registerlib(L, "root", awesome_root_lib);
-    lua_pop(L, 1); /* luaA_registerlib() leaves the table on stack */
+    luaA_openlib(L, "root", awesome_root_methods, awesome_root_meta);
 
 #ifdef WITH_DBUS
     /* Export D-Bus lib */

@@ -37,7 +37,7 @@ local function new_drawin(_, args)
     ret.data.drawable.refresh  = function() end
     ret.data._struts           = { top = 0, right = 0, left = 0, bottom = 0 }
 
-    for _, k in pairs{ "buttons", "get_xproperty", "set_xproperty" } do
+    for _, k in pairs{ "_buttons", "get_xproperty", "set_xproperty" } do
         ret[k] = function() end
     end
 

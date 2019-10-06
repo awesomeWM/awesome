@@ -515,7 +515,7 @@ window_class_setup(lua_State *L)
     static const struct luaL_Reg window_meta[] =
     {
         { "struts", luaA_window_struts },
-        { "buttons", luaA_window_buttons },
+        { "_buttons", luaA_window_buttons },
         { "set_xproperty", luaA_window_set_xproperty },
         { "get_xproperty", luaA_window_get_xproperty },
         { NULL, NULL }

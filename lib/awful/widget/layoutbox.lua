@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------
---- Layoutbox widget.
+--- Display the current client layout (`awful.layout`) icon or name
+--
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
@@ -13,6 +14,8 @@ local tooltip = require("awful.tooltip")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local surface = require("gears.surface")
+-- local gdebug = require("gears.debug")
+local gtable = require("gears.table")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -42,10 +45,25 @@ end
 
 --- Create a layoutbox widget. It draws a picture with the current layout
 -- symbol of the current tag.
--- @param screen The screen number that the layout will be represented for.
--- @return An imagebox widget configured as a layoutbox.
--- @constructorfct awful.widget.layoutbox
-function layoutbox.new(screen)
+-- @tparam table args The arguments.
+-- @tparam screen args.screen The screen number that the layout will be represented for.
+-- @tparam table args.buttons The `awful.button`s for this layoutbox.
+-- @return The layoutbox.
+function layoutbox.new(args)
+    args = args or {}
+    local screen = nil
+
+    if type(args) == "number" or type(args) == "screen" or args.fake_remove then
+        screen, args = args, {}
+--TODO uncomment
+--         gdebug.deprecate(
+--             "Use awful.widget.layoutbox{screen=s} instead of awful.widget.layoutbox(screen)",
+--             {deprecated_in=5}
+--         )
+    end
+
+    assert(type(args) == "table")
+
     screen = get_screen(screen or 1)
 
     -- Do we already have the update callbacks registered?
@@ -80,6 +98,9 @@ function layoutbox.new(screen)
 
         w._layoutbox_tooltip = tooltip {objects = {w}, delay_show = 1}
 
+        -- Apply the buttons, visible, forced_width and so on
+        gtable.crush(w, args)
+
         update(w, screen)
         boxes[screen] = w
     end
@@ -90,6 +111,10 @@ end
 function layoutbox.mt:__call(...)
     return layoutbox.new(...)
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(layoutbox, layoutbox.mt)
 

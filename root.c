@@ -31,6 +31,7 @@
 #include "common/xcursor.h"
 #include "common/xutil.h"
 #include "objects/button.h"
+#include "common/luaclass.h"
 #include "xwindow.h"
 
 #include "math.h"
@@ -38,6 +39,10 @@
 #include <xcb/xtest.h>
 #include <xcb/xcb_aux.h>
 #include <cairo-xcb.h>
+
+static int miss_index_handler    = LUA_REFNIL;
+static int miss_newindex_handler = LUA_REFNIL;
+static int miss_call_handler     = LUA_REFNIL;
 
 static void
 root_set_wallpaper_pixmap(xcb_connection_t *c, xcb_pixmap_t p)
@@ -330,11 +335,12 @@ luaA_root_fake_input(lua_State *L)
 }
 
 /** Get or set global key bindings.
- * These bindings will be available when you press keys on the root window.
+ * These bindings will be available when you press keys on the root window
+ * (the wallpaper).
  *
- * @tparam table|nil keys_array An array of key binding objects, or nothing.
- * @return The array of key bindings objects of this client.
- * @staticfct keys
+ * @property keys
+ * @param table
+ * @see awful.key
  */
 static int
 luaA_root_keys(lua_State *L)
@@ -369,13 +375,22 @@ luaA_root_keys(lua_State *L)
     return 1;
 }
 
-/** Get or set global mouse bindings.
- * This binding will be available when you click on the root window.
+/**
+ * Store the list of mouse buttons to be applied on the wallpaper (also
+ * known as root window).
  *
- * @param button_table An array of mouse button bindings objects, or nothing.
- * @return The array of mouse button bindings objects.
- * @staticfct buttons
+ * @property buttons
+ * @tparam[opt={}] table buttons The list of buttons.
+ * @see awful.button
+ *
+ * @usage
+ * root.buttons = {
+ *     awful.button({ }, 3, function () mymainmenu:toggle() end),
+ *     awful.button({ }, 4, awful.tag.viewnext),
+ *     awful.button({ }, 5, awful.tag.viewprev),
+ * }
  */
+
 static int
 luaA_root_buttons(lua_State *L)
 {
@@ -525,10 +540,65 @@ luaA_root_tags(lua_State *L)
     return 1;
 }
 
-const struct luaL_Reg awesome_root_lib[] =
+/**
+* Add a custom call handler.
+*/
+static int
+luaA_root_set_call_handler(lua_State *L)
 {
-    { "buttons", luaA_root_buttons },
-    { "keys", luaA_root_keys },
+    return luaA_registerfct(L, 1, &miss_call_handler);
+}
+
+/**
+* Add a custom property handler (getter).
+*/
+static int
+luaA_root_set_index_miss_handler(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &miss_index_handler);
+}
+
+/**
+* Add a custom property handler (setter).
+*/
+static int
+luaA_root_set_newindex_miss_handler(lua_State *L)
+{
+    return luaA_registerfct(L, 1, &miss_newindex_handler);
+}
+
+/** Root library.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ * \luastack
+ */
+static int
+luaA_root_index(lua_State *L)
+{
+    if (miss_index_handler != LUA_REFNIL)
+        return luaA_call_handler(L, miss_index_handler);
+
+    return luaA_default_index(L);
+}
+
+/** Newindex for root.
+ * \param L The Lua VM state.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_root_newindex(lua_State *L)
+{
+    /* Call the lua root property handler */
+    if (miss_newindex_handler != LUA_REFNIL)
+        return luaA_call_handler(L, miss_newindex_handler);
+
+    return luaA_default_newindex(L);
+}
+
+const struct luaL_Reg awesome_root_methods[] =
+{
+    { "_buttons", luaA_root_buttons },
+    { "_keys", luaA_root_keys },
     { "cursor", luaA_root_cursor },
     { "fake_input", luaA_root_fake_input },
     { "drawins", luaA_root_drawins },
@@ -536,8 +606,17 @@ const struct luaL_Reg awesome_root_lib[] =
     { "size", luaA_root_size },
     { "size_mm", luaA_root_size_mm },
     { "tags", luaA_root_tags },
-    { "__index", luaA_default_index },
-    { "__newindex", luaA_default_newindex },
+    { "__index", luaA_root_index },
+    { "__newindex", luaA_root_newindex },
+    { "set_index_miss_handler", luaA_root_set_index_miss_handler},
+    { "set_call_handler", luaA_root_set_call_handler},
+    { "set_newindex_miss_handler", luaA_root_set_newindex_miss_handler},
+
+    { NULL, NULL }
+};
+
+const struct luaL_Reg awesome_root_meta[] =
+{
     { NULL, NULL }
 };
 

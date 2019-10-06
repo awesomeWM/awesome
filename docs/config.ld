@@ -118,10 +118,8 @@ file = {
     '../spawn.c',
     '../xkb.c',
     '../common/luaobject.c',
-    '../objects/button.c',
     '../objects/client.c',
     '../objects/drawable.c',
-    '../objects/key.c',
     '../objects/screen.c',
     '../objects/tag.c',
     '../objects/window.c',
@@ -135,6 +133,7 @@ file = {
         -- documentation
         '../lib/awful/autofocus.lua',
         '../lib/awful/dbus.lua',
+        '../lib/awful/_compat.lua',
         '../lib/awful/init.lua',
         '../lib/awful/remote.lua',
         '../lib/awful/screen/dpi.lua',
@@ -154,6 +153,11 @@ file = {
         '../lib/naughty/container/init.lua',
         '../lib/naughty/list/init.lua',
         '../lib/naughty/widget/_default.lua',
+
+        -- Ignore components that provide no value to users and have confusing
+        -- names
+        '../objects/button.c',
+        '../objects/key.c',
 
         -- Deprecated classes for one years or more don't deserve entries
         -- in the index

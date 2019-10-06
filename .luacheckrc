@@ -26,7 +26,6 @@ read_globals = {
     "key",
     "keygrabber",
     "mousegrabber",
-    "root",
     "selection",
     "tag",
     "window",
@@ -43,6 +42,7 @@ read_globals = {
 globals = {
     "screen",
     "mouse",
+    "root",
     "client"
 }
 

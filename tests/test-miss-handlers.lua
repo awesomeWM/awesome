@@ -4,7 +4,10 @@ local mouse = mouse
 local class = tag
 local obj = class({})
 local handler = require("gears.object.properties")
+local abutton = require("awful.button")
+local gtable = require("gears.table")
 local wibox = require("wibox")
+local runner = require("_runner")
 
 awesome.connect_signal("debug::index::miss", error)
 awesome.connect_signal("debug::newindex::miss", error)
@@ -68,6 +71,51 @@ assert(w2:get_children_by_id("main_textbox")[1])
 assert(w2.main_background.main_textbox)
 assert(w2.main_background == w2:get_children_by_id("main_background")[1])
 
-require("_runner").run_steps({ function() return true end })
+-- You can't retry this, so if the assert above were false, assume it never
+-- reaches this.
+
+local steps = { function() return true end }
+
+-- Try each combinations of current and legacy style accessors.
+table.insert(steps, function()local b1, b2 = button({}, 1, function() end), button({}, 2, function() end)
+    root.buttons = {b1}
+
+    assert(#root.buttons   == 1 )
+    assert(#root.buttons() == 1 )
+    assert(root.buttons[1] == b1)
+
+    root.buttons{b2}
+
+    assert(#root.buttons     == 1 )
+    assert(#root.buttons()   == 1 )
+    assert(root.buttons()[1] == b2)
+
+    local ab1, ab2 = abutton({}, 1, function() end), abutton({}, 2, function() end)
+
+    root.buttons = {ab1}
+    assert(#root.buttons == 1)
+    assert(#root.buttons() == 4)
+    for i=1, 4 do
+        assert(root.buttons()[i] == ab1[i])
+    end
+
+    root.buttons(gtable.join(ab2))
+    assert(#root.buttons == 1)
+    assert(#root.buttons() == 4)
+    for i=1, 4 do
+        assert(root.buttons()[i] == ab2[i])
+    end
+
+    root.buttons{ab1}
+    assert(#root.buttons == 1)
+    assert(#root.buttons() == 4)
+    for i=1, 4 do
+        assert(root.buttons()[i] == ab1[i])
+    end
+
+    return true
+end)
+
+runner.run_steps(steps)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

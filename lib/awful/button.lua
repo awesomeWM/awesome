@@ -35,7 +35,6 @@ local ignore_modifiers = { "Lock", "Mod2" }
 -- will return 2 button objects: one with CapsLock on, and the other one with
 -- CapsLock off.
 --
--- @see button
 -- @treturn table A table with one or several button objects.
 function button.new(mod, _button, press, release)
     local ret = {}

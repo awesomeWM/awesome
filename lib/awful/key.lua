@@ -103,7 +103,7 @@ end
 -- ignored by default by this function), creating a key binding with this
 -- function will return 2 key objects: one with CapsLock on, and another one
 -- with CapsLock off.
--- @see key.key
+--
 -- @tparam table mod A list of modifier keys.  Valid modifiers are: Any, Mod1,
 --   Mod2, Mod3, Mod4, Mod5, Shift, Lock and Control.
 -- @tparam string _key The key to trigger an event.
@@ -113,6 +113,7 @@ end
 -- for example {description="select next tag", group="tag"}.
 -- @treturn table A table with one or several key objects.
 -- @constructorfct awful.key
+
 function key.new(mod, _key, press, release, data)
     if type(release)=='table' then
         data=release

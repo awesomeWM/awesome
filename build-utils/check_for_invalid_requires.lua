@@ -54,7 +54,7 @@ local allowed_deps = {
 -- Turn "foo.bar.baz" into "foo.bar". Returns nil if there is nothing more to
 -- remove.
 local function get_supermodule(module)
-    return string.match(module, "(.+)%.%a+")
+    return string.match(module, "(.+)%.[a-z_]+")
 end
 
 -- Check if "module" (or one of its parents) is allowed to depend on
