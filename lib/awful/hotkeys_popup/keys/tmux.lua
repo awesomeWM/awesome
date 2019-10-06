@@ -19,7 +19,7 @@ local tmux = {}
 -- will show tmux hotkeys for any window that has 'tmux' in its title.
 -- If no rules are provided then tmux hotkeys will be shown always!
 -- @function add_rules_for_terminal
--- @see awful.rules.rules
+-- @see ruled.client.rules
 -- @tparam table rule Rules to match a window containing a tmux session.
 function tmux.add_rules_for_terminal(rule)
     for group_name, group_data in pairs({

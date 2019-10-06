@@ -147,7 +147,7 @@ additions to the path you want to use in Awesome.
 ### How to remove gaps between windows?
 
 You can add `size_hints_honor = false` to the `properties` section in your
-`awful.rules.rules` table in your `rc.lua`. It will match and apply this rule
+`ruled.client.rules` table in your `rc.lua`. It will match and apply this rule
 to all clients.
 
 See [the mailing list archive](http://www.mail-archive.com/awesome@naquadah.org/msg01767.html)
@@ -173,8 +173,8 @@ your `globalkeys`:
 ### How to control titlebars?
 
 To disable titlebars on all clients remove the `titlebars_enabled=true` from the
-`awful.rules.rules` table in your config. If you want a titlebar only on
-certain clients, you can use `awful.rules` to set this property only for certain
+`ruled.client.rules` table in your config. If you want a titlebar only on
+certain clients, you can use `ruled.client` to set this property only for certain
 clients.
 
 ### How to toggle titlebar visibility?
@@ -208,7 +208,7 @@ their last invocation. The default key binding to toggle maximized state is
 "Mod4 + m".
 
 You can ensure no application ever starts maximized in the first rule of your
-`awful.rules.rules` table, which applies to all clients, by adding:
+`ruled.client.rules` table, which applies to all clients, by adding:
 
     -- Search for this rule,
     keys = clientkeys,
@@ -267,14 +267,14 @@ terminal output you can use the following to match clients in Awesome:
                        |--- name
 
 You can use the above identifiers (instance, class and name) in your
-`awful.rules.rules` table to do matching, tagging and other client manipulation.
+`ruled.client.rules` table to do matching, tagging and other client manipulation.
 See the next FAQ answer for some examples.
 
 ### How to start clients on specific tags and others as floating?
 
-You can add matching rules to your `awful.rules.rules` table. The default
+You can add matching rules to your `ruled.client.rules` table. The default
 `rc.lua` already has several examples, but some more can be found in the
-@{awful.rules.rules|documentation}.
+@{ruled.client.rules|documentation}.
 
 ### How to start clients as slave windows instead of master?
 
@@ -299,7 +299,7 @@ layout and allows to change it by clicking on it.
 
 ### How to make windows spawn under the mouse cursor?
 
-In the default `awful.rules`-rule, the following placement is specified:
+In the default `ruled.client`-rule, the following placement is specified:
 
     placement = awful.placement.no_overlap+awful.placement.no_offscreen
 

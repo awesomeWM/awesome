@@ -61,7 +61,7 @@
 
 --- A table which content will be compared to the target object current properties.
 --
--- The comparison will be made using the lesser (`>`) operator.
+-- The comparison will be made using the greater (`>`) operator.
 --
 -- @rulecomponent rule_greater
 -- @param table

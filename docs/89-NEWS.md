@@ -70,6 +70,9 @@ This document was last updated at commit v4.3-197-g9085ed631.
    slightly. The border is now applied before the titlebar offset. This should
    not affect most users unless you had mitigated the bug it fixes by adding
    the titlebar offset in your rules.
+ * Setting `awful.rules.rules` now append the rules to the existing set.
+   Clearing the rules was never officially supported. If you *really* want the
+   old behavior, use `awful.rules.rules = {}; awful.rules.rules = my_new_rules`.
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes
