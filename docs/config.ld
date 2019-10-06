@@ -471,6 +471,7 @@ file = {
         '../lib/naughty/constants.lua',
         '../lib/naughty/dbus.lua',
         '../lib/beautiful/gtk.lua',
+        '../lib/ruled/init.lua',
 
         -- Ignore some parts of the widget library
         '../lib/awful/widget/init.lua',
