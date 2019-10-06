@@ -730,16 +730,20 @@ function titlebar.widget.button(c, name, selector, action)
     end
     ret.state = ""
     if action then
-        ret:buttons(abutton({ }, 1, nil, function()
-            ret.state = ""
-            update()
-            action(c, selector(c))
-        end))
+        ret.buttons = {
+            abutton({ }, 1, nil, function()
+                ret.state = ""
+                update()
+                action(c, selector(c))
+            end)
+        }
     else
-        ret:buttons(abutton({ }, 1, nil, function()
-            ret.state = ""
-            update()
-        end))
+        ret.buttons = {
+            abutton({ }, 1, nil, function()
+                ret.state = ""
+                update()
+            end)
+        }
     end
     ret:connect_signal("mouse::enter", function()
         ret.state = "hover"
