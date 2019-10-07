@@ -1,28 +1,11 @@
 local timer = require("gears.timer")
-local awful = require("awful")
 local gtable = require("gears.table")
-local gdebug = require("gears.debug")
 
 local runner = {
     quit_awesome_on_error = os.getenv('TEST_PAUSE_ON_ERRORS') ~= '1',
 }
 
 local verbose = os.getenv('VERBOSE') == '1'
-
--- Helpers.
-
---- Add some rules to awful.rules.rules, after the defaults.
-local dep = gdebug.deprecate
-gdebug.deprecate = function() end
-local default_rules = gtable.clone(awful.rules.rules)
-gdebug.deprecate = dep
-
-runner.add_to_default_rules = function(r)
-    gdebug.deprecate = function() end
-    awful.rules.rules = gtable.clone(default_rules)
-    table.insert(awful.rules.rules, r)
-    gdebug.deprecate = dep
-end
 
 -- Was the runner started already?
 local running = false

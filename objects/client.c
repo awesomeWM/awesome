@@ -255,7 +255,7 @@
  *   (from `awful.client.focus.history.previous`).
  * * *menu.clients*: When using the builtin client menu
  *   (from `awful.menu.clients`).
- * * *rules*: When a new client is focused from a rule (from `awful.rules`).
+ * * *rules*: When a new client is focused from a rule (from `ruled.client`).
  * * *screen.focus*: When a screen is focused (from `awful.screen.focus`).
  *
  * Default implementation: `awful.ewmh.activate`.
@@ -596,7 +596,7 @@
  * multiple of the character size. Honoring size hints will cause the terminal
  * window to have a small gap at the bottom.
  *
- * This is enabled by default. To disable it by default, see `awful.rules`.
+ * This is enabled by default. To disable it by default, see `ruled.client`.
  *
  * **Signal:**
  *
@@ -946,8 +946,8 @@
  *        blacklisted_snid[snid] = c
  *    end
  *
- *    awful.rules.add_rule_source(
- *        "snid", fix_startup_id, {}, {"awful.spawn", "awful.rules"}
+ *    ruled.client.add_rule_source(
+ *        "snid", fix_startup_id, {}, {"awful.spawn", "ruled.client"}
  *    )
  *
  * **Signal:**

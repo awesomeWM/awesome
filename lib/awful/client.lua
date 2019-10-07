@@ -1296,7 +1296,7 @@ end
 -- @staticfct awful.client.iterate
 -- @usage -- un-minimize all urxvt instances
 -- local urxvt = function (c)
---   return awful.rules.match(c, {class = "URxvt"})
+--   return ruled.client.match(c, {class = "URxvt"})
 -- end
 --
 -- for c in awful.client.iterate(urxvt) do
@@ -1326,7 +1326,7 @@ end
 -- @usage -- run or raise urxvt (perhaps, with tabs) on modkey + semicolon
 -- awful.key({ modkey, }, 'semicolon', function ()
 --     local matcher = function (c)
---         return awful.rules.match(c, {class = 'URxvt'})
+--         return ruled.client.match(c, {class = 'URxvt'})
 --     end
 --     awful.client.run_or_raise('urxvt', matcher)
 -- end);

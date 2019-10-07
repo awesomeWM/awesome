@@ -1684,8 +1684,8 @@ end
 -- Register standard signals.
 capi.client.connect_signal("property::screen", function(c)
     -- First, the delayed timer is necessary to avoid a race condition with
-    -- awful.rules. It is also messing up the tags before the user have a chance
-    -- to set them manually.
+    -- `ruled.client`. It is also messing up the tags before the user have a
+    -- chance to set them manually.
     timer.delayed_call(function()
         if not c.valid then
             return

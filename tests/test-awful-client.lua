@@ -1,5 +1,7 @@
 local awful = require("awful")
 local test_client = require("_client")
+local cruled = require("ruled.client")
+local gdebug = require("gears.debug")
 
 local has_spawned = false
 local steps = {
@@ -177,7 +179,10 @@ end)
 local has_error
 
 -- Disable awful.screen.preferred(c)
-awful.rules.rules[1].properties.screen = nil
+local dep = gdebug.deprecate
+gdebug.deprecate = function() end
+cruled.rules[1].properties.screen = nil
+gdebug.deprecate = dep
 
 table.insert(steps, function()
     -- Make sure there is no extra callbacks that causes double screen changes

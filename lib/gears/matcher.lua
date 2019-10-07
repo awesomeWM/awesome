@@ -3,7 +3,7 @@
 -- Sources
 -- =======
 --
--- This module holds the business logic used by `awful.rules`. It provides an
+-- This module holds the business logic used by `ruled.client`. It provides an
 -- object on which one can add sets of rules or, alternatively, functions.
 -- In this module, the sets of rules or custom functions are called sources.
 --
@@ -29,11 +29,11 @@
 --
 -- @DOC_text_gears_matcher_types_EXAMPLE@
 --
--- More examples are available in `awful.rules`.
+-- More examples are available in `ruled.client`.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @see awful.rules
+-- @see ruled.client
 -- @module gears.matcher
 
 local gtable = require("gears.table")
@@ -445,7 +445,7 @@ function matcher:remove_matching_source(name)
     return false
 end
 
---- Apply awful.rules.rules to an object.
+--- Apply ruled.client.rules to an object.
 --
 -- Calling this will apply all properties provided by the matching functions
 -- and rules.

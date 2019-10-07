@@ -185,7 +185,7 @@
 --
 -- This should (if the program correctly implements the protocol) result in
 -- `c.startup_id` to at least match `something`.
--- This identifier can then be used in `awful.rules` to configure the client.
+-- This identifier can then be used in `ruled.client` to configure the client.
 --
 -- Awesome can automatically set the `DESKTOP_STARTUP_ID` variable. This is used
 -- by `awful.spawn` to specify additional rules for the startup. For example:
@@ -206,7 +206,7 @@
 --      })'
 --
 -- This table contains the client properties that are valid when used the
--- `sn_rules` or `prop` function argument. They are the same as in `awful.rules`.
+-- `sn_rules` or `prop` function argument. They are the same as in `ruled.client`.
 --
 --@DOC_rules_index_COMMON@
 --
@@ -334,7 +334,7 @@ end
 -- Applying properties or running a callback requires the program/client to
 -- support startup notifications.
 --
--- See `awful.rules.execute` for more details about the format of `sn_rules`.
+-- See `ruled.client.execute` for more details about the format of `sn_rules`.
 --
 -- @tparam string|table cmd The command.
 -- @tparam[opt=true] table|boolean sn_rules A table of properties to be applied
@@ -636,7 +636,7 @@ end
 -- command and rules, you need to specify an UID or only the first one will be
 -- executed.
 --
--- The `rules` are standard `awful.rules`.
+-- The `rules` are standard `ruled.client`.
 --
 -- This function depends on the startup notification protocol to be correctly
 -- implemented by the command. See `client.startup_id` for more information.
@@ -649,7 +649,7 @@ end
 -- @tparam[opt] string unique_id A string to identify the client so it isn't executed
 --  multiple time.
 -- @tparam[opt] function callback A callback function when the client is created.
--- @see awful.rules
+-- @see ruled.client
 -- @staticfct awful.spawn.once
 function spawn.once(cmd, rules, matcher, unique_id, callback)
     local hash = unique_id or hash_command(cmd, rules)
@@ -666,7 +666,7 @@ end
 -- This is like `awful.spawn.once`, but will spawn new instances if the previous
 -- has finished.
 --
--- The `rules` are standard `awful.rules`.
+-- The `rules` are standard `ruled.client`.
 --
 -- This function depends on the startup notification protocol to be correctly
 -- implemented by the command. See `client.startup_id` for more information.
@@ -682,7 +682,7 @@ end
 -- @tparam[opt] string unique_id A string to identify the client so it isn't executed
 --  multiple time.
 -- @tparam[opt] function callback A callback function when the client is created.
--- @see awful.rules
+-- @see ruled.client
 -- @staticfct awful.spawn.single_instance
 function spawn.single_instance(cmd, rules, matcher, unique_id, callback)
     local hash = unique_id or hash_command(cmd, rules)
@@ -709,7 +709,7 @@ local raise_rules = {focus = true, switch_to_tags = true, raise = true}
 -- @tparam[opt] string unique_id A string to identify the client so it isn't executed
 --  multiple time.
 -- @tparam[opt] function callback A callback function when the client is created.
--- @see awful.rules
+-- @see ruled.client
 -- @treturn client The client if it already exists.
 -- @staticfct awful.spawn.raise_or_spawn
 -- @request client activate spawn.raise_or_spawn granted Activate a client when
