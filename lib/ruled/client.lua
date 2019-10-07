@@ -79,6 +79,11 @@
 -- Note that all rules can have an `id` field. This can then be used to find
 -- the rule. For example, it can be used in `remove_rule` instead of the table.
 --
+-- Flowchart
+-- =========
+--
+-- ![Client rules](../images/client_rules.svg)
+--
 -- Applicable client properties
 -- ===
 --
