@@ -67,6 +67,8 @@ client.focus = require("awful.client.focus")
 --
 --    awful.placement.no_overlap+awful.placement.no_offscreen
 --
+-- @DOC_sequences_client_rules_placement_EXAMPLE@
+--
 -- @clientruleproperty placement
 -- @see awful.placement
 
@@ -84,6 +86,9 @@ client.focus = require("awful.client.focus")
 -- @see awful.placement
 
 --- The client default tag.
+--
+-- @DOC_sequences_client_rules_tags_EXAMPLE@
+--
 -- @clientruleproperty tag
 -- @param tag
 -- @see tag
@@ -111,11 +116,7 @@ client.focus = require("awful.client.focus")
 -- If a table is used, all of its properties will be passed to the tag
 -- constructor:
 --
---    new_tag = {
---        name     = "My new tag!", -- The tag name.
---        layout   = awful.layout.suit.max, -- Set the tag layout.
---        volatile = true, -- Remove the tag when the client is closed.
---    }
+-- @DOC_sequences_client_rules_new_tag_EXAMPLE@
 --
 -- @tparam[opt=false] table|string|boolean new_tag
 -- @clientruleproperty new_tag
@@ -125,6 +126,9 @@ client.focus = require("awful.client.focus")
 
 --- Unselect the current tags and select this client tags.
 -- Note that this property was called `switchtotag` in previous Awesome versions.
+--
+-- @DOC_sequences_client_rules_switch_to_tags_EXAMPLE@
+--
 -- @clientruleproperty switch_to_tags
 -- @param[opt=false] boolean
 -- @see tag.selected
