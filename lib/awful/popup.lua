@@ -293,9 +293,9 @@ end
 -- @property minimum_height
 -- @tparam[opt=1] number The minimum height
 
---- The popup minimum width.
--- @property maxmimum_width
--- @tparam[opt=1] number The maxmimum width
+--- The popup maximum width.
+-- @property maximum_width
+-- @tparam[opt=1] number The maximum width
 
 --- The popup maximum height.
 -- @property maximum_height
