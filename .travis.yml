@@ -42,6 +42,7 @@ addons:
       - xvfb
       - zsh
       - x11-apps
+      - vim-nox
       # Need xorg-macros
       - xutils-dev
       # lgi.
