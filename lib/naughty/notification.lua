@@ -438,14 +438,18 @@ local notification = {}
 --- Destroy notification by notification object.
 --
 -- @method destroy
--- @tparam string reason One of the reasons from `notification_closed_reason`
+-- @tparam number reason One of the reasons from
+--   `naughty.constants.notification_closed_reason`.
 -- @tparam[opt=false] boolean keep_visible If true, keep the notification visible
 -- @return True if the popup was successfully destroyed, false otherwise
 function notification:destroy(reason, keep_visible)
     if self._private.is_destroyed then
-          gdebug.print_warning("Trying to destroy the same notification twice. It"..
-            " was destroyed because: "..self._private.destroy_reason)
-          return false
+        gdebug.print_warning(string.format(
+            "Trying to destroy an already destroyed notification. "..
+            "original reason=%s, reason=%s, title=%s, text=%s\n%s",
+            self._private.destroy_reason, reason, self.title, self.text,
+            _G.debug.traceback()))
+        return false
     end
 
     reason = reason or cst.notification_closed_reason.dismissed_by_user
