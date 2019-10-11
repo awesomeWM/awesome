@@ -133,6 +133,13 @@ end
 function imagebox:set_image(image)
     local setup_succeed
 
+    if type(image) == "userdata" then
+        -- This function is not documented to handle userdata objects, but
+        -- historically it did, and it did by just assuming they refer to a
+        -- cairo surface.
+        image = surface.load(image)
+    end
+
     if type(image) == "string" then
         -- try to load rsvg handle from file
         setup_succeed = load_and_apply(self, image, load_rsvg_handle, set_handle)
