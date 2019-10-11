@@ -28,9 +28,11 @@ if source_date_epoch and os.getenv("SOURCE_DIRECTORY") then
     end
 end
 
---- Set the clock's format
+--- Set the clock's format.
+-- For information about the format specifiers, see
+-- [the GLib docs](https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format).
 -- @property format
--- @tparam string format The new time format.  This can contain pango markup
+-- @tparam string format The new time format. This can contain pango markup.
 
 function textclock:set_format(format)
     self._private.format = format
