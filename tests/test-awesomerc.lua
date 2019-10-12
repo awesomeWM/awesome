@@ -24,6 +24,8 @@ local function num_pairs(container_table)
   return number_of_items
 end
 
+local test_context = {}
+
 local steps = {
     function(count)
         if count <= 5 then
@@ -239,11 +241,22 @@ local steps = {
         elseif count == 2 then
             assert(num_pairs(cached_wiboxes) > 0)
             assert(num_pairs(cached_wiboxes[s]) == 1)
+
+        elseif (
+            test_context.hotkeys01_count_vim and
+            (count - test_context.hotkeys01_count_vim) == 2
+        ) then
+            -- new wibox instance should be generated for including vim hotkeys:
+            assert(num_pairs(cached_wiboxes[s]) == 2)
         end
 
         local hotkeys_wibox
+        local visible_hotkeys_widget
         for _, widget in pairs(cached_wiboxes[s]) do
             hotkeys_wibox = widget.wibox
+            if hotkeys_wibox.visible then
+                visible_hotkeys_widget = widget
+            end
         end
 
         if count == 2 then
@@ -255,7 +268,38 @@ local steps = {
         elseif count == 3 then
             assert(not hotkeys_wibox.visible)
             root.fake_input("key_release", "Super_L")
-            return true
+            -- now let's run vim so hotkeys widget will show hotkeys for it:
+            test_context.hotkeys01_clients_before = #client.get()
+            awful.spawn("xterm -e vim")
+
+        elseif not test_context.hotkeys01_count_vim then
+            -- if xterm with vim got already opened:
+            if (
+                    test_context.hotkeys01_clients_before and
+                    test_context.hotkeys01_clients_before < #client.get()
+            ) then
+                -- open hotkeys popup with vim hotkeys:
+                awful.key.execute({modkey}, "s")
+                test_context.hotkeys01_count_vim = count
+            end
+
+        elseif test_context.hotkeys01_count_vim then
+            if (count - test_context.hotkeys01_count_vim) == 1 then
+                assert(visible_hotkeys_widget ~= nil)
+                assert(visible_hotkeys_widget.current_page == 1)
+                -- Should change the page on PgDn:
+                root.fake_input("key_press", "Next")
+            elseif (count - test_context.hotkeys01_count_vim) == 2 then
+                assert(visible_hotkeys_widget ~= nil)
+                assert(visible_hotkeys_widget.current_page == 2)
+                root.fake_input("key_release", "Next")
+                -- Should disappear on anykey
+                root.fake_input("key_press", "Super_L")
+            elseif (count - test_context.hotkeys01_count_vim) == 3 then
+                assert(not visible_hotkeys_widget)
+                root.fake_input("key_release", "Super_L")
+                return true
+            end
         end
     end,
 
