@@ -15,10 +15,13 @@ local function new_tag(_, args)
     local ret = gears_obj()
     awesome._forward_class(ret, tag)
 
-    ret.data = {}
+    ret._private = {}
     ret.name = tostring(args.name) or "test"
     ret.activated = true
     ret.selected = not has_selected_tag(args.screen)
+
+    -- Deprecated.
+    ret.data = ret._private
 
     function ret:clients(_) --TODO handle new
         local list = {}

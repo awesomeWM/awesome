@@ -277,7 +277,6 @@ local function new(args)
         return ret
     end
 
-    w._private = {}
     ret.drawin = w
     ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")

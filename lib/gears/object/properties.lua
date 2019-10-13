@@ -54,7 +54,8 @@ function object.capi_index_fallback(class, args)
         end
 
         -- Use the fallback property table
-        return cobj.data[prop]
+        assert(prop ~= "_private")
+        return cobj._private[prop]
     end
 
     local setter = args.setter or function(cobj, prop, value)
@@ -74,7 +75,7 @@ function object.capi_index_fallback(class, args)
         end
 
         -- Use the fallback property table
-        cobj.data[prop] = value
+        cobj._private[prop] = value
 
         -- Emit the signal
         if args.auto_emit then

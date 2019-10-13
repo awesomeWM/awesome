@@ -752,7 +752,7 @@ function module.display_tags()
                     selected            = t.selected,
                     icon                = t.icon,
                     screen              = t.screen,
-                    data                = t.data,
+                    _private            = t._private,
                     clients             = t.clients,
                     layout              = t.layout,
                     master_width_factor = t.master_width_factor,

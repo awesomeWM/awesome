@@ -437,11 +437,18 @@ luaA_class_index(lua_State *L)
 
     lua_class_property_t *prop = luaA_class_property_get(L, class, 2);
 
-    /* Is this the special 'data' property? This is available on all objects and
-     * thus not implemented as a lua_class_property_t.
+    /* This is the table storing the object private variables.
      */
-    if (A_STREQ(attr, "data"))
+    if (A_STREQ(attr, "_private"))
     {
+        luaA_checkudata(L, 1, class);
+        luaA_getuservalue(L, 1);
+        lua_getfield(L, -1, "data");
+        return 1;
+    }
+    else if (A_STREQ(attr, "data"))
+    {
+        luaA_deprecate(L, "Use `._private` instead of `.data`");
         luaA_checkudata(L, 1, class);
         luaA_getuservalue(L, 1);
         lua_getfield(L, -1, "data");

@@ -150,7 +150,7 @@ end
 -- Compute more useful viewport metadata frrom_sparse(add)om the list of output.
 -- @treturn table An viewport with more information.
 local function update_screen_viewport(s)
-    local viewport = s.data.viewport
+    local viewport = s._private.viewport
 
     if #ascreen._viewports == 0 then
         ascreen._viewports = update_viewports(false)
@@ -171,7 +171,7 @@ local function update_screen_viewport(s)
         end
 
         if big_a then
-            viewport, s.data.viewport = big_a, big_a
+            viewport, s._private.viewport = big_a, big_a
         end
     end
 
@@ -203,7 +203,7 @@ end
 
 function module.remove_screen_handler(viewport)
     for s in capi.screen do
-        if s.data.viewport and s.data.viewport.id == viewport.id then
+        if s._private.viewport and s._private.viewport.id == viewport.id then
             s:fake_remove()
             return
         end
@@ -212,12 +212,12 @@ end
 
 function module.resize_screen_handler(old_viewport, new_viewport)
     for s in capi.screen do
-        if s.data.viewport and s.data.viewport.id == old_viewport.id then
+        if s._private.viewport and s._private.viewport.id == old_viewport.id then
             local ngeo = new_viewport.geometry
             s:fake_resize(
                 ngeo.x, ngeo.y, ngeo.width, ngeo.height
             )
-            s.data.viewport = new_viewport
+            s._private.viewport = new_viewport
             return
         end
     end
@@ -274,32 +274,32 @@ function module._get_viewports()
 end
 
 local function get_dpi(s)
-    if s.data.dpi or s.data.dpi_cache then
-        return s.data.dpi or s.data.dpi_cache
+    if s._private.dpi or s._private.dpi_cache then
+        return s._private.dpi or s._private.dpi_cache
     end
 
-    if not s.data.viewport then
+    if not s._private.viewport then
         update_screen_viewport(s)
     end
 
     -- Pick a DPI (from best to worst).
     local dpi = ascreen._get_xft_dpi()
-        or (s.data.viewport and s.data.viewport.preferred_dpi or nil)
+        or (s._private.viewport and s._private.viewport.preferred_dpi or nil)
         or get_fallback_dpi()
 
     -- Pick the screen DPI depending on the `autodpi` settings.
     -- Historically, AwesomeWM size unit was the pixel. This assumption is
     -- present in a lot, if not most, user config and is why this cannot be
     -- enable by default for existing users.
-    s.data.dpi_cache = data.autodpi and dpi
+    s._private.dpi_cache = data.autodpi and dpi
         or ascreen._get_xft_dpi()
         or get_fallback_dpi()
 
-    return s.data.dpi_cache
+    return s._private.dpi_cache
 end
 
 local function set_dpi(s, dpi)
-    s.data.dpi = dpi
+    s._private.dpi = dpi
 end
 
 screen.connect_signal("request::create", module.create_screen_handler)
@@ -362,7 +362,7 @@ capi.screen.connect_signal("property::_viewports", function(a)
 
     -- Drop the cache.
     for s in capi.screen do
-        s.data.dpi_cache = nil
+        s._private.dpi_cache = nil
     end
 
     capi.screen.emit_signal("property::viewports", ascreen._get_viewports())
@@ -402,11 +402,11 @@ return function(screen, d)
                            "preferred_dpi"                           } do
 
         screen.object["get_"..prop] = function(s)
-            if not s.data.viewport then
+            if not s._private.viewport then
                 update_screen_viewport(s)
             end
 
-            local a = s.data.viewport or {}
+            local a = s._private.viewport or {}
 
             return a[prop] or nil
         end

@@ -6,7 +6,10 @@ local gears_obj = require("gears.object")
 -- handlers.
 local function _shim_fake_class()
     local obj = gears_obj()
-    obj.data = {}
+    obj._private = {}
+
+    -- Deprecated.
+    obj.data = obj._private
 
     local meta = {
         __index     = function()end,

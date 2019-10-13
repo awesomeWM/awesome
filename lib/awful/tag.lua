@@ -283,7 +283,7 @@ function tag.add(name, props)
     local newtag = capi.tag{ name = name }
 
     -- Start with a fresh property table to avoid collisions with unsupported data
-    newtag.data.awful_tag_properties = {screen=properties.screen, index=properties.index}
+    newtag._private.awful_tag_properties = {screen=properties.screen, index=properties.index}
 
     newtag.activated = true
 
@@ -402,7 +402,7 @@ function tag.object.delete(self, fallback_tag, force)
     end
 
     -- delete the tag
-    self.data.awful_tag_properties.screen = nil
+    self._private.awful_tag_properties.screen = nil
     self.activated = false
 
     -- Update all indexes
@@ -1519,7 +1519,7 @@ end
 -- @tparam tag _tag The tag.
 -- @return The data table.
 function tag.getdata(_tag)
-    return _tag.data.awful_tag_properties
+    return _tag._private.awful_tag_properties
 end
 
 --- Get a tag property.
@@ -1532,8 +1532,9 @@ end
 -- @return The property.
 function tag.getproperty(_tag, prop)
     if not _tag then return end -- FIXME: Turn this into an error?
-    if _tag.data.awful_tag_properties then
-       return _tag.data.awful_tag_properties[prop]
+
+    if _tag._private.awful_tag_properties then
+       return _tag._private.awful_tag_properties[prop]
     end
 end
 
@@ -1548,12 +1549,12 @@ end
 -- @param prop The property name.
 -- @param value The value.
 function tag.setproperty(_tag, prop, value)
-    if not _tag.data.awful_tag_properties then
-        _tag.data.awful_tag_properties = {}
+    if not _tag._private.awful_tag_properties then
+        _tag._private.awful_tag_properties = {}
     end
 
-    if _tag.data.awful_tag_properties[prop] ~= value then
-        _tag.data.awful_tag_properties[prop] = value
+    if _tag._private.awful_tag_properties[prop] ~= value then
+        _tag._private.awful_tag_properties[prop] = value
         _tag:emit_signal("property::" .. prop)
     end
 end
@@ -1731,8 +1732,8 @@ capi.screen.connect_signal("removed", function(s)
     for _, t in pairs(s.tags) do
         t.activated = false
 
-        if t.data.awful_tag_properties then
-            t.data.awful_tag_properties.screen = nil
+        if t._private.awful_tag_properties then
+            t._private.awful_tag_properties.screen = nil
         end
     end
 end)
