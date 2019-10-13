@@ -161,15 +161,9 @@ function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_
     magic_obj["get_"..name] = function(self)
         self = is_object and self or obj
 
-        --FIXME v5 all objects should use _private instead of getproperty.
-        if not self._private then
-            self._private = {}
-        end
-
         self._private[name] = self._private[name] or copy_object(
             obj, {}, name, capi_name, is_object, join_if, set_empty
         )
-
 
         assert(self._private[name])
         return self._private[name]
