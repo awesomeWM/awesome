@@ -11,7 +11,7 @@
 -- Grab environment we need
 local setmetatable = setmetatable
 local ipairs = ipairs
-local capi = { button = button }
+local capi = { button = button, root = root }
 local gmath = require("gears.math")
 local gtable = require("gears.table")
 
@@ -133,13 +133,22 @@ end
 
 function button:trigger()
     local data = reverse_map[self]
-    if data.press then
-        data.press()
+
+    local press = data.weak_content.press
+
+    if press then
+        press()
     end
 
-    if data.release then
-        data.release()
+    local release = data.weak_content.release
+
+    if release then
+        release()
     end
+end
+
+function button:get_has_root_binding()
+    return capi.root.has_button(self)
 end
 
 local function index_handler(self, k)
@@ -154,7 +163,11 @@ local function index_handler(self, k)
     local data = reverse_map[self]
     assert(data)
 
-    return data[k]
+    if data[k] ~= nil then
+        return data[k]
+    else
+        return data.weak_content[k]
+    end
 end
 
 local function newindex_handler(self, key, value)
@@ -165,7 +178,11 @@ local function newindex_handler(self, key, value)
     local data = reverse_map[self]
     assert(data)
 
-    data[key] = value
+    if data.weak_content[key] ~= nil then
+        data.weak_content[key] = value
+    else
+        data[key] = value
+    end
 end
 
 local obj_mt = {
@@ -212,7 +229,15 @@ local function new_common(mod, _button, press, release)
         end
     end
 
-    reverse_map[ret] = {_is_capi_button = false}
+    reverse_map[ret] = {
+        -- Use weak tables to let Lua 5.1 and Luajit GC the `awful.buttons`,
+        -- Lua 5.3 is smart enough to figure this out.
+        weak_content = setmetatable({
+            press   = press,
+            release = release,
+        }, {__mode = "v"}),
+        _is_capi_button = false
+    }
 
     return setmetatable(ret, obj_mt)
 end
