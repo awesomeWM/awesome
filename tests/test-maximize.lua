@@ -232,6 +232,30 @@ gears.table.merge(steps, {
 
         return true
     end,
+    -- Maximize then unmaximize. The window state should be restored.
+    function()
+        if #client.get() > 0 then return end
+
+        test_client(nil,nil,nil,nil,nil,{maximize_before=true,unmaximize_after=true})
+
+        return true
+    end,
+    function()
+        local c = client.get()[1]
+
+        if not c then return end
+
+        assert(not c.maximized_horizontal)
+        assert(not c.maximized_vertical)
+        -- May need to retry
+        if c.maximized then return end
+        assert(not c.immobilized_horizontal)
+        assert(not c.immobilized_vertical)
+
+        c:kill()
+
+        return true
+    end,
     function()
         if #client.get() > 0 then return end
 
