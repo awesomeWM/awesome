@@ -102,49 +102,6 @@ mykeyboardlayout = awful.widget.keyboardlayout()
 -- Create a textclock widget
 mytextclock = wibox.widget.textclock()
 
--- Create a wibox for each screen and add it
--- @TAGLIST_BUTTON@
-local taglist_buttons = {
-    awful.button({ }, 1, function(t) t:view_only() end),
-    awful.button({ modkey }, 1, function(t)
-                                if client.focus then
-                                    client.focus:move_to_tag(t)
-                                end
-                            end),
-    awful.button({ }, 3, awful.tag.viewtoggle),
-    awful.button({ modkey }, 3, function(t)
-                                if client.focus then
-                                    client.focus:toggle_tag(t)
-                                end
-                            end),
-    awful.button({ }, 4, function(t) awful.tag.viewnext(t.screen) end),
-    awful.button({ }, 5, function(t) awful.tag.viewprev(t.screen) end),
-}
-
--- @TASKLIST_BUTTON@
-local tasklist_buttons = {
-    awful.button({ }, 1, function (c)
-                            if c == client.focus then
-                                c.minimized = true
-                            else
-                                c:emit_signal(
-                                    "request::activate",
-                                    "tasklist",
-                                    {raise = true}
-                                )
-                            end
-                        end),
-    awful.button({ }, 3, function()
-                            awful.menu.client_list({ theme = { width = 250 } })
-                        end),
-    awful.button({ }, 4, function ()
-                            awful.client.focus.byidx(1)
-                        end),
-    awful.button({ }, 5, function ()
-                            awful.client.focus.byidx(-1)
-                        end),
-}
-
 -- @DOC_WALLPAPER@
 screen.connect_signal("request::wallpaper", function(s)
     -- Wallpaper
@@ -165,6 +122,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 
     -- Create a promptbox for each screen
     s.mypromptbox = awful.widget.prompt()
+
     -- Create an imagebox widget which will contain an icon indicating which layout we're using.
     -- We need one layoutbox per screen.
     s.mylayoutbox = awful.widget.layoutbox {
@@ -181,14 +139,44 @@ screen.connect_signal("request::desktop_decoration", function(s)
     s.mytaglist = awful.widget.taglist {
         screen  = s,
         filter  = awful.widget.taglist.filter.all,
-        buttons = taglist_buttons
+        buttons = {
+            awful.button({ }, 1, function(t) t:view_only() end),
+            awful.button({ modkey }, 1, function(t)
+                                            if client.focus then
+                                                client.focus:move_to_tag(t)
+                                            end
+                                        end),
+            awful.button({ }, 3, awful.tag.viewtoggle),
+            awful.button({ modkey }, 3, function(t)
+                                            if client.focus then
+                                                client.focus:toggle_tag(t)
+                                            end
+                                        end),
+            awful.button({ }, 4, function(t) awful.tag.viewnext(t.screen) end),
+            awful.button({ }, 5, function(t) awful.tag.viewprev(t.screen) end),
+        }
     }
 
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist {
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
-        buttons = tasklist_buttons
+        buttons = {
+            awful.button({ }, 1, function (c)
+                                     if c == client.focus then
+                                         c.minimized = true
+                                     else
+                                         c:emit_signal(
+                                             "request::activate",
+                                             "tasklist",
+                                             {raise = true}
+                                         )
+                                     end
+                                 end),
+            awful.button({ }, 3, function() awful.menu.client_list { theme = { width = 250 } } end),
+            awful.button({ }, 4, function() awful.client.focus.byidx( 1) end),
+            awful.button({ }, 5, function() awful.client.focus.byidx(-1) end),
+        }
     }
 
     -- @DOC_WIBAR@
