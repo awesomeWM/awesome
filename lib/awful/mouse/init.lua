@@ -529,6 +529,15 @@ end)
 --  when button 1 is pressed.
 -- @staticfct mouse.coords
 
+capi.client.connect_signal("scanning", function()
+    capi.client.emit_signal("request::default_mousebindings", "startup")
+end)
+
+-- Private function to be used by `ruled.client`.
+function mouse._get_client_mousebindings()
+    return default_buttons
+end
+
 return mouse
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

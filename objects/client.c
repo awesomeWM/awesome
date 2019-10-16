@@ -244,6 +244,17 @@
  * @signal request::urgent
  */
 
+/** Emitted during startup to gather the default client mousebindings.
+ *
+ * This signals gives a chance to all module to register new client keybindings.
+ * Assuming the client rules does not overwrite them with the `keys` property,
+ * they will be added to all clients.
+ *
+ * @signal request::default_mousebindings
+ * @tparam string context The reason why the signal was sent (currently always
+ *  `startup`).
+*/
+
 /** When a client gets tagged.
  * @signal tagged
  * @tag t The tag object.
