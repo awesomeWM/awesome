@@ -6,7 +6,7 @@
 -- @inputmodule awful.keyboard
 ---------------------------------------------------------------------------
 
-local capi   = {root = root, awesome = awesome}
+local capi   = {root = root, awesome = awesome, client = client}
 local module = {}
 
 --- Convert the modifiers into pc105 key names
@@ -138,4 +138,39 @@ function module.remove_global_keybinding(key)
     capi.root._remove_key(key)
 end
 
+
+local default_keys = {}
+
+--- Add an `awful.key` to the default client keys.
+--
+-- @staticfct awful.keyboard.append_client_keybinding
+-- @tparam awful.key key The key.
+-- @emits client_keybinding::added
+-- @emitstparam client_keybinding::added awful.key key The key.
+-- @see awful.key
+
+function module.append_client_keybinding(key)
+    table.insert(default_keys, key)
+
+    for _, c in ipairs(capi.client.get(nil, false)) do
+        c:append_keybinding(key)
+    end
+
+    capi.client.emit_signal("client_keybinding::added", key)
+end
+
+--- Add a `awful.key`s to the default client keys.
+--
+-- @staticfct awful.keyboard.append_client_keybindings
+-- @tparam table keys A table containing `awful.key` objects.
+-- @emits client_keybinding::added
+-- @emitstparam client_keybinding::added awful.key key The key.
+-- @see awful.key
+-- @see awful.keyboard.append_client_keybinding
+
+function module.append_client_keybindings(keys)
+    for _, key in ipairs(keys) do
+        module.append_client_keybinding(key)
+    end
+end
 return module
