@@ -14,6 +14,7 @@ local ipairs = ipairs
 local capi = { button = button, root = root }
 local gmath = require("gears.math")
 local gtable = require("gears.table")
+local gobject = require("gears.object")
 
 local button = { mt = {} }
 
@@ -118,12 +119,47 @@ function button:set_modifiers(mod)
     end
 end
 
-for _, prop in ipairs { "description", "group", "on_press", "on_release", "name" } do
+for _, prop in ipairs { "description", "group", "name" } do
     button["get_"..prop] = function(self)
         return reverse_map[self][prop]
     end
     button["set_"..prop] = function(self, value)
         reverse_map[self][prop] = value
+    end
+end
+
+-- Store the callbacks as weakly as possible.
+--
+-- Lua 5.1 GC is not very smart with reference loops. When the titlebar has
+-- buttons, they usually contain the client in their lambda. In turn, storing
+-- the callback in something stored by the titlebar, which is stored by the
+-- clients, will not be GC-able as-is.
+--
+-- To work around this, we use weak `v` references stored within a weak `k`
+-- table. So both the `awful.button` and the callbacks are weak in their own
+-- realm. To avoid the GC of the callback, it is important to use
+-- `connect_signal` on the `capi.button` to keep a reference alive.
+for _, prop in ipairs { "press", "release" } do
+    local long_name = "on_"..prop
+
+    button["get_"..long_name] = function(self)
+        return reverse_map[self].weak_content[long_name]
+    end
+    button["set_"..long_name] = function(self, value)
+        local old = reverse_map[self].weak_content[long_name]
+        local new = function(_, ...) value(...) end
+
+        if old then
+            for i=1, 4 do
+                self[i]:disconnect_signal(prop, old)
+            end
+        end
+
+        reverse_map[self].weak_content[prop] = new
+
+        for i=1, 4 do
+            self[i]:connect_signal(prop, new)
+        end
     end
 end
 
@@ -134,13 +170,13 @@ end
 function button:trigger()
     local data = reverse_map[self]
 
-    local press = data.weak_content.press
+    local press = self.on_press or data.weak_content.press
 
     if press then
         press()
     end
 
-    local release = data.weak_content.release
+    local release = self.on_release or data.weak_content.release
 
     if release then
         release()
@@ -149,6 +185,13 @@ end
 
 function button:get_has_root_binding()
     return capi.root.has_button(self)
+end
+
+-- This is used by the keygrabber and prompt to identify valid awful.button
+-- objects. It *cannot* be put directly in the object since `capi` uses a lot
+-- of `next` internally and fixing that would suck more.
+function button:get__is_awful_button()
+    return true
 end
 
 local function index_handler(self, k)
@@ -219,14 +262,14 @@ local function new_common(mod, _button, press, release)
     local ret = {}
     local subsets = gmath.subsets(ignore_modifiers)
     for _, set in ipairs(subsets) do
-        ret[#ret + 1] = capi.button({ modifiers = gtable.join(mod, set),
-                                      button = _button })
-        if press then
-            ret[#ret]:connect_signal("press", function(_, ...) press(...) end)
-        end
-        if release then
-            ret[#ret]:connect_signal("release", function (_, ...) release(...) end)
-        end
+        local sub_button = capi.button {
+            modifiers = gtable.join(mod, set),
+            button    = _button
+        }
+
+        sub_button._private._legacy_convert_to = ret
+
+        ret[#ret + 1] = sub_button
     end
 
     reverse_map[ret] = {
@@ -238,6 +281,14 @@ local function new_common(mod, _button, press, release)
         }, {__mode = "v"}),
         _is_capi_button = false
     }
+
+    if press then
+        button.set_on_press(ret, press)
+    end
+
+    if release then
+        button.set_on_release(ret, release)
+    end
 
     return setmetatable(ret, obj_mt)
 end
@@ -260,6 +311,10 @@ end
 function button.mt:__call(...)
     return button.new(...)
 end
+
+gobject.properties(capi.button, {
+    auto_emit = true,
+})
 
 return setmetatable(button, button.mt)
 
