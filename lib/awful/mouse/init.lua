@@ -434,7 +434,27 @@ local default_buttons = {}
 
 function mouse.append_client_mousebinding(button)
     table.insert(default_buttons, button)
+
+    for _, c in ipairs(capi.client.get(nil, false)) do
+        c:append_mousebinding(button)
+    end
+
     capi.client.emit_signal("client_mousebinding::added", button)
+end
+
+--- Add a `awful.button`s to the default client buttons.
+--
+-- @staticfct awful.mouse.append_client_mousebindings
+-- @tparam table buttons A table containing `awful.button` objects.
+-- @see awful.button
+-- @see awful.keyboard.append_client_keybinding
+-- @see awful.mouse.append_client_mousebinding
+-- @see awful.keyboard.append_client_keybindings
+
+function mouse.append_client_mousebindings(buttons)
+    for _, button in ipairs(buttons) do
+        mouse.append_client_mousebinding(button)
+    end
 end
 
 for _, b in ipairs {"left", "right", "middle"} do

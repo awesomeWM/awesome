@@ -148,6 +148,7 @@ local default_keys = {}
 -- @emits client_keybinding::added
 -- @emitstparam client_keybinding::added awful.key key The key.
 -- @see awful.key
+-- @see awful.keyboard.append_client_keybindings
 
 function module.append_client_keybinding(key)
     table.insert(default_keys, key)
@@ -167,7 +168,6 @@ end
 -- @emitstparam client_keybinding::added awful.key key The key.
 -- @see awful.key
 -- @see awful.keyboard.append_client_keybinding
-
 function module.append_client_keybindings(keys)
     for _, key in ipairs(keys) do
         module.append_client_keybinding(key)
