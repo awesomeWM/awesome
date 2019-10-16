@@ -457,6 +457,29 @@ function mouse.append_client_mousebindings(buttons)
     end
 end
 
+--- Remove a mousebinding from the default client buttons.
+--
+-- @staticfct awful.mouse.remove_client_mousebinding
+-- @tparam awful.button button The button.
+-- @treturn boolean True if the button was removed and false if it wasn't found.
+-- @see awful.keyboard.append_client_keybinding
+
+function mouse.remove_client_mousebinding(button)
+    for k, v in ipairs(default_buttons) do
+        if button == v then
+            table.remove(default_buttons, k)
+
+            for _, c in ipairs(capi.client.get(nil, false)) do
+                c:remove_mousebinding(button)
+            end
+
+            return true
+        end
+    end
+
+    return false
+end
+
 for _, b in ipairs {"left", "right", "middle"} do
     mouse.object["is_".. b .."_mouse_button_pressed"] = function()
         return capi.mouse.coords().buttons[1]
