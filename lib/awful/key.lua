@@ -14,6 +14,7 @@ local capi = { key = key, root = root, awesome = awesome }
 local gmath = require("gears.math")
 local gtable = require("gears.table")
 local gdebug = require("gears.debug")
+local gobject = require("gears.object")
 
 --- The keyboard key used to trigger this keybinding.
 --
@@ -128,6 +129,13 @@ function key:get_has_root_binding()
     return capi.root.has_key(self)
 end
 
+-- This is used by the keygrabber and prompt to identify valid awful.key
+-- objects. It *cannot* be put directly in the object since `capi` uses a lot
+-- of `next` internally and fixing that would suck more.
+function key:get__is_awful_key()
+    return true
+end
+
 local function index_handler(self, k)
     if key["get_"..k] then
         return key["get_"..k](self)
@@ -223,14 +231,26 @@ local function new_common(mod, _key, press, release, data)
     local ret = {}
     local subsets = gmath.subsets(key.ignore_modifiers)
     for _, set in ipairs(subsets) do
-        ret[#ret + 1] = capi.key({ modifiers = gtable.join(mod, set),
-                                   key = _key })
-        if press then
-            ret[#ret]:connect_signal("press", function(_, ...) press(...) end)
-        end
-        if release then
-            ret[#ret]:connect_signal("release", function(_, ...) release(...) end)
-        end
+        local sub_key = capi.key {
+            modifiers = gtable.join(mod, set),
+            key       = _key
+        }
+
+        sub_key._private._legacy_convert_to = ret
+
+        sub_key:connect_signal("press", function(_, ...)
+            if ret.on_press then
+                ret.on_press(...)
+            end
+        end)
+
+        sub_key:connect_signal("release", function(_, ...)
+            if ret.on_release then
+                ret.on_release(...)
+            end
+        end)
+
+        ret[#ret + 1] = sub_key
     end
 
     -- append custom userdata (like description) to a hotkey
@@ -296,6 +316,10 @@ end
 function key.mt:__call(...)
     return key.new(...)
 end
+
+gobject.properties(capi.key, {
+    auto_emit = true,
+})
 
 return setmetatable(key, key.mt)
 
