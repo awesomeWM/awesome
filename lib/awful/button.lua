@@ -261,6 +261,7 @@ local obj_mt = {
 local function new_common(mod, _button, press, release)
     local ret = {}
     local subsets = gmath.subsets(ignore_modifiers)
+
     for _, set in ipairs(subsets) do
         local sub_button = capi.button {
             modifiers = gtable.join(mod, set),
