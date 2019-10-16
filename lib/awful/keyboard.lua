@@ -197,4 +197,13 @@ function module.remove_client_keybinding(key)
     return false
 end
 
+capi.client.connect_signal("scanning", function()
+    capi.client.emit_signal("request::default_keybindings", "context")
+end)
+
+-- Private function to be used by `ruled.client`.
+function module._get_client_keybindings()
+    return default_keys
+end
+
 return module
