@@ -173,4 +173,28 @@ function module.append_client_keybindings(keys)
         module.append_client_keybinding(key)
     end
 end
+
+--- Remove a key from the default client keys.
+--
+-- @staticfct awful.keyboard.remove_client_keybinding
+-- @tparam awful.key key The key.
+-- @treturn boolean True if the key was removed and false if it wasn't found.
+-- @see awful.keyboard.append_client_keybinding
+
+function module.remove_client_keybinding(key)
+    for k, v in ipairs(default_keys) do
+        if key == v then
+            table.remove(default_keys, k)
+
+            for _, c in ipairs(capi.client.get(nil, false)) do
+                c:remove_keybinding(key)
+            end
+
+            return true
+        end
+    end
+
+    return false
+end
+
 return module
