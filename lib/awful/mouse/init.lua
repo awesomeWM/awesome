@@ -421,6 +421,22 @@ function mouse.remove_global_mousebinding(button)
     capi.root._remove_button(button)
 end
 
+local default_buttons = {}
+
+--- Add an `awful.button` to the default client buttons.
+--
+-- @staticfct awful.mouse.append_client_mousebinding
+-- @tparam awful.button button The button.
+-- @emits client_mousebinding::added
+-- @emitstparam client_mousebinding::added awful.button button The button.
+-- @see awful.button
+-- @see awful.keyboard.append_client_keybinding
+
+function mouse.append_client_mousebinding(button)
+    table.insert(default_buttons, button)
+    capi.client.emit_signal("client_mousebinding::added", button)
+end
+
 for _, b in ipairs {"left", "right", "middle"} do
     mouse.object["is_".. b .."_mouse_button_pressed"] = function()
         return capi.mouse.coords().buttons[1]
@@ -469,7 +485,6 @@ end)
 -- @treturn table table.buttons Table containing the status of buttons, e.g. field [1] is true
 --  when button 1 is pressed.
 -- @staticfct mouse.coords
-
 
 return mouse
 
