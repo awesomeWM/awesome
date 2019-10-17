@@ -95,6 +95,11 @@ export GDK_SCALE=1
 # No idea what this does, but it silences a warning that GTK init might print
 export NO_AT_BRIDGE=1
 
+# Enable partial maximization tests if wmctrl is found.
+if command -v wmctrl >/dev/null 2>&1; then
+    export HAS_WMCTRL=1
+fi
+
 if [ $HEADLESS = 1 ]; then
     "$XVFB" $D -noreset -screen 0 "${SIZE}x24" &
     xserver_pid=$!
