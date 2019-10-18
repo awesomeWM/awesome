@@ -108,6 +108,7 @@ Additionally, the following optional dependencies exist:
   SVG files without scaling artifacts
 - [wmctrl](http://tripie.sweb.cz/utils/wmctrl) for testing WM interactions
   with external actions.
+- [vim](https://www.vim.org/) for testing app-specific hotkeys help widget.
 
 ## Running Awesome
 
