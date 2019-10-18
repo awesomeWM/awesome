@@ -107,7 +107,8 @@ Additionally, the following optional dependencies exist:
 - [libRSVG](https://wiki.gnome.org/action/show/Projects/LibRsvg) for displaying
   SVG files without scaling artifacts
 - [wmctrl](http://tripie.sweb.cz/utils/wmctrl) for testing WM interactions
-  with external actions.
+  with external actions
+- [xterm](https://invisible-island.net/xterm/) for various test cases
 
 ## Running Awesome
 
