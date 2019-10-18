@@ -268,9 +268,10 @@ local steps = {
         elseif count == 3 then
             assert(not hotkeys_wibox.visible)
             root.fake_input("key_release", "Super_L")
-            -- now let's run vim so hotkeys widget will show hotkeys for it:
             test_context.hotkeys01_clients_before = #client.get()
-            awful.spawn("xterm -e vim")
+            -- imitate fake client with name "vim"
+            -- so hotkeys widget will offer vim hotkeys:
+            awful.spawn("xterm -title vim cat")
 
         elseif not test_context.hotkeys01_count_vim then
             -- if xterm with vim got already opened:

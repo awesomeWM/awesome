@@ -109,7 +109,6 @@ Additionally, the following optional dependencies exist:
 - [wmctrl](http://tripie.sweb.cz/utils/wmctrl) for testing WM interactions
   with external actions
 - [xterm](https://invisible-island.net/xterm/) for various test cases
-- [vim](https://www.vim.org/) for testing app-specific hotkeys help widget
 
 ## Running Awesome
 
