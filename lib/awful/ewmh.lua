@@ -353,14 +353,37 @@ function ewmh.merge_maximization(c, context, hints)
 
     if not c._delay_maximization then
         c._delay_maximization = function()
-            -- This ignores unlikely corner cases like mismatching toggles.
-            -- That's likely to be an accident anyway.
-            if c._delayed_max_h and c._delayed_max_v then
-                c.maximized = c._delayed_max_h or c._delayed_max_v
-            elseif c._delayed_max_h then
-                c.maximized_horizontal = c._delayed_max_h
-            elseif c._delayed_max_v then
-                c.maximized_vertical = c._delayed_max_v
+            -- Computes the actual X11 atoms before/after
+            local before_max_h = c.maximized or c.maximized_horizontal
+            local before_max_v = c.maximized or c.maximized_vertical
+            local after_max_h, after_max_v
+            if c._delayed_max_h ~= nil then
+                after_max_h = c._delayed_max_h
+            else
+                after_max_h = before_max_h
+            end
+            if c._delayed_max_v ~= nil then
+                after_max_v = c._delayed_max_v
+            else
+                after_max_v = before_max_v
+            end
+            -- Interprets the client's intention based on the client's view
+            if after_max_h and after_max_v then
+                c.maximized = true
+            elseif before_max_h and before_max_v then
+                -- At this point, c.maximized must be true, and the client is
+                -- trying to unmaximize the window, and potentially partial
+                -- maximized the window
+                c.maximized = false
+                if after_max_h ~= after_max_v then
+                    c.maximized_horizontal = after_max_h
+                    c.maximized_vertical = after_max_v
+                end
+            else
+                -- At this point, c.maximized must be false, and the client is
+                -- not trying to fully maximize the window
+                c.maximized_horizontal = after_max_h
+                c.maximized_vertical = after_max_v
             end
         end
 
@@ -383,7 +406,7 @@ function ewmh.merge_maximization(c, context, hints)
         if hints.toggle and c["_delayed_max_"..suffix] ~= nil then
             return not c["_delayed_max_"..suffix]
         elseif hints.toggle then
-            return not c["maximized_"..long_suffix]
+            return not (c["maximized"] or c["maximized_"..long_suffix])
         else
             return hints.status
         end

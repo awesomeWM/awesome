@@ -172,6 +172,82 @@ for _, gravity in ipairs { "NORTH_WEST", "NORTH", "NORTH_EAST", "WEST",
 })
 end
 
+-- Partial maximization tests, which depend on wmctrl as a portable way to generate external requests.
+if os.getenv('HAS_WMCTRL') == '1' then
+    print("Added tests for partial maximization.")
+    gears.table.merge(steps, {
+        function()
+            if #client.get() > 0 then return end
+
+            test_client(nil,nil,nil,nil,nil,{})
+
+            return true
+        end,
+        -- Makes the window partially maximized
+        function()
+            local c = client.get()[1]
+
+            if not c then return end
+
+            c.maximized_vertical = true
+            return true
+        end,
+        -- Maximizes the window externally
+        function()
+            local c = client.get()[1]
+
+            assert(c.maximized_vertical)
+            awful.spawn.with_shell(
+                "wmctrl -i -r " .. tostring(c.window) .. " -b add,maximized_vert,maximized_horz")
+            return true
+        end,
+        -- Partially unmaximizes the window externally
+        function()
+            local c = client.get()[1]
+
+            if not c.maximized then return end
+            awful.spawn.with_shell(
+                "wmctrl -i -r " .. tostring(c.window) .. " -b remove,maximized_vert")
+            return true
+        end,
+        -- Checks if the window is properly partially maximized, then fully maximizes it back externally
+        function()
+            local c = client.get()[1]
+
+            if c.maximized then return end
+            assert(c.maximized_horizontal)
+            assert(not c.maximized_vertical)
+
+            awful.spawn.with_shell(
+                "wmctrl -i -r " .. tostring(c.window) .. " -b add,maximized_vert")
+            return true
+        end,
+        -- Unmaximizes the window externally
+        function()
+            local c = client.get()[1]
+
+            if not c.maximized then return end
+            awful.spawn.with_shell(
+                "wmctrl -i -r " .. tostring(c.window) .. " -b toggle,maximized_vert,maximized_horz", false)
+            return true
+        end,
+        -- Checks that partial maximization is restored, then kills the client.
+        function()
+            local c = client.get()[1]
+
+            if c.maximized then return end
+            assert(c.maximized_horizontal)
+            assert(not c.maximized_vertical)
+
+            c:kill()
+
+            return true
+        end
+    })
+else
+    print("Ignored partial maximization tests because wmctrl is not found.")
+end
+
 local counter = 0
 
 local function geometry_handler(c, context, hints)
@@ -227,6 +303,30 @@ gears.table.merge(steps, {
 
         assert(c.immobilized_horizontal)
         assert(c.immobilized_vertical)
+
+        c:kill()
+
+        return true
+    end,
+    -- Maximize then unmaximize. The window state should be restored.
+    function()
+        if #client.get() > 0 then return end
+
+        test_client(nil,nil,nil,nil,nil,{maximize_before=true,unmaximize_after=true})
+
+        return true
+    end,
+    function()
+        local c = client.get()[1]
+
+        if not c then return end
+
+        assert(not c.maximized_horizontal)
+        assert(not c.maximized_vertical)
+        -- May need to retry
+        if c.maximized then return end
+        assert(not c.immobilized_horizontal)
+        assert(not c.immobilized_vertical)
 
         c:kill()
 

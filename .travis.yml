@@ -38,6 +38,7 @@ addons:
       - dbus-x11
       - xterm
       - xdotool
+      - wmctrl
       - xterm
       - xvfb
       - zsh
