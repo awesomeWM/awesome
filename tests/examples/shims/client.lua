@@ -75,7 +75,8 @@ function client.gen_fake(args)
     ret.name = "Example Client"
     ret._private._struts = { top = 0, right = 0, left = 0, bottom = 0 }
 
-    -- Deprecated.
+    --TODO v5: remove this. This was a private API and thus doesn't need to be
+    -- officially deprecated.
     ret.data = ret._private
 
     -- This is a hack because there's a `:is_transient_for(c2)` method
@@ -245,6 +246,23 @@ function client.gen_fake(args)
     ret.below = false
     ret.above = false
     ret.sticky = false
+
+    -- Declare the deprecated buttons and keys methods.
+    function ret:_keys(new)
+        if new then
+            ret._private.keys = new
+        end
+
+        return ret._private.keys or {}
+    end
+
+    function ret:_buttons(new)
+        if new then
+            ret._private.buttons = new
+        end
+
+        return ret._private.buttons or {}
+    end
 
     -- Add to the client list
     table.insert(clients, ret)
