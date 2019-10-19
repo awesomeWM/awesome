@@ -2,8 +2,6 @@ local root = {_tags={}}
 
 local gtable = require("gears.table")
 
-local hotkeys = nil
-
 function root:tags()
     return root._tags
 end
@@ -86,15 +84,9 @@ local function match_modifiers(mods1, mods2)
 end
 
 local function execute_keybinding(key, event)
-    -- It *could* be extracted from gears.object private API, but it's equally
-    -- ugly as using the list used by the hotkey widget.
-    if not hotkeys then
-        hotkeys = require("awful.key").hotkeys
-    end
-
-    for _, v in ipairs(hotkeys) do
-        if key == v.key and match_modifiers(v.mod, get_mods()) and v[event] then
-            v[event]()
+    for _, v in ipairs(keys) do
+        if key == v.key and match_modifiers(v.modifiers, get_mods()) then
+            v:emit_signal(event)
             return
         end
     end
