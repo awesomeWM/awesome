@@ -14,6 +14,7 @@ local object = require("gears.object")
 local grect = require("gears.geometry").rectangle
 local gmath = require("gears.math")
 local gtable = require("gears.table")
+local amousec = require("awful.mouse.client")
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -1386,6 +1387,71 @@ end, true, true, "keybinding")
 function client.object.set_shape(self, shape)
     client.property.set(self, "_shape", shape)
     set_shape(self)
+end
+
+--- Activate (focus) a client.
+--
+-- This method is the correct way to focus a client. While
+-- `client.focus = my_client` works and is commonly used in older code, it has
+-- some drawbacks. The most obvious one is that it bypasses the activate
+-- filters. It also doesn't handle minimized clients well and requires a lot
+-- of boilerplate code to make work properly.
+--
+-- The valid `args.actions` are:
+--
+-- * **mouse_move**: Move the client when the mouse cursor moves until the
+--  mouse buttons are release.
+-- * **mouse_resize**: Resize the client when the mouse cursor moves until the
+--  mouse buttons are release.
+-- * **mouse_center**: Move the mouse cursor to the center of the client if it
+--  isn't already within its geometry,
+-- * **toggle_minimization**: If the client is already active, minimize it.
+--
+-- @method activate
+-- @tparam table args
+-- @tparam[opt=other] string args.context Why was this activate called?
+-- @tparam[opt=true] boolean args.raise Raise the client to the top of its layer.
+-- @tparam[opt=false] boolean args.force Force the activation even for unfocusable
+--  clients.
+-- @tparam[opt=false] boolean args.switch_to_tags
+-- @tparam[opt=false] boolean args.switch_to_tag
+-- @tparam[opt=false] boolean args.action Once activated, perform an action.
+-- @tparam[opt=false] boolean args.toggle_minimization
+-- @see awful.ewmh.add_activate_filter
+-- @see request::activate
+function client.object.activate(c, args)
+    local new_args = setmetatable({}, {__index = args or {}})
+
+    -- Set the default arguments.
+    new_args.raise = new_args.raise == nil and true or args.raise
+
+    if c == capi.client.focus and new_args.action == "toggle_minimization" then
+        c.minimized = true
+    else
+        c:emit_signal(
+            "request::activate",
+            new_args.context or "other",
+            new_args
+        )
+    end
+
+    if new_args.action and new_args.action == "mouse_move" then
+        amousec.move(c)
+    elseif new_args.action and new_args.action == "mouse_resize" then
+        amousec.resize(c)
+    elseif new_args.action and new_args.action == "mouse_center" then
+        local coords, geo = mouse.mouse.coords(), c:geometry()
+        coords.width, coords.height = 1,1
+
+        if not grect.area_intersect_area(geo, coords) then
+            -- Do not use `awful.placement` to avoid an useless circular
+            -- dependency. Centering is *very* simple.
+            mouse.mouse.coords {
+                x = geo.x + math.ceil(geo.width /2),
+                y = geo.y + math.ceil(geo.height/2)
+            }
+        end
+    end
 end
 
 -- Register standards signals
