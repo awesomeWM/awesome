@@ -157,22 +157,15 @@ screen.connect_signal("request::desktop_decoration", function(s)
         }
     }
 
+    -- @TASKLIST_BUTTON@
     -- Create a tasklist widget
     s.mytasklist = awful.widget.tasklist {
         screen  = s,
         filter  = awful.widget.tasklist.filter.currenttags,
         buttons = {
             awful.button({ }, 1, function (c)
-                                     if c == client.focus then
-                                         c.minimized = true
-                                     else
-                                         c:emit_signal(
-                                             "request::activate",
-                                             "tasklist",
-                                             {raise = true}
-                                         )
-                                     end
-                                 end),
+                c:activate { context = "tasklist", action = "toggle_minimization" }
+            end),
             awful.button({ }, 3, function() awful.menu.client_list { theme = { width = 250 } } end),
             awful.button({ }, 4, function() awful.client.focus.byidx( 1) end),
             awful.button({ }, 5, function() awful.client.focus.byidx(-1) end),
@@ -286,9 +279,7 @@ awful.keyboard.append_global_keybindings({
                   local c = awful.client.restore()
                   -- Focus restored client
                   if c then
-                    c:emit_signal(
-                        "request::activate", "key.unminimize", {raise = true}
-                    )
+                    c:activate { raise = true, context = "key.unminimize" }
                   end
               end,
               {description = "restore minimized", group = "client"}),
@@ -383,15 +374,13 @@ awful.keyboard.append_global_keybindings({
 client.connect_signal("request::default_mousebindings", function()
     awful.mouse.append_client_mousebindings({
         awful.button({ }, 1, function (c)
-            c:emit_signal("request::activate", "mouse_click", {raise = true})
+            c:activate { context = "mouse_click" }
         end),
         awful.button({ modkey }, 1, function (c)
-            c:emit_signal("request::activate", "mouse_click", {raise = true})
-            awful.mouse.client.move(c)
+            c:activate { context = "mouse_click", action = "mouse_move"  }
         end),
         awful.button({ modkey }, 3, function (c)
-            c:emit_signal("request::activate", "mouse_click", {raise = true})
-            awful.mouse.client.resize(c)
+            c:activate { context = "mouse_click", action = "mouse_resize"}
         end),
     })
 end)
@@ -528,12 +517,10 @@ client.connect_signal("request::titlebars", function(c)
     -- buttons for the titlebar
     local buttons = {
         awful.button({ }, 1, function()
-            c:emit_signal("request::activate", "titlebar", {raise = true})
-            awful.mouse.client.move(c)
+            c:activate { context = "titlebar", action = "mouse_move"  }
         end),
         awful.button({ }, 3, function()
-            c:emit_signal("request::activate", "titlebar", {raise = true})
-            awful.mouse.client.resize(c)
+            c:activate { context = "titlebar", action = "mouse_resize"}
         end),
     }
 
@@ -565,7 +552,7 @@ end)
 
 -- Enable sloppy focus, so that focus follows mouse.
 client.connect_signal("mouse::enter", function(c)
-    c:emit_signal("request::activate", "mouse_enter", {raise = false})
+    c:activate { context = "mouse_enter", raise = false }
 end)
 
 -- @DOC_BORDER@
