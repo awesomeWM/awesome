@@ -8,6 +8,7 @@
 ---------------------------------------------------------------------------
 
 local gtable = require("gears.table")
+local gtimer = nil --require("gears.timer")
 -- local gdebug = require("gears.debug")
 local object = {}
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -82,6 +83,8 @@ function object.capi_index_fallback(class, args)
             cobj:emit_signal("property::"..prop, value)
         end
     end
+
+    assert(type(class) ~= "function")
 
     -- Attach the accessor methods
     class.set_index_miss_handler(getter)
@@ -190,7 +193,7 @@ local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set
     })
 end
 
-function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_empty)
+function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_empty, delay)
 
     -- Some objects have a special "object" property to add more properties, but
     -- not all.
@@ -248,15 +251,33 @@ function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_
 
 
         --TODO v6 Use the original directly and drop this legacy copy
-        local result = is_formatted and objs
-            or gtable.join(unpack(objs))
+        local function apply()
+            local result = is_formatted and objs
+                or gtable.join(unpack(objs))
 
-        if is_object and capi_name then
-            self[capi_name](self, result)
-        elseif capi_name then
-            obj[capi_name](result)
+            if is_object and capi_name then
+                self[capi_name](self, result)
+            elseif capi_name then
+                obj[capi_name](result)
+            else
+                self._private[name.."_formatted"] = result
+            end
+        end
+
+        -- Some properties, like keys, are expensive to set, schedule them
+        -- instead.
+        if not delay then
+            apply()
         else
-            self._private[name.."_formatted"] = result
+            if not self._private["_delayed_"..name] then
+                gtimer = gtimer or require("gears.timer")
+                gtimer.delayed_call(function()
+                    self._private["_delayed_"..name]()
+                    self._private["_delayed_"..name] = nil
+                end)
+            end
+
+            self._private["_delayed_"..name] = apply
         end
 
         self._private[name] = copy_object(
