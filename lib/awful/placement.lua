@@ -89,7 +89,6 @@ local capi =
     mouse = mouse,
     client = client
 }
-local client = require("awful.client")
 local layout = require("awful.layout")
 local a_screen = require("awful.screen")
 local grect = require("gears.geometry").rectangle
@@ -938,7 +937,7 @@ function placement.no_overlap(c, args)
     local screen   = get_screen(c.screen or a_screen.getbycoord(geometry.x, geometry.y))
     local cls, curlay
     if client_on_selected_tags(c) then
-        cls = client.visible(screen)
+        cls = screen:get_clients(false)
         curlay = layout.get()
     else
         -- When placing a client on unselected tags, place it as if all tags of
