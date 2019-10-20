@@ -193,7 +193,8 @@ local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set
     })
 end
 
-function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_empty, delay)
+function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_empty, delay, add_append_name)
+    delay = delay or add_append_name
 
     -- Some objects have a special "object" property to add more properties, but
     -- not all.
@@ -283,6 +284,31 @@ function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_
         self._private[name] = copy_object(
             obj, objs, name, capi_name, is_object, join_if, set_empty
         )
+    end
+
+    if add_append_name then
+        magic_obj["append_"..add_append_name] = function(self, obj2)
+            self._private[name] = self._private[name]
+                or magic_obj["get_"..name](self, nil)
+
+            table.insert(self._private[name], obj2)
+
+            magic_obj["set_"..name](self, self._private[name])
+        end
+
+        magic_obj["remove_"..add_append_name] = function(self, obj2)
+            self._private[name] = self._private[name]
+                or magic_obj["get_"..name](self, nil)
+
+            for k, v in ipairs(self._private[name]) do
+                if v == obj2 then
+                    table.remove(self._private[name], k)
+                    break
+                end
+            end
+
+            magic_obj["set_"..name](self, self._private[name])
+        end
     end
 end
 
