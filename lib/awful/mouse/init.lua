@@ -7,7 +7,7 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local layout = require("awful.layout")
+local floating = require("awful.layout.suit.floating")
 local aplace = require("awful.placement")
 local gdebug = require("gears.debug")
 local type = type
@@ -241,7 +241,7 @@ function mouse.resize_handler(c, context, hints)
         local t = c.screen.selected_tag
         local lay = t and t.layout or nil
 
-        if (lay and lay == layout.suit.floating) or c.floating then
+        if (lay and lay == floating) or c.floating then
             c:geometry {
                 x      = hints.x,
                 y      = hints.y,
@@ -262,9 +262,9 @@ mouse.resize.add_enter_callback(function(c, args) --luacheck: no unused args
     if c.floating then return end
 
     local l = c.screen.selected_tag and c.screen.selected_tag.layout or nil
-    if l == layout.suit.floating then return end
+    if l == floating then return end
 
-    if l ~= layout.suit.floating and l.mouse_resize_handler then
+    if l.mouse_resize_handler then
         capi.mousegrabber.stop()
 
         local geo, corner = aplace.closest_corner(capi.mouse, {parent=c})
