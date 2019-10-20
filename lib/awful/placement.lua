@@ -392,31 +392,29 @@ local function geometry_common(obj, args, new_geo, ignore_border_width)
             and obj.coords(new_geo) or obj.coords()
         return {x=coords.x, y=coords.y, width=0, height=0}
     elseif obj.geometry then
-        local geo = obj.geometry
-
-        -- It is either a drawable or something that implement its API
-        if type(geo) == "function" then
-            local dgeo = area_common(
-                obj, fix_new_geometry(new_geo, args), ignore_border_width, args
-            )
-
-            -- Apply the margins
-            if args.margins then
-                local delta = get_decoration(args)
-
-                return {
-                    x      = dgeo.x      - (delta.left or 0),
-                    y      = dgeo.y      - (delta.top  or 0),
-                    width  = dgeo.width  + (delta.left or 0) + (delta.right  or 0),
-                    height = dgeo.height + (delta.top  or 0) + (delta.bottom or 0),
-                }
-            end
-
-            return dgeo
+        if obj.get_bounding_geometry then
+            -- It is a screen, it doesn't support setting new sizes.
+            return obj:get_bounding_geometry(args)
         end
 
-        -- It is a screen, it doesn't support setting new sizes.
-        return obj:get_bounding_geometry(args)
+        -- It is either a drawable or something that implement its API
+        local dgeo = area_common(
+            obj, fix_new_geometry(new_geo, args), ignore_border_width, args
+        )
+
+        -- Apply the margins
+        if args.margins then
+            local delta = get_decoration(args)
+
+            return {
+                x      = dgeo.x      - (delta.left or 0),
+                y      = dgeo.y      - (delta.top  or 0),
+                width  = dgeo.width  + (delta.left or 0) + (delta.right  or 0),
+                height = dgeo.height + (delta.top  or 0) + (delta.bottom or 0),
+            }
+        end
+
+        return dgeo
     else
         assert(false, "Invalid object")
     end
@@ -1462,7 +1460,7 @@ function placement.next_to(d, args)
     args = add_context(args, "next_to")
     d    = d or capi.client.focus
 
-    local osize = type(d.geometry) == "function"  and d:geometry() or nil
+    local osize = type(d.geometry) == "function"  and d:geometry() or d.geometry
     local original_pos, original_anchors = args.preferred_positions, args.preferred_anchors
 
     if type(original_pos) == "string" then
