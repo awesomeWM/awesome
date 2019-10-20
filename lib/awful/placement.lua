@@ -89,7 +89,7 @@ local capi =
     mouse = mouse,
     client = client
 }
-local layout = require("awful.layout")
+local floating = require("awful.layout.suit.floating")
 local a_screen = require("awful.screen")
 local grect = require("gears.geometry").rectangle
 local gdebug = require("gears.debug")
@@ -938,7 +938,8 @@ function placement.no_overlap(c, args)
     local cls, curlay
     if client_on_selected_tags(c) then
         cls = screen:get_clients(false)
-        curlay = layout.get()
+        local t = screen.selected_tag
+        curlay = t.layout or floating
     else
         -- When placing a client on unselected tags, place it as if all tags of
         -- that client are selected.
@@ -955,7 +956,7 @@ function placement.no_overlap(c, args)
     for _, cl in pairs(cls) do
         if cl ~= c
            and cl.type ~= "desktop"
-           and (cl.floating or curlay == layout.suit.floating)
+           and (cl.floating or curlay == floating)
            and not (cl.maximized or cl.fullscreen) then
             areas = grect.area_remove(areas, area_common(cl))
         end
