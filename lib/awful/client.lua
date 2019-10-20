@@ -365,6 +365,29 @@ function client.cycle(clockwise, s, stacked)
     end
 end
 
+--- Append a keybinding.
+--
+-- @method append_keybinding
+-- @tparam awful.key key The key.
+-- @see remove_keybinding
+-- @see append_mousebinding
+-- @see remove_mousebinding
+
+--- Remove a keybinding.
+--
+-- @method remove_keybinding
+-- @tparam awful.key key The key.
+
+--- Append a mousebinding.
+--
+-- @method append_mousebinding
+-- @tparam awful.button button The button.
+
+--- Remove a mousebinding.
+--
+-- @method remove_mousebinding
+-- @tparam awful.button button The button.
+
 --- Get the master window.
 --
 -- @legacylayout awful.client.getmaster
@@ -1348,13 +1371,13 @@ object.properties._legacy_accessors(client, "buttons", "_buttons", true, functio
     return new_btns[1] and (
         type(new_btns[1]) == "button" or new_btns[1]._is_capi_button
     ) or false
-end, true)
+end, true, true, "mousebinding")
 
 object.properties._legacy_accessors(client, "keys", "_keys", true, function(new_btns)
     return new_btns[1] and (
         type(new_btns[1]) == "key" or new_btns[1]._is_capi_key
     ) or false
-end, true)
+end, true, true, "keybinding")
 
 --- Set the client shape.
 -- @property shape
