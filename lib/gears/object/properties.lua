@@ -135,7 +135,7 @@ end
 --
 -- TO BE USED FOR DEPRECATION ONLY.
 
-local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set_empty)
+local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set_empty)-- luacheck: no unused
     local ret = gtable.clone(to_set, false)
 
     -- .buttons used to be a function taking the result of `gears.table.join`.
@@ -148,12 +148,14 @@ local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set
 --                 {deprecated_in=5}
 --             )
 
-            new_objs, self = is_object and new_objs or self, is_object and self or obj
+            if not is_object then
+                new_objs, self = self, obj
+            end
+
+            local has_content = new_objs and next(new_objs)
 
             -- Setter
-            if new_objs and #new_objs > 0 then
-                if (not set_empty) and not next(new_objs) then return end
-
+            if new_objs and has_content then
                 local is_formatted = join_if(new_objs)
 
                 -- Because modules may rely on :buttons taking a list of
