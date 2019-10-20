@@ -22,13 +22,13 @@ local capi =
 }
 
 local mouse = {
-    resize = require("awful.mouse.resize"),
     snap   = require("awful.mouse.snap"),
+    client = require("awful.mouse.client"),
+    resize = require("awful.mouse.resize"),
     drag_to_tag = require("awful.mouse.drag_to_tag")
 }
 
 mouse.object = {}
-mouse.client = {}
 mouse.wibox = {}
 
 --- The default snap distance.
@@ -69,189 +69,6 @@ function mouse.client_under_pointer()
     gdebug.deprecate("Use mouse.current_client instead of awful.mouse.client_under_pointer()", {deprecated_in=4})
 
     return mouse.object.get_current_client()
-end
-
---- Move a client.
--- @staticfct awful.mouse.client.move
--- @param c The client to move, or the focused one if nil.
--- @param snap The pixel to snap clients.
--- @param finished_cb Deprecated, do not use
-function mouse.client.move(c, snap, finished_cb) --luacheck: no unused args
-    if finished_cb then
-        gdebug.deprecate("The mouse.client.move `finished_cb` argument is no longer"..
-            " used, please use awful.mouse.resize.add_leave_callback(f, 'mouse.move')", {deprecated_in=4})
-    end
-
-    c = c or capi.client.focus
-
-    if not c
-        or c.fullscreen
-        or c.maximized
-        or c.type == "desktop"
-        or c.type == "splash"
-        or c.type == "dock" then
-        return
-    end
-
-    -- Compute the offset
-    local coords = capi.mouse.coords()
-    local geo    = aplace.centered(capi.mouse,{parent=c, pretend=true})
-
-    local offset = {
-        x = geo.x - coords.x,
-        y = geo.y - coords.y,
-    }
-
-    mouse.resize(c, "mouse.move", {
-        placement = aplace.under_mouse,
-        offset    = offset,
-        snap      = snap
-    })
-end
-
-mouse.client.dragtotag = { }
-
---- Move a client to a tag by dragging it onto the left / right side of the screen.
--- @deprecated awful.mouse.client.dragtotag.border
--- @param c The client to move
-function mouse.client.dragtotag.border(c)
-    gdebug.deprecate("Use awful.mouse.snap.drag_to_tag_enabled = true instead "..
-        "of awful.mouse.client.dragtotag.border(c). It will now be enabled.", {deprecated_in=4})
-
-    -- Enable drag to border
-    mouse.snap.drag_to_tag_enabled = true
-
-    return mouse.client.move(c)
-end
-
---- Move the wibox under the cursor.
--- @staticfct awful.mouse.wibox.move
---@tparam wibox w The wibox to move, or none to use that under the pointer
-function mouse.wibox.move(w)
-    w = w or mouse.current_wibox
-    if not w then return end
-
-    if not w
-        or w.type == "desktop"
-        or w.type == "splash"
-        or w.type == "dock" then
-        return
-    end
-
-    -- Compute the offset
-    local coords = capi.mouse.coords()
-    local geo    = aplace.centered(capi.mouse,{parent=w, pretend=true})
-
-    local offset = {
-        x = geo.x - coords.x,
-        y = geo.y - coords.y,
-    }
-
-    mouse.resize(w, "mouse.move", {
-        placement = aplace.under_mouse,
-        offset    = offset
-    })
-end
-
---- Get a client corner coordinates.
--- @deprecated awful.mouse.client.corner
--- @tparam[opt=client.focus] client c The client to get corner from, focused one by default.
--- @tparam string corner The corner to use: auto, top_left, top_right, bottom_left,
--- bottom_right, left, right, top bottom. Default is auto, and auto find the
--- nearest corner.
--- @treturn string The corner name
--- @treturn number x The horizontal position
--- @treturn number y The vertical position
-function mouse.client.corner(c, corner)
-    gdebug.deprecate(
-        "Use awful.placement.closest_corner(mouse) or awful.placement[corner](mouse)"..
-        " instead of awful.mouse.client.corner", {deprecated_in=4}
-    )
-
-    c = c or capi.client.focus
-    if not c then return end
-
-    local ngeo = nil
-
-    if (not corner) or corner == "auto" then
-        ngeo, corner = aplace.closest_corner(mouse, {parent = c})
-    elseif corner and aplace[corner] then
-        ngeo = aplace[corner](mouse, {parent = c})
-    end
-
-    return corner, ngeo and ngeo.x or nil, ngeo and ngeo.y or nil
-end
-
---- Resize a client.
--- @staticfct awful.mouse.client.resize
--- @param c The client to resize, or the focused one by default.
--- @tparam string corner The corner to grab on resize. Auto detected by default.
--- @tparam[opt={}] table args A set of `awful.placement` arguments
--- @treturn string The corner (or side) name
-function mouse.client.resize(c, corner, args)
-    c = c or capi.client.focus
-
-    if not c then return end
-
-    if c.fullscreen
-        or c.maximized
-        or c.type == "desktop"
-        or c.type == "splash"
-        or c.type == "dock" then
-        return
-    end
-
-    -- Set some default arguments
-    local new_args = setmetatable(
-        {
-            include_sides = (not args) or args.include_sides ~= false
-        },
-        {
-            __index = args or {}
-        }
-    )
-
-    -- Move the mouse to the corner
-    if corner and aplace[corner] then
-        aplace[corner](capi.mouse, {parent=c})
-    else
-        local _
-        _, corner = aplace.closest_corner(capi.mouse, {
-            parent        = c,
-            include_sides = new_args.include_sides ~= false,
-        })
-    end
-
-    new_args.corner = corner
-
-    mouse.resize(c, "mouse.resize", new_args)
-
-    return corner
-end
-
---- Default handler for `request::geometry` signals with "mouse.resize" context.
--- @signalhandler awful.mouse.resize_handler
--- @tparam client c The client
--- @tparam string context The context
--- @tparam[opt={}] table hints The hints to pass to the handler
-function mouse.resize_handler(c, context, hints)
-    if hints and context and context:find("mouse.*") then
-        -- This handler only handle the floating clients. If the client is tiled,
-        -- then it let the layouts handle it.
-        local t = c.screen.selected_tag
-        local lay = t and t.layout or nil
-
-        if (lay and lay == floating) or c.floating then
-            c:geometry {
-                x      = hints.x,
-                y      = hints.y,
-                width  = hints.width,
-                height = hints.height,
-            }
-        elseif lay and lay.resize_handler then
-            lay.resize_handler(c, context, hints)
-        end
-    end
 end
 
 -- Older layouts implement their own mousegrabber.
@@ -356,6 +173,35 @@ function mouse.object.get_current_widget_geometries()
     local _, ret = mouse.object.get_current_widgets()
 
     return ret
+end
+
+--- Move the wibox under the cursor.
+-- @staticfct awful.mouse.wibox.move
+--@tparam wibox w The wibox to move, or none to use that under the pointer
+function mouse.wibox.move(w)
+    w = w or mouse.current_wibox
+    if not w then return end
+
+    if not w
+        or w.type == "desktop"
+        or w.type == "splash"
+        or w.type == "dock" then
+        return
+    end
+
+    -- Compute the offset
+    local coords = capi.mouse.coords()
+    local geo    = aplace.centered(capi.mouse,{parent=w, pretend=true})
+
+    local offset = {
+        x = geo.x - coords.x,
+        y = geo.y - coords.y,
+    }
+
+    mouse.resize(w, "mouse.move", {
+        placement = aplace.under_mouse,
+        offset    = offset
+    })
 end
 
 --- True if the left mouse button is pressed.
@@ -486,8 +332,6 @@ for _, b in ipairs {"left", "right", "middle"} do
     end
 end
 
-capi.client.connect_signal("request::geometry", mouse.resize_handler)
-
 -- Set the cursor at startup
 capi.root.cursor("left_ptr")
 
@@ -537,6 +381,8 @@ end)
 function mouse._get_client_mousebindings()
     return default_buttons
 end
+
+mouse.resize_handler = mouse.resize._resize_handler
 
 return mouse
 

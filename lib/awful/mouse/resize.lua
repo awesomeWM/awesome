@@ -10,8 +10,9 @@
 ---------------------------------------------------------------------------
 
 local aplace = require("awful.placement")
-local capi = {mousegrabber = mousegrabber}
+local capi = {mousegrabber = mousegrabber, client = client}
 local beautiful = require("beautiful")
+local floating = require("awful.layout.suit.floating")
 
 local module = {}
 
@@ -228,6 +229,28 @@ local function handler(_, client, context, args) --luacheck: no unused_args
         return false
     end, cursor)
 end
+
+function module._resize_handler(c, context, hints)
+    if hints and context and context:find("mouse.*") then
+        -- This handler only handle the floating clients. If the client is tiled,
+        -- then it let the layouts handle it.
+        local t = c.screen.selected_tag
+        local lay = t and t.layout or nil
+
+        if (lay and lay == floating) or c.floating then
+            c:geometry {
+                x      = hints.x,
+                y      = hints.y,
+                width  = hints.width,
+                height = hints.height,
+            }
+        elseif lay and lay.resize_handler then
+            lay.resize_handler(c, context, hints)
+        end
+    end
+end
+
+capi.client.connect_signal("request::geometry", module._resize_handler)
 
 return setmetatable(module, {__call=handler})
 
