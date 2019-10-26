@@ -176,7 +176,25 @@ function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_
         if not is_object then
             objs, self = self, obj
         end
-        assert(objs)
+
+        -- When using lua expressions like `false and true and my_objects`,
+        -- it is possible the code ends up as a boolean rather than `nil`
+        -- the resulting type is sometime counter intuitive and different
+        -- from similar languages such as JavaScript. Be forgiving and correct
+        -- course.
+        if objs == false then
+            objs = nil
+        end
+
+        -- Sometime, setting `nil` might be volontary since the user might
+        -- expect it will act as "clear". The correct thing would be to set
+        -- `{}`, but allow it nevertheless.
+
+        if objs == nil then
+            objs = {}
+        end
+
+        assert(self)
 
         -- When called from a declarative property list, "buttons" will be set
         -- using the result of gears.table.join, detect this
