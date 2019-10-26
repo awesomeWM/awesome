@@ -168,7 +168,15 @@ for _, type_name in ipairs { "key", "button" } do
             -- This *will* happen with older configs because `awful.rules` will
             -- loop the properties, find the old capi list and fail to understand
             -- that the content should use the legacy API.
-            c[type_name.."s"] = gtable.join(o1)
+
+            local joined = gtable.join(o1)
+
+            assert(#joined == 4)
+
+            c[type_name.."s"] = joined
+
+            -- It should have been converted to the new format.
+            assert(#c[type_name.."s"] == 1)
 
             return true
         end)
@@ -190,7 +198,7 @@ for _, type_name in ipairs { "key", "button" } do
 
             local c = mouse.screen.clients[1]
 
-            assert(#c[type_name.."s"] ~= 0)
+            assert(#c[type_name.."s"] == 1)
 
             -- Test setting the object to `false` to simulate an inline Lua
             -- expression gone wrong. This used to work and is rather
@@ -201,7 +209,7 @@ for _, type_name in ipairs { "key", "button" } do
 
             c[type_name.."s"] = {o1}
 
-            assert(#c[type_name.."s"] ~= 0)
+            assert(#c[type_name.."s"] == 1)
 
             -- Test removing the objects using `nil`.
             c[type_name.."s"] = nil
@@ -210,7 +218,7 @@ for _, type_name in ipairs { "key", "button" } do
 
             c[type_name.."s"] = {o1}
 
-            assert(#c[type_name.."s"] ~= 0)
+            assert(#c[type_name.."s"] == 1)
 
             -- Test removing using `{}`
             c[type_name.."s"] = {}
