@@ -88,6 +88,36 @@ function object.capi_index_fallback(class, args)
     class.set_newindex_miss_handler(setter)
 end
 
+-- Convert the capi objects back into awful ones.
+local function deprecated_to_current(content)
+    local first   = content[1]
+
+    local current = first and first._private and
+        first._private._legacy_convert_to or nil
+
+    if not current then return nil end
+
+    local ret = {current}
+
+    for _, o in ipairs(content) do
+        -- If this is false, someone tried to mix things in a
+        -- way that is definitely not intentional.
+        assert(o._private and o._private._legacy_convert_to)
+
+        if o._private._legacy_convert_to ~= current then
+            -- If this is false, someone tried to mix things in a
+            -- way that is definitely not intentional.
+            assert(o._private._legacy_convert_to)
+
+            table.insert(
+                ret, o._private._legacy_convert_to
+            )
+            current = o._private._legacy_convert_to
+        end
+    end
+
+    return ret
+end
 
 -- (private api)
 -- Many legacy Awesome APIs such as `client:tags()`, `root.buttons()`,
@@ -130,7 +160,15 @@ local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set
                 local result = is_formatted and
                     new_objs or gtable.join(unpack(new_objs))
 
-                if capi_name and is_object then
+                -- First, when possible, get rid of the legacy format and go
+                -- back to the non-deprecated code path.
+                local current = self["set_"..name]
+                    and deprecated_to_current(result) or nil
+
+                if current then
+                    self["set_"..name](self, current)
+                    return capi_name and self[capi_name](self) or self[name]
+                elseif capi_name and is_object then
                     return self[capi_name](self, result)
                 elseif capi_name then
                     return self[capi_name](result)
@@ -166,8 +204,9 @@ function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_
             obj, {}, name, capi_name, is_object, join_if, set_empty
         )
 
-        assert(self._private[name])
-        return self._private[name]
+        local current = deprecated_to_current(self._private[name])
+
+        return current or self._private[name]
     end
 
     magic_obj["set_"..name] = function(self, objs)
