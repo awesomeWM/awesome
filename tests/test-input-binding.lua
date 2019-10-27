@@ -58,6 +58,8 @@ for _, type_name in ipairs { "key", "button" } do
         root["_remove_"..type_name](objects[1])
 
         assert(second[type_name][2])
+
+        -- Use the multiple parameters syntax.
         objects[2] = module[type_name](
             {"Mod1"}, second[type_name][2], function() pressed[2] = true end, function() released[2] = true end
         )
@@ -106,9 +108,17 @@ for _, type_name in ipairs { "key", "button" } do
         table.insert(steps, function()
             local c = mouse.screen.clients[1]
 
-            o1 = module[type_name](
-                {"Mod1"}, second[type_name][3], function() pressed[3] = true end, function() released[3] = true end
-            )
+            -- This time, use the `args` syntax.
+            local args = {
+                modifiers   = {"Mod1"},
+                on_press    = function() pressed [3] = true end,
+                on_release  = function() released[3] = true end
+            }
+
+            args[type_name] = second[type_name][3]
+
+            -- This time, use the `args` syntax.
+            o1 = module[type_name](args)
 
             -- Test the old API.
             c[type_name.."s"](c, gtable.join(o1))
