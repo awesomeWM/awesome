@@ -49,7 +49,9 @@
 <h2>Contents</h2>
 <ul>
 # for kind,items in module.kinds() do
+#  if not kind:match("^ldoc_skip") then
 <li><a href="#$(no_spaces(kind))">$(kind)</a></li>
+# end
 # end
 </ul>
 # end
@@ -57,12 +59,16 @@
 
 # if ldoc.no_summary and module and not ldoc.one then -- bang out the functions on the side
 # for kind, items in module.kinds() do
-<h2>$(kind)</h2>
+#  if not kind:match("^ldoc_skip") then
+<h2>$(kind)dasdasd</h2>
 <ul class="nowrap">
+#  end
 # for item in items() do
     <li><a href="#$(item.name)">$(display_name(item))</a></li>
 # end
+#  if not kind:match("^ldoc_skip") then
 </ul>
+# end
 # end
 # end
 # -------- contents of project ----------
@@ -125,9 +131,15 @@
 
 # if not ldoc.no_summary then
 # -- bang out the tables of item types for this module (e.g Functions, Tables, etc)
+# local last_kind = ""
 # for kind,items in module.kinds() do
+#  if not kind:match("^ldoc_skip") then
+#   if last_kind ~= "" then
+</table>
+#   end
 <h2><a href="#$(no_spaces(kind))">$(kind)</a></h2>
 <table class="function_list">
+#  end
 #  for item in items() do
 #   local dn = display_name(item)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
@@ -141,8 +153,9 @@
       <td class="summary">$(M(item.summary,item))</td>
     </tr>
 #  end -- for items
-</table>
+# last_kind = kind
 #end -- for kinds
+</table>
 
 <br/>
 <br/>
@@ -152,11 +165,16 @@
 # --- currently works for both Functions and Tables. The params field either contains
 # --- function parameters or table fields.
 # local show_return = not ldoc.no_return_or_parms
-# local show_parms = show_return
+# local show_parms, last_kind = show_return, ""
 # for kind, items in module.kinds() do
 #   local kitem = module.kinds:get_item(kind)
 #   local has_description = kitem and ldoc.descript(kitem) ~= ""
+#   if not kind:match("^ldoc_skip") then
+#    if last_kind ~= "" then
+</dl>
+#    end
     <h2 class="section-header $(has_description and 'has-description')"><a name="$(no_spaces(kind))"></a>$(kind)</h2>
+#   end
     $(M(module.kinds:get_section_description(kind),nil))
 #   if kitem then
 #       if has_description then
@@ -169,7 +187,9 @@
             <pre class="example">$(ldoc.prettify(kitem.usage[1]))</pre>
 #        end
 #   end
+#  if not kind:match("^ldoc_skip") then
     <dl class="function">
+#  end
 #  for item in items() do
     <dt>
     <a name = "$(item.name)"></a>
@@ -289,8 +309,9 @@
 
 </dd>
 # end -- for items
-</dl>
+#  last_kind = kind
 # end -- for kinds
+</dl>
 
 # else -- if module; project-level contents
 

@@ -3,7 +3,7 @@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
--- @classmod awful.button
+-- @inputmodule awful.button
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
