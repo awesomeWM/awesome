@@ -290,7 +290,7 @@ function screen.object.get_outputs(s)
     local ret = {}
 
     local outputs = s._custom_outputs
-        or (s.data.viewport and s.data.viewport.outputs or s._outputs)
+        or (s._private.viewport and s._private.viewport.outputs or s._outputs)
 
     -- The reason this exists is because output with name as keys is very
     -- convenient for quick name lookup by the users, but inconvenient in
@@ -671,9 +671,9 @@ function screen.object.split(s, ratios, mode, _geo)
         table.insert(ret, ns)
 
         if s then
-            ns.data.viewport = s.data.viewport
+            ns._private.viewport = s._private.viewport
 
-            if not ns.data.viewport then
+            if not ns._private.viewport then
                 ns.outputs = s.outputs
             end
         end
@@ -708,7 +708,7 @@ end
 -- @staticfct awful.screen.set_auto_dpi_enabled
 function screen.set_auto_dpi_enabled(enabled)
     for s in capi.screen do
-        s.data.dpi_cache = nil
+        s._private.dpi_cache = nil
     end
     data.autodpi = enabled
 end

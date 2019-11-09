@@ -31,8 +31,11 @@ local function create_screen(args)
     local s = gears_obj()
     awesome._forward_class(s, screen)
 
-    s.data = {}
+    s._private = {}
     s.valid = true
+
+    -- Deprecated.
+    s.data = s._private
 
     -- Copy the geo in case the args are mutated
     local geo = {

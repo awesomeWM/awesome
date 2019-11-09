@@ -28,11 +28,11 @@ local properties = {}
 for _, prop in ipairs {
   "maximized", "maximized_horizontal", "maximized_vertical", "fullscreen" } do
     properties["get_"..prop] = function(self)
-        return self.data[prop] or false
+        return self._private[prop] or false
     end
 
     properties["set_"..prop] = function(self, value)
-        self.data[prop] = value or false
+        self._private[prop] = value or false
 
         if value then
             self:emit_signal("request::geometry", prop, nil)
@@ -43,12 +43,12 @@ for _, prop in ipairs {
 end
 
 function properties.get_screen(self)
-    return self.data.screen or screen[1]
+    return self._private.screen or screen[1]
 end
 
 function properties.set_screen(self, s)
     s = screen[s]
-    self.data.screen = s
+    self._private.screen = s
 
     if self.x < s.geometry.x or self.x > s.geometry.x+s.geometry.width then
         self:geometry { x = s.geometry.x }
@@ -66,14 +66,18 @@ function client.gen_fake(args)
     local ret = gears_obj()
     awesome._forward_class(ret, client)
 
-    ret.data = {}
+    ret._private = {}
     ret.type = "normal"
     ret.valid = true
     ret.size_hints = {}
     ret.border_width = 1
     ret.icon_sizes = {{16,16}}
     ret.name = "Example Client"
-    ret.data._struts = { top = 0, right = 0, left = 0, bottom = 0 }
+    ret._private._struts = { top = 0, right = 0, left = 0, bottom = 0 }
+
+    --TODO v5: remove this. This was a private API and thus doesn't need to be
+    -- officially deprecated.
+    ret.data = ret._private
 
     -- This is a hack because there's a `:is_transient_for(c2)` method
     -- and a `transient_for` property. It will cause a stack overflow
@@ -194,10 +198,10 @@ function client.gen_fake(args)
 
     function ret:struts(new)
         for k, v in pairs(new or {}) do
-            ret.data._struts[k] = v
+            ret._private._struts[k] = v
         end
 
-        return ret.data._struts
+        return ret._private._struts
     end
 
     -- Set a dummy one for now since set_screen will corrupt it.
@@ -242,6 +246,23 @@ function client.gen_fake(args)
     ret.below = false
     ret.above = false
     ret.sticky = false
+
+    -- Declare the deprecated buttons and keys methods.
+    function ret:_keys(new)
+        if new then
+            ret._private.keys = new
+        end
+
+        return ret._private.keys or {}
+    end
+
+    function ret:_buttons(new)
+        if new then
+            ret._private.buttons = new
+        end
+
+        return ret._private.buttons or {}
+    end
 
     -- Add to the client list
     table.insert(clients, ret)

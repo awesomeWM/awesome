@@ -54,7 +54,8 @@ function object.capi_index_fallback(class, args)
         end
 
         -- Use the fallback property table
-        return cobj.data[prop]
+        assert(prop ~= "_private")
+        return cobj._private[prop]
     end
 
     local setter = args.setter or function(cobj, prop, value)
@@ -74,7 +75,7 @@ function object.capi_index_fallback(class, args)
         end
 
         -- Use the fallback property table
-        cobj.data[prop] = value
+        cobj._private[prop] = value
 
         -- Emit the signal
         if args.auto_emit then
@@ -87,6 +88,36 @@ function object.capi_index_fallback(class, args)
     class.set_newindex_miss_handler(setter)
 end
 
+-- Convert the capi objects back into awful ones.
+local function deprecated_to_current(content)
+    local first   = content[1]
+
+    local current = first and first._private and
+        first._private._legacy_convert_to or nil
+
+    if not current then return nil end
+
+    local ret = {current}
+
+    for _, o in ipairs(content) do
+        -- If this is false, someone tried to mix things in a
+        -- way that is definitely not intentional.
+        assert(o._private and o._private._legacy_convert_to)
+
+        if o._private._legacy_convert_to ~= current then
+            -- If this is false, someone tried to mix things in a
+            -- way that is definitely not intentional.
+            assert(o._private._legacy_convert_to)
+
+            table.insert(
+                ret, o._private._legacy_convert_to
+            )
+            current = o._private._legacy_convert_to
+        end
+    end
+
+    return ret
+end
 
 -- (private api)
 -- Many legacy Awesome APIs such as `client:tags()`, `root.buttons()`,
@@ -129,7 +160,15 @@ local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set
                 local result = is_formatted and
                     new_objs or gtable.join(unpack(new_objs))
 
-                if capi_name and is_object then
+                -- First, when possible, get rid of the legacy format and go
+                -- back to the non-deprecated code path.
+                local current = self["set_"..name]
+                    and deprecated_to_current(result) or nil
+
+                if current then
+                    self["set_"..name](self, current)
+                    return capi_name and self[capi_name](self) or self[name]
+                elseif capi_name and is_object then
                     return self[capi_name](self, result)
                 elseif capi_name then
                     return self[capi_name](result)
@@ -161,18 +200,13 @@ function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_
     magic_obj["get_"..name] = function(self)
         self = is_object and self or obj
 
-        --FIXME v5 all objects should use _private instead of getproperty.
-        if not self._private then
-            self._private = {}
-        end
-
         self._private[name] = self._private[name] or copy_object(
             obj, {}, name, capi_name, is_object, join_if, set_empty
         )
 
+        local current = deprecated_to_current(self._private[name])
 
-        assert(self._private[name])
-        return self._private[name]
+        return current or self._private[name]
     end
 
     magic_obj["set_"..name] = function(self, objs)
@@ -181,7 +215,25 @@ function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_
         if not is_object then
             objs, self = self, obj
         end
-        assert(objs)
+
+        -- When using lua expressions like `false and true and my_objects`,
+        -- it is possible the code ends up as a boolean rather than `nil`
+        -- the resulting type is sometime counter intuitive and different
+        -- from similar languages such as JavaScript. Be forgiving and correct
+        -- course.
+        if objs == false then
+            objs = nil
+        end
+
+        -- Sometime, setting `nil` might be volontary since the user might
+        -- expect it will act as "clear". The correct thing would be to set
+        -- `{}`, but allow it nevertheless.
+
+        if objs == nil then
+            objs = {}
+        end
+
+        assert(self)
 
         -- When called from a declarative property list, "buttons" will be set
         -- using the result of gears.table.join, detect this

@@ -1,3 +1,10 @@
+_G.key = setmetatable({
+    set_index_miss_handler = function() end,
+    set_newindex_miss_handler = function() end
+}, {
+    __call = function() return {} end
+})
+
 local function assert_markup_format(markup)
     if #markup == 0 then
         return

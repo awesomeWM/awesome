@@ -370,6 +370,57 @@ end
 -- @property is_middle_mouse_button_pressed
 -- @param boolean
 
+--- Add an `awful.button` based mousebinding to the global set.
+--
+-- A **global** mousebinding is one which is always present, even when there is
+-- no focused client. If your intent is too add a mousebinding which acts on
+-- the focused client do **not** use this.
+--
+-- @staticfct awful.mouse.append_global_mousebinding
+-- @tparam awful.button button The button object.
+-- @see awful.button
+
+function mouse.append_global_mousebinding(button)
+    capi.root._append_button(button)
+end
+
+--- Add multiple `awful.button` based mousebindings to the global set.
+--
+-- A **global** mousebinding is one which is always present, even when there is
+-- no focused client. If your intent is too add a mousebinding which acts on
+-- the focused client do **not** use this
+--
+-- @tparam table buttons A table of `awful.button` objects. Optionally, it can have
+--  a `group` entry. If set, the `group` property will be set on all `awful.buttons`
+--  objects.
+-- @see awful.button
+
+function mouse.append_global_mousebindings(buttons)
+    local g = buttons.group
+    buttons.group = nil
+
+    -- Avoid the boilerplate. If the user is adding multiple buttons at once, then
+    -- they are probably related.
+    if g then
+        for _, k in ipairs(buttons) do
+            k.group = g
+        end
+    end
+
+    capi.root._append_buttons(buttons)
+    buttons.group = g
+end
+
+--- Remove a mousebinding from the global set.
+--
+-- @staticfct awful.mouse.remove_global_mousebinding
+-- @tparam awful.button button The button object.
+-- @see awful.button
+
+function mouse.remove_global_mousebinding(button)
+    capi.root._remove_button(button)
+end
+
 for _, b in ipairs {"left", "right", "middle"} do
     mouse.object["is_".. b .."_mouse_button_pressed"] = function()
         return capi.mouse.coords().buttons[1]

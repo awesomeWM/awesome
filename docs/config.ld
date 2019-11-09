@@ -54,6 +54,7 @@ tparam_alias('screen_or_idx', 'screen|int')
 
 -- The first stereotype are the constructors.
 new_type("constructorfct", "Constructors", false, "Parameters")
+new_type("constructorfct2", "ldoc_skip", false, "Parameters")
 -- Hack to get the functions on top of the signals and properties
 new_type("function", "Functions", false, "Parameters")
 -- For "classes", use an explicit type for static functions. This allows
@@ -100,6 +101,7 @@ sort_modules=true
 
 -- Add more project level (left side index) types.
 new_type("coreclassmod", "Core_components"  , true)
+new_type("inputmodule" , "Input handling"   , true)
 new_type("widgetmod"   , "Widgets"   , true)
 new_type("containermod", "Widget_containers", true)
 new_type("layoutmod"   , "Widget_layouts"   , true)
@@ -264,17 +266,19 @@ local coreclassmap = {
 
 -- Add the full module name in front.
 local add_mod = {
-    ["function"]   = true,
-    constructorfct = true,
-    staticfct      = true,
-    deprecated     = true,
-    field          = true,
+    ["function"]    = true,
+    constructorfct  = true,
+    constructorfct2 = true,
+    staticfct       = true,
+    deprecated      = true,
+    field           = true,
 }
 
 -- Add the arguments.
 local add_args = {
-    constructorfct = true,
-    staticfct      = true,
+    constructorfct  = true,
+    constructorfct2 = true,
+    staticfct       = true,
 }
 
 -- Add a type column to the summary and type field in the description.
@@ -287,11 +291,12 @@ local display_type = {
 
 -- Show return values.
 local show_return = {
-    ["function"]   = true,
-    constructorfct = true,
-    staticfct      = true,
-    method         = true,
-    deprecated     = true,
+    ["function"]    = true,
+    constructorfct  = true,
+    constructorfct2 = true,
+    staticfct       = true,
+    method          = true,
+    deprecated      = true,
 }
 
 custom_display_name_handler = function(item, default_handler)

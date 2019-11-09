@@ -77,4 +77,4 @@ gprop._legacy_accessors(capi.root, "keys", "_keys", false, function(new_btns)
     ) or false
 end, true)
 
-assert(root.keys)
+require("awful.root")

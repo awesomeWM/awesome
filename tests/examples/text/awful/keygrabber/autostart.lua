@@ -7,7 +7,7 @@ local autostart_works = false --DOC_HIDE
 
 awful.keygrabber {
     autostart      = true,
-    stop_key    = "Return",
+    stop_key       = "Return",
     stop_callback  = function(_, _, _, sequence)
         autostart_works = true --DOC_HIDE
         assert(sequence == "abc") --DOC_HIDE

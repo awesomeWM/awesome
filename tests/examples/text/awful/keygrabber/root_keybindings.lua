@@ -1,5 +1,6 @@
 --DOC_GEN_OUTPUT --DOC_HIDE
-local awful = { keygrabber = require("awful.keygrabber") } --DOC_HIDE
+local awful = { keygrabber = require("awful.keygrabber"), --DOC_HIDE
+    key = require("awful.key") } --DOC_HIDE
 
 local keybinding_works = {} --DOC_HIDE
 
@@ -7,17 +8,25 @@ local g = --DOC_HIDE
 awful.keygrabber {
     mask_modkeys = true,
     root_keybindings = {
-        {{"Mod4"}, "i", function(self)
-            print("Is now active!", self)
-            keybinding_works[1] = true --DOC_HIDE
-        end},
+        awful.key {
+            modifiers = {"Mod4"},
+            key       = "i",
+            on_press  = function(self)
+                print("Is now active!", self)
+                keybinding_works[1] = true --DOC_HIDE
+            end
+        },
     },
     keybindings = {
-        {{"Mod4", "Shift"}, "i", function(self)
-            print("Called again!")
-            keybinding_works[3] = true --DOC_HIDE
-            self:stop()
-        end},
+        awful.key {
+            modifiers = {"Mod4", "Shift"},
+            key       = "i",
+            on_press  = function(self)
+                print("Called again!")
+                keybinding_works[3] = true --DOC_HIDE
+                self:stop()
+            end
+        },
     },
     keypressed_callback  = function(_, modifiers, key)
         print("A key was pressed:", key, "with", #modifiers, "modifier!")
@@ -51,7 +60,6 @@ root._execute_keybinding({"Mod4"}, "i")
 assert(keybinding_works[2] == 2) --DOC_HIDE because mask_modkeys is set
 assert(g == awful.keygrabber.current_instance) --DOC_HIDE
 assert(not keybinding_works[3])--DOC_HIDE
-
 
 --DOC_NEWLINE
 -- Now the keygrabber own keybindings will work

@@ -1167,8 +1167,8 @@ end)
 -- @return The property.
 -- @deprecated awful.client.property.get
 function client.property.get(c, prop)
-    if not c.data._persistent_properties_loaded then
-        c.data._persistent_properties_loaded = true
+    if not c._private._persistent_properties_loaded then
+        c._private._persistent_properties_loaded = true
         for p in pairs(client.data.persistent_properties_registered) do
             local value = c:get_xproperty("awful.client.property." .. p)
             if value ~= nil then
@@ -1176,8 +1176,8 @@ function client.property.get(c, prop)
             end
         end
     end
-    if c.data.awful_client_properties then
-        return c.data.awful_client_properties[prop]
+    if c._private.awful_client_properties then
+        return c._private.awful_client_properties[prop]
     end
 end
 
@@ -1191,14 +1191,14 @@ end
 -- @param value The value.
 -- @deprecated awful.client.property.set
 function client.property.set(c, prop, value)
-    if not c.data.awful_client_properties then
-        c.data.awful_client_properties = {}
+    if not c._private.awful_client_properties then
+        c._private.awful_client_properties = {}
     end
-    if c.data.awful_client_properties[prop] ~= value then
+    if c._private.awful_client_properties[prop] ~= value then
         if client.data.persistent_properties_registered[prop] then
             c:set_xproperty("awful.client.property." .. prop, value)
         end
-        c.data.awful_client_properties[prop] = value
+        c._private.awful_client_properties[prop] = value
         c:emit_signal("property::" .. prop)
     end
 end
@@ -1216,8 +1216,8 @@ function client.property.persist(prop, kind)
 
     -- Make already-set properties persistent
     for c in pairs(capi.client.get()) do
-        if c.data.awful_client_properties and c.data.awful_client_properties[prop] ~= nil then
-            c:set_xproperty(xprop, c.data.awful_client_properties[prop])
+        if c._private.awful_client_properties and c._private.awful_client_properties[prop] ~= nil then
+            c:set_xproperty(xprop, c._private.awful_client_properties[prop])
         end
     end
 end

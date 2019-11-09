@@ -64,27 +64,27 @@ local function fake_replay(viewports)
         local s = screen[k]
 
         -- Check if the extra metadata are computed.
-        assert(s.data.viewport.maximum_dpi)
-        assert(s.data.viewport.minimum_dpi)
-        assert(s.data.viewport.preferred_dpi)
+        assert(s._private.viewport.maximum_dpi)
+        assert(s._private.viewport.minimum_dpi)
+        assert(s._private.viewport.preferred_dpi)
         assert(s.dpi)
-        assert(s.maximum_dpi   == s.data.viewport.maximum_dpi  )
-        assert(s.minimum_dpi   == s.data.viewport.minimum_dpi  )
-        assert(s.preferred_dpi == s.data.viewport.preferred_dpi)
+        assert(s.maximum_dpi   == s._private.viewport.maximum_dpi  )
+        assert(s.minimum_dpi   == s._private.viewport.minimum_dpi  )
+        assert(s.preferred_dpi == s._private.viewport.preferred_dpi)
 
         -- Make sure it enters either the main `if` or the fallback one.
-        assert(s.data.viewport.minimum_dpi   ~= math.huge)
-        assert(s.data.viewport.preferred_dpi ~= math.huge)
+        assert(s._private.viewport.minimum_dpi   ~= math.huge)
+        assert(s._private.viewport.preferred_dpi ~= math.huge)
 
         -- Check the range.
-        assert(s.data.viewport.maximum_dpi   >= s.data.viewport.minimum_dpi)
-        assert(s.data.viewport.preferred_dpi >= s.data.viewport.minimum_dpi)
-        assert(s.data.viewport.preferred_dpi <= s.data.viewport.maximum_dpi)
+        assert(s._private.viewport.maximum_dpi   >= s._private.viewport.minimum_dpi)
+        assert(s._private.viewport.preferred_dpi >= s._private.viewport.minimum_dpi)
+        assert(s._private.viewport.preferred_dpi <= s._private.viewport.maximum_dpi)
 
         -- Check if the screen was created using the right viewport
         -- (order *is* relevant).
-        assert(#s.data.viewport.outputs == #a.outputs)
-        assert(s.data.viewport and s.data.viewport.id == a.id)
+        assert(#s._private.viewport.outputs == #a.outputs)
+        assert(s._private.viewport and s._private.viewport.id == a.id)
     end
 
     -- The original shall not be modified, the CAPI for this is read-only.
@@ -314,7 +314,7 @@ end,
 
 -- Test adding an output.
 function()
-    local viewport = screen[1].data.viewport
+    local viewport = screen[1]._private.viewport
 
     add_output(fake_viewports[1], {
         name      = "foobar",
@@ -328,24 +328,24 @@ function()
     })
 
     -- It should have been kept.
-    assert(viewport == screen[1].data.viewport)
+    assert(viewport == screen[1]._private.viewport)
 
     -- If this isn't true, then auto-dpi didn't do its job.
     assert(screen[1].dpi ~= saved_dpi1)
 
     -- Now that there is multiple DPIs for the same viewport, the number
     -- should double.
-    assert(#screen[1].data.viewport.outputs == 3)
+    assert(#screen[1]._private.viewport.outputs == 3)
     assert(screen[1].maximum_dpi == saved_dpi2*2)
     assert(screen[1].minimum_dpi == saved_dpi3/2)
     assert(screen[1].dpi         == saved_dpi1/2)
 
     remove_output(fake_viewports[1], "leet")
-    assert(#screen[1].data.viewport.outputs == 2)
+    assert(#screen[1]._private.viewport.outputs == 2)
     remove_output(fake_viewports[1], "foobar")
 
     -- At this point, only 1 DPI is left.
-    assert(#screen[1].data.viewport.outputs == 1)
+    assert(#screen[1]._private.viewport.outputs == 1)
     assert(screen[1].maximum_dpi == saved_dpi1/2)
     assert(screen[1].minimum_dpi == saved_dpi1/2)
     assert(screen[1].dpi         == saved_dpi1/2)
@@ -368,25 +368,25 @@ function()
     }
 
     assert(screen.count() == 2)
-    assert(screen[1].data.viewport.id == 10)
-    assert(screen[2].data.viewport.id == 11)
-    assert(grect.are_equal(screen[1].data.viewport.geometry, screen[1].geometry))
-    assert(grect.are_equal(screen[2].data.viewport.geometry, screen[2].geometry))
+    assert(screen[1]._private.viewport.id == 10)
+    assert(screen[2]._private.viewport.id == 11)
+    assert(grect.are_equal(screen[1]._private.viewport.geometry, screen[1].geometry))
+    assert(grect.are_equal(screen[2]._private.viewport.geometry, screen[2].geometry))
     assert(#ascreen._viewports == 2)
 
     remove_viewport(10)
 
     assert(#ascreen._viewports == 1)
     assert(screen.count() == 1)
-    assert(screen[1].data.viewport.id == 11)
-    assert(grect.are_equal(screen[1].data.viewport.geometry, screen[1].geometry))
+    assert(screen[1]._private.viewport.id == 11)
+    assert(grect.are_equal(screen[1]._private.viewport.geometry, screen[1].geometry))
 
     return true
 end,
 
 -- Test resizing.
 function()
-    local s, sa = screen[1], screen[1].data.viewport
+    local s, sa = screen[1], screen[1]._private.viewport
     assert(screen.count() == 1)
     assert(#ascreen._viewports == 1)
 
@@ -403,8 +403,8 @@ function()
 
     assert(screen.count() == 1)
     assert(s == screen[1])
-    assert(s.data.viewport ~= sa)
-    assert(s.data.viewport.id == 12)
+    assert(s._private.viewport ~= sa)
+    assert(s._private.viewport.id == 12)
 
     -- Now 2 smaller (resolution) screens side by side to make sure it doesn't
     -- go haywire with overlapping
@@ -423,7 +423,7 @@ function()
 
     assert(screen.count() == 2)
     assert(s == screen[1])
-    assert(s.data.viewport.id == 13)
+    assert(s._private.viewport.id == 13)
     assert(s.geometry.x == 1337)
     assert(s.geometry.width == 680)
 
@@ -453,8 +453,8 @@ function()
     }
 
     assert(screen.count() == 2)
-    assert(screen[1].data.viewport.id == 15)
-    assert(screen[2].data.viewport.id == 16)
+    assert(screen[1]._private.viewport.id == 15)
+    assert(screen[2]._private.viewport.id == 16)
 
     -- Connect custom handler and see if the internals accidently depend on
     -- implementation details.

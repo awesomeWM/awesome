@@ -66,7 +66,8 @@ function wibox:find_widgets(x, y)
 end
 
 function wibox:_buttons(btns)
-    return self.drawin:_buttons(btns)
+    -- The C code uses the argument count, `nil` counts.
+    return btns and self.drawin:_buttons(btns) or self.drawin:_buttons()
 end
 
 --- Create a widget that reflects the current state of this wibox.
@@ -277,7 +278,6 @@ local function new(args)
         return ret
     end
 
-    w._private = {}
     ret.drawin = w
     ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
         "wibox drawable (" .. object.modulename(3) .. ")")

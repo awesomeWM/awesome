@@ -24,6 +24,7 @@ return
     mouse = require("awful.mouse");
     remote = require("awful.remote");
     key = require("awful.key");
+    keyboard = require("awful.keyboard");
     button = require("awful.button");
     wibar = require("awful.wibar");
     wibox = require("awful.wibox");

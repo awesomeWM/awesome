@@ -3,6 +3,14 @@
 -- @copyright 2015 Uli Schlachter and Kazunobu Kuriyama
 ---------------------------------------------------------------------------
 
+-- luacheck: globals button
+_G.button = setmetatable({
+    set_index_miss_handler = function() end,
+    set_newindex_miss_handler = function() end
+}, {
+    __call = function() return {} end
+})
+
 local kb = require("awful.widget.keyboardlayout")
 
 describe("awful.widget.keyboardlayout get_groups_from_group_names", function()

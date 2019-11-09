@@ -7,11 +7,20 @@ local awful = require("awful")
 local keygrabber_a_active = false
 local keygrabber_b_active = false
 
+-- Disable the deprecation to test both the current and legacy APIs.
+local gdebug = require("gears.debug")
+gdebug.deprecate = function() end
+
 local steps = {
     function()
+
         awful.keygrabber {
             keybindings = {
-                {{}, "a", function() keygrabber_a_active = true end},
+                awful.key {
+                    modifiers = {},
+                    key       = "a",
+                    on_press  = function() keygrabber_a_active = true end
+                }
             },
             stop_key = "Escape",
             stop_callback = function() keygrabber_a_active = false end,
