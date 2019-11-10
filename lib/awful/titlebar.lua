@@ -557,7 +557,9 @@ local function new(c, args)
         c:connect_signal("unfocus", update_colors)
 
         -- Inform the drawable when it becomes invisible
-        c:connect_signal("unmanage", function() ret:_inform_visible(false) end)
+        c:connect_signal("request::unmanage", function()
+            ret:_inform_visible(false)
+        end)
     else
         bars[position].args = args
         ret = bars[position].drawable
@@ -832,7 +834,7 @@ function titlebar.widget.stickybutton(c)
     return widget
 end
 
-client.connect_signal("unmanage", function(c)
+client.connect_signal("request::unmanage", function(c)
     all_titlebars[c] = nil
 end)
 

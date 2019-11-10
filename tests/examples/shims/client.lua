@@ -287,7 +287,11 @@ function client.gen_fake(args)
         end
     })
 
+    client.emit_signal("request::manage", ret)
+
+    --TODO v6 remove this.
     client.emit_signal("manage", ret)
+
     assert(not args.screen or (args.screen == ret.screen))
 
     return ret

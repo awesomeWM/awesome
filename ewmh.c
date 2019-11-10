@@ -238,8 +238,8 @@ ewmh_init_lua(void)
 
     luaA_class_connect_signal(L, &client_class, "focus", ewmh_update_net_active_window);
     luaA_class_connect_signal(L, &client_class, "unfocus", ewmh_update_net_active_window);
-    luaA_class_connect_signal(L, &client_class, "manage", ewmh_update_net_client_list);
-    luaA_class_connect_signal(L, &client_class, "unmanage", ewmh_update_net_client_list);
+    luaA_class_connect_signal(L, &client_class, "request::manage", ewmh_update_net_client_list);
+    luaA_class_connect_signal(L, &client_class, "request::unmanage", ewmh_update_net_client_list);
     luaA_class_connect_signal(L, &client_class, "property::modal" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::fullscreen" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::maximized_horizontal" , ewmh_client_update_hints);
@@ -256,7 +256,7 @@ ewmh_init_lua(void)
     luaA_class_connect_signal(L, &client_class, "property::titlebar_right" , ewmh_client_update_frame_extents);
     luaA_class_connect_signal(L, &client_class, "property::titlebar_left" , ewmh_client_update_frame_extents);
     luaA_class_connect_signal(L, &client_class, "property::border_width" , ewmh_client_update_frame_extents);
-    luaA_class_connect_signal(L, &client_class, "manage", ewmh_client_update_frame_extents);
+    luaA_class_connect_signal(L, &client_class, "request::manage", ewmh_client_update_frame_extents);
     /* NET_CURRENT_DESKTOP handling */
     luaA_class_connect_signal(L, &client_class, "focus", ewmh_update_net_current_desktop);
     luaA_class_connect_signal(L, &client_class, "unfocus", ewmh_update_net_current_desktop);

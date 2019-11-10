@@ -621,7 +621,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
         capi.client.connect_signal("property::hidden", u)
         capi.client.connect_signal("tagged", u)
         capi.client.connect_signal("untagged", u)
-        capi.client.connect_signal("unmanage", function(c)
+        capi.client.connect_signal("request::unmanage", function(c)
             u(c)
             for _, i in pairs(instances) do
                 for _, tlist in pairs(i) do

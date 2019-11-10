@@ -52,7 +52,7 @@ local function create_titlebar(c)
 end
 
 -- "Enable" titlebars (so that the titlebar can prevent garbage collection)
-client.connect_signal("manage", function (c)
+client.connect_signal("request::manage", function (c)
     create_titlebar(c)
 end)
 

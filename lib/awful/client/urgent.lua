@@ -83,7 +83,7 @@ end
 
 capi.client.connect_signal("property::urgent", urgent.add)
 capi.client.connect_signal("focus", urgent.delete)
-capi.client.connect_signal("unmanage", urgent.delete)
+capi.client.connect_signal("request::unmanage", urgent.delete)
 
 return urgent
 

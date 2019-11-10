@@ -47,6 +47,14 @@ typedef enum {
     CLIENT_TITLEBAR_COUNT = 4
 } client_titlebar_t;
 
+typedef enum {
+    CLIENT_UNMANAGE_DESTROYED = 0,
+    CLIENT_UNMANAGE_USER = 1,
+    CLIENT_UNMANAGE_REPARENT = 2,
+    CLIENT_UNMANAGE_UNMAP = 3,
+    CLIENT_UNMANAGE_FAILED = 4
+} client_unmanage_t;
+
 /* Special bit we invented to "fake" unset hints */
 #define MWM_HINTS_AWESOME_SET   (1L << 15)
 
@@ -206,7 +214,7 @@ void client_ban_unfocus(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, xcb_get_window_attributes_reply_t *);
 bool client_resize(client_t *, area_t, bool);
-void client_unmanage(client_t *, bool);
+void client_unmanage(client_t *, client_unmanage_t);
 void client_kill(client_t *);
 void client_set_sticky(lua_State *, int, bool);
 void client_set_above(lua_State *, int, bool);

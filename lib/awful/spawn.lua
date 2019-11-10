@@ -736,7 +736,7 @@ end
 
 capi.awesome.connect_signal("spawn::canceled" , spawn.on_snid_cancel   )
 capi.awesome.connect_signal("spawn::timeout"  , spawn.on_snid_cancel   )
-capi.client.connect_signal ("manage"          , spawn.on_snid_callback )
+capi.client.connect_signal ("request::manage" , spawn.on_snid_callback )
 
 return setmetatable(spawn, { __call = function(_, ...) return spawn.spawn(...) end })
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

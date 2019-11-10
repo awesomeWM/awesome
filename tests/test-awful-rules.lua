@@ -13,7 +13,7 @@ local tests = {}
 local tb_height = gears.math.round(beautiful.get_font_height() * 1.5)
 -- local border_width = beautiful.border_width
 
--- Detect "manage" race conditions
+-- Detect "request::manage" race conditions
 local real_apply = awful.rules.apply
 function awful.rules.apply(c)
     assert(#c:tags() == 0)

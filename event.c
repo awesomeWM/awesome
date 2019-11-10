@@ -478,7 +478,7 @@ event_handle_destroynotify(xcb_destroy_notify_event_t *ev)
     client_t *c;
 
     if((c = client_getbywin(ev->window)))
-        client_unmanage(c, false);
+        client_unmanage(c, CLIENT_UNMANAGE_DESTROYED);
     else
         for(int i = 0; i < globalconf.embedded.len; i++)
             if(globalconf.embedded.tab[i].win == ev->window)
@@ -856,7 +856,7 @@ event_handle_unmapnotify(xcb_unmap_notify_event_t *ev)
     client_t *c;
 
     if((c = client_getbywin(ev->window)))
-        client_unmanage(c, true);
+        client_unmanage(c, CLIENT_UNMANAGE_UNMAP);
 }
 
 /** The randr screen change notify event handler.
@@ -993,7 +993,7 @@ event_handle_reparentnotify(xcb_reparent_notify_event_t *ev)
         /* Ignore reparents to the root window, they *might* be caused by
          * ourselves if a client quickly unmaps and maps itself again. */
         if (ev->parent != globalconf.screen->root)
-            client_unmanage(c, true);
+            client_unmanage(c, CLIENT_UNMANAGE_REPARENT);
     }
     else if (ev->parent != globalconf.systray.window) {
         /* Embedded window moved elsewhere, end of embedding */

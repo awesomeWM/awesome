@@ -70,6 +70,8 @@ new_type("deprecatedproperty", "Deprecated object properties", false, "Type cons
 new_type("method", "Object methods ", false, "Parameters")
 -- New type for signals
 new_type("signal", "Signals", false, "Arguments")
+-- Deprecated signals.
+new_type("deprecatedsignal", "Deprecated signals", false, "Arguments")
 -- New type for signals connections
 new_type("signalhandler", "Request handlers", false, "Arguments")
 -- Allow objects to define a set of beautiful properties affecting them
@@ -736,6 +738,13 @@ local show_return = {
     deprecated      = true,
 }
 
+-- The different type of deprecation.
+local is_deprecated = {
+    deprecated         = true,
+    deprecatedproperty = true,
+    deprecatedsignal   = true,
+}
+
 custom_display_name_handler = function(item, default_handler)
     init_custom_types(item)
 
@@ -776,7 +785,7 @@ custom_display_name_handler = function(item, default_handler)
         end
     end
 
-    if item.type == "deprecated" or item.type == "deprecatedproperty" then
+    if is_deprecated[item.type] then
         return ret .. "<i class=\"deprecated_label\"> [deprecated]</i>"
     end
 

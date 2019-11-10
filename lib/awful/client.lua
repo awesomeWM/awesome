@@ -843,7 +843,7 @@ capi.client.connect_signal("property::maximized_vertical", update_implicitly_flo
 capi.client.connect_signal("property::maximized_horizontal", update_implicitly_floating)
 capi.client.connect_signal("property::maximized", update_implicitly_floating)
 capi.client.connect_signal("property::size_hints", update_implicitly_floating)
-capi.client.connect_signal("manage", update_implicitly_floating)
+capi.client.connect_signal("request::manage", update_implicitly_floating)
 
 --- Toggle the floating state of a client between 'auto' and 'true'.
 -- Use `c.floating = not c.floating`
@@ -1464,23 +1464,44 @@ end
 -- @tparam[opt=nil] string content The context (like "rules")
 -- @tparam[opt=nil] table hints Some hints.
 
---- The client marked signal (deprecated).
--- @signal marked
+--- The client marked signal.
+-- @deprecatedsignal marked
 
---- The client unmarked signal (deprecated).
--- @signal unmarked
+--- The client unmarked signal.
+-- @deprecatedsignal unmarked
 
 -- Add clients during startup to focus history.
 -- This used to happen through ewmh.activate, but that only handles visible
 -- clients now.
-capi.client.connect_signal("manage", function (c)
+capi.client.connect_signal("request::manage", function (c)
+    if capi.awesome.startup
+      and not c.size_hints.user_position
+      and not c.size_hints.program_position then
+        -- Prevent clients from being unreachable after screen count changes.
+        require("awful.placement").no_offscreen(c)
+    end
+
     if awesome.startup then
         client.focus.history.add(c)
     end
 end)
-capi.client.connect_signal("unmanage", client.focus.history.delete)
+capi.client.connect_signal("request::unmanage", client.focus.history.delete)
 
-capi.client.connect_signal("unmanage", client.floating.delete)
+capi.client.connect_signal("request::unmanage", client.floating.delete)
+
+-- Print a warning when the old `manage` signal is used.
+capi.client.connect_signal("manage::connected", function()
+    gdebug.deprecate(
+        "Use `request::manage` rather than `manage`",
+        {deprecated_in=5}
+    )
+end)
+capi.client.connect_signal("unmanage::connected", function()
+    gdebug.deprecate(
+        "Use `request::unmanage` rather than `unmanage`",
+        {deprecated_in=5}
+    )
+end)
 
 -- Connect to "focus" signal, and allow to disable tracking.
 do

@@ -63,7 +63,7 @@
  *
  * To execute a callback when a new client is added, use the `manage` signal:
  *
- *    client.connect_signal("manage", function(c)
+ *    client.connect_signal("request::manage", function(c)
  *        -- do something
  *    end)
  *
@@ -164,7 +164,46 @@
  */
 
 /** When a new client appears and gets managed by Awesome.
- * @signal manage
+ *
+ * This request should be implemented by code which track the client. It isn't
+ * recommended to use this to initialize the client content. This use case is
+ * a better fit for `ruled.client`, which has built-in dependency management.
+ * Using this request to mutate the client state will likely conflict with
+ * `ruled.client`.
+ *
+ * @signal request::manage
+ * @tparam client c The client.
+ * @tparam string context What created the client. It is currently either "new"
+ *  or "startup".
+ * @tparam table hints More metadata (currently empty, it exists for compliance
+ *  with the other `request::` signals).
+ */
+
+/** When a client is going away.
+ *
+ * Each places which store `client` objects in non-weak table or whose state
+ * depend on the current client should answer this request.
+ *
+ * The contexts are:
+ *
+ * * **user**: `c:unmanage()` was called.
+ * * **reparented**: The window was reparented to another window. It is no
+ *   longer a stand alone client.
+ * * **destroyed**: The window was closed.
+ *
+ * @signal request::unmanage
+ * @tparam client c The client.
+ * @tparam string context Why was the client unmanaged.
+ * @tparam table hints More metadata (currently empty, it exists for compliance
+ *  with the other `request::` signals).
+ */
+
+/** Use `request::manage`.
+ * @deprecatedsignal manage
+ */
+
+/** Use `request::unmanage`.
+ * @deprecatedsignal unmanage
  */
 
 /**
@@ -273,10 +312,6 @@
 
 /** When a client gets unfocused.
  * @signal unfocus
- */
-
-/**
- * @signal unmanage
  */
 
 /** When a client gets untagged.
@@ -1735,7 +1770,19 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     luaA_class_emit_signal(L, &client_class, "list", 0);
 
+    /* Add the context */
+    if (globalconf.loop == NULL)
+        lua_pushstring(L, "startup");
+    else
+        lua_pushstring(L, "new");
+
+    /* Hints */
+    lua_newtable(L);
+
     /* client is still on top of the stack; emit signal */
+    luaA_object_emit_signal(L, -3, "request::manage", 2);
+
+    /*TODO v6: remove this*/
     luaA_object_emit_signal(L, -1, "manage", 0);
 
     xcb_generic_error_t *error = xcb_request_check(globalconf.connection, reparent_cookie);
@@ -1744,7 +1791,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                 NONULL(c->name), NONULL(c->class), NONULL(c->instance));
         event_handle((xcb_generic_event_t *) error);
         p_delete(&error);
-        client_unmanage(c, true);
+        client_unmanage(c, CLIENT_UNMANAGE_FAILED);
     }
 
     /* pop client */
@@ -2354,10 +2401,10 @@ client_unban(client_t *c)
 
 /** Unmanage a client.
  * \param c The client.
- * \param window_valid Is the client's window still valid?
+ * \param reason Why was the unmanage done.
  */
 void
-client_unmanage(client_t *c, bool window_valid)
+client_unmanage(client_t *c, client_unmanage_t reason)
 {
     lua_State *L = globalconf_get_lua_State();
 
@@ -2384,6 +2431,28 @@ client_unmanage(client_t *c, bool window_valid)
         untag_client(c, globalconf.tags.tab[i]);
 
     luaA_object_push(L, c);
+
+    /* Give the context to Lua */
+    switch (reason)
+    {
+            break;
+        case CLIENT_UNMANAGE_USER:
+            lua_pushstring(L, "user");
+            break;
+        case CLIENT_UNMANAGE_REPARENT:
+            lua_pushstring(L, "reparented");
+            break;
+        case CLIENT_UNMANAGE_UNMAP:
+        case CLIENT_UNMANAGE_FAILED:
+        case CLIENT_UNMANAGE_DESTROYED:
+            lua_pushstring(L, "destroyed");
+            break;
+    }
+
+    /* Hints */
+    lua_newtable(L);
+
+    luaA_object_emit_signal(L, -3, "request::unmanage", 2);
     luaA_object_emit_signal(L, -1, "unmanage", 0);
     lua_pop(L, 1);
 
@@ -2413,7 +2482,7 @@ client_unmanage(client_t *c, bool window_valid)
 
     /* Clear our event mask so that we don't receive any events from now on,
      * especially not for the following requests. */
-    if(window_valid)
+    if(reason != CLIENT_UNMANAGE_DESTROYED)
         xcb_change_window_attributes(globalconf.connection,
                                      c->window,
                                      XCB_CW_EVENT_MASK,
@@ -2423,7 +2492,7 @@ client_unmanage(client_t *c, bool window_valid)
                                  XCB_CW_EVENT_MASK,
                                  (const uint32_t []) { 0 });
 
-    if(window_valid)
+    if(reason != CLIENT_UNMANAGE_DESTROYED)
     {
         xcb_unmap_window(globalconf.connection, c->window);
         xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
@@ -2434,7 +2503,7 @@ client_unmanage(client_t *c, bool window_valid)
         window_array_append(&globalconf.destroy_later_windows, c->nofocus_window);
     window_array_append(&globalconf.destroy_later_windows, c->frame_window);
 
-    if(window_valid)
+    if(reason != CLIENT_UNMANAGE_DESTROYED)
     {
         /* Remove this window from the save set since this shouldn't be made visible
          * after a restart anymore. */
@@ -2823,7 +2892,7 @@ static int
 luaA_client_unmanage(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
-    client_unmanage(c, true);
+    client_unmanage(c, CLIENT_UNMANAGE_USER);
     return 0;
 }
 

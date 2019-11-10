@@ -16,7 +16,7 @@ client.connect_signal("property::urgent", function (c)
 end)
 
 local manage_cb_done
-client.connect_signal("manage", function (c)
+client.connect_signal("request::manage", function (c)
     manage_cb_done = true
     assert(c.class == "XTerm", "Client should be xterm!")
 end)

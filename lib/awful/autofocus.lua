@@ -64,7 +64,7 @@ end
 tag.connect_signal("property::selected", function (t)
     timer.delayed_call(check_focus_tag, t)
 end)
-client.connect_signal("unmanage",            check_focus_delayed)
+client.connect_signal("request::unmanage",   check_focus_delayed)
 client.connect_signal("tagged",              check_focus_delayed)
 client.connect_signal("untagged",            check_focus_delayed)
 client.connect_signal("property::hidden",    check_focus_delayed)

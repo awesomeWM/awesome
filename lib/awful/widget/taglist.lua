@@ -555,7 +555,7 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
         end)
         capi.client.connect_signal("tagged", uc)
         capi.client.connect_signal("untagged", uc)
-        capi.client.connect_signal("unmanage", uc)
+        capi.client.connect_signal("request::unmanage", uc)
         capi.screen.connect_signal("removed", function(s)
             instances[get_screen(s)] = nil
         end)

@@ -657,7 +657,7 @@ function rules.completed_with_payload_callback(c, props, callbacks)
     rules.execute(c, props, callbacks)
 end
 
-client.connect_signal("manage", rules.apply)
+client.connect_signal("request::manage", rules.apply)
 
 --@DOC_rule_COMMON@
 

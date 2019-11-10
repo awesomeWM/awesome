@@ -208,12 +208,6 @@ sections.DOC_DIALOG_RULE = [[
  &nbsp;
 ]]
 
-
-sections.DOC_MANAGE_HOOK = [[
- &nbsp;
-]]
-
-
 sections.DOC_TITLEBARS = [[
  &nbsp;
 ]]
