@@ -133,7 +133,7 @@ table.insert(steps, function()
     c1, c2 = client.get()[1], client.get()[2]
 
     -- This should still be the case
-    assert(client.focus == c1)
+    assert(c1.active)
 
     c2:emit_signal("request::activate", "i_said_so")
 
@@ -143,7 +143,7 @@ end)
 -- Check if writing a focus stealing filter works.
 table.insert(steps, function()
     -- This should still be the case
-    assert(client.focus == c2)
+    assert(c2.active)
 
     original_count = #awful.ewmh.generic_activate_filters
 
@@ -158,7 +158,7 @@ end)
 
 table.insert(steps, function()
     -- The request should have been denied
-    assert(client.focus == c2)
+    assert(c2.active)
 
     -- Test the remove function
     awful.ewmh.remove_activate_filter(function() end)
@@ -171,7 +171,7 @@ table.insert(steps, function()
 
     c1:emit_signal("request::activate", "i_said_so")
 
-    return client.focus == c1
+    return c1.active
 end)
 
 local has_error

@@ -443,7 +443,7 @@ local all_titlebars = setmetatable({}, { __mode = 'k' })
 -- Get a color for a titlebar, this tests many values from the array and the theme
 local function get_color(name, c, args)
     local suffix = "_normal"
-    if capi.client.focus == c then
+    if c.active then
         suffix = "_focus"
     end
     local function get(array)
@@ -707,7 +707,7 @@ function titlebar.widget.button(c, name, selector, action)
                 end
             end
             local prefix = "normal"
-            if capi.client.focus == c then
+            if c.active then
                 prefix = "focus"
             end
             if img ~= "" then

@@ -64,7 +64,7 @@ local steps = {
 
             client.focus = client.get()[1]
             local c  = client.focus
-            assert(c and client.focus == c)
+            assert(c and c.active)
             assert(beautiful.awesome_icon)
 
             local t = awful.tag.add("Test", {clients={c}, icon = beautiful.awesome_icon})

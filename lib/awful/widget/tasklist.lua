@@ -352,7 +352,7 @@ local function tasklist_label(c, args, tb)
         end
     end
 
-    local focused = capi.client.focus == c
+    local focused = c.active
     -- Handle transient_for: the first parent that does not skip the taskbar
     -- is considered to be focused, if the real client has skip_taskbar.
     if not focused and capi.client.focus and capi.client.focus.skip_taskbar
@@ -723,7 +723,7 @@ end
 -- @filterfunction awful.tasklist.filter.focused
 function tasklist.filter.focused(c, screen)
     -- Only print client on the same screen as this widget
-    return get_screen(c.screen) == get_screen(screen) and capi.client.focus == c
+    return get_screen(c.screen) == get_screen(screen) and c.active
 end
 
 --- Get all the clients in an undefined order.

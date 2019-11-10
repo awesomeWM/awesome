@@ -536,7 +536,7 @@ function client.object.move_to_screen(self, s)
         end
         s = get_screen(s)
         if get_screen(self.screen) ~= s then
-            local sel_is_focused = self == capi.client.focus
+            local sel_is_focused = self.active
             self.screen = s
             screen.focus(s)
 

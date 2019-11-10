@@ -76,7 +76,7 @@ local steps = {
     -- Killing the client means the first selected tag counts
     function(count)
         if count == 1 then
-            assert(client.focus == c)
+            assert(c.active)
             c:kill()
             c = nil
             return
