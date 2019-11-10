@@ -1419,6 +1419,7 @@ end
 -- @tparam[opt=false] boolean args.toggle_minimization
 -- @see awful.ewmh.add_activate_filter
 -- @see request::activate
+-- @see active
 function client.object.activate(c, args)
     local new_args = setmetatable({}, {__index = args or {}})
 
@@ -1451,6 +1452,62 @@ function client.object.activate(c, args)
                 y = geo.y + math.ceil(geo.height/2)
             }
         end
+    end
+end
+
+--- Return true if the client is active (has focus).
+--
+-- This property is **READ ONLY**. Use `c:activate { context = "myreason" }`
+-- to change the focus.
+--
+-- The reason for this is that directly setting the focus
+-- (which can also be done using `client.focus = c`) will bypass the focus
+-- stealing filters. This is easy at first, but as this gets called from more
+-- and more places, it quickly become unmanageable. This coding style is
+-- recommended for maintainable code:
+--
+--    -- Check if a client has focus:
+--    if c.active then
+--        -- do something
+--    end
+--
+--    -- Check if there is a active (focused) client:
+--    if client.focus ~= nil then
+--        -- do something
+--    end
+--
+--    -- Get the active (focused) client:
+--    local c = client.focus
+--
+--    -- Set the focus:
+--    c:activate {
+--        context       = "myreason",
+--        switch_to_tag = true,
+--    }
+--
+-- @property active
+-- @tparam boolean active
+-- @see activate
+-- @see request::activate
+-- @see awful.ewmh.add_activate_filter
+
+function client.object.get_active(c)
+    return capi.client.focus == c
+end
+
+function client.object.set_active(c, value)
+    if value then
+        -- Do it, but print an error popup. Setting the focus without a context
+        -- breaks the filters. This seems a good idea at first, then cause
+        -- endless pain. QtWidgets also enforces this.
+        c:activate()
+        assert(false, "You cannot set `active` directly, use `c:activate()`.")
+    else
+        -- Be permissive given the alternative is a bit convoluted.
+        capi.client.focus = nil
+        gdebug.print_warning(
+            "Consider using `client.focus = nil` instead of `c.active = false"
+        )
     end
 end
 
