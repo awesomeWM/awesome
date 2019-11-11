@@ -553,8 +553,7 @@ local function new(c, args)
         }
 
         -- Update the colors when focus changes
-        c:connect_signal("focus", update_colors)
-        c:connect_signal("unfocus", update_colors)
+        c:connect_signal("property::active", update_colors)
 
         -- Inform the drawable when it becomes invisible
         c:connect_signal("request::unmanage", function()

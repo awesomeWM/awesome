@@ -630,8 +630,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
             end
         end)
         capi.client.connect_signal("list", u)
-        capi.client.connect_signal("focus", u)
-        capi.client.connect_signal("unfocus", u)
+        capi.client.connect_signal("property::active", u)
         capi.screen.connect_signal("removed", function(s)
             instances[get_screen(s)] = nil
         end)
