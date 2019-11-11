@@ -207,6 +207,20 @@
  * @signal request::select
  */
 
+/**
+ * This signal is emitted to fill the list of default layouts.
+ *
+ * It is emitted on the global `tag` class rather than individual tag objects.
+ * The default handler is part of `rc.lua`. New modules can also use this signal
+ * to dynamically add new layouts to the list of default layouts.
+ *
+ * @signal request::default_layouts
+ * @see awful.layout.layouts
+ * @see awful.layout.append_default_layout
+ * @see awful.layout.remove_default_layout
+ */
+
+
 /** When a client gets tagged with this tag.
  * @signal tagged
  * @client c The tagged client.
