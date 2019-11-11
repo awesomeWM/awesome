@@ -1485,6 +1485,26 @@ end
 --        switch_to_tag = true,
 --    }
 --
+--    -- Get notified when a client gets or loses the focus:
+--    c:connect_signal("property::active", function(c, is_active)
+--        -- do something
+--    end)
+--
+--    -- Get notified when any client gets or loses the focus:
+--    client.connect_signal("property::active", function(c, is_active)
+--        -- do something
+--    end)
+--
+--    -- Get notified when any client gets the focus:
+--    client.connect_signal("focus", function(c)
+--        -- do something
+--    end)
+--
+--    -- Get notified when any client loses the focus:
+--    client.connect_signal("unfocus", function(c)
+--        -- do something
+--    end)
+--
 -- @property active
 -- @tparam boolean active
 -- @see activate
