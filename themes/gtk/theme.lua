@@ -120,9 +120,9 @@ theme.fg_minimize   = mix(theme.wibar_fg, theme.wibar_bg, 0.9)
 
 theme.bg_systray    = theme.wibar_bg
 
-theme.border_normal = theme.gtk.wm_border_unfocused_color
-theme.border_focus  = theme.gtk.wm_border_focused_color
-theme.border_marked = theme.gtk.success_color
+theme.border_color_normal = theme.gtk.wm_border_unfocused_color
+theme.border_color_active = theme.gtk.wm_border_focused_color
+theme.border_color_marked = theme.gtk.success_color
 
 theme.border_width  = dpi(theme.gtk.button_border_width or 1)
 theme.border_radius = theme.gtk.button_border_radius

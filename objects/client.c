@@ -568,20 +568,19 @@
  * The client border width.
  * @property border_width
  * @param integer
+ * @propemits false false
+ * @see request::border
  */
 
 /**
  * The client border color.
  *
- * **Signal:**
- *
- *  * *property::border\_color*
- *
- * @see gears.color
- *
  * @property border_color
- * @param pattern Any string, gradients and patterns will be converted to a
+ * @param color Any string, gradients and patterns will be converted to a
  *  cairo pattern.
+ * @propemits false false
+ * @see request::border
+ * @see gears.color
  */
 
 /**
@@ -593,6 +592,8 @@
  *
  * @property urgent
  * @param boolean
+ * @propemits false false
+ * @see request::border
  */
 
 /**
@@ -619,6 +620,8 @@
  *
  * @property opacity
  * @param number Between 0 (transparent) to 1 (opaque)
+ * @propemits false false
+ * @see request::border
  */
 
 /**
@@ -673,6 +676,8 @@
  *
  * @property maximized
  * @param boolean
+ * @propemits false false
+ * @see request::border
  */
 
 /**
@@ -974,27 +979,6 @@
 /** When the x or y coordinate changed.
  * @signal property::position
  * @see client.geometry
- */
-
-/**
- * The border color when the client is focused.
- *
- * @beautiful beautiful.border_focus
- * @param string
- */
-
-/**
- * The border color when the client is not focused.
- *
- * @beautiful beautiful.border_normal
- * @param string
- */
-
-/**
- * The client border width.
- *
- * @beautiful beautiful.border_width
- * @param integer
  */
 
 /** Return client struts (reserved space at the edge of the screen).
@@ -4094,5 +4078,7 @@ client_class_setup(lua_State *L)
 }
 
 /* @DOC_cobject_COMMON@ */
+
+/* @DOC_client_theme_COMMON@ */
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

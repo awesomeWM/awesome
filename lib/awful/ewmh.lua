@@ -17,6 +17,7 @@ local asuit = require("awful.layout.suit")
 local beautiful = require("beautiful")
 local alayout = require("awful.layout")
 local atag = require("awful.tag")
+local gdebug = require("gears.debug")
 
 local ewmh = {
     generic_activate_filters    = {},
@@ -453,6 +454,158 @@ ewmh.add_activate_filter(function(c)
     end
 end, "mouse_enter")
 
+--- The default client `request::border` handler.
+--
+-- To replace this handler with your own, use:
+--
+--    client.disconnect_signal("request::border", awful.ewmh.update_border)
+--
+-- The default implementation chooses from dozens beautiful theme variables
+-- depending if the client is tiled, floating, maximized and then from its state
+-- (urgent, new, active, normal)
+--
+-- @signalhandler awful.ewmh.update_border
+-- @usebeautiful beautiful.border_color_active
+-- @usebeautiful beautiful.border_color_normal
+-- @usebeautiful beautiful.border_color_new
+-- @usebeautiful beautiful.border_color_urgent
+-- @usebeautiful beautiful.border_color_floating
+-- @usebeautiful beautiful.border_color_floating_active
+-- @usebeautiful beautiful.border_color_floating_normal
+-- @usebeautiful beautiful.border_color_floating_new
+-- @usebeautiful beautiful.border_color_floating_urgent
+-- @usebeautiful beautiful.border_color_maximized
+-- @usebeautiful beautiful.border_color_maximized_active
+-- @usebeautiful beautiful.border_color_maximized_normal
+-- @usebeautiful beautiful.border_color_maximized_new
+-- @usebeautiful beautiful.border_color_maximized_urgent
+-- @usebeautiful beautiful.border_color_fullscreen
+-- @usebeautiful beautiful.border_color_fullscreen_active
+-- @usebeautiful beautiful.border_color_fullscreen_normal
+-- @usebeautiful beautiful.border_color_fullscreen_new
+-- @usebeautiful beautiful.border_color_fullscreen_urgent
+-- @usebeautiful beautiful.border_width_active
+-- @usebeautiful beautiful.border_width_normal
+-- @usebeautiful beautiful.border_width_new
+-- @usebeautiful beautiful.border_width_urgent
+-- @usebeautiful beautiful.border_width_floating
+-- @usebeautiful beautiful.border_width_floating_active
+-- @usebeautiful beautiful.border_width_floating_normal
+-- @usebeautiful beautiful.border_width_floating_new
+-- @usebeautiful beautiful.border_width_floating_urgent
+-- @usebeautiful beautiful.border_width_maximized
+-- @usebeautiful beautiful.border_width_maximized_active
+-- @usebeautiful beautiful.border_width_maximized_normal
+-- @usebeautiful beautiful.border_width_maximized_new
+-- @usebeautiful beautiful.border_width_maximized_urgent
+-- @usebeautiful beautiful.border_width_fullscreen
+-- @usebeautiful beautiful.border_width_fullscreen_active
+-- @usebeautiful beautiful.border_width_fullscreen_normal
+-- @usebeautiful beautiful.border_width_fullscreen_new
+-- @usebeautiful beautiful.border_width_fullscreen_urgent
+-- @usebeautiful beautiful.opacity_floating
+-- @usebeautiful beautiful.opacity_floating_active
+-- @usebeautiful beautiful.opacity_floating_normal
+-- @usebeautiful beautiful.opacity_floating_new
+-- @usebeautiful beautiful.opacity_floating_urgent
+-- @usebeautiful beautiful.opacity_maximized
+-- @usebeautiful beautiful.opacity_maximized_active
+-- @usebeautiful beautiful.opacity_maximized_normal
+-- @usebeautiful beautiful.opacity_maximized_new
+-- @usebeautiful beautiful.opacity_maximized_urgent
+-- @usebeautiful beautiful.opacity_fullscreen
+-- @usebeautiful beautiful.opacity_fullscreen_active
+-- @usebeautiful beautiful.opacity_fullscreen_normal
+-- @usebeautiful beautiful.opacity_fullscreen_new
+-- @usebeautiful beautiful.opacity_fullscreen_urgent
+-- @usebeautiful beautiful.opacity_active
+-- @usebeautiful beautiful.opacity_normal
+-- @usebeautiful beautiful.opacity_new
+-- @usebeautiful beautiful.opacity_urgent
+
+function ewmh.update_border(c, context)
+    local suffix, fallback = "", ""
+
+    -- Add the sub-namespace.
+    if c.fullscreen then
+        suffix, fallback = "_fullscreen", "_fullscreen"
+    elseif c.maximized then
+        suffix, fallback = "_maximized", "_maximized"
+    elseif c.floating then
+        suffix, fallback = "_floating", "_floating"
+    end
+
+    -- Add the state suffix.
+    if c.urgent then
+        suffix = suffix .. "_urgent"
+    elseif c.active then
+        suffix = suffix .. "_active"
+    elseif context == "added" then
+        suffix = suffix .. "_new"
+    else
+        suffix = suffix .. "_normal"
+    end
+
+    if not c._private._user_border_width then
+        c._border_width = beautiful["border_width"..suffix]
+            or beautiful["border_width"..fallback]
+            or beautiful.border_width
+    end
+
+    if not c._private._user_border_color then
+        -- First, check marked clients. This is a concept that should probably
+        -- never have been added to the core. The documentation claims it works,
+        -- even if it has been broken for 90% of AwesomeWM releases ever since
+        -- it was added.
+        if c.marked and beautiful.border_marked then
+            c._border_color = beautiful.border_marked
+            return
+        end
+
+        local tv = beautiful["border_color"..suffix]
+
+        if fallback ~= "" and not tv then
+            tv = beautiful["border_color"..fallback]
+        end
+
+        -- The old theme variable did not have "color" in its name.
+        if (not tv) and beautiful.border_normal and (not c.active) then
+            gdebug.deprecate(
+                "Use `beautiful.border_color_normal` instead of `beautiful.border_normal`",
+                {deprecated_in=5}
+            )
+            tv = beautiful.border_normal
+        elseif (not tv) and beautiful.border_focus then
+            gdebug.deprecate(
+                "Use `beautiful.border_color_active` instead of `beautiful.border_focus`",
+                {deprecated_in=5}
+            )
+            tv = beautiful.border_focus
+        end
+
+        if not tv then
+            tv = beautiful.border_color
+        end
+
+        if tv then
+            c._border_color = tv
+        end
+    end
+
+    if not c._private._user_opacity then
+        local tv = beautiful["opacity"..suffix]
+
+        if fallback ~= "" and not tv then
+            tv = beautiful["opacity"..fallback]
+        end
+
+        if tv then
+            c._opacity = tv
+        end
+    end
+end
+
+client.connect_signal("request::border", ewmh.update_border)
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)

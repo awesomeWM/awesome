@@ -27,9 +27,9 @@ theme.fg_minimize   = "#2e3436"
 
 theme.useless_gap   = dpi(0)
 theme.border_width  = dpi(2)
-theme.border_normal = "#dae3e0"
-theme.border_focus  = "#729fcf"
-theme.border_marked = "#eeeeec"
+theme.border_color_normal = "#dae3e0"
+theme.border_color_active = "#729fcf"
+theme.border_color_marked = "#eeeeec"
 
 -- IMAGES
 theme.layout_fairh           = themes_path .. "sky/layouts/fairh.png"

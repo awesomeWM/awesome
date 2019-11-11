@@ -63,8 +63,23 @@ end
 -- @client c The client object.
 -- @param prop The property which is updated.
 function urgent.add(c, prop)
-    if type(c) == "client" and prop == "urgent" and c.urgent then
+    assert(
+        c.urgent ~= nil,
+        "`awful.client.urgent.add()` takes a client as first parameter"
+    )
+
+    if prop == "urgent" and c.urgent then
         table.insert(data, c)
+    end
+
+    if c.urgent then
+        c:emit_signal("request::border", "urgent", {})
+    else
+        c:emit_signal(
+            "request::border",
+            (c.active and "" or "in").."active",
+            {}
+        )
     end
 end
 

@@ -62,6 +62,14 @@ This document was last updated at commit v4.3-197-g9085ed631.
   objects. If you used these low level APIs to add keys and buttons dynamically,
   please migrate your code to the corresponding `:append_` and `:remove_`
   client methods.
+ * `beautiful.border_width` and `beautiful.border_color` are now honored even
+   when the part related to borders is removed from `rc.lua`. Set them
+   appropriately in your theme or disconnect the default `request::border`
+   handler.
+ * The order by which the client rules compute the geometry have changed
+   slightly. The border is now applied before the titlebar offset. This should
+   not affect most users unless you had mitigated the bug it fixes by adding
+   the titlebar offset in your rules.
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes

@@ -688,6 +688,12 @@ function client.object.set_floating(c, s)
             c:geometry(client.property.get(c, "floating_geometry"))
         end
         c.screen = scr
+
+        if s then
+            c:emit_signal("request::border", "floating", {})
+        else
+            c:emit_signal("request::border", (c.active and "" or "in").."active", {})
+        end
     end
 end
 
@@ -834,6 +840,17 @@ local function update_implicitly_floating(c)
     if cur ~= new then
         client.property.set(c, "_implicitly_floating", new)
         c:emit_signal("property::floating")
+
+        -- Don't send the border signals as they would be sent twice (with this
+        -- one having the wrong context). There is some `property::` signal
+        -- sent before `request::manage`.
+        if client.property.get(c, "_border_init") then
+            if cur then
+                c:emit_signal("request::border", "floating", {})
+            else
+                c:emit_signal("request::border", (c.active and "" or "in").."active", {})
+            end
+        end
     end
 end
 
@@ -1389,6 +1406,19 @@ function client.object.set_shape(self, shape)
     set_shape(self)
 end
 
+-- Proxy those properties to decorate their accessors with an extra flag to
+-- define when they are set by the user. This allows to "manage" the value of
+-- those properties internally until they are manually overridden.
+for _, prop in ipairs { "border_width", "border_color", "opacity" } do
+    client.object["get_"..prop] = function(self)
+        return self["_"..prop]
+    end
+    client.object["set_"..prop] = function(self, value)
+        self._private["_user_"..prop] = true
+        self["_"..prop] = value
+    end
+end
+
 --- Activate (focus) a client.
 --
 -- This method is the correct way to focus a client. While
@@ -1531,7 +1561,9 @@ function client.object.set_active(c, value)
     end
 end
 
--- Register standards signals
+capi.client.connect_signal("property::active", function(c)
+    c:emit_signal("request::border", (c.active and "" or "in").."active", {})
+end)
 
 --- The last geometry when client was floating.
 -- @signal property::floating_geometry
@@ -1547,6 +1579,21 @@ end
 --- The client unmarked signal.
 -- @deprecatedsignal unmarked
 
+--- Emited when the border client might need to be update.
+--
+-- The context are:
+--
+-- * **added**: When a new client is created.
+-- * **active**: When client gains the focus (or stop being urgent/floating
+--   but is active).
+-- * **inactive**: When client loses the focus (or stop being urgent/floating
+--   and is not active.
+-- * **urgent**: When a client becomes urgent.
+-- * **floating**: When the floating or maximization state changes.
+--
+-- @signal request::border
+-- @see awful.ewmh.update_border
+
 -- Add clients during startup to focus history.
 -- This used to happen through ewmh.activate, but that only handles visible
 -- clients now.
@@ -1561,6 +1608,9 @@ capi.client.connect_signal("request::manage", function (c)
     if awesome.startup then
         client.focus.history.add(c)
     end
+
+    client.property.set(c, "_border_init", true)
+    c:emit_signal("request::border", "added", {})
 end)
 capi.client.connect_signal("request::unmanage", client.focus.history.delete)
 

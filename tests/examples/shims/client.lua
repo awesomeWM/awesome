@@ -70,7 +70,7 @@ function client.gen_fake(args)
     ret.type = "normal"
     ret.valid = true
     ret.size_hints = {}
-    ret.border_width = 1
+    ret._border_width = 1
     ret.icon_sizes = {{16,16}}
     ret.name = "Example Client"
     ret._private._struts = { top = 0, right = 0, left = 0, bottom = 0 }

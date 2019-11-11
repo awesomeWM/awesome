@@ -132,23 +132,12 @@ local active_font
 -- @beautiful beautiful.useless_gap
 -- @param[opt=0] number
 
---- The client border width.
+--- The fallback border width.
 -- @beautiful beautiful.border_width
 -- @param number
 
---- The default clients border color.
--- Note that only solid colors are supported.
--- @beautiful beautiful.border_normal
--- @param color
-
---- The focused client border color.
--- Note that only solid colors are supported.
--- @beautiful beautiful.border_focus
--- @param color
-
---- The marked clients border color.
--- Note that only solid colors are supported.
--- @beautiful beautiful.border_marked
+--- The fallback border color.
+-- @beautiful beautiful.border_color
 -- @param color
 
 --- The wallpaper path.

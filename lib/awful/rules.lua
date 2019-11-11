@@ -538,17 +538,17 @@ crules._execute = function(_, c, props, callbacks)
     props.keys    = props.keys or keys
     props.buttons = props.buttons or btns
 
+    -- Border width will also cause geometry related properties to fail
+    if props.border_width then
+        c.border_width = type(props.border_width) == "function" and
+            props.border_width(c, props) or props.border_width
+    end
+
     -- This has to be done first, as it will impact geometry related props.
     if props.titlebars_enabled and (type(props.titlebars_enabled) ~= "function"
             or props.titlebars_enabled(c,props)) then
         c:emit_signal("request::titlebars", "rules", {properties=props})
         c._request_titlebars_called = true
-    end
-
-    -- Border width will also cause geometry related properties to fail
-    if props.border_width then
-        c.border_width = type(props.border_width) == "function" and
-            props.border_width(c, props) or props.border_width
     end
 
     -- Size hints will be re-applied when setting width/height unless it is

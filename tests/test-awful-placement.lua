@@ -1,6 +1,4 @@
 local awful = require("awful")
-local gears = require("gears")
-local beautiful = require("beautiful")
 local test_client = require("_client")
 local runner = require("_runner")
 
@@ -14,8 +12,9 @@ end
 
 local tests = {}
 
-local tb_height = gears.math.round(beautiful.get_font_height() * 1.5)
-local border_width = beautiful.border_width
+-- Set it to something different than the default to make sure it doesn't change
+-- due to some request::border.
+local border_width = 3
 
 local class = "test-awful-placement"
 local rule = {
@@ -24,6 +23,7 @@ local rule = {
     },
     properties = {
         floating = true,
+        border_width = border_width,
         placement = awful.placement.no_overlap + awful.placement.no_offscreen
     }
 }
@@ -40,7 +40,7 @@ end
 local function default_test(c, geometry)
     check_geometry(c, geometry.expected_x, geometry.expected_y,
         geometry.expected_width  or geometry.width,
-        geometry.expected_height or (geometry.height + tb_height))
+        geometry.expected_height or (geometry.height))
     return true
 end
 
@@ -242,7 +242,7 @@ for _, tag_num in ipairs{1, 2, 3} do
                 width       = wa.width - 50,
                 height      = 100,
                 expected_x  = wa.x,
-                expected_y  = wa.y + tb_height + 2*border_width + 100
+                expected_y  = wa.y + 2*border_width + 100
             }
         end
     }
@@ -258,7 +258,7 @@ for _, tag_num in ipairs{1, 2, 3} do
                 width       = wa.width - 10,
                 height      = wa.height - 50,
                 expected_x  = wa.x,
-                expected_y  = wa.y + 50 - 2*border_width - tb_height
+                expected_y  = (wa.y + wa.height) - (wa.height - 50 + 2*border_width)
             }
         end
     }
@@ -270,7 +270,7 @@ for _, tag_num in ipairs{1, 2, 3} do
             return {
                 width       = wa.width - 10,
                 height      = wa.height - 50,
-                expected_x  = wa.x + 10 - 2*border_width,
+                expected_x  = (wa.x + wa.width) - (wa.width - 10 + 2*border_width),
                 expected_y  = wa.y
             }
         end
@@ -283,8 +283,8 @@ for _, tag_num in ipairs{1, 2, 3} do
             return {
                 width       = wa.width - 10,
                 height      = wa.height - 50,
-                expected_x  = wa.x + 10 - 2*border_width,
-                expected_y  = wa.y + 50 - 2*border_width - tb_height
+                expected_x  = (wa.x + wa.width ) - (wa.width - 10 + 2*border_width),
+                expected_y  = (wa.y + wa.height) - (wa.height - 50 + 2*border_width)
             }
         end
     }

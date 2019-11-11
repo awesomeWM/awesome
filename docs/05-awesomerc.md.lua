@@ -221,11 +221,6 @@ sections.DOC_CSD_TITLEBARS = [[
  See `client.requests_no_titlebar` for more details.
 ]]
 
-
-sections.DOC_BORDER = [[
- &nbsp;
-]]
-
 -- Ask ldoc to generate links
 
 local function add_links(line)

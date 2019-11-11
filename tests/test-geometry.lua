@@ -17,7 +17,7 @@ awful.rules.rules = {
     y                = 0,
     width            = 100,
     height           = 100,
-    border_color     = beautiful.border_normal
+    border_color     = beautiful.border_color_normal
 }
     }
 }
@@ -103,7 +103,7 @@ local steps = {
     function()
         local c = client.get()[1]
 
-        assert(not pcall(function() c.border_width = -2000 end))
+        assert(not pcall(function() c._border_width = -2000 end))
         assert(c.border_width==0)
 
         c.border_width = 125

@@ -5,8 +5,8 @@ local runner = require("_runner")
 local awful = require("awful")
 
 local beautiful = require("beautiful")
-beautiful.border_normal = "#0000ff"
-beautiful.border_focus  = "#00ff00"
+beautiful.border_color_normal = "#0000ff"
+beautiful.border_color_active = "#00ff00"
 
 client.connect_signal("focus", function(c)
     c.border_color = "#ff0000"

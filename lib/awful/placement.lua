@@ -708,7 +708,7 @@ local function get_relative_regions(geo, mode, is_absolute)
     -- Detect various types of geometry table and (try) to get rid of the
     -- differences so the code below don't have to care anymore.
     if geo.drawin then
-        bw, dgeo = geo.drawin.border_width, geo.drawin:geometry()
+        bw, dgeo = geo.drawin._border_width, geo.drawin:geometry()
     elseif geo.drawable and geo.drawable.get_wibox then
         bw   = geo.drawable.get_wibox().border_width
         dgeo = geo.drawable.get_wibox():geometry()
