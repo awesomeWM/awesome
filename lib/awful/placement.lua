@@ -1137,7 +1137,7 @@ function placement.resize_to_mouse(d, args)
     remove_border(d, args, ngeo)
 
     -- Now, correct the geometry by the given size_hints offset
-    if d.apply_size_hints then
+    if d.apply_size_hints and ngeo.width ~= 0 and ngeo.height ~= 0 then
         local w, h = d:apply_size_hints(
             ngeo.width,
             ngeo.height
