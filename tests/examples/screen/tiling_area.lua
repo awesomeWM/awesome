@@ -18,7 +18,7 @@ screen[1].padding = {
     bottom = 20,
 }
 
-awful.wibar {
+local wibar = awful.wibar {
     position = "top",
     height   = 24,
 }
@@ -27,4 +27,5 @@ return {
     factor                = 2    ,
     show_boxes            = false,
     highlight_tiling_area = true ,
+    draw_wibar            = wibar,
 }

@@ -29,7 +29,7 @@ end --DOC_HIDE
     --DOC_NEWLINE
 
     -- This will shift the workarea by 24px at the top.
-    awful.wibar {
+    local wibar = awful.wibar {
         position = "top",
         height   = 24,
     }
@@ -38,4 +38,5 @@ return { --DOC_HIDE
     factor             = 2    , --DOC_HIDE
     show_boxes         = false, --DOC_HIDE
     highlight_workarea = true , --DOC_HIDE
+    draw_wibar         = wibar, --DOC_HIDE
 } --DOC_HIDE
