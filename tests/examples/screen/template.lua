@@ -80,6 +80,7 @@ local colors = {
     workarea    = "#0000ff",
     tiling_area = "#ff0000",
     padding_area= "#ff0000",
+    wibar       = "#000000",
 }
 
 local function draw_area(_, rect, name, offset, highlight)
@@ -106,6 +107,42 @@ local function draw_bounding_area(_, rect, hole, name, offset)
     cr:set_source_rgb(1, 1, 1)
     cr:fill()
     cr:set_operator(cairo.Operator.OVER)
+end
+
+local function draw_solid_area(_, rect, name, offset, alpha)
+    alpha = alpha or "59" -- Defaults to 35%
+    local x, y = rect.x*factor+offset, rect.y*factor+offset
+    cr:rectangle(x, y, rect.width*factor, rect.height*factor)
+
+    cr:save()
+    cr:set_source(color.create_solid_pattern(colors[name] .. alpha))
+    cr:fill_preserve()
+    cr:restore()
+
+    cr:set_source(color(colors[name].."44"))
+    cr:stroke()
+end
+
+local function draw_wibar(_, wibar, offset)
+    draw_solid_area(_, wibar, 'wibar', offset)
+
+    -- Prepare to write on the wibar area
+    local pctx    = PangoCairo.font_map_get_default():create_context()
+    local playout = Pango.Layout.new(pctx)
+    local pdesc   = Pango.FontDescription()
+    pdesc:set_absolute_size(11 * Pango.SCALE)
+    playout:set_font_description(pdesc)
+
+    -- Write wibar on the bar area
+    playout.attributes, playout.text = Pango.parse_markup('Wibar', -1, 0)
+    local _, logical = playout:get_pixel_extents()
+    local dx = (wibar.width*factor - logical.width) / 2
+    local dy  = (wibar.height*factor - logical.height) / 2
+    cr:set_source_rgb(0, 0, 0)
+    cr:move_to(dx, dy)
+    cr:show_layout(playout)
+
+
 end
 
 local function compute_ruler(_, rect, name)
@@ -334,6 +371,11 @@ for k=1, screen.count() do
 
     -- Draw the ruler.
     draw_rulers(s)
+
+    -- Draw the wibar.
+    if args.draw_wibar then
+        draw_wibar(s, args.draw_wibar, (k-1)*10)
+    end
 
     -- Draw the informations.
     if args.display_screen_info ~= false then
