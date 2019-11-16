@@ -444,6 +444,7 @@ file = {
         '../lib/awful/screen/dpi.lua',
         '../lib/awful/startup_notification.lua',
         '../lib/awful/mouse/drag_to_tag.lua',
+        '../lib/awful/permissions/_common.lua',
         '../lib/gears/init.lua',
         '../lib/wibox/layout/init.lua',
         '../lib/wibox/container/init.lua',

@@ -266,6 +266,26 @@
  * @tparam[opt=false] boolean hints.raise should the client be raised?
  */
 
+/** When an event could lead to the client being activated.
+ *
+ * This is an layer "on top" of `request::activate` for event which are not
+ * actual request for activation/focus, but where "it would be nice" if the
+ * client got the focus. This includes the focus-follow-mouse model and focusing
+ * previous clients when the selected tag changes.
+ *
+ * This idea is that `request::autoactivate` will emit `request::activate`.
+ * However it is much easier to replace the handler for `request::autoactivate`
+ * than it is to replace the handler for `request::activate`. Thus it provides
+ * a nice abstraction to simplify handling the focus when switching tags or
+ * moving the mouse.
+ *
+ * @signal request::autoactivate
+ * @tparam string context The context where this signal was used.
+ * @tparam[opt] table hints A table with additional hints:
+ * @tparam[opt=false] boolean hints.raise should the client be raised?
+ *
+ */
+
 /**
  * @signal request::geometry
  * @tparam client c The client

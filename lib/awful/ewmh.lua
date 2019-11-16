@@ -18,6 +18,7 @@ local beautiful = require("beautiful")
 local alayout = require("awful.layout")
 local atag = require("awful.tag")
 local gdebug = require("gears.debug")
+local pcommon = require("awful.permissions._common")
 
 local ewmh = {
     generic_activate_filters    = {},
@@ -73,6 +74,60 @@ local function repair_geometry(window)
     end
 
     repair_geometry_lock = false
+end
+
+local function filter_sticky(c)
+    return not c.sticky and aclient.focus.filter(c)
+end
+
+--- Give focus when clients appear/disappear.
+--
+-- @param obj An object that should have a .screen property.
+local function check_focus(obj)
+    if (not obj.screen) or not obj.screen.valid then return end
+    -- When no visible client has the focus...
+    if not client.focus or not client.focus:isvisible() then
+        local c = aclient.focus.history.get(screen[obj.screen], 0, filter_sticky)
+        if not c then
+            c = aclient.focus.history.get(screen[obj.screen], 0, aclient.focus.filter)
+        end
+        if c then
+            c:emit_signal(
+                "request::autoactivate",
+                "history",
+                {raise=false}
+            )
+        end
+    end
+end
+
+--- Check client focus (delayed).
+-- @param obj An object that should have a .screen property.
+local function check_focus_delayed(obj)
+    timer.delayed_call(check_focus, {screen = obj.screen})
+end
+
+--- Give focus on tag selection change.
+--
+-- @tparam tag t A tag object
+local function check_focus_tag(t)
+    local s = t.screen
+    if (not s) or (not s.valid) then return end
+    s = screen[s]
+    check_focus({ screen = s })
+    if client.focus and screen[client.focus.screen] ~= s then
+        local c = aclient.focus.history.get(s, 0, filter_sticky)
+        if not c then
+            c = aclient.focus.history.get(s, 0, aclient.focus.filter)
+        end
+        if c then
+            c:emit_signal(
+                "request::autoactivate",
+                "switch_tag",
+                {raise=false}
+            )
+        end
+    end
 end
 
 --- Activate a window.
@@ -605,6 +660,32 @@ function ewmh.update_border(c, context)
     end
 end
 
+local activate_context_map = {
+    mouse_enter = "mouse.enter",
+    switch_tag  = "autofocus.check_focus_tag",
+    history     = "autofocus.check_focus"
+}
+
+--- Default handler for the `request::autoactivate` signal.
+--
+-- All it does is to emit `request::activate` with the following context
+-- mapping:
+--
+-- * mouse_enter: *mouse.enter*
+-- * switch_tag : *autofocus.check_focus_tag*
+-- * history    : *autofocus.check_focus*
+--
+-- @signalhandler awful.ewmh.autoactivate
+function ewmh.autoactivate(c, context, args)
+    if not pcommon.check("client", "autoactivate", context) then return end
+
+    local ctx = activate_context_map[context] and
+        activate_context_map[context] or context
+
+    c:emit_signal("request::activate", ctx, args)
+end
+
+client.connect_signal("request::autoactivate", ewmh.autoactivate)
 client.connect_signal("request::border", ewmh.update_border)
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
@@ -614,10 +695,25 @@ client.connect_signal("request::geometry", ewmh.merge_maximization)
 client.connect_signal("request::geometry", ewmh.client_geometry_requests)
 client.connect_signal("property::border_width", repair_geometry)
 client.connect_signal("property::screen", repair_geometry)
+client.connect_signal("request::unmanage",   check_focus_delayed)
+client.connect_signal("tagged",              check_focus_delayed)
+client.connect_signal("untagged",            check_focus_delayed)
+client.connect_signal("property::hidden",    check_focus_delayed)
+client.connect_signal("property::minimized", check_focus_delayed)
+client.connect_signal("property::sticky",    check_focus_delayed)
+tag.connect_signal("property::selected", function (t)
+    timer.delayed_call(check_focus_tag, t)
+end)
+
 screen.connect_signal("property::workarea", function(s)
     for _, c in pairs(client.get(s)) do
         repair_geometry(c)
     end
+end)
+
+-- Enable sloppy focus, so that focus follows mouse.
+client.connect_signal("mouse::enter", function(c)
+    c:emit_signal("request::autoactivate", "mouse_enter", {raise=false})
 end)
 
 return ewmh

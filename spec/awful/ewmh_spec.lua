@@ -11,6 +11,9 @@ describe("awful.ewmh.client_geometry_requests", function()
     _G.screen = {
         connect_signal = function() end,
     }
+    _G.tag = {
+        connect_signal = function() end,
+    }
 
     local ewmh = require("awful.ewmh")
 
