@@ -293,14 +293,14 @@ end
 for _=1, screen.count() do
     local s = screen[1]
 
-    -- The outer geometry.
-    compute_ruler(s, s.geometry, "geometry")
+    -- The padding.
+    compute_ruler(s, s.tiling_area, "tiling_area")
 
     -- The workarea.
     compute_ruler(s, s.workarea, "workarea")
 
-    -- The padding.
-    compute_ruler(s, s.tiling_area, "tiling_area")
+    -- The outer geometry.
+    compute_ruler(s, s.geometry, "geometry")
 end
 
 -- Get the final size of the image.
