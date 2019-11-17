@@ -471,6 +471,7 @@ file = {
         '../lib/awful/widget/progressbar.lua',
         '../lib/awful/widget/textclock.lua',
         '../lib/awful/wibox.lua',
+        '../lib/awful/ewmh.lua',
         '../lib/wibox/layout/constraint.lua',
         '../lib/wibox/layout/margin.lua',
         '../lib/wibox/layout/mirror.lua',

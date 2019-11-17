@@ -315,17 +315,17 @@ You can call the `awful.layout.set()` function, here's an example:
 
 ### Why are new clients urgent by default?
 
-You can change this by redefining `awful.ewmh.activate(c)` in your rc.lua. If
+You can change this by redefining `awful.permissions.activate(c)` in your rc.lua. If
 you don't want new clients to be urgent by default put this in your rc.lua:
 
-    client.disconnect_signal("request::activate", awful.ewmh.activate)
-    function awful.ewmh.activate(c)
+    client.disconnect_signal("request::activate", awful.permissions.activate)
+    function awful.permissions.activate(c)
         if c:isvisible() then
             client.focus = c
             c:raise()
         end
     end
-    client.connect_signal("request::activate", awful.ewmh.activate)
+    client.connect_signal("request::activate", awful.permissions.activate)
 
 ## Usage
 

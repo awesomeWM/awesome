@@ -2,7 +2,7 @@
 local module = ... --DOC_HIDE
 local awful = {tag = require("awful.tag"), layout = require("awful.layout")} --DOC_HIDE
 awful.placement = require("awful.placement") --DOC_HIDE
-require("awful.ewmh") --DOC_HIDE
+require("awful.permissions") --DOC_HIDE
 screen[1]:fake_resize(0, 0, 1024/2, 768/2) --DOC_HIDE
 screen.fake_add(1034/2, 0, 1024/2, 768/2).outputs = {["eVGA1"] = {mm_height=60/2, mm_width=80/2 }} --DOC_HIDE
 screen.fake_add(2074/2, 0, 1024/2, 768/2).outputs = {["DVI1" ] = {mm_height=60/2, mm_width=80/2 }} --DOC_HIDE

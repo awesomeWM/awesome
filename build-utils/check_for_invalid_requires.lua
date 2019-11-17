@@ -32,6 +32,9 @@ local allowed_deps = {
         gears = true,
         lgi = true,
         wibox = true,
+
+        -- Necessary to lazy-load the deprecated modules.
+        ["awful.*"] = true
     },
     naughty = {
         awful = true,

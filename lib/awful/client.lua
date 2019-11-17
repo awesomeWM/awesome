@@ -1447,7 +1447,7 @@ end
 -- @tparam[opt=false] boolean args.switch_to_tag
 -- @tparam[opt=false] boolean args.action Once activated, perform an action.
 -- @tparam[opt=false] boolean args.toggle_minimization
--- @see awful.ewmh.add_activate_filter
+-- @see awful.permissions.add_activate_filter
 -- @see request::activate
 -- @see active
 function client.object.activate(c, args)
@@ -1539,7 +1539,7 @@ end
 -- @tparam boolean active
 -- @see activate
 -- @see request::activate
--- @see awful.ewmh.add_activate_filter
+-- @see awful.permissions.add_activate_filter
 
 function client.object.get_active(c)
     return capi.client.focus == c
@@ -1592,10 +1592,10 @@ end)
 -- * **floating**: When the floating or maximization state changes.
 --
 -- @signal request::border
--- @see awful.ewmh.update_border
+-- @see awful.permissions.update_border
 
 -- Add clients during startup to focus history.
--- This used to happen through ewmh.activate, but that only handles visible
+-- This used to happen through permissions.activate, but that only handles visible
 -- clients now.
 capi.client.connect_signal("request::manage", function (c)
     if capi.awesome.startup
