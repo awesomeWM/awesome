@@ -1435,6 +1435,76 @@ end
 
 local request_filters = {generic={}, contextual={}}
 
+function client.object.get_size_hints_honor(c)
+    gdebug.deprecate(
+        "Use the permission system to know the status of `request::size_hints`"..
+        " instead of the `size_hints_honor` property.",
+        {deprecated_in=5}
+    )
+    return c._size_hints_honor
+end
+
+function client.object.set_size_hints_honor(c, value)
+    gdebug.deprecate(
+        "Use the permission system to set the status of `request::size_hints`"..
+        " instead of the `size_hints_honor` property.",
+        {deprecated_in=5}
+    )
+
+    c._size_hints_honor = value
+end
+
+--- How to align the size hints.
+--
+-- The gravities are:
+--
+--  * top_left (default)
+--  * top_right
+--  * bottom_left
+--  * bottom_right
+--  * left
+--  * right
+--  * top
+--  * bottom
+--  * middle
+--
+-- @property size_hint_gravity
+-- @param string
+
+--- Activate (focus) a client.
+--
+-- This method is the correct way to focus a client. While
+-- `client.focus = my_client` works and is commonly used in older code, it has
+-- some drawbacks. The most obvious one is that it bypasses the activate
+-- filters. It also doesn't handle minimized clients well and requires a lot
+-- of boilerplate code to make work properly.
+--
+-- The valid `args.actions` are:
+--
+-- * **mouse_move**: Move the client when the mouse cursor moves until the
+--  mouse buttons are release.
+-- * **mouse_resize**: Resize the client when the mouse cursor moves until the
+--  mouse buttons are release.
+-- * **mouse_center**: Move the mouse cursor to the center of the client if it
+--  isn't already within its geometry,
+-- * **toggle_minimization**: If the client is already active, minimize it.
+--
+-- @method activate
+-- @tparam table args
+-- @tparam[opt=other] string args.context Why was this activate called?
+-- @tparam[opt=true] boolean args.raise Raise the client to the top of its layer.
+-- @tparam[opt=false] boolean args.force Force the activation even for unfocusable
+--  clients.
+-- @tparam[opt=false] boolean args.switch_to_tags
+-- @tparam[opt=false] boolean args.switch_to_tag
+-- @tparam[opt=false] boolean args.action Once activated, perform an action.
+-- @tparam[opt=false] boolean args.toggle_minimization
+-- @see awful.ewmh.add_activate_filter
+-- @see request::activate
+-- @see active
+function client.object.activate(c, args)
+    local new_args = setmetatable({}, {__index = args or {}})
+
 --- Use the common filtering system to allow or deny various requests.
 --
 -- Each request:: handler should call this.

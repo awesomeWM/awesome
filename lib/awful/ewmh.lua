@@ -29,6 +29,19 @@ local ewmh = setmetatable({}, {
     end
 })
 
+-- How to align the size_hints
+local align_map = {
+    top_left          = function(_ , _ , _ , _ ) return {x=0        , y=0        } end,
+    top_right         = function(sw, _ , dw, _ ) return {x=sw-dw    , y=0        } end,
+    bottom_left       = function(_ , sh, _ , dh) return {x=0        , y=sh-dh    } end,
+    bottom_right      = function(sw, sh, dw, dh) return {x=sw-dw    , y=sh-dh    } end,
+    left              = function(_ , sh, _ , dh) return {x=0        , y=sh/2-dh/2} end,
+    right             = function(sw, sh, dw, dh) return {x=sw-dw    , y=sh/2-dh/2} end,
+    top               = function(sw, _ , dw, _ ) return {x=sw/2-dw/2, y=0        } end,
+    bottom            = function(sw, sh, dw, dh) return {x=sw/2-dw/2, y=sh-dh    } end,
+    middle            = function(sw, sh, dw, dh) return {x=sw/2-dw/2, y=sh/2-dh/2} end,
+}
+
 --- Honor the screen padding when maximizing.
 -- @beautiful beautiful.maximized_honor_padding
 -- @tparam[opt=true] boolean maximized_honor_padding
@@ -430,6 +443,111 @@ aclient.add_request_filter("request::activate", function(c)
     end
 end, "mouse_enter")
 
+--- The default client `request::border` handler.
+--
+-- This is the default handler to set the border color. It sets the color
+-- depending on the `c.active` status.
+--
+-- To replace this handler with your own, use:
+--
+--    client.disconnect_signal("request::border", awful.ewmh.update_border)
+--
+-- A more advanced handler could also handle the `urgent` case, change the
+-- border depending on the maximization, floating or fullscreen status and
+-- modify the border width.
+--
+-- The default implementation is:
+--
+--    function awful.ewmh.update_border(c)
+--        c.border_width = beautiful.border_width
+--        c.border_color = c.active and
+--            beautiful.border_focus or beautiful.border_normal
+--    end
+--
+-- @signalhandler awful.ewmh.update_border
+-- @see beautiful.border_color_focus
+-- @see beautiful.border_color_normal
+
+function ewmh.update_border(c)
+    c.border_width = beautiful.border_width
+    c.border_color = c.active and
+        beautiful.border_focus or beautiful.border_normal
+end
+
+local activate_context_map = {
+    mouse_enter = "mouse.enter",
+    switch_tag  = "autofocus.check_focus_tag",
+    history     = "autofocus.check_focus"
+}
+
+--- Default handler for the `request::autoactivate` signal.
+--
+-- All it does is to emit `request::activate` with the following context
+-- mapping:
+--
+-- * mouse_enter: *mouse.enter*
+-- * switch_tag : *autofocus.check_focus_tag*
+-- * history    : *autofocus.check_focus*
+--
+-- @signalhandler awful.ewmh.autoactivate
+function ewmh.autoactivate(c, context, args)
+    if not pcommon.check("client", "autoactivate", context) then return end
+
+    local ctx = activate_context_map[context] and
+        activate_context_map[context] or context
+
+    c:emit_signal("request::activate", ctx, args)
+end
+
+--- The default handler for `request::size_hints`.
+--
+-- It computes the correct size hints set them.
+--
+-- The gravities are:
+--
+--  * top_left (default)
+--  * top_right
+--  * bottom_left
+--  * bottom_right
+--  * left
+--  * right
+--  * top
+--  * bottom
+--  * middle
+--
+-- @signalhandler awful.ewmh.size_hints
+function ewmh.size_hints(c, context, hints)
+    if not pcommon.check("client", "size_hints", context) then return end
+
+    hints = hints or {}
+
+    local w_hint, h_hint = c:apply_size_hints(
+        hints.width ,
+        hints.height
+    )
+
+    -- Nothing to do.
+    if hints.width == w_hint and hints.height == hints.height then
+        -- Set them anyway to make sure it doesn't trigger the fallback.
+        c._requests_size_hints = hints
+        return
+    end
+
+    local g = hints.gravity or hints.size_hint_gravity
+
+    if g and hints.gravity[g] then
+        local x, y = align_map[g](w, h, hints.width, hints.height)
+        hints.x, hints.y = hints.x + x, hints.y + y
+    end
+
+    hints.width, hints.height = w_hint, h_hint
+
+    c._requests_size_hints = hints
+end
+
+-- client.connect_signal("request::size_hints", ewmh.size_hints)
+client.connect_signal("request::autoactivate", ewmh.autoactivate)
+client.connect_signal("request::border", ewmh.update_border)
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)

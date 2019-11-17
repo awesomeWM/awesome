@@ -81,6 +81,15 @@ typedef enum {
 
 #define MWM_TEAROFF_WINDOW    (1L<<0)
 
+/**
+ * Data structure to coordinate the dance between Lua and C to apply
+ * the size hints.
+ */
+typedef struct {
+    uint16_t active;
+    area_t   area;
+} size_hints_transaction_t;
+
 typedef struct {
     uint32_t hints;
     uint32_t functions;
@@ -178,6 +187,8 @@ struct client_t
     client_t *transient_for;
     /** Value of WM_TRANSIENT_FOR */
     xcb_window_t transient_for_window;
+    /** Private size hints transaction data */
+
     /** Titelbar information */
     struct {
         /** The size of this bar. */
@@ -187,6 +198,8 @@ struct client_t
     } titlebar[CLIENT_TITLEBAR_COUNT];
     /** Motif WM hints, with an additional MWM_HINTS_AWESOME_SET bit */
     motif_wm_hints_t motif_wm_hints;
+    /** Transaction to allow size_hints to be handled in Lua */
+    size_hints_transaction_t size_hints_transaction;
 };
 
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
@@ -205,8 +218,8 @@ void client_ban(client_t *);
 void client_ban_unfocus(client_t *);
 void client_unban(client_t *);
 void client_manage(xcb_window_t, xcb_get_geometry_reply_t *, xcb_get_window_attributes_reply_t *);
-bool client_resize(client_t *, area_t, bool);
-void client_unmanage(client_t *, bool);
+bool client_resize(client_t *, area_t);
+void client_unmanage(client_t *, client_unmanage_t);
 void client_kill(client_t *);
 void client_set_sticky(lua_State *, int, bool);
 void client_set_above(lua_State *, int, bool);
