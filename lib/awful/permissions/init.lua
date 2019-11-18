@@ -146,6 +146,8 @@ end
 -- @tparam[opt=false] boolean hints.switch_to_tags Select all tags associated
 --  with the client.
 function permissions.activate(c, context, hints) -- luacheck: no unused args
+    if not pcommon.check(c, "client", "activate", context) then return end
+
     hints = hints or  {}
 
     if c.focusable == false and not hints.force then
@@ -333,6 +335,8 @@ local context_mapper = {
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function permissions.geometry(c, context, hints)
+    if not pcommon.check(c, "client", "geometry", context) then return end
+
     local layout = c.screen.selected_tag and c.screen.selected_tag.layout or nil
 
     -- Setting the geometry will not work unless the client is floating.
@@ -403,6 +407,8 @@ end
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function permissions.merge_maximization(c, context, hints)
+    if not pcommon.check(c, "client", "geometry", context) then return end
+
     if context ~= "client_maximize_horizontal" and context ~= "client_maximize_vertical" then
         return
     end
@@ -484,6 +490,8 @@ end
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function permissions.client_geometry_requests(c, context, hints)
+    if not pcommon.check(c, "client", "geometry", context) then return end
+
     if context == "ewmh" and hints then
         if c.immobilized_horizontal then
             hints = gtable.clone(hints)
@@ -679,7 +687,7 @@ local activate_context_map = {
 --
 -- @signalhandler awful.permissions.autoactivate
 function permissions.autoactivate(c, context, args)
-    if not pcommon.check("client", "autoactivate", context) then return end
+    if not pcommon.check(c, "client", "autoactivate", context) then return end
 
     local ctx = activate_context_map[context] and
         activate_context_map[context] or context

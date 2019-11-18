@@ -15,6 +15,7 @@ local grect = require("gears.geometry").rectangle
 local gmath = require("gears.math")
 local gtable = require("gears.table")
 local amousec = require("awful.mouse.client")
+local pcommon = require("awful.permissions._common")
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -1484,6 +1485,22 @@ function client.object.activate(c, args)
         end
     end
 end
+
+--- Grant a permission for a client.
+--
+-- @method grant
+-- @tparam string permission The permission name (just the name, no `request::`).
+-- @tparam string context The reason why this permission is requested.
+-- @see awful.permissions
+
+--- Deny a permission for a client.
+--
+-- @method deny
+-- @tparam string permission The permission name (just the name, no `request::`).
+-- @tparam string context The reason why this permission is requested.
+-- @see awful.permissions
+
+pcommon.setup_grant(client.object, "client")
 
 --- Return true if the client is active (has focus).
 --

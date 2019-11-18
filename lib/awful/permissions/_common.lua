@@ -19,10 +19,18 @@ local default_permissions = {
     }
 }
 
-function module.check(class, request, context)
+function module.check(object, class, request, context)
     if not default_permissions[class] then return true end
     if not default_permissions[class][request] then return true end
     if default_permissions[class][request][context] == nil then return true end
+
+    local ret = nil
+
+    if object._private.permissions and object._private.permissions[request] then
+        ret = object._private.permissions[request][context]
+    end
+
+    if ret ~= nil then return ret end
 
     return default_permissions[class][request][context]
 end
@@ -51,6 +59,24 @@ function module._deprecated_autofocus_in_use()
     module.set("client", "autoactivate", "mouse_enter", true)
     module.set("client", "autoactivate", "switch_tag" , true)
     module.set("client", "autoactivate", "history"    , true)
+end
+
+local function set_object_permission_common(self, request, context, v)
+    self._private.permissions = self._private.permissions or {}
+        if not self._private.permissions[request] then
+            self._private.permissions[request] = {}
+        end
+        self._private.permissions[request][context] = v
+end
+
+-- Add the grant and deny methods to the objects.
+function module.setup_grant(class, classname) -- luacheck: no unused
+    function class.grant(self, request, context)
+        set_object_permission_common(self, request, context, true)
+    end
+    function class.deny(self, request, context)
+        set_object_permission_common(self, request, context, false)
+    end
 end
 
 return module
