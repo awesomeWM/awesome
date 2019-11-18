@@ -274,7 +274,9 @@ function widget.new(args)
                 end
                 table.sort(
                     sorted_table,
-                    function(a,b) return (a.mod or '')..a.key<(b.mod or '')..b.key end
+                    function(a,b)
+                        local k1, k2 = a.key or a.keys[1][1], b.key or b.keys[1][1]
+                        return (a.mod or '')..k1<(b.mod or '')..k2 end
                 )
                 target[group] = sorted_table
             end
@@ -287,7 +289,9 @@ function widget.new(args)
             return
         end
         for _, data in pairs(awful.key.hotkeys) do
-            self:_add_hotkey(data.key, data, self._cached_awful_keys)
+            for _, key_pair in ipairs(data.keys) do
+                self:_add_hotkey(key_pair[1], data, self._cached_awful_keys)
+            end
         end
         self:_sort_hotkeys(self._cached_awful_keys)
     end
