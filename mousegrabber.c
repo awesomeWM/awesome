@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome mousegrabber API
+/** awesome mousegrabber API.
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @coreclassmod mousegrabber

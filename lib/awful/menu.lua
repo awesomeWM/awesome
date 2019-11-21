@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
---- A menu for awful
+--- A menu for awful.
 --
 -- @author Damien Leone &lt;damien.leone@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;

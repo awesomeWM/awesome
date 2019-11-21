@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Utility module for awful
+--- Utility module for awful.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou

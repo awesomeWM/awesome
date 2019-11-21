@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Display the current client layout (`awful.layout`) icon or name
+--- Display the current client layout (`awful.layout`) icon or name.
 --
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;

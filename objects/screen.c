@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome screen API
+/** awesome screen API.
  *
  * Screen objects can be added and removed over time. To get a callback for all
  * current and future screens, use `awful.screen.connect_for_each_screen`:

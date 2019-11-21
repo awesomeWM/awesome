@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- A calendar widget
+-- A calendar widget.
 --
 -- This module defines two widgets: a month calendar and a year calendar
 --

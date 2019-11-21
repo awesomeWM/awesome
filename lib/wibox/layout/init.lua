@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Collection of layouts that can be used in widget boxes
+--- Collection of layouts that can be used in widget boxes.
 --
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter

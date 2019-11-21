@@ -20,7 +20,7 @@
  *
  */
 
-/** awesome drawable API
+/** awesome drawable API.
  *
  * Furthermore to the classes described here, one can also use signals as
  * described in @{signals}.

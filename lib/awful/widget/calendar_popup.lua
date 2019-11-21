@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- A calendar popup wibox
+-- A calendar popup wibox.
 --
 -- Display a month or year calendar popup using `calendar_popup.month` or `calendar_popup.year`.
 -- The calendar style can be tweaked by providing tables of style properties at creation:
