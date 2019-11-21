@@ -135,11 +135,24 @@ local function load_and_apply(ib, file, image_loader, image_setter)
     return image_applied
 end
 
---- Set an imagebox' image
+--- The image rendered by the `imagebox`.
+-- <br />It can can be any of the following:
+--
+-- * A `string` : Interpreted as the path to an image file ;
+-- * A cairo image surface : Directly used as is ;
+-- * An rsvg handle object : Directly used as is ;
+-- * `nil` : Deny previously setted image.
+--
 -- @property image
--- @param image This can can be string, cairo image surface, rsvg handle object or nil. A string is
---   interpreted as the path to an image file. Nil will deny previously set image.
--- @return true on success, false if the image cannot be used
+-- @tparam image image The image to render.
+-- @see set_image
+
+--- Set the `imagebox` image.
+-- @method imagebox:set_image
+-- @tparam image image The image to render.
+-- @treturn boolean `true` on success, `false` if the image cannot be used.
+-- @usage my_imagebox:set_image(beautiful.awesome_icon)
+-- @usage my_imagebox:set_image('/usr/share/icons/theme/my_icon.png')
 function imagebox:set_image(image)
     local setup_succeed
 
@@ -179,23 +192,23 @@ function imagebox:set_image(image)
     return true
 end
 
---- Set a clip shape for this imagebox
+--- Set a clip shape for this imagebox.
 -- A clip shape define an area where the content is displayed and one where it
 -- is trimmed.
 --
 -- @property clip_shape
--- @tparam gears.shape clip_shape A `gears_shape` compatible shape function
+-- @tparam function|gears.shape clip_shape A `gears.shape` compatible shape function.
 -- @see gears.shape
 -- @see set_clip_shape
 
---- Set a clip shape for this imagebox
+--- Set a clip shape for this imagebox.
 -- A clip shape define an area where the content is displayed and one where it
 -- is trimmed.
 --
--- Any other parameters will be passed to the clip shape function
+-- Any other parameters will be passed to the clip shape function.
 --
--- @tparam function clip_shape A `gears_shape` compatible shape function.
--- @method set_clip_shape
+-- @tparam function|gears.shape clip_shape A `gears_shape` compatible shape function.
+-- @method imagebox:set_clip_shape
 -- @see gears.shape
 -- @see clip_shape
 function imagebox:set_clip_shape(clip_shape, ...)
@@ -206,21 +219,25 @@ end
 
 --- Should the image be resized to fit into the available space?
 -- @property resize
--- @param allowed If false, the image will be clipped, else it will be resized
---   to fit into the available space.
+-- @tparam boolean resize
+
+--- Should the image be resized to fit into the available space?
+-- @tparam boolean allowed If `false`, the image will be clipped, else it will
+--   be resized to fit into the available space.
+-- @method imagebox:set_resize
 function imagebox:set_resize(allowed)
     self._private.resize_forbidden = not allowed
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
 end
 
---- Returns a new imagebox.
--- Any other arguments will be passed to the clip shape function
--- @param image the image to display, may be nil
--- @param resize_allowed If false, the image will be clipped, else it will be resized
---   to fit into the available space.
--- @param clip_shape A `gears.shape` compatible function
--- @treturn table A new `imagebox`
+--- Returns a new `wibox.widget.imagebox` instance.
+-- Any additional arguments will be passed to the clip shape function.
+-- @tparam[opt] image image The image to display (may be `nil`).
+-- @tparam[opt] boolean resize_allowed If `false`, the image will be
+--   clipped, else it will be resized to fit into the available space.
+-- @tparam[opt] function clip_shape A `gears.shape` compatible function.
+-- @treturn wibox.widget.imagebox A new `wibox.widget.imagebox` widget instance.
 -- @constructorfct wibox.widget.imagebox
 local function new(image, resize_allowed, clip_shape)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
