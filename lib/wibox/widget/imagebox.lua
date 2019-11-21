@@ -1,6 +1,16 @@
 ---------------------------------------------------------------------------
+-- A widget to render image(s).
 --
---@DOC_wibox_widget_defaults_imagebox_EXAMPLE@
+-- The `wibox.widget.imagebox` is part of the Awesome WM's wiboxes system.
+-- It renders image in a box widget.
+--
+-- @DOC_wibox_widget_defaults_imagebox_EXAMPLE@
+--
+-- Alternatively, you can declare the `imagebox` widget using the
+-- declarative pattern (Both codes are strictly equivalent):
+--
+-- @DOC_wibox_widget_declarative-pattern_imagebox_EXAMPLE@
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @widgetmod wibox.widget.imagebox
