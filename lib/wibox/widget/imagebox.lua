@@ -1,8 +1,15 @@
 ---------------------------------------------------------------------------
--- A widget to render image(s).
+-- A widget to display image.
 --
--- The `wibox.widget.imagebox` is part of the Awesome WM's wiboxes system.
--- It renders image in a box widget.
+-- The `wibox.widget.imagebox` is part of the Awesome WM's wiboxes system
+-- (see @{03-declarative-layout.md}).
+--
+-- This widget displays an image. The image can be a file,
+-- a cairo image surface, or an rsvg handle object (see the
+-- [image property](#image)).
+--
+-- Use a `wibox.widget.imagebox`
+-- ---
 --
 -- @DOC_wibox_widget_defaults_imagebox_EXAMPLE@
 --
@@ -136,23 +143,28 @@ local function load_and_apply(ib, file, image_loader, image_setter)
 end
 
 --- The image rendered by the `imagebox`.
--- <br />It can can be any of the following:
 --
--- * A `string` : Interpreted as the path to an image file ;
--- * A cairo image surface : Directly used as is ;
--- * An rsvg handle object : Directly used as is ;
--- * `nil` : Deny previously setted image.
+-- It can can be any of the following:
+--
+-- * A `string` : Interpreted as the path to an image file,
+-- * A cairo image surface : Directly used as is,
+-- * An rsvg handle object : Directly used as is,
+-- * `nil` : Unset the image.
 --
 -- @property image
 -- @tparam image image The image to render.
 -- @see set_image
 
 --- Set the `imagebox` image.
+--
+-- The image can be a file, a cairo image surface, or an rsvg handle object
+-- (see the [image property](#image)).
 -- @method imagebox:set_image
 -- @tparam image image The image to render.
 -- @treturn boolean `true` on success, `false` if the image cannot be used.
 -- @usage my_imagebox:set_image(beautiful.awesome_icon)
 -- @usage my_imagebox:set_image('/usr/share/icons/theme/my_icon.png')
+-- @see image
 function imagebox:set_image(image)
     local setup_succeed
 
@@ -232,6 +244,16 @@ function imagebox:set_resize(allowed)
 end
 
 --- Returns a new `wibox.widget.imagebox` instance.
+--
+-- This is the constructor of `wibox.widget.imagebox`. It creates a new
+-- instance of imagebox widget.
+--
+-- Alternatively, the declarative layout syntax can handle
+-- `wibox.widget.imagebox` instanciation.
+--
+-- The image can be a file, a cairo image surface, or an rsvg handle object
+-- (see the [image property](#image)).
+--
 -- Any additional arguments will be passed to the clip shape function.
 -- @tparam[opt] image image The image to display (may be `nil`).
 -- @tparam[opt] boolean resize_allowed If `false`, the image will be
