@@ -161,12 +161,12 @@
 #   else
       <td class="name" $(nowrap)><a href="#$(item.name)">$(dn)</a></td>
 #   end
-      <td class="summary">$(M(item.summary,item))</td>
-      <td class="baseclass" $(nowrap)>
+      <td colspan="$(item.inherited and 1 or 2)" class="summary">$(M(item.summary,item))</td>
 #   if item.inherited then
+      <td class="baseclass" $(nowrap)>
         Inherited from $(item.baseclass)
-#   end
       </td>
+#   end
     </tr>
 #  end -- for items
 # last_kind = kind
@@ -210,6 +210,11 @@
     <dt>
     <a name = "$(item.name)"></a>
     <strong>$(display_name(item))</strong>
+#   if item.display_inheritance then
+    <span class="inheritance">
+      &middot Inherited from
+      <a href="$(item.display_inheritance)">$(item.display_inheritance)</a>
+#   end
 #   if item.display_type then
     <span class="proptype">($(item.display_type))</span>
 #   end

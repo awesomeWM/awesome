@@ -59,7 +59,7 @@
 
 --- Add a new `awful.button` to this widget.
 -- @tparam awful.button button The button to add.
--- @function add_button
+-- @method add_button
 -- @baseclass wibox.widget
 
 --- Emit a signal and ensure all parent widgets in the hierarchies also
@@ -67,8 +67,8 @@
 -- set of containers and layouts wrapping the widget.
 -- @tparam string signal_name
 -- @param ... Other arguments
--- @method emit_signal_recursive
 -- @baseclass wibox.widget
+-- @method emit_signal_recursive
 
 --- When the layout (size) change.
 -- This signal is emitted when the previous results of `:layout()` and `:fit()`

@@ -591,7 +591,6 @@ local function wrap_args(item)
     return "<span class='function_args'> <b>(</b>"..new_args.."<b>)</b></span>"
 end
 
-
 -- Mimics the ldoc built-in method style, but better.
 --
 -- This custom renderer exists because using ldoc built-in method detection
@@ -638,7 +637,9 @@ local function sanitize_type(item, ldoc)
     item.display_type = "<span class='summary_type'>N/A</span>"
 end
 local no_prefix = {
-    property = true, signal = true, clientruleproperty = true,
+    property           = true,
+    signal             = true,
+    clientruleproperty = true,
     deprecatedproperty = true,
 }
 
@@ -732,7 +733,6 @@ custom_display_name_handler = function(item, default_handler)
     if item.type == "method" then
         ret = render_methods(item)
     end
-
 
     -- Get rid of the "module:" in front of method names. It is either wrong or
     -- just redundant.
