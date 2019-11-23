@@ -402,7 +402,7 @@ function tag.object.delete(self, fallback_tag, force)
     end
 
     -- delete the tag
-    self._private.awful_tag_properties.screen = nil
+    tag.setproperty(self, "screen", nil)
     self.activated = false
 
     -- Update all indexes
