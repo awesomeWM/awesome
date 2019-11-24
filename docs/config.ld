@@ -262,6 +262,13 @@ add_custom_tag {
     }
 }
 
+-- Define the base class where a method/property is implemented.
+-- @baseclass my_module.my_submodule.my_baseclass
+add_custom_tag {
+    name   = "baseclass",
+    hidden = true
+}
+
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
