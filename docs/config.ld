@@ -168,9 +168,9 @@ local function default_format_callback(self, params, _, md)
         end
 
         if params.type then
-            ret = ret .. '<span class="parameter">( '..
-                params.type.value..
-            " )</span>"
+            ret = ret .. '<span class="parameter">('..
+                md("`"..params.type.value.."`")..
+            ")</span>"
         end
 
         return ret.." "..md(params.description)
@@ -231,6 +231,19 @@ add_custom_tag = function(args)
         }
     end
 end
+
+-- When a type will request a permission.
+-- @emits class signal Message[...]
+add_custom_tag {
+    name   = "emits",
+    title  = "Emit signals",
+    hidden = false,
+    params = {
+        {
+            name = "name"
+        }
+    }
+}
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
