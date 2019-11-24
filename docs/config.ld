@@ -245,6 +245,23 @@ add_custom_tag {
     }
 }
 
+-- List the beautiful variables used by the method or property fllbacks.
+-- @usebeautiful beautiful.varname usage[...]
+add_custom_tag {
+    name   = "usebeautiful",
+    title  = "Consumed theme variables",
+    hidden = false,
+    table  = {
+        "Variable", "Usage"
+    },
+    params = {
+        {
+            name     = "name",
+            markdown = true,
+        }
+    }
+}
+
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
