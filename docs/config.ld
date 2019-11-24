@@ -245,6 +245,50 @@ add_custom_tag {
     }
 }
 
+-- Avoid repetitive boilerplate code for property signals.
+-- Add true if the signal has the value or false if it doesn't.
+-- @propemits true/false true/false description[...]
+add_custom_tag {
+    name   = "propemits",
+    title  = "Emit signals:",
+    hidden = false,
+    params = {{name = "new_value"}, {name = "old_value"}},
+    format = function(self, params, item, md)
+        -- Add an automatic fallback description.
+        local description = params.description ~= "" and params.description or
+            "When the `"..item.name.."` value changes."
+        local new_value = params.new_value.value == "true"
+        local old_value = params.old_value.value == "true"
+
+        -- Add the sub-tags.
+        local subs = {}
+        item.auto_params["propemitstparam_override"] = subs
+
+        -- The first argument is always the object which changes.
+        subs[1] = item.module.name.." self ".." The object which changed ("..
+            "useful when connecting many object to the same callback)."
+
+        -- Most signals also have the new value.
+        if new_value then
+            local type = item.params[1] or "unknown"
+            subs[2] = type.." ".."v The new value."
+        end
+
+        -- Some also have the old value.
+        if old_value then
+            local type = item.params[1] or "unknown"
+            subs[3] = type.." ".."v The new value."
+        end
+
+        local new_params = {
+            name = { name  = name, value = "property::"..item.name },
+            description = params.description
+        }
+
+        return default_format_callback(self, new_params, item, md)
+    end
+}
+
 -- List the beautiful variables used by the method or property fllbacks.
 -- @usebeautiful beautiful.varname usage[...]
 add_custom_tag {
@@ -444,10 +488,14 @@ local function init_custom_types(item)
 
     -- Allow the template to fetch the right sub-tags.
     function item.get_auto_params(tag, value)
+        -- Makes auto-generated subtags easier to implement.
+        if item.auto_params[tag.."tparam_override"] then
+            return item.auto_params[tag.."tparam_override"], named_tags[tag.."tparam"]
+        end
+
         if not item.auto_params[tag.."tparam"] then return nil, nil end
 
         local parsed = parse_custom_tags(value, named_tags[tag].params)
-
 
         if parsed.name and item.auto_params[tag.."tparam"][parsed.name.value] then
             return item.auto_params[tag.."tparam"][parsed.name.value], named_tags[tag.."tparam"]
