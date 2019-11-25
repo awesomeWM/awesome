@@ -140,7 +140,7 @@ end
 --- Get the widget's direct children widgets.
 --
 -- This method should be re-implemented by the relevant widgets.
--- @treturn table The children
+-- @treturn table children The children.
 -- @method get_children
 function base.widget:get_children()
     return {}
@@ -170,7 +170,7 @@ end
 --
 -- *Warning*: This method it prone to stack overflow if the widget, or any of
 -- its children, contains (directly or indirectly) itself.
--- @treturn table The children
+-- @treturn table children The children.
 -- @method get_all_children
 function base.widget:get_all_children()
     local ret = {}

@@ -73,7 +73,7 @@ end
 
 --- Get or set the children elements.
 -- @property children
--- @tparam table The children
+-- @tparam table children The children.
 
 function place:get_children()
     return {self._private.widget}

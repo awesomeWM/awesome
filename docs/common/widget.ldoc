@@ -10,14 +10,14 @@
 
 --- Get or set the children elements.
 -- @property children
--- @tparam table The children
+-- @tparam table children The children.
 
 --- Get all direct and indirect children widgets.
 -- This will scan all containers recursively to find widgets
 -- Warning: This method it prone to stack overflow id the widget, or any of its
 -- children, contain (directly or indirectly) itself.
 -- @property all_children
--- @tparam table The children
+-- @tparam table children The children.
 
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
