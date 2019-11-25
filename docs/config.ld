@@ -306,6 +306,37 @@ add_custom_tag {
     }
 }
 
+-- For all properties which have a standard `@beautiful` variable for them
+-- @propbeautiful fallback1 fallback2 fallback3 fallback4
+add_custom_tag {
+    name   = "propbeautiful",
+    title  = "Consumed theme variables",
+    params = {
+        { name = "fallback1" },
+        { name = "fallback2" },
+        { name = "fallback3" },
+        { name = "fallback4" },
+    },
+    table  = {
+        "Variable", "Usage"
+    },
+    format = function(self, p, item, md)
+        local modname = item.module.name:gmatch("[^.]+$")()
+        local last = "beautiful."..(modname.."_"..item.name):gsub("[.]", "_")
+        local ret = "<td>"..md("`"..last.."`").."</td><td>Fallback when "..md("`"..item.name.."`")..
+            " isn't set.</td>"
+
+        for _, fallback in ipairs({p.fallback1, p.fallback2, p.fallback3, p.fallback4 }) do
+            ret = ret .. "</tr><tr>"..
+                "<td>"..md("`"..fallback.value.."`").."</td><td>Fallback when "..md("`"..last.."`")..
+            " isn't set.</td>"
+            last = fallback.value
+        end
+
+        return ret
+    end
+}
+
 -- Define the base class where a method/property is implemented.
 -- @baseclass my_module.my_submodule.my_baseclass
 add_custom_tag {
@@ -412,7 +443,8 @@ local named_args = {
 }
 
 local delimiter_for_tag = {
-    usebeautiful = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}}
+    usebeautiful  = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
+    propbeautiful = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
 }
 
 -- Use the first word of the subtag content to map it to its tag.
