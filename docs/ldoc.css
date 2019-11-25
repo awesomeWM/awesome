@@ -443,3 +443,11 @@ pre .url { color: #272fc2; text-decoration: underline; }
   background-repeat:no-repeat;
   color:transparent;
 }
+
+/* Hide some extra documentation noise by default */
+.hide_extra {
+    display: none
+}
+.show_more {
+    display: default
+}

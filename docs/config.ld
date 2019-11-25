@@ -186,7 +186,7 @@ local function default_format(self, callback)
     end
 end
 
-local named_tags = {}
+local named_tags, item_id = {}, 1
 
 -- Add a new @something which can be used in any types.
 -- @tparam table args
@@ -467,6 +467,9 @@ end
 -- of content, which is before any custom types is used.
 local function init_custom_types(item)
     if item.is_init then return end
+
+    -- Give each item an unique identifier so the JavaScript can locate them.
+    item.uid, item_id = item_id, item_id + 1
 
     item.delims, item.auto_usage, item.auto_params = {}, {}, {}
 

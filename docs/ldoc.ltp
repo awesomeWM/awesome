@@ -9,6 +9,17 @@
 # if ldoc.custom_css then -- add custom CSS file if configured.
     <link rel="stylesheet" href="$(ldoc.custom_css)" type="text/css" />
 # end
+   <script>
+     function show_extra(id) {
+        var cur = document.getElementById(id).className
+
+        if (cur == "hide_extra")
+            document.getElementById(id).className = "show_more"
+        else
+            document.getElementById(id).className = "hide_extra"
+     }
+   </script>
+
 </head>
 <body>
 
@@ -300,35 +311,42 @@
     </ul>
 #   end -- if usage
 
-#   if ldoc.custom_tags then
-#    for custom in iter(ldoc.custom_tags) do
-#     local tag = item.tags[custom[1]]
-#     if tag and not custom.hidden then
-#      local group_begin, group_end, row_type_begin, row_type_end, group_header = item.get_delim(custom[1])
-    <h3>$(custom.title or custom[1]):</h3>
-    <$(group_begin)>
-#      if group_header then
-        <tr style='font-weight: bold;'>
-#       for _, g in ldoc.ipairs(group_header) do
-          <th>$(g)</th>
-#       end -- for g
-        </tr>
-#      end -- if group_header then
-#      for value in iter(tag) do
-         <$(row_type_begin)>$(custom.format and custom.format(value, item, M) or M(value))</$(row_type_end)>
-#        local sub_values, sub_custom = item.get_auto_params(custom[1], value)
-#        if sub_values then
-          <ul>
-#         for _, value in ldoc.ipairs(sub_values) do
-            <li>$(sub_custom.format(value, item, M))</li>
-#         end -- for auto_params
-          </ul>
-#        end -- if item.auto_params
-#      end -- for
-    </$(group_end)>
-#     end -- if tag
-#    end -- iter tags
-#   end -- ldoc.custom_tags
+    <br />
+    <a class="deprecated_h2" onclick="show_extra('$("item"..item.uid)')">
+     Click to display more
+    </a>
+
+    <span id=item$(item.uid) class="hide_extra">
+#    if ldoc.custom_tags then
+#     for custom in iter(ldoc.custom_tags) do
+#      local tag = item.tags[custom[1]]
+#      if tag and not custom.hidden then
+#       local group_begin, group_end, row_type_begin, row_type_end, group_header = item.get_delim(custom[1])
+     <h3>$(custom.title or custom[1]):</h3>
+     <$(group_begin)>
+#       if group_header then
+         <tr style='font-weight: bold;'>
+#        for _, g in ldoc.ipairs(group_header) do
+           <th>$(g)</th>
+#        end -- for g
+         </tr>
+#       end -- if group_header then
+#       for value in iter(tag) do
+          <$(row_type_begin)>$(custom.format and custom.format(value, item, M) or M(value))</$(row_type_end)>
+#         local sub_values, sub_custom = item.get_auto_params(custom[1], value)
+#         if sub_values then
+           <ul>
+#          for _, value in ldoc.ipairs(sub_values) do
+             <li>$(sub_custom.format(value, item, M))</li>
+#          end -- for auto_params
+           </ul>
+#         end -- if item.auto_params
+#       end -- for
+     </$(group_end)>
+#      end -- if tag
+#     end -- iter tags
+#    end -- ldoc.custom_tags
+    </span>
 
 </dd>
 # end -- for items
