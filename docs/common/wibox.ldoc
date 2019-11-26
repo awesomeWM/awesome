@@ -4,6 +4,7 @@
 --
 --  * *property::border_width*
 --
+-- @baseclass wibox
 -- @property border_width
 -- @param integer
 
@@ -29,6 +30,7 @@
 --
 --  * *property::border_color*
 --
+-- @baseclass wibox
 -- @property border_color
 -- @param string
 
@@ -38,6 +40,7 @@
 --
 --  * *property::ontop*
 --
+-- @baseclass wibox
 -- @property ontop
 -- @param boolean
 
@@ -47,6 +50,7 @@
 --
 --  * *property::cursor*
 --
+-- @baseclass wibox
 -- @property cursor
 -- @param string
 -- @see mouse
@@ -57,6 +61,7 @@
 --
 --  * *property::visible*
 --
+-- @baseclass wibox
 -- @property visible
 -- @param boolean
 
@@ -66,6 +71,7 @@
 --
 --  * *property::opacity*
 --
+-- @baseclass wibox
 -- @property opacity
 -- @tparam number opacity (between 0 and 1)
 
@@ -75,6 +81,7 @@
 --
 --  * *property::type*
 --
+-- @baseclass wibox
 -- @property type
 -- @param string
 -- @see client.type
@@ -85,6 +92,7 @@
 --
 --  * *property::x*
 --
+-- @baseclass wibox
 -- @property x
 -- @param integer
 
@@ -94,6 +102,7 @@
 --
 --  * *property::y*
 --
+-- @baseclass wibox
 -- @property y
 -- @param integer
 
@@ -103,6 +112,7 @@
 --
 --  * *property::width*
 --
+-- @baseclass wibox
 -- @property width
 -- @param width
 
@@ -112,11 +122,13 @@
 --
 --  * *property::height*
 --
+-- @baseclass wibox
 -- @property height
 -- @param height
 
 --- The wibox screen.
 --
+-- @baseclass wibox
 -- @property screen
 -- @param screen
 
@@ -126,10 +138,12 @@
 --
 --  * *property::drawable*
 --
+-- @baseclass wibox
 -- @property drawable
 -- @tparam drawable drawable
 
 --- The widget that the `wibox` displays.
+-- @baseclass wibox
 -- @property widget
 -- @param widget
 
@@ -139,6 +153,7 @@
 --
 --  * *property::window*
 --
+-- @baseclass wibox
 -- @property window
 -- @param string
 -- @see client.window
@@ -149,6 +164,7 @@
 --
 --  * *property::shape_bounding*
 --
+-- @baseclass wibox
 -- @property shape_bounding
 -- @param surface._native
 
@@ -158,6 +174,7 @@
 --
 --  * *property::shape_clip*
 --
+-- @baseclass wibox
 -- @property shape_clip
 -- @param surface._native
 
@@ -167,6 +184,7 @@
 --
 --  * *property::shape_input*
 --
+-- @baseclass wibox
 -- @property shape_input
 -- @param surface._native
 
@@ -177,6 +195,7 @@
 --
 --  * *property::shape*
 --
+-- @baseclass wibox
 -- @property shape
 -- @tparam gears.shape shape
 
@@ -192,35 +211,41 @@
 --
 --  * *property::input_passthrough*
 --
+-- @baseclass wibox
 -- @property input_passthrough
 -- @param[opt=false] boolean
 -- @see shape_input
 
 --- Get or set mouse buttons bindings to a wibox.
 --
+-- @baseclass wibox
 -- @param buttons_table A table of buttons objects, or nothing.
 -- @method buttons
 
 --- Get or set wibox geometry. That's the same as accessing or setting the x,
 -- y, width or height properties of a wibox.
 --
+-- @baseclass wibox
 -- @param A table with coordinates to modify.
 -- @return A table with wibox coordinates and geometry.
 -- @method geometry
 
 --- Get or set wibox struts.
 --
+-- @baseclass wibox
 -- @param strut A table with new strut, or nothing
 -- @return The wibox strut in a table.
 -- @method struts
 -- @see client.struts
 
 --- The default background color.
+-- @baseclass wibox
 -- @beautiful beautiful.bg_normal
 -- @param color
 -- @see bg
 
 --- The default foreground (text) color.
+-- @baseclass wibox
 -- @beautiful beautiful.fg_normal
 -- @param color
 -- @see fg
@@ -228,9 +253,11 @@
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @param args An array containing the widgets disposition
+-- @baseclass wibox
 -- @method setup
 
 --- The background of the wibox.
+-- @baseclass wibox
 -- @param c The background to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
 -- @property bg
@@ -241,12 +268,14 @@
 -- If `image` is a function, it will be called with `(context, cr, width, height)`
 -- as arguments. Any other arguments passed to this method will be appended.
 -- @param image A background image or a function
+-- @baseclass wibox
 -- @property bgimage
 -- @see gears.surface
 
 --- The foreground (text) of the wibox.
 -- @param c The foreground to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
+-- @baseclass wibox
 -- @property fg
 -- @param color
 -- @see gears.color
@@ -258,4 +287,5 @@
 -- @treturn table A sorted table of widgets positions. The first element is the biggest
 -- container while the last is the topmost widget. The table contains *x*, *y*,
 -- *width*, *height* and *widget*.
+-- @baseclass wibox
 -- @method find_widgets
