@@ -26,7 +26,7 @@ end --DOC_HIDE
         bottom = 20,
     }
 
-    awful.wibar { --DOC_HIDE
+    local wibar = awful.wibar { --DOC_HIDE
         position = "top", --DOC_HIDE
         height   = 24, --DOC_HIDE
     } --DOC_HIDE
@@ -35,4 +35,5 @@ return { --DOC_HIDE
     factor                = 2    , --DOC_HIDE
     show_boxes            = false, --DOC_HIDE
     highlight_padding_area = true , --DOC_HIDE
+    draw_wibar            = wibar, --DOC_HIDE
 } --DOC_HIDE
