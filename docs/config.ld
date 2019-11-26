@@ -442,6 +442,14 @@ local named_args = {
     [ "([args={}])"  ] = true
 }
 
+-- Sections which are hidden by default, but visible when clicked.
+local summarize = {
+    emits         = {index = 1, title = "Signals"        },
+    propemits     = {index = 2, title = "Signals"        },
+    usebeautiful  = {index = 3, title = "Theme variables"},
+    propbeautiful = {index = 4, title = "Theme variables"}
+}
+
 local delimiter_for_tag = {
     usebeautiful  = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
     propbeautiful = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
@@ -460,6 +468,31 @@ local function sort_subtags(item, tag, subtag, values)
     return ret
 end
 
+-- Gather a summary of the tags hidden by default .
+local function generate_summary(item)
+    local tgs = {}
+
+    for k, v in pairs(summarize) do
+        tgs[v.index] = {title=v.title, count=0}
+    end
+
+    for tag, value in pairs(item.tags) do
+        if summarize[tag] then
+            tgs[summarize[tag].index].count = tgs[summarize[tag].index].count + 1
+        end
+    end
+
+    local ret = {}
+
+    for k, v in ipairs(tgs) do
+        if v.count > 0 then
+            ret[#ret+1] = v
+        end
+    end
+
+    item.extra_summary = #ret > 0 and ret or nil
+end
+
 -- We have custom types, sub-types and different rendering.
 --
 -- To avoid added too much business logic in the template, handle this now.
@@ -467,6 +500,8 @@ end
 -- of content, which is before any custom types is used.
 local function init_custom_types(item)
     if item.is_init then return end
+
+    generate_summary(item)
 
     -- Give each item an unique identifier so the JavaScript can locate them.
     item.uid, item_id = item_id, item_id + 1
