@@ -151,6 +151,11 @@
       <td class="name" $(nowrap)><a href="#$(item.name)">$(dn)</a></td>
 #   end
       <td class="summary">$(M(item.summary,item))</td>
+      <td class="baseclass" $(nowrap)>
+#   if item.inherited then
+        Inherited from $(item.baseclass)
+#   end
+      </td>
     </tr>
 #  end -- for items
 # last_kind = kind
@@ -196,6 +201,9 @@
     <strong>$(display_name(item))</strong>
 #   if item.display_type then
     <span class="proptype">($(item.display_type))</span>
+#   end
+#   if item.inherited then
+    <span class="baseclass" $(nowrap)>&nbsp;&middot;&nbsp;Inherited from $(item.baseclass)</span>
 #   end
 #   if ldoc.prettify_files and ldoc.is_file_prettified[item.module.file.filename] then
     <a style="float:right;" href="$(ldoc.source_ref(item))">line $(item.lineno)</a>

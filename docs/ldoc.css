@@ -288,6 +288,7 @@ table.module_list td.summary, table.function_list td.summary {
     background-color: white;
     width: 100%;
     border-left-width: 0px;
+    border-right: none;
 }
 
 table.function_list td.shortname {
@@ -332,6 +333,19 @@ table.function_list .function_named_args {
     color: #ba97ff;
     text-decoration: underline;
     text-decoration-color: #bbd3ff;
+}
+
+table.function_list td.baseclass {
+    background-color: white;
+    color: #a4c7ff;
+    min-width: 200px;
+    border-left: none;
+    border-right: none;
+    text-align: right;
+}
+
+.baseclass {
+    font-size: 85%;
 }
 
 dl.function {
