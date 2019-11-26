@@ -483,6 +483,8 @@ end
 -- * maximized clients
 -- * floating clients
 --
+-- @DOC_screen_tiled_clients_EXAMPLE@
+--
 -- @property tiled_clients
 -- @param table The clients list, ordered from top to bottom.
 
