@@ -289,7 +289,7 @@ add_custom_tag {
     end
 }
 
--- List the beautiful variables used by the method or property fllbacks.
+-- List the beautiful variables used by the method or property fallbacks.
 -- @usebeautiful beautiful.varname usage[...]
 add_custom_tag {
     name   = "usebeautiful",
