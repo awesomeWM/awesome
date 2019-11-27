@@ -93,6 +93,257 @@ new_type("filterfunction", "List filters", false)
 -- Extra client properties available only in awful.rules/spawn constructs
 new_type("clientruleproperty", "Extra properties available in awful.rules and awful.spawn", false, "Type")
 
+-- Simulate the default "params" parser format, except the optional "[]" section
+-- needs a space.
+local function parse_custom_tags(text, params)
+    text = text:gmatch("[ ]*(.*)$")()
+    local raw_extra = ""
+
+    if text:sub(1,1) == '[' then
+        local count = 1
+
+        -- Find the matching ']'
+        for i=2, text:len() do
+            local char = text:sub(i,i)
+
+            if char == '[' then
+                count = count + 1
+            elseif char == ']' then
+                count = count - 1
+            end
+
+            raw_extra = raw_extra..char
+
+            if count == 0 then
+                text = text:sub(i+2)
+                break
+            end
+        end
+    end
+
+    -- Split the remaining text into words.
+    local words, values, description = {}, {}, {}
+
+    for word in text:gmatch("[^ \n\r]*") do
+        if word ~= "" then
+            words[#words+1] = word
+        end
+    end
+
+    for idx, word in ipairs(words) do
+        if idx <= #params then
+            local name = params[idx].name
+            values[name] = {
+                name  = name,
+                title = params[idx].title or name,
+                value = word
+            }
+        else
+            description[#description+1] = word
+            values.description = values.description and
+                values.description.." "..word or
+                word
+        end
+    end
+
+    return values
+end
+
+-- Mimic the template classes.
+local function default_format_callback(self, params, _, md)
+    local ret = ""
+
+    if self.table then
+        -- All columns are mandatory
+        for _, p in ipairs(self.params) do
+            local content = params[p.name] and params[p.name].value or ""
+            ret = ret.."<td>"..(p.markdown and md("`"..content.."`") or content).."</td>"
+        end
+        return ret .. "<td>"..md(params.description).."</td>"
+    else
+        if params.name then
+            ret = '<span class="parameter">'..
+                md("`"..params.name.value.."`")..
+            "</span> "
+        end
+
+        if params.type then
+            ret = ret .. '<span class="parameter">('..
+                md("`"..params.type.value.."`")..
+            ")</span>"
+        end
+
+        return ret.." "..md(params.description)
+    end
+end
+
+-- Generate a format function.
+local function default_format(self, callback)
+    return function(raw, item, md)
+        return (callback or default_format_callback)(
+            self, parse_custom_tags(raw, self.params or {}), item, md
+        )
+    end
+end
+
+local named_tags, item_id = {}, 1
+
+-- Add a new @something which can be used in any types.
+-- @tparam table args
+-- @tparam string args.name The name.
+-- @tparam string args.hidden Show in the doc or for internal use only.
+-- @tparam table args.table Show the items in a table rather than a list. The
+--  content is the list of header names.
+-- @tparam table args.params The parameters (table with name, tilte, format).
+-- @tparam boolean[opt=true] args.auto_subtags Create the usage and tparams subtags.
+local add_custom_tag
+add_custom_tag = function(args)
+    local name = args.name
+
+    args.name, args[1] = nil, name
+
+    custom_tags = custom_tags or {}
+
+    local f = args.format
+
+    args.format = default_format(args, f)
+
+    custom_tags[#custom_tags+1] = args
+    named_tags[name] = args
+
+    -- Auto create @name_tparams and @name_usage for each custom tags.
+    if args.auto_subtags ~= false then
+        add_custom_tag {
+            name         = name.."tparam",
+            auto_params  = true,
+            parent       = args,
+            auto_subtags = false,
+            params       = {
+                { name   = "type" },
+                { name   = "name" },
+            }
+        }
+        add_custom_tag {
+            name         = name.."usage",
+            auto_usage   = true,
+            parent       = args,
+            auto_subtags = false,
+        }
+    end
+end
+
+-- When a type will request a permission.
+-- @emits class signal Message[...]
+add_custom_tag {
+    name   = "emits",
+    title  = "Emit signals",
+    hidden = false,
+    params = {
+        {
+            name = "name"
+        }
+    }
+}
+
+-- Avoid repetitive boilerplate code for property signals.
+-- Add true if the signal has the value or false if it doesn't.
+-- @propemits true/false true/false description[...]
+add_custom_tag {
+    name   = "propemits",
+    title  = "Emit signals:",
+    hidden = false,
+    params = {{name = "new_value"}, {name = "old_value"}},
+    format = function(self, params, item, md)
+        -- Add an automatic fallback description.
+        local description = params.description ~= "" and params.description or
+            "When the `"..item.name.."` value changes."
+        local new_value = params.new_value.value == "true"
+        local old_value = params.old_value.value == "true"
+
+        -- Add the sub-tags.
+        local subs = {}
+        item.auto_params["propemitstparam_override"] = subs
+
+        -- The first argument is always the object which changes.
+        subs[1] = item.module.name.." self ".." The object which changed ("..
+            "useful when connecting many object to the same callback)."
+
+        -- Most signals also have the new value.
+        if new_value then
+            local type = item.params[1] or "unknown"
+            subs[2] = type.." ".."v The new value."
+        end
+
+        -- Some also have the old value.
+        if old_value then
+            local type = item.params[1] or "unknown"
+            subs[3] = type.." ".."v The new value."
+        end
+
+        local new_params = {
+            name = { name  = name, value = "property::"..item.name },
+            description = params.description
+        }
+
+        return default_format_callback(self, new_params, item, md)
+    end
+}
+
+-- List the beautiful variables used by the method or property fallbacks.
+-- @usebeautiful beautiful.varname usage[...]
+add_custom_tag {
+    name   = "usebeautiful",
+    title  = "Consumed theme variables",
+    hidden = false,
+    table  = {
+        "Variable", "Usage"
+    },
+    params = {
+        {
+            name     = "name",
+            markdown = true,
+        }
+    }
+}
+
+-- For all properties which have a standard `@beautiful` variable for them
+-- @propbeautiful fallback1 fallback2 fallback3 fallback4
+add_custom_tag {
+    name   = "propbeautiful",
+    title  = "Consumed theme variables",
+    params = {
+        { name = "fallback1" },
+        { name = "fallback2" },
+        { name = "fallback3" },
+        { name = "fallback4" },
+    },
+    table  = {
+        "Variable", "Usage"
+    },
+    format = function(self, p, item, md)
+        local modname = item.module.name:gmatch("[^.]+$")()
+        local last = "beautiful."..(modname.."_"..item.name):gsub("[.]", "_")
+        local ret = "<td>"..md("`"..last.."`").."</td><td>Fallback when "..md("`"..item.name.."`")..
+            " isn't set.</td>"
+
+        for _, fallback in ipairs({p.fallback1, p.fallback2, p.fallback3, p.fallback4 }) do
+            ret = ret .. "</tr><tr>"..
+                "<td>"..md("`"..fallback.value.."`").."</td><td>Fallback when "..md("`"..last.."`")..
+            " isn't set.</td>"
+            last = fallback.value
+        end
+
+        return ret
+    end
+}
+
+-- Define the base class where a method/property is implemented.
+-- @baseclass my_module.my_submodule.my_baseclass
+add_custom_tag {
+    name   = "baseclass",
+    hidden = true
+}
+
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
@@ -190,6 +441,141 @@ local named_args = {
     [ "([args=nil])" ] = true,
     [ "([args={}])"  ] = true
 }
+
+-- Sections which are hidden by default, but visible when clicked.
+local summarize = {
+    emits         = {index = 1, title = "Signals"        },
+    propemits     = {index = 2, title = "Signals"        },
+    usebeautiful  = {index = 3, title = "Theme variables"},
+    propbeautiful = {index = 4, title = "Theme variables"}
+}
+
+local delimiter_for_tag = {
+    usebeautiful  = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
+    propbeautiful = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
+}
+
+-- Use the first word of the subtag content to map it to its tag.
+local function sort_subtags(item, tag, subtag, values)
+    local ret = {}
+
+    for _, value in ipairs(values) do
+        local parsed = parse_custom_tags(value, {{name = "maps_to"}})
+        ret[parsed.maps_to.value] = ret[parsed.maps_to.value] or {}
+        ret[parsed.maps_to.value][#ret[parsed.maps_to.value]+1] = parsed.description
+    end
+
+    return ret
+end
+
+-- Gather a summary of the tags hidden by default .
+local function generate_summary(item)
+    local tgs = {}
+
+    for k, v in pairs(summarize) do
+        tgs[v.index] = {title=v.title, count=0}
+    end
+
+    for tag, value in pairs(item.tags) do
+        if summarize[tag] then
+            tgs[summarize[tag].index].count = tgs[summarize[tag].index].count + 1
+        end
+    end
+
+    local ret = {}
+
+    for k, v in ipairs(tgs) do
+        if v.count > 0 then
+            ret[#ret+1] = v
+        end
+    end
+
+    item.extra_summary = #ret > 0 and ret or nil
+end
+
+-- We have custom types, sub-types and different rendering.
+--
+-- To avoid added too much business logic in the template, handle this now.
+-- Note that this works because the name handler is called when doing the table
+-- of content, which is before any custom types is used.
+local function init_custom_types(item)
+    if item.is_init then return end
+
+    generate_summary(item)
+
+    -- Give each item an unique identifier so the JavaScript can locate them.
+    item.uid, item_id = item_id, item_id + 1
+
+    item.delims, item.auto_usage, item.auto_params = {}, {}, {}
+
+    local to_rm = {}
+
+    for tag, values in pairs(item.tags) do
+        -- Remove the sub-tags so they don't get rendered as top level ones.
+        if named_tags[tag] and named_tags[tag].auto_usage then
+            item.auto_usage[tag] = sort_subtags(
+                item, named_tags[tag].parent, named_tags[tag], values
+            )
+            to_rm[#to_rm+1] = tag
+        elseif named_tags[tag] and named_tags[tag].auto_params then
+            item.auto_params[tag] = sort_subtags(
+                item, named_tags[tag].parent, named_tags[tag], values
+            )
+            to_rm[#to_rm+1] = tag
+        end
+    end
+
+    -- Remove from the top-level tag list.
+    for _, rm in ipairs(to_rm) do
+        item.tags[rm] = nil
+    end
+
+    -- Set the item base class.
+    if item.tags["baseclass"] then
+        item.baseclass = item.tags["baseclass"][1]
+    end
+
+    if not item.baseclass and item.module then
+        item.baseclass = item.module.name
+    end
+
+    -- Some methods and properties can be inherited from parent classes.
+    -- in those case, they need the explicit `@baseclass` tag.
+    item.inherited = item.baseclass and item.module
+        and item.module.name ~= item.baseclass
+
+    function item.get_delim(tag)
+        if delimiter_for_tag[tag] then
+            return delimiter_for_tag[tag][1],
+                   delimiter_for_tag[tag][2],
+                   delimiter_for_tag[tag][3],
+                   delimiter_for_tag[tag][4],
+                   delimiter_for_tag[tag][5]
+        else
+            return "ul", "ul", "li", "li", nil
+        end
+    end
+
+    -- Allow the template to fetch the right sub-tags.
+    function item.get_auto_params(tag, value)
+        -- Makes auto-generated subtags easier to implement.
+        if item.auto_params[tag.."tparam_override"] then
+            return item.auto_params[tag.."tparam_override"], named_tags[tag.."tparam"]
+        end
+
+        if not item.auto_params[tag.."tparam"] then return nil, nil end
+
+        local parsed = parse_custom_tags(value, named_tags[tag].params)
+
+        if parsed.name and item.auto_params[tag.."tparam"][parsed.name.value] then
+            return item.auto_params[tag.."tparam"][parsed.name.value], named_tags[tag.."tparam"]
+        end
+
+        return nil, nil
+    end
+
+    item.is_init = true
+end
 
 -- Wrap the arguments for the CSS highlight.
 local function wrap_args(item)
@@ -300,6 +686,8 @@ local show_return = {
 }
 
 custom_display_name_handler = function(item, default_handler)
+    init_custom_types(item)
+
     local ret = default_handler(item)
 
     -- Edit the input so the template is notified.

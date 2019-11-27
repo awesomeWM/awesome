@@ -7,10 +7,12 @@
 -- @return The parent layout
 -- @return The path between self and widget
 -- @method index
+-- @baseclass wibox.widget
 
 --- Get or set the children elements.
 -- @property children
 -- @tparam table children The children.
+-- @baseclass wibox.widget
 
 --- Get all direct and indirect children widgets.
 -- This will scan all containers recursively to find widgets
@@ -18,27 +20,33 @@
 -- children, contain (directly or indirectly) itself.
 -- @property all_children
 -- @tparam table children The children.
+-- @baseclass wibox.widget
 
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @param args An array containing the widgets disposition
 -- @method setup
+-- @baseclass wibox.widget
 
 --- Force a widget height.
 -- @property forced_height
 -- @tparam number|nil height The height (`nil` for automatic)
+-- @baseclass wibox.widget
 
 --- Force a widget width.
 -- @property forced_width
 -- @tparam number|nil width The width (`nil` for automatic)
+-- @baseclass wibox.widget
 
 --- The widget opacity (transparency).
 -- @property opacity
 -- @tparam[opt=1] number opacity The opacity (between 0 and 1)
+-- @baseclass wibox.widget
 
 --- The widget visibility.
 -- @property visible
 -- @param boolean
+-- @baseclass wibox.widget
 
 --- The widget buttons.
 --
@@ -47,10 +55,12 @@
 -- @property buttons
 -- @param table
 -- @see awful.button
+-- @baseclass wibox.widget
 
 --- Add a new `awful.button` to this widget.
 -- @tparam awful.button button The button to add.
 -- @function add_button
+-- @baseclass wibox.widget
 
 --- Emit a signal and ensure all parent widgets in the hierarchies also
 -- forward the signal. This is useful to track signals when there is a dynamic
@@ -58,6 +68,7 @@
 -- @tparam string signal_name
 -- @param ... Other arguments
 -- @method emit_signal_recursive
+-- @baseclass wibox.widget
 
 --- When the layout (size) change.
 -- This signal is emitted when the previous results of `:layout()` and `:fit()`
@@ -65,6 +76,7 @@
 -- must return the same result when called with the same arguments.
 -- @signal widget::layout_changed
 -- @see widget::redraw_needed
+-- @baseclass wibox.widget
 
 --- When the widget content changed.
 -- This signal is emitted when the content of the widget changes. The widget will
@@ -72,6 +84,7 @@
 -- `:layout()` and `:fit()` would still return the same results as before.
 -- @signal widget::redraw_needed
 -- @see widget::layout_changed
+-- @baseclass wibox.widget
 
 --- When a mouse button is pressed over the widget.
 -- @signal button::press
@@ -101,6 +114,7 @@
 -- @tparam number find_widgets_result.widget_height The exact height of the widget
 -- in its local coordinate system.
 -- @see mouse
+-- @baseclass wibox.widget
 
 --- When a mouse button is released over the widget.
 -- @signal button::release
@@ -130,6 +144,7 @@
 -- @tparam number find_widgets_result.widget_height The exact height of the widget
 -- in its local coordinate system.
 -- @see mouse
+-- @baseclass wibox.widget
 
 --- When the mouse enter a widget.
 -- @signal mouse::enter
@@ -153,6 +168,7 @@
 -- @tparam number find_widgets_result.widget_height The exact height of the widget
 -- in its local coordinate system.
 -- @see mouse
+-- @baseclass wibox.widget
 
 --- When the mouse leave a widget.
 -- @signal mouse::leave
@@ -176,3 +192,4 @@
 -- @tparam number find_widgets_result.widget_height The exact height of the widget
 -- in its local coordinate system.
 -- @see mouse
+-- @baseclass wibox.widget

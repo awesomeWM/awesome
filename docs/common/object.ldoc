@@ -3,6 +3,7 @@
 -- @tparam string name The name of the signal.
 -- @tparam function func The callback that should be disconnected.
 -- @method disconnect_signal
+-- @baseclass gears.object
 
 --- Emit a signal.
 --
@@ -11,11 +12,13 @@
 --   function receives the object as first argument and then any extra
 --   arguments that are given to emit_signal().
 -- @method emit_signal
+-- @baseclass gears.object
 
 --- Connect to a signal.
 -- @tparam string name The name of the signal.
 -- @tparam function func The callback to call when the signal is emitted.
 -- @method connect_signal
+-- @baseclass gears.object
 
 --- Connect to a signal weakly.
 --
@@ -28,3 +31,4 @@
 -- @tparam string name The name of the signal.
 -- @tparam function func The callback to call when the signal is emitted.
 -- @method weak_connect_signal
+-- @baseclass gears.object
