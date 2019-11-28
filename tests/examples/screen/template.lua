@@ -81,6 +81,7 @@ local colors = {
     tiling_area = "#ff0000",
     padding_area= "#ff0000",
     wibar       = "#000000",
+    tiling_client = "#ff0000",
 }
 
 local function draw_area(_, rect, name, offset, highlight)
@@ -123,26 +124,29 @@ local function draw_solid_area(_, rect, name, offset, alpha)
     cr:stroke()
 end
 
-local function draw_wibar(_, wibar, offset)
-    draw_solid_area(_, wibar, 'wibar', offset)
-
-    -- Prepare to write on the wibar area
+local function write_on_area_middle(rect, text, offset)
+    -- Prepare to write on the rect area
     local pctx    = PangoCairo.font_map_get_default():create_context()
     local playout = Pango.Layout.new(pctx)
     local pdesc   = Pango.FontDescription()
     pdesc:set_absolute_size(11 * Pango.SCALE)
     playout:set_font_description(pdesc)
 
-    -- Write wibar on the bar area
-    playout.attributes, playout.text = Pango.parse_markup('Wibar', -1, 0)
+    -- Write 'text' on the rect area
+    playout.attributes, playout.text = Pango.parse_markup(text, -1, 0)
     local _, logical = playout:get_pixel_extents()
-    local dx = (wibar.width*factor - logical.width) / 2
-    local dy  = (wibar.height*factor - logical.height) / 2
+    local dx = (rect.x*factor+offset) + (rect.width*factor - logical.width) / 2
+    local dy  = (rect.y*factor+offset) + (rect.height*factor - logical.height) / 2
     cr:set_source_rgb(0, 0, 0)
     cr:move_to(dx, dy)
     cr:show_layout(playout)
+end
 
-
+local function draw_struct(_, struct, name, offset, label)
+    draw_solid_area(_, struct, name, offset)
+    if type(label) == 'string' then
+        write_on_area_middle(struct, label, offset)
+    end
 end
 
 local function compute_ruler(_, rect, name)
@@ -374,7 +378,14 @@ for k=1, screen.count() do
 
     -- Draw the wibar.
     if args.draw_wibar then
-        draw_wibar(s, args.draw_wibar, (k-1)*10)
+        draw_struct(s, args.draw_wibar, 'wibar', (k-1)*10, 'Wibar')
+    end
+
+    -- Draw clients.
+    if args.draw_clients then
+        for label,c in pairs(args.draw_clients) do
+            draw_struct(s, c, 'tiling_client', (k-1)*10, label)
+        end
     end
 
     -- Draw the informations.
