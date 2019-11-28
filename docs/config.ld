@@ -344,6 +344,13 @@ add_custom_tag {
     hidden = true
 }
 
+-- Define which interface a method or property implements.
+-- @interface container
+add_custom_tag {
+    name   = "interface",
+    hidden = true
+}
+
 -- Specify when this an item was deprecated.
 -- @deprecatedin 4.4 Optional message.
 add_custom_tag {
