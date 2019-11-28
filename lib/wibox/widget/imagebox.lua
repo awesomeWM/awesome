@@ -261,7 +261,7 @@ end
 -- @tparam[opt] function clip_shape A `gears.shape` compatible function.
 -- @treturn wibox.widget.imagebox A new `wibox.widget.imagebox` widget instance.
 -- @constructorfct wibox.widget.imagebox
-local function new(image, resize_allowed, clip_shape)
+local function new(image, resize_allowed, clip_shape, ...)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, imagebox, true)
@@ -274,7 +274,7 @@ local function new(image, resize_allowed, clip_shape)
     end
 
     ret._private.clip_shape = clip_shape
-    ret._private.clip_args = {}
+    ret._private.clip_args = {...}
 
     return ret
 end
