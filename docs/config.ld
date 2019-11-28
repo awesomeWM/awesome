@@ -377,6 +377,16 @@ add_custom_tag {
     },
 }
 
+-- Specify when an item was added.
+-- @introducedin 4.4
+add_custom_tag {
+    name   = "introducedin",
+    hidden = true,
+    params = {
+        { name = "api_level" },
+    },
+}
+
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
