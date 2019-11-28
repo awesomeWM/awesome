@@ -230,6 +230,7 @@ function imagebox:set_clip_shape(clip_shape, ...)
 end
 
 --- Should the image be resized to fit into the available space?
+-- @DOC_wibox_widget_imagebox_resize_EXAMPLE@
 -- @property resize
 -- @tparam boolean resize
 
