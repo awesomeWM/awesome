@@ -344,6 +344,39 @@ add_custom_tag {
     hidden = true
 }
 
+-- Specify when this an item was deprecated.
+-- @deprecatedin 4.4 Optional message.
+add_custom_tag {
+    name   = "deprecatedin",
+    hidden = true,
+    params = {
+        { name = "api_level" },
+    },
+}
+
+-- Specify when this an item was deprecated because it was renamed.
+-- @renamedin 4.4 new_name Optional message.
+add_custom_tag {
+    name   = "renamedin",
+    hidden = true,
+    params = {
+        { name = "api_level" },
+        { name = "new_name"  },
+    },
+}
+
+-- Specify when this an item was deprecated because it was moved.
+-- @movedin 4.4 new_class new_name Optional message.
+add_custom_tag {
+    name   = "movedin",
+    hidden = true,
+    params = {
+        { name = "api_level" },
+        { name = "new_class" },
+        { name = "new_name"  },
+    },
+}
+
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
