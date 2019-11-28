@@ -471,3 +471,14 @@ pre .url { color: #272fc2; text-decoration: underline; }
 .show_more {
     display: default
 }
+.show_more_button {
+    display:block;
+    position: relative;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 15px;
+    padding-left: 15px;
+    border: 1px solid rgb(210, 210, 220);
+    color: rgb(128, 128, 128);
+    border-radius: 7px;
+}

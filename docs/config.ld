@@ -444,10 +444,10 @@ local named_args = {
 
 -- Sections which are hidden by default, but visible when clicked.
 local summarize = {
-    emits         = {index = 1, title = "Signals"        },
-    propemits     = {index = 2, title = "Signals"        },
-    usebeautiful  = {index = 3, title = "Theme variables"},
-    propbeautiful = {index = 4, title = "Theme variables"}
+    emits         = {index = 1, title = "signals"        },
+    propemits     = {index = 2, title = "signals"        },
+    usebeautiful  = {index = 3, title = "theme variables"},
+    propbeautiful = {index = 4, title = "theme variables"}
 }
 
 local delimiter_for_tag = {
