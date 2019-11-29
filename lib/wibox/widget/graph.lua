@@ -28,41 +28,53 @@ local beautiful = require("beautiful")
 local graph = { mt = {} }
 
 --- Set the graph border color.
+--
 -- If the value is nil, no border will be drawn.
 --
 -- @property border_color
 -- @tparam gears.color border_color The border color to set.
+-- @propbeautiful
+-- @propemits true false
 -- @see gears.color
 
 --- Set the graph foreground color.
 --
 -- @property color
 -- @tparam color color The graph color.
+-- @usebeautiful beautiful.graph_fg
+-- @propemits true false
 -- @see gears.color
 
 --- Set the graph background color.
 --
 -- @property background_color
 -- @tparam gears.color background_color The graph background color.
+-- @usebeautiful beautiful.graph_bg
+-- @propemits true false
 -- @see gears.color
 
 --- Set the maximum value the graph should handle.
+--
 -- If "scale" is also set, the graph never scales up below this value, but it
 -- automatically scales down to make all data fit.
 --
 -- @property max_value
--- @param number
+-- @tparam number max_value
+-- @propemits true false
 
 --- The minimum value.
+--
 -- Note that the min_value is not supported when used along with the stack
 -- property.
 -- @property min_value
--- @param number
+-- @tparam number min_value
+-- @propemits true false
 
 --- Set the graph to automatically scale its values. Default is false.
 --
 -- @property scale
--- @param boolean
+-- @tparam boolean scale
+-- @propemits true false
 
 --- Set the width or the individual steps.
 --
@@ -71,39 +83,47 @@ local graph = { mt = {} }
 --@DOC_wibox_widget_graph_step_EXAMPLE@
 --
 -- @property step_width
--- @param[opt=1] number
+-- @tparam[opt=1] number step_width
+-- @propemits true false
 
 --- Set the spacing between the steps.
 --
 -- Note that it isn't supported when used along with stacked graphs.
 --
 -- @property step_spacing
--- @param[opt=0] number
+-- @tparam[opt=0] number step_spacing
+-- @propemits true false
 
 --- The step shape.
+--
 -- @property step_shape
--- @param[opt=rectangle] shape
+-- @tparam[opt=rectangle] gears.shape|function step_shape
+-- @propemits true false
 -- @see gears.shape
 
 --- Set the graph to draw stacks. Default is false.
 --
 -- @property stack
--- @param boolean
+-- @tparam boolean stack
+-- @propemits true false
 
 --- Set the graph stacking colors. Order matters.
 --
 -- @property stack_colors
--- @param stack_colors A table with stacking colors.
+-- @tparam table stack_colors A table with stacking colors.
 
 --- The graph background color.
+--
 -- @beautiful beautiful.graph_bg
 -- @param color
 
 --- The graph foreground color.
+--
 -- @beautiful beautiful.graph_fg
 -- @param color
 
 --- The graph border color.
+--
 -- @beautiful beautiful.graph_border_color
 -- @param color
 
@@ -235,8 +255,8 @@ end
 --- Add a value to the graph
 --
 -- @method add_value
--- @param value The value to be added to the graph
--- @param group The stack color group index.
+-- @tparam number value The value to be added to the graph
+-- @tparam[opt] number group The stack color group index.
 function graph:add_value(value, group)
     value = value or 0
     local values = self._private.values
@@ -269,6 +289,7 @@ function graph:add_value(value, group)
 end
 
 --- Clear the graph.
+--
 -- @method clear
 function graph:clear()
     self._private.values = {}
@@ -277,25 +298,31 @@ function graph:clear()
 end
 
 --- Set the graph height.
+--
 -- @property height
--- @param number The height to set.
+-- @tparam number height The height to set.
+-- @propemits true false
 
 function graph:set_height(height)
     if height >= 5 then
         self._private.height = height
         self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::height", height)
     end
     return self
 end
 
 --- Set the graph width.
+--
 -- @property width
--- @param number The width to set.
+-- @param number width The width to set.
+-- @propemits true false
 
 function graph:set_width(width)
     if width >= 5 then
         self._private.width = width
         self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::width", width)
     end
     return self
 end
@@ -307,6 +334,7 @@ for _, prop in ipairs(properties) do
             if _graph._private[prop] ~= value then
                 _graph._private[prop] = value
                 _graph:emit_signal("widget::redraw_needed")
+                _graph:emit_signal("property::"..prop, value)
             end
             return _graph
         end
@@ -319,9 +347,10 @@ for _, prop in ipairs(properties) do
 end
 
 --- Create a graph widget.
--- @param args Standard widget() arguments. You should add width and height
+--
+-- @tparam table args Standard widget() arguments. You should add width and height
 -- key to set graph geometry.
--- @return A new graph widget.
+-- @treturn wibox.widget.graph A new graph widget.
 -- @constructorfct wibox.widget.graph
 function graph.new(args)
     args = args or {}

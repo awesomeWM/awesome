@@ -33,37 +33,53 @@ local gtable = require("gears.table")
 local progressbar = { mt = {} }
 
 --- The progressbar border color.
+--
 -- If the value is nil, no border will be drawn.
 --
 -- @property border_color
--- @tparam gears.color color The border color to set.
+-- @tparam color color The border color to set.
+-- @propemits true false
+-- @propbeautiful
 -- @see gears.color
 
 --- The progressbar border width.
+--
 -- @property border_width
--- @param number
+-- @tparam number border_width
+-- @propemits true false
+-- @propbeautiful
 
 --- The progressbar inner border color.
+--
 -- If the value is nil, no border will be drawn.
 --
 -- @property bar_border_color
--- @tparam gears.color color The border color to set.
+-- @tparam color color The border color to set.
+-- @propemits true false
+-- @propbeautiful
 -- @see gears.color
 
 --- The progressbar inner border width.
+--
 -- @property bar_border_width
--- @param number
+-- @tparam number bar_border_width
+-- @propbeautiful
+-- @propemits true false
 
 --- The progressbar foreground color.
 --
 -- @property color
--- @tparam gears.color color The progressbar color.
+-- @tparam color color The progressbar color.
+-- @propemits true false
+-- @usebeautiful beautiful.progressbar_fg
 -- @see gears.color
 
 --- The progressbar background color.
 --
 -- @property background_color
--- @tparam gears.color color The progressbar background color.
+-- @tparam color color The progressbar background color.
+-- @propemits true false
+-- @usebeautiful beautiful.progressbar_bg
 -- @see gears.color
 
 --- The progressbar inner shape.
@@ -72,6 +88,8 @@ local progressbar = { mt = {} }
 --
 -- @property bar_shape
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape
+-- @propemits true false
+-- @propbeautiful
 -- @see gears.shape
 
 --- The progressbar shape.
@@ -80,12 +98,17 @@ local progressbar = { mt = {} }
 --
 -- @property shape
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape
+-- @propemits true false
+-- @propbeautiful
 -- @see gears.shape
 
 --- Set the progressbar to draw vertically.
+--
 -- This doesn't do anything anymore, use a `wibox.container.rotate` widget.
+--
 -- @deprecated set_vertical
 -- @tparam boolean vertical
+-- @deprecatedin 4.0
 
 --- Force the inner part (the bar) to fit in the background shape.
 --
@@ -93,90 +116,110 @@ local progressbar = { mt = {} }
 --
 -- @property clip
 -- @tparam[opt=true] boolean clip
+-- @propemits true false
 
 --- The progressbar to draw ticks. Default is false.
 --
 -- @property ticks
--- @param boolean
+-- @tparam boolean ticks
+-- @propemits true false
 
 --- The progressbar ticks gap.
 --
 -- @property ticks_gap
--- @param number
+-- @tparam number ticks_gap
+-- @propemits true false
 
 --- The progressbar ticks size.
 --
 -- @property ticks_size
--- @param number
+-- @tparam number ticks_size
+-- @propemits true false
 
 --- The maximum value the progressbar should handle.
 --
 -- @property max_value
--- @param number
+-- @tparam number max_value
+-- @propemits true false
 
 --- The progressbar background color.
+--
 -- @beautiful beautiful.progressbar_bg
 -- @param color
 
 --- The progressbar foreground color.
+--
 -- @beautiful beautiful.progressbar_fg
 -- @param color
 
 --- The progressbar shape.
+--
 -- @beautiful beautiful.progressbar_shape
 -- @tparam gears.shape shape
 -- @see gears.shape
 
 --- The progressbar border color.
+--
 -- @beautiful beautiful.progressbar_border_color
 -- @param color
 
 --- The progressbar outer border width.
+--
 -- @beautiful beautiful.progressbar_border_width
 -- @param number
 
 --- The progressbar inner shape.
+--
 -- @beautiful beautiful.progressbar_bar_shape
 -- @tparam gears.shape shape
 -- @see gears.shape
 
 --- The progressbar bar border width.
+--
 -- @beautiful beautiful.progressbar_bar_border_width
 -- @param number
 
 --- The progressbar bar border color.
+--
 -- @beautiful beautiful.progressbar_bar_border_color
 -- @param color
 
 --- The progressbar margins.
+--
 -- Note that if the `clip` is disabled, this allows the background to be smaller
 -- than the bar.
 --
 -- See the `clip` example.
 --
+-- @property margins
 -- @tparam[opt=0] (table|number|nil) margins A table for each side or a number
 -- @tparam[opt=0] number margins.top
 -- @tparam[opt=0] number margins.bottom
 -- @tparam[opt=0] number margins.left
 -- @tparam[opt=0] number margins.right
--- @property margins
+-- @propemits false false
+-- @propbeautiful
 -- @see clip
 
 --- The progressbar padding.
+--
 -- Note that if the `clip` is disabled, this allows the bar to be taller
 -- than the background.
 --
 -- See the `clip` example.
 --
+-- @property paddings
 -- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
 -- @tparam[opt=0] number padding.top
 -- @tparam[opt=0] number padding.bottom
 -- @tparam[opt=0] number padding.left
 -- @tparam[opt=0] number padding.right
--- @property paddings
+-- @propemits false false
+-- @propbeautiful
 -- @see clip
 
 --- The progressbar margins.
+--
 -- Note that if the `clip` is disabled, this allows the background to be smaller
 -- than the bar.
 -- @tparam[opt=0] (table|number|nil) margins A table for each side or a number
@@ -188,6 +231,7 @@ local progressbar = { mt = {} }
 -- @see clip
 
 --- The progressbar padding.
+--
 -- Note that if the `clip` is disabled, this allows the bar to be taller
 -- than the background.
 -- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
@@ -378,8 +422,10 @@ function progressbar:fit(_, width, height)
 end
 
 --- Set the progressbar value.
+--
 -- @property value
--- @param number The progress bar value between 0 and 1.
+-- @tparam number value The progress bar value between 0 and 1.
+-- @propemits true false
 
 function progressbar:set_value(value)
     value = value or 0
@@ -398,20 +444,26 @@ function progressbar:set_max_value(max_value)
 end
 
 --- Set the progressbar height.
+--
 -- This method is deprecated.  Use a `wibox.container.constraint` widget or
 -- `forced_height`.
--- @param height The height to set.
+--
+-- @tparam number height The height to set.
 -- @deprecated set_height
+-- @renamedin 4.0
 function progressbar:set_height(height)
     gdebug.deprecate("Use a `wibox.container.constraint` widget or `forced_height`", {deprecated_in=4})
     self:set_forced_height(height)
 end
 
 --- Set the progressbar width.
+--
 -- This method is deprecated.  Use a `wibox.container.constraint` widget or
 -- `forced_width`.
--- @param width The width to set.
+--
+-- @tparam number width The width to set.
 -- @deprecated set_width
+-- @renamedin 4.0
 function progressbar:set_width(width)
     gdebug.deprecate("Use a `wibox.container.constraint` widget or `forced_width`", {deprecated_in=4})
     self:set_forced_width(width)
@@ -423,7 +475,13 @@ for _, prop in ipairs(properties) do
         progressbar["set_" .. prop] = function(pbar, value)
             pbar._private[prop] = value
             pbar:emit_signal("widget::redraw_needed")
+            pbar:emit_signal("property::"..prop, value)
             return pbar
+        end
+    end
+    if not progressbar["get_"..prop] then
+        progressbar["set_" .. prop] = function(pbar)
+            return pbar._private[prop]
         end
     end
 end
@@ -434,9 +492,12 @@ end
 
 
 --- Create a progressbar widget.
--- @param args Standard widget() arguments. You should add width and height
--- key to set progressbar geometry.
--- @return A progressbar widget.
+--
+-- @tparam table args Standard widget() arguments. You should add width and
+--  height constructor parameters to set progressbar geometry.
+-- @tparam number args.width The width.
+-- @tparam number args.height The height.
+-- @treturn wibox.widget.progressbar A progressbar widget.
 -- @constructorfct wibox.widget.progressbar
 function progressbar.new(args)
     args = args or {}

@@ -20,41 +20,50 @@ local gtable    = require( "gears.table"       )
 local checkbox = {}
 
 --- The outer (unchecked area) border width.
+--
 -- @beautiful beautiful.checkbox_border_width
 -- @param number
 
 --- The outer (unchecked area) background color, pattern or gradient.
+--
 -- @beautiful beautiful.checkbox_bg
 -- @param color
 
 --- The outer (unchecked area) border color.
+--
 -- @beautiful beautiful.checkbox_border_color
 -- @param color
 
 --- The checked part border color.
+--
 -- @beautiful beautiful.checkbox_check_border_color
 -- @param color
 
 --- The checked part border width.
+--
 -- @beautiful beautiful.checkbox_check_border_width
 -- @param number
 
 --- The checked part filling color.
+--
 -- @beautiful beautiful.checkbox_check_color
 -- @param number
 
 --- The outer (unchecked area) shape.
+--
 -- @beautiful beautiful.checkbox_shape
--- @tparam gears.shape shape
+-- @tparam gears.shape|function shape
 -- @see gears.shape
 
 --- The checked part shape.
+--
 -- If none is set, then the `shape` property will be used.
 -- @beautiful beautiful.checkbox_check_shape
--- @tparam gears.shape shape
+-- @tparam gears.shape|function shape
 -- @see gears.shape
 
 --- The padding between the outline and the progressbar.
+--
 -- @beautiful beautiful.checkbox_paddings
 -- @tparam[opt=0] table|number paddings A number or a table
 -- @tparam[opt=0] number paddings.top
@@ -63,6 +72,7 @@ local checkbox = {}
 -- @tparam[opt=0] number paddings.right
 
 --- The checkbox color.
+--
 -- This will be used for the unchecked part border color and the checked part
 -- filling color. Note that `check_color` and `border_color` have priority
 -- over this property.
@@ -70,57 +80,87 @@ local checkbox = {}
 -- @param color
 
 --- The outer (unchecked area) border width.
+--
 -- @property border_width
--- @param number
+-- @tparam number border_width
+-- @propbeautiful
+-- @propemits true false
 
 --- The outer (unchecked area) background color, pattern or gradient.
+--
 --@DOC_wibox_widget_checkbox_bg_EXAMPLE@
 -- @property bg
--- @param color
+-- @tparam color bg
+-- @propbeautiful
+-- @propemits true false
 
 --- The outer (unchecked area) border color.
+--
 -- @property border_color
--- @param color
+-- @tparam color border_color
+-- @propbeautiful
+-- @propemits true false
 
 --- The checked part border color.
+--
 -- @property check_border_color
--- @param color
+-- @tparam color check_border_color
+-- @propbeautiful
+-- @propemits true false
 
 --- The checked part border width.
+--
 -- @property check_border_width
--- @param number
+-- @tparam number check_border_width
+-- @propbeautiful
+-- @propemits true false
 
 --- The checked part filling color.
+--
 -- @property check_color
--- @param color
+-- @tparam color check_color
+-- @propbeautiful
+-- @propemits true false
 
 --- The outer (unchecked area) shape.
+--
 --@DOC_wibox_widget_checkbox_shape_EXAMPLE@
 -- @property shape
 -- @tparam gears.shape shape
+-- @propbeautiful
+-- @propemits true false
 -- @see gears.shape
 
 --- The checked part shape.
+--
 -- If none is set, then the `shape` property will be used.
 --@DOC_wibox_widget_checkbox_check_shape_EXAMPLE@
 -- @property check_shape
 -- @tparam gears.shape shape
+-- @propbeautiful
+-- @propemits true false
 -- @see gears.shape
 
 --- The padding between the outline and the progressbar.
+--
 -- @property paddings
 -- @tparam[opt=0] table|number paddings A number or a table
 -- @tparam[opt=0] number paddings.top
 -- @tparam[opt=0] number paddings.bottom
 -- @tparam[opt=0] number paddings.left
 -- @tparam[opt=0] number paddings.right
+-- @propbeautiful
+-- @propemits false false
 
 --- The checkbox color.
+--
 -- This will be used for the unchecked part border color and the checked part
 -- filling color. Note that `check_color` and `border_color` have priority
 -- over this property.
 -- @property color
--- @param color
+-- @tparam color color
+-- @propbeautiful
+-- @propemits true false
 
 local function outline_workarea(self, width, height)
     local offset = (self._private.border_width or
@@ -220,7 +260,7 @@ for _, prop in ipairs {"border_width", "bg", "border_color", "check_border_color
     "checked", "color" } do
     checkbox["set_"..prop] = function(self, value)
         self._private[prop] = value
-        self:emit_signal("property::"..prop)
+        self:emit_signal("property::"..prop, value)
         self:emit_signal("widget::redraw_needed")
     end
     checkbox["get_"..prop] = function(self)

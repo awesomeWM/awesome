@@ -153,6 +153,7 @@ end
 --
 -- @property image
 -- @tparam image image The image to render.
+-- @propemits false false
 -- @see set_image
 
 --- Set the `imagebox` image.
@@ -201,6 +202,7 @@ function imagebox:set_image(image)
 
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::image")
     return true
 end
 
@@ -210,6 +212,7 @@ end
 --
 -- @property clip_shape
 -- @tparam function|gears.shape clip_shape A `gears.shape` compatible shape function.
+-- @propemits true false
 -- @see gears.shape
 -- @see set_clip_shape
 
@@ -227,11 +230,13 @@ function imagebox:set_clip_shape(clip_shape, ...)
     self._private.clip_shape = clip_shape
     self._private.clip_args = {...}
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::clip_shape", clip_shape)
 end
 
 --- Should the image be resized to fit into the available space?
 -- @DOC_wibox_widget_imagebox_resize_EXAMPLE@
 -- @property resize
+-- @propemits true false
 -- @tparam boolean resize
 
 --- Should the image be resized to fit into the available space?
@@ -242,6 +247,7 @@ function imagebox:set_resize(allowed)
     self._private.resize_forbidden = not allowed
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::resize", allowed)
 end
 
 --- Returns a new `wibox.widget.imagebox` instance.
