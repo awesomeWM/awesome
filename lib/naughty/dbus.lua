@@ -55,7 +55,7 @@ local urgency = {
 -- @tfield table 2 normal urgency
 -- @tfield table 3 critical urgency
 -- @table config.mapping
-dbus.config.mapping = cst.mapping
+dbus.config.mapping = cst.config.mapping
 
 local function sendActionInvoked(notificationId, action)
     if bus_connection then
