@@ -22,35 +22,48 @@ local gtable  = require("gears.table")
 
 local stack = {mt={}}
 
---@DOC_fixed_COMMON@
-
 --- Add some widgets to the given stack layout.
--- @param layout The layout you are modifying.
+--
 -- @tparam widget ... Widgets that should be added (must at least be one)
 -- @method add
+-- @interface layout
 
---- Remove a widget from the layout
+--- Remove a widget from the layout.
+--
 -- @tparam index The widget index to remove
 -- @treturn boolean index If the operation is successful
 -- @method remove
+-- @interface layout
 
 --- Insert a new widget in the layout at position `index`.
+--
 -- @tparam number index The position
--- @param widget The widget
+-- @tparam widget widget The widget
 -- @treturn boolean If the operation is successful
 -- @method insert
+-- @emits widget::inserted
+-- @emitstparam widget::inserted widget self The fixed layout.
+-- @emitstparam widget::inserted widget widget index The inserted widget.
+-- @emitstparam widget::inserted number count The widget count.
+-- @interface layout
 
 --- Remove one or more widgets from the layout.
+--
 -- The last parameter can be a boolean, forcing a recursive seach of the
 -- widget(s) to remove.
--- @param widget ... Widgets that should be removed (must at least be one)
+--
+-- @tparam widget widget ... Widgets that should be removed (must at least be one)
 -- @treturn boolean If the operation is successful
 -- @method remove_widgets
+-- @interface layout
 
 --- Add spacing around the widget, similar to the margin container.
+--
 --@DOC_wibox_layout_stack_spacing_EXAMPLE@
 -- @property spacing
 -- @tparam number spacing Spacing between widgets.
+-- @propemits true false
+-- @interface layout
 
 function stack:layout(_, width, height)
     local result = {}
@@ -83,7 +96,10 @@ function stack:fit(context, orig_width, orig_height)
 end
 
 --- If only the first stack widget is drawn.
+--
 -- @property top_only
+-- @tparam boolean top_only
+-- @propemits true false
 
 function stack:get_top_only()
     return self._private.top_only
@@ -91,9 +107,12 @@ end
 
 function stack:set_top_only(top_only)
     self._private.top_only = top_only
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::top_only", top_only)
 end
 
 --- Raise a widget at `index` to the top of the stack.
+--
 -- @method raise
 -- @tparam number index the widget index to raise
 function stack:raise(index)
@@ -107,8 +126,9 @@ function stack:raise(index)
 end
 
 --- Raise the first instance of `widget`.
+--
 -- @method raise_widget
--- @param widget The widget to raise
+-- @tparam widget widget The widget to raise
 -- @tparam[opt=false] boolean recursive Also look deeper in the hierarchy to
 --   find the widget
 function stack:raise_widget(widget, recursive)
@@ -134,7 +154,9 @@ end
 --@DOC_wibox_layout_stack_offset_EXAMPLE@
 --
 -- @property horizontal_offset
--- @param number
+-- @tparam number horizontal_offset
+-- @propemits true false
+-- @see vertial_offset
 
 --- Add an vertical offset to each layers.
 --
@@ -142,20 +164,24 @@ end
 -- layers offsets.
 --
 -- @property vertial_offset
--- @param number
+-- @tparam number vertial_offset
+-- @propemits true false
 -- @see horizontal_offset
 
 function stack:set_horizontal_offset(value)
     self._private.h_offset = value
-    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::horizontal_offset")
+    self:emit_signal("property::top_only", value)
 end
 
 function stack:set_vertical_offset(value)
     self._private.v_offset = value
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::vertical_offset", value)
 end
 
 --- Create a new stack layout.
+--
 -- @constructorfct wibox.layout.stack
 -- @treturn widget A new stack layout
 
@@ -173,6 +199,8 @@ end
 function stack.mt:__call(_, ...)
     return new(...)
 end
+
+--@DOC_fixed_COMMON@
 
 --@DOC_widget_COMMON@
 

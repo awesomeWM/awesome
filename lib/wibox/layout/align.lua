@@ -142,7 +142,8 @@ end
 --- Set the layout's first widget.
 -- This is the widget that is at the left/top
 -- @property first
--- @param widget
+-- @tparam widget first
+-- @propemits true false
 
 function align:set_first(widget)
     if self._private.first == widget then
@@ -150,11 +151,13 @@ function align:set_first(widget)
     end
     self._private.first = widget
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::first", widget)
 end
 
 --- Set the layout's second widget. This is the centered one.
 -- @property second
--- @param widget
+-- @tparam widget second
+-- @propemits true false
 
 function align:set_second(widget)
     if self._private.second == widget then
@@ -162,12 +165,14 @@ function align:set_second(widget)
     end
     self._private.second = widget
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::second", widget)
 end
 
 --- Set the layout's third widget.
 -- This is the widget that is at the right/bottom
 -- @property third
--- @param widget
+-- @tparam widget third
+-- @propemits true false
 
 function align:set_third(widget)
     if self._private.third == widget then
@@ -175,6 +180,7 @@ function align:set_third(widget)
     end
     self._private.third = widget
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::third", widget)
 end
 
 for _, prop in ipairs {"first", "second", "third", "expand" } do
@@ -182,12 +188,6 @@ for _, prop in ipairs {"first", "second", "third", "expand" } do
         return self._private[prop]
     end
 end
-
---- All direct children of this layout.
--- This can be used to replace all 3 widgets at once.
--- @treturn table a list of all widgets
--- @property children
--- @param table
 
 function align:get_children()
     return gtable.from_sparse {self._private.first, self._private.second, self._private.third}
@@ -229,7 +229,7 @@ end
 --- Set the expand mode which determines how sub widgets expand to take up
 -- unused space.
 --
--- @tparam[opt=inside] string mode How to use unused space.
+-- The following values are valid:
 --
 -- * "inside" - Default option. Size of outside widgets is determined using
 --   their fit function. Second, middle, or center widget expands to fill
@@ -240,7 +240,9 @@ end
 -- * "none" - All widgets are sized using their fit function, drawn to only the
 --   returned space, or remaining space, whichever is smaller. Center widget
 --   gets priority.
+--
 -- @property expand
+-- @tparam[opt=inside] string mode How to use unused space.
 
 function align:set_expand(mode)
     if mode == "none" or mode == "outside" then
@@ -249,6 +251,7 @@ function align:set_expand(mode)
         self._private.expand = "inside"
     end
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::expand", mode)
 end
 
 function align:reset()

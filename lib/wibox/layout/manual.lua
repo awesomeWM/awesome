@@ -18,21 +18,26 @@ local manual_layout = {}
 --- Add some widgets to the given stack layout.
 --
 -- @method add
--- @param layout The layout you are modifying.
 -- @tparam widget ... Widgets that should be added
 
 --- Remove a widget from the layout.
 --
 -- @method remove
--- @tparam index The widget index to remove
+-- @tparam number index The widget index to remove
 -- @treturn boolean index If the operation is successful
+-- @interface layout
 
 --- Insert a new widget in the layout at position `index`.
 --
 -- @method insert
 -- @tparam number index The position
--- @param widget The widget
--- @treturn boolean If the operation is successful
+-- @tparam widget widget The widget
+-- @treturn boolean If the operation is successful.
+-- @emits widget::inserted
+-- @emitstparam widget::inserted widget self The fixed layout.
+-- @emitstparam widget::inserted widget widget index The inserted widget.
+-- @emitstparam widget::inserted number count The widget count.
+-- @interface layout
 function manual_layout:insert(index, widget)
     table.insert(self._private.widgets, index, widget)
 
@@ -40,6 +45,8 @@ function manual_layout:insert(index, widget)
     if widget.point then
         table.insert(self._private.pos, index, widget.point)
     end
+
+    self:emit_signal("widget::inserted", widget, #self._private.widgets)
 
     self:emit_signal("widget::layout_changed")
 end
@@ -50,7 +57,7 @@ end
 -- widget(s) to remove.
 --
 -- @method remove_widgets
--- @param widget ... Widgets that should be removed (must at least be one)
+-- @tparam widget ... Widgets that should be removed (must at least be one)
 -- @treturn boolean If the operation is successful
 
 
@@ -177,6 +184,7 @@ function manual_layout:add_at(widget, point)
 end
 
 --- Move a widget (by index).
+--
 -- @method move
 -- @tparam number index The widget index.
 -- @tparam table|function point A new point value.
@@ -219,6 +227,7 @@ function manual_layout:reset()
 end
 
 --- Create a manual layout.
+--
 -- @constructorfct wibox.layout.manual
 -- @tparam table ... Widgets to add to the layout.
 
@@ -234,6 +243,7 @@ local function new_manual(...)
     return ret
 end
 
+--@DOC_fixed_COMMON@
 
 --@DOC_widget_COMMON@
 
