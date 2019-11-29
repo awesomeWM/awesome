@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Taglist widget module for awful
+--- Taglist widget module for awful.
 --
 -- Here is a more advanced example of how to extent the `taglist`. It provides:
 --

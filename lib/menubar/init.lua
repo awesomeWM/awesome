@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Menubar module, which aims to provide a freedesktop menu alternative
+--- Menubar module, which aims to provide a freedesktop menu alternative.
 --
 -- List of menubar keybindings:
 -- ---
