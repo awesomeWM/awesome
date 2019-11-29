@@ -59,8 +59,10 @@ function rotate:fit(context, width, height)
 end
 
 --- The widget to be rotated.
+--
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam widget widget The widget.
+-- @interface container
 
 rotate.set_widget = base.set_widget_common
 
@@ -76,18 +78,19 @@ function rotate:set_children(children)
     self:set_widget(children[1])
 end
 
---- Reset this layout. The widget will be removed and the rotation reset.
+--- Reset this layout.
+--
+-- The widget will be removed and the rotation reset.
+--
 -- @method reset
+-- @interface container
 function rotate:reset()
     self._private.direction = nil
     self:set_widget(nil)
 end
 
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
-
 --- The direction of this rotating container.
+--
 -- Valid values are:
 --
 -- * *north*
@@ -97,7 +100,8 @@ end
 --
 --@DOC_wibox_container_rotate_angle_EXAMPLE@
 -- @property direction
--- @tparam string dir The direction
+-- @tparam string dir The direction.
+-- @propemits true false
 
 function rotate:set_direction(dir)
     local allowed = {
@@ -113,6 +117,7 @@ function rotate:set_direction(dir)
 
     self._private.direction = dir
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::direction")
 end
 
 -- Get the direction of this rotating layout
@@ -121,11 +126,12 @@ function rotate:get_direction()
 end
 
 --- Returns a new rotate container.
--- A rotate container rotates a given widget. Use
--- :set_widget() to set the widget and :set_direction() for the direction.
+--
+-- A rotate container rotates a given widget. Use the `widget` property
+-- to set the widget and `direction` property for the direction.
 -- The default direction is "north" which doesn't change anything.
--- @param[opt] widget The widget to display.
--- @param[opt] dir The direction to rotate to.
+-- @tparam[opt] widget widget The widget to display.
+-- @tparam[opt] string dir The direction to rotate to.
 -- @treturn table A new rotate container.
 -- @constructorfct wibox.container.rotate
 local function new(widget, dir)
@@ -142,6 +148,10 @@ end
 function rotate.mt:__call(...)
     return new(...)
 end
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(rotate, rotate.mt)
 

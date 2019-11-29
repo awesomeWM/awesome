@@ -62,18 +62,16 @@ function place:fit(context, width, height)
 end
 
 --- The widget to be placed.
+--
 -- @property widget
 -- @tparam widget widget The widget
+-- @interface container
 
 place.set_widget = base.set_widget_common
 
 function place:get_widget()
     return self._private.widget
 end
-
---- Get or set the children elements.
--- @property children
--- @tparam table children The children.
 
 function place:get_children()
     return {self._private.widget}
@@ -85,6 +83,7 @@ end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
 -- @method reset
+-- @interface container
 function place:reset()
     self:set_widget(nil)
 end
@@ -98,7 +97,8 @@ end
 -- * *bottom*
 --
 -- @property valign
--- @param[opt="center"] string
+-- @tparam[opt="center"] string valign
+-- @propemits true false
 
 --- The horizontal alignment.
 --
@@ -109,7 +109,8 @@ end
 -- * *right*
 --
 -- @property halign
--- @param[opt="center"] string
+-- @tparam[opt="center"] string halign
+-- @propemits true false
 
 function place:set_valign(value)
     if value ~= "center" and value ~= "top" and value ~= "bottom" then
@@ -118,6 +119,7 @@ function place:set_valign(value)
 
     self._private.valign = value
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::valign", value)
 end
 
 function place:set_halign(value)
@@ -127,46 +129,60 @@ function place:set_halign(value)
 
     self._private.halign = value
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::halign", value)
 end
 
 --- Fill the vertical space.
+--
 -- @property fill_vertical
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean fill_vertical
+-- @propemits true false
 
 function place:set_fill_vertical(value)
     self._private.fill_vertical = value
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::fill_vertical", value)
 end
 
 --- Fill the horizontal space.
+--
 -- @property fill_horizontal
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean fill_horizontal
+-- @propemits true false
 
 function place:set_fill_horizontal(value)
     self._private.fill_horizontal = value
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::fill_horizontal", value)
 end
 
 --- Stretch the contained widget so it takes all the vertical space.
+--
 -- @property content_fill_vertical
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean content_fill_vertical
+-- @propemits true false
 
 function place:set_content_fill_vertical(value)
     self._private.content_fill_vertical = value
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::content_fill_vertical", value)
 end
 
 --- Stretch the contained widget so it takes all the horizontal space.
+--
 -- @property content_fill_horizontal
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean content_fill_horizontal
+-- @propemits true false
 
 function place:set_content_fill_horizontal(value)
     self._private.content_fill_horizontal = value
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::content_fill_horizontal", value)
 end
 
 --- Returns a new place container.
--- @param[opt] widget The widget to display.
+--
+-- @tparam[opt] widget widget The widget to display.
 -- @tparam[opt="center"] string halign The horizontal alignment
 -- @tparam[opt="center"] string valign The vertical alignment
 -- @treturn table A new place container.
