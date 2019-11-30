@@ -30,6 +30,8 @@ local slider = {mt={}}
 --
 -- @property handle_shape
 -- @tparam[opt=gears shape rectangle] gears.shape shape
+-- @propemits true false
+-- @propbeautiful
 -- @see gears.shape
 
 --- The slider handle color.
@@ -37,7 +39,9 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_handle_color_EXAMPLE@
 --
 -- @property handle_color
--- @param color
+-- @propbeautiful
+-- @tparam color handle_color
+-- @propemits true false
 
 --- The slider handle margins.
 --
@@ -49,24 +53,32 @@ local slider = {mt={}}
 -- @tparam[opt=0] number margins.right
 -- @tparam[opt=0] number margins.top
 -- @tparam[opt=0] number margins.bottom
+-- @propemits true false
+-- @propbeautiful
 
 --- The slider handle width.
 --
 --@DOC_wibox_widget_slider_handle_width_EXAMPLE@
 --
 -- @property handle_width
--- @param number
+-- @tparam number handle_width
+-- @propemits true false
+-- @propbeautiful
 
 --- The handle border_color.
 --
 --@DOC_wibox_widget_slider_handle_border_EXAMPLE@
 --
 -- @property handle_border_color
--- @param color
+-- @tparam color handle_border_color
+-- @propemits true false
+-- @propbeautiful
 
 --- The handle border width.
 -- @property handle_border_width
--- @param[opt=0]  number
+-- @tparam[opt=0] number handle_border_width
+-- @propemits true false
+-- @propbeautiful
 
 --- The bar (background) shape.
 --
@@ -74,6 +86,8 @@ local slider = {mt={}}
 --
 -- @property bar_shape
 -- @tparam[opt=gears shape rectangle] gears.shape shape
+-- @propemits true false
+-- @propbeautiful
 -- @see gears.shape
 
 --- The bar (background) height.
@@ -81,14 +95,18 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_bar_height_EXAMPLE@
 --
 -- @property bar_height
--- @param number
+-- @tparam number bar_height
+-- @propbeautiful
+-- @propemits true false
 
 --- The bar (background) color.
 --
 --@DOC_wibox_widget_slider_bar_color_EXAMPLE@
 --
 -- @property bar_color
--- @param color
+-- @tparam color bar_color
+-- @propbeautiful
+-- @propemits true false
 
 --- The bar (active) color.
 --
@@ -96,7 +114,9 @@ local slider = {mt={}}
 --
 -- Only works when both `bar_active_color` and `bar_color` are passed as hex color string
 -- @property bar_active_color
--- @param color
+-- @tparam color bar_active_color
+-- @propbeautiful
+-- @propemits true false
 
 --- The bar (background) margins.
 --
@@ -108,17 +128,22 @@ local slider = {mt={}}
 -- @tparam[opt=0] number margins.right
 -- @tparam[opt=0] number margins.top
 -- @tparam[opt=0] number margins.bottom
+-- @propbeautiful
+-- @propemits true false
 
 --- The bar (background) border width.
 -- @property bar_border_width
--- @param[opt=0] numbergb
+-- @tparam[opt=0] number bar_border_width
+-- @propemits true false
 
 --- The bar (background) border_color.
 --
 --@DOC_wibox_widget_slider_bar_border_EXAMPLE@
 --
 -- @property bar_border_color
--- @param color
+-- @tparam color bar_border_color
+-- @propbeautiful
+-- @propemits true false
 
 --- The slider value.
 --
@@ -127,54 +152,70 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_value_EXAMPLE@
 --
 -- @property value
--- @param[opt=0] number
+-- @tparam[opt=0] number value
+-- @propemits true false
 
 --- The slider minimum value.
+--
 -- @property minimum
--- @param[opt=0] number
+-- @tparam[opt=0] number minimum
+-- @propemits true false
 
 --- The slider maximum value.
+--
 -- @property maximum
--- @param[opt=100] number
+-- @tparam[opt=100] number maximum
+-- @propemits true false
 
 --- The bar (background) border width.
+--
 -- @beautiful beautiful.slider_bar_border_width
 -- @param number
 
 --- The bar (background) border color.
+--
 -- @beautiful beautiful.slider_bar_border_color
 -- @param color
 
 --- The handle border_color.
+--
 -- @beautiful beautiful.slider_handle_border_color
 -- @param color
 
 --- The handle border width.
+--
 -- @beautiful beautiful.slider_handle_border_width
 -- @param number
 
---- The handle .
+--- The handle width.
+--
 -- @beautiful beautiful.slider_handle_width
 -- @param number
 
+--- The handle color.
+--
 -- @beautiful beautiful.slider_handle_color
 -- @param color
 
 --- The handle shape.
+--
 -- @beautiful beautiful.slider_handle_shape
 -- @tparam[opt=gears shape rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The bar (background) shape.
+--
 -- @beautiful beautiful.slider_bar_shape
 -- @tparam[opt=gears shape rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The bar (background) height.
+--
 -- @beautiful beautiful.slider_bar_height
 -- @param number
 
 --- The bar (background) margins.
+--
 -- @beautiful beautiful.slider_bar_margins
 -- @tparam[opt={}] table margins
 -- @tparam[opt=0] number margins.left
@@ -183,6 +224,7 @@ local slider = {mt={}}
 -- @tparam[opt=0] number margins.bottom
 
 --- The slider handle margins.
+--
 -- @beautiful beautiful.slider_handle_margins
 -- @tparam[opt={}] table margins
 -- @tparam[opt=0] number margins.left
@@ -191,10 +233,12 @@ local slider = {mt={}}
 -- @tparam[opt=0] number margins.bottom
 
 --- The bar (background) color.
+--
 -- @beautiful beautiful.slider_bar_color
 -- @param color
 
 --- The bar (active) color.
+--
 -- Only works when both `beautiful.slider_bar_color` and `beautiful.slider_bar_active_color` are hex color strings
 -- @beautiful beautiful.slider_bar_active_color
 -- @param color
@@ -231,7 +275,7 @@ for prop in pairs(properties) do
         self._private[prop] = value
 
         if changed then
-            self:emit_signal("property::"..prop)
+            self:emit_signal("property::"..prop, value)
             self:emit_signal("widget::redraw_needed")
         end
     end
@@ -253,7 +297,7 @@ function slider:set_value(value)
     self._private.value = value
 
     if changed then
-        self:emit_signal( "property::value"       )
+        self:emit_signal( "property::value", value)
         self:emit_signal( "widget::redraw_needed" )
     end
 end

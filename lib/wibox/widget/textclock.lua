@@ -29,6 +29,7 @@ if source_date_epoch and os.getenv("SOURCE_DIRECTORY") then
 end
 
 --- Set the clock's format.
+--
 -- For information about the format specifiers, see
 -- [the GLib docs](https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format).
 -- @property format
@@ -43,7 +44,8 @@ function textclock:get_format()
     return self._private.format
 end
 
---- Set the clock's timezone
+--- Set the clock's timezone.
+--
 -- e.g. "Z" for UTC, "±hh:mm" or "Europe/Amsterdam". See
 -- [GTimeZone](https://developer.gnome.org/glib/stable/glib-GTimeZone.html#g-time-zone-new).
 -- @property timezone
@@ -59,7 +61,8 @@ function textclock:get_timezone()
     return self._private.tzid
 end
 
---- Set the clock's refresh rate
+--- Set the clock's refresh rate.
+--
 -- @property refresh
 -- @tparam number refresh How often the clock is updated, in seconds
 
@@ -73,6 +76,7 @@ function textclock:get_refresh()
 end
 
 --- Force a textclock to update now.
+--
 -- @method force_update
 function textclock:force_update()
     self._timer:emit_signal("timeout")

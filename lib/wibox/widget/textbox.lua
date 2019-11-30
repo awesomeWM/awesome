@@ -19,6 +19,7 @@ local setmetatable = setmetatable
 local textbox = { mt = {} }
 
 --- The textbox font.
+--
 -- @beautiful beautiful.font
 -- @param string
 
@@ -69,8 +70,10 @@ function textbox:fit(context, width, height)
 end
 
 --- Get the preferred size of a textbox.
+--
 -- This returns the size that the textbox would use if infinite space were
 -- available.
+--
 -- @method get_preferred_size
 -- @tparam integer|screen s The screen on which the textbox will be displayed.
 -- @treturn number The preferred width.
@@ -88,8 +91,10 @@ function textbox:get_preferred_size(s)
 end
 
 --- Get the preferred height of a textbox at a given width.
+--
 -- This returns the height that the textbox would use when it is limited to the
 -- given width.
+--
 -- @method get_height_for_width
 -- @tparam number width The available width.
 -- @tparam integer|screen s The screen on which the textbox will be displayed.
@@ -106,8 +111,10 @@ function textbox:get_height_for_width(width, s)
 end
 
 --- Get the preferred size of a textbox.
+--
 -- This returns the size that the textbox would use if infinite space were
 -- available.
+--
 -- @method get_preferred_size_at_dpi
 -- @tparam number dpi The DPI value to render at.
 -- @treturn number The preferred width.
@@ -121,8 +128,10 @@ function textbox:get_preferred_size_at_dpi(dpi)
 end
 
 --- Get the preferred height of a textbox at a given width.
+--
 -- This returns the height that the textbox would use when it is limited to the
 -- given width.
+--
 -- @method get_height_for_width_at_dpi
 -- @tparam number width The available width.
 -- @tparam number dpi The DPI value to render at.
@@ -136,8 +145,9 @@ function textbox:get_height_for_width_at_dpi(width, dpi)
     return h
 end
 
---- Set the text of the textbox (with
+--- Set the text of the textbox.(with
 -- [Pango markup](https://developer.gnome.org/pango/stable/PangoMarkupFormat.html)).
+--
 -- @tparam string text The text to set. This can contain pango markup (e.g.
 --   `<b>bold</b>`). You can use `gears.string.escape` to escape
 --   parts of it.
@@ -161,15 +171,18 @@ function textbox:set_markup_silently(text)
     self._private.layout.attributes = attr
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::markup", text)
     return true
 end
 
 --- Set the text of the textbox (with
 -- [Pango markup](https://developer.gnome.org/pango/stable/PangoMarkupFormat.html)).
+--
 -- @property markup
 -- @tparam string text The text to set. This can contain pango markup (e.g.
 --   `<b>bold</b>`). You can use `gears.string.escape` to escape
 --   parts of it.
+-- @propemits true false
 -- @see text
 
 function textbox:set_markup(text)
@@ -183,9 +196,12 @@ function textbox:get_markup()
     return self._private.markup
 end
 
---- Set a textbox' text.
+--- Set a textbox text.
+--
 -- @property text
--- @param text The text to display. Pango markup is ignored and shown as-is.
+-- @tparam string text The text to display. Pango markup is ignored and shown
+--  as-is.
+-- @propemits true false
 -- @see markup
 
 function textbox:set_text(text)
@@ -197,15 +213,25 @@ function textbox:set_text(text)
     self._private.layout.attributes = nil
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::text", text)
 end
 
 function textbox:get_text()
     return self._private.layout.text
 end
 
---- Set a textbox' ellipsize mode.
+--- Set a textbox ellipsize mode.
+--
+-- Valid values are:
+--
+-- * **start**
+-- * **middle**
+-- * **end**
+--
 -- @property ellipsize
--- @param mode Where should long lines be shortened? "start", "middle" or "end"
+-- @tparam string mode Where should long lines be shortened? "start", "middle"
+--  or "end".
+-- @propemits true false
 
 function textbox:set_ellipsize(mode)
     local allowed = { none = "NONE", start = "START", middle = "MIDDLE", ["end"] = "END" }
@@ -216,12 +242,21 @@ function textbox:set_ellipsize(mode)
         self._private.layout:set_ellipsize(allowed[mode])
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::ellipsize", mode)
     end
 end
 
---- Set a textbox' wrap mode.
+--- Set a textbox wrap mode.
+--
+-- Valid values are:
+--
+-- * **word**
+-- * **char**
+-- * **word_char**
+--
 -- @property wrap
--- @param mode Where to wrap? After "word", "char" or "word_char"
+-- @tparam string mode Where to wrap? After "word", "char" or "word_char".
+-- @propemits true false
 
 function textbox:set_wrap(mode)
     local allowed = { word = "WORD", char = "CHAR", word_char = "WORD_CHAR" }
@@ -232,12 +267,22 @@ function textbox:set_wrap(mode)
         self._private.layout:set_wrap(allowed[mode])
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::wrap", mode)
     end
 end
 
---- The textbox' vertical alignment
+--- The textbox' vertical alignment.
+--
+-- Valid values are:
+--
+-- * **top**
+-- * **center**
+-- * **bottom**
+--
 -- @property valign
--- @param mode Where should the textbox be drawn? "top", "center" or "bottom"
+-- @tparam string mode Where should the textbox be drawn? "top", "center" or
+--  "bottom".
+-- @propemits true false
 
 function textbox:set_valign(mode)
     local allowed = { top = true, center = true, bottom = true }
@@ -248,12 +293,22 @@ function textbox:set_valign(mode)
         self._private.valign = mode
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::valign", mode)
     end
 end
 
---- Set a textbox' horizontal alignment.
+--- Set a textbox horizontal alignment.
+--
+-- Valid values are:
+--
+-- * **left**
+-- * **center**
+-- * **right**
+--
 -- @property align
--- @param mode Where should the textbox be drawn? "left", "center" or "right"
+-- @tparam string mode Where should the textbox be drawn? "left", "center" or
+--  "right".
+-- @propemits true false
 
 function textbox:set_align(mode)
     local allowed = { left = "LEFT", center = "CENTER", right = "RIGHT" }
@@ -264,20 +319,26 @@ function textbox:set_align(mode)
         self._private.layout:set_alignment(allowed[mode])
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::align", mode)
     end
 end
 
---- Set a textbox' font
+--- Set a textbox font.
+--
 -- @property font
--- @param font The font description as string
+-- @tparam string font The font description as string.
+-- @propemits true false
+-- @propbeautiful
 
 function textbox:set_font(font)
     self._private.layout:set_font_description(beautiful.get_font(font))
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::font", font)
 end
 
 --- Create a new textbox.
+--
 -- @tparam[opt=""] string text The textbox content
 -- @tparam[opt=false] boolean ignore_markup Ignore the pango/HTML markup
 -- @treturn table A new textbox widget

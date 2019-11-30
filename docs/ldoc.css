@@ -282,6 +282,7 @@ table.module_list td, table.function_list td {
 table.module_list td.name, table.function_list td.name {
     background-color: white;
     min-width: 200px;
+    border-left-width: 0px;
     border-right-width: 0px;
 }
 table.module_list td.summary, table.function_list td.summary {
@@ -293,12 +294,26 @@ table.module_list td.summary, table.function_list td.summary {
 
 table.function_list td.shortname {
     background-color: white;
+    border-left-width: 0px;
     border-right-width: 0px;
+}
+
+table.function_list td.inheritance {
+    background-color: white;
+    border-right-width: 0px;
+    border-left-width: 0px;
+    color: #a4c7ff;
+    min-width: 200px;
 }
 
 .proptype {
     padding-right: 20px;
     float: right;
+}
+
+span.inheritance {
+    color: #9db9f3;
+    font-weight: normal;
 }
 
 td.summarytype {
@@ -402,6 +417,11 @@ ul.nowrap {
     font-weight: normal;
 }
 
+/*.inheritedmethodparent {
+    color: #9db9f3;
+    font-weight: normal;
+}*/
+
 /* stop sublists from having initial vertical space */
 ul ul { margin-top: 0px; }
 ol ul { margin-top: 0px; }
@@ -450,4 +470,15 @@ pre .url { color: #272fc2; text-decoration: underline; }
 }
 .show_more {
     display: default
+}
+.show_more_button {
+    display:block;
+    position: relative;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    padding-right: 15px;
+    padding-left: 15px;
+    border: 1px solid rgb(210, 210, 220);
+    color: rgb(128, 128, 128);
+    border-radius: 7px;
 }

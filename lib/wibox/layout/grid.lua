@@ -959,6 +959,8 @@ function grid.mt:__call(...)
     return new(...)
 end
 
+--@DOC_fixed_COMMON@
+
 --@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@

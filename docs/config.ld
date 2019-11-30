@@ -344,6 +344,56 @@ add_custom_tag {
     hidden = true
 }
 
+-- Define which interface a method or property implements.
+-- @interface container
+add_custom_tag {
+    name   = "interface",
+    hidden = true
+}
+
+-- Specify when this an item was deprecated.
+-- @deprecatedin 4.4 Optional message.
+add_custom_tag {
+    name   = "deprecatedin",
+    hidden = true,
+    params = {
+        { name = "api_level" },
+    },
+}
+
+-- Specify when this an item was deprecated because it was renamed.
+-- @renamedin 4.4 new_name Optional message.
+add_custom_tag {
+    name   = "renamedin",
+    hidden = true,
+    params = {
+        { name = "api_level" },
+        { name = "new_name"  },
+    },
+}
+
+-- Specify when this an item was deprecated because it was moved.
+-- @movedin 4.4 new_class new_name Optional message.
+add_custom_tag {
+    name   = "movedin",
+    hidden = true,
+    params = {
+        { name = "api_level" },
+        { name = "new_class" },
+        { name = "new_name"  },
+    },
+}
+
+-- Specify when an item was added.
+-- @introducedin 4.4
+add_custom_tag {
+    name   = "introducedin",
+    hidden = true,
+    params = {
+        { name = "api_level" },
+    },
+}
+
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
@@ -444,10 +494,10 @@ local named_args = {
 
 -- Sections which are hidden by default, but visible when clicked.
 local summarize = {
-    emits         = {index = 1, title = "Signals"        },
-    propemits     = {index = 2, title = "Signals"        },
-    usebeautiful  = {index = 3, title = "Theme variables"},
-    propbeautiful = {index = 4, title = "Theme variables"}
+    emits         = {index = 1, title = "signals"        },
+    propemits     = {index = 2, title = "signals"        },
+    usebeautiful  = {index = 3, title = "theme variables"},
+    propbeautiful = {index = 4, title = "theme variables"}
 }
 
 local delimiter_for_tag = {
@@ -591,7 +641,6 @@ local function wrap_args(item)
     return "<span class='function_args'> <b>(</b>"..new_args.."<b>)</b></span>"
 end
 
-
 -- Mimics the ldoc built-in method style, but better.
 --
 -- This custom renderer exists because using ldoc built-in method detection
@@ -638,7 +687,9 @@ local function sanitize_type(item, ldoc)
     item.display_type = "<span class='summary_type'>N/A</span>"
 end
 local no_prefix = {
-    property = true, signal = true, clientruleproperty = true,
+    property           = true,
+    signal             = true,
+    clientruleproperty = true,
     deprecatedproperty = true,
 }
 
@@ -732,7 +783,6 @@ custom_display_name_handler = function(item, default_handler)
     if item.type == "method" then
         ret = render_methods(item)
     end
-
 
     -- Get rid of the "module:" in front of method names. It is either wrong or
     -- just redundant.

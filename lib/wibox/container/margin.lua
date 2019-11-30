@@ -1,4 +1,5 @@
 ---------------------------------------------------------------------------
+-- Add a margin around a widget.
 --
 --@DOC_wibox_container_defaults_margin_EXAMPLE@
 -- @author Uli Schlachter
@@ -70,8 +71,10 @@ function margin:fit(context, width, height)
 end
 
 --- The widget to be wrapped the the margins.
+--
 -- @property widget
 -- @tparam widget widget The widget
+-- @interface container
 
 margin.set_widget = base.set_widget_common
 
@@ -88,9 +91,11 @@ function margin:set_children(children)
 end
 
 --- Set all the margins to val.
+--
 -- @property margins
 -- @tparam number|table val The margin value. It can be a number or a table with
 --  the *left*/*right*/*top*/*bottom* keys.
+-- @propemits false false
 
 function margin:set_margins(val)
 
@@ -114,28 +119,36 @@ function margin:set_margins(val)
     end
 
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::margins")
 end
 
 --- Set the margins color to create a border.
+--
 -- @property color
 -- @param color A color used to fill the margin.
+-- @propemits true false
 
 function margin:set_color(color)
     self._private.color = color and gcolor(color)
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::color", color)
 end
 
 function margin:get_color()
     return self._private.color
 end
 
---- Draw the margin even if the content size is 0x0 (default: true)
--- @method draw_empty
--- @tparam boolean draw_empty Draw nothing is content is 0x0 or draw the margin anyway
+--- Draw the margin even if the content size is 0x0.
+--
+-- @property draw_empty
+-- @tparam[opt=true] boolean draw_empty Draw nothing is content is 0x0 or draw
+--  the margin anyway.
+-- @propemits true false
 
 function margin:set_draw_empty(draw_empty)
     self._private.draw_empty = draw_empty
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::draw_empty", draw_empty)
 end
 
 function margin:get_draw_empty()
@@ -145,6 +158,7 @@ end
 --- Reset this layout. The widget will be unreferenced, the margins set to 0
 -- and the color erased
 -- @method reset
+-- @interface container
 function margin:reset()
     self:set_widget(nil)
     self:set_margins(0)
@@ -152,20 +166,28 @@ function margin:reset()
 end
 
 --- Set the left margin that this layout adds to its widget.
--- @param margin The new margin to use.
+--
 -- @property left
+-- @tparam number left The new margin to use.
+-- @propemits true false
 
 --- Set the right margin that this layout adds to its widget.
--- @param margin The new margin to use.
+--
 -- @property right
+-- @tparam number right The new margin to use.
+-- @propemits true false
 
 --- Set the top margin that this layout adds to its widget.
--- @param margin The new margin to use.
+--
 -- @property top
+-- @tparam number top The new margin to use.
+-- @propemits true false
 
 --- Set the bottom margin that this layout adds to its widget.
--- @param margin The new margin to use.
+--
 -- @property bottom
+-- @tparam number bottom The new margin to use.
+-- @propemits true false
 
 -- Create setters for each direction
 for _, v in pairs({ "left", "right", "top", "bottom" }) do
@@ -173,6 +195,7 @@ for _, v in pairs({ "left", "right", "top", "bottom" }) do
         if layout._private[v] == val then return end
         layout._private[v] = val
         layout:emit_signal("widget::layout_changed")
+        layout:emit_signal("property::".. v, val)
     end
 
     margin["get_" .. v] = function(layout)
@@ -181,6 +204,7 @@ for _, v in pairs({ "left", "right", "top", "bottom" }) do
 end
 
 --- Returns a new margin container.
+--
 -- @param[opt] widget A widget to use.
 -- @param[opt] left A margin to use on the left side of the widget.
 -- @param[opt] right A margin to use on the right side of the widget.

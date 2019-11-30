@@ -137,49 +137,68 @@ local function fit(_, _, width, height)
 end
 
 --- The pie chart data list.
+--
 -- @property data_list
 -- @tparam table data_list Sorted table where each entry has a label as its
 -- first value and a number as its second value.
+-- @propemits false false
 
 --- The pie chart data.
+--
 -- @property data
 -- @tparam table data Labels as keys and number as value.
+-- @propemits false false
 
 --- The border color.
+--
 -- If none is set, it will use current foreground (text) color.
+--
 --@DOC_wibox_widget_piechart_border_color_EXAMPLE@
 -- @property border_color
--- @param color
+-- @tparam color border_color
+-- @propemits true false
+-- @propbeautiful
 -- @see gears.color
 
 --- The pie elements border width.
+--
 --@DOC_wibox_widget_piechart_border_width_EXAMPLE@
 -- @property border_width
 -- @tparam[opt=1] number border_width
+-- @propemits true false
+-- @propbeautiful
 
 --- The pie chart colors.
+--
 -- If no color is set, only the border will be drawn. If less colors than
 -- required are set, colors will be re-used in order.
+--
 -- @property colors
--- @tparam table colors A table of colors, one for each elements
+-- @tparam table colors A table of colors, one for each elements.
+-- @propemits true false
+-- @propbeautiful
 -- @see gears.color
 
 --- The border color.
+--
 -- If none is set, it will use current foreground (text) color.
 -- @beautiful beautiful.piechart_border_color
 -- @param color
 -- @see gears.color
 
 --- If the pie chart has labels.
+--
 --@DOC_wibox_widget_piechart_label_EXAMPLE@
 -- @property display_labels
 -- @param[opt=true] boolean
 
 --- The pie elements border width.
+--
 -- @beautiful beautiful.piechart_border_width
 -- @tparam[opt=1] number border_width
 
 --- The pie chart colors.
+--
 -- If no color is set, only the border will be drawn. If less colors than
 -- required are set, colors will be re-used in order.
 -- @beautiful beautiful.piechart_colors
@@ -194,6 +213,8 @@ for _, prop in ipairs {"data_list", "border_color", "border_width", "colors",
         self:emit_signal("property::"..prop)
         if prop == "data_list" then
             self:emit_signal("property::data")
+        else
+            self:emit_signal("property::"..prop, value)
         end
         self:emit_signal("widget::redraw_needed")
     end
@@ -219,6 +240,7 @@ function piechart:get_data()
 end
 
 --- Create a new piechart.
+--
 -- @constructorfct wibox.widget.piechart
 -- @tparam table data_list The data.
 
