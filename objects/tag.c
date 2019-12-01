@@ -203,8 +203,9 @@
 #include "ewmh.h"
 #include "luaa.h"
 
-/**
+/** When a tag requests to be selected.
  * @signal request::select
+ * @tparam string context The reason why it was called.
  */
 
 /**

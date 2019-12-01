@@ -462,7 +462,8 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
         {
             lua_State *L = globalconf_get_lua_State();
             luaA_object_push(L, globalconf.tags.tab[idx]);
-            luaA_object_emit_signal(L, -1, "request::select", 0);
+            lua_pushstring(L, "ewmh");
+            luaA_object_emit_signal(L, -1, "request::select", 1);
             lua_pop(L, 1);
         }
     }
