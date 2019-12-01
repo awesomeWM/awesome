@@ -220,6 +220,15 @@
  * @see awful.layout.remove_default_layout
  */
 
+/** This signals is emitted when a tag needs layouts for the first time.
+ *
+ * If no handler implement it, it will fallback to the content added by
+ * `request::default_layouts`
+ *
+ * @signal request::layouts
+ * @tparam string context The context (currently always "awful").
+ * @tparam table hints A, currently empty, table with hints.
+ */
 
 /** When a client gets tagged with this tag.
  * @signal tagged

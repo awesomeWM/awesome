@@ -867,6 +867,22 @@ function tag.object.get_layouts(self)
 
     local cls = custom_layouts(self)
 
+    -- Request some layouts. Maybe a new module was added?
+    if #cls == 0 and not tag.getproperty(self, "_layouts_requested") then
+        tag.setproperty(self, "_layouts_requested", true)
+        local old_count = #cls
+        self:emit_signal("request::layouts", "awful", {})
+
+        -- When request::layouts is used, assume it takes precedence over
+        -- the fallback.
+        if #cls > old_count then
+            tag.setproperty(self, "_layouts", gtable.clone(cls, false))
+            return tag.getproperty(self, "_layouts")
+        end
+
+        return tag.object.get_layouts(self)
+    end
+
     -- Without the clone, the custom_layouts would grow
     return #cls > 0 and gtable.merge(gtable.clone(cls, false), alayout.layouts) or
         alayout.layouts
@@ -880,6 +896,60 @@ function tag.object.set_layouts(self, layouts)
     update_layouts(self, cur, cur)
 
     self:emit_signal("property::layouts")
+end
+
+function tag.object.append_layout(self, layout)
+    -- If the layouts are manually modified, don't request more.
+    tag.setproperty(self, "_layouts_requested", true)
+
+    local cls = tag.getproperty(self, "_layouts")
+
+    if not cls then
+        cls = custom_layouts(self)
+    end
+
+    table.insert(cls, layout)
+    self:emit_signal("property::layouts")
+end
+
+function tag.object.append_layouts(self, layouts)
+    -- If the layouts are manually modified, don't request more.
+    tag.setproperty(self, "_layouts_requested", true)
+
+    local cls = tag.getproperty(self, "_layouts")
+
+    if not cls then
+        cls = custom_layouts(self)
+    end
+
+    for _, l in ipairs(layouts) do
+        table.insert(cls, l)
+    end
+    self:emit_signal("property::layouts")
+end
+
+function tag.object.remove_layout(self, layout)
+    local cls = tag.getproperty(self, "_layouts")
+
+    if not cls then
+        cls = custom_layouts(self)
+    end
+
+    local pos = {}
+    for k, l in ipairs(cls) do
+        if l == layout then
+            table.insert(pos, k)
+        end
+    end
+
+    if #pos > 0 then
+        for i=#pos, 1, -1 do
+            table.remove(cls, i)
+        end
+        self:emit_signal("property::layouts")
+    end
+
+    return #pos > 0
 end
 
 function tag.object.get_layout(t)

@@ -259,6 +259,8 @@ end
 
 --- Remove a layout from the list of default layouts.
 --
+-- @DOC_text_awful_layout_remove_EXAMPLE@
+--
 -- @staticfct awful.layout.remove_default_layout
 -- @tparam layout to_remove A valid tag layout.
 -- @treturn boolean True if the layout was found and removed.
@@ -455,13 +457,27 @@ local mt = {
     end,
     __newindex = function(_, key, value)
         if key == "layouts" then
-            gdebug.print_warning(
-                "`awful.layout.layouts` was set before `request::default_layouts` could "..
-                "be called. Please use `awful.layout.append_default_layouts` to "..
-                " avoid this problem"
-            )
-            capi.tag.disconnect_signal("new", init_layouts)
-            init_layouts = nil
+            assert(type(value) == "table", "`awful.layout.layouts` needs a table.")
+
+            -- Do not ask for layouts if they were already provided.
+            if init_layouts then
+                gdebug.print_warning(
+                    "`awful.layout.layouts` was set before `request::default_layouts` could "..
+                    "be called. Please use `awful.layout.append_default_layouts` to "..
+                    " avoid this problem"
+                )
+
+                capi.tag.disconnect_signal("new", init_layouts)
+                init_layouts = nil
+            elseif #default_layouts > 0 then
+                gdebug.print_warning(
+                    "`awful.layout.layouts` was set after `request::default_layouts` was "..
+                    "used to get the layouts. This is probably an accident. Use "..
+                    "`awful.layout.remove_default_layout` to get rid of this warning."
+                )
+            end
+
+            default_layouts = value
         else
             rawset(layout, key, value)
         end
