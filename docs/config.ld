@@ -402,6 +402,20 @@ add_custom_tag {
     },
 }
 
+add_custom_tag {
+    name   = "request",
+    title  = "Requested actions or permissions",
+    params = {
+        { name = "class"   },
+        { name = "type"    },
+        { name = "context" },
+        { name = "default" },
+    },
+    table  = {
+        "Class", "Permission", "Context", "Default", "Description"
+    },
+}
+
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
@@ -507,12 +521,14 @@ local summarize = {
     emits         = {index = 1, title = "signals"        },
     propemits     = {index = 2, title = "signals"        },
     usebeautiful  = {index = 3, title = "theme variables"},
-    propbeautiful = {index = 4, title = "theme variables"}
+    propbeautiful = {index = 4, title = "theme variables"},
+    request       = {index = 5, title = "permissions"    },
 }
 
 local delimiter_for_tag = {
     usebeautiful  = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
     propbeautiful = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
+    request       = { "table class='widget_list' border=1", "table", "tr", "tr", {"Class", "Permission", "Context", "Default", "Description"}},
 }
 
 -- Use the first word of the subtag content to map it to its tag.
