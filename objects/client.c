@@ -177,6 +177,8 @@
  *  or "startup".
  * @tparam table hints More metadata (currently empty, it exists for compliance
  *  with the other `request::` signals).
+ * @request client border added granted When a new client needs a its initial
+ *  border settings.
  */
 
 /** When a client is going away.
@@ -264,6 +266,7 @@
  * @tparam string context The context where this signal was used.
  * @tparam[opt] table hints A table with additional hints:
  * @tparam[opt=false] boolean hints.raise should the client be raised?
+ * @request client activate ewmh granted When the client asks to be activated.
  */
 
 /** When an event could lead to the client being activated.
@@ -286,13 +289,18 @@
  *
  */
 
-/**
+/** When something request a client geometry to be modified.
+ *
  * @signal request::geometry
  * @tparam client c The client
  * @tparam string context Why and what to resize. This is used for the
  *   handlers to know if they are capable of applying the new geometry.
  * @tparam[opt={}] table Additional arguments. Each context handler may
  *   interpret this differently.
+ * @request client geometry client_maximize_horizontal granted When a client
+ *  (programmatically) asks for the maximization to be changed.
+ * @request client geometry client_maximize_vertical granted When a client
+ *  (programmatically) asks for the maximization to be changed.
  */
 
 /**
@@ -337,6 +345,7 @@
  * @signal request::default_keybindings
  * @tparam string context The context (currently always "startup").
  * @classsignal
+ * @request client default_keybindings startup granted Sent when AwesomeWM starts.
  */
 
 /** When a client gets tagged.
@@ -691,12 +700,11 @@
  *
  * @DOC_sequences_client_fullscreen_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::fullscreen*
- *
  * @property fullscreen
- * @param boolean
+ * @tparam boolean fullscreen
+ * @propemits false false
+ * @request client geometry fullscreen granted When the client must be resized
+ *  because it became (or stop being) fullscreen.
  */
 
 /**
@@ -704,13 +712,11 @@
  *
  * @DOC_sequences_client_maximized_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::maximized*
- *
  * @property maximized
- * @param boolean
+ * @tparam boolean maximized
  * @propemits false false
+ * @request client geometry maximized granted When the client must be resized
+ *  because it became (or stop being) maximized.
  * @see request::border
  */
 
@@ -719,12 +725,11 @@
  *
  * @DOC_sequences_client_maximized_horizontal_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::maximized\_horizontal*
- *
  * @property maximized_horizontal
- * @param boolean
+ * @tparam boolean maximized_horizontal
+ * @propemits false false
+ * @request client geometry maximized_horizontal granted When the client must be resized
+ *  because it became (or stop being) maximized horizontally.
  */
 
 /**
@@ -732,34 +737,27 @@
  *
  * @DOC_sequences_client_maximized_vertical_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::maximized\_vertical*
- *
  * @property maximized_vertical
- * @param boolean
+ * @tparam boolean maximized_vertical
+ * @propemits false false
+ * @request client geometry maximized_vertical granted When the client must be resized
+ *  because it became (or stop being) maximized vertically.
  */
 
 /**
  * The client the window is transient for.
  *
- * **Signal:**
- *
- *  * *property::transient\_for*
- *
  * @property transient_for
  * @param client
+ * @propemits false false
  */
 
 /**
  * Window identification unique to a group of windows.
  *
- * **Signal:**
- *
- *  * *property::group\_window*
- *
  * @property group_window
  * @param client
+ * @propemits false false
  */
 
 /**
@@ -770,10 +768,6 @@
 
 /**
  * A table with size hints of the client.
- *
- * **Signal:**
- *
- *  * *property::size\_hints*
  *
  * @property size_hints
  * @param table
@@ -787,6 +781,7 @@
  * @tfield integer table.min_height
  * @tfield integer table.width_inc
  * @tfield integer table.height_inc
+ * @propemits false false
  * @see size_hints_honor
  */
 
@@ -800,10 +795,6 @@
  * resizable, but asks for the other functions not to be able. If however both
  * "resize" and "all" are set, this means that all but the resize function
  * should be enabled.
- *
- * **Signal:**
- *
- *  * *property::motif\_wm\_hints*
  *
  * @property motif_wm_hints
  * @param table
@@ -825,51 +816,40 @@
  * @tfield[opt] string table.input_mode
  * @tfield[opt] table table.status
  * @tfield[opt] boolean table.status.tearoff_window
+ * @propemits false false
  */
 
 /**
  * Set the client sticky, i.e. available on all tags.
  *
- * **Signal:**
- *
- *  * *property::sticky*
- *
  * @property sticky
  * @param boolean
+ * @propemits false false
  */
 
 /**
  * Indicate if the client is modal.
  *
- * **Signal:**
- *
- *  * *property::modal*
- *
  * @property modal
  * @param boolean
+ * @propemits false false
  */
 
 /**
  * True if the client can receive the input focus.
  *
- * **Signal:**
- *
- *  * *property::focusable*
- *
  * @property focusable
  * @param boolean
+ * @propemits false false
  */
 
 /**
  * The client's bounding shape as set by awesome as a (native) cairo surface.
  *
- * **Signal:**
- *
- *  * *property::shape\_bounding*
- *
  * @see gears.surface.apply_shape_bounding
  * @property shape_bounding
  * @param surface
+ * @propemits false false
  */
 
 /**

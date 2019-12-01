@@ -15,7 +15,9 @@ local module = {}
 -- @staticfct awful.mouse.client.move
 -- @param c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
--- @param finished_cb Deprecated, do not use
+-- @param finished_cb Deprecated, do not use.
+-- @request client geometry mouse.move granted When `awful.mouse.client.move` is
+--  called.
 function module.move(c, snap, finished_cb) --luacheck: no unused args
     if finished_cb then
         gdebug.deprecate("The mouse.client.move `finished_cb` argument is no longer"..
@@ -99,6 +101,8 @@ end
 -- @tparam string corner The corner to grab on resize. Auto detected by default.
 -- @tparam[opt={}] table args A set of `awful.placement` arguments
 -- @treturn string The corner (or side) name
+-- @request client geometry mouse.resize granted When `awful.mouse.client.resize`
+--  is called.
 function module.resize(c, corner, args)
     c = c or capi.client.focus
 

@@ -815,6 +815,8 @@ end
 --
 -- @property layouts
 -- @param table
+-- @request tag layouts awful granted When the `layouts` property is first called
+--  and there is no layouts, then that signal is called.
 -- @see awful.layout.layouts
 -- @see layout
 
@@ -1758,6 +1760,7 @@ capi.tag.connect_signal("request::select", tag.object.view_only)
 -- this, an handler for this request must simply set a new screen
 -- for the tag.
 -- @signal request::screen
+-- @tparam string context Why it was called.
 
 --- Emitted after `request::screen` if no new screen has been set.
 -- The tag will be deleted, this is a last chance to move its clients
@@ -1777,7 +1780,7 @@ end)
 capi.screen.connect_signal("removed", function(s)
     -- First give other code a chance to move the tag to another screen
     for _, t in pairs(s.tags) do
-        t:emit_signal("request::screen")
+        t:emit_signal("request::screen", "removed")
     end
     -- Everything that's left: Tell everyone that these tags go away (other code
     -- could e.g. save clients)

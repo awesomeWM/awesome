@@ -405,7 +405,7 @@ end)
 
 local init_layouts
 init_layouts = function()
-    capi.tag.emit_signal("request::default_layouts")
+    capi.tag.emit_signal("request::default_layouts", "startup")
     capi.tag.disconnect_signal("new", init_layouts)
 
     -- Fallback.

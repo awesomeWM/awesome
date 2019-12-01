@@ -62,6 +62,11 @@ end
 -- @function awful.urgent.add
 -- @client c The client object.
 -- @param prop The property which is updated.
+-- @request client border active granted When a client becomes active and is no
+--  longer urgent.
+-- @request client border inactive granted When a client stop being active and
+--  is no longer urgent.
+-- @request client border urgent granted When a client stop becomes urgent.
 function urgent.add(c, prop)
     assert(
         c.urgent ~= nil,

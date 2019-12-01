@@ -529,6 +529,8 @@ end
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
 -- @staticfct awful.rules.execute
+-- @request client titlebars rules granted The `titlebars_enabled` is set in the
+--  rules.
 
 crules._execute = function(_, c, props, callbacks)
 

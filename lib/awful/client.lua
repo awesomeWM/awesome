@@ -171,6 +171,8 @@ end
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
 --   tag as arguments.
+-- @request client activate client.jumpto granted When a client is activated
+--  because `c:jump_to()` is called.
 function client.object.jump_to(self, merge)
     local s = get_screen(screen.focused())
     -- focus the screen
@@ -302,6 +304,8 @@ end
 -- @staticfct awful.client.swap.global_bydirection
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt] sel The client.
+-- @request client activate client.swap.global_bydirection granted When a client
+--  could be activated because `awful.client.swap.global_bydirection` was called.
 function client.swap.global_bydirection(dir, sel)
     sel = sel or capi.client.focus
     local scr = get_screen(sel and sel.screen or screen.focused())
@@ -463,6 +467,8 @@ end
 --- Move a client to a tag.
 -- @method move_to_tag
 -- @tparam tag target The tag to move the client to.
+-- @request client activate client.movetotag granted When a client could be
+--  activated because `c:move_to_tag()` was called.
 function client.object.move_to_tag(self, target)
     local s = target.screen
     if self and s then
@@ -526,6 +532,8 @@ end
 -- @tparam[opt=c.screen.index+1] screen s The screen, default to current + 1.
 -- @see screen
 -- @see request::activate
+-- @request client activate client.movetoscreen granted When a client could be
+--  activated because `c:move_to_screen()` was called.
 function client.object.move_to_screen(self, s)
     if self then
         local sc = capi.screen.count()
@@ -798,6 +806,7 @@ function client.floating.get(c)
 end
 
 --- The client floating state.
+--
 -- If the client is part of the tiled layout or free floating.
 --
 -- Note that some windows might be floating even if you
@@ -809,7 +818,13 @@ end
 --  * *property::floating*
 --
 -- @property floating
--- @param boolean The floating state
+-- @tparam boolean floating The floating state.
+-- @request client border floating granted When a border update is required
+--  because the client focus status changed.
+-- @request client border active granted When a client becomes active and is not
+--  floating.
+-- @request client border inactive granted When a client stop being active and
+--  is not floating.
 
 function client.object.get_floating(c)
     c = c or capi.client.focus
@@ -1554,6 +1569,8 @@ pcommon.setup_grant(client.object, "client")
 --
 -- @property active
 -- @tparam boolean active
+-- @request client border active granted When a client becomes active.
+-- @request client border inactive granted When a client stop being active.
 -- @see activate
 -- @see request::activate
 -- @see awful.permissions.add_activate_filter

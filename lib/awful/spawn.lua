@@ -712,6 +712,8 @@ local raise_rules = {focus = true, switch_to_tags = true, raise = true}
 -- @see awful.rules
 -- @treturn client The client if it already exists.
 -- @staticfct awful.spawn.raise_or_spawn
+-- @request client activate spawn.raise_or_spawn granted Activate a client when
+--  `awful.spawn.raise_or_spawn` is called and the client exists.
 function spawn.raise_or_spawn(cmd, rules, matcher, unique_id, callback)
     local hash = unique_id or hash_command(cmd, rules)
 

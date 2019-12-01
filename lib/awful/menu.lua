@@ -521,6 +521,8 @@ end
 --   included in the menu.
 -- @return The menu.
 -- @constructorfct awful.menu.clients
+-- @request client activate menu.clients granted When clicking on a clients menu
+--  element.
 function menu.clients(args, item_args, filter)
     local cls_t = {}
     for c in client_iterate(filter or function() return true end) do

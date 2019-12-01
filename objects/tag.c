@@ -206,6 +206,9 @@
 /** When a tag requests to be selected.
  * @signal request::select
  * @tparam string context The reason why it was called.
+ * @request tag select ewmh granted When the client request to be moved to a
+ *  specific virtual desktop. AwesomeWM interprets virtual desktop as indexed
+ *  tags.
  */
 
 /**
@@ -216,6 +219,10 @@
  * to dynamically add new layouts to the list of default layouts.
  *
  * @signal request::default_layouts
+ * @tparam string context The context (currently always "startup").
+ * @classsignal
+ * @request tag default_layouts startup granted When AwesomeWM starts, it queries
+ *  for default layout using this request.
  * @see awful.layout.layouts
  * @see awful.layout.append_default_layout
  * @see awful.layout.remove_default_layout
