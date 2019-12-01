@@ -312,6 +312,7 @@
  * @signal request::default_mousebindings
  * @tparam string context The reason why the signal was sent (currently always
  *  `startup`).
+ * @classsignal
 */
 
 /** Emitted during startup to gather the default client keybindings.
@@ -323,6 +324,19 @@
  * @signal request::default_keybindings
  * @tparam string context The reason why the signal was sent (currently always
  *  `startup`).
+ * @classsignal
+ */
+
+/** Sent once when AwesomeWM starts to add default keybindings.
+ *
+ * Keybindings can be set directly on clients. Actually, older version of
+ * AwesomeWM did that through the rules. However this makes it impossible for
+ * auto-configured modules to add their own keybindings. Using the signals,
+ * `rc.lua` or any module can cleanly manage keybindings.
+ *
+ * @signal request::default_keybindings
+ * @tparam string context The context (currently always "startup").
+ * @classsignal
  */
 
 /** When a client gets tagged.
