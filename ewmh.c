@@ -412,14 +412,17 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
     {
         if(set == _NET_WM_STATE_REMOVE) {
             lua_pushboolean(L, false);
+            /*TODO v5: Add a context */
             luaA_object_emit_signal(L, -2, "request::urgent", 1);
         }
         else if(set == _NET_WM_STATE_ADD) {
             lua_pushboolean(L, true);
+            /*TODO v5: Add a context */
             luaA_object_emit_signal(L, -2, "request::urgent", 1);
         }
         else if(set == _NET_WM_STATE_TOGGLE) {
             lua_pushboolean(L, !c->urgent);
+            /*TODO v5: Add a context */
             luaA_object_emit_signal(L, -2, "request::urgent", 1);
         }
     }
@@ -436,6 +439,7 @@ ewmh_process_desktop(client_t *c, uint32_t desktop)
     {
         luaA_object_push(L, c);
         lua_pushboolean(L, true);
+        /*TODO v5: Move the context argument to arg1 */
         luaA_object_emit_signal(L, -2, "request::tag", 1);
         /* Pop the client, arguments are already popped */
         lua_pop(L, 1);
@@ -444,6 +448,7 @@ ewmh_process_desktop(client_t *c, uint32_t desktop)
     {
         luaA_object_push(L, c);
         luaA_object_push(L, globalconf.tags.tab[idx]);
+        /*TODO v5: Move the context argument to arg1 */
         luaA_object_emit_signal(L, -2, "request::tag", 1);
         /* Pop the client, arguments are already popped */
         lua_pop(L, 1);

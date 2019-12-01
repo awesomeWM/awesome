@@ -1697,6 +1697,7 @@ capi.client.connect_signal("property::screen", function(c)
         end
 
         if #new_tags == 0 then
+            --TODO v5: Add a context as first param
             c:emit_signal("request::tag", nil, {reason="screen"})
         elseif #new_tags < #tags then
             c:tags(new_tags)
@@ -1785,6 +1786,7 @@ capi.screen.connect_signal("removed", function(s)
     end
     -- Give other code yet another change to save clients
     for _, c in pairs(capi.client.get(s)) do
+        --TODO v5: Add a context as first param
         c:emit_signal("request::tag", nil, { reason = "screen-removed" })
     end
     -- Then force all clients left to go somewhere random

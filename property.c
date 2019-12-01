@@ -199,6 +199,7 @@ property_update_wm_hints(client_t *c, xcb_get_property_cookie_t cookie)
 
     luaA_object_push(L, c);
 
+    /*TODO v5: Add a context */
     lua_pushboolean(L, xcb_icccm_wm_hints_get_urgency(&wmh));
     luaA_object_emit_signal(L, -2, "request::urgent", 1);
 
