@@ -480,7 +480,7 @@ for _, prop in ipairs(properties) do
         end
     end
     if not progressbar["get_"..prop] then
-        progressbar["set_" .. prop] = function(pbar)
+        progressbar["get_" .. prop] = function(pbar)
             return pbar._private[prop]
         end
     end
