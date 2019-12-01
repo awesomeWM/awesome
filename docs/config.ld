@@ -353,6 +353,12 @@ add_custom_tag {
     hidden = true
 }
 
+-- Define when a signal is only emitted on a class rather than on objects.
+add_custom_tag {
+    name   = "classsignal",
+    hidden = true,
+}
+
 -- Specify when this an item was deprecated.
 -- @deprecatedin 4.4 Optional message.
 add_custom_tag {
