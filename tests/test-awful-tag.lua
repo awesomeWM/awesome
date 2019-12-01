@@ -1,5 +1,6 @@
 local awful = require("awful")
 local gtable = require("gears.table")
+local gdebug = require("gears.debug")
 local beautiful = require("beautiful")
 
 local function check_order()
@@ -196,6 +197,26 @@ local steps = {
 
         return true
     end,
+
+    -- Test adding and removing layouts.
+    function()
+        local t = mouse.screen.tags[9]
+        local count = #t.layouts
+        t:append_layout(awful.layout.suit.floating)
+        assert(#t.layouts == count + 1)
+
+        t:append_layouts({
+            awful.layout.suit.floating,
+            awful.layout.suit.floating,
+        })
+
+        assert(#t.layouts == count + 3)
+
+        t:remove_layout(awful.layout.suit.floating)
+        assert(#t.layouts == count)
+
+        return true
+    end
 }
 
 local multi_screen_steps = {}
@@ -312,6 +333,27 @@ end)
 local ms = require("_multi_screen")
 ms.disable_wibox()
 ms(steps, multi_screen_steps)
+
+-- Check deprecation.
+table.insert(steps, function()
+    assert(#awful.layout.layouts > 0)
+
+    local called1, called2 = false, false
+    gdebug.deprecate     = function() called1 = true end
+    gdebug.print_warning = function() called2 = true end
+
+    awful.layout.layouts = {}
+
+    assert(called2)
+    assert(not called1)
+    assert(#awful.layout.layouts == 0)
+
+    -- Test the random property setter.
+    awful.layout.foo = "bar"
+    assert(awful.layout.foo == "bar")
+
+    return true
+end)
 
 require("_runner").run_steps(steps)
 
