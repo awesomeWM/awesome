@@ -57,6 +57,9 @@ insulate('main', function ()
         run                       = function() end,
         stop                      = function() end,
     }
+    _G.client = {
+        connect_signal = function() end
+    }
     -- luacheck: globals string
     function string.wlen(self)
           return #self
