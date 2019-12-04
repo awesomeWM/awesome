@@ -4,6 +4,8 @@ local runner      = require( "_runner"         )
 local placement   = require( "awful.placement" )
 local gtable      = require( "gears.table"     )
 local test_client = require( "_client"         )
+local akeyboard   = require( "awful.keyboard"  )
+local amouse      = require( "awful.mouse"     )
 
 local module = {
     key    = require( "awful.key"    ),
@@ -248,6 +250,127 @@ for _, type_name in ipairs { "key", "button" } do
         end)
     end
 end
+
+local exe1, exe2, exe3, exe4 = false, false, false, false
+local new1, new2 = nil, nil
+
+-- Check that you can add new default key/mousebindings at any time.
+table.insert(steps, function()
+    assert(#mouse.screen.clients == 0)
+
+    new1 = module.key {
+        key       = "a",
+        modifiers = {},
+        on_press  = function() exe1 = true end
+    }
+
+    new2 = module.button {
+        button    = 8,
+        modifiers = {},
+        on_press  = function() exe2 = true end
+    }
+
+    akeyboard.append_client_keybinding(new1)
+    amouse.append_client_mousebinding(new2)
+
+    -- Spawn a client.
+    test_client("myclient")
+
+    return true
+end)
+
+table.insert(steps, function()
+    if #mouse.screen.clients == 0 then return end
+
+    client.focus = mouse.screen.clients[1]
+
+    -- That should trigger the newly added keybinding.
+    root.fake_input("key_press"  , "a")
+    root.fake_input("key_release", "a")
+
+    -- Move the mouse over the client so mousebindings work.
+    placement.centered(mouse, {parent=client.focus})
+    awesome.sync()
+
+    -- Same thing for the mouse.
+    root.fake_input("button_press"  , 8)
+    root.fake_input("button_release", 8)
+
+    return true
+end)
+
+table.insert(steps, function()
+    if (not exe1) or (not exe2) then return end
+
+    akeyboard.remove_client_keybinding(new1)
+    amouse.remove_client_mousebinding(new2)
+
+    exe1, exe2 = false, false
+
+    return true
+end)
+
+-- Removing is async, so wait until the next loop.
+table.insert(steps, function()
+    root.fake_input("key_press"  , "a")
+    root.fake_input("key_release", "a")
+    root.fake_input("button_press"  , 8)
+    root.fake_input("button_release", 8)
+    awesome.sync()
+
+    return true
+end)
+
+-- Try adding key/mousebindings to existing clients.
+table.insert(steps, function(count)
+    if count ~= 3 then return end
+
+    assert(not exe1)
+    assert(not exe2)
+
+    -- Append both types at the same time to make sure nothing overwrite
+    -- the list.
+    akeyboard.append_client_keybinding(new1)
+    amouse.append_client_mousebinding(new2)
+
+    new1 = module.key {
+        key       = "b",
+        modifiers = {},
+        on_press  = function() exe3 = true end
+    }
+
+    new2 = module.button {
+        button    = 7,
+        modifiers = {},
+        on_press  = function() exe4 = true end
+    }
+
+    -- Append directly on the client.
+    client.focus:append_keybinding(new1)
+    client.focus:append_mousebinding(new2)
+
+    return true
+end)
+
+-- Removing is async, so wait until the next loop.
+table.insert(steps, function()
+
+    root.fake_input("key_press"  , "b")
+    root.fake_input("key_release", "b")
+    root.fake_input("button_press"  , 7)
+    root.fake_input("button_release", 7)
+
+    return true
+end)
+
+table.insert(steps, function()
+    if (not exe3) or (not exe4) then return end
+
+    -- Note, there is no point to try remove_keybinding, it was already called
+    -- (indirectly) 4 steps ago.
+
+    return true
+end)
 
 runner.run_steps(steps)
 
