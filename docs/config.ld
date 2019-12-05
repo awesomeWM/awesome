@@ -168,9 +168,9 @@ local function default_format_callback(self, params, _, md)
         end
 
         if params.type then
-            ret = ret .. '<span class="parameter">('..
+            ret = ret .. '<span class="types">'..
                 md("`"..params.type.value.."`")..
-            ")</span>"
+            "</span>"
         end
 
         return ret.." "..md(params.description)
