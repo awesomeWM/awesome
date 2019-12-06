@@ -168,9 +168,9 @@ local function default_format_callback(self, params, _, md)
         end
 
         if params.type then
-            ret = ret .. '<span class="parameter">('..
+            ret = ret .. '<span class="types">'..
                 md("`"..params.type.value.."`")..
-            ")</span>"
+            "</span>"
         end
 
         return ret.." "..md(params.description)
@@ -250,7 +250,7 @@ add_custom_tag {
 -- @propemits true/false true/false description[...]
 add_custom_tag {
     name   = "propemits",
-    title  = "Emit signals:",
+    title  = "Emit signals",
     hidden = false,
     params = {{name = "new_value"}, {name = "old_value"}},
     format = function(self, params, item, md)
@@ -271,18 +271,18 @@ add_custom_tag {
         -- Most signals also have the new value.
         if new_value then
             local type = item.params[1] or "unknown"
-            subs[2] = type.." ".."v The new value."
+            subs[2] = type.." ".."new_value The new value affected to the property."
         end
 
         -- Some also have the old value.
         if old_value then
             local type = item.params[1] or "unknown"
-            subs[3] = type.." ".."v The new value."
+            subs[3] = type.." ".."old_value The property's old value."
         end
 
         local new_params = {
-            name = { name  = name, value = "property::"..item.name },
-            description = params.description
+            name = { name  = item.name, value = "property::"..item.name },
+            description = description
         }
 
         return default_format_callback(self, new_params, item, md)
