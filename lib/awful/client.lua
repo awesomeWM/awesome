@@ -236,6 +236,74 @@ function client.tiled(s, stacked)
     return tclients
 end
 
+--- Allow clients to move and resize themselves.
+--
+-- @property resize_requests_honor
+-- @param[opt=true] boolean
+-- @see request::geometry
+-- @see awful.ewmh.client_geometry_requests
+-- @see size_hints_honor
+-- @see maximize_requests_honor
+-- @see fullscreen_requests_honor
+
+--- Allow clients to make themselves maximized.
+--
+-- Some clients try to "save" their state and wont get tiled properly if
+-- they were left maximized when last closed. This property allows to ignore
+-- such client requests.
+--
+-- @property maximize_requests_honor
+-- @param[opt=true] boolean
+-- @see request::geometry
+-- @see awful.ewmh.client_geometry_requests
+-- @see fullscreen_requests_honor
+-- @see size_hints_honor
+-- @see maximized
+-- @see maximized_horizontal
+-- @see maximized_vertical
+
+--- Allow clients to make themselves fullscreen.
+--
+-- Prevent clients from making themselves fullscreen. This will unset the
+-- X11 fullscreen property and may cause mild flickering.
+--
+-- @property fullscreen_requests_honor
+-- @param[opt=true] boolean
+-- @see request::geometry
+-- @see awful.ewmh.client_geometry_requests
+-- @see size_hints_honor
+-- @see fullscreen
+-- @see maximize_requests_honor
+
+--- Tell to clients they are fullscreen even if they are not.
+--
+-- Some application have special fullscreen modes that are either superior,
+-- less bloated or better suited for tiling than their regular mode. For
+-- examples, web videos don't have ads for more content when played fullscreen.
+--
+-- When enabled, this will tell the client it is fullscreen when it really isn't.
+-- Some applications may be smart enough to figure this out, but the vast
+-- majority wont ever bother to double check.
+--
+-- @property fake_fullscreen
+-- @param[opt=false] boolean
+-- @see fullscreen
+-- @see fullscreen_requests_honor
+
+for _, prop in ipairs {"resize", "maximize", "fullscreen" } do
+    local name = prop.."_requests_honor"
+    client.object["get_"..name] = function(c)
+        if c["_"..name] == nil then return true end
+
+        return c["_"..name]
+    end
+
+    client.object["set_"..name] = function(c, value)
+        c["_"..name] = value
+        c:emit_signal("property::"..name, value)
+    end
+end
+
 --- Get a client by its relative index to another client.
 -- If no client is passed, the focused client will be used.
 --
@@ -1387,6 +1455,256 @@ function client.object.set_shape(self, shape)
     client.property.set(self, "_shape", shape)
     set_shape(self)
 end
+
+local request_filters = {generic={}, contextual={}}
+
+function client.object.get_size_hints_honor(c)
+    gdebug.deprecate(
+        "Use the permission system to know the status of `request::size_hints`"..
+        " instead of the `size_hints_honor` property.",
+        {deprecated_in=5}
+    )
+    return c._size_hints_honor
+end
+
+function client.object.set_size_hints_honor(c, value)
+    gdebug.deprecate(
+        "Use the permission system to set the status of `request::size_hints`"..
+        " instead of the `size_hints_honor` property.",
+        {deprecated_in=5}
+    )
+
+    c._size_hints_honor = value
+end
+
+--- How to align the size hints.
+--
+-- The gravities are:
+--
+--  * top_left (default)
+--  * top_right
+--  * bottom_left
+--  * bottom_right
+--  * left
+--  * right
+--  * top
+--  * bottom
+--  * middle
+--
+-- @property size_hint_gravity
+-- @param string
+
+--- Activate (focus) a client.
+--
+-- This method is the correct way to focus a client. While
+-- `client.focus = my_client` works and is commonly used in older code, it has
+-- some drawbacks. The most obvious one is that it bypasses the activate
+-- filters. It also doesn't handle minimized clients well and requires a lot
+-- of boilerplate code to make work properly.
+--
+-- The valid `args.actions` are:
+--
+-- * **mouse_move**: Move the client when the mouse cursor moves until the
+--  mouse buttons are release.
+-- * **mouse_resize**: Resize the client when the mouse cursor moves until the
+--  mouse buttons are release.
+-- * **mouse_center**: Move the mouse cursor to the center of the client if it
+--  isn't already within its geometry,
+-- * **toggle_minimization**: If the client is already active, minimize it.
+--
+-- @method activate
+-- @tparam table args
+-- @tparam[opt=other] string args.context Why was this activate called?
+-- @tparam[opt=true] boolean args.raise Raise the client to the top of its layer.
+-- @tparam[opt=false] boolean args.force Force the activation even for unfocusable
+--  clients.
+-- @tparam[opt=false] boolean args.switch_to_tags
+-- @tparam[opt=false] boolean args.switch_to_tag
+-- @tparam[opt=false] boolean args.action Once activated, perform an action.
+-- @tparam[opt=false] boolean args.toggle_minimization
+-- @see awful.ewmh.add_activate_filter
+-- @see request::activate
+-- @see active
+function client.object.activate(c, args)
+    local new_args = setmetatable({}, {__index = args or {}})
+
+--- Use the common filtering system to allow or deny various requests.
+--
+-- Each request:: handler should call this.
+--
+-- @tparam string request The request name (like *request::activate*).
+-- @tparam[opt=""] string context The request context, if any.
+-- @tparam[opt={}] table hints The request context hints, if any.
+-- @treturn boolean|nil True if the request is explicitly granted, false if
+--  the request is explicitly denied and nil if nothing matches the request.
+function client.object:check_allowed_requests(request, context, hints)
+    local generic = client._get_request_filters(request, "generic")
+    local ctx = client._get_request_filters(request, "contextual")[context] or {}
+
+    -- Execute the filters until something handle the request
+    for _, tab in ipairs { ctx, generic } do
+        for i=#tab, 1, -1 do
+            local ret = tab[i](self, context, hints)
+
+            if ret ~= nil then
+                return ret
+            end
+        end
+    end
+
+    return nil
+end
+
+-- Get the list of filters for a request.
+--
+-- A previous iteration of this API made this data public. The newer
+-- `gears.sort` and `gears.matcher` APIs makes that only (narrow) use case
+-- for that disappear. This (private) function exists for legacy compatibility.
+function client._get_request_filters(request, group)
+    if not request_filters[group] then return {} end
+
+    return request_filters[group][request] or {}
+end
+
+--- Add an activate (focus stealing) filter function.
+--
+-- The callback takes the following parameters:
+--
+-- * **c** (*client*) The client requesting the activation
+-- * **context** (*string*) The activation context.
+-- * **hints** (*table*) Some additional hints (depending on the context)
+--
+-- If the callback returns `true`, the client will be activated. If the callback
+-- returns `false`, the activation request is cancelled unless the `force` hint is
+-- set. If the callback returns `nil`, the previous callback will be executed.
+-- This will continue until either a callback handles the request or when it runs
+-- out of callbacks. In that case, the request will be granted if the client is
+-- visible.
+--
+-- For example, to block Firefox from stealing the focus, use:
+--
+--    awful.ewmh.add_request_filter("request::activate", function(c)
+--        if c.class == "Firefox" then return false end
+--    end, "ewmh")
+--
+-- @tparam function f The callback
+-- @tparam[opt] string context The `request::activate` context
+-- @see generic_activate_filters
+-- @see contextual_activate_filters
+-- @see remove_activate_filter
+-- @see request::activate
+-- @see request::geometry
+-- @see request::titlebars
+-- @see request::tag
+-- @see request::urgent
+function client.add_request_filter(request, f, context)
+    if not context then
+        request_filters.generic[request] = request_filters.generic[request] or {}
+        table.insert(request_filters.generic[request], f)
+    else
+        request_filters.contextual[request] = request_filters.contextual[request] or {}
+
+        request_filters.contextual[request][context] =
+            request_filters.contextual[request][context] or {}
+
+        table.insert(request_filters.contextual[request][context], f)
+    end
+end
+
+--- Remove an activate (focus stealing) filter function.
+-- This is an helper to avoid dealing with `ewmh.add_request_filter` directly.
+-- @tparam function f The callback
+-- @tparam[opt] string context The `request::activate` context
+-- @treturn boolean If the callback existed.
+-- @see request::activate
+-- @see request::geometry
+-- @see request::titlebars
+function client.remove_request_filter(request, f, context)
+    local tab = context and (ewmh.contextual_activate_filters[context] or {})
+        or ewmh.generic_activate_filters
+
+    for k, v in ipairs(tab) do
+        if v == f then
+            table.remove(tab, k)
+
+            -- In case the callback is there multiple time.
+            ewmh.remove_request_filter(request, f, context)
+
+            return true
+        end
+    end
+
+    return false
+end
+
+--- Block a contextual request.
+--
+-- This only works when the request handler checks uses
+-- `check_allowed_requests`.
+--
+-- It can be used, for example, to prevent a client from resizing or moving
+-- itself by blocking `request::geometry` with the `ewmh` context.
+--
+-- Note that if other request filters handle the request, they may have priority
+-- over this policy. This method can often be convenient, but is less powerful
+-- than using a custom request filter.
+--
+-- @function client.grant_requests
+-- @see check_allowed_requests
+-- @see awful.client.add_request_filter
+-- @see awful.client.remove_request_filter
+-- @see granted_requests
+
+function client.object.grant_requests(self, request, context, value)
+    local reqs = client.property.get(c, "blocked_requests")
+
+    if not reqs then
+        reqs = {}
+        return client.property.get(c, "blocked_requests", reqs)
+    end
+
+    reqs[request] = reqs[request] or {}
+    reqs[request][context] = value
+end
+
+-- Add a request filter for each common client requests.
+--
+-- It can simplify some common filtering like preventing clients from resizing
+-- themselves. It is mostly intended to by used by the rules, but is also
+-- provided as an API so that extensions can modify it. It can also be useful
+-- for adding a keybinding to toggle some requests.
+for _, req in ipairs { "activate", "geometry", "tag", "urgent" } do
+    client.add_request_filter("request::"..req, function(c, ctx)
+        local reqs = client.property.get(c, "blocked_requests") or {}
+
+        -- Can return true, false or nil. The lack of "or" is intentional.
+        return reqs["request::"..req]
+            and reqs["request::"..req][ctx or ""]
+    end)
+end
+
+--- This property allows to contextually enable or disable some client requests.
+--
+-- The first table takes the request name as key and a table as the argument.
+-- That table has the context as key a boolean to grant (true) or deny (false)
+-- the request.
+--
+--    granted_requests = {
+--        geometry = {
+--            ewmh      = false,
+--            maximized = true,
+--        },
+--        activate = {
+--            -- Some context have `.` in their name, use the correct Lua syntax:
+--            ["client.movetotag"] = true,
+--            mouse_enter          = false,
+--        },
+--    }
+--
+-- @clientruleproperty granted_requests
+-- @see check_allowed_requests
+-- @see awful.client.add_request_filter
+-- @see awful.client.remove_request_filter
 
 -- Register standards signals
 

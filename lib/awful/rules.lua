@@ -473,6 +473,17 @@ function rules.high_priority_properties.new_tag(c, value, props)
     return t
 end
 
+function rules.extra_properties.granted_requests(c, value, props)
+    value = type(value) == "function" and value(c, props) or value
+
+    for req, ctxes in pairs(value) do
+        for ctx, grant in pairs(ctxes) do
+            assert(type(grant) == "boolean")
+            c:grant_requests("request::"..req, ctx, grant)
+        end
+    end
+end
+
 function rules.extra_properties.placement(c, value, props)
     -- Avoid problems
     if awesome.startup and

@@ -219,7 +219,7 @@
  *
  * Default implementation: `awful.ewmh.activate`.
  *
- * To implement focus stealing filters see `awful.ewmh.add_activate_filter`.
+ * To implement focus stealing filters see `awful.client.add_request_filter`.
  *
  * @signal request::activate
  * @tparam string context The context where this signal was used.
@@ -524,7 +524,7 @@
  *
  *  * *property::size\_hints\_honor*
  *
- * @property size_hints_honor
+ * @deprecatedproperty size_hints_honor
  * @param boolean
  * @see size_hints
  */
@@ -1953,23 +1953,11 @@ client_resize_do(client_t *c, area_t geometry)
  * The sizes given as parameters are with borders!
  * \param c Client to resize.
  * \param geometry New window geometry.
- * \param honor_hints Use size hints.
  * \return true if an actual resize occurred.
  */
 bool
-client_resize(client_t *c, area_t geometry, bool honor_hints)
+client_resize(client_t *c, area_t geometry)
 {
-    if (honor_hints) {
-        /* We could get integer underflows in client_remove_titlebar_geometry()
-         * without these checks here.
-         */
-        if(geometry.width < c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size)
-            return false;
-        if(geometry.height < c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size)
-            return false;
-        geometry = client_apply_size_hints(c, geometry);
-    }
-
     if(geometry.width < c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size)
         return false;
     if(geometry.height < c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size)
@@ -3043,6 +3031,52 @@ HANDLE_TITLEBAR(right, CLIENT_TITLEBAR_RIGHT)
 HANDLE_TITLEBAR(bottom, CLIENT_TITLEBAR_BOTTOM)
 HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
 
+/** Not very graceful way to allow Lua to create the size hints.
+ *
+ * It was tried a couple time before to fully move size hints handling to Lua,
+ * but in practice there is always some corner case where this gets messy.
+ *
+ * To mitigate the problem and allow a `request::` style API to filter when the
+ * size hints should be honored and when they should be rejected, this function
+ * ask Lua to give size hints and if nothing happens, it fall back to the C
+ * implementation.
+ */
+static size_hints_transaction_t
+client_requests_size_hints(lua_State *L, client_t *c, area_t new_geometry)
+{
+    if (c->size_hints_transaction.active)
+    {
+        warn("A size hint transaction tries to re-enter.");
+        return c->size_hints_transaction;
+    }
+
+    /* Mark this has being a transaction, Lua code should place the new geo
+     * in a buffer
+     */
+    c->size_hints_transaction.active = 1;
+
+    /* Add the context */
+    lua_pushstring(L, "new");
+
+    /* Hints */
+    luaA_pusharea(L, new_geometry);
+
+    luaA_object_emit_signal(L, 1, "request::size_hints", 2);
+
+    /* Make a copy */
+    size_hints_transaction_t t = c->size_hints_transaction;
+
+    /* Finish/reset the transaction */
+    c->size_hints_transaction.active = 0;
+    c->size_hints_transaction.area.width  = 0;
+    c->size_hints_transaction.area.height = 0;
+    c->size_hints_transaction.area.x      = 0;
+    c->size_hints_transaction.area.y      = 0;
+
+    /* Return the copy */
+    return t;
+}
+
 /** Return or set client geometry.
  *
  * @tparam table|nil geo A table with new coordinates, or nil.
@@ -3053,6 +3087,10 @@ static int
 luaA_client_geometry(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
+
+    /* If a transaction is progress, don't do anything */
+    if (c->size_hints_transaction.active)
+        return luaA_pusharea(L, c->geometry);
 
     if(lua_gettop(L) == 2 && !lua_isnil(L, 2))
     {
@@ -3072,7 +3110,37 @@ luaA_client_geometry(lua_State *L)
             geometry.height = ceil(luaA_getopt_number_range(L, 2, "height", c->geometry.height, MIN_X11_SIZE, MAX_X11_SIZE));
         }
 
-        client_resize(c, geometry, c->size_hints_honor);
+        /* Try to get the size hints from Lua or from use the C implementation*/
+        if (c->size_hints_honor)
+        {
+            size_hints_transaction_t t = client_requests_size_hints(L, c, geometry);
+
+            /* When active > 1, then one or more new values were set by Lua */
+            if (t.active > 1)
+            {
+                if (t.area.width >= 1)
+                    geometry.width  = t.area.width;
+                if (t.area.height >= 1)
+                    geometry.height = t.area.height;
+
+                geometry.x = t.area.x;
+                geometry.y = t.area.y;
+            }
+            else
+            {
+                /* We could get integer underflows in client_remove_titlebar_geometry()
+                * without these checks here.
+                */
+                if(geometry.width < c->titlebar[CLIENT_TITLEBAR_LEFT].size + c->titlebar[CLIENT_TITLEBAR_RIGHT].size)
+                    return luaA_pusharea(L, c->geometry);
+                if(geometry.height < c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size)
+                    return luaA_pusharea(L, c->geometry);
+
+                geometry = client_apply_size_hints(c, geometry);
+            }
+        }
+
+        client_resize(c, geometry);
     }
 
     return luaA_pusharea(L, c->geometry);
@@ -3194,6 +3262,42 @@ luaA_client_set_size_hints_honor(lua_State *L, client_t *c)
     c->size_hints_honor = luaA_checkboolean(L, -1);
     luaA_object_emit_signal(L, -3, "property::size_hints_honor", 0);
     return 0;
+}
+
+static int
+luaA_client_set_requests_size_hints(lua_State *L, client_t *c)
+{
+    c->size_hints_transaction.active++;
+    luaA_checktable(L, -1);
+
+    c->size_hints_transaction.area.x = round(luaA_getopt_number_range(
+        L, -1, "x", c->size_hints_transaction.area.x,
+        MIN_X11_COORDINATE, MAX_X11_COORDINATE
+    ));
+
+    c->size_hints_transaction.area.y = round(luaA_getopt_number_range(
+        L, -1, "y", c->size_hints_transaction.area.y,
+        MIN_X11_COORDINATE, MAX_X11_COORDINATE
+    ));
+
+    c->size_hints_transaction.area.width = round(luaA_getopt_number_range(
+        L, -1, "width", c->size_hints_transaction.area.width,
+        MIN_X11_COORDINATE, MAX_X11_COORDINATE
+    ));
+
+    c->size_hints_transaction.area.height = round(luaA_getopt_number_range(
+        L, -1, "height", c->size_hints_transaction.area.height,
+        MIN_X11_COORDINATE, MAX_X11_COORDINATE
+    ));
+
+    return 0;
+}
+
+static int
+luaA_client_get_requests_size_hints(lua_State *L, client_t *c)
+{
+    lua_pushboolean(L, c->size_hints_transaction.active > 0);
+    return 1;
 }
 
 static int
@@ -3972,10 +4076,14 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_set_sticky,
                             (lua_class_propfunc_t) luaA_client_get_sticky,
                             (lua_class_propfunc_t) luaA_client_set_sticky);
-    luaA_class_add_property(&client_class, "size_hints_honor",
+    luaA_class_add_property(&client_class, "_size_hints_honor",
                             (lua_class_propfunc_t) luaA_client_set_size_hints_honor,
                             (lua_class_propfunc_t) luaA_client_get_size_hints_honor,
                             (lua_class_propfunc_t) luaA_client_set_size_hints_honor);
+    luaA_class_add_property(&client_class, "_requests_size_hints",
+                            (lua_class_propfunc_t) luaA_client_set_requests_size_hints,
+                            (lua_class_propfunc_t) luaA_client_get_requests_size_hints,
+                            (lua_class_propfunc_t) luaA_client_set_requests_size_hints);
     luaA_class_add_property(&client_class, "urgent",
                             (lua_class_propfunc_t) luaA_client_set_urgent,
                             (lua_class_propfunc_t) luaA_client_get_urgent,

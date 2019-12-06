@@ -147,7 +147,7 @@ table.insert(steps, function()
 
     original_count = #awful.ewmh.generic_activate_filters
 
-    awful.ewmh.add_activate_filter(function(c)
+    awful.client.add_request_filter("request::activate", function(c)
         if c == c1 then return false end
     end)
 
@@ -161,11 +161,15 @@ table.insert(steps, function()
     assert(client.focus == c2)
 
     -- Test the remove function
-    awful.ewmh.remove_activate_filter(function() end)
+    awful.client.remove_request_filter("request::activate", function() end)
 
-    awful.ewmh.add_activate_filter(awful.ewmh.generic_activate_filters[1])
+    awful.client.add_request_filter(
+        "request::activate", awful.ewmh.generic_activate_filters[1]
+    )
 
-    awful.ewmh.remove_activate_filter(awful.ewmh.generic_activate_filters[1])
+    awful.client.remove_request_filter(
+        "request::activate", awful.ewmh.generic_activate_filters[1]
+    )
 
     assert(original_count == #awful.ewmh.generic_activate_filters)
 

@@ -18,9 +18,28 @@ local beautiful = require("beautiful")
 local alayout = require("awful.layout")
 local atag = require("awful.tag")
 
-local ewmh = {
-    generic_activate_filters    = {},
-    contextual_activate_filters = {},
+local ewmh = setmetatable({}, {
+    __index = function(_, k)
+        -- deprecated members
+        if k == "generic_activate_filters" then
+            return aclient._get_request_filters("request::activate", "generic")
+        elseif k == "contextual_activate_filters" then
+            return aclient._get_request_filters("request::activate", "contextual")
+        end
+    end
+})
+
+-- How to align the size_hints
+local align_map = {
+    top_left          = function(_ , _ , _ , _ ) return {x=0        , y=0        } end,
+    top_right         = function(sw, _ , dw, _ ) return {x=sw-dw    , y=0        } end,
+    bottom_left       = function(_ , sh, _ , dh) return {x=0        , y=sh-dh    } end,
+    bottom_right      = function(sw, sh, dw, dh) return {x=sw-dw    , y=sh-dh    } end,
+    left              = function(_ , sh, _ , dh) return {x=0        , y=sh/2-dh/2} end,
+    right             = function(sw, sh, dw, dh) return {x=sw-dw    , y=sh/2-dh/2} end,
+    top               = function(sw, _ , dw, _ ) return {x=sw/2-dw/2, y=0        } end,
+    bottom            = function(sw, sh, dw, dh) return {x=sw/2-dw/2, y=sh-dh    } end,
+    middle            = function(sw, sh, dw, dh) return {x=sw/2-dw/2, y=sh/2-dh/2} end,
 }
 
 --- Honor the screen padding when maximizing.
@@ -34,22 +53,6 @@ local ewmh = {
 --- Hide the border on maximized clients.
 -- @beautiful beautiful.maximized_hide_border
 -- @tparam[opt=false] boolean maximized_hide_border
-
---- The list of all registered generic request::activate (focus stealing)
--- filters. If a filter is added to only one context, it will be in
--- `ewmh.contextual_activate_filters`["context_name"].
--- @table[opt={}] generic_activate_filters
--- @see ewmh.activate
--- @see ewmh.add_activate_filter
--- @see ewmh.remove_activate_filter
-
---- The list of all registered contextual request::activate (focus stealing)
--- filters. If a filter is added to only one context, it will be in
--- `ewmh.generic_activate_filters`.
--- @table[opt={}] contextual_activate_filters
--- @see ewmh.activate
--- @see ewmh.add_activate_filter
--- @see ewmh.remove_activate_filter
 
 --- Update a client's settings when its geometry changes, skipping signals
 -- resulting from calls within.
@@ -89,7 +92,7 @@ end
 --  be selected if none of the client's tags are selected?
 -- @tparam[opt=false] boolean hints.switch_to_tags Select all tags associated
 --  with the client.
-function ewmh.activate(c, context, hints) -- luacheck: no unused args
+function ewmh.activate(c, context, hints)
     hints = hints or  {}
 
     if c.focusable == false and not hints.force then
@@ -100,20 +103,7 @@ function ewmh.activate(c, context, hints) -- luacheck: no unused args
         return
     end
 
-    local found, ret = false
-
-    -- Execute the filters until something handle the request
-    for _, tab in ipairs {
-        ewmh.contextual_activate_filters[context] or {},
-        ewmh.generic_activate_filters
-    } do
-        for i=#tab, 1, -1 do
-            ret = tab[i](c, context, hints)
-            if ret ~= nil then found=true; break end
-        end
-
-        if found then break end
-    end
+    local ret = c:check_allowed_requests("request::activate", context, hints)
 
     -- Minimized clients can be requested to have focus by, for example, 3rd
     -- party toolbars and they might not try to unminimize it first.
@@ -164,46 +154,21 @@ end
 --
 -- @tparam function f The callback
 -- @tparam[opt] string context The `request::activate` context
--- @see generic_activate_filters
--- @see contextual_activate_filters
--- @see remove_activate_filter
--- @staticfct awful.ewmh.add_activate_filter
+-- @deprecated awful.ewmh.add_activate_filter
+-- @see awful.client.add_request_filter
 function ewmh.add_activate_filter(f, context)
-    if not context then
-        table.insert(ewmh.generic_activate_filters, f)
-    else
-        ewmh.contextual_activate_filters[context] =
-            ewmh.contextual_activate_filters[context] or {}
-
-        table.insert(ewmh.contextual_activate_filters[context], f)
-    end
+    aclient.add_request_filter("request::activate", f, context)
 end
 
 --- Remove an activate (focus stealing) filter function.
 -- This is an helper to avoid dealing with `ewmh.add_activate_filter` directly.
 -- @tparam function f The callback
 -- @tparam[opt] string context The `request::activate` context
+-- @deprecated awful.ewmh.remove_activate_filter
 -- @treturn boolean If the callback existed
--- @see generic_activate_filters
--- @see contextual_activate_filters
--- @see add_activate_filter
--- @staticfct awful.ewmh.remove_activate_filter
+-- @see awful.client.remove_request_filter
 function ewmh.remove_activate_filter(f, context)
-    local tab = context and (ewmh.contextual_activate_filters[context] or {})
-        or ewmh.generic_activate_filters
-
-    for k, v in ipairs(tab) do
-        if v == f then
-            table.remove(tab, k)
-
-            -- In case the callback is there multiple time.
-            ewmh.remove_activate_filter(f, context)
-
-            return true
-        end
-    end
-
-    return false
+    aclient.remove_request_filter("request::activate", f, context)
 end
 
 -- Get tags that are on the same screen as the client. This should _almost_
@@ -229,6 +194,12 @@ end
 -- @tparam[opt] tag|boolean t A tag to use. If true, then the client is made sticky.
 -- @tparam[opt={}] table hints Extra information
 function ewmh.tag(c, t, hints) --luacheck: no unused
+    local is_accepted = c:check_allowed_requests(
+        "request::tag", hints and hints.reason or "", hints
+    ) ~= false
+
+    if not is_accepted then return end
+
     -- There is nothing to do
     if not t and #get_valid_tags(c, c.screen) > 0 then return end
 
@@ -255,6 +226,12 @@ end
 -- @client c A client
 -- @tparam boolean urgent If the client should be urgent
 function ewmh.urgent(c, urgent)
+    local is_accepted = c:check_allowed_requests(
+        "request::urgent", ""--[[TODO]], hints
+    ) ~= false
+
+    if not is_accepted then return end
+
     if c ~= client.focus and not aclient.property.get(c,"ignore_urgent") then
         c.urgent = urgent
     end
@@ -277,6 +254,10 @@ local context_mapper = {
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.geometry(c, context, hints)
+    local is_accepted = c:check_allowed_requests("request::geometry", context, hints) ~= false
+
+    if not is_accepted then return end
+
     local layout = c.screen.selected_tag and c.screen.selected_tag.layout or nil
 
     -- Setting the geometry will not work unless the client is floating.
@@ -347,9 +328,15 @@ end
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.merge_maximization(c, context, hints)
-    if context ~= "client_maximize_horizontal" and context ~= "client_maximize_vertical" then
-        return
-    end
+    local is_accepted = (
+        context == "client_maximize_horizontal" or
+        context == "client_maximize_vertical"
+    ) and c:check_allowed_requests("request::geometry", context, hints) ~= false
+
+    if not is_accepted then return end
+
+    --TODO unset the X properties
+    if not c.maximize_requests_honor then return end
 
     if not c._delay_maximization then
         c._delay_maximization = function()
@@ -428,23 +415,26 @@ end
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
 function ewmh.client_geometry_requests(c, context, hints)
-    if context == "ewmh" and hints then
-        if c.immobilized_horizontal then
-            hints = gtable.clone(hints)
-            hints.x = nil
-            hints.width = nil
-        end
-        if c.immobilized_vertical then
-            hints = gtable.clone(hints)
-            hints.y = nil
-            hints.height = nil
-        end
-        c:geometry(hints)
+    local is_accepted = context == "ewmh" and hints
+        and c:check_allowed_requests("request::geometry", context, hints) ~= false
+
+    if not is_accepted then return end
+
+    if c.immobilized_horizontal then
+        hints = gtable.clone(hints)
+        hints.x = nil
+        hints.width = nil
     end
+    if c.immobilized_vertical then
+        hints = gtable.clone(hints)
+        hints.y = nil
+        hints.height = nil
+    end
+    c:geometry(hints)
 end
 
 -- The magnifier layout doesn't work with focus follow mouse.
-ewmh.add_activate_filter(function(c)
+aclient.add_request_filter("request::activate", function(c)
     if alayout.get(c.screen) ~= alayout.suit.magnifier
       and aclient.focus.filter(c) then
         return nil
@@ -453,6 +443,111 @@ ewmh.add_activate_filter(function(c)
     end
 end, "mouse_enter")
 
+--- The default client `request::border` handler.
+--
+-- This is the default handler to set the border color. It sets the color
+-- depending on the `c.active` status.
+--
+-- To replace this handler with your own, use:
+--
+--    client.disconnect_signal("request::border", awful.ewmh.update_border)
+--
+-- A more advanced handler could also handle the `urgent` case, change the
+-- border depending on the maximization, floating or fullscreen status and
+-- modify the border width.
+--
+-- The default implementation is:
+--
+--    function awful.ewmh.update_border(c)
+--        c.border_width = beautiful.border_width
+--        c.border_color = c.active and
+--            beautiful.border_focus or beautiful.border_normal
+--    end
+--
+-- @signalhandler awful.ewmh.update_border
+-- @see beautiful.border_color_focus
+-- @see beautiful.border_color_normal
+
+function ewmh.update_border(c)
+    c.border_width = beautiful.border_width
+    c.border_color = c.active and
+        beautiful.border_focus or beautiful.border_normal
+end
+
+local activate_context_map = {
+    mouse_enter = "mouse.enter",
+    switch_tag  = "autofocus.check_focus_tag",
+    history     = "autofocus.check_focus"
+}
+
+--- Default handler for the `request::autoactivate` signal.
+--
+-- All it does is to emit `request::activate` with the following context
+-- mapping:
+--
+-- * mouse_enter: *mouse.enter*
+-- * switch_tag : *autofocus.check_focus_tag*
+-- * history    : *autofocus.check_focus*
+--
+-- @signalhandler awful.ewmh.autoactivate
+function ewmh.autoactivate(c, context, args)
+    if not pcommon.check("client", "autoactivate", context) then return end
+
+    local ctx = activate_context_map[context] and
+        activate_context_map[context] or context
+
+    c:emit_signal("request::activate", ctx, args)
+end
+
+--- The default handler for `request::size_hints`.
+--
+-- It computes the correct size hints set them.
+--
+-- The gravities are:
+--
+--  * top_left (default)
+--  * top_right
+--  * bottom_left
+--  * bottom_right
+--  * left
+--  * right
+--  * top
+--  * bottom
+--  * middle
+--
+-- @signalhandler awful.ewmh.size_hints
+function ewmh.size_hints(c, context, hints)
+    if not pcommon.check("client", "size_hints", context) then return end
+
+    hints = hints or {}
+
+    local w_hint, h_hint = c:apply_size_hints(
+        hints.width ,
+        hints.height
+    )
+
+    -- Nothing to do.
+    if hints.width == w_hint and hints.height == hints.height then
+        -- Set them anyway to make sure it doesn't trigger the fallback.
+        c._requests_size_hints = hints
+        return
+    end
+
+    local g = hints.gravity or hints.size_hint_gravity
+
+    if g and hints.gravity[g] then
+        local x, y = align_map[g](w, h, hints.width, hints.height)
+        hints.x, hints.y = hints.x + x, hints.y + y
+    end
+
+    hints.width, hints.height = w_hint, h_hint
+
+    c._requests_size_hints = hints
+end
+
+-- client.connect_signal("request::size_hints", ewmh.size_hints)
+client.connect_signal("request::autoactivate", ewmh.autoactivate)
+client.connect_signal("request::border", ewmh.update_border)
 client.connect_signal("request::activate", ewmh.activate)
 client.connect_signal("request::tag", ewmh.tag)
 client.connect_signal("request::urgent", ewmh.urgent)

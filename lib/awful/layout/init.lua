@@ -334,6 +334,10 @@ function layout.move_handler(c, context, hints) --luacheck: no unused args
     if c.floating then return end
     if context ~= "mouse.move" then return end
 
+    if c:check_allowed_requests("request::geometry", context, hints) == false then
+         return
+    end
+
     if capi.mouse.screen ~= c.screen then
         c.screen = capi.mouse.screen
     end
