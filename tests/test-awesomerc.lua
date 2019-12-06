@@ -228,6 +228,25 @@ local steps = {
         return true
     end,
 
+    -- Add more keybindings for make sure the popup has many pages.
+    function()
+        for j=1, 10 do
+            for i=1, 200 do
+                awful.keyboard.append_global_keybinding(
+                    awful.key {
+                        key = "#"..(300+i),
+                        modifiers = {},
+                        on_press = function() end,
+                        description = "Fake "..i,
+                        group = "Fake"..j,
+                    }
+                )
+            end
+        end
+
+        return true
+    end,
+
     -- Hotkeys popup should be displayed and hidden
     function(count)
         local s = awful.screen.focused()

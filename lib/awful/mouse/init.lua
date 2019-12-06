@@ -421,6 +421,65 @@ function mouse.remove_global_mousebinding(button)
     capi.root._remove_button(button)
 end
 
+local default_buttons = {}
+
+--- Add an `awful.button` to the default client buttons.
+--
+-- @staticfct awful.mouse.append_client_mousebinding
+-- @tparam awful.button button The button.
+-- @emits client_mousebinding::added
+-- @emitstparam client_mousebinding::added awful.button button The button.
+-- @see awful.button
+-- @see awful.keyboard.append_client_keybinding
+
+function mouse.append_client_mousebinding(button)
+    table.insert(default_buttons, button)
+
+    for _, c in ipairs(capi.client.get(nil, false)) do
+        c:append_mousebinding(button)
+    end
+
+    capi.client.emit_signal("client_mousebinding::added", button)
+end
+
+--- Add a `awful.button`s to the default client buttons.
+--
+-- @staticfct awful.mouse.append_client_mousebindings
+-- @tparam table buttons A table containing `awful.button` objects.
+-- @see awful.button
+-- @see awful.keyboard.append_client_keybinding
+-- @see awful.mouse.append_client_mousebinding
+-- @see awful.keyboard.append_client_keybindings
+
+function mouse.append_client_mousebindings(buttons)
+    for _, button in ipairs(buttons) do
+        mouse.append_client_mousebinding(button)
+    end
+end
+
+--- Remove a mousebinding from the default client buttons.
+--
+-- @staticfct awful.mouse.remove_client_mousebinding
+-- @tparam awful.button button The button.
+-- @treturn boolean True if the button was removed and false if it wasn't found.
+-- @see awful.keyboard.append_client_keybinding
+
+function mouse.remove_client_mousebinding(button)
+    for k, v in ipairs(default_buttons) do
+        if button == v then
+            table.remove(default_buttons, k)
+
+            for _, c in ipairs(capi.client.get(nil, false)) do
+                c:remove_mousebinding(button)
+            end
+
+            return true
+        end
+    end
+
+    return false
+end
+
 for _, b in ipairs {"left", "right", "middle"} do
     mouse.object["is_".. b .."_mouse_button_pressed"] = function()
         return capi.mouse.coords().buttons[1]
@@ -470,6 +529,14 @@ end)
 --  when button 1 is pressed.
 -- @staticfct mouse.coords
 
+capi.client.connect_signal("scanning", function()
+    capi.client.emit_signal("request::default_mousebindings", "startup")
+end)
+
+-- Private function to be used by `ruled.client`.
+function mouse._get_client_mousebindings()
+    return default_buttons
+end
 
 return mouse
 

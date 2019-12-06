@@ -121,6 +121,8 @@ local protected_call = require("gears.protected_call")
 local aspawn = require("awful.spawn")
 local gdebug = require("gears.debug")
 local gmatcher = require("gears.matcher")
+local amouse = require("awful.mouse")
+local akeyboard = require("awful.keyboard")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local rules = {}
@@ -529,6 +531,13 @@ end
 -- @staticfct awful.rules.execute
 
 crules._execute = function(_, c, props, callbacks)
+
+    -- Set the default buttons and keys
+    local btns = amouse._get_client_mousebindings()
+    local keys = akeyboard._get_client_keybindings()
+    props.keys    = props.keys or keys
+    props.buttons = props.buttons or btns
+
     -- This has to be done first, as it will impact geometry related props.
     if props.titlebars_enabled and (type(props.titlebars_enabled) ~= "function"
             or props.titlebars_enabled(c,props)) then

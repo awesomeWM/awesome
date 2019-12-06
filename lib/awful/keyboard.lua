@@ -6,7 +6,7 @@
 -- @inputmodule awful.keyboard
 ---------------------------------------------------------------------------
 
-local capi   = {root = root, awesome = awesome}
+local capi   = {root = root, awesome = awesome, client = client}
 local module = {}
 
 --- Convert the modifiers into pc105 key names
@@ -136,6 +136,74 @@ end
 
 function module.remove_global_keybinding(key)
     capi.root._remove_key(key)
+end
+
+
+local default_keys = {}
+
+--- Add an `awful.key` to the default client keys.
+--
+-- @staticfct awful.keyboard.append_client_keybinding
+-- @tparam awful.key key The key.
+-- @emits client_keybinding::added
+-- @emitstparam client_keybinding::added awful.key key The key.
+-- @see awful.key
+-- @see awful.keyboard.append_client_keybindings
+
+function module.append_client_keybinding(key)
+    table.insert(default_keys, key)
+
+    for _, c in ipairs(capi.client.get(nil, false)) do
+        c:append_keybinding(key)
+    end
+
+    capi.client.emit_signal("client_keybinding::added", key)
+end
+
+--- Add a `awful.key`s to the default client keys.
+--
+-- @staticfct awful.keyboard.append_client_keybindings
+-- @tparam table keys A table containing `awful.key` objects.
+-- @emits client_keybinding::added
+-- @emitstparam client_keybinding::added awful.key key The key.
+-- @see awful.key
+-- @see awful.keyboard.append_client_keybinding
+function module.append_client_keybindings(keys)
+    for _, key in ipairs(keys) do
+        module.append_client_keybinding(key)
+    end
+end
+
+--- Remove a key from the default client keys.
+--
+-- @staticfct awful.keyboard.remove_client_keybinding
+-- @tparam awful.key key The key.
+-- @treturn boolean True if the key was removed and false if it wasn't found.
+-- @see awful.keyboard.append_client_keybinding
+
+function module.remove_client_keybinding(key)
+    for k, v in ipairs(default_keys) do
+        if key == v then
+            table.remove(default_keys, k)
+
+            for _, c in ipairs(capi.client.get(nil, false)) do
+                c:remove_keybinding(key)
+            end
+
+            return true
+        end
+    end
+
+    return false
+end
+
+capi.client.connect_signal("scanning", function()
+    capi.client.emit_signal("request::default_keybindings", "context")
+end)
+
+-- Private function to be used by `ruled.client`.
+function module._get_client_keybindings()
+    return default_keys
 end
 
 return module

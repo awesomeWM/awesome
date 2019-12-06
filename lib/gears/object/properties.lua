@@ -8,6 +8,7 @@
 ---------------------------------------------------------------------------
 
 local gtable = require("gears.table")
+local gtimer = nil --require("gears.timer")
 -- local gdebug = require("gears.debug")
 local object = {}
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -83,6 +84,8 @@ function object.capi_index_fallback(class, args)
         end
     end
 
+    assert(type(class) ~= "function")
+
     -- Attach the accessor methods
     class.set_index_miss_handler(getter)
     class.set_newindex_miss_handler(setter)
@@ -132,7 +135,7 @@ end
 --
 -- TO BE USED FOR DEPRECATION ONLY.
 
-local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set_empty)
+local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set_empty)-- luacheck: no unused
     local ret = gtable.clone(to_set, false)
 
     -- .buttons used to be a function taking the result of `gears.table.join`.
@@ -145,12 +148,14 @@ local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set
 --                 {deprecated_in=5}
 --             )
 
-            new_objs, self = is_object and new_objs or self, is_object and self or obj
+            if not is_object then
+                new_objs, self = self, obj
+            end
+
+            local has_content = new_objs and next(new_objs)
 
             -- Setter
-            if new_objs and #new_objs > 0 then
-                if (not set_empty) and not next(new_objs) then return end
-
+            if new_objs and has_content then
                 local is_formatted = join_if(new_objs)
 
                 -- Because modules may rely on :buttons taking a list of
@@ -190,7 +195,8 @@ local function copy_object(obj, to_set, name, capi_name, is_object, join_if, set
     })
 end
 
-function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_empty)
+function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_empty, delay, add_append_name)
+    delay = delay or add_append_name
 
     -- Some objects have a special "object" property to add more properties, but
     -- not all.
@@ -248,20 +254,63 @@ function object._legacy_accessors(obj, name, capi_name, is_object, join_if, set_
 
 
         --TODO v6 Use the original directly and drop this legacy copy
-        local result = is_formatted and objs
-            or gtable.join(unpack(objs))
+        local function apply()
+            local result = is_formatted and objs
+                or gtable.join(unpack(objs))
 
-        if is_object and capi_name then
-            self[capi_name](self, result)
-        elseif capi_name then
-            obj[capi_name](result)
+            if is_object and capi_name then
+                self[capi_name](self, result)
+            elseif capi_name then
+                obj[capi_name](result)
+            else
+                self._private[name.."_formatted"] = result
+            end
+        end
+
+        -- Some properties, like keys, are expensive to set, schedule them
+        -- instead.
+        if not delay then
+            apply()
         else
-            self._private[name.."_formatted"] = result
+            if not self._private["_delayed_"..name] then
+                gtimer = gtimer or require("gears.timer")
+                gtimer.delayed_call(function()
+                    self._private["_delayed_"..name]()
+                    self._private["_delayed_"..name] = nil
+                end)
+            end
+
+            self._private["_delayed_"..name] = apply
         end
 
         self._private[name] = copy_object(
             obj, objs, name, capi_name, is_object, join_if, set_empty
         )
+    end
+
+    if add_append_name then
+        magic_obj["append_"..add_append_name] = function(self, obj2)
+            self._private[name] = self._private[name]
+                or magic_obj["get_"..name](self, nil)
+
+            table.insert(self._private[name], obj2)
+
+            magic_obj["set_"..name](self, self._private[name])
+        end
+
+        magic_obj["remove_"..add_append_name] = function(self, obj2)
+            self._private[name] = self._private[name]
+                or magic_obj["get_"..name](self, nil)
+
+            for k, v in ipairs(self._private[name]) do
+                if v == obj2 then
+                    table.remove(self._private[name], k)
+                    break
+                end
+            end
+
+            magic_obj["set_"..name](self, self._private[name])
+        end
     end
 end
 

@@ -24,6 +24,17 @@ local gobject = require("gears.object")
 -- @property key
 -- @param string
 
+--- A group of keys.
+--
+-- The valid keygroups are:
+--
+-- * **numrow**: The row above the letters in the US PC-105/PC-104 keyboards
+--   and its derivative. This is usually the number 1-9 followed by 0.
+-- * **arrows**: The Left/Right/Top/Bottom keys usually located right of the
+--   spacebar.
+--
+-- @property keygroup
+
 --- The table of modifier keys.
 --
 -- A modifier, such as `Control` are a predetermined set of keys that can be
@@ -222,7 +233,7 @@ end
 -- @treturn table A table with one or several key objects.
 -- @constructorfct awful.key
 
-local function new_common(mod, _key, press, release, data)
+local function new_common(mod, _keys, press, release, data)
     if type(release)=='table' then
         data=release
         release=nil
@@ -230,38 +241,52 @@ local function new_common(mod, _key, press, release, data)
 
     local ret = {}
     local subsets = gmath.subsets(key.ignore_modifiers)
-    for _, set in ipairs(subsets) do
-        local sub_key = capi.key {
-            modifiers = gtable.join(mod, set),
-            key       = _key
-        }
+    for _, key_pair in ipairs(_keys) do
+        for _, set in ipairs(subsets) do
+            local sub_key = capi.key {
+                modifiers = gtable.join(mod, set),
+                key       = key_pair[1]
+            }
 
-        sub_key._private._legacy_convert_to = ret
+            sub_key._private._legacy_convert_to = ret
 
-        sub_key:connect_signal("press", function(_, ...)
-            if ret.on_press then
-                ret.on_press(...)
-            end
-        end)
+            sub_key:connect_signal("press", function(_, ...)
+                if ret.on_press then
+                    if key_pair[2] ~= nil then
+                        ret.on_press(key_pair[2], ...)
+                    else
+                        ret.on_press(...)
+                    end
+                end
+            end)
 
-        sub_key:connect_signal("release", function(_, ...)
-            if ret.on_release then
-                ret.on_release(...)
-            end
-        end)
+            sub_key:connect_signal("release", function(_, ...)
+                if ret.on_release then
+                    if key_pair[2] ~= nil then
+                        ret.on_release(key_pair[2], ...)
+                    else
+                        ret.on_release(...)
+                    end
+                end
+            end)
 
-        ret[#ret + 1] = sub_key
+            ret[#ret + 1] = sub_key
+        end
     end
 
     -- append custom userdata (like description) to a hotkey
     data = data and gtable.clone(data) or {}
     data.mod = mod
-    data.key = _key
+    data.keys = _keys
     data.on_press = press
     data.on_release = release
     data._is_capi_key = false
+    assert((not data.key) or type(data.key) == "string")
     table.insert(key.hotkeys, data)
-    data.execute = function(_) key.execute(mod, _key) end
+    data.execute = function(_)
+        assert(#_keys == 1, "key:execute() makes no sense for groups")
+        key.execute(mod, _keys[1])
+    end
 
     -- Store the private data
     reverse_map[ret] = data
@@ -273,19 +298,54 @@ local function new_common(mod, _key, press, release, data)
     return setmetatable(ret, obj_mt)
 end
 
+local keygroups = {
+    numrow = {},
+    arrows = {
+        {"Left"  , "Left"  },
+        {"Right" , "Right" },
+        {"Top"   , "Top"   },
+        {"Bottom", "Bottom"},
+    }
+}
+
+-- Technically, this isn't very popular, but we have been doing this for 12
+-- years and nobody complained too loudly.
+for i = 1, 10 do
+    table.insert(keygroups.numrow, {"#" .. i + 9, i == 10 and 0 or i})
+end
+
+-- Allow key objects to provide more than 1 key.
+--
+-- Some "groups" like arrows, the numpad, F-keys or numrow "belong together"
+local function get_keys(args)
+    if not args.keygroup then return {{args.key}} end
+
+    -- Make sure nothing weird happens.
+    assert(
+        not args.key,
+        "Please provide either the `key` or `keygroup` property, not both"
+    )
+
+    assert(keygroups[args.keygroup], "Please provide a valid keygroup")
+    return keygroups[args.keygroup]
+end
+
 function key.new(args, _key, press, release, data)
     -- Assume this is the new constructor.
     if not _key then
         assert(not (press or release or data), "Calling awful.key() requires a key name")
+
+        local keys = get_keys(args)
+
         return new_common(
             args.modifiers,
-            args.key,
+            keys,
             args.on_press,
             args.on_release,
             args
         )
     else
-        return new_common(args, _key, press, release, data)
+        return new_common(args, {{_key}}, press, release, data)
     end
 end
 

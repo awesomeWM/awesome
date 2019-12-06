@@ -57,6 +57,11 @@ This document was last updated at commit v4.3-197-g9085ed631.
 * `naughty.dbus` now uses Gio for talking to DBus. This is a first step in the
   deprecation of Awesome's own DBus bindings and could lead to behaviour changes
   on DBus.
+* The client `keys` and `buttons` property now return `awful.key`
+  and `awful.buttons` objects rather than the lower level `key` and `button`
+  objects. If you used these low level APIs to add keys and buttons dynamically,
+  please migrate your code to the corresponding `:append_` and `:remove_`
+  client methods.
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes
