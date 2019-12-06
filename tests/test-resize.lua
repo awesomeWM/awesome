@@ -1,6 +1,7 @@
 local test_client = require("_client")
 local placement = require("awful.placement")
 local amouse = require("awful.mouse")
+local wibox = require("wibox")
 local rounded_rect = require("gears.shape").rounded_rect
 
 local steps = {}
@@ -520,6 +521,51 @@ table.insert(steps, function()
     -- window size 0x0.
     assert(c:geometry().width == geo.width)
     assert(c:geometry().height == geo.height)
+    return true
+end)
+
+-- Test the wibox move.
+table.insert(steps, function()
+    local w = wibox {
+        visible = true,
+        width   = 100,
+        height  = 100,
+        bg      = "#ff00ff"
+    }
+
+    placement.centered(w)
+    placement.centered(mouse)
+
+    root.fake_input("button_press",1)
+    amouse.wibox.move(w)
+    mouse.coords {x = 100, y = 100}
+    root.fake_input("button_release",1)
+
+    return true
+end)
+
+-- Trigger floating client the mouse tiling.
+table.insert(steps, function()
+    -- Disable deprecation.
+    require("gears.debug").deprecate = function() end
+
+    local c = client.get()[1]
+
+    root.fake_input("button_press",1)
+    amouse.client.dragtotag.border(c, 10, function() end)
+    mouse.coords {x = c:geometry().x+10, y= c:geometry().y+10}
+    root.fake_input("button_release",1)
+
+    root.fake_input("button_press",1)
+    amouse.client.corner(c, "top_left")
+    mouse.coords {x = c:geometry().x+100, y= c:geometry().y+100}
+    root.fake_input("button_release",1)
+
+    root.fake_input("button_press",1)
+    amouse.client.corner(c, "auto")
+    mouse.coords {x = c:geometry().x+10, y= c:geometry().y+10}
+    root.fake_input("button_release",1)
+
     return true
 end)
 
