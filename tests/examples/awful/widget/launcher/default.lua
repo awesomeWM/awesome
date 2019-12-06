@@ -18,6 +18,7 @@ local mytaglist = awful.widget.taglist(screen[1], awful.widget.taglist.filter.al
 local mytasklist = awful.widget.tasklist(screen[1], awful.widget.tasklist.filter.currenttags, {}) --DOC_HIDE
 local hotkeys_popup = nil --DOC_HIDE
 
+    local --DOC_HIDE
     myawesomemenu = {
        { "hotkeys", function() hotkeys_popup.show_help(nil, awful.screen.focused()) end },
        { "manual", "xterm" .. " -e man awesome" },
@@ -27,6 +28,7 @@ local hotkeys_popup = nil --DOC_HIDE
 
     --DOC_NEWLINE
 
+    local --DOC_HIDE
     mymainmenu = awful.menu({ items = { { "awesome", myawesomemenu, beautiful.awesome_icon },
                                         { "open terminal", "xterm"}
                                       }
@@ -34,6 +36,7 @@ local hotkeys_popup = nil --DOC_HIDE
 
     --DOC_NEWLINE
 
+    local --DOC_HIDE
     mylauncher = awful.widget.launcher({ image = beautiful.awesome_icon,
                                          menu = mymainmenu })
 
