@@ -1,6 +1,7 @@
 ---------------------------------------------------------------------------
 --- Display the current client layout (`awful.layout`) icon or name.
 --
+-- @DOC_awful_widget_layoutbox_default_EXAMPLE@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
