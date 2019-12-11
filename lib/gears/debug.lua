@@ -81,7 +81,7 @@ local displayed_deprecations = {}
 
 --- Display a deprecation notice, but only once per traceback.
 --
--- This function also emits the `debug::deprecate` signal on the `awesome`
+-- This function also emits the `debug::deprecation` signal on the `awesome`
 -- global object.
 --
 -- @param[opt] see The message to a new method / function to use.
@@ -90,6 +90,10 @@ local displayed_deprecations = {}
 -- @tparam integer args.deprecated_in Print the message only when Awesome's
 --   version is equal to or greater than deprecated_in.
 -- @staticfct gears.debug.deprecate
+-- @emits debug::deprecation
+-- @emitstparam @emitstparam string msg The full formatted message.
+-- @emitstparam @emitstparam string see A message provided by the caller.
+-- @emitstparam @emitstparam table args Some extra context.
 function debug.deprecate(see, args)
     args = args or {}
     if args.deprecated_in then
