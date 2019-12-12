@@ -38,6 +38,7 @@ topics={
     '05-awesomerc.md',
     '06-appearance.md',
     '07-my-first-awesome.md',
+    '08-client-layout-system.md',
     '09-options.md',
     '16-using-cairo.md',
     '17-porting-tips.md',
