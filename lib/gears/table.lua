@@ -1,6 +1,13 @@
 ---------------------------------------------------------------------------
 --- Table module for gears.
 --
+-- Examples
+-- =======
+--
+-- Using `cycle_value`, you can cycle through values in a table.
+-- When the end of the table is reached, `cycle_value` loops around to the beginning.
+-- @DOC_text_gears_table_cycle_value_EXAMPLE@
+--
 -- @utillib gears.table
 ---------------------------------------------------------------------------
 
@@ -215,6 +222,41 @@ function gtable.clone(t, deep)
         end
     end
     return c
+end
+
+--- Get the next (or previous) value from a table and cycle if necessary.
+--
+-- If the table contains the same value multiple type (aka, is not a set), the
+-- `first_index` has to be specified.
+--
+-- @tparam table t The input table.
+-- @param value A value from the table.
+-- @tparam[opt=1] number step_size How many element forward (or backward) to pick.
+-- @tparam[opt=nil] function filter An optional function. When it returns
+--  `false`, the element are skipped until a match if found. It takes the value
+--  as its sole parameter.
+-- @tparam[opt=1] number start_at Where to start the lookup from.
+-- @return The value. If no element match, then `nil` is returned.
+-- @treturn number|nil The element (if any) key.
+-- @staticfct gears.table.cycle_value
+function gtable.cycle_value(t, value, step_size, filter, start_at)
+    local k = gtable.hasitem(t, value, true, start_at)
+    if not k then return end
+
+    step_size = step_size or 1
+    local new_key = gmath.cycle(#t, k + step_size)
+
+    if filter and not filter(t[new_key]) then
+        for i=1, #t, step_size do
+            local k2 = gmath.cycle(#t, new_key + i)
+            if filter(t[k2]) then
+                return t[k2], k2
+            end
+        end
+        return
+    end
+
+    return t[new_key], new_key
 end
 
 --- Iterate over a table.

@@ -63,10 +63,10 @@ local modkey = "mod4" --DOC_HIDE
         stop_key = {"Escape", "Super_L", "Super_R"},
         keybindings = {
             {{ modkey          } , " " , function()
-                awful.layout.set(gears.table.iterate_value(ll.layouts, ll.current_layout, 1))
+                awful.layout.set(gears.table.cycle_value(ll.layouts, ll.current_layout, 1))
             end},
             {{ modkey, "Shift" } , " " , function()
-                awful.layout.set(gears.table.iterate_value(ll.layouts, ll.current_layout, -1), nil)
+                awful.layout.set(gears.table.cycle_value(ll.layouts, ll.current_layout, -1), nil)
             end},
         }
     }
