@@ -3,6 +3,7 @@
 
 local runner = require("_runner")
 local awful = require("awful")
+local gdebug = require("gears.debug")
 
 local beautiful = require("beautiful")
 beautiful.border_color_normal = "#0000ff"
@@ -64,8 +65,36 @@ local steps = {
         test("#123456")
         test("#12345678")
         test("#123456ff", "#123456")
+
         return true
-    end
+    end,
+
+    function()
+        assert(client.focus)
+        local called, called2 = false, false
+        gdebug.print_warning = function() called = true end
+        local c2 = client.focus
+
+        client.focus.active = false
+        assert(called)
+        assert(not client.focus)
+        assert(not c2.active)
+        called = false
+
+        local real_assert = assert
+        assert = function() called2 = true end --luacheck: globals assert
+
+        c2.active = true
+
+        assert = real_assert --luacheck: globals assert
+
+        assert(called2)
+        assert(not called)
+        assert(c2.active)
+        assert(client.focus == c2)
+
+        return true
+    end,
 }
 
 runner.run_steps(steps)
