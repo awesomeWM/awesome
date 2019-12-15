@@ -4,6 +4,7 @@ local hotkeys_widget = require("awful.hotkeys_popup").widget
 -- luacheck: globals modkey
 
 local old_c = nil
+local called = false
 
 
 -- Get a tag and a client
@@ -322,7 +323,50 @@ local steps = {
             end
         end
     end,
+    -- Test the `c:activate{}` keybindings.
+    function()
+        client.connect_signal("request::activate", function()
+            called = true
+        end)
 
+        old_c = client.focus
+
+        root.fake_input("key_press", "Super_L")
+        awful.placement.centered(mouse, {parent=old_c})
+        root.fake_input("button_press",1)
+        root.fake_input("button_release",1)
+        root.fake_input("key_release", "Super_L")
+
+        return true
+    end,
+    function()
+        if not called then return end
+
+        client.focus = nil
+        called = false
+        root.fake_input("key_press", "Super_L")
+        root.fake_input("button_press",1)
+        root.fake_input("button_release",1)
+        root.fake_input("key_release", "Super_L")
+        return true
+    end,
+    -- Test resize.
+    function()
+        if not called then return end
+
+        called = false
+        root.fake_input("key_press", "Super_L")
+        root.fake_input("button_press",3)
+        root.fake_input("button_release",3)
+        root.fake_input("key_release", "Super_L")
+
+        return true
+    end,
+    function()
+        if not called then return end
+
+        return true
+    end
 }
 
 require("_runner").run_steps(steps)
