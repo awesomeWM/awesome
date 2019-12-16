@@ -432,9 +432,6 @@ local notification = {}
 -- @property widget_template
 -- @param table
 
---FIXME remove the screen attribute, let the handlers decide
--- document all handler extra properties
-
 --- Destroy notification by notification object.
 --
 -- @method destroy

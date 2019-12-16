@@ -10,13 +10,16 @@
 -- @popupmod naughty.layout.box
 ----------------------------------------------------------------------------
 
+local capi       = {screen=screen}
 local beautiful  = require("beautiful")
+local gtimer     = require("gears.timer")
 local gtable     = require("gears.table")
 local wibox      = require("wibox")
 local popup      = require("awful.popup")
 local awcommon   = require("awful.widget.common")
 local placement  = require("awful.placement")
 local abutton    = require("awful.button")
+local ascreen    = require("awful.screen")
 local gpcall     = require("gears.protected_call")
 local dpi        = require("beautiful").xresources.apply_dpi
 
@@ -26,10 +29,32 @@ local box, by_position = {}, {}
 
 -- Init the weak tables for each positions. It is done ahead of time rather
 -- than when notifications are added to simplify the code.
-for _, pos in ipairs { "top_left"   , "top_middle"   , "top_right",
-                       "bottom_left", "bottom_middle", "bottom_right" } do
-    by_position[pos] = setmetatable({},{__mode = "v"})
+
+local function init_screen(s)
+    if not s.valid then return end
+
+    if by_position[s] then return by_position[s] end
+
+    by_position[s] = setmetatable({},{__mode = "k"})
+
+    for _, pos in ipairs { "top_left"   , "top_middle"   , "top_right",
+                           "bottom_left", "bottom_middle", "bottom_right" } do
+        by_position[s][pos] = setmetatable({},{__mode = "v"})
+    end
+
+    return by_position[s]
 end
+
+ascreen.connect_for_each_screen(init_screen)
+
+-- Manually cleanup to help the GC.
+capi.screen.connect_signal("removed", function(scr)
+    -- By that time, all direct events should have been handled. Cleanup the
+    -- leftover. Being a weak table doesn't help Lua 5.1.
+    gtimer.delayed_call(function()
+        by_position[scr] = nil
+    end)
+end)
 
 local function get_spacing()
     local margin = beautiful.notification_spacing or 2
@@ -42,30 +67,32 @@ local function update_position(position)
     local align = position:match("_(.*)")
         :gsub("left", "front"):gsub("right", "back")
 
-    for k, wdg in ipairs(by_position[position]) do
-        local args = {
-            geometry            = by_position[position][k-1],
-            preferred_positions = {pref },
-            preferred_anchors   = {align},
-            margins             = get_spacing(),
-            honor_workarea      = true,
-        }
+    for _, pos in pairs(by_position) do
+        for k, wdg in ipairs(pos[position]) do
+            local args = {
+                geometry            = pos[position][k-1],
+                preferred_positions = {pref },
+                preferred_anchors   = {align},
+                margins             = get_spacing(),
+                honor_workarea      = true,
+            }
 
-        -- The first entry is aligned to the workarea, then the following to the
-        -- previous widget.
-        placement[k==1 and position:gsub("_middle", "") or "next_to"](wdg, args)
+            -- The first entry is aligned to the workarea, then the following to the
+            -- previous widget.
+            placement[k==1 and position:gsub("_middle", "") or "next_to"](wdg, args)
 
-        wdg.visible = true
+            wdg.visible = true
+        end
     end
 end
 
 local function finish(self)
     self.visible = false
-    assert(by_position[self.position])
+    assert(init_screen(self.screen)[self.position])
 
-    for k, v in ipairs(by_position[self.position]) do
+    for k, v in ipairs(init_screen(self.screen)[self.position]) do
         if v == self then
-            table.remove(by_position[self.position], k)
+            table.remove(init_screen(self.screen)[self.position], k)
             break
         end
     end
@@ -192,12 +219,15 @@ local function init(self, notification)
         end
     end
 
+    local s = notification.screen
+    assert(s)
+
     -- Add the notification to the active list
-    assert(by_position[position])
+    assert(init_screen(s)[position])
 
     self:_apply_size_now()
 
-    table.insert(by_position[position], self)
+    table.insert(init_screen(s)[position], self)
 
     local function update() update_position(position) end
 
@@ -231,18 +261,28 @@ function box:get_position()
 end
 
 local function new(args)
+    args = args or {}
+
     -- Set the default wibox values
     local new_args = {
         ontop        = true,
         visible      = false,
-        bg           = args and args.bg or beautiful.notification_bg,
-        fg           = args and args.fg or beautiful.notification_fg,
-        shape        = args and args.shape or beautiful.notification_shape,
-        border_width = args and args.border_width or beautiful.notification_border_width or 1,
-        border_color = args and args.border_color or beautiful.notification_border_color,
+        bg           = args.bg or beautiful.notification_bg,
+        fg           = args.fg or beautiful.notification_fg,
+        shape        = args.shape or beautiful.notification_shape,
+        border_width = args.border_width or beautiful.notification_border_width or 1,
+        border_color = args.border_color or beautiful.notification_border_color,
     }
 
-    new_args = args and setmetatable(new_args, {__index = args}) or new_args
+    -- Add a weak-table layer for the screen.
+    local weak_args = setmetatable({
+        screen = args.notification and args.notification.screen or nil
+    }, {__index = args, __mode = "v"})
+
+    -- This will cascade from the overriden `new_args` to the weak `weak_args`
+    -- to the original arguments. This way the original wont be modified and
+    -- the screen wont leak.
+    new_args = setmetatable(new_args, {__index = weak_args})
 
     -- Generate the box before the popup is created to avoid the size changing
     new_args.widget = generate_widget(new_args, new_args.notification)

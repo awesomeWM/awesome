@@ -574,8 +574,7 @@ local function register(notification, args)
     -- Add the some more properties
     rawset(notification, "get_suspended", get_suspended)
 
-    --TODO v5 uncouple the notifications and the screen
-    local s = get_screen(args.screen
+    local s = get_screen(notification.screen or args.screen
         or (notification.preset and notification.preset.screen)
         or screen.focused())
 
