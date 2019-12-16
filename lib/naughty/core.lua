@@ -415,6 +415,10 @@ function naughty.get__has_preset_handler()
     return conns["request::preset"] and #conns["request::preset"] > 0 or false
 end
 
+function naughty._reset_display_handlers()
+    conns["request::display"] = nil
+end
+
 --- Set new notification timeout.
 --
 -- This function is deprecated, use `notification:reset_timeout(new_timeout)`.
