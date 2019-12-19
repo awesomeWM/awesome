@@ -170,6 +170,22 @@ local vim_keys = {
             y="scroll line down",
         }
     }},
+
+    ["VIM: fold"] = {{
+        modifiers = {},
+        keys = {
+            za="toggle",
+            zc="close",
+            zo="open",
+            zA="toggle recursive",
+            zC="close recursive",
+            zO="open recursive",
+            zm="close all one level",
+            zr="open all one level",
+            zM="close all",
+            zR="open all",
+        }
+    }},
 }
 
 hotkeys_popup.add_hotkeys(vim_keys)
