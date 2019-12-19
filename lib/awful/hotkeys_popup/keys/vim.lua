@@ -10,12 +10,13 @@ local hotkeys_popup = require("awful.hotkeys_popup.widget")
 
 local vim_rule_any = {name={"vim", "VIM"}}
 for group_name, group_data in pairs({
-    ["VIM: motion"] =             { color="#009F00", rule_any=vim_rule_any },
-    ["VIM: command"] =            { color="#aFaF00", rule_any=vim_rule_any },
-    ["VIM: command (insert)"] =   { color="#cF4F40", rule_any=vim_rule_any },
-    ["VIM: operator"] =           { color="#aF6F00", rule_any=vim_rule_any },
-    ["VIM: find"] =               { color="#65cF9F", rule_any=vim_rule_any },
-    ["VIM: scroll"] =             { color="#659FdF", rule_any=vim_rule_any },
+    ["VIM: motion"] =             { rule_any=vim_rule_any },
+    ["VIM: command"] =            { rule_any=vim_rule_any },
+    ["VIM: command (insert)"] =   { rule_any=vim_rule_any },
+    ["VIM: operator"] =           { rule_any=vim_rule_any },
+    ["VIM: find"] =               { rule_any=vim_rule_any },
+    ["VIM: scroll"] =             { rule_any=vim_rule_any },
+    ["VIM: fold"] =               { rule_any=vim_rule_any },
 }) do
     hotkeys_popup.add_group_rules(group_name, group_data)
 end
