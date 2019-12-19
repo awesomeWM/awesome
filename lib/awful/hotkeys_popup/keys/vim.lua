@@ -8,20 +8,6 @@
 
 local hotkeys_popup = require("awful.hotkeys_popup.widget")
 
-local vim_rule_any = {name={"vim", "VIM"}}
-for group_name, group_data in pairs({
-    ["VIM: motion"] =             { rule_any=vim_rule_any },
-    ["VIM: command"] =            { rule_any=vim_rule_any },
-    ["VIM: command (insert)"] =   { rule_any=vim_rule_any },
-    ["VIM: operator"] =           { rule_any=vim_rule_any },
-    ["VIM: find"] =               { rule_any=vim_rule_any },
-    ["VIM: scroll"] =             { rule_any=vim_rule_any },
-    ["VIM: fold"] =               { rule_any=vim_rule_any },
-}) do
-    hotkeys_popup.add_group_rules(group_name, group_data)
-end
-
-
 local vim_keys = {
 
     ["VIM: motion"] = {{
@@ -190,5 +176,10 @@ local vim_keys = {
 }
 
 hotkeys_popup.add_hotkeys(vim_keys)
+
+local vim_rule_any = {name={"vim", "VIM"}}
+for group_name, _ in pairs(vim_keys) do
+    hotkeys_popup.add_group_rules(group_name, { rule_any=vim_rule_any })
+end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
