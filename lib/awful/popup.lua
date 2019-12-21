@@ -125,6 +125,7 @@ function main_widget:set_widget(widget)
     end
     self._private.widget = widget
     self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::widget")
 end
 
 function main_widget:get_widget()
@@ -164,10 +165,12 @@ local popup = {}
 --  table of positions
 -- @see awful.placement.next_to
 -- @see awful.popup.preferred_anchors
+-- @propemits true false
 
 function popup:set_preferred_positions(pref_pos)
     self._private.preferred_directions = pref_pos
     set_position(self)
+    self:emit_signal("property::preferred_positions", pref_pos)
 end
 
 --- Set the preferred popup anchors relative to the parent.
@@ -188,12 +191,14 @@ end
 -- @property preferred_anchors
 -- @tparam table|string preferred_anchors Either a single anchor name or a table
 --  ordered by priority.
+-- @propemits true false
 -- @see awful.placement.next_to
 -- @see awful.popup.preferred_positions
 
 function popup:set_preferred_anchors(pref_anchors)
     self._private.preferred_anchors = pref_anchors
     set_position(self)
+    self:emit_signal("property::preferred_anchors", pref_anchors)
 end
 
 --- The current position relative to the parent object.
@@ -278,34 +283,49 @@ end
 --
 -- @property hide_on_right_click
 -- @tparam[opt=false] boolean hide_on_right_click
+-- @propemits true false
 
 function popup:set_hide_on_right_click(value)
     self[value and "connect_signal" or "disconnect_signal"](
         self, "button::press", self._private.hide_fct
     )
+    self:emit_signal("property::hide_on_right_click", value)
 end
 
 --- The popup minimum width.
+--
 -- @property minimum_width
--- @tparam[opt=1] number The minimum width
+-- @tparam[opt=1] number minimum_width The minimum width.
+-- @propemits true false
 
 --- The popup minimum height.
+--
 -- @property minimum_height
--- @tparam[opt=1] number The minimum height
+-- @tparam[opt=1] number minimum_height The minimum height.
+-- @propemits true false
 
 --- The popup maximum width.
+--
 -- @property maximum_width
--- @tparam[opt=1] number The maximum width
+-- @tparam[opt=1] number maximum_width The maximum width.
+-- @propemits true false
 
 --- The popup maximum height.
+--
 -- @property maximum_height
--- @tparam[opt=1] number The maximum height
+-- @tparam[opt=1] number maximum_height The maximum height.
+-- @propemits true false
 
 for _, orientation in ipairs {"_width", "_height"} do
     for _, limit in ipairs {"minimum", "maximum"} do
-        popup["set_"..limit..orientation] = function(self, value)
-            self._private[limit..orientation] = value
+        local prop = limit..orientation
+        popup["set_"..prop] = function(self, value)
+            self._private[prop] = value
             self._private.container:emit_signal("widget::layout_changed")
+            self:emit_signal("property::"..prop, value)
+        end
+        popup["get_"..prop] = function(self)
+            return self._private[prop]
         end
     end
 end
@@ -320,6 +340,7 @@ end
 -- @tparam table|number offset An integer value or a `{x=, y=}` table.
 -- @tparam[opt=offset] number offset.x The horizontal distance.
 -- @tparam[opt=offset] number offset.y The vertical distance.
+-- @propemits true false
 
 function popup:set_offset(offset)
 
@@ -339,13 +360,18 @@ function popup:set_offset(offset)
     self._private.offset = offset
 
     self:_apply_size_now(false)
+
+    self:emit_signal("property::offset", offset)
 end
 
 --- Set the placement function.
+--
 -- @tparam[opt=next_to] function|string|boolean The placement function or name
 -- (or false to disable placement)
 -- @property placement
 -- @param function
+-- @propemits true false
+-- @see awful.placement
 
 function popup:set_placement(f)
     if type(f) == "string" then
@@ -354,6 +380,7 @@ function popup:set_placement(f)
 
     self._private.placement = f
     self:_apply_size_now(false)
+    self:emit_signal("property::placement")
 end
 
 -- For the tests and the race condition when 2 popups are placed next to each
@@ -382,6 +409,7 @@ end
 function popup:set_widget(wid)
     self._private.widget = wid
     self._private.container:set_widget(wid)
+    self:emit_signal("property::widget", wid)
 end
 
 function popup:get_widget()
