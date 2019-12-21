@@ -1,12 +1,9 @@
 --- Border width.
 --
--- **Signal:**
---
---  * *property::border_width*
---
 -- @baseclass wibox
 -- @property border_width
 -- @param integer
+-- @propemits false false
 
 --- Border color.
 --
@@ -26,178 +23,146 @@
 --       T‾  ‾T
 --    Green   Alpha
 --
--- **Signal:**
---
---  * *property::border_color*
---
 -- @baseclass wibox
 -- @property border_color
 -- @param string
+-- @propemits false false
 
 --- On top of other windows.
---
--- **Signal:**
---
---  * *property::ontop*
 --
 -- @baseclass wibox
 -- @property ontop
 -- @param boolean
+-- @propemits false false
 
 --- The mouse cursor.
---
--- **Signal:**
---
---  * *property::cursor*
 --
 -- @baseclass wibox
 -- @property cursor
 -- @param string
 -- @see mouse
+-- @propemits false false
 
 --- Visibility.
---
--- **Signal:**
---
---  * *property::visible*
 --
 -- @baseclass wibox
 -- @property visible
 -- @param boolean
+-- @propemits false false
 
 --- The opacity of the wibox, between 0 and 1.
---
--- **Signal:**
---
---  * *property::opacity*
 --
 -- @baseclass wibox
 -- @property opacity
 -- @tparam number opacity (between 0 and 1)
+-- @propemits false false
 
 --- The window type (desktop, normal, dock, ...).
---
--- **Signal:**
---
---  * *property::type*
 --
 -- @baseclass wibox
 -- @property type
 -- @param string
 -- @see client.type
+-- @propemits false false
 
 --- The x coordinates.
---
--- **Signal:**
---
---  * *property::x*
 --
 -- @baseclass wibox
 -- @property x
 -- @param integer
+-- @propemits false false
 
 --- The y coordinates.
---
--- **Signal:**
---
---  * *property::y*
 --
 -- @baseclass wibox
 -- @property y
 -- @param integer
+-- @propemits false false
 
 --- The width of the wibox.
---
--- **Signal:**
---
---  * *property::width*
 --
 -- @baseclass wibox
 -- @property width
 -- @param width
+-- @propemits false false
 
 --- The height of the wibox.
---
--- **Signal:**
---
---  * *property::height*
 --
 -- @baseclass wibox
 -- @property height
 -- @param height
+-- @propemits false false
 
 --- The wibox screen.
 --
 -- @baseclass wibox
 -- @property screen
 -- @param screen
+-- @propemits true false
 
 ---  The wibox's `drawable`.
---
--- **Signal:**
---
---  * *property::drawable*
 --
 -- @baseclass wibox
 -- @property drawable
 -- @tparam drawable drawable
+-- @propemits false false
 
 --- The widget that the `wibox` displays.
 -- @baseclass wibox
 -- @property widget
 -- @param widget
+-- @propemits true false
 
 --- The X window id.
---
--- **Signal:**
---
---  * *property::window*
 --
 -- @baseclass wibox
 -- @property window
 -- @param string
 -- @see client.window
+-- @propemits false false
 
 --- The wibox's bounding shape as a (native) cairo surface.
 --
--- **Signal:**
---
---  * *property::shape_bounding*
+-- If you want to set a shape, let say some rounded corners, use
+-- the `shape` property rather than this. If you want something
+-- very complex, for example, holes, then use this.
 --
 -- @baseclass wibox
 -- @property shape_bounding
 -- @param surface._native
+-- @propemits false false
+-- @see shape
 
 --- The wibox's clip shape as a (native) cairo surface.
 --
--- **Signal:**
---
---  * *property::shape_clip*
+-- The clip shape is the shape of the window *content* rather
+-- than the outer window shape.
 --
 -- @baseclass wibox
 -- @property shape_clip
 -- @param surface._native
+-- @propemits false false
+-- @see shape
 
 --- The wibox's input shape as a (native) cairo surface.
 --
--- **Signal:**
---
---  * *property::shape_input*
+-- The input shape allows to disable clicks and mouse events
+-- on part of the window. This is how `input_passthrough` is
+-- implemented.
 --
 -- @baseclass wibox
 -- @property shape_input
 -- @param surface._native
-
+-- @propemits false false
+-- @see input_passthrough
 
 --- The wibar's shape.
---
--- **Signal:**
---
---  * *property::shape*
 --
 -- @baseclass wibox
 -- @property shape
 -- @tparam gears.shape shape
+-- @propemits true false
+-- @see gears.shape
 
 --- Forward the inputs to the client below the wibox.
 --
@@ -207,20 +172,18 @@
 -- a subtle transparent wibox on top a fullscreen client to display important
 -- data such as a low battery warning.
 --
--- **Signal:**
---
---  * *property::input_passthrough*
---
 -- @baseclass wibox
 -- @property input_passthrough
 -- @param[opt=false] boolean
 -- @see shape_input
+-- @propemits true false
 
 --- Get or set mouse buttons bindings to a wibox.
 --
 -- @baseclass wibox
+-- @property buttons
 -- @param buttons_table A table of buttons objects, or nothing.
--- @method buttons
+-- @propemits false false
 
 --- Get or set wibox geometry. That's the same as accessing or setting the x,
 -- y, width or height properties of a wibox.
@@ -229,16 +192,33 @@
 -- @param A table with coordinates to modify.
 -- @return A table with wibox coordinates and geometry.
 -- @method geometry
+-- @emits property::geometry When the geometry change.
+-- @emitstparam property::geometry table geo The geometry table.
 
 --- Get or set wibox struts.
+--
+-- Struts are the area which should be reserved on each side of
+-- the screen for this wibox. This is used to make bars and
+-- docked displays. Note that `awful.wibar` implements all the
+-- required boilerplate code to make bar. Only use this if you
+-- want special type of bars (like bars not fully attached to
+-- the side of the screen).
 --
 -- @baseclass wibox
 -- @param strut A table with new strut, or nothing
 -- @return The wibox strut in a table.
 -- @method struts
 -- @see client.struts
+-- @emits property::struts
 
 --- The default background color.
+--
+-- The background color can be transparent. If there is a
+-- compositing manager such as compton, then it will be
+-- real transparency and may include blur (provided by the
+-- compositor). When there is no compositor, it will take
+-- a picture of the wallpaper and blend it.
+--
 -- @baseclass wibox
 -- @beautiful beautiful.bg_normal
 -- @param color
@@ -257,28 +237,41 @@
 -- @method setup
 
 --- The background of the wibox.
+--
+-- The background color can be transparent. If there is a
+-- compositing manager such as compton, then it will be
+-- real transparency and may include blur (provided by the
+-- compositor). When there is no compositor, it will take
+-- a picture of the wallpaper and blend it.
+--
 -- @baseclass wibox
--- @param c The background to use. This must either be a cairo pattern object,
---   nil or a string that gears.color() understands.
 -- @property bg
--- @param color
+-- @tparam c The background to use. This must either be a cairo pattern object,
+--   nil or a string that gears.color() understands.
 -- @see gears.color
+-- @propemits true false
+-- @usebeautiful beautiful.bg_normal The default (fallback) bg color.
 
 --- The background image of the drawable.
+--
 -- If `image` is a function, it will be called with `(context, cr, width, height)`
 -- as arguments. Any other arguments passed to this method will be appended.
--- @param image A background image or a function
+--
+-- @tparam gears.suface|string|function image A background image or a function.
 -- @baseclass wibox
 -- @property bgimage
 -- @see gears.surface
+-- @propemits true false
 
 --- The foreground (text) of the wibox.
--- @param c The foreground to use. This must either be a cairo pattern object,
+-- @tparam color c The foreground to use. This must either be a cairo pattern object,
 --   nil or a string that gears.color() understands.
 -- @baseclass wibox
 -- @property fg
 -- @param color
 -- @see gears.color
+-- @propemits true false
+-- @usebeautiful beautiful.fg_normal The default (fallback) fg color.
 
 --- Find a widget by a point.
 -- The wibox must have drawn itself at least once for this to work.
