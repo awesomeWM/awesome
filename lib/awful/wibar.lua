@@ -36,14 +36,8 @@ local wiboxes = setmetatable({}, {__mode = "v"})
 --- If the wibar needs to be stretched to fill the screen.
 -- @property stretch
 -- @tparam boolean stretch
-
---- The wibar's width.
--- @property width
--- @tparam integer width
-
---- The wibar's height.
--- @property height
--- @tparam integer height
+-- @propbeautiful
+-- @propemits true false
 
 --- If the wibar needs to be stretched to fill the screen.
 -- @beautiful beautiful.wibar_stretch
@@ -165,8 +159,17 @@ local function reattach(wb)
 end
 
 --- The wibox position.
+--
+-- The valid values are:
+--
+-- * left
+-- * right
+-- * top
+-- * bottom
+--
 -- @property position
--- @param string Either "left", right", "top" or "bottom"
+-- @tparam string position Either "left", right", "top" or "bottom"
+-- @propemits true false
 
 local function get_position(wb)
     return wb._position or "top"
@@ -215,6 +218,8 @@ local function set_position(wb, position, skip_reattach)
         -- or right wibars. To solve, this, they need to be re-attached.
         reattach(wb)
     end
+
+    wb:emit_signal("property::position", position)
 end
 
 local function get_stretch(w)
@@ -225,6 +230,8 @@ local function set_stretch(w, value)
     w._stretch = value
 
     attach(w, w.position)
+
+    w:emit_signal("property::stretch", value)
 end
 
 --- Remove a wibar.
@@ -443,6 +450,8 @@ function awfulwibar.mt:__call(...)
 end
 
 --@DOC_wibox_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(awfulwibar, awfulwibar.mt)
 
