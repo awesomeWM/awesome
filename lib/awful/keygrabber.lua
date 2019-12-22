@@ -406,7 +406,7 @@ end
 -- poluting the original object of having extra boilerplate code.
 --
 -- @tfield keygrabber current_instance
--- @see property::current_instance
+-- @emits property::current_instance
 
 --- The global signal used to track the `current_instance`.
 --
@@ -422,6 +422,8 @@ end
 --
 -- @method start
 -- @treturn boolean If the keygrabber was successfully started.
+-- @emits started
+-- @emits property::current_instance
 function keygrabber:start()
     if self.grabber or keygrab.current_instance then
         return false
@@ -473,6 +475,8 @@ end
 
 --- Stop the keygrabber.
 -- @method stop
+-- @emits stopped
+-- @emits property::current_instance
 function keygrabber:stop(_stop_key, _stop_mods) -- (at)function disables ldoc params
     keygrab.stop(self.grabber)
 
