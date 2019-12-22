@@ -200,7 +200,7 @@ end
 
 --- The wibox containing the tooltip widgets.
 -- @property wibox
--- @param `wibox`
+-- @param wibox
 
 function tooltip:get_wibox()
     if self._private.wibox then
@@ -224,6 +224,7 @@ end
 --- Is the tooltip visible?
 -- @property visible
 -- @param boolean
+-- @propemits true false
 
 function tooltip:get_visible()
     return self._private.visible
@@ -237,6 +238,8 @@ function tooltip:set_visible(value)
     else
         hide(self)
     end
+
+    self:emit_signal("property::visible", value)
 end
 
 --- The horizontal alignment.
@@ -261,9 +264,10 @@ end
 --
 -- @property align
 -- @param string
--- @see beautiful.tooltip_align
 -- @see mode
 -- @see preferred_positions
+-- @propemits true false
+-- @propbeautiful
 
 --- The default tooltip alignment.
 -- @beautiful beautiful.tooltip_align
@@ -282,7 +286,7 @@ function tooltip:set_align(value)
     self._private.align = value
 
     set_geometry(self)
-    self:emit_signal("property::align")
+    self:emit_signal("property::align", value)
 end
 
 --- The shape of the tooltip window.
@@ -292,10 +296,13 @@ end
 -- @property shape
 -- @tparam gears.shape shape
 -- @see gears.shape
--- @see beautiful.tooltip_shape
+-- @propemits true false
+-- @propbeautiful
 
 function tooltip:set_shape(s)
     self.backgroundbox:set_shape(s)
+
+    self:emit_signal("property::shape", s)
 end
 
 --- Set the tooltip positioning mode.
@@ -318,12 +325,13 @@ end
 --
 -- @property mode
 -- @param string
+-- @propemits true false
 
 function tooltip:set_mode(mode)
     self._private.mode = mode
 
     set_geometry(self)
-    self:emit_signal("property::mode")
+    self:emit_signal("property::mode", mode)
 end
 
 function tooltip:get_mode()
@@ -350,6 +358,7 @@ end
 --
 -- @property preferred_positions
 -- @tparam table preferred_positions The position, ordered by priorities
+-- @propemits true false
 -- @see align
 -- @see mode
 -- @see preferred_alignments
@@ -363,6 +372,8 @@ function tooltip:set_preferred_positions(value)
     self._private.preferred_positions = value
 
     set_geometry(self)
+
+    self:emit_signal("property::preferred_positions", value)
 end
 
 --- The preferred alignment when using the `outside` mode.
@@ -394,6 +405,7 @@ end
 --
 -- @property preferred_alignments
 -- @param string
+-- @propemits true false
 -- @see preferred_positions
 
 function tooltip:get_preferred_alignments()
@@ -405,14 +417,16 @@ function tooltip:set_preferred_alignments(value)
     self._private.preferred_alignments = value
 
     set_geometry(self)
+
+    self:emit_signal("property::preferred_alignments", value)
 end
 
 --- Change displayed text.
 --
 -- @property text
--- @tparam tooltip self The tooltip object.
 -- @tparam string  text New tooltip text, passed to
 --   `wibox.widget.textbox.set_text`.
+-- @propemits true false
 -- @see wibox.widget.textbox
 
 function tooltip:set_text(text)
@@ -420,14 +434,16 @@ function tooltip:set_text(text)
     if self._private.visible then
         set_geometry(self)
     end
+
+    self:emit_signal("property::text", text)
 end
 
 --- Change displayed markup.
 --
 -- @property markup
--- @tparam tooltip self The tooltip object.
 -- @tparam string  text New tooltip markup, passed to
 --   `wibox.widget.textbox.set_markup`.
+-- @propemits true false
 -- @see wibox.widget.textbox
 
 function tooltip:set_markup(text)
@@ -435,18 +451,21 @@ function tooltip:set_markup(text)
     if self._private.visible then
         set_geometry(self)
     end
+
+    self:emit_signal("property::markup", text)
 end
 
 --- Change the tooltip's update interval.
 --
 -- @property timeout
--- @tparam tooltip self A tooltip object.
 -- @tparam number timeout The timeout value.
+-- @propemits true false
 
 function tooltip:set_timeout(timeout)
     if self.timer then
         self.timer.timeout = timeout
     end
+    self:emit_signal("property::timeout", timeout)
 end
 
 --- Set all margins around the tooltip textbox
@@ -454,11 +473,12 @@ end
 -- @DOC_awful_tooltip_margins_EXAMPLE@
 --
 -- @property margins
--- @tparam tooltip self A tooltip object
--- @tparam number New margins value
+-- @tparam number|table New margins value
+-- @propemits true false
 
 function tooltip:set_margins(val)
     self.marginbox:set_margins(val)
+    self:emit_signal("property::margins", val)
 end
 
 --- The border width.
@@ -467,9 +487,12 @@ end
 --
 -- @property border_width
 -- @param number
+-- @propemits true false
+-- @propbeautiful
 
 function tooltip:set_border_width(val)
     self.widget.border_width = val
+    self:emit_signal("property::border_width", val)
 end
 
 --- The border color.
@@ -478,10 +501,11 @@ end
 --
 -- @property border_color
 -- @param color
--- @param gears.color
+-- @propemits true false
 
 function tooltip:set_border_color(val)
     self.widget.border_color = val
+    self:emit_signal("property::border_color", val)
 end
 
 --- Set the margins around the left and right of the tooltip textbox
@@ -489,12 +513,13 @@ end
 -- @DOC_awful_tooltip_margins_leftright_EXAMPLE@
 --
 -- @property margins_leftright
--- @tparam tooltip self A tooltip object
 -- @tparam number New margins value
+-- @propemits true false
 
 function tooltip:set_margin_leftright(val)
     self.marginbox:set_left(val)
     self.marginbox:set_right(val)
+    self:emit_signal("property::margin_leftright", val)
 end
 
 --TODO v5 deprecate this
@@ -507,12 +532,13 @@ end
 -- @DOC_awful_tooltip_margins_topbottom_EXAMPLE@
 --
 -- @property margins_topbottom
--- @tparam tooltip self A tooltip object
 -- @tparam number New margins value
+-- @propemits true false
 
 function tooltip:set_margin_topbottom(val)
     self.marginbox:set_top(val)
     self.marginbox:set_bottom(val)
+    self:emit_signal("property::margin_topbottom", val)
 end
 
 --TODO v5 deprecate this
@@ -726,6 +752,8 @@ end
 function tooltip.mt:__call(...)
     return tooltip.new(...)
 end
+
+--@DOC_object_COMMON@
 
 return setmetatable(tooltip, tooltip.mt)
 
