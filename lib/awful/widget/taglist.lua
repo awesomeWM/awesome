@@ -607,6 +607,10 @@ function taglist.mt:__call(...)
     return taglist.new(...)
 end
 
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
+
 return setmetatable(taglist, taglist.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

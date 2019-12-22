@@ -84,6 +84,7 @@ end
 --
 -- @property client
 -- @param client
+-- @propemits true false
 
 function clienticon:get_client()
     return self._private.client
@@ -94,6 +95,7 @@ function clienticon:set_client(c)
     self._private.client = c
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::client", c)
 end
 
 --- Returns a new clienticon.

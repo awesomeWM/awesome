@@ -310,6 +310,10 @@ function keyboardlayout.mt:__call(...)
     return _instance
 end
 
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
+
 return setmetatable(keyboardlayout, keyboardlayout.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
