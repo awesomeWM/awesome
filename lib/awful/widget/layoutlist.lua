@@ -178,12 +178,14 @@ local layoutlist = {}
 -- automatically.
 -- @property base_layout
 -- @param widget
+-- @propemits true false
 -- @see wibox.layout.fixed.vertical
 -- @see base_layout
 
 --- The delegate widget template.
 -- @property widget_template
 -- @param table
+-- @propemits true false
 
 --- The layoutlist screen.
 -- @property screen
@@ -329,6 +331,7 @@ function layoutlist:set_base_layout(layout)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::base_layout", layout)
 end
 
 function layoutlist:set_widget_template(widget_template)
@@ -345,6 +348,7 @@ function layoutlist:set_widget_template(widget_template)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::widget_template", widget_template)
 end
 
 function layoutlist:layout(_, width, height)

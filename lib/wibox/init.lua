@@ -41,6 +41,7 @@ local force_forward = {
 function wibox:set_widget(widget)
     local w = base.make_widget_from_value(widget)
     self._drawable:set_widget(w)
+    self:emit_signal("property::widget", widget)
 end
 
 function wibox:get_widget()
@@ -51,14 +52,17 @@ wibox.setup = base.widget.setup
 
 function wibox:set_bg(c)
     self._drawable:set_bg(c)
+    self:emit_signal("property::bg", c)
 end
 
 function wibox:set_bgimage(image, ...)
     self._drawable:set_bgimage(image, ...)
+    self:emit_signal("property::bgimage", ...)
 end
 
 function wibox:set_fg(c)
     self._drawable:set_fg(c)
+    self:emit_signal("property::fg", c)
 end
 
 function wibox:find_widgets(x, y)
@@ -149,6 +153,7 @@ end
 function wibox:set_shape(shape)
     self._shape = shape
     self:_apply_shape()
+    self:emit_signal("property::shape", shape)
 end
 
 function wibox:get_shape()
@@ -199,6 +204,7 @@ function wibox:set_screen(s)
     -- (x,y) is not enough to figure out the correct screen.
     self.screen_assigned = s
     self._drawable:_force_screen(s)
+    self:emit_signal("property::screen", s)
 end
 
 function wibox:get_children_by_id(name)

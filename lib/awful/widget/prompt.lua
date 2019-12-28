@@ -158,6 +158,10 @@ function widgetprompt.mt:__call(...)
     return widgetprompt.new(...)
 end
 
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
+
 return setmetatable(widgetprompt, widgetprompt.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -85,6 +85,7 @@ local timer = { mt = {} }
 
 --- Start the timer.
 -- @method start
+-- @emits start
 function timer:start()
     if self.data.source_id ~= nil then
         gdebug.print_error(traceback("timer already started"))
@@ -99,6 +100,7 @@ end
 
 --- Stop the timer.
 -- @method stop
+-- @emits stop
 function timer:stop()
     if self.data.source_id == nil then
         gdebug.print_error(traceback("timer not started"))
@@ -113,6 +115,8 @@ end
 -- This is equivalent to stopping the timer if it is running and then starting
 -- it.
 -- @method again
+-- @emits start
+-- @emits stop
 function timer:again()
     if self.data.source_id ~= nil then
         self:stop()
@@ -128,6 +132,7 @@ end
 -- **Signal:** property::timeout
 -- @property timeout
 -- @param number
+-- @propemits true false
 
 local timer_instance_mt = {
     __index = function(self, property)
@@ -143,7 +148,7 @@ local timer_instance_mt = {
     __newindex = function(self, property, value)
         if property == "timeout" then
             self.data.timeout = tonumber(value)
-            self:emit_signal("property::timeout")
+            self:emit_signal("property::timeout", value)
         end
     end
 }

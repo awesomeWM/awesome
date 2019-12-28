@@ -739,6 +739,10 @@ function tasklist.mt:__call(...)
     return tasklist.new(...)
 end
 
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
+
 return setmetatable(tasklist, tasklist.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
