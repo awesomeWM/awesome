@@ -273,7 +273,7 @@ function keyboardlayout.new()
     end
 
     self.next_layout = function()
-        self.set_layout((self._current + 1) % (#self._layout + 1))
+        self.set_layout(((self._current + 1) % #self._layout) + 1)
     end
 
     self.set_layout = function(group_number)
