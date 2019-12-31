@@ -418,7 +418,7 @@ sort_modules=true
 
 -- Add more project level (left side index) types.
 new_type("coreclassmod", "Core_components"  , true)
-new_type("inputmodule" , "Input handling"   , true)
+new_type("inputmodule" , "Input_handling"   , true)
 new_type("ruleslib"    , "Declarative_rules", true)
 new_type("widgetmod"   , "Widgets"          , true)
 new_type("containermod", "Widget_containers", true)
