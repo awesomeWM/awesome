@@ -1716,6 +1716,15 @@ capi.client.connect_signal("unmanage::connected", function()
     )
 end)
 
+for _, sig in ipairs {"marked", "unmarked"} do
+    capi.client.connect_signal(sig.."::connected", function()
+        gdebug.deprecate(
+            "Use `property::marked` rather than `".. sig .. "`",
+            {deprecated_in=4}
+        )
+    end)
+end
+
 -- Connect to "focus" signal, and allow to disable tracking.
 do
     local disabled_count = 1
