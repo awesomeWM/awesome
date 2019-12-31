@@ -19,7 +19,7 @@ shape.update = {}
 
 --- Get one of a client's shapes and transform it to include window decorations.
 -- @function awful.client.shape.get_transformed
--- @client c The client whose shape should be retrieved
+-- @tparam client c The client whose shape should be retrieved
 -- @tparam string shape_name Either "bounding" or "clip"
 function shape.get_transformed(c, shape_name)
     local border = shape_name == "bounding" and c.border_width or 0
@@ -91,7 +91,7 @@ end
 
 --- Update all of a client's shapes from the shapes the client set itself.
 -- @function awful.client.shape.update.all
--- @client c The client to act on
+-- @tparam client c The client to act on
 function shape.update.all(c)
     shape.update.bounding(c)
     shape.update.clip(c)
@@ -99,7 +99,7 @@ end
 
 --- Update a client's bounding shape from the shape the client set itself.
 -- @function awful.client.shape.update.bounding
--- @client c The client to act on
+-- @tparam client c The client to act on
 function shape.update.bounding(c)
     local res = shape.get_transformed(c, "bounding")
     c.shape_bounding = res and res._native
@@ -111,7 +111,7 @@ end
 
 --- Update a client's clip shape from the shape the client set itself.
 -- @function awful.client.shape.update.clip
--- @client c The client to act on
+-- @tparam client c The client to act on
 function shape.update.clip(c)
     local res = shape.get_transformed(c, "clip")
     c.shape_clip = res and res._native

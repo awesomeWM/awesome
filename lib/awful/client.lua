@@ -157,7 +157,7 @@ client.focus = require("awful.client.focus")
 --
 -- @deprecated awful.client.jumpto
 -- @see client.jump_to
--- @client c the client to jump to
+-- @tparam client c the client to jump to
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
@@ -251,7 +251,7 @@ end
 --
 -- @staticfct awful.client.next
 -- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
--- @client[opt] sel The client.
+-- @tparam[opt] client sel The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn[opt] client|nil A client, or nil if no client is available.
 --
@@ -287,7 +287,7 @@ end
 --
 -- @staticfct awful.client.swap.bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
--- @client[opt=focused] c The client.
+-- @tparam[opt=focused] client c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @see swap
 -- @see swapped
@@ -316,7 +316,7 @@ end
 -- Swaps across screens.
 -- @staticfct awful.client.swap.global_bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
--- @client[opt] sel The client.
+-- @tparam[opt] client sel The client.
 -- @request client activate client.swap.global_bydirection granted When a client
 --  could be activated because `awful.client.swap.global_bydirection` was called.
 -- @see swap
@@ -357,7 +357,7 @@ end
 --
 -- @staticfct awful.client.swap.byidx
 -- @tparam integer i The index.
--- @client[opt] c The client, otherwise focused one is used.
+-- @tparam[opt] client c The client, otherwise focused one is used.
 -- @see swap
 -- @see swapped
 -- @see awful.client.swap.bydirection
@@ -429,7 +429,7 @@ end
 --- Get the master window.
 --
 -- @legacylayout awful.client.getmaster
--- @screen_or_idx[opt=awful.screen.focused()] s The screen.
+-- @tparam[opt=awful.screen.focused()] screen s The screen.
 -- @treturn client The master client.
 function client.getmaster(s)
     s = s or screen.focused()
@@ -439,7 +439,7 @@ end
 --- Set the client as master: put it at the beginning of other windows.
 --
 -- @legacylayout awful.client.setmaster
--- @client c The window to set as master.
+-- @tparam client c The window to set as master.
 function client.setmaster(c)
     local cls = gtable.reverse(capi.client.get(c.screen))
     for _, v in pairs(cls) do
@@ -449,7 +449,7 @@ end
 
 --- Set the client as slave: put it at the end of other windows.
 -- @legacylayout awful.client.setslave
--- @client c The window to set as slave.
+-- @tparam client c The window to set as slave.
 function client.setslave(c)
     local cls = capi.client.get(c.screen)
     for _, v in pairs(cls) do
@@ -463,7 +463,7 @@ end
 -- @tparam integer y The relative y coordinate.
 -- @tparam integer w The relative width.
 -- @tparam integer h The relative height.
--- @client[opt] c The client, otherwise focused one is used.
+-- @tparam[opt] client c The client, otherwise focused one is used.
 -- @see client.relative_move
 function client.moveresize(x, y, w, h, c)
     gdebug.deprecate("Use c:relative_move(x, y, w, h) instead of awful.client.moveresize", {deprecated_in=4})
@@ -489,7 +489,7 @@ end
 --- Move a client to a tag.
 -- @deprecated awful.client.movetotag
 -- @tparam tag target The tag to move the client to.
--- @client[opt] c The client to move, otherwise the focused one is used.
+-- @tparam[opt] client c The client to move, otherwise the focused one is used.
 -- @see client.move_to_tag
 function client.movetotag(target, c)
     gdebug.deprecate("Use c:move_to_tag(target) instead of awful.client.movetotag", {deprecated_in=4})
@@ -519,7 +519,7 @@ end
 --
 -- @deprecated awful.client.toggletag
 -- @tparam tag target The tag to toggle.
--- @client[opt] c The client to toggle, otherwise the focused one is used.
+-- @tparam[opt] client c The client to toggle, otherwise the focused one is used.
 -- @see client.toggle_tag
 -- @see tags
 function client.toggletag(target, c)
@@ -556,7 +556,7 @@ end
 
 --- Move a client to a screen. Default is next screen, cycling.
 -- @deprecated awful.client.movetoscreen
--- @client c The client to move.
+-- @tparam client c The client to move.
 -- @tparam screen s The screen, default to current + 1.
 -- @see screen
 -- @see client.move_to_screen
@@ -660,7 +660,7 @@ end
 
 --- Mark a client, and then call 'marked' hook.
 -- @deprecated awful.client.mark
--- @client c The client to mark, the focused one if not specified.
+-- @tparam client c The client to mark, the focused one if not specified.
 function client.mark(c)
     gdebug.deprecate("Use c.marked = true instead of awful.client.mark", {deprecated_in=4})
     client.object.set_marked(c or capi.client.focus, true)
@@ -668,7 +668,7 @@ end
 
 --- Unmark a client and then call 'unmarked' hook.
 -- @deprecated awful.client.unmark
--- @client c The client to unmark, or the focused one if not specified.
+-- @tparam client c The client to unmark, or the focused one if not specified.
 function client.unmark(c)
     gdebug.deprecate("Use c.marked = false instead of awful.client.unmark", {deprecated_in=4})
     client.object.set_marked(c or capi.client.focus, false)
@@ -676,7 +676,7 @@ end
 
 --- Check if a client is marked.
 -- @deprecated awful.client.ismarked
--- @client c The client to check, or the focused one otherwise.
+-- @tparam client c The client to check, or the focused one otherwise.
 function client.ismarked(c)
     gdebug.deprecate("Use c.marked instead of awful.client.ismarked", {deprecated_in=4})
     return client.object.get_marked(c or capi.client.focus)
@@ -684,7 +684,7 @@ end
 
 --- Toggle a client as marked.
 -- @deprecated awful.client.togglemarked
--- @client c The client to toggle mark.
+-- @tparam client c The client to toggle mark.
 function client.togglemarked(c)
     gdebug.deprecate("Use c.marked = not c.marked instead of awful.client.togglemarked", {deprecated_in=4})
     c = c or capi.client.focus
@@ -712,7 +712,7 @@ end
 --- Set a client floating state, overriding auto-detection.
 -- Floating client are not handled by tiling layouts.
 -- @deprecated awful.client.floating.set
--- @client c A client.
+-- @tparam client c A client.
 -- @tparam boolean s True or false.
 function client.floating.set(c, s)
     gdebug.deprecate("Use c.floating = true instead of awful.client.floating.set", {deprecated_in=4})
@@ -721,7 +721,7 @@ end
 
 -- Set a client floating state, overriding auto-detection.
 -- Floating client are not handled by tiling layouts.
--- @client c A client.
+-- @tparam client c A client.
 -- @tparam boolan s True or false.
 function client.object.set_floating(c, s)
     c = c or capi.client.focus
@@ -760,7 +760,7 @@ capi.client.connect_signal("property::geometry", store_floating_geometry)
 
 --- Return if a client has a fixed size or not.
 -- This function is deprecated, use `c.is_fixed`
--- @client c The client.
+-- @tparam client c The client.
 -- @deprecated awful.client.isfixed
 -- @see is_fixed
 -- @see size_hints_honor
@@ -826,7 +826,7 @@ function client.object.is_immobilized_vertical(c)
 end
 
 --- Get a client floating state.
--- @client c A client.
+-- @tparam client c A client.
 -- @see floating
 -- @deprecated awful.client.floating.get
 -- @treturn boolean True or false. Note that some windows might be floating even if you
@@ -910,7 +910,7 @@ capi.client.connect_signal("request::manage", update_implicitly_floating)
 --- Toggle the floating state of a client between 'auto' and 'true'.
 -- Use `c.floating = not c.floating`
 -- @deprecated awful.client.floating.toggle
--- @client c A client.
+-- @tparam client c A client.
 -- @see floating
 function client.floating.toggle(c)
     c = c or capi.client.focus
@@ -919,7 +919,7 @@ function client.floating.toggle(c)
 end
 
 -- Remove the floating information on a client.
--- @client c The client.
+-- @tparam client c The client.
 function client.floating.delete(c)
     client.object.set_floating(c, nil)
 end
@@ -1026,7 +1026,7 @@ end
 -- number of visible clients in this column.
 --
 -- @legacylayout awful.client.idx
--- @client c the client
+-- @tparam client c the client
 -- @treturn integer col The column number.
 -- @treturn integer idx Index of the client in the column.
 -- @treturn integer num The number of visible clients in the column.
@@ -1088,7 +1088,7 @@ end
 --
 -- @legacylayout awful.client.setwfact
 -- @tparam number wfact the window factor value
--- @client c the client
+-- @tparam client c the client
 -- @emits property::windowfact
 function client.setwfact(wfact, c)
     -- get the currently selected window
@@ -1144,7 +1144,7 @@ end
 -- @tparam number add Amount to increase/decrease the client's window factor.
 --   Should be between `-current_window_factor` and something close to
 --   infinite.  The normalisation then ensures that the sum of all factors is 1.
--- @client c the client.
+-- @tparam client c the client.
 -- @emits property::windowfact
 function client.incwfact(add, c)
     c = c or capi.client.focus
@@ -1167,7 +1167,7 @@ end
 
 --- Get a client's dockable state.
 --
--- @client c A client.
+-- @tparam client c A client.
 -- @treturn bool
 -- @deprecated awful.client.dockable.get
 function client.dockable.get(c)
@@ -1207,7 +1207,7 @@ end
 -- With this enabled you can dock windows by moving them from the center
 -- to the edge of the workarea.
 --
--- @client c A client.
+-- @tparam client c A client.
 -- @tparam boolean value True or false.
 -- @deprecated awful.client.dockable.set
 function client.dockable.set(c, value)
@@ -1249,7 +1249,7 @@ end)
 --
 -- This method is deprecated. It is now possible to use `c.value` directly.
 --
--- @client c The client.
+-- @tparam client c The client.
 -- @tparam string prop The property name.
 -- @return The property value.
 -- @deprecated awful.client.property.get
@@ -1273,7 +1273,7 @@ end
 -- This method is deprecated. It is now possible to use `c.value = value`
 -- directly.
 --
--- @client c The client.
+-- @tparam client c The client.
 -- @tparam string prop The property name.
 -- @param value The property value.
 -- @deprecated awful.client.property.set
@@ -1377,7 +1377,7 @@ end
 --- Get a matching transient_for client (if any).
 -- @deprecated awful.client.get_transient_for_matching
 -- @see client.get_transient_for_matching
--- @client c The client.
+-- @tparam client c The client.
 -- @tparam function matcher A function that should return true, if
 --   a matching parent client is found.
 -- @treturn client|nil The matching parent client or nil.
@@ -1411,8 +1411,8 @@ end
 --
 -- @deprecated awful.client.is_transient_for
 -- @see client.is_transient_for
--- @client c The child client (having transient_for).
--- @client c2 The parent client to check.
+-- @tparam client c The child client (having transient_for).
+-- @tparam client c2 The parent client to check.
 -- @treturn client|nil The parent client or nil.
 function client.is_transient_for(c, c2)
     gdebug.deprecate("Use c:is_transient_for(c2) instead of"..
@@ -1430,7 +1430,7 @@ end
 -- likely return values.
 --
 -- @method is_transient_for
--- @client c2 The parent client to check.
+-- @tparam client c2 The parent client to check.
 -- @treturn client|nil The parent client or nil.
 -- @see transient_for
 -- @see modal

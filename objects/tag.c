@@ -240,12 +240,12 @@
 
 /** When a client gets tagged with this tag.
  * @signal tagged
- * @client c The tagged client.
+ * @tparam client c The tagged client.
  */
 
 /** When a client gets untagged with this tag.
  * @signal untagged
- * @client c The untagged client.
+ * @tparam client c The untagged client.
  */
 
 /**

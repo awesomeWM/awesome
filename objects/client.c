@@ -364,7 +364,7 @@
 
 /** When a client gets tagged.
  * @signal tagged
- * @tag t The tag object.
+ * @tparam tag t The tag object.
  */
 
 /** When a client gets unfocused.
@@ -373,7 +373,7 @@
 
 /** When a client gets untagged.
  * @signal untagged
- * @tag t The tag object.
+ * @tparam tag t The tag object.
  */
 
 /**
@@ -2940,7 +2940,7 @@ luaA_client_kill(lua_State *L)
 }
 
 /** Swap a client with another one in global client list.
- * @client c A client to swap with.
+ * @tparam client c A client to swap with.
  * @method swap
  * @emits swapped
  * @emitstparam swapped client The other client.

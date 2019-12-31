@@ -757,7 +757,7 @@ end
 
 --- Create a notification.
 --
--- @tab args The argument table containing any of the arguments below.
+-- @tparam table args The argument table containing any of the arguments below.
 -- @string[opt=""] args.text Text of the notification.
 -- @string[opt] args.title Title of the notification.
 -- @int[opt=5] args.timeout Time in seconds after which popup expires.

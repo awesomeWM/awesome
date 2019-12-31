@@ -374,7 +374,7 @@ end
 
 --- Spawn a program and asynchronously capture its output line by line.
 -- @tparam string|table cmd The command.
--- @tab callbacks Table containing callbacks that should be invoked on
+-- @tparam table callbacks Table containing callbacks that should be invoked on
 --   various conditions.
 -- @tparam[opt] function callbacks.stdout Function that is called with each
 --   line of output on stdout, e.g. `stdout(line)`.
@@ -428,7 +428,7 @@ end
 --- Asynchronously spawn a program and capture its output.
 -- (wraps `spawn.with_line_callback`).
 -- @tparam string|table cmd The command.
--- @tab callback Function with the following arguments
+-- @tparam table callback Function with the following arguments
 --   @tparam string callback.stdout Output on stdout.
 --   @tparam string callback.stderr Output on stderr.
 --   @tparam string callback.exitreason Exit reason ("exit" or "signal").
@@ -479,7 +479,7 @@ end
 --- Call `spawn.easy_async` with a shell.
 -- This calls `cmd` with `$SHELL -c` (via `awful.util.shell`).
 -- @tparam string cmd The command.
--- @tab callback Function with the following arguments
+-- @tparam table callback Function with the following arguments
 --   @tparam string callback.stdout Output on stdout.
 --   @tparam string callback.stderr Output on stderr.
 --   @tparam string callback.exitreason Exit reason ("exit" or "signal").

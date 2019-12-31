@@ -44,14 +44,6 @@ topics={
     '89-NEWS.md',
 }
 
--- Setup @client to be an alias for "@tparam client.object"
-tparam_alias('client', 'client.object')
-tparam_alias('tag', 'tag')
--- Should be default, but is not.  Sets up "@tab" => "@tparam table".
-tparam_alias('tab', 'table')
-tparam_alias('screen', 'screen')
-tparam_alias('screen_or_idx', 'screen|int')
-
 -- The first stereotype are the constructors.
 new_type("constructorfct", "Constructors", false, "Parameters")
 new_type("constructorfct2", "ldoc_skip", false, "Parameters")

@@ -123,8 +123,8 @@ local module = {}
 local crules = gmatcher()
 
 --- Check if a client matches a rule.
--- @client c The client.
--- @tab rule The rule to check.
+-- @tparam client c The client.
+-- @tparam table rule The rule to check.
 -- @treturn bool True if it matches, false otherwise.
 -- @staticfct ruled.client.match
 function module.match(c, rule)
@@ -132,8 +132,8 @@ function module.match(c, rule)
 end
 
 --- Check if a client matches any part of a rule.
--- @client c The client.
--- @tab rule The rule to check.
+-- @tparam client c The client.
+-- @tparam table rule The rule to check.
 -- @treturn bool True if at least one rule is matched, false otherwise.
 -- @staticfct ruled.client.match_any
 function module.match_any(c, rule)
@@ -141,8 +141,8 @@ function module.match_any(c, rule)
 end
 
 --- Does a given rule entry match a client?
--- @client c The client.
--- @tab entry Rule entry (with keys `rule`, `rule_any`, `except` and/or
+-- @tparam client c The client.
+-- @tparam table entry Rule entry (with keys `rule`, `rule_any`, `except` and/or
 --   `except_any`).
 -- @treturn bool
 -- @staticfct ruled.client.matches
@@ -151,8 +151,8 @@ function module.matches(c, entry)
 end
 
 --- Get list of matching rules for a client.
--- @client c The client.
--- @tab _rules The rules to check. List with "rule", "rule_any", "except" and
+-- @tparam client c The client.
+-- @tparam table _rules The rules to check. List with "rule", "rule_any", "except" and
 --   "except_any" keys.
 -- @treturn table The list of matched rules.
 -- @staticfct ruled.client.matching_rules
@@ -161,8 +161,8 @@ function module.matching_rules(c, _rules)
 end
 
 --- Check if a client matches a given set of rules.
--- @client c The client.
--- @tab _rules The rules to check. List of tables with `rule`, `rule_any`,
+-- @tparam client c The client.
+-- @tparam table _rules The rules to check. List of tables with `rule`, `rule_any`,
 --   `except` and `except_any` keys.
 -- @treturn bool True if at least one rule is matched, false otherwise.
 -- @staticfct ruled.client.matches_list
@@ -179,7 +179,7 @@ function module.remove_rule_source(name)
 end
 
 --- Apply ruled.client.rules to a client.
--- @client c The client.
+-- @tparam client c The client.
 -- @staticfct ruled.client.apply
 function module.apply(c)
     return crules:apply(c)
@@ -525,9 +525,9 @@ function module.high_priority_properties.tags(c, value, props)
 end
 
 --- Apply properties and callbacks to a client.
--- @client c The client.
--- @tab props Properties to apply.
--- @tab[opt] callbacks Callbacks to apply.
+-- @tparam client c The client.
+-- @tparam table props Properties to apply.
+-- @tparam[opt] table callbacks Callbacks to apply.
 -- @staticfct ruled.client.execute
 -- @request client titlebars rules granted The `titlebars_enabled` is set in the
 --  rules.

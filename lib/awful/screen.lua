@@ -88,7 +88,7 @@ end
 -- This moves the mouse pointer to the last known position on the new screen,
 -- or keeps its position relative to the current focused screen.
 -- @staticfct awful.screen.focus
--- @screen _screen Screen number (defaults / falls back to mouse.screen).
+-- @tparam screen _screen Screen number (defaults / falls back to mouse.screen).
 -- @request client activate screen.focus granted The most recent focused client
 --  for this screen should be re-activated.
 function screen.focus(_screen)
@@ -361,9 +361,9 @@ end
 -- @tparam[opt] int|table args.margins Apply some margins on the output.
 --   This can either be a number or a table with *left*, *right*, *top*
 --   and *bottom* keys.
--- @tag[opt] args.tag Use this tag's screen.
+-- @tparam[opt] tag args.tag Use this tag's screen.
 -- @tparam[opt] drawable args.parent A parent drawable to use as base geometry.
--- @tab[opt] args.bounding_rect A bounding rectangle. This parameter is
+-- @tparam[opt] table args.bounding_rect A bounding rectangle. This parameter is
 --   incompatible with `honor_workarea`.
 -- @treturn table A table with *x*, *y*, *width* and *height*.
 -- @usage local geo = screen:get_bounding_geometry {
@@ -516,7 +516,7 @@ end
 --
 -- @staticfct awful.screen.connect_for_each_screen
 -- @tparam function func The function to call.
--- @screen func.screen The screen.
+-- @tparam screen func.screen The screen.
 function screen.connect_for_each_screen(func)
     for s in capi.screen do
         func(s)

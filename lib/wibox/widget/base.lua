@@ -150,7 +150,7 @@ end
 --
 -- The default implementation does nothing, this must be re-implemented by
 -- all layout and container widgets.
--- @tab children A table composed of valid widgets.
+-- @tparam table children A table composed of valid widgets.
 -- @method set_children
 function base.widget:set_children(children) -- luacheck: no unused
     -- Nothing on purpose
@@ -309,7 +309,7 @@ end
 -- This calls the widget's `:fit` callback and caches the result for later use.
 -- Never call `:fit` directly, but always through this function!
 -- @tparam widget parent The parent widget which requests this information.
--- @tab context The context in which we are fit.
+-- @tparam table context The context in which we are fit.
 -- @tparam widget widget The widget to fit (this uses
 --   `widget:fit(context, width, height)`).
 -- @tparam number width The available width for the widget.
@@ -358,7 +358,7 @@ end
 -- However, normally there shouldn't be any reason why you need to use this
 -- function.
 -- @tparam widget parent The parent widget which requests this information.
--- @tab context The context in which we are laid out.
+-- @tparam table context The context in which we are laid out.
 -- @tparam widget widget The widget to layout (this uses
 --   `widget:layout(context, width, height)`).
 -- @tparam number width The available width for the widget.
@@ -574,7 +574,7 @@ end
 --- Set a declarative widget hierarchy description.
 --
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html).
--- @tab args A table containing the widget's disposition.
+-- @tparam table args A table containing the widget's disposition.
 -- @method setup
 function base.widget:setup(args)
     local f,ids = self.set_widget or self.add or self.set_first,{}
@@ -601,7 +601,7 @@ end
 --- Create a widget from a declarative description.
 --
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html).
--- @tab args A table containing the widgets disposition.
+-- @tparam table args A table containing the widgets disposition.
 -- @constructorfct wibox.widget.base.make_widget_declarative
 function base.make_widget_declarative(args)
     local ids = {}

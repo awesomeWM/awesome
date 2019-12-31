@@ -849,7 +849,7 @@ end
 
 --- Place the client so no part of it will be outside the screen (workarea).
 --@DOC_awful_placement_no_offscreen_EXAMPLE@
--- @client c The client.
+-- @tparam client c The client.
 -- @tparam[opt={}] table args The arguments
 -- @tparam[opt=client's screen] integer args.screen The screen.
 -- @treturn table The new client geometry.

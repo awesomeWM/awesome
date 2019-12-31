@@ -137,7 +137,7 @@ end
 -- It is the default signal handler for `request::activate` on a `client`.
 --
 -- @signalhandler awful.permissions.activate
--- @client c A client to use
+-- @tparam client c A client to use
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
 -- @tparam[opt=false] boolean hints.raise should the client be raised?
@@ -283,7 +283,7 @@ end
 -- It is the default signal handler for `request::tag` on a `client`.
 --
 -- @signalhandler awful.permissions.tag
--- @client c A client to tag
+-- @tparam client c A client to tag
 -- @tparam[opt] tag|boolean t A tag to use. If true, then the client is made sticky.
 -- @tparam[opt={}] table hints Extra information
 function permissions.tag(c, t, hints) --luacheck: no unused
@@ -310,7 +310,7 @@ end
 
 --- Handle client urgent request
 -- @signalhandler awful.permissions.urgent
--- @client c A client
+-- @tparam client c A client
 -- @tparam boolean urgent If the client should be urgent
 function permissions.urgent(c, urgent)
     if c ~= client.focus and not aclient.property.get(c,"ignore_urgent") then
