@@ -514,11 +514,11 @@ local named_args = {
 
 -- Sections which are hidden by default, but visible when clicked.
 local summarize = {
-    emits         = {index = 1, title = "signals"         , count = true },
-    propemits     = {index = 2, title = "signals"         , count = true },
-    usebeautiful  = {index = 3, title = "theme variables" , count = true },
-    propbeautiful = {index = 4, title = "theme variables" , count = true },
-    request       = {index = 5, title = "permissions"     , count = true },
+    emits         = {index = 1, title = "signal"          , count = true },
+    propemits     = {index = 2, title = "signal"          , count = true },
+    usebeautiful  = {index = 3, title = "theme variable"  , count = true },
+    propbeautiful = {index = 4, title = "theme variable"  , count = true },
+    request       = {index = 5, title = "permission"      , count = true },
     classsignal   = {index = 6, title = "Class level only", count = false},
 }
 
@@ -551,7 +551,7 @@ local function generate_summary(item)
 
     for tag, value in pairs(item.tags) do
         if summarize[tag] then
-            tgs[summarize[tag].index].count = tgs[summarize[tag].index].count + 1
+            tgs[summarize[tag].index].count = #value
         end
     end
 
@@ -559,6 +559,11 @@ local function generate_summary(item)
 
     for k, v in ipairs(tgs) do
         if v.count > 0 then
+
+            if v.count > 1 then
+                v.title = v.title .. "s"
+            end
+
             ret[#ret+1] = v
             has_show_more = v.showcount or has_show_more
         end
