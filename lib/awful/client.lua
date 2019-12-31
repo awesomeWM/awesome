@@ -1654,6 +1654,7 @@ end)
 -- @signal request::titlebars
 -- @tparam[opt=nil] string content The context (like "rules")
 -- @tparam[opt=nil] table hints Some hints.
+-- @classsignal
 
 --- The client marked signal.
 -- @deprecatedsignal marked
@@ -1674,6 +1675,9 @@ end)
 -- * **floating**: When the floating or maximization state changes.
 --
 -- @signal request::border
+-- @tparam string context The context.
+-- @tparam table hints The hints.
+-- @classsignal
 -- @see awful.permissions.update_border
 
 -- Add clients during startup to focus history.

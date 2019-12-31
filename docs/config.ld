@@ -514,11 +514,12 @@ local named_args = {
 
 -- Sections which are hidden by default, but visible when clicked.
 local summarize = {
-    emits         = {index = 1, title = "signals"        },
-    propemits     = {index = 2, title = "signals"        },
-    usebeautiful  = {index = 3, title = "theme variables"},
-    propbeautiful = {index = 4, title = "theme variables"},
-    request       = {index = 5, title = "permissions"    },
+    emits         = {index = 1, title = "signals"         , count = true },
+    propemits     = {index = 2, title = "signals"         , count = true },
+    usebeautiful  = {index = 3, title = "theme variables" , count = true },
+    propbeautiful = {index = 4, title = "theme variables" , count = true },
+    request       = {index = 5, title = "permissions"     , count = true },
+    classsignal   = {index = 6, title = "Class level only", count = false},
 }
 
 local delimiter_for_tag = {
@@ -545,7 +546,7 @@ local function generate_summary(item)
     local tgs = {}
 
     for k, v in pairs(summarize) do
-        tgs[v.index] = {title=v.title, count=0}
+        tgs[v.index] = {title=v.title, count=0, showcount=v.count}
     end
 
     for tag, value in pairs(item.tags) do
@@ -554,15 +555,17 @@ local function generate_summary(item)
         end
     end
 
-    local ret = {}
+    local ret, has_show_more = {}, false
 
     for k, v in ipairs(tgs) do
         if v.count > 0 then
             ret[#ret+1] = v
+            has_show_more = v.showcount or has_show_more
         end
     end
 
     item.extra_summary = #ret > 0 and ret or nil
+    item.has_show_more = has_show_more
 end
 
 -- We have custom types, sub-types and different rendering.
