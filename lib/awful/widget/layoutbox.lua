@@ -10,13 +10,17 @@
 
 local setmetatable = setmetatable
 local capi = { screen = screen, tag = tag }
+local common = require("awful.widget.common")
 local layout = require("awful.layout")
 local tooltip = require("awful.tooltip")
 local beautiful = require("beautiful")
-local wibox = require("wibox")
 local surface = require("gears.surface")
 local gdebug = require("gears.debug")
 local gtable = require("gears.table")
+local timer = require("gears.timer")
+local wibox = require("wibox")
+local wlayout = require("wibox.layout")
+local base = require("wibox.widget.base")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -24,24 +28,53 @@ end
 
 local layoutbox = { mt = {} }
 
+local default_template = {
+    {
+        id = "imagebox",
+        widget = wibox.widget.imagebox
+    },
+    {
+        id = "textbox",
+        widget = wibox.widget.textbox
+    },
+    layout = wlayout.fixed.horizontal
+}
+
+
 local boxes = nil
 
-local function update(w, screen)
-    screen = get_screen(screen)
-    local name = layout.getname(layout.get(screen))
-    w._layoutbox_tooltip:set_text(name or "[no name]")
+local function layoutbox_label(t, tscreen)
+    local theme = beautiful.get()
+    local bg = "#ffffff"
+    local bg_image = "#00ffff"
+    local layoutbox_disable_icon = theme.layoutbox_disable_icon or false
+    local layout_screen = layout.get(tscren)
+    local text = layout.getname(layout_screen)
 
-    local img = surface.load_silently(beautiful["layout_" .. name], false)
-    w.imagebox.image = img
-    w.textbox.text   = img and "" or name
+    local img = surface.load_silently(beautiful["layout_" .. text], false)
+    -- TODO says values are nil when uncommented
+    --t.imagebox.image = img
+    --t.textbox.text   = text
+    local other_args = {}
+    return text, bg, bg_image, not layoutbox_disable_icon and img or nil, other_args
 end
 
-local function update_from_tag(t)
-    local screen = get_screen(t.screen)
-    local w = boxes[screen]
-    if w then
-        update(w, screen)
-    end
+-- Remove some callback boilerplate from the user provided templates
+local function create_callback(w, t)
+    common._set_common_property(w, "layout", t)
+end
+
+local function update(w, screen, buttons, data, update_function, args)
+    local layouts = layout.layouts -- TODO get all of the layouts
+
+    local sscreen = get_screen(screen)
+
+    local function label(c, sscreen) return layoutbox_label(c, sscreen) end
+
+    update_function(w, buttons, label, data, layouts, {
+        widget_template = args.widget_template or default_template,
+        create_callback = create_callback,
+    })
 end
 
 --- Create a layoutbox widget. It draws a picture with the current layout
@@ -67,15 +100,49 @@ function layoutbox.new(args)
 
     screen = get_screen(screen or 1)
 
+    local uf = args.update_function or common.list_update
+    local w = base.make_widget_from_value(args.layout or wlayout.fixed.horizontal)
+
+    local data = setmetatable({}, { __mode = 'k' })
+
+    local queued_update = {}
+
+    function w._do_layoutbox_update_now()
+        if screen.valid then
+            update(w, screen, args.buttons, data, uf, args)
+        end
+        queued_update[screen] = false
+    end
+
+    function w._do_layoutbox_update()
+        -- Add a delayed callback for the first update.
+        if not queued_update[screen] then
+            timer.delayed_call(w._do_taglist_update_now)
+            queued_update[screen] = true
+        end
+    end
+
     -- Do we already have the update callbacks registered?
     if boxes == nil then
         boxes = setmetatable({}, { __mode = "kv" })
-        capi.tag.connect_signal("property::selected", update_from_tag)
-        capi.tag.connect_signal("property::layout", update_from_tag)
+        capi.tag.connect_signal("property::selected", function(t)
+            local tag_screen = get_screen(t.screen)
+            local wig = boxes[tag_screen]
+            if wig then
+                update(wig, tag_screen, args.buttons, data, uf, args)
+            end
+        end)
+        capi.tag.connect_signal("property::layout", function(t)
+            local tag_screen = get_screen(t.screen)
+            local wig = boxes[screen]
+            if wig then
+                update(wig, tag_screen, args.buttons, data, uf, args)
+            end
+        end)
         capi.tag.connect_signal("property::screen", function()
-            for s, w in pairs(boxes) do
+            for s, x in pairs(boxes) do
                 if s.valid then
-                    update(w, s)
+                    update(x, s, args.buttons, data, uf, args)
                 end
             end
         end)
@@ -85,6 +152,7 @@ function layoutbox.new(args)
     -- Do we already have a layoutbox for this screen?
     local w = boxes[screen]
     if not w then
+        -- TODO rip this out with template
         w = wibox.widget {
             {
                 id     = "imagebox",
@@ -94,7 +162,7 @@ function layoutbox.new(args)
                 id     = "textbox",
                 widget = wibox.widget.textbox
             },
-            layout = wibox.layout.fixed.horizontal
+            layout = wlayout.fixed.horizontal
         }
 
         w._layoutbox_tooltip = tooltip {objects = {w}, delay_show = 1}
@@ -102,7 +170,7 @@ function layoutbox.new(args)
         -- Apply the buttons, visible, forced_width and so on
         gtable.crush(w, args)
 
-        update(w, screen)
+        update(w, screen, args.buttons, data, uf, args)
         boxes[screen] = w
     end
 
