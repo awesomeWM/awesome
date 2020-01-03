@@ -1,0 +1,7 @@
+new entry created with value 0
+0
+new entry created with value 1
+42
+new entry created with value 2
+84
+0
