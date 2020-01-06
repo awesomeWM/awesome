@@ -315,17 +315,18 @@ You can call the `awful.layout.set()` function, here's an example:
 
 ### Why are new clients urgent by default?
 
-You can change this by redefining `awful.ewmh.activate(c)` in your rc.lua. If
-you don't want new clients to be urgent by default put this in your rc.lua:
+By default, new windows/clients will highlight the tag they appear on, unless
+the tag is currently visible. You can read more about the "urgent" property in 
+@{client.urgent|the documentation}. You can change the behaviour by wrapping 
+`awful.ewmh.activate(c)` in your rc.lua. If you don't want new clients to be 
+urgent by default, put this in your rc.lua:
 
     client.disconnect_signal("request::activate", awful.ewmh.activate)
-    function awful.ewmh.activate(c)
-        if c:isvisible() then
-            client.focus = c
-            c:raise()
-        end
+    function newactivate(c, context, hints)
+        awful.ewmh.activate(c, context, hints)
+        c.urgent = false
     end
-    client.connect_signal("request::activate", awful.ewmh.activate)
+    client.connect_signal("request::activate", newactivate)
 
 ## Usage
 
