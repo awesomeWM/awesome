@@ -1,4 +1,16 @@
 ---------------------------------------------------------------------------
+--- Cache object with data that can be garbage-collected.
+--
+-- Here is an example with a basic cache:
+--
+--@DOC_text_gears_cache_cache_EXAMPLE@
+--
+-- The example below demonstrates how the garbage collector will clear the
+-- cache:
+--
+--@DOC_text_gears_cache_another_cache_EXAMPLE@
+--
+--
 -- @author Uli Schlachter
 -- @copyright 2015 Uli Schlachter
 -- @classmod gears.cache

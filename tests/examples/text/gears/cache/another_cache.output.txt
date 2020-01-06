@@ -1,0 +1,6 @@
+cache object #0 for first
+cache object #1 for second
+cache object #0 for first
+forcing a garbage collect
+cache object #2 for first
+cache object #3 for second
