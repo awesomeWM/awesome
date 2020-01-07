@@ -93,16 +93,19 @@ end
 -- @treturn table list of the substrings
 -- @staticfct gears.string.split
 function gstring.split(str, delimiter)
-    local pattern = "(.-)" .. delimiter .. "()"
+    delimiter = delimiter or "\n"
     local result = {}
-    local n = 0
-    local lastPos = 0
-    for part, pos in string.gmatch(str, pattern) do
-        n = n + 1
-        result[n] = part
-        lastPos = pos
+    if gstring.startswith(str, delimiter) then
+        result[#result+1] = ""
     end
-    result[n + 1] = string.sub(str, lastPos)
+    local pattern = string.format("([^%s]+)", delimiter)
+    str:gsub(pattern, function(c) result[#result+1] = c end)
+    if gstring.endswith(str, delimiter) then
+        result[#result+1] = ""
+    end
+    if #result == 0 then
+        result[#result+1] = str
+    end
     return result
 end
 

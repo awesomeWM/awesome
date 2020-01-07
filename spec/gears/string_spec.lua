@@ -48,6 +48,12 @@ describe("gears.string", function()
         assert.is_same(gstring.split("foo", "\n"), {"foo"})
         assert.is_same(gstring.split("foo\n", "\n"), {"foo", ""})
         assert.is_same(gstring.split("foo\nbar", "\n"), {"foo", "bar"})
+
+        assert.is_same(gstring.split("", "."), {""})
+        assert.is_same(gstring.split(".", "."), {"", ""})
+        assert.is_same(gstring.split("foo", "."), {"foo"})
+        assert.is_same(gstring.split("foo.", "."), {"foo", ""})
+        assert.is_same(gstring.split("foo.bar", "."), {"foo", "bar"})
     end)
 end)
 
