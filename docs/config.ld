@@ -70,6 +70,8 @@ new_type("deprecatedproperty", "Deprecated object properties", false, "Type cons
 new_type("method", "Object methods ", false, "Parameters")
 -- New type for signals
 new_type("signal", "Signals", false, "Arguments")
+-- Deprecated signals.
+new_type("deprecatedsignal", "Deprecated signals", false, "Arguments")
 -- New type for signals connections
 new_type("signalhandler", "Request handlers", false, "Arguments")
 -- Allow objects to define a set of beautiful properties affecting them
@@ -351,6 +353,12 @@ add_custom_tag {
     hidden = true
 }
 
+-- Define when a signal is only emitted on a class rather than on objects.
+add_custom_tag {
+    name   = "classsignal",
+    hidden = true,
+}
+
 -- Specify when this an item was deprecated.
 -- @deprecatedin 4.4 Optional message.
 add_custom_tag {
@@ -391,6 +399,20 @@ add_custom_tag {
     hidden = true,
     params = {
         { name = "api_level" },
+    },
+}
+
+add_custom_tag {
+    name   = "request",
+    title  = "Requested actions or permissions",
+    params = {
+        { name = "class"   },
+        { name = "type"    },
+        { name = "context" },
+        { name = "default" },
+    },
+    table  = {
+        "Class", "Permission", "Context", "Default", "Description"
     },
 }
 
@@ -442,6 +464,7 @@ file = {
         '../lib/awful/screen/dpi.lua',
         '../lib/awful/startup_notification.lua',
         '../lib/awful/mouse/drag_to_tag.lua',
+        '../lib/awful/permissions/_common.lua',
         '../lib/gears/init.lua',
         '../lib/wibox/layout/init.lua',
         '../lib/wibox/container/init.lua',
@@ -468,6 +491,7 @@ file = {
         '../lib/awful/widget/progressbar.lua',
         '../lib/awful/widget/textclock.lua',
         '../lib/awful/wibox.lua',
+        '../lib/awful/ewmh.lua',
         '../lib/wibox/layout/constraint.lua',
         '../lib/wibox/layout/margin.lua',
         '../lib/wibox/layout/mirror.lua',
@@ -497,12 +521,14 @@ local summarize = {
     emits         = {index = 1, title = "signals"        },
     propemits     = {index = 2, title = "signals"        },
     usebeautiful  = {index = 3, title = "theme variables"},
-    propbeautiful = {index = 4, title = "theme variables"}
+    propbeautiful = {index = 4, title = "theme variables"},
+    request       = {index = 5, title = "permissions"    },
 }
 
 local delimiter_for_tag = {
     usebeautiful  = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
     propbeautiful = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
+    request       = { "table class='widget_list' border=1", "table", "tr", "tr", {"Class", "Permission", "Context", "Default", "Description"}},
 }
 
 -- Use the first word of the subtag content to map it to its tag.
@@ -736,6 +762,13 @@ local show_return = {
     deprecated      = true,
 }
 
+-- The different type of deprecation.
+local is_deprecated = {
+    deprecated         = true,
+    deprecatedproperty = true,
+    deprecatedsignal   = true,
+}
+
 custom_display_name_handler = function(item, default_handler)
     init_custom_types(item)
 
@@ -776,7 +809,7 @@ custom_display_name_handler = function(item, default_handler)
         end
     end
 
-    if item.type == "deprecated" or item.type == "deprecatedproperty" then
+    if is_deprecated[item.type] then
         return ret .. "<i class=\"deprecated_label\"> [deprecated]</i>"
     end
 

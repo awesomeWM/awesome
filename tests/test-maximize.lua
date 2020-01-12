@@ -358,8 +358,8 @@ gears.table.merge(steps, {
         -- Remove the default handler and replace it with a testing one.
         -- **WARNING**: add tests **BEFORE** this function if you want them
         -- to be relevant.
-        client.disconnect_signal("request::geometry", awful.ewmh.geometry)
-        client.disconnect_signal("request::geometry", awful.ewmh.merge_maximization)
+        client.disconnect_signal("request::geometry", awful.permissions.geometry)
+        client.disconnect_signal("request::geometry", awful.permissions.merge_maximization)
         client.connect_signal("request::geometry", geometry_handler)
 
         test_client(nil,nil,nil,nil,nil,{maximize_after=true})

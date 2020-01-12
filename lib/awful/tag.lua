@@ -815,6 +815,8 @@ end
 --
 -- @property layouts
 -- @param table
+-- @request tag layouts awful granted When the `layouts` property is first called
+--  and there is no layouts, then that signal is called.
 -- @see awful.layout.layouts
 -- @see layout
 
@@ -867,6 +869,22 @@ function tag.object.get_layouts(self)
 
     local cls = custom_layouts(self)
 
+    -- Request some layouts. Maybe a new module was added?
+    if #cls == 0 and not tag.getproperty(self, "_layouts_requested") then
+        tag.setproperty(self, "_layouts_requested", true)
+        local old_count = #cls
+        self:emit_signal("request::layouts", "awful", {})
+
+        -- When request::layouts is used, assume it takes precedence over
+        -- the fallback.
+        if #cls > old_count then
+            tag.setproperty(self, "_layouts", gtable.clone(cls, false))
+            return tag.getproperty(self, "_layouts")
+        end
+
+        return tag.object.get_layouts(self)
+    end
+
     -- Without the clone, the custom_layouts would grow
     return #cls > 0 and gtable.merge(gtable.clone(cls, false), alayout.layouts) or
         alayout.layouts
@@ -880,6 +898,60 @@ function tag.object.set_layouts(self, layouts)
     update_layouts(self, cur, cur)
 
     self:emit_signal("property::layouts")
+end
+
+function tag.object.append_layout(self, layout)
+    -- If the layouts are manually modified, don't request more.
+    tag.setproperty(self, "_layouts_requested", true)
+
+    local cls = tag.getproperty(self, "_layouts")
+
+    if not cls then
+        cls = custom_layouts(self)
+    end
+
+    table.insert(cls, layout)
+    self:emit_signal("property::layouts")
+end
+
+function tag.object.append_layouts(self, layouts)
+    -- If the layouts are manually modified, don't request more.
+    tag.setproperty(self, "_layouts_requested", true)
+
+    local cls = tag.getproperty(self, "_layouts")
+
+    if not cls then
+        cls = custom_layouts(self)
+    end
+
+    for _, l in ipairs(layouts) do
+        table.insert(cls, l)
+    end
+    self:emit_signal("property::layouts")
+end
+
+function tag.object.remove_layout(self, layout)
+    local cls = tag.getproperty(self, "_layouts")
+
+    if not cls then
+        cls = custom_layouts(self)
+    end
+
+    local pos = {}
+    for k, l in ipairs(cls) do
+        if l == layout then
+            table.insert(pos, k)
+        end
+    end
+
+    if #pos > 0 then
+        for i=#pos, 1, -1 do
+            table.remove(cls, i)
+        end
+        self:emit_signal("property::layouts")
+    end
+
+    return #pos > 0
 end
 
 function tag.object.get_layout(t)
@@ -1627,6 +1699,7 @@ capi.client.connect_signal("property::screen", function(c)
         end
 
         if #new_tags == 0 then
+            --TODO v5: Add a context as first param
             c:emit_signal("request::tag", nil, {reason="screen"})
         elseif #new_tags < #tags then
             c:tags(new_tags)
@@ -1687,6 +1760,7 @@ capi.tag.connect_signal("request::select", tag.object.view_only)
 -- this, an handler for this request must simply set a new screen
 -- for the tag.
 -- @signal request::screen
+-- @tparam string context Why it was called.
 
 --- Emitted after `request::screen` if no new screen has been set.
 -- The tag will be deleted, this is a last chance to move its clients
@@ -1706,7 +1780,7 @@ end)
 capi.screen.connect_signal("removed", function(s)
     -- First give other code a chance to move the tag to another screen
     for _, t in pairs(s.tags) do
-        t:emit_signal("request::screen")
+        t:emit_signal("request::screen", "removed")
     end
     -- Everything that's left: Tell everyone that these tags go away (other code
     -- could e.g. save clients)
@@ -1715,6 +1789,7 @@ capi.screen.connect_signal("removed", function(s)
     end
     -- Give other code yet another change to save clients
     for _, c in pairs(capi.client.get(s)) do
+        --TODO v5: Add a context as first param
         c:emit_signal("request::tag", nil, { reason = "screen-removed" })
     end
     -- Then force all clients left to go somewhere random

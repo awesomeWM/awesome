@@ -203,8 +203,39 @@
 #include "ewmh.h"
 #include "luaa.h"
 
-/**
+/** When a tag requests to be selected.
  * @signal request::select
+ * @tparam string context The reason why it was called.
+ * @request tag select ewmh granted When the client request to be moved to a
+ *  specific virtual desktop. AwesomeWM interprets virtual desktop as indexed
+ *  tags.
+ */
+
+/**
+ * This signal is emitted to fill the list of default layouts.
+ *
+ * It is emitted on the global `tag` class rather than individual tag objects.
+ * The default handler is part of `rc.lua`. New modules can also use this signal
+ * to dynamically add new layouts to the list of default layouts.
+ *
+ * @signal request::default_layouts
+ * @tparam string context The context (currently always "startup").
+ * @classsignal
+ * @request tag default_layouts startup granted When AwesomeWM starts, it queries
+ *  for default layout using this request.
+ * @see awful.layout.layouts
+ * @see awful.layout.append_default_layout
+ * @see awful.layout.remove_default_layout
+ */
+
+/** This signals is emitted when a tag needs layouts for the first time.
+ *
+ * If no handler implement it, it will fallback to the content added by
+ * `request::default_layouts`
+ *
+ * @signal request::layouts
+ * @tparam string context The context (currently always "awful").
+ * @tparam table hints A, currently empty, table with hints.
  */
 
 /** When a client gets tagged with this tag.

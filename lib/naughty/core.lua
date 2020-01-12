@@ -630,7 +630,7 @@ end
 -- @string[opt=`beautiful.notification_fg` or `beautiful.fg_focus` or `'#ffffff'`] args.fg Foreground color.
 -- @string[opt=`beautiful.notification_fg` or `beautiful.bg_focus` or `'#535d6c'`] args.bg Background color.
 -- @int[opt=`beautiful.notification_border_width` or 1] args.border_width Border width.
--- @string[opt=`beautiful.notification_border_color` or `beautiful.border_focus` or `'#535d6c'`] args.border_color Border color.
+-- @string[opt=`beautiful.notification_border_color` or `beautiful.border_color_active` or `'#535d6c'`] args.border_color Border color.
 -- @tparam[opt=`beautiful.notification_shape`] gears.shape args.shape Widget shape.
 -- @tparam[opt=`beautiful.notification_opacity`] gears.opacity args.opacity Widget opacity.
 -- @tparam[opt=`beautiful.notification_margin`] gears.margin args.margin Widget margin.

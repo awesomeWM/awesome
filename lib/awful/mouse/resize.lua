@@ -103,7 +103,6 @@ end
 -- @tparam client client A client.
 -- @tparam[default=mouse.resize] string context The resizing context.
 -- @tparam[opt={}] table args A set of `awful.placement` arguments.
-
 local function handler(_, client, context, args) --luacheck: no unused_args
     args = args or {}
     context = context or "mouse.resize"

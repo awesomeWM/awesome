@@ -5,7 +5,7 @@ local test_client = require("_client")
 
 local manage_called, c_snid
 
-client.connect_signal("manage", function(c)
+client.connect_signal("request::manage", function(c)
     manage_called = true
     c_snid = c.startup_id
     assert(c.machine == awesome.hostname,

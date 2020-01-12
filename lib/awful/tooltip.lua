@@ -694,7 +694,7 @@ function tooltip.new(args)
         or beautiful.bg_focus or "#ffcb60"
     local border_width = args.border_width or beautiful.tooltip_border_width or 0
     local border_color = args.border_color or beautiful.tooltip_border_color
-        or beautiful.border_normal or "#ffcb60"
+        or beautiful.border_color_normal or "#ffcb60"
 
     -- Set wibox default properties
     self.wibox_properties = {

@@ -16,7 +16,7 @@ client.connect_signal("property::urgent", function (c)
 end)
 
 local manage_cb_done
-client.connect_signal("manage", function (c)
+client.connect_signal("request::manage", function (c)
     manage_cb_done = true
     assert(c.class == "XTerm", "Client should be xterm!")
 end)
@@ -56,7 +56,7 @@ local steps = {
             assert(#client.get() == 1)
             local c = client.get()[1]
             assert(not c.urgent, "Client is not urgent anymore.")
-            assert(c == client.focus, "Client is focused.")
+            assert(c.active, "Client is focused.")
             assert(awful.tag.getproperty(awful.screen.focused().tags[2], "urgent") == false)
             assert(awful.tag.getproperty(awful.screen.focused().tags[2], "urgent_count") == 0)
             return true

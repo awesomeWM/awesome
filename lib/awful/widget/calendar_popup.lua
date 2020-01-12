@@ -131,7 +131,7 @@ local function parse_cell_options(cell, args)
         elseif prop == 'border_width' then
             default = beautiful.border_width or 0
         elseif prop == 'border_color' then
-            default = beautiful.border_normal or beautiful.fg_normal
+            default = beautiful.border_color_normal or beautiful.fg_normal
         end
 
         -- Get default

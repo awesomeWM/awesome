@@ -208,12 +208,6 @@ sections.DOC_DIALOG_RULE = [[
  &nbsp;
 ]]
 
-
-sections.DOC_MANAGE_HOOK = [[
- &nbsp;
-]]
-
-
 sections.DOC_TITLEBARS = [[
  &nbsp;
 ]]
@@ -225,11 +219,6 @@ sections.DOC_CSD_TITLEBARS = [[
  `titlebars_enabled = function(c) return not c.requests_no_titlebar end`
 
  See `client.requests_no_titlebar` for more details.
-]]
-
-
-sections.DOC_BORDER = [[
- &nbsp;
 ]]
 
 -- Ask ldoc to generate links

@@ -352,7 +352,7 @@ local function tasklist_label(c, args, tb)
         end
     end
 
-    local focused = capi.client.focus == c
+    local focused = c.active
     -- Handle transient_for: the first parent that does not skip the taskbar
     -- is considered to be focused, if the real client has skip_taskbar.
     if not focused and capi.client.focus and capi.client.focus.skip_taskbar
@@ -621,7 +621,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
         capi.client.connect_signal("property::hidden", u)
         capi.client.connect_signal("tagged", u)
         capi.client.connect_signal("untagged", u)
-        capi.client.connect_signal("unmanage", function(c)
+        capi.client.connect_signal("request::unmanage", function(c)
             u(c)
             for _, i in pairs(instances) do
                 for _, tlist in pairs(i) do
@@ -630,8 +630,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
             end
         end)
         capi.client.connect_signal("list", u)
-        capi.client.connect_signal("focus", u)
-        capi.client.connect_signal("unfocus", u)
+        capi.client.connect_signal("property::active", u)
         capi.screen.connect_signal("removed", function(s)
             instances[get_screen(s)] = nil
         end)
@@ -723,7 +722,7 @@ end
 -- @filterfunction awful.tasklist.filter.focused
 function tasklist.filter.focused(c, screen)
     -- Only print client on the same screen as this widget
-    return get_screen(c.screen) == get_screen(screen) and capi.client.focus == c
+    return get_screen(c.screen) == get_screen(screen) and c.active
 end
 
 --- Get all the clients in an undefined order.

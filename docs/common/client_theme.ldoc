@@ -1,0 +1,492 @@
+*/
+
+
+/**
+ * The fallback border color when the client is floating.
+ *
+ * @beautiful beautiful.border_color_floating
+ * @param color
+ * @see request::border
+ * @see beautiful.border_color_floating_active
+ * @see beautiful.border_color_floating_normal
+ * @see beautiful.border_color_floating_urgent
+ * @see beautiful.border_color_floating_new
+ */
+
+/**
+ * The fallback border color when the client is mazimized.
+ *
+ * @beautiful beautiful.border_color_mazimized
+ * @param color
+ * @see request::border
+ * @see beautiful.border_color_maximized_active
+ * @see beautiful.border_color_maximized_normal
+ * @see beautiful.border_color_maximized_urgent
+ * @see beautiful.border_color_maximized_new
+ */
+
+/**
+ * The border color when the client is active.
+ *
+ * @beautiful beautiful.border_color_active
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the client is not active.
+ *
+ * @beautiful beautiful.border_color_normal
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the client has the urgent property set.
+ *
+ * @beautiful beautiful.border_color_urgent
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the client is not active and new.
+ *
+ * @beautiful beautiful.border_color_new
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (floating) client is active.
+ *
+ * @beautiful beautiful.border_color_floating_active
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (floating) client is not active.
+ *
+ * @beautiful beautiful.border_color_floating_normal
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (floating) client has the urgent property set.
+ *
+ * @beautiful beautiful.border_color_floating_urgent
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (floating) client is not active and new.
+ *
+ * @beautiful beautiful.border_color_floating_new
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (maximized) client is active.
+ *
+ * @beautiful beautiful.border_color_maximized_active
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (maximized) client is not active.
+ *
+ * @beautiful beautiful.border_color_maximized_normal
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (maximized) client has the urgent property set.
+ *
+ * @beautiful beautiful.border_color_maximized_urgent
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (maximized) client is not active and new.
+ *
+ * @beautiful beautiful.border_color_maximized_new
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (fullscreen) client is active.
+ *
+ * @beautiful beautiful.border_color_fullscreen_active
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (fullscreen) client is not active.
+ *
+ * @beautiful beautiful.border_color_fullscreen_normal
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (fullscreen) client has the urgent property set.
+ *
+ * @beautiful beautiful.border_color_fullscreen_urgent
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The border color when the (fullscreen) client is not active and new.
+ *
+ * @beautiful beautiful.border_color_fullscreen_new
+ * @param color
+ * @see request::border
+ */
+
+/**
+ * The fallback border width when nothing else is set.
+ *
+ * @beautiful beautiful.border_width
+ * @param integer
+ * @see request::border
+ * @see beautiful.border_width_floating
+ * @see beautiful.border_width_mazimized
+ * @see beautiful.border_width_floating_active
+ * @see beautiful.border_width_floating_normal
+ * @see beautiful.border_width_floating_urgent
+ * @see beautiful.border_width_floating_new
+ * @see beautiful.border_width_maximized_active
+ * @see beautiful.border_width_maximized_normal
+ * @see beautiful.border_width_maximized_urgent
+ * @see beautiful.border_width_maximized_new
+ */
+
+/**
+ * The fallback border width when the client is floating.
+ *
+ * @beautiful beautiful.border_width_floating
+ * @param integer
+ * @see request::border
+ * @see beautiful.border_width_floating_active
+ * @see beautiful.border_width_floating_normal
+ * @see beautiful.border_width_floating_urgent
+ * @see beautiful.border_width_floating_new
+ */
+
+/**
+ * The fallback border width when the client is mazimized.
+ *
+ * @beautiful beautiful.border_width_mazimized
+ * @param integer
+ * @see request::border
+ * @see beautiful.border_width_maximized_active
+ * @see beautiful.border_width_maximized_normal
+ * @see beautiful.border_width_maximized_urgent
+ * @see beautiful.border_width_maximized_new
+ */
+
+/**
+ * The client border width for the normal clients.
+ *
+ * @beautiful beautiful.border_width_normal
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the active client.
+ *
+ * @beautiful beautiful.border_width_active
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the urgent clients.
+ *
+ * @beautiful beautiful.border_width_urgent
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the new clients.
+ *
+ * @beautiful beautiful.border_width_new
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the normal floating clients.
+ *
+ * @beautiful beautiful.border_width_floating_normal
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the active floating client.
+ *
+ * @beautiful beautiful.border_width_floating_active
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the urgent floating clients.
+ *
+ * @beautiful beautiful.border_width_floating_urgent
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the new floating clients.
+ *
+ * @beautiful beautiful.border_width_floating_new
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the normal maximized clients.
+ *
+ * @beautiful beautiful.border_width_maximized_normal
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the active maximized client.
+ *
+ * @beautiful beautiful.border_width_maximized_active
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the urgent maximized clients.
+ *
+ * @beautiful beautiful.border_width_maximized_urgent
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the new maximized clients.
+ *
+ * @beautiful beautiful.border_width_maximized_new
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the normal fullscreen clients.
+ *
+ * @beautiful beautiful.border_width_fullscreen_normal
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the active fullscreen client.
+ *
+ * @beautiful beautiful.border_width_fullscreen_active
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the urgent fullscreen clients.
+ *
+ * @beautiful beautiful.border_width_fullscreen_urgent
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client border width for the new fullscreen clients.
+ *
+ * @beautiful beautiful.border_width_fullscreen_new
+ * @param integer
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the normal clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_normal
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the active client.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_active
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the urgent clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_urgent
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the new clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_new
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the normal floating clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_floating_normal
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the active floating client.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_floating_active
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the urgent floating clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_floating_urgent
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the new floating clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_floating_new
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the normal maximized clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_maximized_normal
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the active maximized client.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_maximized_active
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the urgent maximized clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_maximized_urgent
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the new maximized clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_maximized_new
+ * @param[opt=1] number
+ * @see request::border
+ */
+/**
+ * The client opacity for the normal fullscreen clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_fullscreen_normal
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the active fullscreen client.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_fullscreen_active
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the urgent fullscreen clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_fullscreen_urgent
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The client opacity for the new fullscreen clients.
+ *
+ * A number between 0 and 1.
+ *
+ * @beautiful beautiful.opacity_fullscreen_new
+ * @param[opt=1] number
+ * @see request::border
+ */
+
+/**
+ * The marked clients border color.
+ * Note that only solid colors are supported.
+ * @beautiful beautiful.border_marked
+ * @param color
+ */
+
+/*

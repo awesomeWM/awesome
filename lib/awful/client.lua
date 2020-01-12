@@ -14,6 +14,8 @@ local object = require("gears.object")
 local grect = require("gears.geometry").rectangle
 local gmath = require("gears.math")
 local gtable = require("gears.table")
+local amousec = require("awful.mouse.client")
+local pcommon = require("awful.permissions._common")
 local pairs = pairs
 local type = type
 local ipairs = ipairs
@@ -169,6 +171,8 @@ end
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
 --   tag as arguments.
+-- @request client activate client.jumpto granted When a client is activated
+--  because `c:jump_to()` is called.
 function client.object.jump_to(self, merge)
     local s = get_screen(screen.focused())
     -- focus the screen
@@ -300,6 +304,8 @@ end
 -- @staticfct awful.client.swap.global_bydirection
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @client[opt] sel The client.
+-- @request client activate client.swap.global_bydirection granted When a client
+--  could be activated because `awful.client.swap.global_bydirection` was called.
 function client.swap.global_bydirection(dir, sel)
     sel = sel or capi.client.focus
     local scr = get_screen(sel and sel.screen or screen.focused())
@@ -461,6 +467,8 @@ end
 --- Move a client to a tag.
 -- @method move_to_tag
 -- @tparam tag target The tag to move the client to.
+-- @request client activate client.movetotag granted When a client could be
+--  activated because `c:move_to_tag()` was called.
 function client.object.move_to_tag(self, target)
     local s = target.screen
     if self and s then
@@ -524,6 +532,8 @@ end
 -- @tparam[opt=c.screen.index+1] screen s The screen, default to current + 1.
 -- @see screen
 -- @see request::activate
+-- @request client activate client.movetoscreen granted When a client could be
+--  activated because `c:move_to_screen()` was called.
 function client.object.move_to_screen(self, s)
     if self then
         local sc = capi.screen.count()
@@ -535,7 +545,7 @@ function client.object.move_to_screen(self, s)
         end
         s = get_screen(s)
         if get_screen(self.screen) ~= s then
-            local sel_is_focused = self == capi.client.focus
+            local sel_is_focused = self.active
             self.screen = s
             screen.focus(s)
 
@@ -687,6 +697,12 @@ function client.object.set_floating(c, s)
             c:geometry(client.property.get(c, "floating_geometry"))
         end
         c.screen = scr
+
+        if s then
+            c:emit_signal("request::border", "floating", {})
+        else
+            c:emit_signal("request::border", (c.active and "" or "in").."active", {})
+        end
     end
 end
 
@@ -790,6 +806,7 @@ function client.floating.get(c)
 end
 
 --- The client floating state.
+--
 -- If the client is part of the tiled layout or free floating.
 --
 -- Note that some windows might be floating even if you
@@ -801,7 +818,13 @@ end
 --  * *property::floating*
 --
 -- @property floating
--- @param boolean The floating state
+-- @tparam boolean floating The floating state.
+-- @request client border floating granted When a border update is required
+--  because the client focus status changed.
+-- @request client border active granted When a client becomes active and is not
+--  floating.
+-- @request client border inactive granted When a client stop being active and
+--  is not floating.
 
 function client.object.get_floating(c)
     c = c or capi.client.focus
@@ -833,6 +856,17 @@ local function update_implicitly_floating(c)
     if cur ~= new then
         client.property.set(c, "_implicitly_floating", new)
         c:emit_signal("property::floating")
+
+        -- Don't send the border signals as they would be sent twice (with this
+        -- one having the wrong context). There is some `property::` signal
+        -- sent before `request::manage`.
+        if client.property.get(c, "_border_init") then
+            if cur then
+                c:emit_signal("request::border", "floating", {})
+            else
+                c:emit_signal("request::border", (c.active and "" or "in").."active", {})
+            end
+        end
     end
 end
 
@@ -842,7 +876,7 @@ capi.client.connect_signal("property::maximized_vertical", update_implicitly_flo
 capi.client.connect_signal("property::maximized_horizontal", update_implicitly_floating)
 capi.client.connect_signal("property::maximized", update_implicitly_floating)
 capi.client.connect_signal("property::size_hints", update_implicitly_floating)
-capi.client.connect_signal("manage", update_implicitly_floating)
+capi.client.connect_signal("request::manage", update_implicitly_floating)
 
 --- Toggle the floating state of a client between 'auto' and 'true'.
 -- Use `c.floating = not c.floating`
@@ -1388,7 +1422,182 @@ function client.object.set_shape(self, shape)
     set_shape(self)
 end
 
--- Register standards signals
+-- Proxy those properties to decorate their accessors with an extra flag to
+-- define when they are set by the user. This allows to "manage" the value of
+-- those properties internally until they are manually overridden.
+for _, prop in ipairs { "border_width", "border_color", "opacity" } do
+    client.object["get_"..prop] = function(self)
+        return self["_"..prop]
+    end
+    client.object["set_"..prop] = function(self, value)
+        self._private["_user_"..prop] = true
+        self["_"..prop] = value
+    end
+end
+
+--- Activate (focus) a client.
+--
+-- This method is the correct way to focus a client. While
+-- `client.focus = my_client` works and is commonly used in older code, it has
+-- some drawbacks. The most obvious one is that it bypasses the activate
+-- filters. It also doesn't handle minimized clients well and requires a lot
+-- of boilerplate code to make work properly.
+--
+-- The valid `args.actions` are:
+--
+-- * **mouse_move**: Move the client when the mouse cursor moves until the
+--  mouse buttons are release.
+-- * **mouse_resize**: Resize the client when the mouse cursor moves until the
+--  mouse buttons are release.
+-- * **mouse_center**: Move the mouse cursor to the center of the client if it
+--  isn't already within its geometry,
+-- * **toggle_minimization**: If the client is already active, minimize it.
+--
+-- @method activate
+-- @tparam table args
+-- @tparam[opt=other] string args.context Why was this activate called?
+-- @tparam[opt=true] boolean args.raise Raise the client to the top of its layer.
+-- @tparam[opt=false] boolean args.force Force the activation even for unfocusable
+--  clients.
+-- @tparam[opt=false] boolean args.switch_to_tags
+-- @tparam[opt=false] boolean args.switch_to_tag
+-- @tparam[opt=false] boolean args.action Once activated, perform an action.
+-- @tparam[opt=false] boolean args.toggle_minimization
+-- @see awful.permissions.add_activate_filter
+-- @see request::activate
+-- @see active
+function client.object.activate(c, args)
+    local new_args = setmetatable({}, {__index = args or {}})
+
+    -- Set the default arguments.
+    new_args.raise = new_args.raise == nil and true or args.raise
+
+    if c == capi.client.focus and new_args.action == "toggle_minimization" then
+        c.minimized = true
+    else
+        c:emit_signal(
+            "request::activate",
+            new_args.context or "other",
+            new_args
+        )
+    end
+
+    if new_args.action and new_args.action == "mouse_move" then
+        amousec.move(c)
+    elseif new_args.action and new_args.action == "mouse_resize" then
+        amousec.resize(c)
+    elseif new_args.action and new_args.action == "mouse_center" then
+        local coords, geo = mouse.mouse.coords(), c:geometry()
+        coords.width, coords.height = 1,1
+
+        if not grect.area_intersect_area(geo, coords) then
+            -- Do not use `awful.placement` to avoid an useless circular
+            -- dependency. Centering is *very* simple.
+            mouse.mouse.coords {
+                x = geo.x + math.ceil(geo.width /2),
+                y = geo.y + math.ceil(geo.height/2)
+            }
+        end
+    end
+end
+
+--- Grant a permission for a client.
+--
+-- @method grant
+-- @tparam string permission The permission name (just the name, no `request::`).
+-- @tparam string context The reason why this permission is requested.
+-- @see awful.permissions
+
+--- Deny a permission for a client.
+--
+-- @method deny
+-- @tparam string permission The permission name (just the name, no `request::`).
+-- @tparam string context The reason why this permission is requested.
+-- @see awful.permissions
+
+pcommon.setup_grant(client.object, "client")
+
+--- Return true if the client is active (has focus).
+--
+-- This property is **READ ONLY**. Use `c:activate { context = "myreason" }`
+-- to change the focus.
+--
+-- The reason for this is that directly setting the focus
+-- (which can also be done using `client.focus = c`) will bypass the focus
+-- stealing filters. This is easy at first, but as this gets called from more
+-- and more places, it quickly become unmanageable. This coding style is
+-- recommended for maintainable code:
+--
+--    -- Check if a client has focus:
+--    if c.active then
+--        -- do something
+--    end
+--
+--    -- Check if there is a active (focused) client:
+--    if client.focus ~= nil then
+--        -- do something
+--    end
+--
+--    -- Get the active (focused) client:
+--    local c = client.focus
+--
+--    -- Set the focus:
+--    c:activate {
+--        context       = "myreason",
+--        switch_to_tag = true,
+--    }
+--
+--    -- Get notified when a client gets or loses the focus:
+--    c:connect_signal("property::active", function(c, is_active)
+--        -- do something
+--    end)
+--
+--    -- Get notified when any client gets or loses the focus:
+--    client.connect_signal("property::active", function(c, is_active)
+--        -- do something
+--    end)
+--
+--    -- Get notified when any client gets the focus:
+--    client.connect_signal("focus", function(c)
+--        -- do something
+--    end)
+--
+--    -- Get notified when any client loses the focus:
+--    client.connect_signal("unfocus", function(c)
+--        -- do something
+--    end)
+--
+-- @property active
+-- @tparam boolean active
+-- @request client border active granted When a client becomes active.
+-- @request client border inactive granted When a client stop being active.
+-- @see activate
+-- @see request::activate
+-- @see awful.permissions.add_activate_filter
+
+function client.object.get_active(c)
+    return capi.client.focus == c
+end
+
+function client.object.set_active(c, value)
+    if value then
+        -- Do it, but print an error popup. Setting the focus without a context
+        -- breaks the filters. This seems a good idea at first, then cause
+        -- endless pain. QtWidgets also enforces this.
+        c:activate()
+        assert(false, "You cannot set `active` directly, use `c:activate()`.")
+    else
+        -- Be permissive given the alternative is a bit convoluted.
+        capi.client.focus = nil
+        gdebug.print_warning(
+            "Consider using `client.focus = nil` instead of `c.active = false"
+        )
+    end
+end
+
+capi.client.connect_signal("property::active", function(c)
+    c:emit_signal("request::border", (c.active and "" or "in").."active", {})
+end)
 
 --- The last geometry when client was floating.
 -- @signal property::floating_geometry
@@ -1398,23 +1607,62 @@ end
 -- @tparam[opt=nil] string content The context (like "rules")
 -- @tparam[opt=nil] table hints Some hints.
 
---- The client marked signal (deprecated).
--- @signal marked
+--- The client marked signal.
+-- @deprecatedsignal marked
 
---- The client unmarked signal (deprecated).
--- @signal unmarked
+--- The client unmarked signal.
+-- @deprecatedsignal unmarked
+
+--- Emited when the border client might need to be update.
+--
+-- The context are:
+--
+-- * **added**: When a new client is created.
+-- * **active**: When client gains the focus (or stop being urgent/floating
+--   but is active).
+-- * **inactive**: When client loses the focus (or stop being urgent/floating
+--   and is not active.
+-- * **urgent**: When a client becomes urgent.
+-- * **floating**: When the floating or maximization state changes.
+--
+-- @signal request::border
+-- @see awful.permissions.update_border
 
 -- Add clients during startup to focus history.
--- This used to happen through ewmh.activate, but that only handles visible
+-- This used to happen through permissions.activate, but that only handles visible
 -- clients now.
-capi.client.connect_signal("manage", function (c)
+capi.client.connect_signal("request::manage", function (c)
+    if capi.awesome.startup
+      and not c.size_hints.user_position
+      and not c.size_hints.program_position then
+        -- Prevent clients from being unreachable after screen count changes.
+        require("awful.placement").no_offscreen(c)
+    end
+
     if awesome.startup then
         client.focus.history.add(c)
     end
-end)
-capi.client.connect_signal("unmanage", client.focus.history.delete)
 
-capi.client.connect_signal("unmanage", client.floating.delete)
+    client.property.set(c, "_border_init", true)
+    c:emit_signal("request::border", "added", {})
+end)
+capi.client.connect_signal("request::unmanage", client.focus.history.delete)
+
+capi.client.connect_signal("request::unmanage", client.floating.delete)
+
+-- Print a warning when the old `manage` signal is used.
+capi.client.connect_signal("manage::connected", function()
+    gdebug.deprecate(
+        "Use `request::manage` rather than `manage`",
+        {deprecated_in=5}
+    )
+end)
+capi.client.connect_signal("unmanage::connected", function()
+    gdebug.deprecate(
+        "Use `request::unmanage` rather than `unmanage`",
+        {deprecated_in=5}
+    )
+end)
 
 -- Connect to "focus" signal, and allow to disable tracking.
 do

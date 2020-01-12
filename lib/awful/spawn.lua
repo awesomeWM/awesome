@@ -712,6 +712,8 @@ local raise_rules = {focus = true, switch_to_tags = true, raise = true}
 -- @see awful.rules
 -- @treturn client The client if it already exists.
 -- @staticfct awful.spawn.raise_or_spawn
+-- @request client activate spawn.raise_or_spawn granted Activate a client when
+--  `awful.spawn.raise_or_spawn` is called and the client exists.
 function spawn.raise_or_spawn(cmd, rules, matcher, unique_id, callback)
     local hash = unique_id or hash_command(cmd, rules)
 
@@ -736,7 +738,7 @@ end
 
 capi.awesome.connect_signal("spawn::canceled" , spawn.on_snid_cancel   )
 capi.awesome.connect_signal("spawn::timeout"  , spawn.on_snid_cancel   )
-capi.client.connect_signal ("manage"          , spawn.on_snid_callback )
+capi.client.connect_signal ("request::manage" , spawn.on_snid_callback )
 
 return setmetatable(spawn, { __call = function(_, ...) return spawn.spawn(...) end })
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

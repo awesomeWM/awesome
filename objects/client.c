@@ -63,7 +63,7 @@
  *
  * To execute a callback when a new client is added, use the `manage` signal:
  *
- *    client.connect_signal("manage", function(c)
+ *    client.connect_signal("request::manage", function(c)
  *        -- do something
  *    end)
  *
@@ -164,7 +164,48 @@
  */
 
 /** When a new client appears and gets managed by Awesome.
- * @signal manage
+ *
+ * This request should be implemented by code which track the client. It isn't
+ * recommended to use this to initialize the client content. This use case is
+ * a better fit for `ruled.client`, which has built-in dependency management.
+ * Using this request to mutate the client state will likely conflict with
+ * `ruled.client`.
+ *
+ * @signal request::manage
+ * @tparam client c The client.
+ * @tparam string context What created the client. It is currently either "new"
+ *  or "startup".
+ * @tparam table hints More metadata (currently empty, it exists for compliance
+ *  with the other `request::` signals).
+ * @request client border added granted When a new client needs a its initial
+ *  border settings.
+ */
+
+/** When a client is going away.
+ *
+ * Each places which store `client` objects in non-weak table or whose state
+ * depend on the current client should answer this request.
+ *
+ * The contexts are:
+ *
+ * * **user**: `c:unmanage()` was called.
+ * * **reparented**: The window was reparented to another window. It is no
+ *   longer a stand alone client.
+ * * **destroyed**: The window was closed.
+ *
+ * @signal request::unmanage
+ * @tparam client c The client.
+ * @tparam string context Why was the client unmanaged.
+ * @tparam table hints More metadata (currently empty, it exists for compliance
+ *  with the other `request::` signals).
+ */
+
+/** Use `request::manage`.
+ * @deprecatedsignal manage
+ */
+
+/** Use `request::unmanage`.
+ * @deprecatedsignal unmanage
  */
 
 /**
@@ -225,15 +266,41 @@
  * @tparam string context The context where this signal was used.
  * @tparam[opt] table hints A table with additional hints:
  * @tparam[opt=false] boolean hints.raise should the client be raised?
+ * @request client activate ewmh granted When the client asks to be activated.
  */
 
-/**
+/** When an event could lead to the client being activated.
+ *
+ * This is an layer "on top" of `request::activate` for event which are not
+ * actual request for activation/focus, but where "it would be nice" if the
+ * client got the focus. This includes the focus-follow-mouse model and focusing
+ * previous clients when the selected tag changes.
+ *
+ * This idea is that `request::autoactivate` will emit `request::activate`.
+ * However it is much easier to replace the handler for `request::autoactivate`
+ * than it is to replace the handler for `request::activate`. Thus it provides
+ * a nice abstraction to simplify handling the focus when switching tags or
+ * moving the mouse.
+ *
+ * @signal request::autoactivate
+ * @tparam string context The context where this signal was used.
+ * @tparam[opt] table hints A table with additional hints:
+ * @tparam[opt=false] boolean hints.raise should the client be raised?
+ *
+ */
+
+/** When something request a client geometry to be modified.
+ *
  * @signal request::geometry
  * @tparam client c The client
  * @tparam string context Why and what to resize. This is used for the
  *   handlers to know if they are capable of applying the new geometry.
  * @tparam[opt={}] table Additional arguments. Each context handler may
  *   interpret this differently.
+ * @request client geometry client_maximize_horizontal granted When a client
+ *  (programmatically) asks for the maximization to be changed.
+ * @request client geometry client_maximize_vertical granted When a client
+ *  (programmatically) asks for the maximization to be changed.
  */
 
 /**
@@ -253,6 +320,7 @@
  * @signal request::default_mousebindings
  * @tparam string context The reason why the signal was sent (currently always
  *  `startup`).
+ * @classsignal
 */
 
 /** Emitted during startup to gather the default client keybindings.
@@ -264,6 +332,20 @@
  * @signal request::default_keybindings
  * @tparam string context The reason why the signal was sent (currently always
  *  `startup`).
+ * @classsignal
+ */
+
+/** Sent once when AwesomeWM starts to add default keybindings.
+ *
+ * Keybindings can be set directly on clients. Actually, older version of
+ * AwesomeWM did that through the rules. However this makes it impossible for
+ * auto-configured modules to add their own keybindings. Using the signals,
+ * `rc.lua` or any module can cleanly manage keybindings.
+ *
+ * @signal request::default_keybindings
+ * @tparam string context The context (currently always "startup").
+ * @classsignal
+ * @request client default_keybindings startup granted Sent when AwesomeWM starts.
  */
 
 /** When a client gets tagged.
@@ -273,10 +355,6 @@
 
 /** When a client gets unfocused.
  * @signal unfocus
- */
-
-/**
- * @signal unmanage
  */
 
 /** When a client gets untagged.
@@ -533,20 +611,19 @@
  * The client border width.
  * @property border_width
  * @param integer
+ * @propemits false false
+ * @see request::border
  */
 
 /**
  * The client border color.
  *
- * **Signal:**
- *
- *  * *property::border\_color*
- *
- * @see gears.color
- *
  * @property border_color
- * @param pattern Any string, gradients and patterns will be converted to a
+ * @param color Any string, gradients and patterns will be converted to a
  *  cairo pattern.
+ * @propemits false false
+ * @see request::border
+ * @see gears.color
  */
 
 /**
@@ -558,6 +635,8 @@
  *
  * @property urgent
  * @param boolean
+ * @propemits false false
+ * @see request::border
  */
 
 /**
@@ -584,6 +663,8 @@
  *
  * @property opacity
  * @param number Between 0 (transparent) to 1 (opaque)
+ * @propemits false false
+ * @see request::border
  */
 
 /**
@@ -619,12 +700,11 @@
  *
  * @DOC_sequences_client_fullscreen_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::fullscreen*
- *
  * @property fullscreen
- * @param boolean
+ * @tparam boolean fullscreen
+ * @propemits false false
+ * @request client geometry fullscreen granted When the client must be resized
+ *  because it became (or stop being) fullscreen.
  */
 
 /**
@@ -632,12 +712,12 @@
  *
  * @DOC_sequences_client_maximized_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::maximized*
- *
  * @property maximized
- * @param boolean
+ * @tparam boolean maximized
+ * @propemits false false
+ * @request client geometry maximized granted When the client must be resized
+ *  because it became (or stop being) maximized.
+ * @see request::border
  */
 
 /**
@@ -645,12 +725,11 @@
  *
  * @DOC_sequences_client_maximized_horizontal_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::maximized\_horizontal*
- *
  * @property maximized_horizontal
- * @param boolean
+ * @tparam boolean maximized_horizontal
+ * @propemits false false
+ * @request client geometry maximized_horizontal granted When the client must be resized
+ *  because it became (or stop being) maximized horizontally.
  */
 
 /**
@@ -658,34 +737,27 @@
  *
  * @DOC_sequences_client_maximized_vertical_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::maximized\_vertical*
- *
  * @property maximized_vertical
- * @param boolean
+ * @tparam boolean maximized_vertical
+ * @propemits false false
+ * @request client geometry maximized_vertical granted When the client must be resized
+ *  because it became (or stop being) maximized vertically.
  */
 
 /**
  * The client the window is transient for.
  *
- * **Signal:**
- *
- *  * *property::transient\_for*
- *
  * @property transient_for
  * @param client
+ * @propemits false false
  */
 
 /**
  * Window identification unique to a group of windows.
  *
- * **Signal:**
- *
- *  * *property::group\_window*
- *
  * @property group_window
  * @param client
+ * @propemits false false
  */
 
 /**
@@ -696,10 +768,6 @@
 
 /**
  * A table with size hints of the client.
- *
- * **Signal:**
- *
- *  * *property::size\_hints*
  *
  * @property size_hints
  * @param table
@@ -713,6 +781,7 @@
  * @tfield integer table.min_height
  * @tfield integer table.width_inc
  * @tfield integer table.height_inc
+ * @propemits false false
  * @see size_hints_honor
  */
 
@@ -726,10 +795,6 @@
  * resizable, but asks for the other functions not to be able. If however both
  * "resize" and "all" are set, this means that all but the resize function
  * should be enabled.
- *
- * **Signal:**
- *
- *  * *property::motif\_wm\_hints*
  *
  * @property motif_wm_hints
  * @param table
@@ -751,51 +816,40 @@
  * @tfield[opt] string table.input_mode
  * @tfield[opt] table table.status
  * @tfield[opt] boolean table.status.tearoff_window
+ * @propemits false false
  */
 
 /**
  * Set the client sticky, i.e. available on all tags.
  *
- * **Signal:**
- *
- *  * *property::sticky*
- *
  * @property sticky
  * @param boolean
+ * @propemits false false
  */
 
 /**
  * Indicate if the client is modal.
  *
- * **Signal:**
- *
- *  * *property::modal*
- *
  * @property modal
  * @param boolean
+ * @propemits false false
  */
 
 /**
  * True if the client can receive the input focus.
  *
- * **Signal:**
- *
- *  * *property::focusable*
- *
  * @property focusable
  * @param boolean
+ * @propemits false false
  */
 
 /**
  * The client's bounding shape as set by awesome as a (native) cairo surface.
  *
- * **Signal:**
- *
- *  * *property::shape\_bounding*
- *
  * @see gears.surface.apply_shape_bounding
  * @property shape_bounding
  * @param surface
+ * @propemits false false
  */
 
 /**
@@ -939,27 +993,6 @@
 /** When the x or y coordinate changed.
  * @signal property::position
  * @see client.geometry
- */
-
-/**
- * The border color when the client is focused.
- *
- * @beautiful beautiful.border_focus
- * @param string
- */
-
-/**
- * The border color when the client is not focused.
- *
- * @beautiful beautiful.border_normal
- * @param string
- */
-
-/**
- * The client border width.
- *
- * @beautiful beautiful.border_width
- * @param integer
  */
 
 /** Return client struts (reserved space at the edge of the screen).
@@ -1217,6 +1250,9 @@ client_unfocus_internal(client_t *c)
     globalconf.focus.client = NULL;
 
     luaA_object_push(L, c);
+
+    lua_pushboolean(L, false);
+    luaA_object_emit_signal(L, -2, "property::active", 1);
     luaA_object_emit_signal(L, -1, "unfocus", 0);
     lua_pop(L, 1);
 }
@@ -1334,8 +1370,11 @@ client_focus_update(client_t *c)
     luaA_object_push(L, c);
     client_set_urgent(L, -1, false);
 
-    if(focused_new)
+    if(focused_new) {
+        lua_pushboolean(L, true);
+        luaA_object_emit_signal(L, -2, "property::active", 1);
         luaA_object_emit_signal(L, -1, "focus", 0);
+    }
 
     lua_pop(L, 1);
 
@@ -1735,7 +1774,19 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     luaA_class_emit_signal(L, &client_class, "list", 0);
 
+    /* Add the context */
+    if (globalconf.loop == NULL)
+        lua_pushstring(L, "startup");
+    else
+        lua_pushstring(L, "new");
+
+    /* Hints */
+    lua_newtable(L);
+
     /* client is still on top of the stack; emit signal */
+    luaA_object_emit_signal(L, -3, "request::manage", 2);
+
+    /*TODO v6: remove this*/
     luaA_object_emit_signal(L, -1, "manage", 0);
 
     xcb_generic_error_t *error = xcb_request_check(globalconf.connection, reparent_cookie);
@@ -1744,7 +1795,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                 NONULL(c->name), NONULL(c->class), NONULL(c->instance));
         event_handle((xcb_generic_event_t *) error);
         p_delete(&error);
-        client_unmanage(c, true);
+        client_unmanage(c, CLIENT_UNMANAGE_FAILED);
     }
 
     /* pop client */
@@ -2354,10 +2405,10 @@ client_unban(client_t *c)
 
 /** Unmanage a client.
  * \param c The client.
- * \param window_valid Is the client's window still valid?
+ * \param reason Why was the unmanage done.
  */
 void
-client_unmanage(client_t *c, bool window_valid)
+client_unmanage(client_t *c, client_unmanage_t reason)
 {
     lua_State *L = globalconf_get_lua_State();
 
@@ -2384,6 +2435,28 @@ client_unmanage(client_t *c, bool window_valid)
         untag_client(c, globalconf.tags.tab[i]);
 
     luaA_object_push(L, c);
+
+    /* Give the context to Lua */
+    switch (reason)
+    {
+            break;
+        case CLIENT_UNMANAGE_USER:
+            lua_pushstring(L, "user");
+            break;
+        case CLIENT_UNMANAGE_REPARENT:
+            lua_pushstring(L, "reparented");
+            break;
+        case CLIENT_UNMANAGE_UNMAP:
+        case CLIENT_UNMANAGE_FAILED:
+        case CLIENT_UNMANAGE_DESTROYED:
+            lua_pushstring(L, "destroyed");
+            break;
+    }
+
+    /* Hints */
+    lua_newtable(L);
+
+    luaA_object_emit_signal(L, -3, "request::unmanage", 2);
     luaA_object_emit_signal(L, -1, "unmanage", 0);
     lua_pop(L, 1);
 
@@ -2413,7 +2486,7 @@ client_unmanage(client_t *c, bool window_valid)
 
     /* Clear our event mask so that we don't receive any events from now on,
      * especially not for the following requests. */
-    if(window_valid)
+    if(reason != CLIENT_UNMANAGE_DESTROYED)
         xcb_change_window_attributes(globalconf.connection,
                                      c->window,
                                      XCB_CW_EVENT_MASK,
@@ -2423,7 +2496,7 @@ client_unmanage(client_t *c, bool window_valid)
                                  XCB_CW_EVENT_MASK,
                                  (const uint32_t []) { 0 });
 
-    if(window_valid)
+    if(reason != CLIENT_UNMANAGE_DESTROYED)
     {
         xcb_unmap_window(globalconf.connection, c->window);
         xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
@@ -2434,7 +2507,7 @@ client_unmanage(client_t *c, bool window_valid)
         window_array_append(&globalconf.destroy_later_windows, c->nofocus_window);
     window_array_append(&globalconf.destroy_later_windows, c->frame_window);
 
-    if(window_valid)
+    if(reason != CLIENT_UNMANAGE_DESTROYED)
     {
         /* Remove this window from the save set since this shouldn't be made visible
          * after a restart anymore. */
@@ -2823,7 +2896,7 @@ static int
 luaA_client_unmanage(lua_State *L)
 {
     client_t *c = luaA_checkudata(L, 1, &client_class);
-    client_unmanage(c, true);
+    client_unmanage(c, CLIENT_UNMANAGE_USER);
     return 0;
 }
 
@@ -4019,5 +4092,7 @@ client_class_setup(lua_State *L)
 }
 
 /* @DOC_cobject_COMMON@ */
+
+/* @DOC_client_theme_COMMON@ */
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

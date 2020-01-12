@@ -1,6 +1,5 @@
 local awful = require("awful")
 local gears = require("gears")
-local beautiful = require("beautiful")
 local test_client = require("_client")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
@@ -10,10 +9,9 @@ local message_printed = false
 -- Magic table to store tests
 local tests = {}
 
-local tb_height = gears.math.round(beautiful.get_font_height() * 1.5)
 -- local border_width = beautiful.border_width
 
--- Detect "manage" race conditions
+-- Detect "request::manage" race conditions
 local real_apply = awful.rules.apply
 function awful.rules.apply(c)
     assert(#c:tags() == 0)
@@ -74,7 +72,7 @@ test_rule {
 
         -- The size should not have changed
         local geo = get_client_by_class(class):geometry()
-        assert(geo.width == 100 and geo.height == 100+tb_height)
+        assert(geo.width == 100 and geo.height == 100)
 
         return true
     end

@@ -31,26 +31,17 @@ end
 
 local layout = {}
 
-layout.suit = require("awful.layout.suit")
+-- Support `table.insert()` to avoid breaking old code.
+local default_layouts = setmetatable({}, {
+    __newindex = function(self, key, value)
+        assert(key <= #self+1 and key > 0)
 
-layout.layouts = {
-    layout.suit.floating,
-    layout.suit.tile,
-    layout.suit.tile.left,
-    layout.suit.tile.bottom,
-    layout.suit.tile.top,
-    layout.suit.fair,
-    layout.suit.fair.horizontal,
-    layout.suit.spiral,
-    layout.suit.spiral.dwindle,
-    layout.suit.max,
-    layout.suit.max.fullscreen,
-    layout.suit.magnifier,
-    layout.suit.corner.nw,
-    layout.suit.corner.ne,
-    layout.suit.corner.sw,
-    layout.suit.corner.se,
-}
+        layout.append_default_layout(value)
+    end
+})
+
+
+layout.suit = require("awful.layout.suit")
 
 --- The default list of layouts.
 --
@@ -256,6 +247,53 @@ function layout.arrange(screen)
     end)
 end
 
+--- Append a layout to the list of default tag layouts.
+--
+-- @staticfct awful.layout.append_default_layout
+-- @tparam layout to_add A valid tag layout.
+-- @see awful.layout.layouts
+function layout.append_default_layout(to_add)
+    rawset(default_layouts, #default_layouts+1, to_add)
+    capi.tag.emit_signal("property::layouts")
+end
+
+--- Remove a layout from the list of default layouts.
+--
+-- @DOC_text_awful_layout_remove_EXAMPLE@
+--
+-- @staticfct awful.layout.remove_default_layout
+-- @tparam layout to_remove A valid tag layout.
+-- @treturn boolean True if the layout was found and removed.
+-- @see awful.layout.layouts
+function layout.remove_default_layout(to_remove)
+    local ret, found = false, true
+
+    -- Remove all instances, just in case.
+    while found do
+        found = false
+        for k, l in ipairs(default_layouts) do
+            if l == to_remove then
+                table.remove(default_layouts, k)
+                ret, found = true, true
+                break
+            end
+        end
+    end
+
+    return ret
+end
+
+--- Append many layouts to the list of default tag layouts.
+--
+-- @staticfct awful.layout.append_default_layouts
+-- @tparam table layouts A table of valid tag layout.
+-- @see awful.layout.layouts
+function layout.append_default_layouts(layouts)
+    for _, l in ipairs(layouts) do
+        rawset(default_layouts, #default_layouts+1, l)
+    end
+end
+
 --- Get the current layout name.
 -- @param _layout The layout.
 -- @return The layout name.
@@ -365,6 +403,87 @@ capi.screen.connect_signal("property::geometry", function(s, old_geom)
     end
 end)
 
-return layout
+local init_layouts
+init_layouts = function()
+    capi.tag.emit_signal("request::default_layouts", "startup")
+    capi.tag.disconnect_signal("new", init_layouts)
+
+    -- Fallback.
+    if #default_layouts == 0 then
+        layout.append_default_layouts({
+            layout.suit.floating,
+            layout.suit.tile,
+            layout.suit.tile.left,
+            layout.suit.tile.bottom,
+            layout.suit.tile.top,
+            layout.suit.fair,
+            layout.suit.fair.horizontal,
+            layout.suit.spiral,
+            layout.suit.spiral.dwindle,
+            layout.suit.max,
+            layout.suit.max.fullscreen,
+            layout.suit.magnifier,
+            layout.suit.corner.nw,
+            layout.suit.corner.ne,
+            layout.suit.corner.sw,
+            layout.suit.corner.se,
+        })
+    end
+
+    init_layouts = nil
+end
+
+-- "new" is emited before "activate", do it should be the very last opportunity
+-- generate the list of default layout. With dynamic tag, this can happen later
+-- than the first event loop iteration.
+capi.tag.connect_signal("new", init_layouts)
+
+-- Intercept the calls to `layouts` to both lazyload then and emit the proper
+-- signals.
+local mt = {
+    __index = function(_, key)
+        if key == "layouts" then
+            -- Lazy initialization to *at least* attempt to give modules a
+            -- chance to load before calling `request::default_layouts`. Note
+            -- that the old `rc.lua` called `awful.layout.layouts` in the global
+            -- context. If there was some module `require()` later in the code,
+            -- they will not get the signal.
+            if init_layouts then
+                init_layouts()
+            end
+
+            return default_layouts
+        end
+    end,
+    __newindex = function(_, key, value)
+        if key == "layouts" then
+            assert(type(value) == "table", "`awful.layout.layouts` needs a table.")
+
+            -- Do not ask for layouts if they were already provided.
+            if init_layouts then
+                gdebug.print_warning(
+                    "`awful.layout.layouts` was set before `request::default_layouts` could "..
+                    "be called. Please use `awful.layout.append_default_layouts` to "..
+                    " avoid this problem"
+                )
+
+                capi.tag.disconnect_signal("new", init_layouts)
+                init_layouts = nil
+            elseif #default_layouts > 0 then
+                gdebug.print_warning(
+                    "`awful.layout.layouts` was set after `request::default_layouts` was "..
+                    "used to get the layouts. This is probably an accident. Use "..
+                    "`awful.layout.remove_default_layout` to get rid of this warning."
+                )
+            end
+
+            default_layouts = value
+        else
+            rawset(layout, key, value)
+        end
+    end
+}
+
+return setmetatable(layout, mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

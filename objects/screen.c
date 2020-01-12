@@ -115,6 +115,8 @@
 /**
  * This signal is emitted when a screen is removed from the setup.
  * @signal removed
+ * @request tag screen removed granted When a screen is removed, `request::screen`
+ *  is called on all screen tags to try to relocate them.
  */
 
 /** This signal is emitted when the list of available screens changes.

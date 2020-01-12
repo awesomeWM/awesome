@@ -443,7 +443,7 @@ local all_titlebars = setmetatable({}, { __mode = 'k' })
 -- Get a color for a titlebar, this tests many values from the array and the theme
 local function get_color(name, c, args)
     local suffix = "_normal"
-    if capi.client.focus == c then
+    if c.active then
         suffix = "_focus"
     end
     local function get(array)
@@ -470,12 +470,13 @@ end
 -- when `titlebars_enabled` is not set in the rules.
 -- @tparam client c The client.
 -- @tparam[opt=false] boolean hide_all Hide all titlebars except `keep`
--- @tparam string keep Keep the titlebar at this position
+-- @tparam string keep Keep the titlebar at this position.
+-- @tparam string context The reason why this was called.
 -- @treturn boolean If the titlebars were loaded
-local function load_titlebars(c, hide_all, keep)
+local function load_titlebars(c, hide_all, keep, context)
     if c._request_titlebars_called then return false end
 
-    c:emit_signal("request::titlebars", "awful.titlebar", {})
+    c:emit_signal("request::titlebars", context, {})
 
     if hide_all then
         -- Don't bother checking if it has been created, `.hide` don't works
@@ -553,11 +554,12 @@ local function new(c, args)
         }
 
         -- Update the colors when focus changes
-        c:connect_signal("focus", update_colors)
-        c:connect_signal("unfocus", update_colors)
+        c:connect_signal("property::active", update_colors)
 
         -- Inform the drawable when it becomes invisible
-        c:connect_signal("unmanage", function() ret:_inform_visible(false) end)
+        c:connect_signal("request::unmanage", function()
+            ret:_inform_visible(false)
+        end)
     else
         bars[position].args = args
         ret = bars[position].drawable
@@ -581,9 +583,11 @@ end
 -- @param[opt] position The position of the titlebar. Must be one of "left",
 --   "right", "top", "bottom". Default is "top".
 -- @staticfct awful.titlebar.show
+-- @request client titlebars show granted Called when `awful.titlebar.show` is
+--  called.
 function titlebar.show(c, position)
     position = position or "top"
-    if load_titlebars(c, true, position) then return end
+    if load_titlebars(c, true, position, "show") then return end
     local bars = all_titlebars[c]
     local data = bars and bars[position]
     local args = data and data.args
@@ -605,9 +609,11 @@ end
 -- @param[opt] position The position of the titlebar. Must be one of "left",
 --   "right", "top", "bottom". Default is "top".
 -- @staticfct awful.titlebar.toggle
+-- @request client titlebars toggle granted Called when `awful.titlebar.toggle` is
+--  called.
 function titlebar.toggle(c, position)
     position = position or "top"
-    if load_titlebars(c, true, position) then return end
+    if load_titlebars(c, true, position, "toggle") then return end
     local _, size = get_titlebar_function(c, position)(c)
     if size == 0 then
         titlebar.show(c, position)
@@ -705,7 +711,7 @@ function titlebar.widget.button(c, name, selector, action)
                 end
             end
             local prefix = "normal"
-            if capi.client.focus == c then
+            if c.active then
                 prefix = "focus"
             end
             if img ~= "" then
@@ -832,7 +838,7 @@ function titlebar.widget.stickybutton(c)
     return widget
 end
 
-client.connect_signal("unmanage", function(c)
+client.connect_signal("request::unmanage", function(c)
     all_titlebars[c] = nil
 end)
 

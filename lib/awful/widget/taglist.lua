@@ -539,8 +539,7 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
         end
         local uc = function (c) return u(c.screen) end
         local ut = function (t) return u(t.screen) end
-        capi.client.connect_signal("focus", uc)
-        capi.client.connect_signal("unfocus", uc)
+        capi.client.connect_signal("property::active", uc)
         tag.attached_connect_signal(nil, "property::selected", ut)
         tag.attached_connect_signal(nil, "property::icon", ut)
         tag.attached_connect_signal(nil, "property::hide", ut)
@@ -555,7 +554,7 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
         end)
         capi.client.connect_signal("tagged", uc)
         capi.client.connect_signal("untagged", uc)
-        capi.client.connect_signal("unmanage", uc)
+        capi.client.connect_signal("request::unmanage", uc)
         capi.screen.connect_signal("removed", function(s)
             instances[get_screen(s)] = nil
         end)

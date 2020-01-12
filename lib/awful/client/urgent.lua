@@ -62,9 +62,29 @@ end
 -- @function awful.urgent.add
 -- @client c The client object.
 -- @param prop The property which is updated.
+-- @request client border active granted When a client becomes active and is no
+--  longer urgent.
+-- @request client border inactive granted When a client stop being active and
+--  is no longer urgent.
+-- @request client border urgent granted When a client stop becomes urgent.
 function urgent.add(c, prop)
-    if type(c) == "client" and prop == "urgent" and c.urgent then
+    assert(
+        c.urgent ~= nil,
+        "`awful.client.urgent.add()` takes a client as first parameter"
+    )
+
+    if prop == "urgent" and c.urgent then
         table.insert(data, c)
+    end
+
+    if c.urgent then
+        c:emit_signal("request::border", "urgent", {})
+    else
+        c:emit_signal(
+            "request::border",
+            (c.active and "" or "in").."active",
+            {}
+        )
     end
 end
 
@@ -83,7 +103,7 @@ end
 
 capi.client.connect_signal("property::urgent", urgent.add)
 capi.client.connect_signal("focus", urgent.delete)
-capi.client.connect_signal("unmanage", urgent.delete)
+capi.client.connect_signal("request::unmanage", urgent.delete)
 
 return urgent
 

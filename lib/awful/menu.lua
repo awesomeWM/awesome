@@ -119,8 +119,8 @@ local function load_theme(a, b)
     local fallback = beautiful.get()
     if a.reset      then b = fallback end
     if a == "reset" then a = fallback end
-    ret.border = a.border_color or b.menu_border_color or b.border_normal or
-                 fallback.menu_border_color or fallback.border_normal
+    ret.border = a.border_color or b.menu_border_color or b.border_color_normal or
+                 fallback.menu_border_color or fallback.border_color_normal
     ret.border_width= a.border_width or b.menu_border_width or b.border_width or
                       fallback.menu_border_width or fallback.border_width or dpi(0)
     ret.fg_focus = a.fg_focus or b.menu_fg_focus or b.fg_focus or
@@ -521,6 +521,8 @@ end
 --   included in the menu.
 -- @return The menu.
 -- @constructorfct awful.menu.clients
+-- @request client activate menu.clients granted When clicking on a clients menu
+--  element.
 function menu.clients(args, item_args, filter)
     local cls_t = {}
     for c in client_iterate(filter or function() return true end) do

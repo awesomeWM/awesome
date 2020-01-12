@@ -60,6 +60,8 @@ end
 -- @function awful.client.focus.byidx
 -- @param i The index.
 -- @client[opt] c The client.
+-- @request client activate client.focus.byidx granted When `awful.focus.byidx`
+--  is called.
 function focus.byidx(i, c)
     local target = client.next(i, c)
     if target then
@@ -141,6 +143,8 @@ end
 
 --- Focus the previous client in history.
 -- @function awful.client.focus.history.previous
+-- @request client activate client.focus.history.previous granted When
+--  `awful.focus.history.previous` is called.
 function focus.history.previous()
     local sel = capi.client.focus
     local s = sel and sel.screen or screen.focused()
@@ -158,6 +162,8 @@ end
 -- @client[opt] c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @function awful.client.focus.bydirection
+-- @request client activate client.focus.bydirection granted When
+--  `awful.focus.bydirection` is called.
 function focus.bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
     if sel then
@@ -183,6 +189,8 @@ end
 -- @client[opt] c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @function awful.client.focus.global_bydirection
+-- @request client activate client.focus.global_bydirection granted When
+--  `awful.client.focus.global_bydirection` is called.
 function focus.global_bydirection(dir, c, stacked)
     local sel = c or capi.client.focus
     local scr = get_screen(sel and sel.screen or screen.focused())

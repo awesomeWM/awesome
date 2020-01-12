@@ -529,6 +529,8 @@ end
 -- @tab props Properties to apply.
 -- @tab[opt] callbacks Callbacks to apply.
 -- @staticfct awful.rules.execute
+-- @request client titlebars rules granted The `titlebars_enabled` is set in the
+--  rules.
 
 crules._execute = function(_, c, props, callbacks)
 
@@ -538,17 +540,17 @@ crules._execute = function(_, c, props, callbacks)
     props.keys    = props.keys or keys
     props.buttons = props.buttons or btns
 
+    -- Border width will also cause geometry related properties to fail
+    if props.border_width then
+        c.border_width = type(props.border_width) == "function" and
+            props.border_width(c, props) or props.border_width
+    end
+
     -- This has to be done first, as it will impact geometry related props.
     if props.titlebars_enabled and (type(props.titlebars_enabled) ~= "function"
             or props.titlebars_enabled(c,props)) then
         c:emit_signal("request::titlebars", "rules", {properties=props})
         c._request_titlebars_called = true
-    end
-
-    -- Border width will also cause geometry related properties to fail
-    if props.border_width then
-        c.border_width = type(props.border_width) == "function" and
-            props.border_width(c, props) or props.border_width
     end
 
     -- Size hints will be re-applied when setting width/height unless it is
@@ -657,7 +659,7 @@ function rules.completed_with_payload_callback(c, props, callbacks)
     rules.execute(c, props, callbacks)
 end
 
-client.connect_signal("manage", rules.apply)
+client.connect_signal("request::manage", rules.apply)
 
 --@DOC_rule_COMMON@
 
