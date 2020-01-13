@@ -75,7 +75,8 @@ local notification = {}
 -- This is the equivalent to a PID as allows external applications to select
 -- notifications.
 -- @property id
--- @param number
+-- @tparam number id
+-- @propemits true false
 
 --- Text of the notification.
 --
@@ -89,12 +90,14 @@ local notification = {}
 --- Title of the notification.
 --@DOC_naughty_helloworld_EXAMPLE@
 -- @property title
--- @param string
+-- @tparam string title
+-- @propemits true false
 
 --- Time in seconds after which popup expires.
 --   Set 0 for no timeout.
 -- @property timeout
--- @param number
+-- @tparam number timeout
+-- @propemits true false
 
 --- The notification urgency level.
 --
@@ -106,6 +109,7 @@ local notification = {}
 --
 -- @property urgency
 -- @param string
+-- @propemits true false
 
 --- The notification category.
 --
@@ -152,6 +156,7 @@ local notification = {}
 --
 -- @property category
 -- @tparam string|nil category
+-- @propemits true false
 
 --- True if the notification should be kept when an action is pressed.
 --
@@ -161,14 +166,17 @@ local notification = {}
 --
 -- @property resident
 -- @param[opt=false] boolean
+-- @propemits true false
 
 --- Delay in seconds after which hovered popup disappears.
 -- @property hover_timeout
 -- @param number
+-- @propemits true false
 
 --- Target screen for the notification.
 -- @property screen
 -- @param screen
+-- @propemits true false
 
 --- Corner of the workarea displaying the popups.
 --
@@ -186,6 +194,7 @@ local notification = {}
 --
 -- @property position
 -- @param string
+-- @propemits true false
 -- @see awful.placement.next_to
 
 --- Boolean forcing popups to display on top.
@@ -198,17 +207,20 @@ local notification = {}
 --
 -- @property height
 -- @param number
+-- @propemits true false
 -- @see width
 
 --- Popup width.
 -- @property width
 -- @param number
+-- @propemits true false
 -- @see height
 
 --- Notification font.
 --@DOC_naughty_colors_EXAMPLE@
 -- @property font
 -- @param string
+-- @propemits true false
 
 --- "All in one" way to access the default image or icon.
 --
@@ -228,12 +240,14 @@ local notification = {}
 --
 -- @property icon
 -- @tparam string|surface icon
+-- @propemits true false
 -- @see app_icon
 -- @see image
 
 --- Desired icon size in px.
 -- @property icon_size
 -- @param number
+-- @propemits true false
 
 --- The icon provided in the `app_icon` field of the DBus notification.
 --
@@ -242,6 +256,7 @@ local notification = {}
 --
 -- @property app_icon
 -- @param string
+-- @propemits true false
 
 --- The notification image.
 --
@@ -251,6 +266,7 @@ local notification = {}
 --
 -- @property image
 -- @tparam string|surface image
+-- @propemits true false
 
 --- The notification (animated) images.
 --
@@ -262,6 +278,7 @@ local notification = {}
 --
 -- @property images
 -- @tparam nil|table images
+-- @propemits true false
 
 --- Foreground color.
 --
@@ -269,6 +286,7 @@ local notification = {}
 --
 -- @property fg
 -- @tparam string|color|pattern fg
+-- @propemits true false
 -- @see title
 -- @see gears.color
 
@@ -278,13 +296,14 @@ local notification = {}
 --
 -- @property bg
 -- @tparam string|color|pattern bg
+-- @propemits true false
 -- @see title
 -- @see gears.color
 
 --- Border width.
 -- @property border_width
 -- @param number
--- @see title
+-- @propemits true false
 
 --- Border color.
 --
@@ -292,7 +311,7 @@ local notification = {}
 --
 -- @property border_color
 -- @param string
--- @see title
+-- @propemits true false
 -- @see gears.color
 
 --- Widget shape.
@@ -311,10 +330,12 @@ local notification = {}
 --
 -- @property shape
 -- @tparam gears.shape shape
+-- @propemits true false
 
 --- Widget opacity.
 -- @property opacity
 -- @tparam number opacity Between 0 to 1.
+-- @propemits true false
 
 --- Widget margin.
 --
@@ -322,6 +343,7 @@ local notification = {}
 --
 -- @property margin
 -- @tparam number|table margin
+-- @propemits true false
 -- @see shape
 
 --- Function to run on left click.
@@ -345,12 +367,14 @@ local notification = {}
 --   in the preset.
 -- @property preset
 -- @param table
+-- @propemits true false
 
 --- Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.
 -- @property callback
 -- @param function
+-- @propemits true false
 
 --- A table containing strings that represents actions to buttons.
 --
@@ -358,6 +382,7 @@ local notification = {}
 --
 -- @property actions
 -- @param table
+-- @propemits true false
 
 --- Ignore this notification, do not display.
 --
@@ -366,16 +391,19 @@ local notification = {}
 --
 -- @property ignore
 -- @param boolean
+-- @propemits true false
 
 --- Tell if the notification is currently suspended (read only).
 --
 -- This is always equal to `naughty.suspended`
 --@property suspended
 --@param boolean
+-- @propemits true false
 
 --- If the notification is expired.
 -- @property is_expired
 -- @param boolean
+-- @propemits true false
 -- @see naughty.expiration_paused
 
 --- If the timeout needs to be reset when a property changes.
@@ -385,6 +413,7 @@ local notification = {}
 --
 -- @property auto_reset_timeout
 -- @tparam[opt=true] boolean auto_reset_timeout
+-- @propemits true false
 
 --- Emitted when the notification is destroyed.
 -- @signal destroyed
@@ -415,6 +444,7 @@ local notification = {}
 --
 -- @property[opt=500] max_width
 -- @param number
+-- @propemits true false
 
 --- The application name specified by the notification.
 --
@@ -423,6 +453,7 @@ local notification = {}
 -- In these case, it helps to triage and detect the notification from the rules.
 -- @property app_name
 -- @param string
+-- @propemits true false
 
 --- The widget template used to represent the notification.
 --
@@ -431,13 +462,18 @@ local notification = {}
 --
 -- @property widget_template
 -- @param table
+-- @propemits true false
 
 --- Destroy notification by notification object.
 --
 -- @method destroy
 -- @tparam string reason One of the reasons from `notification_closed_reason`
 -- @tparam[opt=false] boolean keep_visible If true, keep the notification visible
--- @return True if the popup was successfully destroyed, false otherwise
+-- @treturn boolean True if the popup was successfully destroyed, false otherwise.
+-- @emits destroyed
+-- @emitstparam destroyed integer reason The reason.
+-- @emitstparam destroyed boolean keep_visible If the notification should be kept.
+-- @see naughty.notification_closed_reason
 function notification:destroy(reason, keep_visible)
     if self._private.is_destroyed then
           gdebug.print_warning("Trying to destroy the same notification twice. It"..
@@ -522,6 +558,7 @@ function notification:set_timeout(timeout)
     end
     self.die = die
     self._private.timeout = timeout
+    self:emit_signal("property::timeout", timeout)
 end
 
 function notification:set_text(txt)

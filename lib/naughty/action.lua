@@ -27,6 +27,7 @@ local action = {}
 -- The action name.
 -- @property name
 -- @tparam string name The name.
+-- @propemits true false
 
 -- If the action is selected.
 --
@@ -35,14 +36,17 @@ local action = {}
 --
 -- @property selected
 -- @param boolean
+-- @propemits true false
 
 --- The action position (index).
 -- @property position
 -- @param number
+-- @propemits true false
 
 --- The action icon.
 -- @property icon
 -- @tparam gears.surface|string icon
+-- @propemits true false
 
 --- If the action should hide the label and only display the icon.
 --
@@ -50,6 +54,7 @@ local action = {}
 --
 -- @property icon_only
 -- @param[opt=false] boolean
+-- @propemits true false
 
 --- When a notification is invoked.
 -- @signal invoked

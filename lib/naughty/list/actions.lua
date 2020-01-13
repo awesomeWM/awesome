@@ -186,23 +186,47 @@ local actionlist = {}
 
 --- The actionlist parent notification.
 -- @property notification
--- @param notification
+-- @tparam naughty.notification notification
+-- @propemits true false
 -- @see naughty.notification
 
 --- The actionlist layout.
 -- If no layout is specified, a `wibox.layout.fixed.horizontal` will be created
 -- automatically.
--- @property layout
--- @param widget
+-- @property base_layout
+-- @tparam widget base_layout
+-- @propemits true false
 -- @see wibox.layout.fixed.horizontal
 
 --- The actionlist parent notification.
 -- @property widget_template
--- @param table
+-- @tparam table widget_template
+-- @propemits true false
 
 --- A table with values to override each `beautiful.notification_action` values.
 -- @property style
--- @param table
+-- @tparam table style
+-- @propemits true false
+-- @usebeautiful beautiful.font Fallback when the `font` property isn't set.
+-- @usebeautiful beautiful.notification_action_underline_normal Fallback.
+-- @usebeautiful beautiful.notification_action_underline_selected Fallback.
+-- @usebeautiful beautiful.notification_action_icon_only Fallback.
+-- @usebeautiful beautiful.notification_action_label_only Fallback.
+-- @usebeautiful beautiful.notification_action_shape_normal Fallback.
+-- @usebeautiful beautiful.notification_action_shape_selected Fallback.
+-- @usebeautiful beautiful.notification_action_shape_border_color_normal Fallback.
+-- @usebeautiful beautiful.notification_action_shape_border_color_selected Fallback.
+-- @usebeautiful beautiful.notification_action_shape_border_width_normal Fallback.
+-- @usebeautiful beautiful.notification_action_shape_border_width_selected Fallback.
+-- @usebeautiful beautiful.notification_action_icon_size_normal Fallback.
+-- @usebeautiful beautiful.notification_action_icon_size_selected Fallback.
+-- @usebeautiful beautiful.notification_action_bg_normal Fallback.
+-- @usebeautiful beautiful.notification_action_bg_selected Fallback.
+-- @usebeautiful beautiful.notification_action_fg_normal Fallback.
+-- @usebeautiful beautiful.notification_action_fg_selected Fallback.
+-- @usebeautiful beautiful.notification_action_bgimage_normal Fallback.
+-- @usebeautiful beautiful.notification_action_bgimage_selected Fallback.
+
 
 function actionlist:set_notification(notif)
     self._private.notification = notif
@@ -215,6 +239,7 @@ function actionlist:set_notification(notif)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::notification", notif)
 end
 
 function actionlist:set_base_layout(layout)
@@ -224,6 +249,7 @@ function actionlist:set_base_layout(layout)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::base_layout", layout)
 end
 
 function actionlist:set_widget_template(widget_template)
@@ -236,6 +262,7 @@ function actionlist:set_widget_template(widget_template)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::widget_template", widget_template)
 end
 
 function actionlist:set_style(style)
@@ -246,6 +273,7 @@ function actionlist:set_style(style)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::style", style)
 end
 
 function actionlist:get_notification()

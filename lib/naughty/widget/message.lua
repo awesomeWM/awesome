@@ -36,6 +36,7 @@ end
 --- The attached notification.
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propemits true false
 
 function message:set_notification(notif)
     if self._private.notification == notif then return end
@@ -53,12 +54,15 @@ function message:set_notification(notif)
 
     notif:connect_signal("property::message", self._private.message_changed_callback)
     notif:connect_signal("property::fg"     , self._private.message_changed_callback)
+    self:emit_signal("property::notification", notif)
 end
 
 --- Create a new naughty.widget.message.
 -- @tparam table args
 -- @tparam naughty.notification args.notification The notification.
 -- @constructorfct naughty.widget.message
+-- @usebeautiful beautiful.notification_fg
+-- @usebeautiful beautiful.notification_font
 
 local function new(args)
     args = args or {}

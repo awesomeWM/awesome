@@ -119,8 +119,10 @@ end
 -- @tparam[opt="top_right"] string notification_position
 
 --- The widget notification object.
+--
 -- @property notification
--- @param naughty.notification
+-- @tparam naughty.notification notification
+-- @propemits true false
 
 --- The widget template to construct the box content.
 --
@@ -162,6 +164,8 @@ end
 --
 -- @property widget_template
 -- @param widget
+-- @usebeautiful beautiful.notification_max_width The maximum width for the
+--  resulting widget.
 
 local function generate_widget(args, n)
     local w = gpcall(wibox.widget.base.make_widget_from_value,
@@ -250,6 +254,8 @@ function box:set_notification(notif)
     init(self, notif)
 
     self._private.notification = notif
+
+    self:emit_signal("property::notification", notif)
 end
 
 function box:get_position()
@@ -259,6 +265,18 @@ function box:get_position()
 
     return "top_right"
 end
+
+--- Create a notification popup box.
+--
+-- @constructorfct naughty.layout.box
+-- @tparam[opt=nil] table args
+-- @tparam table args.widget_template A widget definition template which will
+--  be instantiated for each box.
+-- @tparam naughty.notification args.notification The notification object.
+-- @tparam string args.position The position. See `naughty.notification.position`.
+--@DOC_wibox_constructor_COMMON@
+-- @usebeautiful beautiful.notification_position If `position` is not defined
+-- in the notification object (or in this constructor).
 
 local function new(args)
     args = args or {}

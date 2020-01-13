@@ -102,6 +102,8 @@ gtable.crush(naughty, require("naughty.constants"))
 --
 -- @property suspended
 -- @param boolean
+-- @emits added
+-- @propemits true false
 
 --- Do not allow notifications to auto-expire.
 --
@@ -111,6 +113,7 @@ gtable.crush(naughty, require("naughty.constants"))
 --
 -- @property expiration_paused
 -- @param[opt=false] boolean
+-- @propemits true false
 
 --- A table with all active notifications.
 --
@@ -122,6 +125,7 @@ gtable.crush(naughty, require("naughty.constants"))
 --
 -- @property active
 -- @param table
+-- @propemits false false
 
 --- True when there is a handler connected to `request::display`.
 -- @property has_display_handler
@@ -134,6 +138,7 @@ gtable.crush(naughty, require("naughty.constants"))
 --
 -- @property auto_reset_timeout
 -- @tparam[opt=true] boolean auto_reset_timeout
+-- @propemits true false
 
 --- Enable or disable naughty ability to claim to support animations.
 --
@@ -143,6 +148,7 @@ gtable.crush(naughty, require("naughty.constants"))
 --
 -- @property image_animations_enabled
 -- @param[opt=false] boolean
+-- @propemits true false
 
 --- Enable or disable the persistent notifications.
 --
@@ -158,6 +164,7 @@ gtable.crush(naughty, require("naughty.constants"))
 --
 -- @property persistence_enabled
 -- @param[opt=false] boolean
+-- @propemits true false
 
 local properties = {
     suspended                = false,
@@ -625,7 +632,7 @@ local function set_index_miss(_, key, value)
             resume()
         end
 
-        naughty.emit_signal("property::"..key)
+        naughty.emit_signal("property::"..key, value)
     else
         rawset(naughty, key, value)
     end

@@ -77,6 +77,7 @@ end
 --- The attached notification.
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propemits true false
 
 function icon:set_notification(notif)
     if self._private.notification == notif then return end
@@ -95,6 +96,7 @@ function icon:set_notification(notif)
     self._private.notification = notif
 
     notif:connect_signal("property::icon", self._private.icon_changed_callback)
+    self:emit_signal("property::notification", notif)
 end
 
 local valid_strategies = {
@@ -117,7 +119,11 @@ local valid_strategies = {
 --@DOC_wibox_nwidget_icon_strategy_EXAMPLE@
 --
 -- @property resize_strategy
--- @param string
+-- @tparam string resize_strategy
+-- @propemits true false
+-- @usebeautiful beautiful.notification_icon_resize_strategy The fallback when
+--  there is no specified strategy.
+-- @usebeautiful beautiful.notification_icon_size  The size upper bound.
 
 function icon:set_resize_strategy(strategy)
     assert(valid_strategies[strategy], "Invalid strategy")
@@ -125,6 +131,7 @@ function icon:set_resize_strategy(strategy)
     self._private.resize_strategy = strategy
 
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::resize_strategy", strategy)
 end
 
 
