@@ -274,15 +274,15 @@ local function new(args)
         border_color = args.border_color or beautiful.notification_border_color,
     }
 
+    -- The C code needs `pairs` to work, so a full copy is required.
+    gtable.crush(new_args, args, true)
+
     -- Add a weak-table layer for the screen.
     local weak_args = setmetatable({
         screen = args.notification and args.notification.screen or nil
-    }, {__index = args, __mode = "v"})
+    }, {__mode="v"})
 
-    -- This will cascade from the overriden `new_args` to the weak `weak_args`
-    -- to the original arguments. This way the original wont be modified and
-    -- the screen wont leak.
-    new_args = setmetatable(new_args, {__index = weak_args})
+    setmetatable(new_args, {__index = weak_args})
 
     -- Generate the box before the popup is created to avoid the size changing
     new_args.widget = generate_widget(new_args, new_args.notification)
@@ -315,6 +315,8 @@ local function new(args)
         abutton({ }, 1, hide),
         abutton({ }, 3, hide)
     ))
+
+    gtable.crush(ret, box, false)
 
     return ret
 end
