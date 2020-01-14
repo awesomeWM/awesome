@@ -14,7 +14,7 @@ needs to change, suitable signals have to be emitted. This will be explained
 later.
 
 The first callback is `:fit`. This function is called to select the size of your
-widget. The arguments to this function is the available space and it should
+widget. The arguments to this function are the available space and it should
 return its desired size. Note that this function only provides a hint which is
 not necessarily followed. The widget must also be able to draw itself at
 different sizes than the one requested.
@@ -26,9 +26,9 @@ different sizes than the one requested.
     end
 
 The next callback is `:draw`. As the name suggests, this function is called to
-draw the widget. The arguments to this widget are the context that the widget is
+draw the widget. The arguments to this function are the context that the widget is
 drawn in, the Cairo context on which it should be drawn and the widget's size.
-The Cairo context is set up in such a way that the widget as its top-left corner
+The Cairo context is set up in such a way that the widget has its top-left corner
 at (0, 0) and its bottom-right corner at (width, height). In other words, no
 special transformation needs to be done. Note that during this callback a
 suitable clip will already be applied to the Cairo context so that this callback
