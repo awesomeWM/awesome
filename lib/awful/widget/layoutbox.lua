@@ -40,6 +40,18 @@ local default_template = {
     layout = wlayout.fixed.horizontal
 }
 
+function layoutbox:layout(_, width, height)
+    if self._private.layout then
+        return { wibox.widget.base.place_widget_at(self._private.layout, 0, 0, width, height) }
+    end
+end
+
+function layoutbox:fit(context, width, height)
+    if self._private.layout then
+        return 0, 0
+    end
+    return wbase.fit_widget(self, context, self._private.layout, width, height)
+end
 
 local boxes = nil
 
