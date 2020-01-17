@@ -18,7 +18,7 @@
 -- The wibox visibility can be changed calling the `toggle` method.
 -- The `attach` method adds mouse bindings to an existing widget in order to toggle the display of the wibox.
 --
---@DOC_wibox_awidget_defaults_calendar_popup_EXAMPLE@
+--@DOC_awful_widget_calendar_popup_default_EXAMPLE@
 --
 -- @author getzze
 -- @copyright 2017 getzze
