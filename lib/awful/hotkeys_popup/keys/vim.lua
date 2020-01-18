@@ -8,19 +8,6 @@
 
 local hotkeys_popup = require("awful.hotkeys_popup.widget")
 
-local vim_rule_any = {name={"vim", "VIM"}}
-for group_name, group_data in pairs({
-    ["VIM: motion"] =             { color="#009F00", rule_any=vim_rule_any },
-    ["VIM: command"] =            { color="#aFaF00", rule_any=vim_rule_any },
-    ["VIM: command (insert)"] =   { color="#cF4F40", rule_any=vim_rule_any },
-    ["VIM: operator"] =           { color="#aF6F00", rule_any=vim_rule_any },
-    ["VIM: find"] =               { color="#65cF9F", rule_any=vim_rule_any },
-    ["VIM: scroll"] =             { color="#659FdF", rule_any=vim_rule_any },
-}) do
-    hotkeys_popup.add_group_rules(group_name, group_data)
-end
-
-
 local vim_keys = {
 
     ["VIM: motion"] = {{
@@ -170,8 +157,29 @@ local vim_keys = {
             y="scroll line down",
         }
     }},
+
+    ["VIM: fold"] = {{
+        modifiers = {},
+        keys = {
+            za="toggle",
+            zc="close",
+            zo="open",
+            zA="toggle recursive",
+            zC="close recursive",
+            zO="open recursive",
+            zm="close all one level",
+            zr="open all one level",
+            zM="close all",
+            zR="open all",
+        }
+    }},
 }
 
 hotkeys_popup.add_hotkeys(vim_keys)
+
+local vim_rule_any = {name={"vim", "VIM"}}
+for group_name, _ in pairs(vim_keys) do
+    hotkeys_popup.add_group_rules(group_name, { rule_any=vim_rule_any })
+end
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
