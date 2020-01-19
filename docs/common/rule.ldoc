@@ -1,6 +1,6 @@
 ---
 
---- A table which content will be used to set the target object properties.
+--- A table whose content will be used to set the target object properties.
 --
 -- @rulecomponent properties
 -- @param table
@@ -14,7 +14,7 @@
 -- @param table
 -- @see properties
 
---- A table which content will be compared to the target object current properties.
+--- A table whose content will be compared to the target object current properties.
 --
 -- @rulecomponent rule
 -- @param table
@@ -50,7 +50,7 @@
 -- @see rule
 -- @see except
 
---- A table which content will be compared to the target object current properties.
+--- A table whose content will be compared to the target object current properties.
 --
 -- The comparison will be made using the lesser (`<`) operator.
 --
@@ -59,7 +59,7 @@
 -- @see rule
 -- @see except
 
---- A table which content will be compared to the target object current properties.
+--- A table whose content will be compared to the target object current properties.
 --
 -- The comparison will be made using the greater (`>`) operator.
 --

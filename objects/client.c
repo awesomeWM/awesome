@@ -446,8 +446,8 @@
 /**
  * The client title.
  *
- * This is the text which will be shown in the `awful.widget.tasklist`
- * and the `awful.titlebar`.
+ * This is the text which will be shown in `awful.widget.tasklist`
+ * and `awful.titlebar.widget.titlewidget`.
  *
  * @property name
  * @tparam string name
@@ -464,15 +464,14 @@
  * the `awful.widget.tasklist` and should not be shown there.
  *
  * The default value of this property reflects the value of the
- * `_NET_WM_STATE_SKIP_TASKBAR` X11 protocol xproperty.
+ * `_NET_WM_STATE_SKIP_TASKBAR` X11 protocol xproperty. Clients can modify this
+ * state through this property.
  *
  * @property skip_taskbar
  * @tparam[opt=false] boolean skip_taskbar
  * @propemits false false
  * @see sticky
  */
-
-//TODO v5: Rename to skip_tasklist?
 
 /**
  * The window type.
@@ -519,7 +518,7 @@
  *
  * A class usually maps to the application name. It is useful in, among other
  * places, the rules to apply different properties to different clients. It
- * is also useful, along with `instance`, so implement "windows counter"
+ * is also useful, along with `instance`, to implement "windows counter"
  * used in many popular docks and Alt-Tab like popups.
  *
  * To get a client class from the command line, use the command:
@@ -532,7 +531,8 @@
  * buggy application like the Spotify desktop client are known to
  * violate the specification and do it anyway. There *is* a signal for
  * this property, but it should hopefully never be useful. If your
- * applications change their classes, please report a bug to them.
+ * applications change their classes, please report a bug to them
+ * and point to ICCCM §4.1.2.5.
  * It tends to break `ruled.client` and other AwesomeWM APIs.
  *
  * @property class
@@ -554,6 +554,12 @@
  *     xprop WM_CLASS
  *
  * The instance will be the first string.
+ *
+ * This *should* never change after the client is created. There
+ * *is* a signal for * this property, but it should hopefully never
+ * be useful. If your applications change their classes, please
+ * report a bug to them and point to ICCCM §4.1.2.5.
+ * It tends to break `ruled.client` and other AwesomeWM APIs.
  *
  * @property instance
  * @tparam string instance
@@ -590,6 +596,10 @@
  * and is either used directly by allowing remote windows
  * using the `xhosts` command for using proxies such as
  * `ssh -X` or `ssh -Y`.
+ *
+ * According to EWMH, this property contains the value
+ * returned by `gethostname()` on the computer that the
+ * client is running on.
  *
  * @property machine
  * @tparam string machine
@@ -652,8 +662,8 @@
  * Please note that clients can only be on one screen at once. X11
  * does not natively allow clients to be in multiple locations at
  * once. Changing the screen directly will affect the tags and may
- * cause several other changes to the state in order to ensure no
- * screen specific code is changing the other screens clients.
+ * cause several other changes to the state in order to ensure that
+ * a client's position and its screen are consistent.
  *
  * @property screen
  * @tparam screen screen
@@ -736,13 +746,16 @@
  *
  *    gears.surface(c.content):write_to_png(path)
  *
- * Please note that once taken, the surface wont be
- * updated when the client content changes. Since
- * AwesomeWM does not have a compositor, the only way
- * to get an animated client screenshot widget is to
- * poll this property multiple time per seconds. This
- * is very slow and should be used only when the said
- * widget is visible rather than all the time.
+ * Please note that this only creates a new cairo surface
+ * referring to the client's content. This means that
+ * changes to the client's content may or may not become
+ * visible in the returned surface. If you want to take a
+ * screenshot, a copy of the surface's content needs to
+ * be taken. Note that the content of parts of a window
+ * that are currently not visible are undefined.
+ *
+ * The only way to get an animated client screenshot widget is to poll this
+ * property multiple time per seconds. This is obviously a bad idea.
  *
  * This property has no signals when the content changes.
  *
@@ -843,19 +856,15 @@
  * The client the window is transient for.
  *
  * A transient window is a client that "belongs" to another
- * client. If the client is also `modal`, then it always has
- * to be on top of the other window *and* the parent client
+ * client. If the client is also `modal`, then  the parent client
  * cannot be focused while the child client exists.
- * This is common for "Save as" dialogs or other dialogs where
- * isn't possible to modify the content of the "parent" client
+ * This is common for "Save as" dialogs or other dialogs where it
+ * is not possible to modify the content of the "parent" client
  * while the dialog is open.
  *
- * However, `modal` isn't a requirement for using the `transient_for`
+ * However, `modal` is not a requirement for using the `transient_for`
  * concept. "Tools" such as popup palette in canvas-and-palettes
  * applications can belong to each other without being modal.
- *
- * However this it is also
- * possible to have
  *
  * @property transient_for
  * @tparam client transient_for
@@ -870,6 +879,8 @@
  * Window identification unique to a group of windows.
  *
  * This is the ID of the group window, not a client object.
+ * The group window is most likely not a visible client, but
+ * only an invisible and internal window.
  *
  * @property group_window
  * @tparam integer group_window
@@ -892,6 +903,9 @@
 
 /**
  * A table with size hints of the client.
+ *
+ * For details on the meaning of the fields, refer to ICCCM § 4.1.2.3
+ * `WM_NORMAL_HINTS`.
  *
  * Please note that most fields are optional and may or may not be set.
  *
@@ -931,6 +945,8 @@
  * @tparam[opt] integer|nil hints.min_aspect_den
  * @tparam[opt] integer|nil hints.max_aspect_num
  * @tparam[opt] integer|nil hints.max_aspect_den
+ * @tparam[opt] integer|nil hints.base_width
+ * @tparam[opt] integer|nil hints.base_height
  * @propemits false false
  * @see size_hints_honor
  * @see geometry
@@ -990,10 +1006,10 @@
  * to be on top of the other window *and* the parent client
  * cannot be focused while the child client exists.
  * This is common for "Save as" dialogs or other dialogs where
- * isn't possible to modify the content of the "parent" client
+ * is not possible to modify the content of the "parent" client
  * while the dialog is open.
  *
- * However, `modal` isn't a requirement for using the `transient_for`
+ * However, `modal` is not a requirement for using the `transient_for`
  * concept. "Tools" such as popup palette in canvas-and-palettes
  * applications can belong to each other without being modal.
  *
@@ -1006,7 +1022,7 @@
 /**
  * True if the client can receive the input focus.
  *
- * The client wont get focused even when the user
+ * The client will not get focused even when the user
  * click on it.
  *
  * @property focusable
@@ -1026,7 +1042,7 @@
  *
  * Do not use this directly unless you want total control over the shape (such
  * as shape with holes). Even then, it is usually recommended to use transparency
- * in the titlebars and a compositing manager. For the vast majority use use
+ * in the titlebars and a compositing manager. For the vast majority of use
  * cases, use the `shape` property.
  *
  * @property shape_bounding
@@ -1203,6 +1219,8 @@
  * The struts area is a table with a `left`, `right`, `top` and `bottom`
  * keys to define how much space of the screen `workarea` this client
  * should reserve for itself.
+ *
+ * This corresponds to EWMH's `_NET_WM_STRUT` and `_NET_WM_STRUT_PARTIAL`.
  *
  * @tparam table struts A table with new strut values, or none.
  * @treturn table A table with strut values.

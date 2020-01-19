@@ -1422,12 +1422,12 @@ end
 
 --- Is a client transient for another one?
 --
--- This will traverse the chain of `transient_for` client
--- until a client which is transient for `c2` is found. If
--- one is found, it will be returned. If none is found, then
--- `nil` will be returned. Most of the time there is no
--- long chain of clients, so `self` or `nil` are the most
--- likely return values.
+-- This will traverse the chain formed by the `transient_for` property of `self`
+-- until a client `c` with `c.transient_for == c2` is found. The found client
+-- `c` is returned. If no client is found, `nil` is returned.
+--
+-- While `transient_for` chains are technically possible, they are unlikely, so
+-- the most likely return values are `self` and `nil`.
 --
 -- @method is_transient_for
 -- @tparam client c2 The parent client to check.
