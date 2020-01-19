@@ -17,6 +17,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local dpi = beautiful.xresources.apply_dpi
 
+local matcher = require("gears.matcher")()
 
 -- Stripped copy of this module https://github.com/copycat-killer/lain/blob/master/util/markup.lua:
 local markup = {}
@@ -522,7 +523,7 @@ function widget.new(args)
                 if group_name==group and (
                     data.rule or data.rule_any or data.except or data.except_any
                 ) then
-                    if not c or not awful.rules.matches(c, {
+                    if not c or not matcher:matches_rule(c, {
                         rule=data.rule,
                         rule_any=data.rule_any,
                         except=data.except,
