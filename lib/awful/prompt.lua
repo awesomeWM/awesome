@@ -170,7 +170,7 @@ local function history_check_load(id, max)
 end
 
 local function is_word_char(c)
-    if string.find("[{[(,.:;_-+=@/ ]", c) then
+    if string.find(c, "[{[(,.:;_-+=@/ ]") then
         return false
     else
         return true
