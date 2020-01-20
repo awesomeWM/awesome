@@ -225,7 +225,7 @@
 #   end
 #   if item.extra_summary then
 #       for _, col in ldoc.ipairs(item.extra_summary) do
-         &middot $(col.count.." "..col.title)
+         &middot $((col.showcount and col.count.." " or "")..col.title)
 #       end -- summary col
 #   end -- summary
     </span>
@@ -324,7 +324,7 @@
     </ul>
 #   end -- if usage
 
-#   if item.extra_summary then
+#   if item.has_show_more then
      <br />
      <center id=button$(item.uid)>
      <a class="show_more_button" onclick="show_extra('$(item.uid)')">

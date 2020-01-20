@@ -1,7 +1,7 @@
 local spawn = require("awful.spawn")
 
 -- This file provide a simple, yet flexible, test client.
--- It is used to test the `awful.rules`
+-- It is used to test the `ruled.client`
 
 local test_client_source = [[
 pcall(require, 'luarocks.loader')

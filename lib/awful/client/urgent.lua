@@ -60,7 +60,7 @@ end
 --- Adds client to urgent stack.
 --
 -- @function awful.urgent.add
--- @client c The client object.
+-- @tparam client c The client object.
 -- @param prop The property which is updated.
 -- @request client border active granted When a client becomes active and is no
 --  longer urgent.
@@ -91,7 +91,7 @@ end
 --- Remove client from urgent stack.
 --
 -- @function awful.urgent.delete
--- @client c The client object.
+-- @tparam client c The client object.
 function urgent.delete(c)
     for k, cl in ipairs(data) do
         if c == cl then

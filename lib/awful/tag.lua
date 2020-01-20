@@ -1670,7 +1670,7 @@ end
 -- future. When a tag is detached from the screen, its signal is removed.
 --
 -- @staticfct awful.tag.attached_connect_signal
--- @screen screen The screen concerned, or all if nil.
+-- @tparam screen screen The screen concerned, or all if nil.
 -- @tparam[opt] string signal The signal name.
 -- @tparam[opt] function Callback
 function tag.attached_connect_signal(screen, ...)
@@ -1684,8 +1684,8 @@ end
 -- Register standard signals.
 capi.client.connect_signal("property::screen", function(c)
     -- First, the delayed timer is necessary to avoid a race condition with
-    -- awful.rules. It is also messing up the tags before the user have a chance
-    -- to set them manually.
+    -- `ruled.client`. It is also messing up the tags before the user have a
+    -- chance to set them manually.
     timer.delayed_call(function()
         if not c.valid then
             return

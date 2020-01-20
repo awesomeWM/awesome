@@ -4,21 +4,38 @@ local runner    = require( "_runner"   )
 local awful     = require( "awful"     )
 local wibox     = require( "wibox"     )
 local beautiful = require( "beautiful" )
+local cruled = require("ruled.client")
+local gdebug = require("gears.debug")
 
 local w = nil
 local w1_draw, w2_draw
 
+-- Replacing the rules is not supported anymore.
+local dep = gdebug.deprecate
+
+local function set_rules(new_rules)
+    gdebug.deprecate = function() end
+
+    cruled.rules = {}
+
+    cruled.append_rules(new_rules)
+
+    gdebug.deprecate = dep
+end
+
 -- Disable automatic placement
-awful.rules.rules = {
-    { rule = { }, properties = {
-    border_width     = 0,
-    size_hints_honor = false,
-    x                = 0,
-    y                = 0,
-    width            = 100,
-    height           = 100,
-    border_color     = beautiful.border_color_normal
-}
+set_rules {
+    {
+        rule       = { },
+        properties = {
+            border_width     = 0,
+            size_hints_honor = false,
+            x                = 0,
+            y                = 0,
+            width            = 100,
+            height           = 100,
+            border_color     = beautiful.border_color_normal
+        }
     }
 }
 
@@ -52,7 +69,7 @@ local steps = {
         end
     end,
     function()
-        awful.rules.rules = {
+        set_rules {
             -- All clients will match this rule.
             { rule = { },properties = {
                 titlebars_enabled = true,

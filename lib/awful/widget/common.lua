@@ -17,7 +17,7 @@ local base = require("wibox.widget.base")
 local common = {}
 
 --- Common method to create buttons.
--- @tab buttons
+-- @tparam table buttons
 -- @param object
 -- @treturn table
 function common.create_buttons(buttons, object)
@@ -112,12 +112,12 @@ end
 
 --- Common update method.
 -- @param w The widget.
--- @tab buttons
+-- @tparam table buttons
 -- @func label Function to generate label parameters from an object.
 --   The function gets passed an object from `objects`, and
 --   has to return `text`, `bg`, `bg_image`, `icon`.
--- @tab data Current data/cache, indexed by objects.
--- @tab objects Objects to be displayed / updated.
+-- @tparam table data Current data/cache, indexed by objects.
+-- @tparam table objects Objects to be displayed / updated.
 -- @tparam[opt={}] table args
 function common.list_update(w, buttons, label, data, objects, args)
     -- update the widgets, creating them if needed

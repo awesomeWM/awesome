@@ -1,7 +1,8 @@
 local runner = require("_runner")
 local titlebar = require("awful.titlebar")
-local rules = require("awful.rules")
+local rules = require("ruled.client")
 local spawn = require("awful.spawn")
+local gdebug = require("gears.debug")
 
 local tiny_client_code_template = [[
 pcall(require, 'luarocks.loader')
@@ -25,7 +26,10 @@ window.decorated = false
 }
 
 -- Use the test client props
+local dep = gdebug.deprecate
+gdebug.deprecate = function() end
 rules.rules = {}
+gdebug.deprecate = dep
 
 -- Too bad there's no way to disconnect the rc.lua request::titlebars function
 

@@ -1,6 +1,7 @@
 local awful = require("awful")
 local test_client = require("_client")
 local runner = require("_runner")
+local cruled = require("ruled.client")
 
 -- This test makes some assumptions about the no_overlap behavior which may not
 -- be correct if the screen is in the portrait orientation.
@@ -27,7 +28,8 @@ local rule = {
         placement = awful.placement.no_overlap + awful.placement.no_offscreen
     }
 }
-table.insert(awful.rules.rules, rule)
+
+cruled.append_rule(rule)
 
 local function check_geometry(c, x, y, width, height)
     local g = c:geometry()

@@ -1803,7 +1803,7 @@ luaA_screen_fake_resize(lua_State *L)
  *
  * @DOC_sequences_screen_swap_EXAMPLE@
  *
- * @client s A screen to swap with.
+ * @tparam client s A screen to swap with.
  * @method swap
  */
 static int

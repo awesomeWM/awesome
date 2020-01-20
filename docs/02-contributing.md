@@ -83,11 +83,6 @@ Parameters of functions should be documented using
 For a more comprehensive description of the available tags see the [LDoc
 documentation](https://stevedonovan.github.io/ldoc/manual/doc.md.html).
 
-In addition to the regular tags provided by LDoc there are also some aliases
-for typed parameters defined in `docs/config.ld`, e.g. `@client` for
-`@tparam client.object`, `@tag` for `@tparam tag` and `@tab` for
-`@tparam table`).
-
 ## Patches
 
 If you plan to submit patches, you should follow the following guidelines.

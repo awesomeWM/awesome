@@ -1,5 +1,4 @@
 local timer = require("gears.timer")
-local awful = require("awful")
 local gtable = require("gears.table")
 
 local runner = {
@@ -7,15 +6,6 @@ local runner = {
 }
 
 local verbose = os.getenv('VERBOSE') == '1'
-
--- Helpers.
-
---- Add some rules to awful.rules.rules, after the defaults.
-local default_rules = gtable.clone(awful.rules.rules)
-runner.add_to_default_rules = function(r)
-    awful.rules.rules = gtable.clone(default_rules)
-    table.insert(awful.rules.rules, r)
-end
 
 -- Was the runner started already?
 local running = false

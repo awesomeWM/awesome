@@ -687,13 +687,13 @@ end
 -- -- a particular rule.
 -- -- Bound to a key, it can be used to select from dozens of terminals open on
 -- -- several tags.
--- -- When using @{awful.rules.match_any} instead of @{awful.rules.match},
+-- -- When using @{ruled.client.match_any} instead of @{ruled.client.match},
 -- -- a menu of clients with different classes could be build.
 --
 -- function terminal_menu ()
 --   terms = {}
 --   for i, c in pairs(client.get()) do
---     if awful.rules.match(c, {class = "URxvt"}) then
+--     if ruled.client.match(c, {class = "URxvt"}) then
 --       terms[i] =
 --         {c.name,
 --          function()

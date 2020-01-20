@@ -25,6 +25,7 @@
 --   <tr><td><a href='../core_components/client.html#dockable'>dockable</a></td><td>If the client is dockable</td></tr>
 --   <tr><td><a href='../core_components/client.html#requests_no_titlebar'>requests\_no\_titlebar</a></td><td>If the client requests not to be decorated with a titlebar</td></tr>
 --   <tr><td><a href='../core_components/client.html#shape'>shape</a></td><td>Set the client shape</td></tr>
+--   <tr><td><a href='../core_components/client.html#active'>active</a></td><td>Return true if the client is active (has focus)</td></tr>
 --   <tr><td><a href='../core_components/client.html#window'>window</a></td><td>The X window id</td></tr>
 --   <tr><td><a href='../core_components/client.html#name'>name</a></td><td>The client title</td></tr>
 --   <tr><td><a href='../core_components/client.html#skip_taskbar'>skip\_taskbar</a></td><td>True if the client does not want to be in taskbar</td></tr>
