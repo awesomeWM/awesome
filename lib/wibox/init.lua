@@ -399,6 +399,32 @@ end
 -- @param wibox
 -- @method draw
 
+--- Connect a global signal on the wibox class.
+--
+-- Functions connected to this signal source will be executed when any
+-- wibox object emits the signal.
+--
+-- It is also used for some generic wibox signals such as
+-- `request::geometry`.
+--
+-- @tparam string name The name of the signal
+-- @tparam function func The function to attach
+-- @staticfct wibox.connect_signal
+-- @usage wibox.connect_signal("added", function(notif)
+--    -- do something
+-- end)
+
+--- Emit a wibox signal.
+-- @tparam string name The signal name.
+-- @param ... The signal callback arguments
+-- @staticfct wibox.emit_signal
+
+--- Disconnect a signal from a source.
+-- @tparam string name The name of the signal
+-- @tparam function func The attached function
+-- @staticfct wibox.disconnect_signal
+-- @treturn boolean If the disconnection was successful
+
 function wibox.mt:__call(...)
     return new(...)
 end
