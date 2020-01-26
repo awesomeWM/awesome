@@ -310,8 +310,9 @@ local function new(args)
         ret._drawable:_inform_visible(w.visible)
     end)
 
+    --TODO v5 deprecate this and use `wibox.object`.
     for k, v in pairs(wibox) do
-        if type(v) == "function" then
+        if (not rawget(ret, k)) and type(v) == "function" then
             ret[k] = v
         end
     end
