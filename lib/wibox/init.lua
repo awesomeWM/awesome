@@ -388,6 +388,9 @@ local function new(args)
         ret.input_passthrough = args.input_passthrough
     end
 
+    -- Make sure all signals bubble up
+    ret:_connect_everything(wibox.emit_signal)
+
     return ret
 end
 
@@ -408,6 +411,8 @@ object.properties(capi.drawin, {
 })
 
 capi.drawin.object = wibox.object
+
+object._setup_class_signals(wibox)
 
 return setmetatable(wibox, wibox.mt)
 
