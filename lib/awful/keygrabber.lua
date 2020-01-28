@@ -615,13 +615,13 @@ end
 -- @tparam table mod The current modifiers (like "Control" or "Shift").
 -- @tparam string key The key name.
 -- @tparam string event The event ("press" or "release").
--- @usage local function my_keypressed_cb(mod, key, command)
+-- @usage local function my_keypressed_cb(self, mod, key, command)
 --    -- do something
 -- end
 
 --- The callback function to call with mod table, key and command as arguments
 -- when a key was released.
--- @usage local function my_keyreleased_cb(mod, key, command)
+-- @usage local function my_keyreleased_cb(self, mod, key, command)
 --    -- do something
 -- end
 -- @callback keyreleased_callback
