@@ -639,6 +639,10 @@ main(int argc, char **argv)
         }
     }
 
+    /* Parse `rc.lua` to see if it has an AwesomeWM modeline */
+    if (!(default_init_flags & INIT_FLAG_FORCE_CMD_ARGS))
+        options_init_config(awesome_argv[0], confpath, &default_init_flags, &searchpath);
+
     /* Setup pipe for SIGCHLD processing */
     {
         if (!g_unix_open_pipe(sigchld_pipe, FD_CLOEXEC, NULL))

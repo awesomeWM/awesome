@@ -26,6 +26,247 @@
 #include <stdio.h>
 #include <getopt.h>
 
+#define KEY_VALUE_BUF_MAX 64
+#define READ_BUF_MAX 127
+
+static void
+push_arg(string_array_t *args, char *value, size_t *len)
+{
+    value[*len] = '\0';
+    string_array_append(args, a_strdup(value));
+    (*len) = 0;
+}
+
+/*
+ * Support both shebang and modeline modes.
+ */
+bool
+options_init_config(char *execpath, char *configpath, int *init_flags, string_array_t *paths)
+{
+    /* The different state the parser can have. */
+    enum {
+        MODELINE_STATE_INIT       , /* Start of line        */
+        MODELINE_STATE_NEWLINE    , /* Start of line        */
+        MODELINE_STATE_COMMENT    , /* until --             */
+        MODELINE_STATE_MODELINE   , /* until awesome_mode:  */
+        MODELINE_STATE_SHEBANG    , /* until !              */
+        MODELINE_STATE_KEY_DELIM  , /* until the key begins */
+        MODELINE_STATE_KEY        , /* until '='            */
+        MODELINE_STATE_VALUE_DELIM, /* after ':'            */
+        MODELINE_STATE_VALUE      , /* until ',' or '\n'    */
+        MODELINE_STATE_COMPLETE   , /* Parsing is done      */
+        MODELINE_STATE_INVALID    , /* note a modeline      */
+        MODELINE_STATE_ERROR        /* broken modeline      */
+    } state = MODELINE_STATE_INIT;
+
+    /* The parsing mode */
+    enum {
+        MODELINE_MODE_NONE   , /* No modeline */
+        MODELINE_MODE_LINE   , /* modeline    */
+        MODELINE_MODE_SHEBANG, /* #! shebang  */
+    } mode = MODELINE_MODE_NONE;
+
+    static const unsigned char name[] = "awesome_mode:";
+    static char key_buf [KEY_VALUE_BUF_MAX+1] = {'\0'};
+    static char file_buf[READ_BUF_MAX+1     ] = {'\0'};
+    size_t pos = 0;
+
+    string_array_t argv;
+    string_array_init(&argv);
+    string_array_append(&argv, a_strdup(execpath));
+
+    FILE *fp = fopen(configpath, "r");
+
+    /* Share the error codepath with parsing errors */
+    if (!fp)
+        return false;
+
+    /* Try to read the first line */
+    if (!fgets(file_buf, READ_BUF_MAX, fp)) {
+        fclose(fp);
+        return false;
+    }
+
+    unsigned char c;
+
+    /* Simple state machine to translate both modeline and shebang into argv */
+    for (int i = 0; (c = file_buf[i++]) != '\0';) {
+        /* Be very permissive, skip the unknown, UTF is not allowed */
+        if ((c > 126 || c < 32) && c != 10 && c != 13 && c != 9)
+            continue;
+
+        switch (state) {
+            case MODELINE_STATE_INIT:
+                switch (c) {
+                    case '#':
+                        state = MODELINE_STATE_SHEBANG;
+                        break;
+                    case ' ': case '-':
+                        state = MODELINE_STATE_COMMENT;
+                        break;
+                    default:
+                        state = MODELINE_STATE_INVALID;
+                }
+                break;
+            case MODELINE_STATE_NEWLINE:
+                switch (c) {
+                    case ' ': case '-':
+                        state = MODELINE_STATE_COMMENT;
+                        break;
+                    default:
+                        state = MODELINE_STATE_INVALID;
+                }
+                break;
+            case MODELINE_STATE_COMMENT:
+                switch (c) {
+                    case '-':
+                        state = MODELINE_STATE_MODELINE;
+                        break;
+                    default:
+                        state = MODELINE_STATE_INVALID;
+                }
+                break;
+            case MODELINE_STATE_MODELINE:
+                if (c == ' ')
+                    break;
+                else if (c != name[pos++]) {
+                    state = MODELINE_STATE_INVALID;
+                    pos   = 0;
+                }
+
+                if (pos == 13) {
+                    pos   = 0;
+                    state = MODELINE_STATE_KEY_DELIM;
+                    mode  = MODELINE_MODE_LINE;
+                }
+
+                break;
+            case MODELINE_STATE_SHEBANG:
+                switch(c) {
+                    case '!':
+                        mode  = MODELINE_MODE_SHEBANG;
+                        state = MODELINE_STATE_KEY_DELIM;
+                        break;
+                    default:
+                        state = MODELINE_STATE_INVALID;
+                }
+                break;
+            case MODELINE_STATE_KEY_DELIM:
+                switch (c) {
+                    case ' ': case '\t': case ':': case '=':
+                        break;
+                    case '\n': case '\r':
+                        state = MODELINE_STATE_ERROR;
+                        break;
+                    default:
+                        /* In modeline mode, assume all keys are the long name */
+                        switch(mode) {
+                            case MODELINE_MODE_LINE:
+                                strcpy(key_buf, "--");
+                                pos = 2;
+                                break;
+                            case MODELINE_MODE_SHEBANG:
+                            case MODELINE_MODE_NONE:
+                                break;
+                        };
+                        state = MODELINE_STATE_KEY;
+                        key_buf[pos++] = c;
+                }
+                break;
+            case MODELINE_STATE_KEY:
+                switch (c) {
+                    case '=':
+                        push_arg(&argv, key_buf, &pos);
+                        state = MODELINE_STATE_VALUE_DELIM;
+                        break;
+                    case ' ': case '\t': case ':':
+                        push_arg(&argv, key_buf, &pos);
+                        state = MODELINE_STATE_KEY_DELIM;
+                        break;
+                    default:
+                        key_buf[pos++] = c;
+                }
+                break;
+            case MODELINE_STATE_VALUE_DELIM:
+                switch (c) {
+                    case ' ': case '\t':
+                        break;
+                    case '\n': case '\r':
+                        state = MODELINE_STATE_ERROR;
+                        break;
+                    case ':':
+                        state = MODELINE_STATE_KEY_DELIM;
+                        break;
+                    default:
+                        state = MODELINE_STATE_VALUE;
+                        key_buf[pos++] = c;
+                }
+                break;
+            case MODELINE_STATE_VALUE:
+                switch(c) {
+                    case ',': case ' ': case ':': case '\t':
+                        push_arg(&argv, key_buf, &pos);
+                        state = MODELINE_STATE_KEY_DELIM;
+                        break;
+                    case '\n': case '\r':
+                        state = MODELINE_STATE_COMPLETE;
+                        break;
+                    default:
+                        key_buf[pos++] = c;
+                }
+                break;
+            case MODELINE_STATE_INVALID:
+                /* This cannot happen, the `if` below should prevent it */
+                state = MODELINE_STATE_ERROR;
+                break;
+            case MODELINE_STATE_COMPLETE:
+            case MODELINE_STATE_ERROR:
+                break;
+        }
+
+        /* No keys or values are that large */
+        if (pos >= KEY_VALUE_BUF_MAX)
+            state = MODELINE_STATE_ERROR;
+
+        /* Stop parsing when completed */
+        if (state == MODELINE_STATE_ERROR || state == MODELINE_STATE_COMPLETE)
+            break;
+
+        /* Try the next line */
+        if (((i == READ_BUF_MAX || file_buf[i+1] == '\0') && !feof(fp)) || state == MODELINE_STATE_INVALID) {
+            if (state == MODELINE_STATE_KEY || state == MODELINE_STATE_VALUE)
+                push_arg(&argv, key_buf, &pos);
+
+            /* Skip empty lines */
+            do {
+                if (fgets(file_buf, READ_BUF_MAX, fp))
+                    state = MODELINE_STATE_NEWLINE;
+                else {
+                    state = argv.len ? MODELINE_STATE_COMPLETE : MODELINE_STATE_ERROR;
+                    break;
+                }
+
+                i = 0; /* Always reset `i` to avoid an unlikely invalid read */
+            } while (i == 0 && file_buf[0] == '\n');
+        }
+    }
+
+    fclose(fp);
+
+    /* Reset the global POSIX args counter */
+    optind = 0;
+
+    /* Be future proof, allow let unknown keys live, let the Lua code decide */
+    (*init_flags) |= INIT_FLAG_ALLOW_FALLBACK;
+
+    options_check_args(argv.len, argv.tab, init_flags, paths);
+
+    /* Cleanup */
+    string_array_wipe(&argv);
+
+    return state == MODELINE_STATE_COMPLETE;
+}
+
 /** Print help and exit(2) with given exit_code.
  * \param exit_code The exit code.
  */
