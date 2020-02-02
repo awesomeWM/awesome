@@ -36,6 +36,7 @@
 #include "spawn.h"
 #include "systray.h"
 #include "xwindow.h"
+#include "options.h"
 
 #include <getopt.h>
 
@@ -552,26 +553,6 @@ true_config_callback(const char *unused)
     return true;
 }
 
-/** Print help and exit(2) with given exit_code.
- * \param exit_code The exit code.
- */
-static void __attribute__ ((noreturn))
-exit_help(int exit_code)
-{
-    FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
-    fprintf(outfile,
-"Usage: awesome [OPTION]\n\
-  -h, --help           show help\n\
-  -v, --version        show version\n\
-  -c, --config FILE    configuration file to use\n\
-      --search DIR     add a directory to the library search path\n\
-  -k, --check          check configuration file syntax\n\
-  -a, --no-argb        disable client transparency support\n\
-  -m, --screen on|off  enable or disable automatic screen creation (default: on)\n\
-  -r, --replace        replace an existing window manager\n");
-    exit(exit_code);
-}
-
 /** Hello, this is main.
  * \param argc Who knows.
  * \param argv Who knows.
@@ -580,27 +561,15 @@ exit_help(int exit_code)
 int
 main(int argc, char **argv)
 {
-    char *confpath = NULL;
     string_array_t searchpath;
-    int xfd, opt;
+    int xfd;
     xdgHandle xdg;
-    bool no_argb = false;
-    bool run_test = false;
-    bool replace_wm = false;
     xcb_query_tree_cookie_t tree_c;
-    static struct option long_options[] =
-    {
-        { "help",    0, NULL, 'h' },
-        { "version", 0, NULL, 'v' },
-        { "config",  1, NULL, 'c' },
-        { "check",   0, NULL, 'k' },
-        { "search",  1, NULL, 's' },
-        { "no-argb", 0, NULL, 'a' },
-        { "replace", 0, NULL, 'r' },
-        { "screen" , 1, NULL, 'm' },
-        { "reap",    1, NULL, '\1' },
-        { NULL,      0, NULL, 0 }
-    };
+
+    /* The default values for the init flags */
+    int default_init_flags = INIT_FLAG_NONE
+        | INIT_FLAG_ARGB
+        | INIT_FLAG_AUTO_SCREEN;
 
     /* Make stdout/stderr line buffered. */
     setvbuf(stdout, NULL, _IOLBF, 0);
@@ -621,48 +590,7 @@ main(int argc, char **argv)
     setlocale(LC_CTYPE, "");
 
     /* check args */
-    while((opt = getopt_long(argc, argv, "vhkc:arm:",
-                             long_options, NULL)) != -1)
-        switch(opt)
-        {
-          case 'v':
-            eprint_version();
-            break;
-          case 'h':
-            exit_help(EXIT_SUCCESS);
-            break;
-          case 'k':
-            run_test = true;
-            break;
-          case 'c':
-            if (confpath != NULL)
-                fatal("--config may only be specified once");
-            confpath = a_strdup(optarg);
-            break;
-          case 'm':
-            /* Validation */
-            if ((!optarg) || !(A_STREQ(optarg, "off") || A_STREQ(optarg, "on")))
-                fatal("The possible values of -m/--screen are \"on\" or \"off\"");
-
-            globalconf.no_auto_screen = A_STREQ(optarg, "off");
-
-            break;
-          case 's':
-            string_array_append(&searchpath, a_strdup(optarg));
-            break;
-          case 'a':
-            no_argb = true;
-            break;
-          case 'r':
-            replace_wm = true;
-            break;
-          case '\1':
-            /* Silently ignore --reap and its argument */
-            break;
-          default:
-            exit_help(EXIT_FAILURE);
-            break;
-        }
+    char *confpath = options_check_args(argc, argv, &default_init_flags, &searchpath);
 
     /* Get XDG basedir data */
     if(!xdgInitHandle(&xdg))
@@ -681,7 +609,8 @@ main(int argc, char **argv)
         string_array_append(&searchpath, entry);
     }
 
-    if (run_test)
+    /* Check the configfile syntax and exit */
+    if (default_init_flags & INIT_FLAG_RUN_TEST)
     {
         bool success = true;
         /* Get the first config that will be tried */
@@ -751,7 +680,7 @@ main(int argc, char **argv)
 
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
     globalconf.default_visual = draw_default_visual(globalconf.screen);
-    if(!no_argb)
+    if(default_init_flags & INIT_FLAG_ARGB)
         globalconf.visual = draw_argb_visual(globalconf.screen);
     if(!globalconf.visual)
         globalconf.visual = globalconf.default_visual;
@@ -794,7 +723,7 @@ main(int argc, char **argv)
     draw_test_cairo_xcb();
 
     /* Acquire the WM_Sn selection */
-    acquire_WM_Sn(replace_wm);
+    acquire_WM_Sn(default_init_flags & INIT_FLAG_REPLACE_WM);
 
     /* initialize dbus */
     a_dbus_init();
