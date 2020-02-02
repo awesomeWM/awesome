@@ -34,5 +34,6 @@ typedef enum {
     INIT_FLAG_FORCE_CMD_ARGS = 0x1 << 5,
 } awesome_init_config_t;
 
+char *options_detect_shebang(int argc, char **argv);
 bool options_init_config(char *execpath, char *configpath, int *init_flags, string_array_t *paths);
 char *options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths);

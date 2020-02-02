@@ -589,8 +589,11 @@ main(int argc, char **argv)
     /* Text won't be printed correctly otherwise */
     setlocale(LC_CTYPE, "");
 
-    /* check args */
-    char *confpath = options_check_args(argc, argv, &default_init_flags, &searchpath);
+    char *confpath = options_detect_shebang(argc, argv);
+
+    /* if no shebang is detected, check the args. Shebang (#!) args are parsed later */
+    if (!confpath)
+        confpath = options_check_args(argc, argv, &default_init_flags, &searchpath);
 
     /* Get XDG basedir data */
     if(!xdgInitHandle(&xdg))
