@@ -580,6 +580,7 @@ main(int argc, char **argv)
     globalconf.keygrabber = LUA_REFNIL;
     globalconf.mousegrabber = LUA_REFNIL;
     globalconf.exit_code = EXIT_SUCCESS;
+    globalconf.api_level = awesome_default_api_level();
     buffer_init(&globalconf.startup_errors);
     string_array_init(&searchpath);
 

@@ -224,6 +224,8 @@ typedef struct
     xcb_generic_event_t *pending_event;
     /** The exit code that main() will return with */
     int exit_code;
+    /** The Global API level */
+    int api_level;
 } awesome_t;
 
 extern awesome_t globalconf;

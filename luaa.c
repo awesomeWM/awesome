@@ -540,13 +540,40 @@ static int luaA_get_active_modifiers(lua_State *L)
 }
 
 /**
- * The version of awesome.
+ * The AwesomeWM version.
  * @tfield string version
  */
 
 /**
- * The release name of awesome.
+ * The AwesomeWM release name.
  * @tfield string release
+ */
+
+/**
+ * The AwesomeWM API level.
+ *
+ * By default, this matches the major version (first component of the version).
+ *
+ * API levels are used to allow newer version of AwesomeWM to alter the behavior
+ * and subset deprecated APIs. Using an older API level than the current major
+ * version allows to use legacy `rc.lua` with little porting. However, they wont
+ * be able to use all the new features. Attempting to use a newer feature along
+ * with an older API level is not and will not be supported, even if it almost
+ * works. Keeping up to date with the newer API levels is highly recommended.
+ *
+ * Going the other direction, setting an higher API level allows to take
+ * advantage of experimental feature. It will also be much harsher when it comes
+ * to deprecation. Setting the API level value beyond `current+3` will treat
+ * using APIs currently pending deprecation as fatal errors. All new code
+ * submitted to the upstream AwesomeWM codebase is forbidden to use deprecated
+ * APIs. Testing your patches with mode and the default config is recommended
+ * before submitting a patch.
+ *
+ * You can use the `-l` command line option or `api-level` modeline key to set
+ * the API level for your `rc.lua`. This setting is global and read only,
+ * individual modules cannot set their own API level.
+ *
+ * @tfield string api_level
  */
 
 /**
@@ -613,6 +640,12 @@ luaA_awesome_index(lua_State *L)
     if(A_STREQ(buf, "release"))
     {
         lua_pushstring(L, awesome_release_string());
+        return 1;
+    }
+
+    if(A_STREQ(buf, "api_level"))
+    {
+        lua_pushinteger(L, globalconf.api_level);
         return 1;
     }
 

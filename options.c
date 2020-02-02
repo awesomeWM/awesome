@@ -24,11 +24,40 @@
 
 #include <unistd.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/stat.h>
 #include <getopt.h>
 
 #define KEY_VALUE_BUF_MAX 64
 #define READ_BUF_MAX 127
+
+static void
+set_api_level(char *value)
+{
+    if (!value)
+        return;
+
+    char *ptr;
+    int ret = strtol(value, &ptr, 10);
+
+    /* There is no valid number at all */
+    if (value == ptr) {
+        fprintf(stderr, "Invalid API level %s\n", value);
+        return;
+    }
+
+    /* There is a number, but also letters, this is invalid */
+    if (ptr[0] != '\0' && ptr[0] != '.') {
+        fprintf(stderr, "Invalid API level %s\n", value);
+        return;
+    }
+
+    /* This API level doesn't exist, fallback to v4 */
+    if (ret < 4)
+        ret = 4;
+
+    globalconf.api_level = ret;
+}
 
 static void
 push_arg(string_array_t *args, char *value, size_t *len)
@@ -327,15 +356,16 @@ exit_help(int exit_code)
     FILE *outfile = (exit_code == EXIT_SUCCESS) ? stdout : stderr;
     fprintf(outfile,
 "Usage: awesome [OPTION]\n\
-  -h, --help           show help\n\
-  -v, --version        show version\n\
-  -f, --force          ignore modelines and apply the command line arguments\n\
-  -c, --config FILE    configuration file to use\n\
-      --search DIR     add a directory to the library search path\n\
-  -k, --check          check configuration file syntax\n\
-  -a, --no-argb        disable client transparency support\n\
-  -m, --screen on|off  enable or disable automatic screen creation (default: on)\n\
-  -r, --replace        replace an existing window manager\n");
+  -h, --help             show help\n\
+  -v, --version          show version\n\
+  -c, --config FILE      configuration file to use\n\
+  -f, --force            ignore modelines and apply the command line arguments\n\
+      --search DIR       add a directory to the library search path\n\
+  -k, --check            check configuration file syntax\n\
+  -a, --no-argb          disable client transparency support\n\
+  -l  --api-level LEVEL  select a different API support level than the current version \n\
+  -m, --screen on|off    enable or disable automatic screen creation (default: on)\n\
+  -r, --replace          replace an existing window manager\n");
     exit(exit_code);
 }
 
@@ -348,23 +378,24 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
 
     static struct option long_options[] =
     {
-        { "help",    NO_ARG, NULL, 'h'  },
-        { "version", NO_ARG, NULL, 'v'  },
-        { "config",  ARG   , NULL, 'c'  },
-        { "force" ,  NO_ARG, NULL, 'f'  },
-        { "check",   NO_ARG, NULL, 'k'  },
-        { "search",  ARG   , NULL, 's'  },
-        { "no-argb", NO_ARG, NULL, 'a'  },
-        { "replace", NO_ARG, NULL, 'r'  },
-        { "screen" , ARG   , NULL, 'm'  },
-        { "reap",    ARG   , NULL, '\1' },
-        { NULL,      NO_ARG, NULL, 0    }
+        { "help"      , NO_ARG, NULL, 'h'  },
+        { "version"   , NO_ARG, NULL, 'v'  },
+        { "config"    , ARG   , NULL, 'c'  },
+        { "force"     , NO_ARG, NULL, 'f'  },
+        { "check"     , NO_ARG, NULL, 'k'  },
+        { "search"    , ARG   , NULL, 's'  },
+        { "no-argb"   , NO_ARG, NULL, 'a'  },
+        { "replace"   , NO_ARG, NULL, 'r'  },
+        { "screen"    , ARG   , NULL, 'm'  },
+        { "api-level" , ARG   , NULL, 'l'  },
+        { "reap"      , ARG   , NULL, '\1' },
+        { NULL        , NO_ARG, NULL, 0    }
     };
 
     char *confpath = NULL;
     int opt;
 
-    while((opt = getopt_long(argc, argv, "vhkc:arm:",
+    while((opt = getopt_long(argc, argv, "vhkc:arml:",
                              long_options, NULL)) != -1) {
         switch(opt)
         {
@@ -405,6 +436,9 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
           case 'r':
             (*init_flags) |= INIT_FLAG_REPLACE_WM;
             break;
+          case 'l':
+              set_api_level(optarg);
+              break;
           case '\1':
             /* Silently ignore --reap and its argument */
             break;

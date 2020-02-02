@@ -100,4 +100,11 @@ awesome_release_string(void)
     return AWESOME_RELEASE;
 }
 
+
+int
+awesome_default_api_level(void)
+{
+    return AWESOME_API_LEVEL;
+}
+
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
