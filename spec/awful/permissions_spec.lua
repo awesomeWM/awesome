@@ -15,6 +15,7 @@ describe("awful.permissions.client_geometry_requests", function()
         connect_signal = function() end,
     }
     _G.awesome = {
+        api_level      = 4,
         connect_signal = function() end,
     }
     _G.drawin = {
