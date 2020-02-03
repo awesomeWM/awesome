@@ -310,8 +310,9 @@ local function new(args)
         ret._drawable:_inform_visible(w.visible)
     end)
 
+    --TODO v5 deprecate this and use `wibox.object`.
     for k, v in pairs(wibox) do
-        if type(v) == "function" then
+        if (not rawget(ret, k)) and type(v) == "function" then
             ret[k] = v
         end
     end
@@ -387,6 +388,9 @@ local function new(args)
         ret.input_passthrough = args.input_passthrough
     end
 
+    -- Make sure all signals bubble up
+    ret:_connect_everything(wibox.emit_signal)
+
     return ret
 end
 
@@ -394,6 +398,32 @@ end
 -- automatically called when needed.
 -- @param wibox
 -- @method draw
+
+--- Connect a global signal on the wibox class.
+--
+-- Functions connected to this signal source will be executed when any
+-- wibox object emits the signal.
+--
+-- It is also used for some generic wibox signals such as
+-- `request::geometry`.
+--
+-- @tparam string name The name of the signal
+-- @tparam function func The function to attach
+-- @staticfct wibox.connect_signal
+-- @usage wibox.connect_signal("added", function(notif)
+--    -- do something
+-- end)
+
+--- Emit a wibox signal.
+-- @tparam string name The signal name.
+-- @param ... The signal callback arguments
+-- @staticfct wibox.emit_signal
+
+--- Disconnect a signal from a source.
+-- @tparam string name The name of the signal
+-- @tparam function func The attached function
+-- @staticfct wibox.disconnect_signal
+-- @treturn boolean If the disconnection was successful
 
 function wibox.mt:__call(...)
     return new(...)
@@ -407,6 +437,8 @@ object.properties(capi.drawin, {
 })
 
 capi.drawin.object = wibox.object
+
+object._setup_class_signals(wibox)
 
 return setmetatable(wibox, wibox.mt)
 

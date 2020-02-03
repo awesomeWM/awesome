@@ -18,6 +18,7 @@ local beautiful = require("beautiful")
 local alayout = require("awful.layout")
 local atag = require("awful.tag")
 local gdebug = require("gears.debug")
+local wibox = require("wibox")
 local pcommon = require("awful.permissions._common")
 
 local permissions = {
@@ -395,6 +396,20 @@ function permissions.geometry(c, context, hints)
     end
 end
 
+--- Move and resize the wiboxes.
+--
+-- This is the default geometry request handler.
+--
+-- @signalhandler awful.permissions.wibox_geometry
+-- @tparam wibox w The wibox.
+-- @tparam string context The context
+-- @tparam[opt={}] table hints The hints to pass to the handler
+function permissions.wibox_geometry(w, context, hints)
+    if not pcommon.check(w, "wibox", "geometry", context) then return end
+
+    w:geometry(hints)
+end
+
 --- Merge the 2 requests sent by clients wanting to be maximized.
 --
 -- The X clients set 2 flags (atoms) when they want to be maximized. This caused
@@ -711,6 +726,8 @@ client.connect_signal("untagged"               , check_focus_delayed)
 client.connect_signal("property::hidden"       , check_focus_delayed)
 client.connect_signal("property::minimized"    , check_focus_delayed)
 client.connect_signal("property::sticky"       , check_focus_delayed)
+
+wibox.connect_signal("request::geometry"       , permissions.wibox_geometry)
 
 tag.connect_signal("property::selected", function (t)
     timer.delayed_call(check_focus_tag, t)

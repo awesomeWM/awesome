@@ -177,7 +177,8 @@ end
 
 --- Move the wibox under the cursor.
 -- @staticfct awful.mouse.wibox.move
---@tparam wibox w The wibox to move, or none to use that under the pointer
+-- @tparam wibox w The wibox to move, or none to use that under the pointer
+-- @request wibox geometry mouse.move granted Requests to move the wibox.
 function mouse.wibox.move(w)
     w = w or mouse.current_wibox
     if not w then return end

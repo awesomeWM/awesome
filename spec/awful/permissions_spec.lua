@@ -14,6 +14,13 @@ describe("awful.permissions.client_geometry_requests", function()
     _G.tag = {
         connect_signal = function() end,
     }
+    _G.awesome = {
+        connect_signal = function() end,
+    }
+    _G.drawin = {
+        set_index_miss_handler    = function() end,
+        set_newindex_miss_handler = function() end
+    }
 
     local permissions = require("awful.permissions")
 
