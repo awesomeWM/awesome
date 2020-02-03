@@ -428,9 +428,11 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
 
             break;
           case 's':
+            globalconf.have_searchpaths = true;
             string_array_append(paths, a_strdup(optarg));
             break;
           case 'a':
+            globalconf.had_overriden_depth = true;
             (*init_flags) &= ~INIT_FLAG_ARGB;
             break;
           case 'r':

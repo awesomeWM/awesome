@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "common/version.h"
+#include "globalconf.h"
 #include "awesome-version-internal.h"
 
 #include <stdlib.h>
@@ -67,16 +68,28 @@ eprint_version(void)
 
     printf("awesome %s (%s)\n"
            " • Compiled against %s (running with %s)\n"
+           " • API level: %d\n"
            " • D-Bus support: %s\n"
            " • xcb-errors support: %s\n"
            " • execinfo support: %s\n"
            " • xcb-randr version: %d.%d\n"
-           " • LGI version: %s\n",
-           AWESOME_VERSION, AWESOME_RELEASE,
-           LUA_RELEASE, lua_tostring(L, -2),
-           has_dbus, has_xcb_errors, has_execinfo,
-           XCB_RANDR_MAJOR_VERSION, XCB_RANDR_MINOR_VERSION,
-           lua_tostring(L, -1));
+           " • LGI version: %s\n"
+           " • Transparency enabled: %s\n"
+           " • Custom search paths: %s\n",
+        /* version      */ AWESOME_VERSION,
+        /* release      */ AWESOME_RELEASE,
+        /* Lua linked   */ LUA_RELEASE,
+        /* Lua runtime  */ lua_tostring(L, -2),
+        /* API Level    */ globalconf.api_level,
+        /* DBus         */ has_dbus,
+        /* XCB Error    */ has_xcb_errors,
+        /* Execinfo     */ has_execinfo,
+        /* XRandR major */ XCB_RANDR_MAJOR_VERSION,
+        /* XRandR minor */ XCB_RANDR_MINOR_VERSION,
+        /* LGI version  */ lua_tostring(L, -1),
+        /* ARGB support */ globalconf.had_overriden_depth ? "no"  : "yes",
+        /* Search path  */ globalconf.have_searchpaths    ? "yes" : "no"
+    );
     lua_close(L);
 
     exit(EXIT_SUCCESS);
