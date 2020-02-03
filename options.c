@@ -360,7 +360,7 @@ exit_help(int exit_code)
   -v, --version          show version\n\
   -c, --config FILE      configuration file to use\n\
   -f, --force            ignore modelines and apply the command line arguments\n\
-      --search DIR       add a directory to the library search path\n\
+  -s, --search DIR       add a directory to the library search path\n\
   -k, --check            check configuration file syntax\n\
   -a, --no-argb          disable client transparency support\n\
   -l  --api-level LEVEL  select a different API support level than the current version \n\
