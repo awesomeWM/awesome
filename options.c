@@ -122,8 +122,15 @@ options_init_config(char *execpath, char *configpath, int *init_flags, string_ar
     /* Simple state machine to translate both modeline and shebang into argv */
     for (int i = 0; (c = file_buf[i++]) != '\0';) {
         /* Be very permissive, skip the unknown, UTF is not allowed */
-        if ((c > 126 || c < 32) && c != 10 && c != 13 && c != 9)
+        if ((c > 126 || c < 32) && c != 10 && c != 13 && c != 9) {
+            static bool once = true;
+            /* Print a warning once */
+            if (once) {
+                fprintf(stderr, "WARNING: modelines must use ASCII\n");
+                once = false;
+            }
             continue;
+        }
 
         switch (state) {
             case MODELINE_STATE_INIT:
