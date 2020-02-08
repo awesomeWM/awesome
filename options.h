@@ -31,6 +31,7 @@ typedef enum {
     INIT_FLAG_REPLACE_WM     = 0x1 << 2,
     INIT_FLAG_AUTO_SCREEN    = 0x1 << 3,
     INIT_FLAG_ALLOW_FALLBACK = 0x1 << 4,
+    INIT_FLAG_FORCE_CMD_ARGS = 0x1 << 5,
 } awesome_init_config_t;
 
 char *options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths);

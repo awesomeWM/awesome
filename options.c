@@ -37,6 +37,7 @@ exit_help(int exit_code)
 "Usage: awesome [OPTION]\n\
   -h, --help           show help\n\
   -v, --version        show version\n\
+  -f, --force          ignore modelines and apply the command line arguments\n\
   -c, --config FILE    configuration file to use\n\
       --search DIR     add a directory to the library search path\n\
   -k, --check          check configuration file syntax\n\
@@ -58,6 +59,7 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
         { "help",    NO_ARG, NULL, 'h'  },
         { "version", NO_ARG, NULL, 'v'  },
         { "config",  ARG   , NULL, 'c'  },
+        { "force" ,  NO_ARG, NULL, 'f'  },
         { "check",   NO_ARG, NULL, 'k'  },
         { "search",  ARG   , NULL, 's'  },
         { "no-argb", NO_ARG, NULL, 'a'  },
@@ -80,6 +82,9 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
           case 'h':
             if (! ((*init_flags) & INIT_FLAG_ALLOW_FALLBACK))
                 exit_help(EXIT_SUCCESS);
+            break;
+          case 'f':
+            (*init_flags) |= INIT_FLAG_FORCE_CMD_ARGS;
             break;
           case 'k':
             (*init_flags) |= INIT_FLAG_RUN_TEST;
