@@ -207,7 +207,7 @@ end
 -- @param notification Notification object to be destroyed
 -- @return True if the popup was successfully destroyed, nil otherwise
 function destroy(notification)
-    if notification and notification.box.screen then
+    if notification and notification.box and notification.box.screen then
         if suspended then
             for k, v in pairs(notifications.suspended) do
                 if v.box == notification.box then
