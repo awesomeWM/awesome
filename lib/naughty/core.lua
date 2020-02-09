@@ -227,6 +227,7 @@ local function remove_from_index(n)
         for _, ns in pairs(positions) do
             for k, n2 in ipairs(ns) do
                 if n2 == n then
+                    assert(ns[k+1] ~= n, "The notification index is corrupted")
                     table.remove(ns, k)
                     return
                 end
@@ -237,6 +238,11 @@ end
 
 -- When id or screen are set after the object is created, update the indexing.
 local function update_index(n)
+    -- Do things in the right order.
+    if not n._private.registered then return end
+
+    assert(not n._private.is_destroyed, "The notification index is corrupted")
+
     -- Find the only index and remove it (there's an useless loop, but it's small).
     remove_from_index(n)
 
@@ -373,6 +379,9 @@ function naughty.destroy_all_notifications(screens, reason)
     for _, scr in pairs(screens) do
         for _, list in pairs(naughty.notifications[scr]) do
             while #list > 0 do
+                -- Better cause an error than risk an infinite loop.
+                assert(not list[1]._private.is_destroyed)
+
                 ret = ret and list[1]:destroy(reason)
             end
         end
@@ -580,20 +589,36 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 -- @tparam naughty.action action The action.
 -- @tparam string icon_name The icon name.
 
+--- Emitted when the screen is not defined or being removed.
+-- @signal request::screen
+-- @tparam table notification The `naughty.notification` object. This is
+--  currently either "new" or "removed".
+-- @tparam string context Why is the signal sent.
+
 -- Register a new notification object.
 local function register(notification, args)
+    assert(not notification._private.registered)
+
     -- Add the some more properties
     rawset(notification, "get_suspended", get_suspended)
 
     local s = get_screen(notification.screen or args.screen
-        or (notification.preset and notification.preset.screen)
-        or screen.focused())
+        or (notification.preset and notification.preset.screen))
+
+    if not s then
+        naughty.emit_signal("request::screen", notification, "new", {})
+        s = notification.screen
+    end
+
+    assert(s)
 
     -- insert the notification to the table
     table.insert(naughty._active, notification)
     table.insert(naughty.notifications[s][notification.position], notification)
     notification.idx    = #naughty.notifications[s][notification.position]
     notification.screen = s
+
+    notification._private.registered = true
 
     if properties.suspended and not args.ignore_suspend then
         notification._private.args = args
