@@ -100,6 +100,17 @@ local function finish(self)
     update_position(self.position)
 end
 
+-- It isn't a good idea to use the `attach` `awful.placement` property. If the
+-- screen is resized or the notification is moved, it causes side effects.
+-- Better listen to geometry changes and reflow.
+capi.screen.connect_signal("property::geometry", function(s)
+    for pos, notifs in pairs(by_position[s]) do
+        if #notifs > 0 then
+            update_position(pos)
+        end
+    end
+end)
+
 --- The maximum notification width.
 -- @beautiful beautiful.notification_max_width
 -- @tparam[opt=500] number notification_max_width
