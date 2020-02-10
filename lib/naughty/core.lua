@@ -196,6 +196,16 @@ screen.connect_for_each_screen(function(s)
 end)
 
 capi.screen.connect_signal("removed", function(scr)
+    -- Allow the notifications to be moved to another screen.
+
+    for _, list in pairs(naughty.notifications[scr]) do
+        -- Clone the list to avoid having an iterator while mutating.
+        list = gtable.clone(list, false)
+
+        for _, n in ipairs(list) do
+            naughty.emit_signal("request::screen", n, "removed", {})
+        end
+    end
     -- Destroy all notifications on this screen
     naughty.destroy_all_notifications({scr})
     naughty.notifications[scr] = nil
@@ -230,7 +240,6 @@ local function update_index(n)
     naughty.notifications[s] = naughty.notifications[s] or {}
     table.insert(naughty.notifications[s][n.position], n)
 end
-
 
 --- Notification state.
 --
@@ -499,6 +508,20 @@ function naughty.set_expiration_paused(p)
          end
     end
 end
+
+--- The default handler for `request::screen`.
+--
+-- It selects `awful.screen.focused()`.
+--
+-- @signalhandler naughty.default_screen_handler
+
+function naughty.default_screen_handler(n)
+    if n.screen and n.screen.valid then return end
+
+    n.screen = screen.focused()
+end
+
+naughty.connect_signal("request::screen", naughty.default_screen_handler)
 
 --- Emitted when an error occurred and requires attention.
 -- @signal request::display_error
