@@ -238,7 +238,7 @@ local function init(self, notification)
     assert(s)
 
     -- Add the notification to the active list
-    assert(init_screen(s)[position])
+    assert(init_screen(s)[position], "Invalid position "..position)
 
     self:_apply_size_now()
 
