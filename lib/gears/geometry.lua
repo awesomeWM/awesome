@@ -80,9 +80,17 @@ end
 
 --- Return true whether rectangle B is in the right direction
 -- compared to rectangle A.
--- @param dir The direction.
--- @param gA The geometric specification for rectangle A.
--- @param gB The geometric specification for rectangle B.
+--
+-- The valid `dir` are:
+--
+-- * up
+-- * down
+-- * left
+-- * right
+--
+-- @tparam string dir The direction.
+-- @tparam table gA The geometric specification for rectangle A.
+-- @tparam table gB The geometric specification for rectangle B.
 -- @return True if B is in the direction of A.
 local function is_in_direction(dir, gA, gB)
     if dir == "up" then
@@ -158,6 +166,7 @@ end
 -- @tparam table a The area.
 -- @tparam table b The other area.
 -- @treturn boolean If the areas are identical.
+-- @staticfct gears.geometry.rectangle.are_equal
 function gears.geometry.rectangle.are_equal(a, b)
     for _, v in ipairs {"x", "y", "width", "height"} do
         if a[v] ~= b[v] then return false end
@@ -166,8 +175,8 @@ function gears.geometry.rectangle.are_equal(a, b)
 end
 
 --- Check if an area intersect another area.
--- @param a The area.
--- @param b The other area.
+-- @tparam table a The area.
+-- @tparam table b The other area.
 -- @return True if they intersect, false otherwise.
 -- @staticfct gears.geometry.rectangle.area_intersect_area
 function gears.geometry.rectangle.area_intersect_area(a, b)
