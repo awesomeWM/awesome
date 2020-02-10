@@ -15,6 +15,7 @@
 -- @copyright 2017 Emmanuel Lepage Vallee
 -- @coreclassmod naughty.notification
 ---------------------------------------------------------------------------
+local capi     = { screen = screen }
 local gobject  = require("gears.object")
 local gtable   = require("gears.table")
 local gsurface = require("gears.surface")
@@ -579,14 +580,14 @@ end
 
 local properties = {
     "message" , "title"   , "timeout" , "hover_timeout" ,
-    "screen"  , "position", "ontop"   , "border_width"  ,
+    "app_name", "position", "ontop"   , "border_width"  ,
     "width"   , "font"    , "icon"    , "icon_size"     ,
     "fg"      , "bg"      , "height"  , "border_color"  ,
     "shape"   , "opacity" , "margin"  , "ignore_suspend",
     "destroy" , "preset"  , "callback", "actions"       ,
     "run"     , "id"      , "ignore"  , "auto_reset_timeout",
     "urgency" , "image"   , "images"  , "widget_template",
-    "max_width", "app_name",
+    "max_width",
 }
 
 for _, prop in ipairs(properties) do
@@ -716,6 +717,23 @@ function notification:append_actions(new_actions)
         table.insert(self._private.actions, a)
     end
 
+end
+
+function notification:set_screen(s)
+    assert(not self._private.screen)
+
+    s = s and capi.screen[s] or nil
+
+    -- Avoid an infinite loop in the management code.
+    if s == self._private.weak_screen[1] then return end
+
+    self._private.weak_screen = setmetatable({s}, {__mode="v"})
+
+    self:emit_signal("property::screen", s)
+end
+
+function notification:get_screen()
+    return self._private.weak_screen[1]
 end
 
 --TODO v6: remove this
@@ -869,7 +887,7 @@ local function create(args)
     n:_connect_everything(naughty.emit_signal)
 
     -- Avoid modifying the original table
-    local private = {}
+    local private = {weak_screen = setmetatable({}, {__mode="v"})}
     rawset(n, "_private", private)
 
     -- Allow extensions to create override the preset with custom data
@@ -882,7 +900,11 @@ local function create(args)
     end
 
     for k, v in pairs(args) do
-        private[k] = v
+        -- Don't keep a strong reference to the screen, Lua 5.1 GC wont be
+        -- smart enough to unwind the mess of circular weak references.
+        if k ~= "screen" then
+            private[k] = v
+        end
     end
 
     -- It's an automatic property
