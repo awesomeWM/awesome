@@ -108,9 +108,17 @@ end
 --- Calculate distance between two points.
 -- i.e: if we want to move to the right, we will take the right border
 -- of the currently focused screen and the left side of the checked screen.
--- @param dir The direction.
--- @param _gA The first rectangle.
--- @param _gB The second rectangle.
+--
+-- The valid `dir` are:
+--
+-- * up
+-- * down
+-- * left
+-- * right
+--
+-- @tparam string dir The direction.
+-- @tparam table _gA The first rectangle.
+-- @tparam table _gB The second rectangle.
 -- @return The distance between the screens.
 local function calculate_distance(dir, _gA, _gB)
     local gAx = _gA.x
@@ -174,6 +182,25 @@ function gears.geometry.rectangle.are_equal(a, b)
     return true
 end
 
+--- Return if rectangle `a` is within rectangle `b`.
+--
+-- This includes the edges. 100% of `a` area has to be within `b` for this
+-- function to return true. If you wish to know if any part of `a` intersect
+-- with `b`, use `gears.geometry.rectangle.get_intersection`.
+--
+-- @tparam table a The smaller area.
+-- @tparam table b The larger area.
+-- @treturn boolean If the areas are identical.
+-- @staticfct gears.geometry.rectangle.is_inside
+-- @see gears.geometry.rectangle.get_intersection
+function gears.geometry.rectangle.is_inside(a, b)
+    return (a.x >= b.x
+        and a.y >= b.y
+        and a.x+a.width  <= b.x + b.width
+        and a.y+a.height <= b.y + b.height
+    )
+end
+
 --- Check if an area intersect another area.
 -- @tparam table a The area.
 -- @tparam table b The other area.
@@ -199,6 +226,7 @@ end
 -- @tparam number b.height The rectangle height
 -- @treturn table The intersect area.
 -- @staticfct gears.geometry.rectangle.get_intersection
+-- @see gears.geometry.rectangle.is_inside
 function gears.geometry.rectangle.get_intersection(a, b)
     local g = {}
     g.x = math.max(a.x, b.x)
