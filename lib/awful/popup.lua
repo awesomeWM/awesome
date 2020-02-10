@@ -21,7 +21,7 @@
 -- @popupmod awful.popup
 ---------------------------------------------------------------------------
 local wibox     = require( "wibox"           )
-local util      = require( "awful.util"      )
+local gtable    = require( "gears.table"     )
 local placement = require( "awful.placement" )
 local xresources= require("beautiful.xresources")
 local timer     = require( "gears.timer"     )
@@ -441,7 +441,7 @@ local function create_popup(_, args)
         enable_properties = true
     })
 
-    util.table.crush(ii, main_widget, true)
+    gtable.crush(ii, main_widget, true)
 
     -- Create a wibox to host the widget
     local w = wibox(args or {})
@@ -453,7 +453,7 @@ local function create_popup(_, args)
         widget = child_widget
     })
 
-    util.table.crush(w, popup)
+    gtable.crush(w, popup)
 
     ii:set_widget(child_widget)
 
