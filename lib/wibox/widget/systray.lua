@@ -66,10 +66,17 @@ function systray:draw(context, cr, width, height)
     else
         ortho, in_dir = width, height
     end
-    if ortho * num_entries <= in_dir then
+    -- The formula for a given base, spacing, and num_entries for the necessary
+    -- space is (draw a picture to convince yourself; this assumes horizontal):
+    --   height = base
+    --   width = (base + spacing) * num_entries - spacing
+    -- Now, we check if we are limited by horizontal or vertical space: Which of
+    -- the two limits the base size more?
+    if (ortho + spacing) * num_entries - spacing <= in_dir then
         base = ortho
     else
-        base = in_dir / num_entries
+        -- Solving the "width" formula above for "base" (with width=in_dir):
+        base = (in_dir + spacing) / num_entries - spacing
     end
     capi.awesome.systray(context.wibox.drawin, math.ceil(x), math.ceil(y),
                          base, is_rotated, bg, reverse, spacing)
