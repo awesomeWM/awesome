@@ -36,8 +36,8 @@ local function update_background(notif, wdg)
 
     wdg:set_bg(bg)
     wdg:set_shape(shape) -- otherwise there's no borders
-    wdg:set_shape_border_width(bw)
-    wdg:set_shape_border_color(bc)
+    wdg:set_border_width(bw)
+    wdg:set_border_color(bc)
 end
 
 --- The attached notification.
