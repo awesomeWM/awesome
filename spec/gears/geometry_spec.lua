@@ -145,6 +145,79 @@ describe("gears.geometry", function()
         end)
     end)
 
+    describe("rectangle.is_inside", function()
+
+        it("equality1", function()
+            assert.is_true(geo.rectangle.is_inside(
+                {x=0, y=0, width=10, height=10},
+                {x=0, y=0, width=10, height=10}
+            ))
+        end)
+
+        it("equality2", function()
+            assert.is_true(geo.rectangle.is_inside(
+                {x=10, y=10, width=10, height=10},
+                {x=10, y=10, width=10, height=10}
+            ))
+        end)
+
+        it("top left edge", function()
+            assert.is_true(geo.rectangle.is_inside(
+                {x=0, y=0, width=5 , height=5 },
+                {x=0, y=0, width=10, height=10}
+            ))
+        end)
+
+        it("bottom right edge", function()
+            assert.is_true(geo.rectangle.is_inside(
+                {x=5, y=5, width=5 , height=5 },
+                {x=0, y=0, width=10, height=10}
+            ))
+        end)
+
+        it("middle", function()
+            assert.is_true(geo.rectangle.is_inside(
+                {x=2.5, y=2.5, width=5 , height=5 },
+                {x=0  , y=0  , width=10, height=10}
+            ))
+        end)
+
+        it("edge overflow", function()
+            assert.is_false(geo.rectangle.is_inside(
+                {x=0, y=0, width=11, height=11},
+                {x=0, y=0, width=10, height=10}
+            ))
+        end)
+
+        it("middle overflow", function()
+            assert.is_false(geo.rectangle.is_inside(
+                {x=2.5, y=2.5, width=11, height=11},
+                {x=0  , y=0  , width=10, height=10}
+            ))
+        end)
+
+        it("top left outside", function()
+            assert.is_false(geo.rectangle.is_inside(
+                {x=-10, y=-10, width=11, height=11},
+                {x=0  , y=0  , width=10, height=10}
+            ))
+        end)
+
+        it("no intersect top left", function()
+            assert.is_false(geo.rectangle.is_inside(
+                {x=-10, y=-10, width=5 , height=5 },
+                {x=0  , y=0  , width=10, height=10}
+            ))
+        end)
+
+        it("no intersect bottom right", function()
+            assert.is_false(geo.rectangle.is_inside(
+                {x=11, y=11, width=5 , height=5 },
+                {x=0 , y=0 , width=10, height=10}
+            ))
+        end)
+    end)
+
     describe("rectangle.area_remove", function()
         -- TODO perhaps it would be better to compare against a cairo.region
         -- than to have this overly specific tests?
