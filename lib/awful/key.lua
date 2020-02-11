@@ -32,6 +32,11 @@ local gobject = require("gears.object")
 --   and its derivative. This is usually the number 1-9 followed by 0.
 -- * **arrows**: The Left/Right/Top/Bottom keys usually located right of the
 --   spacebar.
+-- * **numpad**: Often to the right side of the keyboard, sometimes part of
+--   the alphabet keys and can only be accessed holding the Fn key.
+--   Includes every key but Num Lock.
+-- * **fkeys**: The function keys in the top row of the keyboard, spanning
+--   from F1 to F12.
 --
 -- @property keygroup
 
@@ -299,19 +304,43 @@ local function new_common(mod, _keys, press, release, data)
 end
 
 local keygroups = {
+    -- Left: the keycode in a format which regular awful.key understands.
+    -- Right: the argument of the function ran upon executing the key binding.
     numrow = {},
     arrows = {
         {"Left"  , "Left"  },
         {"Right" , "Right" },
-        {"Top"   , "Top"   },
-        {"Bottom", "Bottom"},
-    }
+        {"Up"    , "Up"    },
+        {"Down"  , "Down"  },
+    },
+    numpad = {
+        {"KP_End"     , "KP_End"     },
+        {"KP_Down"    , "KP_Down"    },
+        {"KP_Next"    , "KP_Next"    },
+        {"KP_Left"    , "KP_Left"    },
+        {"KP_Begin"   , "KP_Begin"   },
+        {"KP_Right"   , "KP_Right"   },
+        {"KP_Home"    , "KP_Home"    },
+        {"KP_Up"      , "KP_Up"      },
+        {"KP_Prior"   , "KP_Prior"   },
+        {"KP_Insert"  , "KP_Insert"  },
+        {"KP_Delete"  , "KP_Delete"  },
+        {"KP_Divide"  , "KP_Divide"  },
+        {"KP_Multiply", "KP_Multiply"},
+        {"KP_Subtract", "KP_Subtract"},
+        {"KP_Add"     , "KP_Add"     },
+        {"KP_Enter"   , "KP_Enter"   },
+    },
+    fkeys = {}
 }
 
 -- Technically, this isn't very popular, but we have been doing this for 12
 -- years and nobody complained too loudly.
 for i = 1, 10 do
     table.insert(keygroups.numrow, {"#" .. i + 9, i == 10 and 0 or i})
+end
+for i = 1, 12 do
+    table.insert(keygroups.fkeys, {"F" .. i, "F" .. i})
 end
 
 -- Allow key objects to provide more than 1 key.

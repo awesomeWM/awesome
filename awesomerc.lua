@@ -372,6 +372,33 @@ awful.keyboard.append_global_keybindings({
                 end
             end
         end,
+    },
+    awful.key {
+        modifiers   = { modkey },
+        keygroup    = "numpad",
+        description = "select layout directly",
+        group       = "layout",
+        on_press    = function (index)
+            local everylayout = {
+                KP_End      = awful.layout.suit.corner.sw,
+                KP_Down     = awful.layout.suit.tile.top,
+                KP_Next     = awful.layout.suit.corner.se,
+                KP_Left     = awful.layout.suit.tile,
+                KP_Begin    = awful.layout.suit.magnifier,
+                KP_Right    = awful.layout.suit.tile.left,
+                KP_Home     = awful.layout.suit.corner.nw,
+                KP_Up       = awful.layout.suit.tile.bottom,
+                KP_Prior    = awful.layout.suit.corner.ne,
+                KP_Insert   = awful.layout.suit.floating,
+                KP_Delete   = awful.layout.suit.max,
+                KP_Divide   = awful.layout.suit.fair,
+                KP_Multiply = awful.layout.suit.spiral,
+                KP_Subtract = awful.layout.suit.fair.horizontal,
+                KP_Add      = awful.layout.suit.spiral.dwindle,
+                KP_Enter    = awful.layout.suit.max.fullscreen
+            }
+            awful.layout.set(everylayout[index])
+        end,
     }
 })
 
