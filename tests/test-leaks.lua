@@ -81,6 +81,16 @@ collectable(awful.widget.tasklist{screen=1, filter=awful.widget.tasklist.filter.
 prepare_for_collect = run_delayed_calls
 collectable(create_wibox())
 
+-- Test that screens can be collected
+local function create_and_remove_screen()
+    local s = screen.fake_add(-10, -10, 10, 10)
+    awful.tag.viewnext(s)
+    s:fake_remove()
+    return s
+end
+prepare_for_collect = run_delayed_calls
+collectable(create_and_remove_screen())
+
 runner.run_steps({ function() return true end })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
