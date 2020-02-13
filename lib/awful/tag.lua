@@ -1811,6 +1811,7 @@ capi.screen.connect_signal("removed", function(s)
             t._private.awful_tag_properties.screen = nil
         end
     end
+    data.history[s] = nil
 end)
 
 function tag.mt:__call(...)
