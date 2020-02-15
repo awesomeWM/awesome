@@ -115,7 +115,7 @@ fi
 # shellcheck disable=SC2206
 awesome_options=($AWESOME_OPTIONS $manual_screens --search lib --search "$this_dir")
 
-awesome_options+=(--screen off)
+awesome_options+=(--screen off --force)
 
 # Cleanup on errors / aborting.
 cleanup() {

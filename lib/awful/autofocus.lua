@@ -8,8 +8,11 @@
 ---------------------------------------------------------------------------
 require("awful.permissions._common")._deprecated_autofocus_in_use()
 
---require("gears.debug").deprecate(
---    "The `awful.autofocus` module is deprecated, remove the require() and "..
---    "look at the new `rc.lua` granted permission section in the client rules",
---    {deprecated_in=5}
---)
+if awesome.api_level > 4 then
+    --TODO v5: Remove `require("awful.autofocus")` from `rc.lua`.
+    require("gears.debug").deprecate(
+        "The `awful.autofocus` module is deprecated, remove the require() and "..
+        "look at the new `rc.lua` granted permission section in the client rules",
+        {deprecated_in=5}
+    )
+end

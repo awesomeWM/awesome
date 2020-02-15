@@ -3,6 +3,7 @@
 
 #define AWESOME_VERSION             "@AWESOME_VERSION@"
 #define AWESOME_RELEASE             "@AWESOME_RELEASE@"
+#define AWESOME_API_LEVEL           @AWESOME_API_LEVEL@
 
 #endif //_AWE_VERSION_INTERNAL_H_
 

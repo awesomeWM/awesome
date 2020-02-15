@@ -83,7 +83,8 @@ function awesome.xrdb_get_value()
 end
 
 -- Always show deprecated messages
-awesome.version = "v9999"
+awesome.version   = "v9999"
+awesome.api_level = 9999
 
 -- SVG are composited. Without it we need a root surface
 awesome.composite_manager_running = true

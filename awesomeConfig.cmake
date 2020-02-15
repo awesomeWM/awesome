@@ -271,6 +271,7 @@ else()
    set(AWESOME_MAN_PATH ${CMAKE_INSTALL_PREFIX}/share/man CACHE PATH "awesome manpage directory")
 endif()
 
+
 # Hide to avoid confusion
 mark_as_advanced(CMAKE_INSTALL_CMAKE_INSTALL_PREFIX)
 
@@ -280,6 +281,7 @@ set(AWESOME_SYSCONFDIR       ${XDG_CONFIG_DIR}/${PROJECT_AWE_NAME})
 set(AWESOME_LUA_LIB_PATH     ${AWESOME_DATA_PATH}/lib)
 set(AWESOME_ICON_PATH        ${AWESOME_DATA_PATH}/icons)
 set(AWESOME_THEMES_PATH      ${AWESOME_DATA_PATH}/themes)
+set(AWESOME_API_LEVEL        4)
 # }}}
 
 if(GENERATE_DOC)

@@ -69,6 +69,7 @@ set(AWE_SRCS
     ${BUILD_DIR}/strut.c
     ${BUILD_DIR}/systray.c
     ${BUILD_DIR}/xwindow.c
+    ${BUILD_DIR}/options.c
     ${BUILD_DIR}/xkb.c
     ${BUILD_DIR}/xrdb.c
     ${BUILD_DIR}/common/atoms.c

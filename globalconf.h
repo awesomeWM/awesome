@@ -126,6 +126,10 @@ typedef struct
     bool have_xkb;
     /** Check for XFixes extension */
     bool have_xfixes;
+    /** Custom searchpaths are present, the runtime is tinted */
+    bool have_searchpaths;
+    /** When --no-argb is used in the modeline or command line */
+    bool had_overriden_depth;
     uint8_t event_base_shape;
     uint8_t event_base_xkb;
     uint8_t event_base_randr;
@@ -224,6 +228,8 @@ typedef struct
     xcb_generic_event_t *pending_event;
     /** The exit code that main() will return with */
     int exit_code;
+    /** The Global API level */
+    int api_level;
 } awesome_t;
 
 extern awesome_t globalconf;
