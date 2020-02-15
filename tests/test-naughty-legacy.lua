@@ -11,6 +11,9 @@ local GLib      = require("lgi"        ).GLib
 local gpcall    = require("gears.protected_call")
 local dwidget   = require("naughty.widget._default")
 
+-- Bypass the new rc.lua and force the legacy mode again.
+naughty._reset_display_handlers()
+
 -- This module test deprecated APIs
 require("gears.debug").deprecate = function() end
 

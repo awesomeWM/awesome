@@ -80,9 +80,17 @@ end
 
 --- Return true whether rectangle B is in the right direction
 -- compared to rectangle A.
--- @param dir The direction.
--- @param gA The geometric specification for rectangle A.
--- @param gB The geometric specification for rectangle B.
+--
+-- The valid `dir` are:
+--
+-- * up
+-- * down
+-- * left
+-- * right
+--
+-- @tparam string dir The direction.
+-- @tparam table gA The geometric specification for rectangle A.
+-- @tparam table gB The geometric specification for rectangle B.
 -- @return True if B is in the direction of A.
 local function is_in_direction(dir, gA, gB)
     if dir == "up" then
@@ -100,9 +108,17 @@ end
 --- Calculate distance between two points.
 -- i.e: if we want to move to the right, we will take the right border
 -- of the currently focused screen and the left side of the checked screen.
--- @param dir The direction.
--- @param _gA The first rectangle.
--- @param _gB The second rectangle.
+--
+-- The valid `dir` are:
+--
+-- * up
+-- * down
+-- * left
+-- * right
+--
+-- @tparam string dir The direction.
+-- @tparam table _gA The first rectangle.
+-- @tparam table _gB The second rectangle.
 -- @return The distance between the screens.
 local function calculate_distance(dir, _gA, _gB)
     local gAx = _gA.x
@@ -158,6 +174,7 @@ end
 -- @tparam table a The area.
 -- @tparam table b The other area.
 -- @treturn boolean If the areas are identical.
+-- @staticfct gears.geometry.rectangle.are_equal
 function gears.geometry.rectangle.are_equal(a, b)
     for _, v in ipairs {"x", "y", "width", "height"} do
         if a[v] ~= b[v] then return false end
@@ -165,9 +182,28 @@ function gears.geometry.rectangle.are_equal(a, b)
     return true
 end
 
+--- Return if rectangle `a` is within rectangle `b`.
+--
+-- This includes the edges. 100% of `a` area has to be within `b` for this
+-- function to return true. If you wish to know if any part of `a` intersect
+-- with `b`, use `gears.geometry.rectangle.get_intersection`.
+--
+-- @tparam table a The smaller area.
+-- @tparam table b The larger area.
+-- @treturn boolean If the areas are identical.
+-- @staticfct gears.geometry.rectangle.is_inside
+-- @see gears.geometry.rectangle.get_intersection
+function gears.geometry.rectangle.is_inside(a, b)
+    return (a.x >= b.x
+        and a.y >= b.y
+        and a.x+a.width  <= b.x + b.width
+        and a.y+a.height <= b.y + b.height
+    )
+end
+
 --- Check if an area intersect another area.
--- @param a The area.
--- @param b The other area.
+-- @tparam table a The area.
+-- @tparam table b The other area.
 -- @return True if they intersect, false otherwise.
 -- @staticfct gears.geometry.rectangle.area_intersect_area
 function gears.geometry.rectangle.area_intersect_area(a, b)
@@ -190,6 +226,7 @@ end
 -- @tparam number b.height The rectangle height
 -- @treturn table The intersect area.
 -- @staticfct gears.geometry.rectangle.get_intersection
+-- @see gears.geometry.rectangle.is_inside
 function gears.geometry.rectangle.get_intersection(a, b)
     local g = {}
     g.x = math.max(a.x, b.x)

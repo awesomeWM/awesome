@@ -159,23 +159,48 @@ local notificationlist = {}
 
 --- The notificationlist parent notification.
 -- @property notification
--- @param notification
+-- @tparam naughty.notification notification
+-- @propemits true false
 -- @see naughty.notification
 
---- The notificationlist layout.
+--- A `wibox.layout` to be used to place the entries.
+--
 -- If no layout is specified, a `wibox.layout.fixed.vertical` will be created
 -- automatically.
--- @property layout
--- @param widget
+--
+-- @property base_layout
+-- @tparam widget base_layout
+-- @propemits true false
+-- @usebeautiful beautiful.notification_spacing
+-- @see wibox.layout.fixed.horizontal
 -- @see wibox.layout.fixed.vertical
+-- @see wibox.layout.flex.horizontal
+-- @see wibox.layout.flex.vertical
+-- @see wibox.layout.grid
 
 --- The notificationlist parent notification.
 -- @property widget_template
--- @param table
+-- @tparam table widget_template
+-- @propemits true false
 
 --- A table with values to override each `beautiful.notification_action` values.
 -- @property style
--- @param table
+-- @tparam table style
+-- @propemits true false
+-- @usebeautiful beautiful.notification_shape_normal Fallback.
+-- @usebeautiful beautiful.notification_shape_selected Fallback.
+-- @usebeautiful beautiful.notification_shape_border_color_normal Fallback.
+-- @usebeautiful beautiful.notification_shape_border_color_selected Fallback.
+-- @usebeautiful beautiful.notification_shape_border_width_normal Fallback.
+-- @usebeautiful beautiful.notification_shape_border_width_selected Fallback.
+-- @usebeautiful beautiful.notification_icon_size_normal Fallback.
+-- @usebeautiful beautiful.notification_icon_size_selected Fallback.
+-- @usebeautiful beautiful.notification_bg_normal Fallback.
+-- @usebeautiful beautiful.notification_bg_selected Fallback.
+-- @usebeautiful beautiful.notification_fg_normal Fallback.
+-- @usebeautiful beautiful.notification_fg_selected Fallback.
+-- @usebeautiful beautiful.notification_bgimage_normal Fallback.
+-- @usebeautiful beautiful.notification_bgimage_selected Fallback.
 
 function notificationlist:set_widget_template(widget_template)
     self._private.widget_template = widget_template
@@ -187,6 +212,7 @@ function notificationlist:set_widget_template(widget_template)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::widget_template", widget_template)
 end
 
 function notificationlist:set_style(style)
@@ -197,6 +223,7 @@ function notificationlist:set_style(style)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::style", style)
 end
 
 function notificationlist:layout(_, width, height)
@@ -213,20 +240,12 @@ function notificationlist:fit(context, width, height)
     return wibox.widget.base.fit_widget(self, context, self._private.base_layout, width, height)
 end
 
---- A `wibox.layout` to be used to place the entries.
--- @property base_layout
--- @param widget
--- @see wibox.layout.fixed.horizontal
--- @see wibox.layout.fixed.vertical
--- @see wibox.layout.flex.horizontal
--- @see wibox.layout.flex.vertical
--- @see wibox.layout.grid
-
 --- A function to prevent some notifications from being added to the list.
 -- @property filter
--- @param function
+-- @tparam function filter
+-- @propemits true false
 
-for _, prop in ipairs { "filter", "client", "clients", "tag", "tags", "screen", "base_layout" } do
+for _, prop in ipairs { "filter", "base_layout" } do
     notificationlist["set_"..prop] = function(self, value)
         self._private[prop] = value
 
@@ -234,6 +253,7 @@ for _, prop in ipairs { "filter", "client", "clients", "tag", "tags", "screen", 
 
         self:emit_signal("widget::layout_changed")
         self:emit_signal("widget::redraw_needed")
+        self:emit_signal("property::"..prop, value)
     end
 
     notificationlist["get_"..prop] = function(self)
@@ -319,9 +339,9 @@ end
 
 module.filter = {}
 
----
--- @param n The notification.
--- @return Always returns true because it doesn't filter anything at all.
+--- All notifications.
+-- @tparam naughty.notification n The notification.
+-- @treturn boolean Always returns true because it doesn't filter anything at all.
 -- @filterfunction naughty.list.notifications.filter.all
 function module.filter.all(n) -- luacheck: no unused args
     return true
@@ -333,9 +353,9 @@ end
 --
 --    filter = function(n) return naughty.list.notifications.filter.most_recent(n, 3) end
 --
--- @param n The notification.
+-- @tparam naughty.notification n The notification.
 -- @tparam[opt=1] number count The number of recent notifications to allow.
--- @return Always returns true because it doesn't filter anything at all.
+-- @treturn boolean Always returns true because it doesn't filter anything at all.
 -- @filterfunction naughty.list.notifications.filter.most_recent
 function module.filter.most_recent(n, count)
     for i=1, count or 1 do

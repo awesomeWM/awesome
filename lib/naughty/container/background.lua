@@ -36,13 +36,14 @@ local function update_background(notif, wdg)
 
     wdg:set_bg(bg)
     wdg:set_shape(shape) -- otherwise there's no borders
-    wdg:set_shape_border_width(bw)
-    wdg:set_shape_border_color(bc)
+    wdg:set_border_width(bw)
+    wdg:set_border_color(bc)
 end
 
 --- The attached notification.
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propemits true false
 
 function background:set_notification(notif)
     if self._private.notification == notif then return end
@@ -66,12 +67,16 @@ function background:set_notification(notif)
     notif:connect_signal("property::border_width", self._private.background_changed_callback)
     notif:connect_signal("property::border_color", self._private.background_changed_callback)
     notif:connect_signal("property::shape"       , self._private.background_changed_callback)
+    self:emit_signal("property::notification", notif)
 end
 
 --- Create a new naughty.container.background.
 -- @tparam table args
 -- @tparam naughty.notification args.notification The notification.
 -- @constructorfct naughty.container.background
+-- @usebeautiful beautiful.notification_border_width Fallback when the `border_width` property isn't set.
+-- @usebeautiful beautiful.notification_border_color Fallback when the `border_color` property isn't set.
+-- @usebeautiful beautiful.notification_shape Fallback when the `shape` property isn't set.
 
 local function new(args)
     args = args or {}

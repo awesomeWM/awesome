@@ -1533,7 +1533,7 @@ function placement.next_to(d, args)
 
             geo.width, geo.height = dgeo.width, dgeo.height
 
-            fit = fit_in_bounding(pos.region.screen, geo, args)
+            fit = fit_in_bounding(pos.region, geo, args)
 
             if fit then break end
         end
