@@ -27,7 +27,6 @@ local capi = {screen = screen, client = client, awesome = awesome}
 local matcher = require("gears.matcher")
 local gtable  = require("gears.table")
 local gobject = require("gears.object")
-local naughty = require("naughty")
 
 --- The notification is attached to the focused client.
 --
@@ -206,7 +205,7 @@ capi.awesome.connect_signal("startup", function()
         module.emit_signal("request::rules")
 
         -- This will disable the legacy preset support.
-        naughty.connect_signal("request::preset", function(n)
+        require("naughty").connect_signal("request::preset", function(n)
             module.apply(n)
         end)
     end
