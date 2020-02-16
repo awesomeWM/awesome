@@ -5,6 +5,7 @@
 
 local theme_assets = require("beautiful.theme_assets")
 local xresources = require("beautiful.xresources")
+local rnotification = require("ruled.notification")
 local dpi = xresources.apply_dpi
 local xrdb = xresources.get_current_theme()
 local gfs = require("gears.filesystem")
@@ -128,6 +129,14 @@ end
 theme.wallpaper = function(s)
     return theme_assets.wallpaper(wallpaper_bg, wallpaper_fg, wallpaper_alt_fg, s)
 end
+
+-- Set different colors for urgent notifications.
+rnotification.connect_signal('request::rules', function()
+    rnotification.append_rule {
+        rule       = { urgency = 'critical' },
+        properties = { bg = '#ff0000', fg = '#ffffff' }
+    }
+end)
 
 return theme
 

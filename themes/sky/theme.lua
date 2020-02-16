@@ -6,6 +6,7 @@
 
 local theme_assets = require("beautiful.theme_assets")
 local xresources = require("beautiful.xresources")
+local rnotification = require("ruled.notification")
 local dpi = xresources.apply_dpi
 local themes_path = require("gears.filesystem").get_themes_dir()
 
@@ -96,6 +97,15 @@ theme.titlebar_maximized_button_normal_inactive = themes_path .. "default/titleb
 theme.titlebar_maximized_button_focus_inactive = themes_path .. "default/titlebar/maximized_focus_inactive.png"
 theme.titlebar_maximized_button_normal_active = themes_path .. "default/titlebar/maximized_normal_active.png"
 theme.titlebar_maximized_button_focus_active = themes_path .. "default/titlebar/maximized_focus_active.png"
+
+
+-- Set different colors for urgent notifications.
+rnotification.connect_signal('request::rules', function()
+    rnotification.append_rule {
+        rule       = { urgency = 'critical' },
+        properties = { bg = '#ff0000', fg = '#ffffff' }
+    }
+end)
 
 return theme
 
