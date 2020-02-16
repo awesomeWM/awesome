@@ -284,7 +284,7 @@ local function resume()
         v._private.args = nil
 
         naughty.emit_signal("added", v, args)
-        naughty.emit_signal("request::display", v, args)
+        naughty.emit_signal("request::display", v, "resume", args)
         if v.timer then v.timer:start() end
     end
     naughty.notifications.suspended = { }
@@ -540,6 +540,7 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 --    end)
 --
 -- @tparam table notification The `naughty.notification` object.
+-- @tparam string context Why is the signal sent.
 -- @tparam table args Any arguments passed to the `naughty.notify` function,
 --  including, but not limited to, all `naughty.notification` properties.
 -- @signal request::display
@@ -547,6 +548,7 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 --- Emitted when a notification needs pre-display configuration.
 --
 -- @tparam table notification The `naughty.notification` object.
+-- @tparam string context Why is the signal sent.
 -- @tparam table args Any arguments passed to the `naughty.notify` function,
 --  including, but not limited to, all `naughty.notification` properties.
 -- @signal request::preset
