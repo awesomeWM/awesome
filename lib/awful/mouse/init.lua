@@ -126,8 +126,9 @@ function mouse.object.get_current_widgets()
     local w = mouse.object.get_current_wibox()
     if w then
         local geo, coords = w:geometry(), capi.mouse:coords()
+        local bw = w.border_width
 
-        local list = w:find_widgets(coords.x - geo.x, coords.y - geo.y)
+        local list = w:find_widgets(coords.x - geo.x - bw, coords.y - geo.y - bw)
 
         local ret = {}
 
