@@ -71,6 +71,10 @@ local gobject = require("gears.object")
 -- @clientruleproperty implicit_timeout
 -- @param number
 
+--- Do not let this notification timeout, even if it asks for it.
+-- @clientruleproperty never_timeout
+-- @param boolean
+
 local nrules = matcher()
 
 local function client_match_common(n, prop, value)
@@ -116,7 +120,20 @@ end)
 
 nrules:add_property_setter("implicit_timeout", function(n, value)
     -- Check if there is an explicit timeout.
-    if not n._private.timeout then
+    if (not n._private.timeout) and (not n._private.never_timeout) then
+        n.timeout = value
+    end
+end)
+
+nrules:add_property_setter("never_timeout", function(n, value)
+    if value then
+        n.timeout = 0
+    end
+end)
+
+nrules:add_property_setter("timeout", function(n, value)
+    -- `never_timeout` has an higher priority than `timeout`.
+    if not n._private.never_timeout then
         n.timeout = value
     end
 end)
