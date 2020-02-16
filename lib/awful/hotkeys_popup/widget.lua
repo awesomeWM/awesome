@@ -55,7 +55,7 @@ local widget = {
 widget.hide_without_description = true
 
 --- Merge hotkey records into one if they have the same modifiers and
--- description.
+-- description. Records with five or more keys will abbreviate them.
 -- @tfield boolean widget.merge_duplicates
 -- @param boolean
 widget.merge_duplicates = true
@@ -110,7 +110,8 @@ widget.merge_duplicates = true
 -- @tparam[opt] table args Configuration options for the widget.
 -- @tparam[opt] boolean args.hide_without_description Don't show hotkeys without descriptions.
 -- @tparam[opt] boolean args.merge_duplicates Merge hotkey records into one if
--- they have the same modifiers and description.
+-- they have the same modifiers and description. Records with five keys or more
+-- will abbreviate them.
 -- @tparam[opt] int args.width Widget width.
 -- @tparam[opt] int args.height Widget height.
 -- @tparam[opt] color args.bg Widget background color.
@@ -141,45 +142,63 @@ function widget.new(args)
         ) and widget.merge_duplicates or args.merge_duplicates,
         group_rules = args.group_rules or gtable.clone(widget.group_rules),
         labels = args.labels or {
-            Mod4="Super",
-            Mod1="Alt",
-            Escape="Esc",
-            Insert="Ins",
-            Delete="Del",
-            Backspace="BackSpc",
-            Return="Enter",
-            Next="PgDn",
-            Prior="PgUp",
-            ['#108']="Alt Gr",
-            Left='←',
-            Up='↑',
-            Right='→',
-            Down='↓',
-            ['#67']="F1",
-            ['#68']="F2",
-            ['#69']="F3",
-            ['#70']="F4",
-            ['#71']="F5",
-            ['#72']="F6",
-            ['#73']="F7",
-            ['#74']="F8",
-            ['#75']="F9",
-            ['#76']="F10",
-            ['#95']="F11",
-            ['#96']="F12",
-            ['#10']="1",
-            ['#11']="2",
-            ['#12']="3",
-            ['#13']="4",
-            ['#14']="5",
-            ['#15']="6",
-            ['#16']="7",
-            ['#17']="8",
-            ['#18']="9",
-            ['#19']="0",
-            ['#20']="-",
-            ['#21']="=",
-            Control="Ctrl"
+            Mod4       ="Super",
+            Mod1       ="Alt",
+            Escape     ="Esc",
+            Insert     ="Ins",
+            Delete     ="Del",
+            Backspace  ="BackSpc",
+            Return     ="Enter",
+            Next       ="PgDn",
+            Prior      ="PgUp",
+            ['#108']   ="Alt Gr",
+            Left       ="←",
+            Up         ="↑",
+            Right      ="→",
+            Down       ="↓",
+            ['#67']    ="F1",
+            ['#68']    ="F2",
+            ['#69']    ="F3",
+            ['#70']    ="F4",
+            ['#71']    ="F5",
+            ['#72']    ="F6",
+            ['#73']    ="F7",
+            ['#74']    ="F8",
+            ['#75']    ="F9",
+            ['#76']    ="F10",
+            ['#95']    ="F11",
+            ['#96']    ="F12",
+            ['#10']    ="1",
+            ['#11']    ="2",
+            ['#12']    ="3",
+            ['#13']    ="4",
+            ['#14']    ="5",
+            ['#15']    ="6",
+            ['#16']    ="7",
+            ['#17']    ="8",
+            ['#18']    ="9",
+            ['#19']    ="0",
+            ['#20']    ="-",
+            ['#21']    ="=",
+            [' ']      ="space",
+            Control    ="Ctrl",
+            KP_End     ="Num1",
+            KP_Down    ="Num2",
+            KP_Next    ="Num3",
+            KP_Left    ="Num4",
+            KP_Begin   ="Num4",
+            KP_Right   ="Num6",
+            KP_Home    ="Num7",
+            KP_Up      ="Num8",
+            KP_Prior   ="Num9",
+            KP_Insert  ="Num0",
+            KP_Delete  ="Num.",
+            KP_Divide  ="Num⁄", -- a fraction slash, to avoid confusion with
+                                -- the solidus, which separates keys.
+            KP_Multiply="Num*",
+            KP_Subtract="Num-",
+            KP_Add     ="Num+",
+            KP_Enter   ="NumEnter",
         },
         _additional_hotkeys = {},
         _cached_wiboxes = {},
@@ -187,7 +206,15 @@ function widget.new(args)
         _colors_counter = {},
         _group_list = {},
         _widget_settings_loaded = false,
+        _keygroups = {},
     }
+    for k, v in pairs(awful.key.keygroups) do
+        widget_instance._keygroups[k] = {}
+        for k2, v2 in pairs(v) do
+            widget_instance._keygroups[k][k2] = widget_instance.labels[v2[1]] or v2[1]
+        end
+        widget_instance._keygroups[k]["text"] = table.concat(widget_instance._keygroups[k], "/")
+    end
 
 
     function widget_instance:_load_widget_settings()
@@ -285,6 +312,71 @@ function widget.new(args)
     end
 
 
+    function widget_instance:_abbreviate_awful_keys()
+        -- This is a very crude method and only useful for keygroups.
+        -- It compares the current key value without modifiers, as it would be
+        -- printed (e.g 2/3/4/5/6) with the string that the entire
+        -- keygroup would display (e.g. 1/2/3/4/5/6/7/8/9/0). Then it prints
+        -- the first and the last match, separated by an ellipsis (2…6)
+        --
+        -- Only rows of more than four keys are abbreviated.
+        -- This prevents:
+        --  - senseless abbreviations of three or two keys,
+        --  - accidental matches between a single letter and a keygroup,
+        --  - and confusing abbreviations of arrow keys.
+        --
+        -- Cheatsheets for external programs are abbreviated by hand where
+        -- applicable: they do not need this method.
+        local clone = {}
+        for group, keys in pairs(self._cached_awful_keys) do
+            clone[group] = gtable.map(function(value)
+                local _, slashes = string.gsub(value.key, "/", "")
+                local keygroup
+                if slashes > 3 then -- checking if there are 4 or more keys
+                    keygroup = gtable.find_first_key(self._keygroups, function(_, v)
+                        local first, last = string.find(v.text, value.key, 1, true)
+                        if type(first) ~= "number" then
+                            return false -- no match; abort.
+                        end
+                        if first > 1 and
+                            string.sub(v.text, first-1, first-1) ~= "/"
+                        then
+                            return false -- match spans part of a key,
+                                         -- so it is a false positive; abort.
+                        end
+                        if last < string.len(v.text) and
+                            string.sub(v.text, last+1, last+1) ~= "/"
+                        then
+                            return false -- match spans part of a key,
+                                         -- so it is a false positive; abort.
+                        end
+                        return true -- match is valid
+                    end)
+                end
+                if keygroup then -- if match is valid
+                    local first, last
+                    for case in string.gmatch(value.key, "[^/]+") do
+                        if not first then first = case end
+                        last = case
+                    end
+                    return {
+                        key = first .. "…" .. last,
+                        mod = value.mod,
+                        description = value.description
+                    }
+                else
+                    return {
+                        key = value.key,
+                        mod = value.mod,
+                        description = value.description
+                    }
+                end
+            end, keys)
+        end
+        self._cached_awful_keys = clone
+    end
+
+
     function widget_instance:_import_awful_keys()
         if next(self._cached_awful_keys) then
             return
@@ -295,6 +387,9 @@ function widget.new(args)
             end
         end
         self:_sort_hotkeys(self._cached_awful_keys)
+        if self.merge_duplicates then
+            self:_abbreviate_awful_keys()
+        end
     end
 
 

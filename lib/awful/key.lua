@@ -303,7 +303,7 @@ local function new_common(mod, _keys, press, release, data)
     return setmetatable(ret, obj_mt)
 end
 
-local keygroups = {
+key.keygroups = {
     -- Left: the keycode in a format which regular awful.key understands.
     -- Right: the argument of the function ran upon executing the key binding.
     numrow = {},
@@ -337,10 +337,10 @@ local keygroups = {
 -- Technically, this isn't very popular, but we have been doing this for 12
 -- years and nobody complained too loudly.
 for i = 1, 10 do
-    table.insert(keygroups.numrow, {"#" .. i + 9, i == 10 and 0 or i})
+    table.insert(key.keygroups.numrow, {"#" .. i + 9, i == 10 and 0 or i})
 end
 for i = 1, 12 do
-    table.insert(keygroups.fkeys, {"F" .. i, "F" .. i})
+    table.insert(key.keygroups.fkeys, {"F" .. i, "F" .. i})
 end
 
 -- Allow key objects to provide more than 1 key.
@@ -355,8 +355,8 @@ local function get_keys(args)
         "Please provide either the `key` or `keygroup` property, not both"
     )
 
-    assert(keygroups[args.keygroup], "Please provide a valid keygroup")
-    return keygroups[args.keygroup]
+    assert(key.keygroups[args.keygroup], "Please provide a valid keygroup")
+    return key.keygroups[args.keygroup]
 end
 
 function key.new(args, _key, press, release, data)

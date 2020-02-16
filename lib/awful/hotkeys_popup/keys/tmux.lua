@@ -53,7 +53,7 @@ local tmux_keys = {
             --['&']     = "close current window",
             p         = "previous window",
             n         = "next window",
-            ['0...9'] = "select window by number"
+            ['0…9'] = "select window by number"
         }
     }},
 
@@ -65,7 +65,7 @@ local tmux_keys = {
             ['"']       = "split pane horizontally",
             ['{']       = "move the current pane left",
             ['}']       = "move the current pane right",
-            ['q 0...9'] = "select pane by number",
+            ['q 0…9'] = "select pane by number",
             o           = "toggle between panes",
             z           = "toggle pane zoom",
             ['space']   = "toggle between layouts",

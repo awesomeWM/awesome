@@ -19,7 +19,7 @@ local firefox_keys = {
     ["Firefox: tabs"] = {{
         modifiers = { "Mod1" },
         keys = {
-            ["1..9"] = "go to tab"
+            ["1…9"] = "go to tab"
         }
     }, {
         modifiers = { "Ctrl" },
