@@ -64,6 +64,14 @@ local naughty = require("naughty")
 -- @clientruleproperty append_actions
 -- @param table
 
+--- Set a fallback timeout the notification has no explicit timeout.
+--
+-- The value is in seconds. If none is specified, the default is 5 seconds. If
+-- the notification specifies its own timeout, this property will be skipped.
+--
+-- @clientruleproperty implicit_timeout
+-- @param number
+
 local nrules = matcher()
 
 local function client_match_common(n, prop, value)
@@ -105,6 +113,13 @@ end)
 nrules:add_property_setter("append_actions", function(n, value)
     local new_actions = gtable.clone(n.actions or {}, false)
     n.actions = gtable.merge(new_actions, value)
+end)
+
+nrules:add_property_setter("implicit_timeout", function(n, value)
+    -- Check if there is an explicit timeout.
+    if not n._private.timeout then
+        n.timeout = value
+    end
 end)
 
 local module = {}
