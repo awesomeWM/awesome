@@ -213,6 +213,15 @@ function module.add_rule_source(name, cb, ...)
     return nrules:add_matching_function(name, cb, ...)
 end
 
+-- Allow to clear the rules for testing purpose only.
+-- Because multiple modules might set their rules, it is a bad idea to let
+-- them be purged under their feet.
+function module._clear()
+    for k in pairs(nrules._matching_rules["ruled.notifications"]) do
+        nrules._matching_rules["ruled.notifications"][k] = nil
+    end
+end
+
 -- Add signals.
 local conns = gobject._setup_class_signals(module)
 

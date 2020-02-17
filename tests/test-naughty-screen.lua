@@ -5,6 +5,7 @@ local steps = {}
 
 local naughty = require("naughty")
 local grect   = require("gears.geometry").rectangle
+local rnotif  = require("ruled.notification")
 
 -- Do not use whatever `rc.lua` has. This avoids having to update the test
 -- every time.
@@ -72,6 +73,7 @@ end
 
 -- Create notifications in each position.
 table.insert(steps, function()
+    rnotif._clear()
     add_many(s1)
 
     return true
