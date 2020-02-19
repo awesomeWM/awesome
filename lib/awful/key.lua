@@ -299,12 +299,14 @@ local function new_common(mod, _keys, press, release, data)
 end
 
 local keygroups = {
+    -- Left: the keycode in a format which regular awful.key understands.
+    -- Right: the argument of the function ran upon executing the key binding.
     numrow = {},
     arrows = {
         {"Left"  , "Left"  },
         {"Right" , "Right" },
-        {"Top"   , "Top"   },
-        {"Bottom", "Bottom"},
+        {"Up"    , "Up"    },
+        {"Down",   "Down"  },
     }
 }
 
