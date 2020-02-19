@@ -55,7 +55,7 @@ local widget = {
 widget.hide_without_description = true
 
 --- Merge hotkey records into one if they have the same modifiers and
--- description.
+-- description. Records with five or more keys will abbreviate them.
 -- @tfield boolean widget.merge_duplicates
 -- @param boolean
 widget.merge_duplicates = true
@@ -110,7 +110,8 @@ widget.merge_duplicates = true
 -- @tparam[opt] table args Configuration options for the widget.
 -- @tparam[opt] boolean args.hide_without_description Don't show hotkeys without descriptions.
 -- @tparam[opt] boolean args.merge_duplicates Merge hotkey records into one if
--- they have the same modifiers and description.
+-- they have the same modifiers and description. Records with five keys or more
+-- will abbreviate them.
 -- @tparam[opt] int args.width Widget width.
 -- @tparam[opt] int args.height Widget height.
 -- @tparam[opt] color args.bg Widget background color.
@@ -187,7 +188,14 @@ function widget.new(args)
         _colors_counter = {},
         _group_list = {},
         _widget_settings_loaded = false,
+        _keygroups = {},
     }
+    for k, v in pairs(awful.key.keygroups) do
+        widget_instance._keygroups[k] = {}
+        for k2, v2 in pairs(v) do
+            widget_instance._keygroups[k][k2] = widget_instance.labels[v2[1]] or v2[1]
+        end
+    end
 
 
     function widget_instance:_load_widget_settings()
@@ -247,6 +255,7 @@ function widget.new(args)
         if not target[group] then target[group] = {} end
         local new_key = {
             key = (self.labels[key] or key),
+            keylist = {(self.labels[key] or key)},
             mod = joined_mods,
             description = data.description
         }
@@ -256,6 +265,7 @@ function widget.new(args)
         else
             if self.merge_duplicates and joined_mods == target[group][index].mod then
                 target[group][index].key = target[group][index].key .. "/" .. new_key.key
+                table.insert(target[group][index].keylist, new_key.key)
             else
                 while target[group][index] do
                     index = index .. " "
@@ -285,6 +295,53 @@ function widget.new(args)
     end
 
 
+    function widget_instance:_abbreviate_awful_keys()
+        -- This method is intended to abbreviate the keys of a merged entry (not
+        -- the modifiers) if and only if the entry consists of five or more
+        -- correlative keys from the same keygroup.
+        --
+        -- For simplicity, it checks only the first keygroup which contains the
+        -- first key. If any of the keys in the merged entry is not in this
+        -- keygroup, or there are any gaps between the keys (e.g. the entry
+        -- contains the 2nd, 3rd, 5th, 6th, and 7th key in
+        -- awful.key.keygroups.numrow, but not the 4th) this method does not try
+        -- to abbreviate the entry.
+        --
+        -- Cheatsheets for external programs are abbreviated by hand where
+        -- applicable: they do not need this method.
+        for _, keys in pairs(self._cached_awful_keys) do
+            for _, params in pairs(keys) do
+                if #params.keylist > 4 then
+                    -- assuming here keygroups will never overlap;
+                    -- if they ever do, another for loop will be necessary:
+                    local keygroup = gtable.find_first_key(self._keygroups, function(_, v)
+                        return not not gtable.hasitem(v, params.keylist[1])
+                    end)
+                    local first, last, count, tally = nil, nil, 0, {}
+                    for _, k in ipairs(params.keylist) do
+                        local i = gtable.hasitem(self._keygroups[keygroup], k)
+                        if i and not tally[i] then
+                            tally[i] = k
+                            if (not first) or (i < first) then first = i end
+                            if (not last) or (i > last) then last = i end
+                            count = count + 1
+                        elseif not i then
+                            count = 0
+                            break
+                        end
+                    end
+                    -- this conditional can only be true if there are more than
+                    -- four actual keys (discounting duplicates) and ALL of
+                    -- these keys can be found one after another in a keygroup:
+                    if count > 4 and last - first + 1 == count then
+                        params.key = tally[first] .. "…" .. tally[last]
+                    end
+                end
+            end
+        end
+    end
+
+
     function widget_instance:_import_awful_keys()
         if next(self._cached_awful_keys) then
             return
@@ -295,6 +352,9 @@ function widget.new(args)
             end
         end
         self:_sort_hotkeys(self._cached_awful_keys)
+        if self.merge_duplicates then
+            self:_abbreviate_awful_keys()
+        end
     end
 
 
