@@ -56,6 +56,10 @@ widget.hide_without_description = true
 
 --- Merge hotkey records into one if they have the same modifiers and
 -- description. Records with five or more keys will abbreviate them.
+--
+-- This property only affects hotkey records added via `awful.key` keybindings.
+-- Cheatsheets for external programs are static and will present merged records
+-- regardless of the value of this property.
 -- @tfield boolean widget.merge_duplicates
 -- @param boolean
 widget.merge_duplicates = true
