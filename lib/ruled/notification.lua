@@ -63,7 +63,7 @@ local gobject = require("gears.object")
 -- @clientruleproperty append_actions
 -- @param table
 
---- Set a fallback timeout the notification has no explicit timeout.
+--- Set a fallback timeout when the notification doesn't have an explicit timeout.
 --
 -- The value is in seconds. If none is specified, the default is 5 seconds. If
 -- the notification specifies its own timeout, this property will be skipped.
