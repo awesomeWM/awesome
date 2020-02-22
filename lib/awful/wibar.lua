@@ -3,6 +3,11 @@
 -- This module allows you to easily create wibox and attach them to the edge of
 -- a screen.
 --
+--@DOC_awful_wibar_default_EXAMPLE@
+--
+-- You can even have vertical bars too.
+--@DOC_awful_wibar_left_EXAMPLE@
+--
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @popupmod awful.wibar
