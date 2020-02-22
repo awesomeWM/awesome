@@ -942,13 +942,13 @@ local function create(args)
 
     -- The rules are attached to this.
     if naughty._has_preset_handler then
-        naughty.emit_signal("request::preset", n, args)
+        naughty.emit_signal("request::preset", n, "new", args)
     end
 
     -- Let all listeners handle the actual visual aspects
     if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) then
-        naughty.emit_signal("request::display" , n, args)
-        naughty.emit_signal("request::fallback", n, args)
+        naughty.emit_signal("request::display" , n, "new", args)
+        naughty.emit_signal("request::fallback", n, "new", args)
     end
 
     -- Because otherwise the setter logic would not be executed

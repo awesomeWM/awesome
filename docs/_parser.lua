@@ -131,47 +131,51 @@ local function parse_files(paths, property_name, matcher, name_matcher)
 
         local buffer = ""
 
-        for line in f:lines() do
+        if f then
+            for line in f and f:lines() do
 
-            local var = line:gmatch(exp1)()
+                local var = line:gmatch(exp1)()
 
-            -- There is no backward/forward pattern in lua
-            if #line <= 1 then
-                buffer = ""
-            elseif #buffer and not var then
-                buffer = buffer.."\n"..line
-            elseif line:sub(1,3) == "---" or line:sub(1,3) == "/**" then
-                buffer = line
-            end
+                -- There is no backward/forward pattern in lua
+                if #line <= 1 then
+                    buffer = ""
+                elseif #buffer and not var then
+                    buffer = buffer.."\n"..line
+                elseif line:sub(1,3) == "---" or line:sub(1,3) == "/**" then
+                    buffer = line
+                end
 
-            if var then
-                -- Get the @param, @see and @usage
-                local params = ""
-                for line in f:lines() do
-                    if line:sub(1,2) ~= "--" and line:sub(1,2) ~= " *" then
-                        break
-                    else
-                        params = params.."\n"..line
+                if var then
+                    -- Get the @param, @see and @usage
+                    local params = ""
+                    for line in f:lines() do
+                        if line:sub(1,2) ~= "--" and line:sub(1,2) ~= " *" then
+                            break
+                        else
+                            params = params.."\n"..line
+                        end
                     end
-                end
 
-                local name = var:gmatch(exp2)()
-                if not name then
-                    print("WARNING:", var,
-                        "seems to be misformatted. Use `beautiful.namespace_name`"
-                    )
-                else
-                    table.insert(ret, {
-                        file = file,
-                        name = name:gsub("_", "\\_"),
-                        link = get_link(file, var, var:match(exp3):gsub("_", "\\_")),
-                        desc = buffer:gmatch("[-*/ \n]+([^\n.]*)")() or "",
-                        mod  = path_to_module(file),
-                    })
-                end
+                    local name = var:gmatch(exp2)()
+                    if not name then
+                        print("WARNING:", var,
+                            "seems to be misformatted. Use `beautiful.namespace_name`"
+                        )
+                    else
+                        table.insert(ret, {
+                            file = file,
+                            name = name:gsub("_", "_"),
+                            link = get_link(file, var, var:match(exp3):gsub("_", "\\_")),
+                            desc = buffer:gmatch("[-*/ \n]+([^\n.]*)")() or "",
+                            mod  = path_to_module(file),
+                        })
+                    end
 
-                buffer = ""
+                    buffer = ""
+                end
             end
+
+            f:close()
         end
     end
 

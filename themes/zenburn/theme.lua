@@ -4,6 +4,7 @@
 -------------------------------
 
 local themes_path = require("gears.filesystem").get_themes_dir()
+local rnotification = require("ruled.notification")
 local dpi = require("beautiful.xresources").apply_dpi
 
 -- {{{ Main
@@ -130,6 +131,14 @@ theme.titlebar_maximized_button_focus_inactive  = themes_path .. "zenburn/titleb
 theme.titlebar_maximized_button_normal_inactive = themes_path .. "zenburn/titlebar/maximized_normal_inactive.png"
 -- }}}
 -- }}}
+
+-- Set different colors for urgent notifications.
+rnotification.connect_signal('request::rules', function()
+    rnotification.append_rule {
+        rule       = { urgency = 'critical' },
+        properties = { bg = '#ff0000', fg = '#ffffff' }
+    }
+end)
 
 return theme
 
