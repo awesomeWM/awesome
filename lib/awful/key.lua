@@ -60,9 +60,9 @@ local gobject = require("gears.object")
 -- @property modifiers
 -- @tparam table modifiers
 
---- The key description.
+--- The description of the function run from a key binding.
 --
--- This is used, for example, by the `awful.hotkey_popup`.
+-- This is used, for example, by `awful.hotkeys_popup`.
 --
 -- @property description
 -- @param string
@@ -74,9 +74,9 @@ local gobject = require("gears.object")
 -- @property name
 -- @param string
 
---- The key group.
+--- The key group bound to a function in a key binding.
 --
--- This is used, for example, by the `awful.hotkey_popup`.
+-- This is used, for example, by `awful.hotkeys_popup`.
 --
 -- @property group
 -- @param string
@@ -298,22 +298,48 @@ local function new_common(mod, _keys, press, release, data)
     return setmetatable(ret, obj_mt)
 end
 
-local keygroups = {
-    -- Left: the keycode in a format which regular awful.key understands.
-    -- Right: the argument of the function ran upon executing the key binding.
+--- The default definitions of keygroups.
+--
+-- A definition for a keygroup (say, **arrows**) can be accessed by indexing
+-- this table (e.g. `awful.key.keygroups.arrows`).
+--
+-- Every definition is given as an array, where every element is another array
+-- with the following structure:
+--
+-- * The first element is a string representing a key, in any format the
+-- property `key` will allow.
+-- * The second element is a value. Key bindings created by `awful.key` and a
+-- `keygroup` are bound to a 1-parameter function, whose parameter is this
+-- second element.
+--
+-- As an example, **arrows** is currently defined thus:
+--
+--    arrows = {
+--        {"Left"  , "Left"  },
+--        {"Right" , "Right" },
+--        {"Up"    , "Up"    },
+--        {"Down"  , "Down"  },
+--    }
+--
+-- This table is acessed internally by Awesome. Users will usually use key
+-- bindings with the property `keygroup` instead of accessing this table
+-- directly.
+-- @name awful.key.keygroups
+-- @class table
+key.keygroups = {
     numrow = {},
     arrows = {
         {"Left"  , "Left"  },
         {"Right" , "Right" },
         {"Up"    , "Up"    },
-        {"Down",   "Down"  },
+        {"Down"  , "Down"  },
     }
 }
 
 -- Technically, this isn't very popular, but we have been doing this for 12
 -- years and nobody complained too loudly.
 for i = 1, 10 do
-    table.insert(keygroups.numrow, {"#" .. i + 9, i == 10 and 0 or i})
+    table.insert(key.keygroups.numrow, {"#" .. i + 9, i == 10 and 0 or i})
 end
 
 -- Allow key objects to provide more than 1 key.
@@ -328,8 +354,8 @@ local function get_keys(args)
         "Please provide either the `key` or `keygroup` property, not both"
     )
 
-    assert(keygroups[args.keygroup], "Please provide a valid keygroup")
-    return keygroups[args.keygroup]
+    assert(key.keygroups[args.keygroup], "Please provide a valid keygroup")
+    return key.keygroups[args.keygroup]
 end
 
 function key.new(args, _key, press, release, data)
