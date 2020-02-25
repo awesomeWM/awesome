@@ -52,7 +52,7 @@ end
 -- @return The layoutbox.
 function layoutbox.new(args)
     args = args or {}
-    local screen = nil
+    local screen = args.screen
 
     if type(args) == "number" or type(args) == "screen" or args.fake_remove then
         screen, args = args, {}
