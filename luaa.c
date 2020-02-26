@@ -72,6 +72,7 @@
 
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
+#include "xkb_utf32_to_keysym.c"
 
 #include <unistd.h> /* for gethostname() */
 
@@ -409,6 +410,126 @@ get_modifier_name(int map_index)
     }
 
     return 0; /* \0 */
+}
+
+// Helper function for luaA_get_key_name() below.
+// Will return the UTF-32 codepoint IF AND ONLY IF the input is exactly one
+// valid UTF-8 character. Otherwise, it will return zero.
+static uint32_t
+one_utf8_to_utf32(const char* input, const size_t length) {
+    // When casting a char to a uint32_t, the missing bits will all be set to
+    // the highest bit in the original char. Thus the exaggerated masking of
+    // every value (Unicode is defined around bytes)
+    if (length < 1 || length > 4)
+        return 0;
+    if (length == 1)
+    {
+        if ((*input & 0x80) == 0)
+            return *input;
+        else
+            return 0;
+    }
+    uint32_t mask = (0xff << (7 - length)) & 0x000000ff;
+    const uint32_t check = (mask << 1) & 0x000000ff;
+    uint32_t ucs = 0x00000000;
+    if ((*input & mask) == check)
+    {
+        mask = (~mask) & 0x000000ff;
+        ucs = (*input & mask) << (6 * (length-1));
+    }
+    else
+        return 0;
+    for (size_t i = 1; i < length; i++)
+    {
+        if ((*(input + i) & 0x000000c0) != 0x00000080)
+            return 0;
+        ucs += (*(input + i) & 0x0000003f) << (6 * (length-i-1));
+    }
+    return ucs;
+}
+
+/** Get Xlib keysym and xkb_keysym_to_uf8 from an Awesome keycode.
+ *
+ * xkb_keysym_to_utf8 returns a UTF-8 representation of the symbol a given
+ * symkey generates. It matches the engraving of the key for level-0 symbols
+ * (but lowercase)
+ *
+ * Keycodes may be given in a string in any valid format for `awful.key`:
+ * "#" + keycode, the symkey name and the UTF-8 representation will all work.
+ *
+ * If no suitable keysym is found, or a malformed keycode is given as an
+ * argument, this function will return (nil, nil)
+ *
+ * @treturn[1] string keysym The keysym name
+ * @treturn[1] nil keysym If no valid keysym is found
+ * @treturn[2] string printsymbol The xkb_keysym_to_utf8 result
+ * @treturn[2] nil printsymbol If the keysym has no printable representation.
+ * @staticfct get_key_name
+ */
+
+static int
+luaA_get_key_name(lua_State *L)
+{
+    // check if argument is valid
+    if (lua_gettop(L) > 1 || lua_type(L, 1) != LUA_TSTRING)
+    {
+        return 0;
+    }
+
+    const char* input = luaL_checkstring(L, 1);
+    const xkb_keysym_t *keysyms;
+    xkb_keysym_t keysym = XKB_KEY_NoSymbol;
+    const size_t length = strlen(input);
+    uint32_t ucs;
+
+    /* Checking for the three possible syntaxes awful.key uses:
+     * 1: #keycode (#8 to #255, any other is invalid)
+     * 2: the symbol itself (the result of xkb_keysym_to_utf8, e.g. @ for at).
+     * 3: the keysym
+     */
+    if (length > 1 && *input == '#' && length < 5) // syntax #1
+    {
+        int keycode_from_hash = 0;
+        for (size_t i = 1; i < length; i++)
+        {
+            if ('9' < *(input + i) || *(input + i) < '0')
+                return 0;
+            else
+            {
+                keycode_from_hash *= 10;
+                keycode_from_hash += input[i] - 48;
+            }
+        }
+        // A keycode cannot go lower than 8 or higher than 255
+        if ((keycode_from_hash < 8) || keycode_from_hash > 255)
+            return 0;
+        xkb_keycode_t keycode = (xkb_keycode_t) keycode_from_hash;
+        struct xkb_keymap *keymap = xkb_state_get_keymap(globalconf.xkb_state);
+        xkb_keymap_key_get_syms_by_level(keymap, keycode, 0, 0, &keysyms);
+        keysym = keysyms[0];
+    }
+    else if ((ucs = one_utf8_to_utf32(input, length)) > 0) //syntax #2
+        keysym = xkb_utf32_to_keysym(ucs);
+    else //syntax #3
+        keysym = xkb_keysym_from_name(input, XKB_KEYSYM_NO_FLAGS);
+
+    if (keysym == XKB_KEY_NoSymbol)
+    {
+        lua_pushnil(L);
+        lua_pushnil(L);
+    }
+    else
+    {
+        char *name = key_get_keysym_name(keysym);
+        lua_pushstring(L, name);
+        char *utfname;
+        utfname=malloc(8);
+        if (xkb_keysym_to_utf8(keysym, utfname, 8) > 0)
+            lua_pushstring(L, utfname);
+        else
+            lua_pushnil(L);
+    }
+    return 2;
 }
 
 /* Undocumented */
@@ -1007,6 +1128,7 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
         { "xrdb_get_value", luaA_xrdb_get_value},
         { "kill", luaA_kill},
         { "sync", luaA_sync},
+        { "get_key_name", luaA_get_key_name},
         { NULL, NULL }
     };
 
