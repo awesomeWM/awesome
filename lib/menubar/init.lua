@@ -63,11 +63,11 @@ end
 -- @param color
 
 --- Menubar selected item text color.
--- @beautiful beautiful.menubar_fg_normal
+-- @beautiful beautiful.menubar_fg_focus
 -- @param color
 
 --- Menubar selected item background color.
--- @beautiful beautiful.menubar_bg_normal
+-- @beautiful beautiful.menubar_bg_focus
 -- @param color
 
 
