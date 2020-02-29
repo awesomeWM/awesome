@@ -87,7 +87,11 @@ user name):
 Your desktop background image is handled in your theme file. To change it, edit
 this line in your theme file:
 
-    beautiful.get().wallpaper = "/usr/share/awesome/themes/default/background.png"
+    theme.wallpaper = themes_path.."default/background.png"
+
+The default uses a path relative to `themes_path` by using the `..` operator to join two strings together. To just set it to an absolute path for example, you could do:
+
+    theme.wallpaper = "/usr/share/backgrounds/my-awesome-wallpaper.png"
 
 ## Personalize your layouts
 
