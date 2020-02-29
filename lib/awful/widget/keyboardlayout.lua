@@ -260,7 +260,7 @@ end
 -- @return A keyboard layout widget.
 function keyboardlayout.new()
     local widget = textbox()
-    local self = widget_base.make_widget(widget)
+    local self = widget_base.make_widget(widget, nil, {enable_properties=true})
 
     self.widget = widget
 
