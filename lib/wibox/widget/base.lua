@@ -765,6 +765,13 @@ function base.make_widget(proxy, widget_name, args)
 
             return rawget(ret, key)
         end
+        mt.__newindex = function(_, key, value)
+            if key == "buttons" then
+                base.widget.set_buttons(ret, value)
+            else
+                rawset(ret, key, value)
+            end
+        end
     end
 
     return setmetatable(ret, mt)
