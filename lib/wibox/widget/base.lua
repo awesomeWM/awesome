@@ -684,8 +684,15 @@ end
 -- @constructorfct wibox.widget.base.make_widget
 function base.make_widget(proxy, widget_name, args)
     args = args or {}
+
+    local prop_default = args.enable_properties ~= false
+
+    if awesome.api_level < 5 then
+        prop_default = args.enable_properties
+    end
+
     local ret = object {
-        enable_properties = args.enable_properties,
+        enable_properties = prop_default,
         class             = args.class,
     }
 
