@@ -1302,7 +1302,7 @@ function client.property.persist(prop, kind)
     client.data.persistent_properties_registered[prop] = true
 
     -- Make already-set properties persistent
-    for c in pairs(capi.client.get()) do
+    for _, c in ipairs(capi.client.get()) do
         if c._private.awful_client_properties and c._private.awful_client_properties[prop] ~= nil then
             c:set_xproperty(xprop, c._private.awful_client_properties[prop])
         end
