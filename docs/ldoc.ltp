@@ -155,11 +155,16 @@
 #   local dn = display_name(item)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
     <tr>
-#   if item.display_type then
+#   if item.display_type and not item.compact_signature then
       <td class="shortname" $(nowrap)><a href="#$(item.name)">$(dn)</a></td>
       <td class="summarytype" nowrap>$(item.display_type)</td>
 #   else
-      <td class="name" $(nowrap)><a href="#$(item.name)">$(dn)</a></td>
+      <td class="name" $(nowrap)>
+        <a href="#$(item.name)">$(dn)</a>
+#     if item.display_type and item.compact_signature then
+        <span class="summarytype">$(item.display_type)</span>
+#     end
+      </td>
 #   end
       <td colspan="$(item.inherited and 1 or 2)" class="summary">$(M(item.summary,item))</td>
 #   if item.inherited then

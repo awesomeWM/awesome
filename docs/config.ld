@@ -785,6 +785,8 @@ local function sanitize_return_type(item, ldoc)
 
         item.display_type = item.display_type .. "</span>"
     end
+
+    item.compact_signature = true
 end
 
 local no_prefix = {
