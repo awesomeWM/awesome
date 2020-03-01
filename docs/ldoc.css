@@ -316,7 +316,7 @@ span.inheritance {
     font-weight: normal;
 }
 
-td.summarytype {
+.summarytype {
     background-color: white;
     color: #a4c7ff;
     font-size: 85%;
