@@ -217,7 +217,7 @@
     </span>
 #   end -- display_inheritance
 #   if item.display_type then
-    <span class="proptype">($(item.display_type))</span>
+    <span class="proptype">$(item.display_type)</span>
 #   end
     <span class="baseclass" $(nowrap)>
 #   if item.inherited then
