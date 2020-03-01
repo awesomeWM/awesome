@@ -252,6 +252,9 @@ local function update_layout(self)
     update_status(self)
 end
 
+--- Select the next layout.
+-- @method next_layout
+
 --- Create a keyboard layout widget.
 --
 -- It shows current keyboard layout name in a textbox.
