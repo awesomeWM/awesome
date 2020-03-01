@@ -10,6 +10,8 @@ local say = require("say")
 local assert = require("luassert")
 local no_parent = base.no_parent_I_know_what_I_am_doing
 
+_G.awesome.api_level = 9999
+
 -- {{{ Own widget-based assertions
 local function widget_fit(state, arguments)
     if #arguments ~= 3 then
