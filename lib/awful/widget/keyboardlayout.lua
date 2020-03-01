@@ -252,6 +252,9 @@ local function update_layout(self)
     update_status(self)
 end
 
+--- Select the next layout.
+-- @method next_layout
+
 --- Create a keyboard layout widget.
 --
 -- It shows current keyboard layout name in a textbox.
@@ -260,7 +263,7 @@ end
 -- @return A keyboard layout widget.
 function keyboardlayout.new()
     local widget = textbox()
-    local self = widget_base.make_widget(widget)
+    local self = widget_base.make_widget(widget, nil, {enable_properties=true})
 
     self.widget = widget
 

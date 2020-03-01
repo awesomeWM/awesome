@@ -684,8 +684,15 @@ end
 -- @constructorfct wibox.widget.base.make_widget
 function base.make_widget(proxy, widget_name, args)
     args = args or {}
+
+    local prop_default = args.enable_properties ~= false
+
+    if awesome.api_level < 5 then
+        prop_default = args.enable_properties
+    end
+
     local ret = object {
-        enable_properties = args.enable_properties,
+        enable_properties = prop_default,
         class             = args.class,
     }
 
@@ -764,6 +771,13 @@ function base.make_widget(proxy, widget_name, args)
             end
 
             return rawget(ret, key)
+        end
+        mt.__newindex = function(_, key, value)
+            if key == "buttons" then
+                base.widget.set_buttons(ret, value)
+            else
+                rawset(ret, key, value)
+            end
         end
     end
 
