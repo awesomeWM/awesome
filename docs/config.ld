@@ -687,7 +687,18 @@ local function render_methods(item)
     return ret .. " " .. wrap_args(item)
 end
 
--- Parse the magic parameters to type concention in something the template eats.
+-- Replace the "|" in alternative types by "or".
+local function pipe_to_or(s)
+    s = s:gsub("|"," <i>or</i> ")
+
+    if s:sub(1,1) == "?" then
+        s = s:gsub("?","nil <i>or</i> ")
+    end
+
+    return s
+end
+
+-- Parse the magic parameters to type in something the template eats.
 local function sanitize_type(item, ldoc)
 
     for parm in ldoc.modules.iter(item.params) do
@@ -698,7 +709,7 @@ local function sanitize_type(item, ldoc)
         t = t:gsub("?","")
 
         -- Add " or " between alternatives
-        t = t:gsub("|"," <i>or</i> ")
+        t = pipe_to_or(t)
 
         -- Fallback.
         t = t == "" and parm or t
@@ -717,6 +728,65 @@ local function sanitize_type(item, ldoc)
     -- It has to be set, otherwise the table will have different col count.
     item.display_type = "<span class='summary_type'>N/A</span>"
 end
+
+
+-- Add parentheses when there is alternative return types.
+local function generate_return_tuple(item, group, ldoc)
+    local tuple = {}
+
+    for r in group:iter() do
+        local type = item:return_type(r);
+
+        type = pipe_to_or(type)
+
+        if type ~= nil and type ~= "" then
+            tuple[#tuple+1] = type
+        end
+    end
+
+    if #tuple == 1 then
+        return tuple[1]
+    else
+        local ret = "("
+        for i, elem in ldoc.ipairs(tuple) do
+            ret = ret..elem
+
+            if i ~= #tuple then
+                ret = ret..", "
+            end
+        end
+        ret = ret..")"
+
+        return ret
+    end
+end
+
+-- Create a return type string.
+local function sanitize_return_type(item, ldoc)
+
+    local groups = item.retgroups
+
+    item.display_type = ""
+
+    if groups then
+        item.display_type = "<span class='summary_type'> -&gt;&nbsp;"
+
+        for i,group in ldoc.ipairs(groups) do
+            item.display_type = item.display_type .. generate_return_tuple(
+                item,
+                group,
+                ldoc
+            )
+
+            if i ~= #groups then
+                item.display_type = item.display_type  .. " <i>or</i> "
+            end
+        end
+
+        item.display_type = item.display_type .. "</span>"
+    end
+end
+
 local no_prefix = {
     property           = true,
     signal             = true,
@@ -760,6 +830,12 @@ local display_type = {
     rulecomponent      = true,
 }
 
+-- Add the `-> ret_type` annotation.
+local display_return_type = {
+    method    = true,
+    staticfct = true,
+}
+
 -- Show return values.
 local show_return = {
     ["function"]    = true,
@@ -786,6 +862,8 @@ custom_display_name_handler = function(item, default_handler)
     if display_type[item.type] then
         -- Punch a hole in the sandbox and inject the `ldoc` object.
         item.sanitize_type = sanitize_type
+    elseif display_return_type[item.type] then
+        item.sanitize_type = sanitize_return_type
     end
 
     -- LDoc hardcode the "Returns" section for "function" only, fix that.
