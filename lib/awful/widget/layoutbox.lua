@@ -47,7 +47,7 @@ function layoutbox:layout(_, width, height)
 end
 
 function layoutbox:fit(context, width, height)
-    if self._private.layout then
+    if not self._private.layout then
         return 0, 0
     end
     return wbase.fit_widget(self, context, self._private.layout, width, height)
