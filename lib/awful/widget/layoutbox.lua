@@ -30,14 +30,19 @@ local layoutbox = { mt = {} }
 
 local default_template = {
     {
-        id = "imagebox",
-        widget = wibox.widget.imagebox
+        {
+            id     = "icon_role",
+            widget = wibox.widget.imagebox
+        },
+        {
+            id     = "text_role",
+            widget = wibox.widget.imagebox,
+        },
+        fill_space = true,
+        layout     = wlayout.fixed.horizontal
     },
-    {
-        id = "textbox",
-        widget = wibox.widget.textbox
-    },
-    layout = wlayout.fixed.horizontal
+    id     = "background_role",
+    widget = wibox.container.background
 }
 
 function layoutbox:layout(_, width, height)
@@ -60,13 +65,10 @@ local function layoutbox_label(t, tscreen)
     local bg = "#ffffff"
     local bg_image = "#00ffff"
     local layoutbox_disable_icon = theme.layoutbox_disable_icon or false
-    local layout_screen = layout.get(tscren)
+    local layout_screen = layout.get(tscreen)
     local text = layout.getname(layout_screen)
 
     local img = surface.load_silently(beautiful["layout_" .. text], false)
-    -- TODO says values are nil when uncommented
-    --t.imagebox.image = img
-    --t.textbox.text   = text
     local other_args = {}
     return text, bg, bg_image, not layoutbox_disable_icon and img or nil, other_args
 end
@@ -81,7 +83,7 @@ local function update(w, screen, buttons, data, update_function, args)
 
     local sscreen = get_screen(screen)
 
-    local function label(c, sscreen) return layoutbox_label(c, sscreen) end
+    local function label(sscreen) return layoutbox_label(c, sscreen) end
 
     update_function(w, buttons, label, data, layouts, {
         widget_template = args.widget_template or default_template,
@@ -94,6 +96,7 @@ end
 -- @tparam table args The arguments.
 -- @tparam screen args.screen The screen number that the layout will be represented for.
 -- @tparam table args.buttons The `awful.button`s for this layoutbox.
+-- @tparam[opt] table args.widget_template A custom widget to be used for each
 -- @return The layoutbox.
 function layoutbox.new(args)
     args = args or {}
@@ -110,7 +113,7 @@ function layoutbox.new(args)
 
     assert(type(args) == "table")
 
-    screen = get_screen(screen or 1)
+    screen = screen or get_screen(args.screen)
 
     local uf = args.update_function or common.list_update
     local w = base.make_widget_from_value(args.layout or wlayout.fixed.horizontal)
@@ -165,18 +168,7 @@ function layoutbox.new(args)
     local w = boxes[screen]
     if not w then
         -- TODO rip this out with template
-        w = wibox.widget {
-            {
-                id     = "imagebox",
-                widget = wibox.widget.imagebox
-            },
-            {
-                id     = "textbox",
-                widget = wibox.widget.textbox
-            },
-            layout = wlayout.fixed.horizontal
-        }
-
+        w = base.make_widget_from_value(args.widget_tempalte or default_template or fixed.horizontal)
         w._layoutbox_tooltip = tooltip {objects = {w}, delay_show = 1}
 
         -- Apply the buttons, visible, forced_width and so on
