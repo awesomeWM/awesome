@@ -16,12 +16,13 @@
 ----------------------------------------------------------------------------
 local textbox = require("wibox.widget.textbox")
 local gtable  = require("gears.table")
+local gstring = require("gears.string")
 local beautiful = require("beautiful")
 
 local message = {}
 
 local function markup(notif, wdg)
-    local ret = notif.message or ""
+    local ret = gstring.xml_escape(notif.message) or ""
     local fg = notif.fg or beautiful.notification_fg
 
     wdg:set_font(notif.font or beautiful.notification_font)
