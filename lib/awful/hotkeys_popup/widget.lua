@@ -570,7 +570,16 @@ function widget.new(args)
         end
         table.insert(pages, columns)
 
-        local mywibox = wibox({
+        -- Function to place the widget in the center and account for the
+        -- workarea. This will be called in the placement field of the
+        -- awful.popup constructor.
+        local place_func = function(c)
+            awful.placement.centered(c, {honor_workarea = true})
+        end
+
+        -- Construct the popup with the widget
+        local mypopup = awful.popup {
+            widget = pages[1],
             ontop = true,
             bg=self.bg,
             fg=self.fg,
@@ -578,20 +587,20 @@ function widget.new(args)
             border_width = self.border_width,
             border_color = self.border_color,
             shape = self.shape,
-        })
+            placement = place_func,
+            minimum_width = wibox_width,
+            minimum_height = wibox_height,
+        }
+
         local widget_obj = {
             current_page = 1,
-            wibox = mywibox,
+            popup = mypopup,
         }
-        mywibox:geometry({
-            x = wa.x + math.floor((wa.width - wibox_width - self.border_width*2) / 2),
-            y = wa.y + math.floor((wa.height - wibox_height - self.border_width*2) / 2),
-            width = wibox_width,
-            height = wibox_height,
-        })
-        mywibox:set_widget(pages[1])
 
-        mywibox.buttons = {
+        -- Set up the mouse buttons to hide the popup
+        -- Any keybinding except what the keygrabber wants wil hide the popup
+        -- too
+        mypopup.buttons = {
             awful.button({ }, 1, function () widget_obj:hide() end),
             awful.button({ }, 3, function () widget_obj:hide() end)
         }
@@ -599,18 +608,18 @@ function widget.new(args)
         function widget_obj.page_next(_self)
             if _self.current_page == #pages then return end
             _self.current_page = _self.current_page + 1
-            _self.wibox:set_widget(pages[_self.current_page])
+            _self.popup:set_widget(pages[_self.current_page])
         end
         function widget_obj.page_prev(_self)
             if _self.current_page == 1 then return end
             _self.current_page = _self.current_page - 1
-            _self.wibox:set_widget(pages[_self.current_page])
+            _self.popup:set_widget(pages[_self.current_page])
         end
         function widget_obj.show(_self)
-            _self.wibox.visible = true
+            _self.popup.visible = true
         end
         function widget_obj.hide(_self)
-            _self.wibox.visible = false
+            _self.popup.visible = false
             if _self.keygrabber then
                 awful.keygrabber.stop(_self.keygrabber)
             end
