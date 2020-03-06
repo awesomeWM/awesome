@@ -1,6 +1,42 @@
 ---------------------------------------------------------------------------
 --- Popup widget which shows current hotkeys and their descriptions.
 --
+-- It's easy to add hotkeys for your favorite application. Below is how to add
+-- hotkeys for firefox to the previously created `hotkeys_popup` in `rc.lua`.
+--
+--    -- Create the rule that we will use to match for the application.
+--    local fire_rule = { class = { "firefox", "Firefox" } }
+--    for group_name, group_data in pairs({
+--        ["Firefox: tabs"] = { color = "#009F00", rule_any = fire_rule }
+--    }) do
+--        hotkeys_popup.add_group_rules(group_name, group_data)
+--    end
+--
+--    -- Table with all of our hotkeys
+--    local firefox_keys = {
+--
+--        ["Firefox: tabs"] = {{
+--            modifiers = { "Mod1" },
+--            keys = {
+--                ["1..9"] = "go to tab"
+--            }
+--        }, {
+--            modifiers = { "Ctrl" },
+--            keys = {
+--                t = "new tab",
+--                w = 'close tab',
+--                ['Tab'] = "next tab"
+--            }
+--        }, {
+--            modifiers = { "Ctrl", "Shift" },
+--            keys = {
+--              ['Tab'] = "previous tab"
+--            }
+--        }}
+--    }
+--
+--    hotkeys_popup.add_hotkeys(firefox_keys)
+--
 -- @author Yauheni Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2014-2015 Yauheni Kirylau
 -- @popupmod awful.hotkeys_popup.widget
