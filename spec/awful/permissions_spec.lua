@@ -26,7 +26,7 @@ describe("awful.permissions.client_geometry_requests", function()
     local permissions = require("awful.permissions")
 
     it("removes x/y/width/height when immobilized", function()
-        local c = {}
+        local c = {_private={}}
         local s = stub.new(c, "geometry")
 
         permissions.client_geometry_requests(c, "ewmh", {})

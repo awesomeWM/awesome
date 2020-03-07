@@ -20,10 +20,6 @@ local default_permissions = {
 }
 
 function module.check(object, class, request, context)
-    if not default_permissions[class] then return true end
-    if not default_permissions[class][request] then return true end
-    if default_permissions[class][request][context] == nil then return true end
-
     local ret = nil
 
     if object._private.permissions and object._private.permissions[request] then
@@ -31,6 +27,10 @@ function module.check(object, class, request, context)
     end
 
     if ret ~= nil then return ret end
+
+    if not default_permissions[class] then return true end
+    if not default_permissions[class][request] then return true end
+    if default_permissions[class][request][context] == nil then return true end
 
     return default_permissions[class][request][context]
 end
