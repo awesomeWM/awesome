@@ -65,7 +65,10 @@ function icon:draw(_, cr, width, height)
 
     local x, y = 0, 0
 
-    if (strategy == "center" and aspect > 1) or strategy == "resize" then
+    if (strategy == "center" and aspect < 1) or strategy == "resize" then
+        x = math.floor((width  - w*aspect) / 2)
+        y = math.floor((height - h*aspect) / 2)
+    elseif strategy == "center" and aspect > 1 then
         x = math.floor((width  - w) / 2)
         y = math.floor((height - h) / 2)
     end
