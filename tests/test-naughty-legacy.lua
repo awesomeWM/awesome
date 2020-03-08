@@ -1095,6 +1095,11 @@ table.insert(steps, function()
     assert(not n._private.widget_template_failed)
     assert(not n.box)
 
+    -- Check adding messages later
+    n.title   = "foo"
+    n.message = "bar"
+    n.icon    = big_icon
+
     n:destroy()
     handler_called = false
 
@@ -1110,6 +1115,12 @@ table.insert(steps, function()
     assert(handler_called)
     assert(had_error)
     assert(not n.box)
+
+    -- Check changing existing content.
+    n.title   = "bar"
+    n.message = "foo"
+    n.icon    = big_icon
+    n.image   = small_icon
 
     handler_called = false
     had_error      = false
