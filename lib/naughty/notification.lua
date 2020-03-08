@@ -618,6 +618,17 @@ for _, prop in ipairs(properties) do
 
 end
 
+-- Changing the image will change the icon, make sure property::icon is emitted.
+for _, prop in ipairs {"image", "images" } do
+    local cur = notification["set_"..prop]
+
+    notification["set_"..prop] = function(self, value)
+        cur(self, value)
+        self._private.icon = nil
+        self:emit_signal("property::icon")
+    end
+end
+
 local hints_default = {
     urgency  = "normal",
     resident = false,
