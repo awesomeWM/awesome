@@ -153,10 +153,11 @@ local function new(args)
     gtable.crush(tb, icon, true)
 
     function tb._private.icon_changed_callback()
+
         local icn = gsurface.load_silently(tb._private.notification.icon)
 
         if icn then
-            tb:set_image()
+            tb:set_image(icn)
         end
     end
 
