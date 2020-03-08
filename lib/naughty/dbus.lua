@@ -323,6 +323,13 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
                 notification[k] = v
             end
 
+            -- Update the icon if necessary.
+            if app_icon ~= notification._private.app_icon then
+                notification._private.app_icon = app_icon
+                notification._private.icon = nil
+                notification:emit_signal("property::icon")
+            end
+
             -- Even if no property changed, restart the timeout.
             notification:reset_timeout()
         else
