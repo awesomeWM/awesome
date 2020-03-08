@@ -417,9 +417,10 @@ get_modifier_name(int map_index)
     return 0; /* \0 */
 }
 
-// Helper function for luaA_get_key_name() below.
-// Will return the UTF-32 codepoint IF AND ONLY IF the input is exactly one
-// valid UTF-8 character. Otherwise, it will return zero.
+/* Helper function for luaA_get_key_name() below.
+ * Will return the UTF-32 codepoint IF AND ONLY IF the input is exactly one
+ * valid UTF-8 character. Otherwise, it will return zero.
+ */
 static uint32_t
 one_utf8_to_utf32(const char* input, const size_t length) {
     gunichar character = g_utf8_get_char_validated(input, length);
@@ -432,7 +433,7 @@ one_utf8_to_utf32(const char* input, const size_t length) {
     return character;
 }
 
-/** Get X11 keysym and a one-character representation from an Awesome keycode.
+/* Get X11 keysym and a one-character representation from an Awesome keycode.
  *
  * A "one-character representation" is a single UTF-8 representing the typical
  * output from that keysym in a text editor (e.g. " " for space, "ñ" for
@@ -449,7 +450,7 @@ one_utf8_to_utf32(const char* input, const size_t length) {
  * @treturn[1] nil keysym If no valid keysym is found
  * @treturn[2] string printsymbol The xkb_keysym_to_utf8 result
  * @treturn[2] nil printsymbol If the keysym has no printable representation.
- * @staticfct get_key_name
+ * @staticfct awful.keyboard.get_key_name
  */
 
 static int
@@ -1101,7 +1102,7 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
         { "xrdb_get_value", luaA_xrdb_get_value},
         { "kill", luaA_kill},
         { "sync", luaA_sync},
-        { "get_key_name", luaA_get_key_name},
+        { "_get_key_name", luaA_get_key_name},
         { NULL, NULL }
     };
 

@@ -184,7 +184,7 @@ function widget.new(args)
         -- For every key in every `awful.key` binding, the first non-nil result
         -- in this lists is chosen as a human-readable name:
         -- * the value corresponding to its keysym in this table;
-        -- * the UTF-8 representation as decided by awesome.get_key_name();
+        -- * the UTF-8 representation as decided by awful.keyboard.get_key_name();
         -- * the keysym name itself;
         -- If no match is found, the key name will not be translated, and will
         -- be presented to the user as-is. (This is useful for cheatsheets for
@@ -250,7 +250,7 @@ function widget.new(args)
     for k, v in pairs(awful.key.keygroups) do
         widget_instance._keygroups[k] = {}
         for k2, v2 in pairs(v) do
-            local keysym, keyprint = awesome.get_key_name(v2[1])
+            local keysym, keyprint = awful.keyboard.get_key_name(v2[1])
             widget_instance._keygroups[k][k2] =
                 widget_instance.labels[keysym] or keyprint or keysym or v2[1]
         end
@@ -312,7 +312,7 @@ function widget.new(args)
         local group = data.group or "none"
         self._group_list[group] = true
         if not target[group] then target[group] = {} end
-        local keysym, keyprint = awesome.get_key_name(key)
+        local keysym, keyprint = awful.keyboard.get_key_name(key)
         local keylabel = self.labels[keysym] or keyprint or keysym or key
         local new_key = {
             key = keylabel,
