@@ -17,21 +17,9 @@
 local textbox = require("wibox.widget.textbox")
 local gtable  = require("gears.table")
 local beautiful = require("beautiful")
+local markup  = require("naughty.widget._markup").set_markup
 
 local title = {}
-
-local function markup(notif, wdg)
-    local ret = "<b>"..(notif.title or "").."</b>"
-    local fg = notif.fg or beautiful.notification_fg
-
-    wdg:set_font(notif.font or beautiful.notification_font)
-
-    if fg then
-        ret = "<span color='" .. fg .. "'>" .. ret .. "</span>"
-    end
-
-    return ret
-end
 
 --- The attached notification.
 -- @property notification
@@ -48,7 +36,7 @@ function title:set_notification(notif)
             self._private.title_changed_callback)
     end
 
-    self:set_markup(markup(notif, self))
+    markup(self, notif.title, notif.fg, notif.font)
 
     self._private.notification = notif
     self._private.title_changed_callback()
@@ -74,7 +62,12 @@ local function new(args)
     gtable.crush(tb, title, true)
 
     function tb._private.title_changed_callback()
-        tb:set_markup(markup(tb._private.notification, tb))
+        markup(
+            tb,
+            tb._private.notification.title,
+            tb._private.notification.fg,
+            tb._private.notification.font
+        )
     end
 
     if args.notification then

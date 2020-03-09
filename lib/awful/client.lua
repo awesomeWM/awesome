@@ -1478,8 +1478,10 @@ for _, prop in ipairs { "border_width", "border_color", "opacity" } do
         return self["_"..prop]
     end
     client.object["set_"..prop] = function(self, value)
-        self._private["_user_"..prop] = true
-        self["_"..prop] = value
+        if value ~= nil then
+            self._private["_user_"..prop] = true
+            self["_"..prop] = value
+        end
     end
 end
 
