@@ -40,7 +40,7 @@ TEXT FORMAT
 You can use Pango markup in a text string.
 This allows formatting the text rendered inside widgets.
 Pango markup documentation can be found in the Pango documentation at
-http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
+https://developer.gnome.org/pango/stable/pango-Markup.html.
 
 A Pango markup example: <span weight="bold" foreground="#336699">...</span>.
 

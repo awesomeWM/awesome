@@ -37,7 +37,7 @@ TEXTFORMATERUNG
 Sie können Pango-Markups in Texten benutzen.
 Dies erlaubt die Formatierung von Texten, welche in einem Widget dargestellt werden.
 Die Pango-Markup Dokumentation können sie in der Dokumentation zu Pango unter
-http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html nachlesen.
+https://developer.gnome.org/pango/stable/pango-Markup.html nachlesen.
 
 Ein Pango-Markup Beispiel: <span weight="bold" foreground="#336699">...</span>.
 

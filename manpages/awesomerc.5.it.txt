@@ -43,7 +43,7 @@ Si possono usare le marcature (makup) Pango in una stringa di testo.
 Questo consente di formattare il testo generato dentro i widgets.
 La documentazione per i markup Pango può essere trovata nella
 documentazione Pango a
-http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
+https://developer.gnome.org/pango/stable/pango-Markup.html.
 
 Un esempio di un markup Pango: <span weight="bold" foreground="#336699">...</span>.
 

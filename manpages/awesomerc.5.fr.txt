@@ -46,7 +46,7 @@ Vous pouvez utiliser les marquages Pango dans une chaîne de caractères.
 Cela permet de formater le texte rendu dans des éléments graphiques.
 On peut trouver la documentation du marquage Pango dans la documentation
 Pango sur le site
-http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
+https://developer.gnome.org/pango/stable/pango-Markup.html.
 
 Un exemple de marquage Pango :
 <span weight="bold" foreground="#336699">...</span>.

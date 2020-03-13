@@ -44,7 +44,7 @@ Pango. Esto permite añadir formato a los textos que se visualizan dentro de
 los widgets.
 La documentación relacionada con el lenguaje de marcado Pango se encuentra
 dentro de la documentación de Pango en
-http://library.gnome.org/devel/pango/stable/PangoMarkupFormat.html.
+https://developer.gnome.org/pango/stable/pango-Markup.html.
 
 Un ejemplo de lenguaje de marcado Pango:
 <span weight="bold" foreground="#336699">...</span>.
