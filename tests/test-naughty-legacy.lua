@@ -892,10 +892,9 @@ local icon_requests = {}
 table.insert(steps, function()
     assert(#active == 0)
 
-    naughty.connect_signal("request::icon", function(a, icon_name)
-        icon_requests[icon_name] = a
-
-        a.icon = icon_name == "list-add" and small_icon or big_icon
+    naughty.connect_signal("request::action_icon", function(a, context, hints)
+        icon_requests[hints.id] = a
+        a.icon = hints.id == "list-add" and small_icon or big_icon
     end)
 
     local hints = {

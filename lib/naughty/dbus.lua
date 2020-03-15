@@ -173,7 +173,7 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
                 -- and `naughty` doesn't depend on `menubar`, so delegate the
                 -- icon "somewhere" using a request.
                 if hints["action-icons"] and action_id ~= "" then
-                    naughty.emit_signal("request::icon", a, action_id)
+                    naughty.emit_signal("request::action_icon", a, "dbus", {id = action_id})
                 end
 
                 a:connect_signal("invoked", function()

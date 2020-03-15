@@ -561,9 +561,18 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 -- If an icon is found, the handler must set the `icon` property on the `action`
 -- object to a path or a `gears.surface`.
 --
--- @signal request::icon
+-- There is no implementation by default. To use the XDG-icon, the common
+-- implementation will be:
+--
+--    naughty.connect_signal("request::action_icon", function(a, context, hints)
+--         a.icon = menubar.utils.lookup_icon(hints.id)
+--    end)
+--
+-- @signal request::action_icon
 -- @tparam naughty.action action The action.
--- @tparam string icon_name The icon name.
+-- @tparam string context The context.
+-- @tparam table hints
+-- @tparam string args.id The action id. This will often by the (XDG) icon name.
 
 --- Emitted when the screen is not defined or being removed.
 -- @signal request::screen
