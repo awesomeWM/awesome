@@ -886,18 +886,70 @@ table.insert(steps, function()
     return true
 end)
 
+-- Check that request::icon stops when an icon is found.
+table.insert(steps, function()
+
+    local called = 0
+
+    local function set_icon1()
+        called = called + 1
+    end
+
+    local function set_icon2(n)
+        called = called + 1
+        n.icon = big_icon
+    end
+
+    local function set_icon3()
+        called = called + 1
+    end
+
+    naughty.connect_signal("request::icon", set_icon1)
+    naughty.connect_signal("request::icon", set_icon2)
+    naughty.connect_signal("request::icon", set_icon3)
+
+    assert(called == 0)
+
+    local n1 = naughty.notification {
+        title    = "foo",
+        message  = "bar",
+        app_icon = "baz"
+    }
+
+    assert(called == 2)
+
+    n1:destroy()
+
+    naughty.disconnect_signal("request::icon", set_icon1)
+    naughty.disconnect_signal("request::icon", set_icon2)
+    naughty.disconnect_signal("request::icon", set_icon3)
+
+    -- Check if `disconnect_signal` works.
+    n1 = naughty.notification {
+        title    = "foo",
+        message  = "bar",
+        app_icon = "baz"
+    }
+
+    assert(called == 2)
+
+    n1:destroy()
+
+    return true
+end)
+
 local icon_requests = {}
 
 -- Check if the action icon support is detected.
 table.insert(steps, function()
     assert(#active == 0)
 
-    naughty.connect_signal("request::action_icon", function(a, context, hints)
+    naughty.connect_signal("request::action_icon", function(a, _, hints)
         icon_requests[hints.id] = a
         a.icon = hints.id == "list-add" and small_icon or big_icon
     end)
 
-    naughty.connect_signal("request::icon", function(n, context, hints)
+    naughty.connect_signal("request::icon", function(n, _)
         icon_requests[n] = true
     end)
 
