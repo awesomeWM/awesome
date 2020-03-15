@@ -274,7 +274,9 @@ function naughty.suspend()
     properties.suspended = true
 end
 
-local conns = gobject._setup_class_signals(naughty)
+local conns = gobject._setup_class_signals(
+    naughty, {allow_chain_of_responsibility=true}
+)
 
 local function resume()
     properties.suspended = false

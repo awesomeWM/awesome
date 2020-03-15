@@ -647,6 +647,11 @@ for _, prop in ipairs { "category", "resident" } do
     end
 end
 
+-- Stop the request::icon when one is found.
+local function request_filter(self, _, _)
+    if self._private.icon then return true end
+end
+
 function notification.get_icon(self)
     -- Honor all overrides.
     if self._private.icon then
@@ -689,7 +694,7 @@ function notification.get_icon(self)
     -- understand.
     if err then
         local ctx = self._private.app_icon and "app_icon" or "image"
-        naughty.emit_signal("request::icon", self, ctx, {
+        naughty._emit_signal_if("request::icon", request_filter, self, ctx, {
             app_icon = self._private.app_icon,
             image    = self.image
         })
