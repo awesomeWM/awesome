@@ -18,6 +18,7 @@ local gdebug  = require("gears.debug")
 local screen  = require("awful.screen")
 local gtable  = require("gears.table")
 local gobject = require("gears.object")
+local gsurface = require("gears.surface")
 
 local naughty = {}
 
@@ -590,6 +591,7 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 --
 -- * app_icon
 -- * clients
+-- * path
 -- * image
 -- * images
 --
@@ -607,11 +609,18 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 --        end
 --    end)
 --
+-- The `images` context has no handler. It is part of the specification to
+-- handle animations. This is not supported by default.
+--
 -- @signal request::icon
 -- @tparam notification n The notification.
 -- @tparam string context The source of the icon to look for.
 -- @tparam table hints The hints.
 -- @tparam string hints.app_icon The name of the icon to look for.
+-- @tparam string hints.path The path of the icon.
+-- @tparam string hints.image The path or pixmap of the icon.
+-- @see naughty.icon_path_handler
+-- @see naughty.client_icon_handler
 
 --- Emitted when the screen is not defined or being removed.
 -- @signal request::screen
@@ -762,8 +771,38 @@ function naughty.notify(args)
     return nnotif(args)
 end
 
+--- Request handler to get the icon using the clients icons.
+-- @signalhandler naughty.client_icon_handler
+function naughty.client_icon_handler(self, context)
+    if context ~= "clients" then return end
+
+    local clients = self:get_clients()
+
+    for _, t in ipairs { "normal", "dialog" } do
+        for _, c in ipairs(clients) do
+            if c.type == t then
+                self._private.icon = gsurface(c.icon) --TODO support other size
+                return
+            end
+        end
+    end
+end
+
+--- Request handler to get the icon using the image or path.
+-- @signalhandler naughty.icon_path_handler
+function naughty.icon_path_handler(self, context, hints)
+    if context ~= "image" and context ~= "path" then return end
+
+    self._private.icon = gsurface.load_uncached_silently(
+        hints.path or hints.image
+    )
+end
+
 naughty.connect_signal("property::screen"  , update_index)
 naughty.connect_signal("property::position", update_index)
+
+naughty.connect_signal("request::icon", naughty.client_icon_handler)
+naughty.connect_signal("request::icon", naughty.icon_path_handler  )
 
 --@DOC_signals_COMMON@
 

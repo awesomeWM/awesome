@@ -968,7 +968,7 @@ table.insert(steps, function()
 
     local n = active[1]
 
-    assert(not icon_requests[n])
+    assert(icon_requests[n])
 
     assert(n._private.freedesktop_hints)
     assert(n._private.freedesktop_hints["action-icons"] == true)
