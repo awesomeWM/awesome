@@ -652,6 +652,20 @@ local function request_filter(self, _, _)
     if self._private.icon then return true end
 end
 
+-- Convert encoded local URI to Unix paths.
+local function check_path(input)
+    if type(input) ~= "string" then return nil end
+
+    if input:sub(1,7) == "file://" then
+        input = input:sub(8)
+    end
+
+    -- urldecode
+    input = input:gsub("%%(%x%x)", function(x) return string.char(tonumber(x, 16)) end )
+
+    return gfs.file_readable(input) and input or nil
+end
+
 function notification.get_icon(self)
     -- Honor all overrides.
     if self._private.icon then
@@ -674,9 +688,11 @@ function notification.get_icon(self)
     end
 
     -- Second level of fallback, icon paths.
-    if self._private.app_icon and gfs.file_readable(self._private.app_icon) then
+    local path = check_path(self._private.app_icon)
+
+    if path then
         naughty._emit_signal_if("request::icon", request_filter, self, "path", {
-            path = self._private.app_icon
+            path = path
         })
     end
 
