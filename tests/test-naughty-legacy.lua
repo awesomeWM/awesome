@@ -897,6 +897,10 @@ table.insert(steps, function()
         a.icon = hints.id == "list-add" and small_icon or big_icon
     end)
 
+    naughty.connect_signal("request::icon", function(n, context, hints)
+        icon_requests[n] = true
+    end)
+
     local hints = {
         ["action-icons"] = GLib.Variant("b", true),
     }
@@ -911,6 +915,8 @@ table.insert(steps, function()
     if #active ~= 1 then return end
 
     local n = active[1]
+
+    assert(not icon_requests[n])
 
     assert(n._private.freedesktop_hints)
     assert(n._private.freedesktop_hints["action-icons"] == true)
@@ -952,9 +958,10 @@ table.insert(steps, function()
     gdebug.deprecate = function() end
 
     local n = naughty.notification {
-        title   = "foo",
-        message = "bar",
-        timeout = 25000,
+        title    = "foo",
+        message  = "bar",
+        timeout  = 25000,
+        app_icon = "baz"
     }
 
     -- Make sure the suspension don't cause errors
@@ -980,6 +987,7 @@ table.insert(steps, function()
     assert(not naughty.suspended)
 
     -- Replace the text
+    assert(icon_requests[n])
     assert(n.title   == "foo")
     assert(n.message == "bar")
     assert(n.text    == "bar")

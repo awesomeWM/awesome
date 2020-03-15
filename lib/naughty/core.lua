@@ -574,6 +574,43 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 -- @tparam table hints
 -- @tparam string args.id The action id. This will often by the (XDG) icon name.
 
+--- Emitted when a notification icon could not be loaded.
+--
+-- When an icon is passed in some "encoded" formats, such as XDG icon names or
+-- network URLs, AwesomeWM will not attempt to load it. If you wish to see the
+-- icon displayed, you must provide an handler. It is highly recommended for
+-- handler to only set `n.icon` when they *found* the icon. That way multiple
+-- handlers can be attached for multiple protocols.
+--
+-- The `context` argument is the origin of the icon to decode. If an handler
+-- only supports one if them, it should check the `context` and return if it
+-- doesn't handle it. The currently valid contexts are:
+--
+-- * app_icon
+-- * clients
+-- * image
+-- * images
+--
+-- For example, an implementation which uses the `app_icon` to perform an XDG
+-- icon lookup will look like:
+--
+--    naughty.connect_signal("request::icon", function(n, context, hints)
+--        if context ~= "app_icon" then return end
+--
+--        local path = menubar.utils.lookup_icon(hints.app_icon) or
+--            menubar.utils.lookup_icon(hints.app_icon:lower())
+--
+--        if path then
+--            n.icon = path
+--        end
+--    end)
+--
+-- @signal request::icon
+-- @tparam notification n The notification.
+-- @tparam string context The source of the icon to look for.
+-- @tparam table hints The hints.
+-- @tparam string hints.app_icon The name of the icon to look for.
+
 --- Emitted when the screen is not defined or being removed.
 -- @signal request::screen
 -- @tparam table notification The `naughty.notification` object. This is

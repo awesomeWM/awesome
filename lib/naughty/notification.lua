@@ -648,31 +648,54 @@ for _, prop in ipairs { "category", "resident" } do
 end
 
 function notification.get_icon(self)
+    -- Honor all overrides.
     if self._private.icon then
         return self._private.icon == "" and nil or self._private.icon
-    elseif self.image and self.image ~= "" then
-        return self.image
-    elseif self._private.app_icon and self._private.app_icon ~= "" then
-        return self._private.app_icon
     end
 
+    local ret = nil
+
+    -- First, check if the image is passed as a surface or a path.
+    if self.image and self.image ~= "" then
+        ret = self.image
+    elseif self._private.app_icon and self._private.app_icon ~= "" then
+        ret = self._private.app_icon
+    end
+
+    local s, err = nil, nil
+
+    -- See if this is a valid path.
+    if ret and ret ~= "" then
+        s, err = gsurface.load_silently(ret)
+    end
+
+    if s and not err then
+        return s
+    end
+
+    -- The second fallback are the client(s) icon(s).
     local clients = notification.get_clients(self)
 
-    for _, c in ipairs(clients) do
-        if c.type == "normal" then
-            self._private.icon = gsurface(c.icon)
-            return self._private.icon
+    for _, t in ipairs { "normal", "dialog" } do
+        for _, c in ipairs(clients) do
+            if c.type == t then
+                self._private.icon = gsurface(c.icon) --TODO support other size
+                return self._private.icon
+            end
         end
     end
 
-    for _, c in ipairs(clients) do
-        if c.type == "dialog" then
-            self._private.icon = gsurface(c.icon)
-            return self._private.icon
-        end
+    -- Now, it might be an XDG icon name or something a request handler can
+    -- understand.
+    if err then
+        local ctx = self._private.app_icon and "app_icon" or "image"
+        naughty.emit_signal("request::icon", self, ctx, {
+            app_icon = self._private.app_icon,
+            image    = self.image
+        })
     end
 
-    return nil
+    return self._private.icon == "" and nil or self._private.icon
 end
 
 function notification.get_clients(self)
