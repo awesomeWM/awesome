@@ -23,6 +23,7 @@ local gfs      = require("gears.filesystem")
 local cst      = require("naughty.constants")
 local naughty  = require("naughty.core")
 local gdebug   = require("gears.debug")
+local pcommon = require("awful.permissions._common")
 
 local notification = {}
 
@@ -648,7 +649,8 @@ for _, prop in ipairs { "category", "resident" } do
 end
 
 -- Stop the request::icon when one is found.
-local function request_filter(self, _, _)
+local function request_filter(self, context, _)
+    if not pcommon.check(self, "notification", "icon", context) then return true end
     if self._private.icon then return true end
 end
 
@@ -1010,6 +1012,22 @@ local function create(args)
 
     return n
 end
+
+--- Grant a permission for a notification.
+--
+-- @method grant
+-- @tparam string permission The permission name (just the name, no `request::`).
+-- @tparam string context The reason why this permission is requested.
+-- @see awful.permissions
+
+--- Deny a permission for a notification
+--
+-- @method deny
+-- @tparam string permission The permission name (just the name, no `request::`).
+-- @tparam string context The reason why this permission is requested.
+-- @see awful.permissions
+
+pcommon.setup_grant(notification, "notification")
 
 -- This allows notification to be updated later.
 local counter = 1
