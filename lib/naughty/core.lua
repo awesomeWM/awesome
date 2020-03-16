@@ -594,6 +594,7 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 -- * path
 -- * image
 -- * images
+-- * dbus_clear
 --
 -- For example, an implementation which uses the `app_icon` to perform an XDG
 -- icon lookup will look like:
@@ -798,11 +799,21 @@ function naughty.icon_path_handler(self, context, hints)
     )
 end
 
+--- Request handler for clearing the icon when asked by ie, DBus.
+-- @signalhandler naughty.icon_clear_handler
+function naughty.icon_clear_handler(self, context, hints) --luacheck: no unused args
+    if context ~= "dbus_clear" then return end
+
+    self._private.icon = nil
+    self:emit_signal("property::icon")
+end
+
 naughty.connect_signal("property::screen"  , update_index)
 naughty.connect_signal("property::position", update_index)
 
 naughty.connect_signal("request::icon", naughty.client_icon_handler)
 naughty.connect_signal("request::icon", naughty.icon_path_handler  )
+naughty.connect_signal("request::icon", naughty.icon_clear_handler )
 
 --@DOC_signals_COMMON@
 
