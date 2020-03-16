@@ -4,6 +4,7 @@ local spawn     = require("awful.spawn")
 local naughty   = require("naughty"    )
 local gdebug    = require("gears.debug")
 local gtable    = require("gears.table")
+local gfs       = require("gears.filesystem")
 local cairo     = require("lgi"        ).cairo
 local beautiful = require("beautiful")
 local Gio       = require("lgi"        ).Gio
@@ -1131,6 +1132,57 @@ table.insert(steps, function()
             widget_template = current_template
         }
     end)
+
+    return true
+end)
+
+-- Check that the various request::icon work.
+table.insert(steps, function()
+    local gsurface = require("gears.surface")
+
+    local ls = gsurface.load_uncached_silently
+
+    function gsurface.load_uncached_silently(input)
+        return {
+            input      = input,
+            get_height = function() return 1 end,
+            get_width  = function() return 1 end,
+        }
+    end
+
+    local fr, gc = gfs.file_readable, naughty.notification.get_clients
+
+    local mocked_client = {
+        type = "normal",
+        icon = "42",
+    }
+
+    function naughty.notification.get_clients()
+        return {mocked_client}
+    end
+
+    function gfs.file_readable() return true end
+
+    local n = naughty.notification {
+        app_icon = "file:///one%20two"
+    }
+
+    assert(type(n.icon) == "table" and n.icon.input == "/one two")
+
+    n:destroy()
+
+    local n2 = naughty.notification {
+        title = "foo"
+    }
+
+    assert(type(n2.icon) == "table" and n2.icon.input == "42")
+
+    n2:destroy()
+
+    -- Restore the real methods.
+    gsurface.load_uncached_silently  = ls
+    naughty.notification.get_clients = gc
+    gfs.file_readable                = fr
 
     return true
 end)
