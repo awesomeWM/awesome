@@ -197,6 +197,29 @@ function module.remove_client_keybinding(key)
     return false
 end
 
+--- Get X11 keysym and a one-character representation from an Awesome keycode.
+--
+-- A "one-character representation" is a single UTF-8 representing the typical
+-- output from that keysym in a text editor (e.g. " " for space, "ñ" for
+-- n_tilde, "Ā" for A_macron). It usually matches the main engraving of the key
+-- for level-0 symbols (but lowercase).
+--
+-- Keycodes may be given in a string in any valid format for `awful.key`:
+-- "#" + keycode, the symkey name and the UTF-8 representation will all work.
+--
+-- If no suitable keysym is found, or a malformed keycode is given as an
+-- argument, this function will return (nil, nil)
+--
+-- @treturn[1] string keysym The keysym name
+-- @treturn[1] nil keysym If no valid keysym is found
+-- @treturn[2] string printsymbol The xkb_keysym_to_utf8 result
+-- @treturn[2] nil printsymbol If the keysym has no printable representation.
+-- @staticfct awful.keyboard.get_key_name
+function module.get_key_name(key)
+    return capi.awesome._get_key_name(key)
+end
+
+
 capi.client.connect_signal("scanning", function()
     capi.client.emit_signal("request::default_keybindings", "context")
 end)

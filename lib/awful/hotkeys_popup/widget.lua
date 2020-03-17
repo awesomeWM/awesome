@@ -181,46 +181,63 @@ function widget.new(args)
             args.merge_duplicates == nil
         ) and widget.merge_duplicates or args.merge_duplicates,
         group_rules = args.group_rules or gtable.clone(widget.group_rules),
+        -- For every key in every `awful.key` binding, the first non-nil result
+        -- in this lists is chosen as a human-readable name:
+        -- * the value corresponding to its keysym in this table;
+        -- * the UTF-8 representation as decided by awful.keyboard.get_key_name();
+        -- * the keysym name itself;
+        -- If no match is found, the key name will not be translated, and will
+        -- be presented to the user as-is. (This is useful for cheatsheets for
+        -- external programs.)
         labels = args.labels or {
-            Mod4="Super",
-            Mod1="Alt",
-            Escape="Esc",
-            Insert="Ins",
-            Delete="Del",
-            Backspace="BackSpc",
-            Return="Enter",
-            Next="PgDn",
-            Prior="PgUp",
-            ['#108']="Alt Gr",
-            Left='←',
-            Up='↑',
-            Right='→',
-            Down='↓',
-            ['#67']="F1",
-            ['#68']="F2",
-            ['#69']="F3",
-            ['#70']="F4",
-            ['#71']="F5",
-            ['#72']="F6",
-            ['#73']="F7",
-            ['#74']="F8",
-            ['#75']="F9",
-            ['#76']="F10",
-            ['#95']="F11",
-            ['#96']="F12",
-            ['#10']="1",
-            ['#11']="2",
-            ['#12']="3",
-            ['#13']="4",
-            ['#14']="5",
-            ['#15']="6",
-            ['#16']="7",
-            ['#17']="8",
-            ['#18']="9",
-            ['#19']="0",
-            ['#20']="-",
-            ['#21']="=",
-            Control="Ctrl"
+            Control          = "Ctrl",
+            Mod1             = "Alt",
+            ISO_Level3_Shift = "Alt Gr",
+            Mod4             = "Super",
+            Insert           = "Ins",
+            Delete           = "Del",
+            Backspace        = "BackSpc",
+            Next             = "PgDn",
+            Prior            = "PgUp",
+            Left             = "←",
+            Up               = "↑",
+            Right            = "→",
+            Down             = "↓",
+            KP_End           = "Num1",
+            KP_Down          = "Num2",
+            KP_Next          = "Num3",
+            KP_Left          = "Num4",
+            KP_Begin         = "Num5",
+            KP_Right         = "Num6",
+            KP_Home          = "Num7",
+            KP_Up            = "Num8",
+            KP_Prior         = "Num9",
+            KP_Insert        = "Num0",
+            KP_Delete        = "Num.",
+            KP_Divide        = "Num/",
+            KP_Multiply      = "Num*",
+            KP_Subtract      = "Num-",
+            KP_Add           = "Num+",
+            -- Some "obvious" entries are necessary for the Escape sequence
+            -- and whitespace characters:
+            Escape           = "Esc",
+            Tab              = "Tab",
+            space            = "Space",
+            Return           = "Enter",
+            -- Dead keys aren't distinct from non-dead keys because no sane
+            -- layout should have both of the same kind:
+            dead_acute       = "´",
+            dead_circumflex  = "^",
+            dead_grave       = "`",
+            -- Basic multimedia keys:
+            XF86MonBrightnessUp   = "🔆+",
+            XF86MonBrightnessDown = "🔅-",
+            XF86AudioRaiseVolume = "Vol+",
+            XF86AudioLowerVolume = "Vol-",
+            XF86AudioMute = "Mute",
+            XF86AudioPlay = "⏯",
+            XF86AudioPrev = "⏮",
+            XF86AudioNext = "⏭",
         },
         _additional_hotkeys = {},
         _cached_wiboxes = {},
@@ -233,7 +250,9 @@ function widget.new(args)
     for k, v in pairs(awful.key.keygroups) do
         widget_instance._keygroups[k] = {}
         for k2, v2 in pairs(v) do
-            widget_instance._keygroups[k][k2] = widget_instance.labels[v2[1]] or v2[1]
+            local keysym, keyprint = awful.keyboard.get_key_name(v2[1])
+            widget_instance._keygroups[k][k2] =
+                widget_instance.labels[keysym] or keyprint or keysym or v2[1]
         end
     end
 
@@ -293,9 +312,11 @@ function widget.new(args)
         local group = data.group or "none"
         self._group_list[group] = true
         if not target[group] then target[group] = {} end
+        local keysym, keyprint = awful.keyboard.get_key_name(key)
+        local keylabel = self.labels[keysym] or keyprint or keysym or key
         local new_key = {
-            key = (self.labels[key] or key),
-            keylist = {(self.labels[key] or key)},
+            key = keylabel,
+            keylist = {keylabel},
             mod = joined_mods,
             description = data.description
         }
