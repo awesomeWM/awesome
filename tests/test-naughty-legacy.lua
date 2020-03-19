@@ -4,6 +4,7 @@ local spawn     = require("awful.spawn")
 local naughty   = require("naughty"    )
 local gdebug    = require("gears.debug")
 local gtable    = require("gears.table")
+local gfs       = require("gears.filesystem")
 local cairo     = require("lgi"        ).cairo
 local beautiful = require("beautiful")
 local Gio       = require("lgi"        ).Gio
@@ -886,16 +887,71 @@ table.insert(steps, function()
     return true
 end)
 
+-- Check that request::icon stops when an icon is found.
+table.insert(steps, function()
+
+    local called = 0
+
+    local function set_icon1()
+        called = called + 1
+    end
+
+    local function set_icon2(n)
+        called = called + 1
+        n.icon = big_icon
+    end
+
+    local function set_icon3()
+        called = called + 1
+    end
+
+    naughty.connect_signal("request::icon", set_icon1)
+    naughty.connect_signal("request::icon", set_icon2)
+    naughty.connect_signal("request::icon", set_icon3)
+
+    assert(called == 0)
+
+    local n1 = naughty.notification {
+        title    = "foo",
+        message  = "bar",
+        app_icon = "baz"
+    }
+
+    assert(called == 2)
+
+    n1:destroy()
+
+    naughty.disconnect_signal("request::icon", set_icon1)
+    naughty.disconnect_signal("request::icon", set_icon2)
+    naughty.disconnect_signal("request::icon", set_icon3)
+
+    -- Check if `disconnect_signal` works.
+    n1 = naughty.notification {
+        title    = "foo",
+        message  = "bar",
+        app_icon = "baz"
+    }
+
+    assert(called == 2)
+
+    n1:destroy()
+
+    return true
+end)
+
 local icon_requests = {}
 
 -- Check if the action icon support is detected.
 table.insert(steps, function()
     assert(#active == 0)
 
-    naughty.connect_signal("request::icon", function(a, icon_name)
-        icon_requests[icon_name] = a
+    naughty.connect_signal("request::action_icon", function(a, _, hints)
+        icon_requests[hints.id] = a
+        a.icon = hints.id == "list-add" and small_icon or big_icon
+    end)
 
-        a.icon = icon_name == "list-add" and small_icon or big_icon
+    naughty.connect_signal("request::icon", function(n, _)
+        icon_requests[n] = true
     end)
 
     local hints = {
@@ -912,6 +968,8 @@ table.insert(steps, function()
     if #active ~= 1 then return end
 
     local n = active[1]
+
+    assert(icon_requests[n])
 
     assert(n._private.freedesktop_hints)
     assert(n._private.freedesktop_hints["action-icons"] == true)
@@ -953,9 +1011,10 @@ table.insert(steps, function()
     gdebug.deprecate = function() end
 
     local n = naughty.notification {
-        title   = "foo",
-        message = "bar",
-        timeout = 25000,
+        title    = "foo",
+        message  = "bar",
+        timeout  = 25000,
+        app_icon = "baz"
     }
 
     -- Make sure the suspension don't cause errors
@@ -981,6 +1040,7 @@ table.insert(steps, function()
     assert(not naughty.suspended)
 
     -- Replace the text
+    assert(icon_requests[n])
     assert(n.title   == "foo")
     assert(n.message == "bar")
     assert(n.text    == "bar")
@@ -1072,6 +1132,57 @@ table.insert(steps, function()
             widget_template = current_template
         }
     end)
+
+    return true
+end)
+
+-- Check that the various request::icon work.
+table.insert(steps, function()
+    local gsurface = require("gears.surface")
+
+    local ls = gsurface.load_uncached_silently
+
+    function gsurface.load_uncached_silently(input)
+        return {
+            input      = input,
+            get_height = function() return 1 end,
+            get_width  = function() return 1 end,
+        }
+    end
+
+    local fr, gc = gfs.file_readable, naughty.notification.get_clients
+
+    local mocked_client = {
+        type = "normal",
+        icon = "42",
+    }
+
+    function naughty.notification.get_clients()
+        return {mocked_client}
+    end
+
+    function gfs.file_readable() return true end
+
+    local n = naughty.notification {
+        app_icon = "file:///one%20two"
+    }
+
+    assert(type(n.icon) == "table" and n.icon.input == "/one two")
+
+    n:destroy()
+
+    local n2 = naughty.notification {
+        title = "foo"
+    }
+
+    assert(type(n2.icon) == "table" and n2.icon.input == "42")
+
+    n2:destroy()
+
+    -- Restore the real methods.
+    gsurface.load_uncached_silently  = ls
+    naughty.notification.get_clients = gc
+    gfs.file_readable                = fr
 
     return true
 end)

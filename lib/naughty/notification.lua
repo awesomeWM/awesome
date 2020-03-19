@@ -18,11 +18,12 @@
 local capi     = { screen = screen }
 local gobject  = require("gears.object")
 local gtable   = require("gears.table")
-local gsurface = require("gears.surface")
 local timer    = require("gears.timer")
+local gfs      = require("gears.filesystem")
 local cst      = require("naughty.constants")
 local naughty  = require("naughty.core")
 local gdebug   = require("gears.debug")
+local pcommon = require("awful.permissions._common")
 
 local notification = {}
 
@@ -647,32 +648,71 @@ for _, prop in ipairs { "category", "resident" } do
     end
 end
 
+-- Stop the request::icon when one is found.
+local function request_filter(self, context, _)
+    if not pcommon.check(self, "notification", "icon", context) then return true end
+    if self._private.icon then return true end
+end
+
+-- Convert encoded local URI to Unix paths.
+local function check_path(input)
+    if type(input) ~= "string" then return nil end
+
+    if input:sub(1,7) == "file://" then
+        input = input:sub(8)
+    end
+
+    -- urldecode
+    input = input:gsub("%%(%x%x)", function(x) return string.char(tonumber(x, 16)) end )
+
+    return gfs.file_readable(input) and input or nil
+end
+
 function notification.get_icon(self)
+    -- Honor all overrides.
     if self._private.icon then
         return self._private.icon == "" and nil or self._private.icon
-    elseif self.image and self.image ~= "" then
-        return self.image
-    elseif self._private.app_icon and self._private.app_icon ~= "" then
-        return self._private.app_icon
     end
 
-    local clients = notification.get_clients(self)
-
-    for _, c in ipairs(clients) do
-        if c.type == "normal" then
-            self._private.icon = gsurface(c.icon)
-            return self._private.icon
-        end
+    -- First, check if the image is passed as a surface or a path.
+    if self.image and self.image ~= "" then
+        naughty._emit_signal_if("request::icon", request_filter, self, "image", {
+            image = self.image
+        })
+    elseif self.images then
+        naughty._emit_signal_if("request::icon", request_filter, self, "images", {
+            images = self.images
+        })
     end
 
-    for _, c in ipairs(clients) do
-        if c.type == "dialog" then
-            self._private.icon = gsurface(c.icon)
-            return self._private.icon
-        end
+    if self._private.icon then
+        return self._private.icon == "" and nil or self._private.icon
     end
 
-    return nil
+    -- Second level of fallback, icon paths.
+    local path = check_path(self._private.app_icon)
+
+    if path then
+        naughty._emit_signal_if("request::icon", request_filter, self, "path", {
+            path = path
+        })
+    end
+
+    if self._private.icon then
+        return self._private.icon == "" and nil or self._private.icon
+    end
+
+    -- Third level fallback is `app_icon`.
+    if self._private.app_icon then
+        naughty._emit_signal_if("request::icon", request_filter, self, "app_icon", {
+            app_icon = self._private.app_icon
+        })
+    end
+
+    -- Finally, the clients.
+    naughty._emit_signal_if("request::icon", request_filter, self, "clients", {})
+
+    return self._private.icon == "" and nil or self._private.icon
 end
 
 function notification.get_clients(self)
@@ -972,6 +1012,22 @@ local function create(args)
 
     return n
 end
+
+--- Grant a permission for a notification.
+--
+-- @method grant
+-- @tparam string permission The permission name (just the name, no `request::`).
+-- @tparam string context The reason why this permission is requested.
+-- @see awful.permissions
+
+--- Deny a permission for a notification
+--
+-- @method deny
+-- @tparam string permission The permission name (just the name, no `request::`).
+-- @tparam string context The reason why this permission is requested.
+-- @see awful.permissions
+
+pcommon.setup_grant(notification, "notification")
 
 -- This allows notification to be updated later.
 local counter = 1

@@ -173,7 +173,7 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
                 -- and `naughty` doesn't depend on `menubar`, so delegate the
                 -- icon "somewhere" using a request.
                 if hints["action-icons"] and action_id ~= "" then
-                    naughty.emit_signal("request::icon", a, action_id)
+                    naughty.emit_signal("request::action_icon", a, "dbus", {id = action_id})
                 end
 
                 a:connect_signal("invoked", function()
@@ -326,8 +326,12 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
             -- Update the icon if necessary.
             if app_icon ~= notification._private.app_icon then
                 notification._private.app_icon = app_icon
-                notification._private.icon = nil
-                notification:emit_signal("property::icon")
+
+                naughty._emit_signal_if(
+                    "request::icon", function()
+                        if notification._private.icon then return true end
+                    end, notification, "dbus_clear", {}
+                )
             end
 
             -- Even if no property changed, restart the timeout.

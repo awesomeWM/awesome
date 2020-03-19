@@ -18,6 +18,7 @@ local gdebug  = require("gears.debug")
 local screen  = require("awful.screen")
 local gtable  = require("gears.table")
 local gobject = require("gears.object")
+local gsurface = require("gears.surface")
 
 local naughty = {}
 
@@ -274,7 +275,9 @@ function naughty.suspend()
     properties.suspended = true
 end
 
-local conns = gobject._setup_class_signals(naughty)
+local conns = gobject._setup_class_signals(
+    naughty, {allow_chain_of_responsibility=true}
+)
 
 local function resume()
     properties.suspended = false
@@ -561,9 +564,64 @@ naughty.connect_signal("request::screen", naughty.default_screen_handler)
 -- If an icon is found, the handler must set the `icon` property on the `action`
 -- object to a path or a `gears.surface`.
 --
--- @signal request::icon
+-- There is no implementation by default. To use the XDG-icon, the common
+-- implementation will be:
+--
+--    naughty.connect_signal("request::action_icon", function(a, context, hints)
+--         a.icon = menubar.utils.lookup_icon(hints.id)
+--    end)
+--
+-- @signal request::action_icon
 -- @tparam naughty.action action The action.
--- @tparam string icon_name The icon name.
+-- @tparam string context The context.
+-- @tparam table hints
+-- @tparam string args.id The action id. This will often by the (XDG) icon name.
+
+--- Emitted when a notification icon could not be loaded.
+--
+-- When an icon is passed in some "encoded" formats, such as XDG icon names or
+-- network URLs, AwesomeWM will not attempt to load it. If you wish to see the
+-- icon displayed, you must provide an handler. It is highly recommended for
+-- handler to only set `n.icon` when they *found* the icon. That way multiple
+-- handlers can be attached for multiple protocols.
+--
+-- The `context` argument is the origin of the icon to decode. If an handler
+-- only supports one if them, it should check the `context` and return if it
+-- doesn't handle it. The currently valid contexts are:
+--
+-- * app_icon
+-- * clients
+-- * path
+-- * image
+-- * images
+-- * dbus_clear
+--
+-- For example, an implementation which uses the `app_icon` to perform an XDG
+-- icon lookup will look like:
+--
+--    naughty.connect_signal("request::icon", function(n, context, hints)
+--        if context ~= "app_icon" then return end
+--
+--        local path = menubar.utils.lookup_icon(hints.app_icon) or
+--            menubar.utils.lookup_icon(hints.app_icon:lower())
+--
+--        if path then
+--            n.icon = path
+--        end
+--    end)
+--
+-- The `images` context has no handler. It is part of the specification to
+-- handle animations. This is not supported by default.
+--
+-- @signal request::icon
+-- @tparam notification n The notification.
+-- @tparam string context The source of the icon to look for.
+-- @tparam table hints The hints.
+-- @tparam string hints.app_icon The name of the icon to look for.
+-- @tparam string hints.path The path of the icon.
+-- @tparam string hints.image The path or pixmap of the icon.
+-- @see naughty.icon_path_handler
+-- @see naughty.client_icon_handler
 
 --- Emitted when the screen is not defined or being removed.
 -- @signal request::screen
@@ -714,8 +772,48 @@ function naughty.notify(args)
     return nnotif(args)
 end
 
+--- Request handler to get the icon using the clients icons.
+-- @signalhandler naughty.client_icon_handler
+function naughty.client_icon_handler(self, context)
+    if context ~= "clients" then return end
+
+    local clients = self:get_clients()
+
+    for _, t in ipairs { "normal", "dialog" } do
+        for _, c in ipairs(clients) do
+            if c.type == t then
+                self._private.icon = gsurface(c.icon) --TODO support other size
+                return
+            end
+        end
+    end
+end
+
+--- Request handler to get the icon using the image or path.
+-- @signalhandler naughty.icon_path_handler
+function naughty.icon_path_handler(self, context, hints)
+    if context ~= "image" and context ~= "path" then return end
+
+    self._private.icon = gsurface.load_uncached_silently(
+        hints.path or hints.image
+    )
+end
+
+--- Request handler for clearing the icon when asked by ie, DBus.
+-- @signalhandler naughty.icon_clear_handler
+function naughty.icon_clear_handler(self, context, hints) --luacheck: no unused args
+    if context ~= "dbus_clear" then return end
+
+    self._private.icon = nil
+    self:emit_signal("property::icon")
+end
+
 naughty.connect_signal("property::screen"  , update_index)
 naughty.connect_signal("property::position", update_index)
+
+naughty.connect_signal("request::icon", naughty.client_icon_handler)
+naughty.connect_signal("request::icon", naughty.icon_path_handler  )
+naughty.connect_signal("request::icon", naughty.icon_clear_handler )
 
 --@DOC_signals_COMMON@
 

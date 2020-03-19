@@ -134,7 +134,8 @@ function object:emit_signal(name, ...)
     end
 end
 
-function object._setup_class_signals(t)
+function object._setup_class_signals(t, args)
+    args = args or {}
     local conns = {}
 
     function t.connect_signal(name, func)
@@ -142,6 +143,18 @@ function object._setup_class_signals(t)
         conns[name] = conns[name] or {}
         table.insert(conns[name], func)
     end
+
+    -- A variant of emit_signal which stops once a condition is met.
+    if args.allow_chain_of_responsibility then
+        function t._emit_signal_if(name, condition, ...)
+            assert(name)
+            for _, func in pairs(conns[name] or {}) do
+                if condition(...) then return end
+                func(...)
+            end
+        end
+    end
+
 
     --- Emit a notification signal.
     -- @tparam string name The signal name.
