@@ -270,23 +270,23 @@ local steps = {
             assert(num_pairs(cached_wiboxes[s]) == 2)
         end
 
-        local hotkeys_wibox
+        local hotkeys_popup
         local visible_hotkeys_widget
         for _, widget in pairs(cached_wiboxes[s]) do
-            hotkeys_wibox = widget.wibox
-            if hotkeys_wibox.visible then
+            hotkeys_popup = widget.popup
+            if hotkeys_popup.visible then
                 visible_hotkeys_widget = widget
             end
         end
 
         if count == 2 then
-            assert(hotkeys_wibox ~= nil)
-            assert(hotkeys_wibox.visible)
+            assert(hotkeys_popup ~= nil)
+            assert(hotkeys_popup.visible)
             -- Should disappear on anykey
             root.fake_input("key_press", "Super_L")
 
         elseif count == 3 then
-            assert(not hotkeys_wibox.visible)
+            assert(not hotkeys_popup.visible)
             root.fake_input("key_release", "Super_L")
             test_context.hotkeys01_clients_before = #client.get()
             -- imitate fake client with name "vim"
