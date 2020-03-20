@@ -1227,6 +1227,8 @@ end
 
 --- Set the number of master windows.
 --
+-- @DOC_sequences_tag_master_count_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::nmaster* (deprecated)
