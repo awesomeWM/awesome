@@ -7,7 +7,7 @@ for _, pos in ipairs{
     "left", "right", "top", "bottom", "centered",
 } do
 local c1 = client.gen_fake {x = 80, y = 55, width=75, height=50}
-c1:_hide()
+c1:_hide_all()
 placement.align(client.focus, {position = pos, honor_workarea=true})
 c1:set_label(pos)
 end

@@ -8,6 +8,7 @@ screen[1]._resize {width = 128, height = 96} --DOC_HIDE
 local placement = require("awful.placement") --DOC_HIDE
 
 local c = client.gen_fake {x = 45, y = 35, width=40, height=30} --DOC_HIDE
+c:_hide_all() --DOC_HIDE
 placement.maximize_vertically(c)
 
 assert(c.height+2*c.border_width == screen[1].geometry.height)--DOC_HIDE
