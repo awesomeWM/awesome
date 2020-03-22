@@ -32,6 +32,10 @@ local gobject = require("gears.object")
 --   and its derivative. This is usually the number 1-9 followed by 0.
 -- * **arrows**: The Left/Right/Top/Bottom keys usually located right of the
 --   spacebar.
+-- * **fkeys**: The keys F1 through F12 located at the topmost row of any
+--   keyboard, plus F13 through F35 on specialist keyboards.
+-- * **numpad**: The number keys on the keypad to the right of the letters and
+--   the arrow keys. Not present in every keyboard.
 --
 -- @property keygroup
 
@@ -333,13 +337,29 @@ key.keygroups = {
         {"Right" , "Right" },
         {"Up"    , "Up"    },
         {"Down"  , "Down"  },
-    }
+    },
+    fkeys = {},
+    numpad = {
+        {"#87"   , 1},
+        {"#88"   , 2},
+        {"#89"   , 3},
+        {"#83"   , 4},
+        {"#84"   , 5},
+        {"#85"   , 6},
+        {"#79"   , 7},
+        {"#80"   , 8},
+        {"#81"   , 9},
+        {"#90"   , 10},
+    },
 }
 
 -- Technically, this isn't very popular, but we have been doing this for 12
 -- years and nobody complained too loudly.
 for i = 1, 10 do
     table.insert(key.keygroups.numrow, {"#" .. i + 9, i == 10 and 0 or i})
+end
+for i = 1, 35 do
+    table.insert(key.keygroups.fkeys, {"F" .. i, "F" .. i})
 end
 
 -- Allow key objects to provide more than 1 key.
