@@ -43,8 +43,45 @@
 local g_matrix = require( "gears.matrix" )
 local unpack   = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local atan2    = math.atan2 or math.atan -- lua 5.3 compat
+local min      = math.min
+local cos      = math.cos
+local sin      = math.sin
 
 local module = {}
+
+--- Add a star shape to the current path.
+-- The star size will be the minimum of the given width and weight
+--
+-- @DOC_gears_shape_star_EXAMPLE@
+--
+-- @param cr A cairo context
+-- @tparam number width The width constraint
+-- @tparam number height The height constraint
+-- @tparam number n Number of grams (default n = 5 -> pentagram)
+-- @staticfct gears.shape.star
+function module.star(cr, width, height, n)
+    -- use the minimum as size
+    local s = min(width, height) / 2
+
+    -- draw pentagram by default
+    n = n or 5
+    local a = 2 * math.pi / n
+
+    -- place the star at the center
+    cr:translate(width/2, height/2)
+    cr:rotate(-math.pi/2)
+
+    for i = 0,(n - 1) do
+        cr:line_to(s   * cos((i      ) * a), s   * sin((i      ) * a))
+        cr:line_to(s/2 * cos((i + 0.5) * a), s/2 * sin((i + 0.5) * a))
+    end
+
+    -- restore the context
+    cr:rotate(math.pi/2)
+    cr:translate(-width/2, -height/2)
+
+    cr:close_path()
+end
 
 --- Add a rounded rectangle to the current path.
 -- Note: If the radius is bigger than either half side, it will be reduced.
