@@ -67,7 +67,9 @@ function module.star(cr, width, height, n)
     n = n or 5
     local a = 2 * math.pi / n
 
+
     -- place the star at the center
+    cr:save()
     cr:translate(width/2, height/2)
     cr:rotate(-math.pi/2)
 
@@ -77,8 +79,7 @@ function module.star(cr, width, height, n)
     end
 
     -- restore the context
-    cr:rotate(math.pi/2)
-    cr:translate(-width/2, -height/2)
+    cr:restore()
 
     cr:close_path()
 end
