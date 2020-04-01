@@ -551,6 +551,22 @@ function tooltip:set_margins_topbottom(val)
     self:set_margin_topbottom(val)
 end
 
+--- Set the margins between the tooltip and its parent
+--
+-- @DOC_awful_tooltip_gaps_EXAMPLE@
+--
+-- @property tooltip_gaps
+-- @tparam number|table New margins value
+-- @propemits true false
+
+function tooltip:set_gaps(val)
+    self._private.tooltip_gaps = val
+end
+
+function tooltip:get_gaps(val)
+    return self._private.tooltip_gaps
+end
+
 --- Add tooltip to an object.
 --
 -- @tparam tooltip self The tooltip.
@@ -607,7 +623,7 @@ end
 -- @tparam[opt] string args.align The horizontal alignment
 -- @tparam[opt] string args.font The tooltip font
 -- @tparam[opt] number args.opacity The tooltip opacity
--- @tparam[opt] table|number args.tooltip_gaps The tooltip margins
+-- @tparam[opt] table|number args.gaps The tooltip margins
 -- @treturn awful.tooltip The created tooltip.
 -- @see add_to_object
 -- @see timeout
