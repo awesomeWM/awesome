@@ -615,15 +615,15 @@ end
 --   seconds.
 -- @tparam[opt=apply_dpi(5)] integer args.margin_leftright The left/right margin for the text.
 -- @tparam[opt=apply_dpi(3)] integer args.margin_topbottom The top/bottom margin for the text.
--- @tparam[opt=nil] gears.shape args.shape The shape
--- @tparam[opt] string args.bg The background color
--- @tparam[opt] string args.fg The foreground color
--- @tparam[opt] string args.border_color The tooltip border color
--- @tparam[opt] number args.border_width The tooltip border width
--- @tparam[opt] string args.align The horizontal alignment
--- @tparam[opt] string args.font The tooltip font
--- @tparam[opt] number args.opacity The tooltip opacity
--- @tparam[opt] table|number args.gaps The tooltip margins
+-- @tparam[opt=nil] gears.shape args.shape The shape.
+-- @tparam[opt] string args.bg The background color.
+-- @tparam[opt] string args.fg The foreground color.
+-- @tparam[opt] string args.border_color The tooltip border color.
+-- @tparam[opt] number args.border_width The tooltip border width.
+-- @tparam[opt] string args.align The horizontal alignment.
+-- @tparam[opt] string args.font The tooltip font.
+-- @tparam[opt] number args.opacity The tooltip opacity.
+-- @tparam[opt] table|number args.gaps The tooltip margins.
 -- @treturn awful.tooltip The created tooltip.
 -- @see add_to_object
 -- @see timeout
