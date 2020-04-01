@@ -473,12 +473,12 @@ function tooltip:set_timeout(timeout)
     self:emit_signal("property::timeout", timeout)
 end
 
---- Set all margins around the tooltip textbox
+--- Set all margins around the tooltip textbox.
 --
 -- @DOC_awful_tooltip_margins_EXAMPLE@
 --
 -- @property margins
--- @tparam number|table New margins value
+-- @tparam number|table New margins value.
 -- @propemits true false
 
 function tooltip:set_margins(val)
@@ -513,12 +513,12 @@ function tooltip:set_border_color(val)
     self:emit_signal("property::border_color", val)
 end
 
---- Set the margins around the left and right of the tooltip textbox
+--- Set the margins around the left and right of the tooltip textbox.
 --
 -- @DOC_awful_tooltip_margins_leftright_EXAMPLE@
 --
 -- @property margins_leftright
--- @tparam number New margins value
+-- @tparam number New margins value.
 -- @propemits true false
 
 function tooltip:set_margin_leftright(val)
@@ -532,12 +532,12 @@ function tooltip:set_margins_leftright(val)
     self:set_margin_leftright(val)
 end
 
---- Set the margins around the top and bottom of the tooltip textbox
+--- Set the margins around the top and bottom of the tooltip textbox.
 --
 -- @DOC_awful_tooltip_margins_topbottom_EXAMPLE@
 --
 -- @property margins_topbottom
--- @tparam number New margins value
+-- @tparam number New margins value.
 -- @propemits true false
 
 function tooltip:set_margin_topbottom(val)
@@ -551,12 +551,12 @@ function tooltip:set_margins_topbottom(val)
     self:set_margin_topbottom(val)
 end
 
---- Set the margins between the tooltip and its parent
+--- Set the margins between the tooltip and its parent.
 --
 -- @DOC_awful_gaps_EXAMPLE@
 --
 -- @property gaps
--- @tparam number|table New margins value
+-- @tparam number|table New margins value.
 -- @propemits true false
 
 function tooltip:set_gaps(val)
