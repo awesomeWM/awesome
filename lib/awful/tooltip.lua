@@ -114,7 +114,7 @@ local offset = {
 
 --- The default tooltip shape.
 -- The default shape for all tooltips is a rectangle. However, by setting
--- this variable they can default to rounded rectangle or stretched octogons.
+-- this variable they can default to rounded rectangle or stretched octagons.
 -- @beautiful beautiful.tooltip_shape
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape A `gears.shape`
 --  compatible function
