@@ -140,7 +140,7 @@ local function apply_outside_mode(self)
         preferred_positions = self.preferred_positions,
         preferred_anchors   = self.preferred_alignments,
         honor_workarea      = true,
-        margins             = self._private.tooltip_gaps
+        margins             = self._private.gaps
     })
 
     self.current_position = position
@@ -553,18 +553,18 @@ end
 
 --- Set the margins between the tooltip and its parent
 --
--- @DOC_awful_tooltip_gaps_EXAMPLE@
+-- @DOC_awful_gaps_EXAMPLE@
 --
--- @property tooltip_gaps
+-- @property gaps
 -- @tparam number|table New margins value
 -- @propemits true false
 
 function tooltip:set_gaps(val)
-    self._private.tooltip_gaps = val
+    self._private.gaps = val
 end
 
 function tooltip:get_gaps()
-    return self._private.tooltip_gaps
+    return self._private.gaps
 end
 
 --- Add tooltip to an object.
@@ -643,9 +643,9 @@ function tooltip.new(args)
     self._private.align   = args.align or beautiful.tooltip_align  or "right"
     self._private.shape   = args.shape or beautiful.tooltip_shape
                                 or shape.rectangle
-    self._private.tooltip_gaps  = args.tooltip_gaps or beautiful.tooltip_gaps or {
-        left = args.tooltip_gaps or 0, right  = args.tooltip_gaps or 0,
-        top  = args.tooltip_gaps or 0, bottom = args.tooltip_gaps or 0
+    self._private.gaps  = args.gaps or beautiful.tooltip_gaps or {
+        left = args.gaps or 0, right  = args.gaps or 0,
+        top  = args.gaps or 0, bottom = args.gaps or 0
     }
 
     -- private data

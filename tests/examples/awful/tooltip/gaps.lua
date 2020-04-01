@@ -20,7 +20,7 @@ for _, side in ipairs{ "left", "right", "bottom", "top" } do
         mode = "outside",
         preferred_positions = {side},
         preferred_alignments = {"back"},
-        tooltip_gaps = 5
+        gaps = 5
     }
     tt.bg = beautiful.bg_normal
 end
