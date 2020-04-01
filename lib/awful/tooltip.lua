@@ -108,6 +108,10 @@ local offset = {
 -- @beautiful beautiful.tooltip_opacity
 -- @param number opacity Between 0 and 1
 
+--- The tooltip margins.
+-- @beautiful beautiful.tooltip_gaps
+-- @param table
+
 --- The default tooltip shape.
 -- The default shape for all tooltips is a rectangle. However, by setting
 -- this variable they can default to rounded rectangle or stretched octogons.
@@ -136,6 +140,7 @@ local function apply_outside_mode(self)
         preferred_positions = self.preferred_positions,
         preferred_anchors   = self.preferred_alignments,
         honor_workarea      = true,
+        margins             = self._private.tooltip_gaps
     })
 
     self.current_position = position
@@ -602,6 +607,7 @@ end
 -- @tparam[opt] string args.align The horizontal alignment
 -- @tparam[opt] string args.font The tooltip font
 -- @tparam[opt] number args.opacity The tooltip opacity
+-- @tparam[opt] table|number args.tooltip_gaps The tooltip margins
 -- @treturn awful.tooltip The created tooltip.
 -- @see add_to_object
 -- @see timeout
@@ -621,6 +627,10 @@ function tooltip.new(args)
     self._private.align   = args.align or beautiful.tooltip_align  or "right"
     self._private.shape   = args.shape or beautiful.tooltip_shape
                                 or shape.rectangle
+    self._private.tooltip_gaps  = args.tooltip_gaps or beautiful.tooltip_gaps or {
+        left = args.tooltip_gaps or 0, right  = args.tooltip_gaps or 0,
+        top  = args.tooltip_gaps or 0, bottom = args.tooltip_gaps or 0
+    }
 
     -- private data
     if args.delay_show then
