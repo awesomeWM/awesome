@@ -553,7 +553,7 @@ end
 
 --- Set the margins between the tooltip and its parent.
 --
--- @DOC_awful_gaps_EXAMPLE@
+-- @DOC_awful_tooltip_gaps_EXAMPLE@
 --
 -- @property gaps
 -- @tparam number|table New margins value.
