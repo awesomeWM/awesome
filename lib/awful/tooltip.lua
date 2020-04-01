@@ -108,9 +108,13 @@ local offset = {
 -- @beautiful beautiful.tooltip_opacity
 -- @param number opacity Between 0 and 1
 
+--- The tooltip margins.
+-- @beautiful beautiful.tooltip_gaps
+-- @param table
+
 --- The default tooltip shape.
 -- The default shape for all tooltips is a rectangle. However, by setting
--- this variable they can default to rounded rectangle or stretched octogons.
+-- this variable they can default to rounded rectangle or stretched octagons.
 -- @beautiful beautiful.tooltip_shape
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape A `gears.shape`
 --  compatible function
@@ -136,6 +140,7 @@ local function apply_outside_mode(self)
         preferred_positions = self.preferred_positions,
         preferred_anchors   = self.preferred_alignments,
         honor_workarea      = true,
+        margins             = self._private.gaps
     })
 
     self.current_position = position
@@ -468,12 +473,12 @@ function tooltip:set_timeout(timeout)
     self:emit_signal("property::timeout", timeout)
 end
 
---- Set all margins around the tooltip textbox
+--- Set all margins around the tooltip textbox.
 --
 -- @DOC_awful_tooltip_margins_EXAMPLE@
 --
 -- @property margins
--- @tparam number|table New margins value
+-- @tparam number|table New margins value.
 -- @propemits true false
 
 function tooltip:set_margins(val)
@@ -508,12 +513,12 @@ function tooltip:set_border_color(val)
     self:emit_signal("property::border_color", val)
 end
 
---- Set the margins around the left and right of the tooltip textbox
+--- Set the margins around the left and right of the tooltip textbox.
 --
 -- @DOC_awful_tooltip_margins_leftright_EXAMPLE@
 --
 -- @property margins_leftright
--- @tparam number New margins value
+-- @tparam number New margins value.
 -- @propemits true false
 
 function tooltip:set_margin_leftright(val)
@@ -527,12 +532,12 @@ function tooltip:set_margins_leftright(val)
     self:set_margin_leftright(val)
 end
 
---- Set the margins around the top and bottom of the tooltip textbox
+--- Set the margins around the top and bottom of the tooltip textbox.
 --
 -- @DOC_awful_tooltip_margins_topbottom_EXAMPLE@
 --
 -- @property margins_topbottom
--- @tparam number New margins value
+-- @tparam number New margins value.
 -- @propemits true false
 
 function tooltip:set_margin_topbottom(val)
@@ -544,6 +549,22 @@ end
 --TODO v5 deprecate this
 function tooltip:set_margins_topbottom(val)
     self:set_margin_topbottom(val)
+end
+
+--- Set the margins between the tooltip and its parent.
+--
+-- @DOC_awful_tooltip_gaps_EXAMPLE@
+--
+-- @property gaps
+-- @tparam number|table New margins value.
+-- @propemits true false
+
+function tooltip:set_gaps(val)
+    self._private.gaps = val
+end
+
+function tooltip:get_gaps()
+    return self._private.gaps
 end
 
 --- Add tooltip to an object.
@@ -594,14 +615,15 @@ end
 --   seconds.
 -- @tparam[opt=apply_dpi(5)] integer args.margin_leftright The left/right margin for the text.
 -- @tparam[opt=apply_dpi(3)] integer args.margin_topbottom The top/bottom margin for the text.
--- @tparam[opt=nil] gears.shape args.shape The shape
--- @tparam[opt] string args.bg The background color
--- @tparam[opt] string args.fg The foreground color
--- @tparam[opt] string args.border_color The tooltip border color
--- @tparam[opt] number args.border_width The tooltip border width
--- @tparam[opt] string args.align The horizontal alignment
--- @tparam[opt] string args.font The tooltip font
--- @tparam[opt] number args.opacity The tooltip opacity
+-- @tparam[opt=nil] gears.shape args.shape The shape.
+-- @tparam[opt] string args.bg The background color.
+-- @tparam[opt] string args.fg The foreground color.
+-- @tparam[opt] string args.border_color The tooltip border color.
+-- @tparam[opt] number args.border_width The tooltip border width.
+-- @tparam[opt] string args.align The horizontal alignment.
+-- @tparam[opt] string args.font The tooltip font.
+-- @tparam[opt] number args.opacity The tooltip opacity.
+-- @tparam[opt] table|number args.gaps The tooltip margins.
 -- @treturn awful.tooltip The created tooltip.
 -- @see add_to_object
 -- @see timeout
@@ -621,6 +643,10 @@ function tooltip.new(args)
     self._private.align   = args.align or beautiful.tooltip_align  or "right"
     self._private.shape   = args.shape or beautiful.tooltip_shape
                                 or shape.rectangle
+    self._private.gaps  = args.gaps or beautiful.tooltip_gaps or {
+        left = args.gaps or 0, right  = args.gaps or 0,
+        top  = args.gaps or 0, bottom = args.gaps or 0
+    }
 
     -- private data
     if args.delay_show then
