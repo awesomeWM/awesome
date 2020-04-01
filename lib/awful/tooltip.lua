@@ -563,7 +563,7 @@ function tooltip:set_gaps(val)
     self._private.tooltip_gaps = val
 end
 
-function tooltip:get_gaps(val)
+function tooltip:get_gaps()
     return self._private.tooltip_gaps
 end
 
