@@ -260,7 +260,7 @@ Code:
         my_textbox1, -- Left
         nil,         -- Nothing in the middle
         my_textbox2, -- Right
-        layout = wibox.layout.fixed.horizontal,
+        layout = wibox.layout.align.horizontal,
     }
 
 
