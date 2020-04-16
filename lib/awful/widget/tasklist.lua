@@ -169,10 +169,42 @@ local instances
 
 --- Disable the extra tasklist client property notification icons.
 --
--- See the <a href="status_icons">Status icons</a> section for more details.
+-- See the <a href="#status_icons">Status icons</a> section for more details.
 --
 -- @beautiful beautiful.tasklist_plain_task_name
 -- @tparam[opt=false] boolean tasklist_plain_task_name
+
+--- Extra tasklist client property notification icon for clients with the sticky property set.
+-- @beautiful beautiful.tasklist_sticky
+-- @tparam[opt=nil] string tasklist_sticky
+
+--- Extra tasklist client property notification icon for clients with the ontop property set.
+-- @beautiful beautiful.tasklist_ontop
+-- @tparam[opt=nil] string tasklist_ontop
+
+--- Extra tasklist client property notification icon for clients with the above property set.
+-- @beautiful beautiful.tasklist_above
+-- @tparam[opt=nil] string tasklist_above
+
+--- Extra tasklist client property notification icon for clients with the below property set.
+-- @beautiful beautiful.tasklist_below
+-- @tparam[opt=nil] string tasklist_below
+
+--- Extra tasklist client property notification icon for clients with the floating property set.
+-- @beautiful beautiful.tasklist_floating
+-- @tparam[opt=nil] string tasklist_floating
+
+--- Extra tasklist client property notification icon for clients with the maximized property set.
+-- @beautiful beautiful.tasklist_maximized
+-- @tparam[opt=nil] string tasklist_maximized
+
+--- Extra tasklist client property notification icon for clients with the maximized_horizontal property set.
+-- @beautiful beautiful.tasklist_maximized_horizontal
+-- @tparam[opt=nil] string maximized_horizontal
+
+--- Extra tasklist client property notification icon for clients with the maximized_vertical property set.
+-- @beautiful beautiful.tasklist_maximized_vertical
+-- @tparam[opt=nil] string maximized_vertical
 
 --- The tasklist font.
 -- @beautiful beautiful.tasklist_font
@@ -494,6 +526,14 @@ end
 -- @tparam[opt=nil] string args.style.bg_image_minimize
 -- @tparam[opt=nil] boolean args.style.tasklist_disable_icon
 -- @tparam[opt=nil] number args.style.icon_size The size of the icon
+-- @tparam[opt='▪'] string args.style.sticky Extra icon when client is sticky
+-- @tparam[opt='⌃'] string args.style.ontop Extra icon when client is ontop
+-- @tparam[opt='▴'] string args.style.above Extra icon when client is above
+-- @tparam[opt='▾'] string args.style.below Extra icon when client is below
+-- @tparam[opt='✈'] string args.style.floating Extra icon when client is floating
+-- @tparam[opt='<b>+</b>'] string args.style.maximized Extra icon when client is maximized
+-- @tparam[opt='⬌'] string args.style.maximized_horizontal Extra icon when client is maximized_horizontal
+-- @tparam[opt='⬍'] string args.style.maximized_vertical Extra icon when client is maximized_vertical
 -- @tparam[opt=false] boolean args.style.disable_task_name
 -- @tparam[opt=nil] string args.style.font
 -- @tparam[opt=left] string args.style.align *left*, *right* or *center*
