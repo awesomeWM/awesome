@@ -200,7 +200,7 @@ struct client_t
 ARRAY_FUNCS(client_t *, client, DO_NOTHING)
 
 /** Client class */
-lua_class_t client_class;
+extern lua_class_t client_class;
 
 LUA_OBJECT_FUNCS(client_class, client_t, client)
 

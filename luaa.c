@@ -91,6 +91,8 @@ extern const struct luaL_Reg awesome_mouse_meta[];
 extern const struct luaL_Reg awesome_root_methods[];
 extern const struct luaL_Reg awesome_root_meta[];
 
+signal_array_t global_signals;
+
 /** A call into the Lua code aborted with an error.
  *
  * This signal is used in the example configuration, @{05-awesomerc.md},

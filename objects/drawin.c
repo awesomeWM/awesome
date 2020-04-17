@@ -46,6 +46,8 @@
 #include <cairo-xcb.h>
 #include <xcb/shape.h>
 
+lua_class_t drawin_class;
+
 /** Drawin object.
  *
  * @field border_width Border width.

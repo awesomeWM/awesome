@@ -20,6 +20,8 @@
 #include "common/lualib.h"
 #include "luaa.h"
 
+lua_CFunction lualib_dofunction_on_error;
+
 void luaA_checkfunction(lua_State *L, int idx)
 {
     if(!lua_isfunction(L, idx))

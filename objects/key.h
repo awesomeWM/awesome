@@ -36,7 +36,7 @@ typedef struct keyb_t
     xcb_keycode_t keycode;
 } keyb_t;
 
-lua_class_t key_class;
+extern lua_class_t key_class;
 LUA_OBJECT_FUNCS(key_class, keyb_t, key)
 DO_ARRAY(keyb_t *, key, DO_NOTHING)
 

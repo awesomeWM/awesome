@@ -39,7 +39,7 @@ typedef struct button_t
     xcb_button_t button;
 } button_t;
 
-lua_class_t button_class;
+extern lua_class_t button_class;
 LUA_OBJECT_FUNCS(button_class, button_t, button)
 ARRAY_FUNCS(button_t *, button, DO_NOTHING)
 

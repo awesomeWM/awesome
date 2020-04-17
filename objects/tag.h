@@ -46,7 +46,7 @@ struct tag
     client_array_t clients;
 };
 
-lua_class_t tag_class;
+extern lua_class_t tag_class;
 LUA_OBJECT_FUNCS(tag_class, tag_t, tag)
 
 void tag_class_setup(lua_State *);

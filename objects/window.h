@@ -80,7 +80,7 @@ typedef struct
     WINDOW_OBJECT_HEADER
 } window_t;
 
-lua_class_t window_class;
+extern lua_class_t window_class;
 
 void window_class_setup(lua_State *);
 

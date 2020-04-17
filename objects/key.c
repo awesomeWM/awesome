@@ -43,6 +43,8 @@
 #include <xkbcommon/xkbcommon.h>
 #include <glib.h>
 
+lua_class_t key_class;
+
 /** Key object.
  *
  * @tfield string key The key to trigger an event.
