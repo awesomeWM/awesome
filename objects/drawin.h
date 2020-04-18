@@ -52,7 +52,7 @@ void luaA_drawin_systray_kickout(lua_State *);
 
 void drawin_class_setup(lua_State *);
 
-lua_class_t drawin_class;
+extern lua_class_t drawin_class;
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

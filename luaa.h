@@ -317,7 +317,7 @@ const char *luaA_find_config(xdgHandle *, const char *, luaA_config_callback *);
 bool luaA_parserc(xdgHandle *, const char *);
 
 /** Global signals */
-signal_array_t global_signals;
+extern signal_array_t global_signals;
 
 int luaA_class_index_miss_property(lua_State *, lua_object_t *);
 int luaA_class_newindex_miss_property(lua_State *, lua_object_t *);

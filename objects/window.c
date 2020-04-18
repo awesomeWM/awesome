@@ -59,6 +59,7 @@
 #include "property.h"
 #include "xwindow.h"
 
+lua_class_t window_class;
 LUA_CLASS_FUNCS(window, window_class)
 
 static xcb_window_t

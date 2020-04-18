@@ -108,6 +108,8 @@
 #include <xcb/shape.h>
 #include <cairo-xcb.h>
 
+lua_class_t client_class;
+
 /** Client class.
  *
  * This table allow to add more dynamic properties to the clients. For example,

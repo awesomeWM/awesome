@@ -35,6 +35,8 @@
 
 #include "button.h"
 
+lua_class_t button_class;
+
 /** Button object.
  *
  * @tfield int button The mouse button number, or 0 for any button.

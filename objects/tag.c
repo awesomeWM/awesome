@@ -203,6 +203,8 @@
 #include "ewmh.h"
 #include "luaa.h"
 
+lua_class_t tag_class;
+
 /** When a tag requests to be selected.
  * @signal request::select
  * @tparam string context The reason why it was called.
