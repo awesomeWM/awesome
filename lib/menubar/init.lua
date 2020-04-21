@@ -314,34 +314,34 @@ local function menulist_update(scr)
     end
 
     -- Add the applications according to their name and cmdline
-    local add_entry = function(v)
-        v.focused = false
-        if not current_category or v.category == current_category then
+    local add_entry = function(entry)
+        entry.focused = false
+        if not current_category or entry.category == current_category then
 
             -- check if the query matches either the name or the commandline
             -- of some entry
-            if string.match(v.name, pattern)
-                or string.match(v.cmdline, pattern) then
+            if string.match(entry.name, pattern)
+                or string.match(entry.cmdline, pattern) then
 
-                v.weight = 0
-                v.prio = PRIO_NONE
+                entry.weight = 0
+                entry.prio = PRIO_NONE
 
                 -- get use count from count_table if present
                 -- and use it as weight
-                if string.len(pattern) > 0 and count_table[v.name] ~= nil then
-                    v.weight = tonumber(count_table[v.name])
+                if string.len(pattern) > 0 and count_table[entry.name] ~= nil then
+                    entry.weight = tonumber(count_table[entry.name])
                 end
 
                 -- check for prefix match
-                if string.match(v.name, "^" .. pattern)
-                    or string.match(v.cmdline, "^" .. pattern) then
+                if string.match(entry.name, "^" .. pattern)
+                    or string.match(entry.cmdline, "^" .. pattern) then
                     -- increase default priority
-                    v.prio = PRIO_NONE + 1
+                    entry.prio = PRIO_NONE + 1
                 else
-                    v.prio = PRIO_NONE
+                    entry.prio = PRIO_NONE
                 end
 
-                table.insert (command_list, v)
+                table.insert (command_list, entry)
             end
         end
     end
