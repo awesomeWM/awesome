@@ -486,9 +486,7 @@ function menubar.show(scr)
     current_category = nil
     menulist_update(scr)
 
-    local prompt_args = menubar.prompt_args or {}
-
-    awful.prompt.run(setmetatable({
+    local default_prompt_args = {
         prompt              = "Run: ",
         textbox             = instance.prompt.widget,
         completion_callback = awful.completion.shell,
@@ -499,7 +497,10 @@ function menubar.show(scr)
             menulist_update(scr)
         end,
         keypressed_callback = prompt_keypressed_callback
-    }, {__index=prompt_args}))
+    }
+
+    awful.prompt.run(setmetatable(menubar.prompt_args, {__index=default_prompt_args}))
+
 
     instance.wibox.visible = true
 end
