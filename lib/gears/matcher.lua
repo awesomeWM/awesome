@@ -79,7 +79,13 @@ local matcher = {}
 -- @see remove_matching_source
 
 local function default_matcher(a, b)
-    return a == b or (type(a) == "string" and a:match(b))
+    local result = a == b
+    if result then return result end
+    if type(a) == "string" and type(b) == "string" then
+      result = a:match(b)
+      if result == '' then result = nil end
+    end
+    return result
 end
 
 local function greater_matcher(a, b)
