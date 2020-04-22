@@ -15,7 +15,7 @@ place.maximize(c, {honor_padding=true, honor_workarea=true}) --DOC_HIDE
     -- function.
 
     local top_titlebar = awful.titlebar(c, {
-        height    = 20,
+        size      = 20,
         bg_normal = "#ff0000",
     })
 
