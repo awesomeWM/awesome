@@ -121,7 +121,7 @@ menubar.left_label = "◀◀"
 local list_interspace = theme.xresources.apply_dpi(4) * 3
 
 --- Allows user to specify custom parameters for prompt.run function
--- (like colors). These will override default parameters.
+-- (like colors). This will merge with the default parameters, overriding affected values.
 -- @see awful.prompt
 menubar.prompt_args = {}
 
