@@ -9,7 +9,7 @@ local escape_pattern = "[<>&]"
 local escape_subs    = { ['<'] = "&lt;", ['>'] = "&gt;", ['&'] = "&amp;" }
 
 -- Also reverse escaping some allowed tags because people actually use them.
-local escape_undo = {['&lt;span '] = "<span "}
+local escape_undo = {["&lt;(span[^&]+)&gt;"] = "<%1>"}
 
 for _, allowed in ipairs {'b', 'i', 'u', 'span'} do
     escape_undo['&lt;' ..allowed..'&gt;'] = "<" ..allowed..">"
