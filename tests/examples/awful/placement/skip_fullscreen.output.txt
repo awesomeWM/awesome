@@ -1,0 +1,4 @@
+Before:	x=0, y=0, width=320, height=240
+After:	x=10, y=10, width=320, height=240
+Before:	x=0, y=0, width=320, height=240
+After:	x=0, y=0, width=320, height=240
