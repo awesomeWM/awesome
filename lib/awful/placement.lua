@@ -1635,7 +1635,7 @@ function placement.skip_fullscreen(d, args)
     d = d or capi.client.focus
 
     if d.fullscreen then
-        return {d:geometry(), {}, true}
+        return {get_screen(d.screen).geometry, {}, true}
     else
         local ngeo = geometry_common(d, args)
         remove_border(d, args, ngeo)
