@@ -37,22 +37,33 @@ do
     end
 end
 
+local show_menubar_and_hide = function(count)
+    -- Just show the menubar and hide it.
+    -- TODO: Write a proper test. But for the mean time this is better than
+    -- nothing (and tells us when errors are thrown).
+
+    if count == 1 then
+        menubar.show()
+    end
+
+    -- Test that the async population of the menubar is done
+    if menubar_refreshed then
+        menubar.hide()
+        awesome.sync()
+        return true
+    end
+end
+
 runner.run_steps {
     function(count)
-        -- Just show the menubar and hide it.
-        -- TODO: Write a proper test. But for the mean time this is better than
-        -- nothing (and tells us when errors are thrown).
+        -- Show and hide with defaults
+        return show_menubar_and_hide(count)
+    end,
 
-        if count == 1 then
-            menubar.show()
-        end
-
-        -- Test that the async population of the menubar is done
-        if menubar_refreshed then
-            menubar.hide()
-            awesome.sync()
-            return true
-        end
+    function(count)
+        -- Show and hide with match_empty set to false
+        menubar.match_empty = false
+        return show_menubar_and_hide(count)
     end,
 
     function()
