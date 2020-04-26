@@ -384,6 +384,10 @@ local function new(args)
         ret.border_color = args.border_color
     end
 
+    if args.opacity then
+        ret.opacity = args.opacity
+    end
+
     if args.input_passthrough then
         ret.input_passthrough = args.input_passthrough
     end
