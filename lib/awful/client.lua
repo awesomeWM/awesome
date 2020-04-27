@@ -630,12 +630,6 @@ end
 -- @emits unmarker (for legacy reasons, use `property::marked`)
 -- @emits property::marked
 
---- The border color when the client is focused.
---
--- @beautiful beautiful.border_marked
--- @param string
---
-
 function client.object.set_marked(self, value)
     local is_marked = self.marked
 
