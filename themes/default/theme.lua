@@ -29,7 +29,7 @@ theme.useless_gap         = dpi(0)
 theme.border_width        = dpi(1)
 theme.border_color_normal = "#000000"
 theme.border_color_active = "#535d6c"
-theme.border_marked       = "#91231c"
+theme.border_color_marked = "#91231c"
 
 -- There are other variable sets
 -- overriding the default one when

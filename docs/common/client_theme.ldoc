@@ -485,7 +485,7 @@
 /**
  * The marked clients border color.
  * Note that only solid colors are supported.
- * @beautiful beautiful.border_marked
+ * @beautiful beautiful.border_color_marked
  * @param color
  */
 

@@ -637,8 +637,8 @@ function permissions.update_border(c, context)
         -- never have been added to the core. The documentation claims it works,
         -- even if it has been broken for 90% of AwesomeWM releases ever since
         -- it was added.
-        if c.marked and beautiful.border_marked then
-            c._border_color = beautiful.border_marked
+        if c.marked and beautiful.border_color_marked then
+            c._border_color = beautiful.border_color_marked
             return
         end
 
