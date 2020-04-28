@@ -543,6 +543,7 @@ end, "mouse_enter")
 -- (urgent, new, active, normal)
 --
 -- @signalhandler awful.ewmh.update_border
+-- @usebeautiful beautiful.border_color_marked
 -- @usebeautiful beautiful.border_color_active
 -- @usebeautiful beautiful.border_color_normal
 -- @usebeautiful beautiful.border_color_new
