@@ -1624,6 +1624,26 @@ function placement.restore(d, args)
     return true
 end
 
+--- Skip all preceeding results of placement pipeline for fullscreen clients.
+--@DOC_awful_placement_skip_fullscreen_EXAMPLE@
+-- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
+-- @tparam[opt={}] table args Other arguments
+-- @treturn table The new geometry
+-- @staticfct awful.placement.skip_fullscreen
+function placement.skip_fullscreen(d, args)
+    args = add_context(args, "skip_fullscreen")
+    d = d or capi.client.focus
+
+    if d.fullscreen then
+        return {get_screen(d.screen).geometry, {}, true}
+    else
+        local ngeo = geometry_common(d, args)
+        remove_border(d, args, ngeo)
+        geometry_common(d, args, ngeo)
+        return fix_new_geometry(ngeo, args, true)
+    end
+end
+
 return placement
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
