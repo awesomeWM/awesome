@@ -2,6 +2,15 @@
 
 
 /**
+ * The border color when the client is marked.
+ * It has priority over the rest of beautiful border color properties.
+ * Note that only solid colors are supported.
+ * @beautiful beautiful.border_color_marked
+ * @param color
+ * @see request::border
+ */
+
+/**
  * The fallback border color when the client is floating.
  *
  * @beautiful beautiful.border_color_floating
@@ -14,15 +23,27 @@
  */
 
 /**
- * The fallback border color when the client is mazimized.
+ * The fallback border color when the client is maximized.
  *
- * @beautiful beautiful.border_color_mazimized
+ * @beautiful beautiful.border_color_maximized
  * @param color
  * @see request::border
  * @see beautiful.border_color_maximized_active
  * @see beautiful.border_color_maximized_normal
  * @see beautiful.border_color_maximized_urgent
  * @see beautiful.border_color_maximized_new
+ */
+
+ /**
+ * The fallback border color when the client is fullscreen.
+ *
+ * @beautiful beautiful.border_color_fullscreen
+ * @param color
+ * @see request::border
+ * @see beautiful.border_color_fullscreen_active
+ * @see beautiful.border_color_fullscreen_normal
+ * @see beautiful.border_color_fullscreen_urgent
+ * @see beautiful.border_color_fullscreen_new
  */
 
 /**
@@ -160,7 +181,7 @@
  * @param integer
  * @see request::border
  * @see beautiful.border_width_floating
- * @see beautiful.border_width_mazimized
+ * @see beautiful.border_width_maximized
  * @see beautiful.border_width_floating_active
  * @see beautiful.border_width_floating_normal
  * @see beautiful.border_width_floating_urgent
@@ -184,9 +205,9 @@
  */
 
 /**
- * The fallback border width when the client is mazimized.
+ * The fallback border width when the client is maximized.
  *
- * @beautiful beautiful.border_width_mazimized
+ * @beautiful beautiful.border_width_maximized
  * @param integer
  * @see request::border
  * @see beautiful.border_width_maximized_active
@@ -480,13 +501,6 @@
  * @beautiful beautiful.opacity_fullscreen_new
  * @param[opt=1] number
  * @see request::border
- */
-
-/**
- * The marked clients border color.
- * Note that only solid colors are supported.
- * @beautiful beautiful.border_marked
- * @param color
  */
 
 /*
