@@ -76,5 +76,19 @@ function gmath.round(x)
     return math.floor(x + 0.5)
 end
 
+--- Return the sign of the number x
+-- return 1 if x is positive, -1 if negative and 0 if x is 0
+-- @tparam number x
+-- @treturn integer
+-- @staticfct gears.math.sign
+function gmath.sign(x)
+    if x > 0 then
+        return 1
+    elseif x < 0 then
+        return -1
+    else
+        return 0
+    end
+end
 
 return gmath

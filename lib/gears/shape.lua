@@ -41,13 +41,136 @@
 -- @themelib gears.shape
 ---------------------------------------------------------------------------
 local g_matrix = require( "gears.matrix" )
+local g_math   = require( "gears.math" )
 local unpack   = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local atan2    = math.atan2 or math.atan -- lua 5.3 compat
 local min      = math.min
+local max      = math.max
 local cos      = math.cos
 local sin      = math.sin
+local abs      = math.abs
+local pow      = math.pow -- luacheck: globals math.pow
+if not pow then
+  -- math.pow can be disabled in Lua 5.3 via LUA_COMPAT_MATHLIB
+  pow = function(x, y)
+        return x^y
+    end
+end
 
 local module = {}
+
+--- Add a squircle shape with only some of the corner are "circled" to the current path.
+-- The squircle is not exactly as the definition.
+-- It will expand to the shape's width and height, kinda like an ellipse
+--
+-- @DOC_gears_shape_partial_squircle_EXAMPLE@
+--
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam boolean tl If the top left corner is rounded
+-- @tparam boolean tr If the top right corner is rounded
+-- @tparam boolean br If the bottom right corner is rounded
+-- @tparam boolean bl If the bottom left corner is rounded
+-- @tparam number rate The "squareness" of the squircle, should be greater than 1
+-- @tparam number delta The "smoothness" of the shape, delta must be greater than 0.01 and will be reset to 0.01 if not
+-- @staticfct gears.shape.partial_squircle
+function module.partial_squircle(cr, width, height, tl, tr, br, bl, rate, delta)
+   -- rate ~ 2 can be used by icon
+   -- this shape doesn't really fit clients
+   -- but you can still use with rate ~ 32
+   rate = rate or 2
+   -- smaller the delta the smoother the shape
+   -- but probably more laggy
+   -- so we'll limit delta to the miminum of 0.01
+   -- so people don't burn their computer
+   delta = delta or 1 / max(width, height)
+   delta = delta > 0.01 and delta or 0.01
+
+   -- just ellipse things
+   local a = width / 2
+   local b = height / 2
+   local phi = 0
+
+   -- move to origin
+   -- the shape goes counter clock wise
+   -- start from (w h / 2)
+   cr:save()
+   cr:translate(a, b)
+   cr:move_to(a, 0)
+
+   -- draw the corner if that corner is rounded
+   local curved_corner = function()
+      local end_angle = phi + math.pi / 2
+      while phi < end_angle do
+         local cosphi = cos(phi)
+         local sinphi = sin(phi)
+         local x = a * pow(abs(cosphi), 1 / rate) * g_math.sign(cosphi)
+         local y = b * pow(abs(sinphi), 1 / rate) * g_math.sign(sinphi)
+         -- so weird, y axis is inverted
+         cr:line_to(x, -y)
+         phi = phi + delta
+      end
+   end
+
+   -- draw with polar cord
+   -- draw top right
+   if tr then
+      curved_corner()
+   else
+      cr:move_to(a,  0)
+      cr:line_to(a, -b)
+      cr:line_to(0, -b)
+      phi = math.pi * 0.5
+   end
+
+   -- draw top left
+   if tl then
+      curved_corner()
+   else
+      cr:line_to(-a, -b)
+      cr:line_to(-a,  0)
+      phi = math.pi
+   end
+
+   if bl then
+      curved_corner()
+   else
+      cr:line_to(-a, b)
+      cr:line_to( 0, b)
+      phi = math.pi * 1.5
+   end
+
+   -- bottom right
+   if br then
+      curved_corner()
+   else
+      cr:line_to(a, b)
+      cr:line_to(a, 0)
+      phi = math.pi * 2
+   end
+
+   -- it's time to stop
+   cr:close_path()
+
+   -- restore cairo context
+   cr:restore()
+end
+
+--- Add a squircle shape to the current path.
+-- This will behave the same as `partial_squircle`
+--
+-- @DOC_gears_shape_squircle_EXAMPLE@
+--
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam number rate The "squareness" of the squircle, should be greater than 1
+-- @tparam number delta The "smoothness" of the shape, delta must be greater than 0.01 and will be reset to 0.01 if not
+-- @staticfct gears.shape.squircle
+function module.squircle(cr, width, height, rate, delta)
+   module.partial_squircle(cr, width, height, true, true, true, true, rate, delta)
+end
 
 --- Add a star shape to the current path.
 -- The star size will be the minimum of the given width and weight
