@@ -318,7 +318,8 @@ end
 function tag.new(names, screen, layout)
     screen = get_screen(screen or 1)
     -- True if `layout` should be used as the layout of each created tag
-    local have_single_layout = (not layout) or (layout.arrange and layout.name)
+    local have_single_layout = (not layout) or (type(layout) == 'function')
+                                or (layout.arrange and layout.name)
     local tags = {}
     for id, name in ipairs(names) do
         local l = layout
