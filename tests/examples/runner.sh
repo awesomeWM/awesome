@@ -45,7 +45,7 @@ then
 fi
 
 # Check if we got the output we wanted
-if ! cmp --silent "${file_stdout}" "${expected_output}"
+if ! cmp -s "${file_stdout}" "${expected_output}"
 then
     echo "Expected text from ${expected_output}, but got:"
     diff -u "${expected_output}" "${file_stdout}" || true
