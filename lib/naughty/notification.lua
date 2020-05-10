@@ -419,6 +419,7 @@ local notification = {}
 
 --- Emitted when the notification is destroyed.
 -- @signal destroyed
+-- @tparam table self The current transaction object.
 -- @tparam number reason Why it was destroyed
 -- @tparam boolean keep_visible If it was kept visible.
 -- @see naughty.notification_closed_reason
