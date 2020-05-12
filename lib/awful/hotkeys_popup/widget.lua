@@ -218,6 +218,7 @@ function widget.new(args)
             KP_Multiply      = "Num*",
             KP_Subtract      = "Num-",
             KP_Add           = "Num+",
+            KP_Enter         = "NumEnter",
             -- Some "obvious" entries are necessary for the Escape sequence
             -- and whitespace characters:
             Escape           = "Esc",
