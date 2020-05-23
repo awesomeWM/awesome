@@ -57,12 +57,23 @@ capi.screen.connect_signal("removed", function(scr)
 end)
 
 local function get_spacing()
-    local margin = beautiful.notification_spacing or 2
+    local margin = beautiful.notification_spacing or dpi(2)
     return {top = margin, bottom = margin}
 end
 
+local function get_offset(position, preset)
+    preset = preset or {}
+    local margin = preset.padding or beautiful.notification_spacing or dpi(4)
+    if position:match('_right') then
+        return {x = -margin}
+    elseif position:match('_left') then
+        return {x = margin}
+    end
+    return {}
+end
+
 -- Leverage `awful.placement` to create the stacks.
-local function update_position(position)
+local function update_position(position, preset)
     local pref  = position:match("top_") and "bottom" or "top"
     local align = position:match("_(.*)")
         :gsub("left", "front"):gsub("right", "back")
@@ -76,6 +87,9 @@ local function update_position(position)
                 margins             = get_spacing(),
                 honor_workarea      = true,
             }
+            if k == 1 then
+                args.offset              = get_offset(position, preset)
+            end
 
             -- The first entry is aligned to the workarea, then the following to the
             -- previous widget.
@@ -97,7 +111,12 @@ local function finish(self)
         end
     end
 
-    update_position(self.position)
+    local preset
+    if self.private and self.private.args and self.private.args.notification then
+        preset = self.private.args.notification.preset
+    end
+
+    update_position(self.position, preset)
 end
 
 -- It isn't a good idea to use the `attach` `awful.placement` property. If the
@@ -106,7 +125,7 @@ end
 capi.screen.connect_signal("property::geometry", function(s)
     for pos, notifs in pairs(by_position[s]) do
         if #notifs > 0 then
-            update_position(pos)
+            update_position(pos, notifs[1].preset)
         end
     end
 end)
@@ -214,7 +233,7 @@ local function init(self, notification)
     local preset = notification.preset or {}
 
     local position = args.position or notification.position or
-        beautiful.notification_position or preset.position or "top_right"
+        preset.position or beautiful.notification_position or "top_right"
 
     if not self.widget then
         self.widget = generate_widget(self._private.args, notification)
@@ -244,13 +263,13 @@ local function init(self, notification)
 
     table.insert(init_screen(s)[position], self)
 
-    local function update() update_position(position) end
+    local function update() update_position(position, preset) end
 
     self:connect_signal("property::geometry", update)
     notification:connect_signal("property::margin", update)
     notification:connect_signal("destroyed", self._private.destroy_callback)
 
-    update_position(position)
+    update_position(position, preset)
 
 end
 
