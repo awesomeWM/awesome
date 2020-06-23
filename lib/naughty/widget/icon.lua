@@ -22,6 +22,8 @@ local beautiful = require("beautiful")
 local gsurface = require("gears.surface")
 local dpi = require("beautiful.xresources").apply_dpi
 
+local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
+
 local icon = {}
 
 -- The default way to resize the icon.
@@ -56,6 +58,11 @@ function icon:draw(_, cr, width, height)
     local h = self._private.image:get_height()
     local aspect = width / w
     local aspect_h = height / h
+
+    -- Set the clip: changed
+    if self._private.clip_shape then
+        cr:clip(self._private.clip_shape(cr, width, height, unpack(self._private.clip_args)))
+    end
 
     if aspect > aspect_h then aspect = aspect_h end
 
