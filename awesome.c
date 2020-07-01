@@ -84,7 +84,7 @@ init_rng(void)
     lua_getfield(L, -1, "randomseed");
 
     /* Push a seed */
-    lua_pushnumber(L, g_random_int() + g_random_double());
+    lua_pushnumber(L, g_random_int());
 
     /* Call math.randomseed */
     lua_call(L, 1, 0);
