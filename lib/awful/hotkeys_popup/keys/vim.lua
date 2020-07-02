@@ -180,7 +180,7 @@ local vim_keys = {
             ["do"]="diff obtain",
             ["dp"]="diff put",
             ["]c"]="jump next",
-            ["[c"]="jump previos",
+            ["[c"]="jump previous",
         }
     }},
 }
