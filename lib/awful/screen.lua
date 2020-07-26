@@ -36,7 +36,7 @@ data.padding = {}
 -- @tparam table geo A geometry (width, height, x, y) table.
 -- @tparam table delta A delta table (top, bottom, x, y).
 -- @treturn table A geometry (width, height, x, y) table.
-local function apply_geometry_ajustments(geo, delta)
+local function apply_geometry_adjustments(geo, delta)
     return {
         x      = geo.x      + (delta.left or 0),
         y      = geo.y      + (delta.top  or 0),
@@ -388,11 +388,11 @@ function screen.object.get_bounding_geometry(self, args)
 
     if (not args.parent) and (not args.bounding_rect) and args.honor_padding then
         local padding = self.padding
-        geo = apply_geometry_ajustments(geo, padding)
+        geo = apply_geometry_adjustments(geo, padding)
     end
 
     if args.margins then
-        geo = apply_geometry_ajustments(geo,
+        geo = apply_geometry_adjustments(geo,
             type(args.margins) == "table" and args.margins or {
                 left = args.margins, right  = args.margins,
                 top  = args.margins, bottom = args.margins,
