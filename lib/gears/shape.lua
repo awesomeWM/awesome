@@ -749,60 +749,136 @@ end
 -- @param cr A cairo context
 -- @tparam number w The shape width
 -- @tparam number h The shape height
--- @tparam number percent The progressbar percent
--- @tparam boolean hide_left Do not draw the left side of the shape
+-- @tparam[opt=1] number percent The progressbar percent
+-- @tparam[opt=false] boolean hide_left Do not draw the left side of the shape
+-- @tparam[opt=math.min(width height) / 2] number radius The arc radius
 -- @staticfct gears.shape.radial_progress
-function module.radial_progress(cr, w, h, percent, hide_left)
+function module.radial_progress(cr, w, h, percent, hide_left, radius)
     percent = percent or 1
-    local total_length = (2*(w-h))+2*((h/2)*math.pi)
-    local bar_percent  = (w-h)/total_length
-    local arc_percent  = ((h/2)*math.pi)/total_length
+    radius  = radius  or (math.min(w, h) / 2)
+
+    if radius > math.min(w, h) / 2 then
+        radius = math.min(w, h) / 2
+    end
+
+    local no_hline = radius == (2*w)
+    local no_vline = radius == (2*h)
+
+    local total_length  = 2*(w + h) - 8*radius + 2*math.pi*radius
+    local hbar_percent  = (w - 2*radius)/total_length
+    local vbar_percent  = (h - 2*radius)/total_length
+    local arc_percent   = (math.pi*radius/2)/total_length
 
     -- Bottom line
-    if percent > bar_percent then
-        cr:move_to(h/2,h)
-        cr:line_to((h/2) + (w-h),h)
+    if not no_hline then
+        if percent > hbar_percent then
+            cr:move_to(radius, h)
+            cr:line_to(radius + (w - 2*radius), h)
+            cr:stroke()
+        elseif percent < hbar_percent then
+            cr:move_to(radius, h)
+            cr:line_to(radius + total_length*percent, h)
+            cr:stroke()
+        end
+    end
+
+    -- Bottom right arc
+    if percent >= hbar_percent + arc_percent then
+        cr:arc(w - radius, h - radius, radius, 0, math.pi/2)
         cr:stroke()
-    elseif percent < bar_percent then
-        cr:move_to(h/2,h)
-        cr:line_to(h/2+(total_length*percent),h)
+    elseif percent > hbar_percent and percent < hbar_percent + arc_percent then
+        local relPercent = percent - hbar_percent
+        cr:arc_negative(w - radius , h - radius, radius,
+                        math.pi/2,
+                        math.pi/2 - total_length*relPercent/radius
+        )
         cr:stroke()
     end
 
-    -- Right arc
-    if percent >= bar_percent+arc_percent then
-        cr:arc(w-h/2 , h/2, h/2,3*(math.pi/2),math.pi/2)
+    -- Right line
+    if not no_vline then
+        if percent >= hbar_percent + arc_percent + vbar_percent then
+            cr:move_to(w, h - radius)
+            cr:line_to(w, radius)
+            cr:stroke()
+        elseif percent > hbar_percent + arc_percent
+        and percent < hbar_percent + arc_percent + vbar_percent then
+            local relPercent = percent - hbar_percent - arc_percent
+            cr:move_to(w, h - radius)
+            cr:line_to(w, h - radius - total_length*relPercent)
+            cr:stroke()
+        end
+    end
+
+    -- Top right arc
+    if percent >= hbar_percent + 2*arc_percent + vbar_percent then
+        cr:arc_negative(w - radius, radius, radius, 0, 3*math.pi/2)
         cr:stroke()
-    elseif percent > bar_percent and percent < bar_percent+(arc_percent/2) then
-        cr:arc(w-h/2 , h/2, h/2,(math.pi/2)-((math.pi/2)*((percent-bar_percent)/(arc_percent/2))),math.pi/2)
-        cr:stroke()
-    elseif percent >= bar_percent+arc_percent/2 and percent < bar_percent+arc_percent then
-        cr:arc(w-h/2 , h/2, h/2,0,math.pi/2)
-        cr:stroke()
-        local add = (math.pi/2)*((percent-bar_percent-arc_percent/2)/(arc_percent/2))
-        cr:arc(w-h/2 , h/2, h/2,2*math.pi-add,0)
+    elseif percent > hbar_percent + arc_percent + vbar_percent
+    and percent < hbar_percent + 2*arc_percent + vbar_percent then
+        local relPercent = percent - hbar_percent - arc_percent - vbar_percent
+        cr:arc_negative(w - radius, radius, radius,
+                        0,
+                        - total_length*relPercent/radius
+        )
         cr:stroke()
     end
 
     -- Top line
-    if percent > 2*bar_percent+arc_percent then
-        cr:move_to((h/2) + (w-h),0)
-        cr:line_to(h/2,0)
-        cr:stroke()
-    elseif percent > bar_percent+arc_percent and percent < 2*bar_percent+arc_percent then
-        cr:move_to((h/2) + (w-h),0)
-        cr:line_to(((h/2) + (w-h))-total_length*(percent-bar_percent-arc_percent),0)
-        cr:stroke()
+    if not no_hline then
+        if percent >= 2*hbar_percent + 2*arc_percent + vbar_percent then
+            cr:move_to(w - radius, 0)
+            cr:line_to(radius, 0)
+            cr:stroke()
+        elseif percent > hbar_percent + 2*arc_percent + vbar_percent
+        and percent < 2*hbar_percent + 2*arc_percent + vbar_percent then
+            local relPercent = percent - hbar_percent - 2*arc_percent - vbar_percent
+            cr:move_to(w - radius, 0)
+            cr:line_to(w - radius - total_length*relPercent, 0)
+            cr:stroke()
+        end
     end
 
-    -- Left arc
     if not hide_left then
-        if percent > 0.985 then
-            cr:arc(h/2, h/2, h/2,math.pi/2,3*(math.pi/2))
+        -- Top left arc
+        if percent >= 2*hbar_percent + 3*arc_percent + vbar_percent then
+            cr:arc_negative(radius, radius, radius, -math.pi/2, math.pi)
             cr:stroke()
-        elseif percent  > 2*bar_percent+arc_percent then
-            local relpercent = (percent - 2*bar_percent - arc_percent)/arc_percent
-            cr:arc(h/2, h/2, h/2,3*(math.pi/2)-(math.pi)*relpercent,3*(math.pi/2))
+        elseif percent > 2*hbar_percent + 2*arc_percent + vbar_percent
+        and percent < 2*hbar_percent + 3*arc_percent + vbar_percent then
+            local relPercent = percent - 2*hbar_percent - 2*arc_percent - vbar_percent
+            cr:arc_negative(radius, radius, radius,
+                            -math.pi/2,
+                            -math.pi/2 - total_length*relPercent/radius
+            )
+            cr:stroke()
+        end
+
+        -- Left line
+        if not no_vline then
+            if percent >= 2*hbar_percent + 3*arc_percent + 2*vbar_percent then
+                cr:move_to(0, radius)
+                cr:line_to(0, h - radius)
+                cr:stroke()
+            elseif percent > 2*hbar_percent + 3*arc_percent + vbar_percent
+            and percent < 2*hbar_percent + 3*arc_percent + 2*vbar_percent then
+                local relPercent = percent - 2*hbar_percent - 3*arc_percent - vbar_percent
+                cr:move_to(0, radius)
+                cr:line_to(0, radius + total_length*relPercent)
+                cr:stroke()
+            end
+        end
+
+        -- Bottom left arc
+        if percent >= 1 - 1e-2 then
+            cr:arc_negative(radius, h - radius, radius, math.pi, math.pi/2)
+            cr:stroke()
+        elseif percent > 2*hbar_percent + 3*arc_percent + 2*vbar_percent then
+            local relPercent = percent - 2*hbar_percent - 3*arc_percent - 2*vbar_percent
+            cr:arc_negative(radius, h - radius, radius,
+                            math.pi,
+                            math.pi - total_length*relPercent/radius
+            )
             cr:stroke()
         end
     end

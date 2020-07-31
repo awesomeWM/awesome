@@ -44,6 +44,11 @@ local radialprogressbar = { mt = {} }
 -- @tparam[opt=0] number paddings.left
 -- @tparam[opt=0] number paddings.right
 
+--- The progressbar arc radius
+--
+-- @beautiful beautiful.radialprogressbar_radius
+-- @param number
+
 local function outline_workarea(self, width, height)
     local border_width = self._private.border_width or
         beautiful.radialprogressbar_border_width or default_outline_width
@@ -81,15 +86,19 @@ function radialprogressbar:after_draw_children(_, cr, width, height)
     local wa = outline_workarea(self, width, height)
     cr:translate(wa.x, wa.y)
 
+    local radius =  self._private.radius or
+        beautiful.radialprogressbar_radius or (wa.height/2)
+
     -- Draw the outline
-    shape.rounded_bar(cr, wa.width, wa.height)
+    shape.rounded_rect(cr, wa.width, wa.height, radius)
     cr:set_source(color(self:get_border_color() or "#0000ff"))
     cr:set_line_width(border_width)
     cr:stroke()
 
     -- Draw the progress
     cr:set_source(color(self:get_color() or "#ff00ff"))
-    shape.radial_progress(cr,  wa.width, wa.height, self._percent or 0)
+    -- radius arg. after hide_left boolean arg. not used here
+    shape.radial_progress(cr, wa.width, wa.height, self._percent or 0, false, radius)
     cr:set_line_width(border_width)
     cr:stroke()
 
@@ -99,8 +108,12 @@ end
 function radialprogressbar:before_draw_children(_, cr, width, height)
     cr:save()
     local wa = content_workarea(self, width, height)
+
+    local radius =  self._private.radius or
+        beautiful.radialprogressbar_radius or (wa.height/2)
+
     cr:translate(wa.x, wa.y)
-    shape.rounded_bar(cr, wa.width, wa.height)
+    shape.rounded_rect(cr, wa.width, wa.height, radius)
     cr:clip()
     cr:translate(-wa.x, -wa.y)
 end
@@ -232,8 +245,15 @@ end
 -- @tparam number max_value
 -- @propemits true false
 
-for _, prop in ipairs {"max_value", "min_value", "border_color", "color",
-    "border_width", "paddings"} do
+--- The arc radius.
+--
+--@DOC_wibox_container_radialprogressbar_radius_EXAMPLE@
+-- @property radius
+-- @tparam number radius
+-- @propemits true false
+
+for _, prop in ipairs {"max_value", "min_value", "radius", "border_color",
+                       "color", "border_width", "paddings"} do
     radialprogressbar["set_"..prop] = function(self, value)
         self._private[prop] = value
         self:emit_signal("property::"..prop, value)
