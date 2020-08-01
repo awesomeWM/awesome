@@ -7,7 +7,7 @@
 ---------------------------------------------------------------------------
 
 local hotkeys_popup = require("awful.hotkeys_popup.widget")
-local fire_rule = { class = { "Firefox" } }
+local fire_rule = { class = { "Firefox", "firefox" } }
 for group_name, group_data in pairs({
     ["Firefox: tabs"] = { color = "#009F00", rule_any = fire_rule }
 }) do
