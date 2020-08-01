@@ -325,7 +325,7 @@ end
 --- Apply some modifications before applying the new geometry.
 -- @tparam table new_geo The new geometry
 -- @tparam table args The common arguments
--- @tparam boolean force Always ajust the geometry, even in pretent mode. This
+-- @tparam boolean force Always adjust the geometry, even in pretent mode. This
 --  should only be used when returning the final geometry as it would otherwise
 --  mess the pipeline.
 -- @treturn table|nil The new geometry

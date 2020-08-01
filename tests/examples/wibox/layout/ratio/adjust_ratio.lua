@@ -38,7 +38,7 @@ for i=1, 5 do
     local w = create() --DOC_HIDE
 
     for _=1, i do --DOC_HIDE
-    w:ajust_ratio(2, unpack(values[i]))
+    w:adjust_ratio(2, unpack(values[i]))
     end --DOC_HIDE
 
     ret:add(w) --DOC_HIDE

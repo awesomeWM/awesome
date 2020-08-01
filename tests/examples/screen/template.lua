@@ -42,7 +42,7 @@ local function stripe_pat(col, angle, line_width, spacing)
 
     --FIXME spacing need to be in "w", not "hy"
     local w, h = math.ceil(a + (line_width - 1)), math.ceil(o + (line_width - 1))
---     ajust_size(self, w, h) --FIXME need a "force_size" method
+--     adjust_size(self, w, h) --FIXME need a "force_size" method
 
     -- Create the pattern
     local img2 = cairo.SvgSurface.create(nil, w, h)
