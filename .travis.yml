@@ -91,7 +91,7 @@ jobs:
             - liblua5.2-dev
             - lua5.2
             - lua-discount
-    - env: LUA=5.4 LUANAME=lua5.4
+    - env: LUA=5.4 LUANAME=lua5.4 LGIVER=git
 
 env:
   global:
@@ -155,7 +155,21 @@ install:
       && make build \
       && sudo make install)
 
-  - travis_retry sudo luarocks install lgi $LGIVER
+  - |
+    if [[ "$LGIVER" == "git" ]]; then
+      # Build LGI from git:
+      travis_retry git clone https://github.com/pavouk/lgi.git lgi
+      (cd lgi
+       make LUA_INCDIR=/usr/include/${LUANAME}/ LUA_VERSION=${LUA} LUA_CFLAGS="-I/usr/include/${LUANAME}"
+       sudo make \
+         LUA_LIBDIR=/usr/lib/lua/${LUA} \
+         LUA_SHAREDIR=/usr/share/lua/${LUA} \
+         LUA_VERSION=${LUA} \
+         install)
+    else
+      # Install LGI (for the selected version):
+      travis_retry sudo luarocks install lgi $LGIVER
+    fi
 
   # Install busted for "make check-unit".
   - travis_retry sudo luarocks install busted
