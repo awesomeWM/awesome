@@ -68,6 +68,16 @@ install:
      ./autogen.sh --prefix=/usr
      make && sudo make install)
 
+  # Install xcb-errors if needed
+  - |
+    set -e
+    if [[ "$WITH_XCB_ERRORS" == "yes" ]]; then
+      git clone --depth 1 --recursive https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git /tmp/xcb-errors
+      (cd /tmp/xcb-errors
+       ./autogen.sh --prefix=/usr
+       make && sudo make install)
+    fi
+
   - |
     (echo '#!/bin/sh' ; echo 'set -x' ; echo 'gcc -shared -Wl,--no-undefined -o "$@" -ldl -lm') > /tmp/myar
     chmod a+x /tmp/myar
