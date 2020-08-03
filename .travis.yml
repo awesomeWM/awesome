@@ -51,46 +51,7 @@ addons:
 
 jobs:
   include:
-    - env: LUA=5.2 LUANAME=lua5.2 DO_COVERAGE=coveralls MANUAL_SCREENS=1
-      addons:
-        apt:
-          packages:
-            - *BASE_PACKAGES
-            - liblua5.2-dev
-            - lua5.2
-    - env: LUA=5.3 LUANAME=lua5.3 DO_COVERAGE=codecov MANUAL_SCREENS=1
-      addons:
-        apt:
-          packages:
-            - *BASE_PACKAGES
-            - liblua5.3-dev
-            - lua5.3
-    - env: LUA=5.1 LUANAME=lua5.1 BUILD_IN_DIR=/tmp/awesome-build WITH_XCB_ERRORS=yes
-      addons:
-        apt:
-          packages:
-            - *BASE_PACKAGES
-            - liblua5.1-dev
-            - lua5.1
-            # For xcb-errors
-            - xcb-proto
-    - env: LUA=5.1 LUANAME=luajit-2.0 LUALIBRARY=/usr/lib/x86_64-linux-gnu/libluajit-5.1.so LUAROCKS_ARGS=--lua-suffix=jit-2.0.4
-      addons:
-        apt:
-          packages:
-            - *BASE_PACKAGES
-            - libluajit-5.1-dev
-            - luajit
-    # Lua 5.2 with older lgi and screen size not divisible by 2.
-    # SOURCE_DATE_EPOCH: used for stable dates during build.
-    - env: LUA=5.2 LUANAME=lua5.2 LGIVER=0.8.0 TESTS_SCREEN_SIZE=1921x1079 BUILD_APIDOC=true DO_CHECKQA=1 EMPTY_THEME_WHILE_LOADING=1 SOURCE_DATE_EPOCH=1893456000 TEST_PREV_COMMITS=1
-      addons:
-        apt:
-          packages:
-            - *BASE_PACKAGES
-            - liblua5.2-dev
-            - lua5.2
-            - lua-discount
+    - env: LUA=5.4
 
 env:
   global:
@@ -123,6 +84,17 @@ install:
        make && sudo make install)
     fi
 
+  - |
+    (echo '#!/bin/sh' ; echo 'set -x' ; echo 'gcc -shared -Wl,--no-undefined -o "$@" -ldl -lm') > /tmp/myar
+    chmod a+x /tmp/myar
+    (cd /tmp
+     wget http://www.lua.org/ftp/lua-5.4.0.tar.gz -O lua.tar.gz
+     tar -xvzf lua.tar.gz
+     cd lua-5-3.*/src \
+      && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_3 -DLUA_USE_APICHECK -Dlua_assert=assert" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="/tmp/myar" liblua.so \
+      && cd .. \
+      && sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB=liblua.so linux install
+    )
   - |
     # Install Lua (per env).
     if [[ "$LUANAME" == "luajit-2.0" ]]; then
