@@ -249,6 +249,9 @@ script:
       travis_run_in_fold "build_in_dir" cmake $CMAKE_ARGS "$SOURCE_DIRECTORY"
     fi
   - travis_run_in_fold "make" make ; sleep 5
+  - make ; sleep 5
+  - make ; sleep 5
+  - make ; sleep 5
   - |
     if [ "$TRAVIS_TEST_RESULT" = 0 ]; then
       travis_run_in_fold "make.install" sudo env PATH=$PATH make install
