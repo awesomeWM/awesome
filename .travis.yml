@@ -131,18 +131,21 @@ install:
       chmod a+x /tmp/myar
       (cd /tmp
        wget http://www.lua.org/ftp/lua-5.4.0.tar.gz -O lua.tar.gz
+       wget https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/lua/trunk/liblua.so.patch -O liblua.so.patch
        tar -xvzf lua.tar.gz
-       cd lua-5.4.*/src \
-        && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2 -DLUA_USE_APICHECK -Dlua_assert=assert" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="/tmp/myar" liblua.so \
-        && cd .. \
-        && sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB="liblua.a liblua.so liblua.so.5.4 liblua.so.5.4.0" linux install
-        sudo ln -sf /usr/lib/liblua.so.5.4.0 /usr/lib/liblua5.4.so
-        wget https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/lua/trunk/lua.pc -O lua.pc.inc
-        sed "s/%VER%/5.4/g;s/%REL%/5.4.0/g" lua.pc.inc > lua.pc
-        sudo install -Dm644 lua.pc /usr/lib/pkgconfig/lua54.pc
-        sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua.pc
-        sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua5.4.pc
-        sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua-5.4.pc
+       cd lua-5.4.*
+       patch -p1 -i ../liblua.so.patch
+       cd src
+       make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2 -DLUA_USE_APICHECK -Dlua_assert=assert" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="/tmp/myar" linux-readline
+       cd ..
+       sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB="liblua.a liblua.so liblua.so.5.4 liblua.so.5.4.0" INSTALL_DATA='cp -d' install
+       sudo ln -sf /usr/lib/liblua.so.5.4.0 /usr/lib/liblua5.4.so
+       wget https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/lua/trunk/lua.pc -O lua.pc.inc
+       sed "s/%VER%/5.4/g;s/%REL%/5.4.0/g" lua.pc.inc > lua.pc
+       sudo install -Dm644 lua.pc /usr/lib/pkgconfig/lua54.pc
+       sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua.pc
+       sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua5.4.pc
+       sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua-5.4.pc
        )
        echo "REMOVE ME:"
        echo ${LUALIBRARY}
