@@ -60,6 +60,13 @@ before_install:
 
 install:
   - sudo gem install asciidoctor
+  - |
+    # Install xcb-util-xrm.
+    set -e
+    (git clone --depth 1 --recursive https://github.com/Airblader/xcb-util-xrm.git /tmp/xcb-util-xrm
+     cd /tmp/xcb-util-xrm
+     ./autogen.sh --prefix=/usr
+     make && sudo make install)
 
   - |
     (echo '#!/bin/sh' ; echo 'set -x' ; echo 'gcc -shared -Wl,--no-undefined -o "$@" -ldl -lm') > /tmp/myar
