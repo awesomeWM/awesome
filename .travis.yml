@@ -86,7 +86,7 @@ install:
   # Install luarocks (for the selected Lua version).
   - |
     travis_retry wget https://github.com/luarocks/luarocks/archive/v3.3.1.tar.gz
-    tar xf v3.0.4.tar.gz -C /tmp
+    tar xf v3.3.1.tar.gz -C /tmp
     (cd /tmp/luarocks-* \
       && ./configure --lua-version=$LUA --with-lua-include=${LUAINCLUDE} ${LUAROCKS_ARGS} \
       && make build \
