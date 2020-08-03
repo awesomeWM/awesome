@@ -1,12 +1,6 @@
 dist: xenial
 language: c
 
-# Build only master and stable branches.  Other branches go through PRs.
-branches:
-  only:
-    - master
-    - 3.5
-
 addons:
   apt:
     packages: &BASE_PACKAGES
