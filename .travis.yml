@@ -281,6 +281,9 @@ script:
       fi
     fi
 
+after_failure:
+    - sleep 10
+
 after_success:
   # Push updated API docs for relevant branches, e.g. non-PRs builds on master.
   - if [ "$BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
@@ -291,3 +294,4 @@ after_success:
       test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
       luacov-coveralls --verbose --merge
     fi
+  - sleep 10
