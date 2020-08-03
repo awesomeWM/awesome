@@ -73,7 +73,7 @@ install:
     chmod a+x /tmp/myar
     (cd /tmp
      wget http://www.lua.org/ftp/lua-5.4.0.tar.gz -O lua.tar.gz
-     tar -xvzf lua.tar.gz
+     tar -xzf lua.tar.gz
      cd lua-5-4.*/src \
       && make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_3 -DLUA_USE_APICHECK -Dlua_assert=assert" SYSLIBS="-Wl,-E -ldl -lreadline" LUA_A=liblua.so MYCFLAGS="-fPIC" RANLIB=: AR="/tmp/myar" liblua.so \
       && cd .. \
