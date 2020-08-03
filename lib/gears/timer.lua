@@ -91,7 +91,7 @@ function timer:start()
         gdebug.print_error(traceback("timer already started"))
         return
     end
-    self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
+    self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, math.ceil(self.data.timeout * 1000), function()
         protected_call(self.emit_signal, self, "timeout")
         return true
     end)
