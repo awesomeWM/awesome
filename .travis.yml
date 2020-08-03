@@ -165,7 +165,7 @@ install:
       # Build LGI from git:
       travis_retry git clone https://github.com/pavouk/lgi.git lgi
       (cd lgi
-       make LUA_INCDIR=/usr/include/${LUANAME}/ LUA_VERSION=${LUA} LUA_CFLAGS="-I/usr/include/${LUANAME}"
+       make LUA_INCDIR=${LUAINCLUDE} LUA_VERSION=${LUA} LUA_CFLAGS="-I${LUAINCLUDE}"
        sudo make \
          LUA_LIBDIR=/usr/lib/lua/${LUA} \
          LUA_SHAREDIR=/usr/share/lua/${LUA} \
