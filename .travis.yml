@@ -127,7 +127,7 @@ install:
   - |
     # Install Lua (per env).
     if [[ "$LUA" == "5.4" ]]; then
-      (echo '#!/bin/sh' ; echo 'set -x' ; echo 'gcc -shared -Wl,--no-undefined -o "$@" -ldl -lm') > /tmp/myar
+      (echo '#!/bin/sh' ; echo 'set -x' ; echo 'gcc -shared -o "$@" -ldl -lm') > /tmp/myar
       chmod a+x /tmp/myar
       (cd /tmp
        wget http://www.lua.org/ftp/lua-5.4.0.tar.gz -O lua.tar.gz
