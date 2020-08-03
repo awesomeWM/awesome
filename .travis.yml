@@ -135,7 +135,7 @@ install:
        tar -xvzf lua.tar.gz
        cd lua-5.4.*
        patch -p1 -i ../liblua.so.patch
-       make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2 -DLUA_USE_APICHECK -Dlua_assert=assert" SYSLIBS="-Wl,-E -ldl -lreadline" MYCFLAGS="-fPIC" RANLIB=: AR="/tmp/myar" linux-readline
+       make SYSCFLAGS="-DLUA_USE_LINUX -ULUA_COMPAT_5_2 -DLUA_USE_APICHECK -Dlua_assert=assert" SYSLIBS="-Wl,-E -ldl -lreadline" MYCFLAGS="-fPIC" RANLIB=: AR="/tmp/myar" linux
        sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB="liblua.a liblua.so liblua.so.5.4 liblua.so.5.4.0" INSTALL_DATA='cp -d' install
        sudo ln -sf /usr/lib/liblua.so.5.4.0 /usr/lib/liblua5.4.so
        wget https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/lua/trunk/lua.pc -O lua.pc.inc
