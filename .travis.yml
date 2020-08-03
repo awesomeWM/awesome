@@ -116,8 +116,8 @@ install:
       (cd lgi
        make LUA_INCDIR=${LUAINCLUDE} LUA_VERSION=${LUA} LUA_CFLAGS="-I${LUAINCLUDE}"
        sudo make \
-         LUA_LIBDIR=/usr/lib/lua/${LUA} \
-         LUA_SHAREDIR=/usr/share/lua/${LUA} \
+         LUA_LIBDIR=/usr/local/lib/lua/${LUA} \
+         LUA_SHAREDIR=/usr/local/share/lua/${LUA} \
          LUA_VERSION=${LUA} \
          install)
     else
