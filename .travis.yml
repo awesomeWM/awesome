@@ -141,6 +141,7 @@ install:
        ls -la ${LUALIBRARY}
        echo ${LUAINCLUDE}
        ls -la ${LUAINCLUDE}
+       export LUA_DIR=${LUAINCLUDE}
     fi
     if [[ "$LUANAME" == "luajit-2.0" ]]; then
       # "Create" /usr/bin/lua if needed (Yup, this is a bad hack)
