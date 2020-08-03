@@ -138,10 +138,10 @@ install:
         && sudo make INSTALL_TOP=/usr/ INSTALL_INC=${LUAINCLUDE} TO_LIB=liblua.so linux install
         wget https://raw.githubusercontent.com/archlinux/svntogit-packages/packages/lua/trunk/lua.pc -O lua.pc.inc
         sed "s/%VER%/5.4/g;s/%REL%/5.4.0/g" lua.pc.inc > lua.pc
-        install -Dm644 lua.pc /usr/lib/pkgconfig/lua54.pc
-        ln -sf lua54.pc /usr/lib/pkgconfig/lua.pc
-        ln -sf lua54.pc /usr/lib/pkgconfig/lua5.4.pc
-        ln -sf lua54.pc /usr/lib/pkgconfig/lua-5.4.pc
+        sudo install -Dm644 lua.pc /usr/lib/pkgconfig/lua54.pc
+        sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua.pc
+        sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua5.4.pc
+        sudo ln -sf lua54.pc /usr/lib/pkgconfig/lua-5.4.pc
        )
        echo "REMOVE ME:"
        echo ${LUALIBRARY}
