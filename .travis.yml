@@ -45,7 +45,7 @@ addons:
 
 jobs:
   include:
-    - env: LUA=5.4 LGIVER=git
+    - env: LUA=5.4 LGIVER=git LUALIBRARY=/usr/lib/liblua.so
 
 env:
   global:
@@ -228,6 +228,7 @@ script:
       cd "$BUILD_IN_DIR"
       travis_run_in_fold "build_in_dir" cmake $CMAKE_ARGS "$SOURCE_DIRECTORY"
     fi
+  - echo $CMAKE_ARGS
   - travis_run_in_fold "make" make ; sleep 5
   - make ; sleep 5
   - make ; sleep 5
