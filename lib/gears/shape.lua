@@ -870,7 +870,7 @@ function module.radial_progress(cr, w, h, percent, hide_left, radius)
         end
 
         -- Bottom left arc
-        if percent >= 1 - 1e-2 then
+        if percent >= 1 - 1.5e-2 then
             cr:arc_negative(radius, h - radius, radius, math.pi, math.pi/2)
             cr:stroke()
         elseif percent > 2*hbar_percent + 3*arc_percent + 2*vbar_percent then

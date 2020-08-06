@@ -87,7 +87,7 @@ function radialprogressbar:after_draw_children(_, cr, width, height)
     cr:translate(wa.x, wa.y)
 
     local radius =  self._private.radius or
-        beautiful.radialprogressbar_radius or (wa.height/2)
+        beautiful.radialprogressbar_radius or (math.min(wa.width, wa.height)/2)
 
     -- Draw the outline
     shape.rounded_rect(cr, wa.width, wa.height, radius)
@@ -110,7 +110,7 @@ function radialprogressbar:before_draw_children(_, cr, width, height)
     local wa = content_workarea(self, width, height)
 
     local radius =  self._private.radius or
-        beautiful.radialprogressbar_radius or (wa.height/2)
+        beautiful.radialprogressbar_radius or (math.min(wa.width, wa.height)/2)
 
     cr:translate(wa.x, wa.y)
     shape.rounded_rect(cr, wa.width, wa.height, radius)
