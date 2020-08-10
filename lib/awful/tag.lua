@@ -713,6 +713,8 @@ end
 -- See the layout suit documentation for information about how the master width
 -- factor is used.
 --
+-- @DOC_screen_mwfact_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::mwfact* (deprecated)
@@ -1088,8 +1090,16 @@ end
 
 --- The gap (spacing, also called `useless_gap`) between clients.
 --
--- This property allow to waste space on the screen in the name of style,
+-- This property allows to waste space on the screen in the name of style,
 -- unicorns and readability.
+--
+-- In this example, the value of `gap` is set to 20:
+--
+-- @DOC_screen_gaps_EXAMPLE@
+--
+-- Compared to setting to the (very high) value of 50:
+--
+-- @DOC_screen_gaps2_EXAMPLE@
 --
 -- **Signal:**
 --
@@ -1140,6 +1150,19 @@ end
 -- @see gap_single_client
 
 --- Enable gaps for a single client.
+--
+-- If the gaps are used purely for readability when multiple
+-- clients are tiled, then it may make sense to disable it
+-- when there is only a single client (to recover that space).
+-- In that case, set `gap_single_client` to `false`.
+--
+-- Default (with a 20px gap):
+--
+-- @DOC_screen_gap_single_client_true_EXAMPLE@
+--
+-- when set to false:
+--
+-- @DOC_screen_gap_single_client_false_EXAMPLE@
 --
 -- **Signal:**
 --
