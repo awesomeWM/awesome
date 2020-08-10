@@ -1224,6 +1224,13 @@ lua_class_t client_class;
  *
  * This corresponds to EWMH's `_NET_WM_STRUT` and `_NET_WM_STRUT_PARTIAL`.
  *
+ * In the example below, 2 object affect the workarea (using their struts):
+ *
+ * * The top wibar add a `top=24`
+ * * The bottom-left client add `bottom=100, left=100`
+ *
+ * @DOC_screen_struts_EXAMPLE@
+ *
  * @tparam table struts A table with new strut values, or none.
  * @treturn table A table with strut values.
  * @method struts
