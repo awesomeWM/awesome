@@ -32,6 +32,9 @@ mouse.object = {}
 mouse.wibox = {}
 
 --- The default distance before snapping clients together.
+--
+-- @DOC_screen_client_snap_EXAMPLE@
+--
 -- @tfield integer awful.mouse.snap.default_distance
 -- @tparam[opt=8] integer default_distance
 -- @see awful.mouse.snap
@@ -42,6 +45,11 @@ mouse.wibox = {}
 -- @see awful.mouse.snap
 
 --- Enable screen edges snapping.
+--
+--
+--
+--@DOC_awful_placement_aero_snap_EXAMPLE@
+--
 -- @tfield[opt=true] boolean awful.mouse.snap.edge_enabled
 
 --- Enable client to client snapping.
