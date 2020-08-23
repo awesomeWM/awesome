@@ -10,6 +10,7 @@ local mytextclock = wibox.widget.textclock()
 local mylayoutbox = awful.widget.layoutbox(screen[1])
 local mytaglist = awful.widget.taglist(screen[1], awful.widget.taglist.filter.all, {})
 local mytasklist = awful.widget.tasklist(screen[1], awful.widget.tasklist.filter.currenttags, {})
+local mypromptbox = wibox.widget.textbox("")
 
 local wb = awful.wibar { position = "top" }
 wb:setup {
@@ -21,11 +22,24 @@ wb:setup {
             widget = wibox.widget.imagebox,
         },
         mytaglist,
+        mypromptbox,
     },
     mytasklist,
     {
         layout = wibox.layout.fixed.horizontal,
         mykeyboardlayout,
+        {
+            image  = beautiful.awesome_icon,
+            widget = wibox.widget.imagebox,
+        },
+        {
+            image  = beautiful.awesome_icon,
+            widget = wibox.widget.imagebox,
+        },
+        {
+            image  = beautiful.awesome_icon,
+            widget = wibox.widget.imagebox,
+        },
         mytextclock,
         mylayoutbox,
     },
@@ -70,5 +84,6 @@ return {
     mylayoutbox      = mylayoutbox     ,
     mytaglist        = mytaglist       ,
     mytasklist       = mytasklist      ,
-    mywibox          = wb,
+    mywibox          = wb              ,
+    mypromptbox      = mypromptbox     ,
 }

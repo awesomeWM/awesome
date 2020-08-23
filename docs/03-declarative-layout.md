@@ -1,6 +1,12 @@
-# The AwesomeWM widget system
+# The Widget system
 
 This document explains how to define, place and manage widgets.
+
+## The default configuration
+
+This is what the widgets present in the default configuration are named:
+
+@DOC_awful_popup_defaultconfig_EXAMPLE@
 
 ## The default widgets
 
