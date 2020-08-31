@@ -24,6 +24,10 @@
 --
 -- ![Example screenshot](../images/awful_widget_watch.png)
 --
+-- Here is the most basic usage:
+--
+-- @DOC_wibox_awidget_defaults_watch_EXAMPLE@
+--
 -- @author Benjamin Petrenko
 -- @author Yauheni Kirylau
 -- @copyright 2015, 2016 Benjamin Petrenko, Yauheni Kirylau

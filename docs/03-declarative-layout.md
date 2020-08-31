@@ -34,7 +34,29 @@ configurable rules.
 
 @DOC_layout_WIDGET_LIST@
 
-### Other
+### Awful widgets
+
+This modules contains the higher level window manager widgets. Since most of them
+are used by the default config, here is how it maps:
+
+@DOC_awful_wibar_defaultwibar_EXAMPLE@
+
+@DOC_awidget_WIDGET_LIST@
+
+### Titlebar widgets
+
+The titlebar comes with some convinient default widgets. It simplify the most
+basic "Windows/macOS" like titlebars.
+
+@DOC_awful_titlebar_defaulttitlebar_EXAMPLE@
+
+Note that titlebars can also be added on
+each side. This is how "active" titlebars (click to resize) can be implemented.
+The default `rc.lua` does not add active borders:
+
+![](../images/client_geo.svg)
+
+### Notification widgets
 
 Notifications also have their own widgets.
 
