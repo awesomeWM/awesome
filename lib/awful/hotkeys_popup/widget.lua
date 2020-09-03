@@ -438,7 +438,10 @@ function widget.new(args)
     end
 
     function widget_instance:_create_group_columns(column_layouts, group, keys, s, wibox_height)
-        local line_height = beautiful.get_font_height(self.font)
+        local line_height = math.max(
+            beautiful.get_font_height(self.font),
+            beautiful.get_font_height(self.description_font)
+        )
         local group_label_height = line_height + self.group_margin
         -- -1 for possible pagination:
         local max_height_px = wibox_height - group_label_height
