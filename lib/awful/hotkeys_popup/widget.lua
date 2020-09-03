@@ -484,15 +484,12 @@ function widget.new(args)
 
         local function insert_keys(_keys, _add_new_column)
             local max_label_width = 0
-            local max_label_content = ""
             local joined_labels = ""
             for i, key in ipairs(_keys) do
-                local length = string.len(key.key or '') + string.len(key.description or '')
                 local modifiers = key.mod
                 if not modifiers or modifiers == "none" then
                     modifiers = ""
                 else
-                    length = length + string.len(modifiers) + 1 -- +1 for "+" character
                     modifiers = markup.fg(self.modifiers_fg, modifiers.."+")
                 end
                 local rendered_hotkey = markup.font(self.font,
@@ -500,16 +497,15 @@ function widget.new(args)
                 ) .. markup.font(self.description_font,
                     key.description or ""
                 )
-                if length > max_label_width then
-                    max_label_width = length
-                    max_label_content = rendered_hotkey
+                local label_width = wibox.widget.textbox.get_markup_geometry(rendered_hotkey, s).width
+                if label_width > max_label_width then
+                    max_label_width = label_width
                 end
                 joined_labels = joined_labels .. rendered_hotkey .. (i~=#_keys and "\n" or "")
                 end
             current_column.layout:add(wibox.widget.textbox(joined_labels))
-            local max_width, _ = wibox.widget.textbox(max_label_content):get_preferred_size(s)
-            max_width = max_width + self.group_margin
-            if not current_column.max_width or max_width > current_column.max_width then
+            local max_width = max_label_width + self.group_margin
+            if not current_column.max_width or (max_width > current_column.max_width) then
                 current_column.max_width = max_width
             end
             -- +1 for group label:
