@@ -26,6 +26,8 @@ local drawable = require("wibox.drawable")
 local imagebox = require("wibox.widget.imagebox")
 local textbox = require("wibox.widget.textbox")
 local base = require("wibox.widget.base")
+local floating = require("awful.layout.suit.floating")
+
 local capi = {
     client = client
 }
@@ -472,8 +474,10 @@ end
 -- @tparam[opt=false] boolean hide_all Hide all titlebars except `keep`
 -- @tparam string keep Keep the titlebar at this position.
 -- @tparam string context The reason why this was called.
+-- @tparam[opt=false] boolean resize_client Resize the client to give space to
+--   the titlebar.
 -- @treturn boolean If the titlebars were loaded
-local function load_titlebars(c, hide_all, keep, context)
+local function load_titlebars(c, hide_all, keep, context, resize_client)
     if c._request_titlebars_called then return false end
 
     c:emit_signal("request::titlebars", context, {})
@@ -483,7 +487,7 @@ local function load_titlebars(c, hide_all, keep, context)
         -- anyway.
         for _, tb in ipairs {"top", "bottom", "left", "right"} do
             if tb ~= keep then
-                titlebar.hide(c, tb)
+                titlebar.hide(c, tb, resize_client)
             end
         end
     end
@@ -511,6 +515,8 @@ end
 -- @tparam[opt=font.height*1.5] number args.size The height of the titlebar.
 -- @tparam[opt=top] string args.position" values are `top`,
 -- `left`, `right` and `bottom`.
+-- @tparam[opt=false] boolean args.resize_client Resize the client to give
+--   space to the titlebar.
 -- @tparam[opt=top] string args.bg_normal
 -- @tparam[opt=top] string args.bg_focus
 -- @tparam[opt=top] string args.bgimage_normal
@@ -572,6 +578,15 @@ local function new(c, args)
     ret.setup = base.widget.setup
     ret.get_children_by_id = get_children_by_id
 
+    local lay = c.screen.selected_tag and c.screen.selected_tag.layout or nil
+    if ((lay and lay == floating) or c.floating) and args.resize_client then
+        if position == "top" or position == "bottom" then
+            c.height = c.height - size
+        elseif position == "right" or position == "left" then
+            c.width = c.width - size
+        end
+    end
+
     c._private = c._private or {}
     c._private.titlebars = bars
 
@@ -582,15 +597,21 @@ end
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
 --   "right", "top", "bottom". Default is "top".
--- @staticfct awful.titlebar.show
+-- @tparam[opt=false] boolean resize_client Resize the client to give space to
+--   the titlebar.
 -- @request client titlebars show granted Called when `awful.titlebar.show` is
 --  called.
-function titlebar.show(c, position)
+function titlebar.show(c, position, resize_client)
     position = position or "top"
-    if load_titlebars(c, true, position, "show") then return end
+
+    if load_titlebars(c, true, position, "show", resize_client) then return end
+
     local bars = all_titlebars[c]
     local data = bars and bars[position]
-    local args = data and data.args
+    local args = data and data.args or {}
+
+    args.resize_client = resize_client
+
     new(c, args)
 end
 
@@ -598,27 +619,44 @@ end
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
 --   "right", "top", "bottom". Default is "top".
+-- @tparam[opt=false] boolean resize_client Resize the client to fill the space
+--   used by the titlebar.
 -- @staticfct awful.titlebar.hide
-function titlebar.hide(c, position)
+function titlebar.hide(c, position, resize_client)
     position = position or "top"
-    get_titlebar_function(c, position)(c, 0)
+    local tb = get_titlebar_function(c, position)
+    local lay = c.screen.selected_tag and c.screen.selected_tag.layout or nil
+
+    if ((lay and lay == floating) or c.floating) and resize_client then
+        local _, tb_size = tb(c)
+
+        if position == "top" or position == "bottom" then
+            c.height = c.height + tb_size
+        elseif position == "right" or position == "left" then
+            c.width = c.width + tb_size
+        end
+    end
+
+    tb(c, 0)
 end
 
 --- Toggle a client's titlebar, hiding it if it is visible, otherwise showing it.
 -- @param c The client whose titlebar is modified
 -- @param[opt] position The position of the titlebar. Must be one of "left",
 --   "right", "top", "bottom". Default is "top".
+-- @tparam[opt=false] boolean resize_client Resize the client to fill the space
+--   used by the titlebar / give space to the titlebar.
 -- @staticfct awful.titlebar.toggle
 -- @request client titlebars toggle granted Called when `awful.titlebar.toggle` is
 --  called.
-function titlebar.toggle(c, position)
+function titlebar.toggle(c, position, resize_client)
     position = position or "top"
-    if load_titlebars(c, true, position, "toggle") then return end
+    if load_titlebars(c, true, position, "toggle", resize_client) then return end
     local _, size = get_titlebar_function(c, position)(c)
     if size == 0 then
-        titlebar.show(c, position)
+        titlebar.show(c, position, resize_client)
     else
-        titlebar.hide(c, position)
+        titlebar.hide(c, position, resize_client)
     end
 end
 
