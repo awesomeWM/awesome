@@ -591,6 +591,7 @@ function widget.new(args)
             placement = place_func,
             minimum_width = wibox_width,
             minimum_height = wibox_height,
+            screen = s,
         }
 
         local widget_obj = {
