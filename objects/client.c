@@ -815,6 +815,12 @@ lua_class_t client_class;
  * @propemits false false
  * @request client geometry fullscreen granted When the client must be resized
  *  because it became (or stop being) fullscreen.
+ * @see maximized_horizontal
+ * @see maximized_vertical
+ * @see immobilized_horizontal
+ * @see immobilized_vertical
+ * @see maximized
+
  */
 
 /**
@@ -828,6 +834,11 @@ lua_class_t client_class;
  * @request client geometry maximized granted When the client must be resized
  *  because it became (or stop being) maximized.
  * @see request::border
+ * @see maximized_horizontal
+ * @see maximized_vertical
+ * @see fullscreen
+ * @see immobilized_horizontal
+ * @see immobilized_vertical
  */
 
 /**
@@ -840,6 +851,11 @@ lua_class_t client_class;
  * @propemits false false
  * @request client geometry maximized_horizontal granted When the client must be resized
  *  because it became (or stop being) maximized horizontally.
+ * @see maximized_vertical
+ * @see fullscreen
+ * @see immobilized_horizontal
+ * @see immobilized_vertical
+ * @see maximized
  */
 
 /**
@@ -852,6 +868,11 @@ lua_class_t client_class;
  * @propemits false false
  * @request client geometry maximized_vertical granted When the client must be resized
  *  because it became (or stop being) maximized vertically.
+ * @see maximized_horizontal
+ * @see fullscreen
+ * @see immobilized_horizontal
+ * @see immobilized_vertical
+ * @see maximized
  */
 
 /**
@@ -993,6 +1014,8 @@ lua_class_t client_class;
  * Please note that AwesomeWM implements `sticky` clients
  * per screens rather than globally like some other
  * implementations.
+ *
+ * @DOC_sequences_client_sticky_EXAMPLE@
  *
  * @property sticky
  * @tparam boolean sticky
