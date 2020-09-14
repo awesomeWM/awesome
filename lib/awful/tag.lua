@@ -354,6 +354,9 @@ end
 -- @see clear
 
 --- Remove all tagged clients.
+--
+-- @DOC_sequences_tag_clear_EXAMPLE@
+--
 -- @method clear
 -- @tparam table args The arguments.
 -- @tparam tag args.fallback_tag A fallback tag.
