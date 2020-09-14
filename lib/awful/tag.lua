@@ -349,6 +349,42 @@ function tag.find_fallback(screen, invalids)
     end
 end
 
+--- When all clients are removed from the tag.
+-- @signal cleared
+-- @see clear
+
+--- Remove all tagged clients.
+-- @method clear
+-- @tparam table args The arguments.
+-- @tparam tag args.fallback_tag A fallback tag.
+-- @tparam[opt=false] boolean args.allow_untagged Allow the untagged clients to remain untagged.
+-- @emits cleared After all clients have been untagged.
+-- @emits untagged For each currently tagged clients.
+-- @emitstparam untagged client c The untagged client.
+function tag.object.clear(self, args)
+    args = args or {}
+
+    local clients = self:clients()
+
+    -- Clear
+    self:clients({})
+
+    if #clients > 0 and not args.allow_untagged then
+        local target_scr = get_screen(tag.getproperty(self, "screen"))
+        local fallback_tag = args.fallback_tag or tag.find_fallback(target_scr, {self})
+
+        if not fallback_tag then return end
+
+        for _, c in ipairs(clients) do
+            if #c:tags() == 0 then
+                c:tags({fallback_tag})
+            end
+        end
+    end
+
+    self:emit_signal("cleared")
+end
+
 --- Delete a tag.
 --
 -- To delete the current tag:
