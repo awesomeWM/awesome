@@ -9,9 +9,10 @@
 -- @copyright 2017 Emmanuel Lepage Vallee
 ----------------------------------------------------------------------------
 local beautiful = require("beautiful")
+local gtable = require("gears.table")
 local dpi = beautiful.xresources.apply_dpi
 
-local ret = {}
+local ret, no_clear = {}, {}
 
 ret.config = {
     padding         = dpi(4),
@@ -21,7 +22,7 @@ ret.config = {
     notify_callback = nil,
 }
 
-ret.config.presets = {
+no_clear.presets = {
     low = {
         timeout = 5
     },
@@ -55,15 +56,15 @@ ret.config._urgency = {
 }
 
 ret.config.mapping = {
-    {{urgency = ret.config._urgency.low     }, ret.config.presets.low}, --compat
-    {{urgency = ret.config._urgency.normal  }, ret.config.presets.normal}, --compat
-    {{urgency = ret.config._urgency.critical}, ret.config.presets.critical}, --compat
-    {{urgency = "low"     }, ret.config.presets.low},
-    {{urgency = "normal"  }, ret.config.presets.normal},
-    {{urgency = "critical"}, ret.config.presets.critical},
+    {{urgency = ret.config._urgency.low     }, no_clear.presets.low}, --compat
+    {{urgency = ret.config._urgency.normal  }, no_clear.presets.normal}, --compat
+    {{urgency = ret.config._urgency.critical}, no_clear.presets.critical}, --compat
+    {{urgency = "low"     }, no_clear.presets.low},
+    {{urgency = "normal"  }, no_clear.presets.normal},
+    {{urgency = "critical"}, no_clear.presets.critical},
 }
 
-ret.config.defaults = {
+no_clear.defaults = {
     timeout      = 5,
     text         = "",
     screen       = nil,
@@ -91,5 +92,22 @@ ret.notification_closed_reason = {
 
 -- Legacy --TODO v5 remove this alias
 ret.notificationClosedReason = ret.notification_closed_reason
+
+-- `no_clear` is used to prevent users from setting the entire table.
+-- If they did and we added a new default value, then it would not be
+-- backward compatible. For safety, we just crush the tables rather than
+-- replace them.
+setmetatable(ret.config, {
+    __index = function(_, key)
+        return no_clear[key]
+    end,
+    __newindex = function(_, key, value)
+        if no_clear[key] then
+            gtable.crush(no_clear[key], value)
+        else
+            rawset(ret.config, key, value)
+        end
+    end
+})
 
 return ret
