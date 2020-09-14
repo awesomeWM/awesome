@@ -473,8 +473,10 @@ luaA_tag_clients(lua_State *L)
     if(lua_gettop(L) == 2)
     {
         luaA_checktable(L, 2);
-        foreach(c, tag->clients)
+        for(int j = 0; j < clients->len; j++)
         {
+            client_t *c = clients->tab[j];
+
             /* Only untag if we aren't going to add this tag again */
             bool found = false;
             lua_pushnil(L);
@@ -483,7 +485,7 @@ luaA_tag_clients(lua_State *L)
                 client_t *tc = luaA_checkudata(L, -1, &client_class);
                 /* Pop the value from lua_next */
                 lua_pop(L, 1);
-                if (tc != *c)
+                if (tc != c)
                     continue;
 
                 /* Pop the key from lua_next */
@@ -491,8 +493,10 @@ luaA_tag_clients(lua_State *L)
                 found = true;
                 break;
             }
-            if(!found)
-                untag_client(*c, tag);
+            if(!found) {
+                untag_client(c, tag);
+                j--;
+            }
         }
         lua_pushnil(L);
         while(lua_next(L, 2))

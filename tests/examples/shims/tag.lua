@@ -1,4 +1,5 @@
 local gears_obj = require("gears.object")
+local gtable = require("gears.table")
 
 local tag, meta = awesome._shim_fake_class()
 
@@ -9,6 +10,22 @@ local function has_selected_tag(s)
         end
     end
     return false
+end
+
+local function get_clients(self)
+    local list = {}
+
+    for _, c in ipairs(client.get()) do
+        if #c:tags() > 0 then
+            for _, t in ipairs(c:tags()) do
+                if t == self then
+                    table.insert(list, c)
+                end
+            end
+        end
+    end
+
+    return list
 end
 
 local function new_tag(_, args)
@@ -23,17 +40,39 @@ local function new_tag(_, args)
     -- Deprecated.
     ret.data = ret._private
 
-    function ret:clients(_) --TODO handle new
-        local list = {}
-        for _, c in ipairs(client.get()) do
-            if #c:tags() > 0 then
-                for _, t in ipairs(c:tags()) do
-                    if t == ret then
-                        table.insert(list, c)
+    function ret:clients(new_clients)
+        local old_clients = get_clients(ret)
+
+        -- Remove the old clients.
+        if new_clients then
+            for _, c in ipairs(client.get()) do
+                local had_client = gtable.hasitem(old_clients, c)
+                local has_client = gtable.hasitem(new_clients, c)
+                 if had_client and not has_client then
+                    local ctags = gtable.clone(c:tags(), false)
+
+                    for k, t in ipairs(ctags) do
+                        if t == self then
+                            table.remove(ctags, k)
+                            c:tags(ctags)
+                        end
                     end
                 end
             end
+
+            -- Add the new clients.
+            for _, c in ipairs(new_clients) do
+
+                if new_clients and not gtable.hasitem(old_clients, c) then
+                    local ctags = gtable.clone(c:tags(), false)
+                    table.insert(ctags, self)
+                    c:tags(ctags)
+                end
+            end
         end
+
+        -- Generate the client list.
+        local list = get_clients(ret)
 
         return list
     end

@@ -170,6 +170,7 @@ function client.gen_fake(args)
 
         for _, t in ipairs(old_tags) do
             ret:emit_signal("untagged", t)
+            t:emit_signal("untagged", ret)
             t:emit_signal("property::tags")
         end
 
