@@ -1256,4 +1256,15 @@ table.insert(steps, function()
     return true
 end)
 
+-- Make sure it isn't possible to remove default variables (#3145).
+table.insert(steps, function()
+    naughty.config.defaults = {fake_variable = 24}
+    naughty.config.text = 1337
+    assert(naughty.config.defaults.fake_variable == 24)
+    assert(naughty.config.defaults.timeout == 5)
+    assert(naughty.config.text == 1337)
+
+     return true
+end)
+
 require("_runner").run_steps(steps)
