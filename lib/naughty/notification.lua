@@ -503,6 +503,13 @@ function notification:reset_timeout(new_timeout)
     -- timer before the constructor ends.
     if new_timeout and self.timer then
         self.timeout = new_timeout
+    elseif new_timeout and new_timeout ~= self._private.timeout then
+        local previous_timer = self._private.timeout
+        timer.delayed_call(function()
+            if self._private.timeout == previous_timer then
+                self.timeout = new_timeout
+            end
+        end)
     end
 
     if self.timer and not self.timer.started then
