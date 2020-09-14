@@ -503,9 +503,8 @@ function screen.object.get_tiled_clients(s, stacked)
     -- Remove floating clients
     for _, c in pairs(clients) do
         if not c.floating
-            and not c.fullscreen
-            and not c.maximized_vertical
-            and not c.maximized_horizontal then
+            and not c.immobilized_horizontal
+            and not c.immobilized_vertical then
             table.insert(tclients, c)
         end
     end
