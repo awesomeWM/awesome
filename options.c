@@ -423,7 +423,7 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
     char *confpath = NULL;
     int opt;
 
-    while((opt = getopt_long(argc, argv, "vhfkc:armsl:",
+    while((opt = getopt_long(argc, argv, "vhfkc:arms:l:",
                              long_options, NULL)) != -1) {
         switch(opt)
         {
