@@ -3380,7 +3380,7 @@ HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
  * @tparam integer geo.x The horizontal position.
  * @tparam integer geo.y The vertical position.
  * @tparam integer geo.width The width.
- * @tparam integer geo.width The height.
+ * @tparam integer geo.height The height.
  * @treturn table A table with client geometry and coordinates.
  * @method geometry
  * @see struts
