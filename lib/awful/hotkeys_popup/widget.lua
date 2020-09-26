@@ -492,8 +492,19 @@ function widget.new(args)
                 else
                     modifiers = markup.fg(self.modifiers_fg, modifiers.."+")
                 end
+                local key_label = ""
+                if key.keylist and #key.keylist > 1 then
+                    for each_key_idx, each_key in ipairs(key.keylist) do
+                        key_label = key_label .. each_key
+                        if each_key_idx ~= #key.keylist then
+                            key_label = key_label .. markup.fg(self.modifiers_fg, '/')
+                        end
+                    end
+                elseif key.key then
+                    key_label = key.key
+                end
                 local rendered_hotkey = markup.font(self.font,
-                    modifiers .. (key.key or "") .. " "
+                    modifiers .. key_label .. " "
                 ) .. markup.font(self.description_font,
                     key.description or ""
                 )
