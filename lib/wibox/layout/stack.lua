@@ -116,11 +116,11 @@ end
 -- @method raise
 -- @tparam number index the widget index to raise
 function stack:raise(index)
-    if (not index) or self._private.widgets[index] then return end
+    if (not index) or (not self._private.widgets[index]) then return end
 
     local w = self._private.widgets[index]
     table.remove(self._private.widgets, index)
-    table.insert(self._private.widgets, w)
+    table.insert(self._private.widgets, 1, w)
 
     self:emit_signal("widget::layout_changed")
 end
