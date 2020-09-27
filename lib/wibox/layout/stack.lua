@@ -174,10 +174,18 @@ function stack:set_horizontal_offset(value)
     self:emit_signal("property::horizontal_offset", value)
 end
 
+function stack:get_horizontal_offset()
+    return self._private.h_offset
+end
+
 function stack:set_vertical_offset(value)
     self._private.v_offset = value
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::vertical_offset", value)
+end
+
+function stack:get_vertical_offset()
+    return self._private.v_offset
 end
 
 --- Create a new stack layout.
