@@ -170,8 +170,8 @@ end
 
 function stack:set_horizontal_offset(value)
     self._private.h_offset = value
-    self:emit_signal("widget::horizontal_offset")
-    self:emit_signal("property::top_only", value)
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::horizontal_offset", value)
 end
 
 function stack:set_vertical_offset(value)
