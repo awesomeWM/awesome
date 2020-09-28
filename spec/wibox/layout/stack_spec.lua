@@ -46,6 +46,43 @@ describe("wibox.layout.stack", function()
                     p(third,  0, 0, 100, 100),
                 })
             end)
+
+            it("layout with offset", function()
+                layout.horizontal_offset = 2
+                layout.vertical_offset = 2
+                assert.widget_layout(layout, { 100 , 100 }, {
+                    p(first,  0, 0, 94, 94),
+                    p(second, 2, 2, 94, 94),
+                    p(third,  4, 4, 94, 94),
+                })
+            end)
+
+            it("layout with offset and spacing", function()
+                layout.horizontal_offset = 2
+                layout.vertical_offset = 2
+                layout.spacing = 3
+                assert.widget_layout(layout, { 100 , 100 }, {
+                    p(first,  3, 3, 88, 88),
+                    p(second, 5, 5, 88, 88),
+                    p(third,  7, 7, 88, 88),
+                })
+            end)
+
+            it("layout with top_only", function()
+                layout.top_only = true
+                assert.widget_layout(layout, { 100 , 100 }, {
+                    p(first,  0, 0, 100, 100),
+                })
+            end)
+
+            it("layout raise", function()
+                layout:raise(2)
+                assert.widget_layout(layout, { 100 , 100 }, {
+                    p(second, 0, 0, 100, 100),
+                    p(first,  0, 0, 100, 100),
+                    p(third,  0, 0, 100, 100),
+                })
+            end)
         end)
 
         describe("without enough height", function()
@@ -60,6 +97,14 @@ describe("wibox.layout.stack", function()
                     p(third,  0, 0, 5, 100),
                 })
             end)
+
+            it("layout with offset", function()
+                layout.horizontal_offset = 2
+                layout.vertical_offset = 2
+                assert.has_error(function()
+                    layout:layout({ "fake context" }, 5, 100)
+                end)
+            end)
         end)
 
         describe("without enough width", function()
@@ -73,6 +118,14 @@ describe("wibox.layout.stack", function()
                     p(second, 0, 0, 100, 5),
                     p(third,  0, 0, 100, 5),
                 })
+            end)
+
+            it("layout with offset", function()
+                layout.horizontal_offset = 2
+                layout.vertical_offset = 2
+                assert.has_error(function()
+                    layout:layout({ "fake context" }, 100, 5)
+                end)
             end)
         end)
     end)
