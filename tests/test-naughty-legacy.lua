@@ -1076,7 +1076,14 @@ table.insert(steps, function()
     assert(naughty.get_by_id(42) ~= n)
 
     -- The timeout
+    local real, called = n.reset_timeout, false
+    n.reset_timeout = function(...)
+        called = true
+        return real(...)
+    end
     naughty.reset_timeout(n, 1337)
+    assert(called)
+    assert(n.timer and n.timer.started)
 
     -- Destroy using the old API
     local old_count = #destroyed
