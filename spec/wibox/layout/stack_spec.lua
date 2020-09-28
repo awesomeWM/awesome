@@ -36,42 +36,42 @@ describe("wibox.layout.stack", function()
 
         describe("with enough space", function()
             it("fit", function()
-                assert.widget_fit(layout, { 100, 100 }, { 15, 35 })
+                assert.widget_fit(layout, { 100, 100 }, { 15, 15 })
             end)
 
             it("layout", function()
                 assert.widget_layout(layout, { 100, 100 }, {
-                    p(first,  0,  0, 100, 10),
-                    p(second, 0, 10, 100, 15),
-                    p(third,  0, 25, 100, 10),
+                    p(first,  0, 0, 100, 100),
+                    p(second, 0, 0, 100, 100),
+                    p(third,  0, 0, 100, 100),
                 })
             end)
         end)
 
         describe("without enough height", function()
             it("fit", function()
-                assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
+                assert.widget_fit(layout, { 5, 100 }, { 5, 15 })
             end)
 
             it("layout", function()
                 assert.widget_layout(layout, { 5, 100 }, {
-                    p(first,  0,  0, 5, 10),
-                    p(second, 0, 10, 5, 15),
-                    p(third,  0, 25, 5, 10),
+                    p(first,  0, 0, 5, 100),
+                    p(second, 0, 0, 5, 100),
+                    p(third,  0, 0, 5, 100),
                 })
             end)
         end)
 
         describe("without enough width", function()
             it("fit", function()
-                assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
+                assert.widget_fit(layout, { 100, 5 }, { 15, 5 })
             end)
 
             it("layout", function()
-                assert.widget_layout(layout, { 100, 20 }, {
-                    p(first,  0,  0, 100, 10),
-                    p(second, 0, 10, 100, 10),
-                    p(third,  0, 20, 100,  0),
+                assert.widget_layout(layout, { 100, 5 }, {
+                    p(first,  0, 0, 100, 5),
+                    p(second, 0, 0, 100, 5),
+                    p(third,  0, 0, 100, 5),
                 })
             end)
         end)
