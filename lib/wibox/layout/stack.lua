@@ -116,11 +116,11 @@ end
 -- @method raise
 -- @tparam number index the widget index to raise
 function stack:raise(index)
-    if (not index) or self._private.widgets[index] then return end
+    if (not index) or (not self._private.widgets[index]) then return end
 
     local w = self._private.widgets[index]
     table.remove(self._private.widgets, index)
-    table.insert(self._private.widgets, w)
+    table.insert(self._private.widgets, 1, w)
 
     self:emit_signal("widget::layout_changed")
 end
@@ -170,14 +170,22 @@ end
 
 function stack:set_horizontal_offset(value)
     self._private.h_offset = value
-    self:emit_signal("widget::horizontal_offset")
-    self:emit_signal("property::top_only", value)
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::horizontal_offset", value)
+end
+
+function stack:get_horizontal_offset()
+    return self._private.h_offset
 end
 
 function stack:set_vertical_offset(value)
     self._private.v_offset = value
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::vertical_offset", value)
+end
+
+function stack:get_vertical_offset()
+    return self._private.v_offset
 end
 
 --- Create a new stack layout.
