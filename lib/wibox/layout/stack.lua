@@ -74,7 +74,9 @@ function stack:layout(_, width, height)
 
     local h_off, v_off = spacing, spacing
 
-    for _, v in pairs(self._private.widgets) do
+    -- Iterate backwards to draw top (index 1) last so that it appears above other layers
+    for i = #self._private.widgets, 1, -1 do
+        local v = self._private.widgets[i]
         table.insert(result, base.place_widget_at(v, h_off, v_off, width, height))
         h_off, v_off = h_off + self._private.h_offset, v_off + self._private.v_offset
         if self._private.top_only then break end
