@@ -5,7 +5,7 @@
 -- a `wibox.widget.textbox` on top of a `awful.widget.progressbar` or manage
 -- "pages" where only one is visible at any given moment.
 --
--- The indices are going from 1 (the bottom of the stack) up to the top of
+-- The indices start from 1 (the top of the stack) down to the bottom of
 -- the stack. The order can be changed either using `:swap` or `:raise`.
 --
 --@DOC_wibox_layout_defaults_stack_EXAMPLE@
