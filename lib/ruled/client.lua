@@ -694,7 +694,7 @@ return setmetatable(module, {
                 crules:append_rules("awful.rules", v)
             end
         else
-            rawset(k, v)
+            rawset(module, k, v)
         end
     end,
     __index = function(_, k)
