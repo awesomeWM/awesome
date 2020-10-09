@@ -30,18 +30,18 @@ awesome через D-Bus. Если установлен «rlwrap», то он б
 ПРИМЕРЫ
 -------
 ....
-$ awesome-client 'return 1+1, "Hello, world"\
+$ awesome-client 'return 1+1, "Hello, world"'
    double 2
    string "Hello, world"
 
 # Следующий пример не возвращает ничего в командную строку,
 # но показывает уведомление.
 $ awesome-client '
-> naughty = require("naughty")
-> naughty.notify({
-> title="CLI Notification",
-> text="Это уведомление было отправлено из командной строки!"})
-> '
+  naughty = require("naughty")
+  naughty.notify({
+  title="CLI Notification",
+  text="Это уведомление было отправлено из командной строки!"})
+'
 
 # Интерактивный режим (REPL)
 # В данном режиме каждая строка введенная пользователем
