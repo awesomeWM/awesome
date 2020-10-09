@@ -37,11 +37,11 @@ $ awesome-client 'return 1+1, "Hello, world"'
 # Следующий пример не возвращает ничего в командную строку,
 # но показывает уведомление.
 $ awesome-client '
-> naughty = require("naughty")
-> naughty.notify({
-> title="CLI Notification",
-> text="Это уведомление было отправлено из командной строки!"})
-> '
+  naughty = require("naughty")
+  naughty.notify({
+  title="CLI Notification",
+  text="Это уведомление было отправлено из командной строки!"})
+'
 
 # Интерактивный режим (REPL)
 # В данном режиме каждая строка введенная пользователем

@@ -36,11 +36,11 @@ $ awesome-client 'return 1+1, "Hello, world"'
 # The following does not return anything on the command line,
 # but will show a notification.
 $ awesome-client '
-> naughty = require("naughty")
-> naughty.notify({
-> title="CLI Notification",
-> text="This is a notification sent from the command line!"})
-> '
+  naughty = require("naughty")
+  naughty.notify({
+  title="CLI Notification",
+  text="This is a notification sent from the command line!"})
+'
 
 # Entering read-eval-print-loop mode
 # This mode will send every line to awesome, exactly the same as passing
