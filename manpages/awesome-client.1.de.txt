@@ -28,7 +28,7 @@ Das Modul 'awful.remote' muss geladen sein, um diesen Befehl zu benutzen.
 BEISPIELE
 ---------
 ....
-$ awesome-client 'return 1+1, "Hello, world"\
+$ awesome-client 'return 1+1, "Hello, world"'
    double 2
    string "Hello, world"
 

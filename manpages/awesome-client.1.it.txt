@@ -31,7 +31,7 @@ comando.
 EXAMPLES
 -------
 ....
-$ awesome-client 'return 1+1, "Hello, world"\
+$ awesome-client 'return 1+1, "Hello, world"'
    double 2
    string "Hello, world"
 
