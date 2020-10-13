@@ -692,7 +692,7 @@ end
 -- getting the common property returns the directional property
 -- defined by the `orientation` property
 for _, prop in ipairs(dir_properties) do
-    for _,dir in ipairs{"horizontal_, vertical_"} do
+    for _,dir in ipairs{"horizontal", "vertical"} do
         local dir_prop = dir .. "_" .. prop
         grid["set_"..dir_prop] = function(self, value)
             if self._private[dir_prop] ~= value then
