@@ -87,11 +87,11 @@ local timer = { mt = {} }
 -- @method start
 -- @emits start
 function timer:start()
-    if self.data.source_id ~= nil then
+    if self._private.source_id ~= nil then
         gdebug.print_error(traceback("timer already started"))
         return
     end
-    self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
+    self._private.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self._private.timeout * 1000, function()
         protected_call(self.emit_signal, self, "timeout")
         return true
     end)
@@ -102,12 +102,12 @@ end
 -- @method stop
 -- @emits stop
 function timer:stop()
-    if self.data.source_id == nil then
+    if self._private.source_id == nil then
         gdebug.print_error(traceback("timer not started"))
         return
     end
-    glib.source_remove(self.data.source_id)
-    self.data.source_id = nil
+    glib.source_remove(self._private.source_id)
+    self._private.source_id = nil
     self:emit_signal("stop")
 end
 
@@ -118,7 +118,7 @@ end
 -- @emits start
 -- @emits stop
 function timer:again()
-    if self.data.source_id ~= nil then
+    if self._private.source_id ~= nil then
         self:stop()
     end
     self:start()
@@ -137,9 +137,9 @@ end
 local timer_instance_mt = {
     __index = function(self, property)
         if property == "timeout" then
-            return self.data.timeout
+            return self._private.timeout
         elseif property == "started" then
-            return self.data.source_id ~= nil
+            return self._private.source_id ~= nil
         end
 
         return timer[property]
@@ -147,7 +147,7 @@ local timer_instance_mt = {
 
     __newindex = function(self, property, value)
         if property == "timeout" then
-            self.data.timeout = tonumber(value)
+            self._private.timeout = tonumber(value)
             self:emit_signal("property::timeout", value)
         end
     end
@@ -167,7 +167,27 @@ function timer.new(args)
     args = args or {}
     local ret = object()
 
-    ret.data = { timeout = 0 } --TODO v5 rename to ._private
+    rawset(ret, "_private", { timeout = 0 })
+
+    -- Preserve backward compatibility with Awesome 4.0-4.3 use of "data"
+    -- rather then "_private".
+    rawset(ret, "data", setmetatable({}, {
+        __index = function(_, key)
+            gdebug.deprecate(
+                "gears.timer.data is deprecated, use normal properties",
+                {deprecated_in=5}
+            )
+            return ret._private[key]
+        end,
+        __newindex = function(_, key, value)
+            gdebug.deprecate(
+                "gears.timer.data is deprecated, use normal properties",
+                {deprecated_in=5}
+            )
+            ret._private[key] = value
+        end
+    }))
+
     setmetatable(ret, timer_instance_mt)
 
     for k, v in pairs(args) do
