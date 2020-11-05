@@ -32,8 +32,8 @@ local function update(w, screen)
     w._layoutbox_tooltip:set_text(name or "[no name]")
 
     local img = surface.load_silently(beautiful["layout_" .. name], false)
-    w.imagebox.image = img
-    w.textbox.text   = img and "" or name
+    w:get_children_by_id("imagebox")[1].image = img
+    w:get_children_by_id("textbox")[1].text = img and "" or name
 end
 
 local function update_from_tag(t)
@@ -85,7 +85,7 @@ function layoutbox.new(args)
     -- Do we already have a layoutbox for this screen?
     local w = boxes[screen]
     if not w then
-        w = wibox.widget {
+        local template = args.widget_template or {
             {
                 id     = "imagebox",
                 widget = wibox.widget.imagebox
@@ -96,6 +96,8 @@ function layoutbox.new(args)
             },
             layout = wibox.layout.fixed.horizontal
         }
+
+        w = wibox.widget(template)
 
         w._layoutbox_tooltip = tooltip {objects = {w}, delay_show = 1}
 
