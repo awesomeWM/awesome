@@ -471,7 +471,8 @@ end
 -- Read the table, separate attributes from widgets.
 local function parse_table(t, leave_empty)
     local max = 0
-    local attributes, widgets = {}, {}
+    local attributes, widgets, with_handlers = {}, {}, {}
+
     for k,v in pairs(t) do
         if type(k) == "number" then
             if v then
@@ -481,10 +482,25 @@ local function parse_table(t, leave_empty)
                     max = k
                 end
 
-                widgets[k] = v
+                -- Those are not added "normally". They have their own callback
+                -- to add them.
+                if rawget(v, "_set_declarative_handler") then
+                    with_handlers[k] = v
+                else
+                    widgets[k] = v
+                end
             end
+        elseif type(v) == "table" and rawget(v, "_set_declarative_handler") then
+            with_handlers[k] = v
         else
             attributes[k] = v
+        end
+    end
+
+    -- Make sure there is no holes in the widgets table.
+    if #with_handlers > 0 then
+        for k in pairs(with_handlers) do
+            table.remove(widgets, k)
         end
     end
 
@@ -494,7 +510,7 @@ local function parse_table(t, leave_empty)
         max = #widgets
     end
 
-    return max, attributes, widgets
+    return max, attributes, widgets, with_handlers
 end
 
 -- Recursively build a container from a declarative table.
@@ -522,7 +538,7 @@ local function drill(ids, content)
     end
 
     -- Get the number of children widgets (including nil widgets).
-    local max, attributes, widgets = parse_table(content, l.allow_empty_widget)
+    local max, attributes, widgets, with_handlers = parse_table(content, l.allow_empty_widget)
 
     -- Get the optional identifier to create a virtual widget tree to place
     -- in an "access table" to be able to retrieve the widget.
@@ -579,6 +595,13 @@ local function drill(ids, content)
     if widgets then
         l:set_children(widgets)
     end
+
+    -- Now that all the children are set, call the custom handlers.
+    -- The order is undefined.
+    for k, v in pairs(with_handlers) do
+        v:_set_declarative_handler(l, k, ids)
+    end
+
     return l, id
 end
 
