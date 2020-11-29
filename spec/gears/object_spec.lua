@@ -148,7 +148,7 @@ describe("gears.object", function()
         assert.is.equal(obj2.foo, 42)
     end)
 
-    it("dynamic property disabled", function()
+    it("dynamic property enabled", function()
         local class = {}
         function class:get_foo() return "bar" end
 
