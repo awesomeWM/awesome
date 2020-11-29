@@ -63,6 +63,7 @@ local allowed_deps = {
     },
     -- TODO: Get rid of these
     ["gears.surface"]        = { ["wibox.hierarchy"] = true },
+    ["gears.connection"] = { ["*"] = true },
 }
 
 -- Turn "foo.bar.baz" into "foo.bar". Returns nil if there is nothing more to
