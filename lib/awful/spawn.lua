@@ -224,55 +224,14 @@ local capi =
     client = client,
 }
 local lgi = require("lgi")
-local Gio = lgi.Gio
 local GLib = lgi.GLib
 local util   = require("awful.util")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
 local aclient = require("awful.client")
-local protected_call = require("gears.protected_call")
+local watcher = require("gears.watcher")
 
 local spawn = {}
-
-
-local end_of_file
-do
-    -- API changes, bug fixes and lots of fun. Figure out how a EOF is signalled.
-    local input
-    if not pcall(function()
-        -- No idea when this API changed, but some versions expect a string,
-        -- others a table with some special(?) entries
-        input = Gio.DataInputStream.new(Gio.MemoryInputStream.new_from_data(""))
-    end) then
-        input = Gio.DataInputStream.new(Gio.MemoryInputStream.new_from_data({}))
-    end
-    local line, length = input:read_line()
-    if not line then
-        -- Fixed in 2016: NULL on the C side is transformed to nil in Lua
-        end_of_file = function(arg)
-            return not arg
-        end
-    elseif tostring(line) == "" and #line ~= length then
-        -- "Historic" behaviour for end-of-file:
-        -- - NULL is turned into an empty string
-        -- - The length variable is not initialized
-        -- It's highly unlikely that the uninitialized variable has value zero.
-        -- Use this hack to detect EOF.
-        end_of_file = function(arg1, arg2)
-            return #arg1 ~= arg2
-        end
-    else
-        assert(tostring(line) == "", "Cannot determine how to detect EOF")
-        -- The above uninitialized variable was fixed and thus length is
-        -- always 0 when line is NULL in C. We cannot tell apart an empty line and
-        -- EOF in this case.
-        require("gears.debug").print_warning("Cannot reliably detect EOF on an "
-                .. "GIOInputStream with this LGI version")
-        end_of_file = function(arg)
-            return tostring(arg) == ""
-        end
-    end
-end
 
 local function hash_command(cmd, rules)
     rules = rules or {}
@@ -392,38 +351,10 @@ end
 -- @treturn[1] Integer the PID of the forked process.
 -- @treturn[2] string Error message.
 -- @staticfct awful.spawn.with_line_callback
-function spawn.with_line_callback(cmd, callbacks)
-    local stdout_callback, stderr_callback, done_callback, exit_callback =
-        callbacks.stdout, callbacks.stderr, callbacks.output_done, callbacks.exit
-    local have_stdout, have_stderr = stdout_callback ~= nil, stderr_callback ~= nil
-    local pid, _, stdin, stdout, stderr = capi.awesome.spawn(cmd,
-            false, false, have_stdout, have_stderr, exit_callback)
-    if type(pid) == "string" then
-        -- Error
-        return pid
-    end
 
-    local done_before = false
-    local function step_done()
-        if have_stdout and have_stderr and not done_before then
-            done_before = true
-            return
-        end
-        if done_callback then
-            done_callback()
-        end
-    end
-    if have_stdout then
-        spawn.read_lines(Gio.UnixInputStream.new(stdout, true),
-                stdout_callback, step_done, true)
-    end
-    if have_stderr then
-        spawn.read_lines(Gio.UnixInputStream.new(stderr, true),
-                stderr_callback, step_done, true)
-    end
-    assert(stdin == nil)
-    return pid
-end
+-- It is still "officially" in `awful.spawn`, but since `gears.watcher`
+-- depends on it, the implementation lives there.
+spawn.with_line_callback = watcher._with_line_callback
 
 --- Asynchronously spawn a program and capture its output.
 -- (wraps `spawn.with_line_callback`).
@@ -438,43 +369,10 @@ end
 -- @treturn[2] string Error message.
 -- @see spawn.with_line_callback
 -- @staticfct awful.spawn.easy_async
-function spawn.easy_async(cmd, callback)
-    local stdout = ''
-    local stderr = ''
-    local exitcode, exitreason
-    local function parse_stdout(str)
-        stdout = stdout .. str .. "\n"
-    end
-    local function parse_stderr(str)
-        stderr = stderr .. str .. "\n"
-    end
-    local function done_callback()
-        return callback(stdout, stderr, exitreason, exitcode)
-    end
-    local exit_callback_fired = false
-    local output_done_callback_fired = false
-    local function exit_callback(reason, code)
-        exitcode = code
-        exitreason = reason
-        exit_callback_fired = true
-        if output_done_callback_fired then
-            return done_callback()
-        end
-    end
-    local function output_done_callback()
-        output_done_callback_fired = true
-        if exit_callback_fired then
-            return done_callback()
-        end
-    end
-    return spawn.with_line_callback(
-        cmd, {
-        stdout=parse_stdout,
-        stderr=parse_stderr,
-        exit=exit_callback,
-        output_done=output_done_callback
-    })
-end
+
+-- It is still "officially" in `awful.spawn`, but since `gears.watcher`
+-- depends on it, the implementation lives there.
+spawn.easy_async = watcher._easy_async
 
 --- Call `spawn.easy_async` with a shell.
 -- This calls `cmd` with `$SHELL -c` (via `awful.util.shell`).
@@ -501,42 +399,8 @@ end
 --   operation finishes (e.g. due to end of file).
 -- @tparam[opt=false] boolean close Should the stream be closed after end-of-file?
 -- @staticfct awful.spawn.read_lines
-function spawn.read_lines(input_stream, line_callback, done_callback, close)
-    local stream = Gio.DataInputStream.new(input_stream)
-    local function done()
-        if close then
-            stream:close()
-        end
-        stream:set_buffer_size(0)
-        if done_callback then
-            protected_call(done_callback)
-        end
-    end
-    local start_read, finish_read
-    start_read = function()
-        stream:read_line_async(GLib.PRIORITY_DEFAULT, nil, finish_read)
-    end
-    finish_read = function(obj, res)
-        local line, length = obj:read_line_finish(res)
-        if type(length) ~= "number" then
-            -- Error
-            print("Error in awful.spawn.read_lines:", tostring(length))
-            done()
-        elseif end_of_file(line, length) then
-            -- End of file
-            done()
-        else
-            -- Read a line
-            -- This needs tostring() for older lgi versions which returned
-            -- "GLib.Bytes" instead of Lua strings (I guess)
-            protected_call(line_callback, tostring(line))
 
-            -- Read the next line
-            start_read()
-        end
-    end
-    start_read()
-end
+spawn.read_lines = watcher._read_lines
 
 -- When a command should only be executed once or only have a single instance,
 -- track the SNID set on them to prevent multiple execution.

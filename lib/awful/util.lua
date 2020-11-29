@@ -7,7 +7,6 @@
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
-local os = os
 local assert = assert
 local load = loadstring or load -- luacheck: globals loadstring (compatibility with Lua 5.1)
 local loadfile = loadfile
@@ -19,6 +18,7 @@ local gstring = require("gears.string")
 local grect = require("gears.geometry").rectangle
 local gcolor = require("gears.color")
 local gfs = require("gears.filesystem")
+local watcher = require("gears.watcher")
 local capi =
 {
     awesome = awesome,
@@ -31,8 +31,7 @@ local util = {}
 util.table = {}
 
 --- The default shell used when spawing processes.
--- @param string
-util.shell = os.getenv("SHELL") or "/bin/sh"
+-- @tfield string awful.util.shell
 
 --- Execute a system command and road the output.
 -- This function implementation **has been removed** and no longer
@@ -484,6 +483,19 @@ function util.round(x)
     return gmath.round(x)
 end
 
-return util
+return setmetatable(util, {
+    __index = function(_, key)
+        if key == "shell" then
+            return watcher._shell
+        end
+    end,
+    __newindex = function(_, key, value)
+        if key == "shell" then
+            watcher._shell = value
+        else
+            rawset(util, key, value)
+        end
+    end
+})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

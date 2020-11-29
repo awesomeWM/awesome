@@ -23,6 +23,9 @@ return
     string = require("gears.string");
     sort = require("gears.sort");
     filesystem = require("gears.filesystem");
+    reactive = require("gears.reactive");
+    connection = require("gears.connection");
+    watcher = require("gears.watcher");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

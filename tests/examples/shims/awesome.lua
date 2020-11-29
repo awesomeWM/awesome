@@ -82,6 +82,8 @@ function awesome.xrdb_get_value()
     return nil
 end
 
+function awesome.spawn() end
+
 -- Always show deprecated messages
 awesome.version   = "v9999"
 awesome.api_level = 9999
