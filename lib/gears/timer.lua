@@ -59,6 +59,7 @@ local traceback = debug.traceback
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local glib = require("lgi").GLib
 local object = require("gears.object")
+local gtable = require("gears.table")
 local protected_call = require("gears.protected_call")
 local gdebug = require("gears.debug")
 
@@ -134,24 +135,28 @@ end
 -- @param number
 -- @propemits true false
 
-local timer_instance_mt = {
-    __index = function(self, property)
-        if property == "timeout" then
-            return self._private.timeout
-        elseif property == "started" then
-            return self._private.source_id ~= nil
-        end
+function timer:get_timeout()
+    return self._private.timeout
+end
 
-        return timer[property]
-    end,
+function timer:get_started()
+    return self._private.source_id ~= nil
+end
 
-    __newindex = function(self, property, value)
-        if property == "timeout" then
-            self._private.timeout = tonumber(value)
-            self:emit_signal("property::timeout", value)
-        end
+function timer:set_started(value)
+    if value == self:get_started() then return end
+
+    if value then
+        self:start()
+    else
+        self:stop()
     end
-}
+end
+
+function timer:set_timeout(value)
+    self._private.timeout = tonumber(value)
+    self:emit_signal("property::timeout", value)
+end
 
 --- Create a new timer object.
 -- @tparam table args Arguments.
@@ -165,7 +170,12 @@ local timer_instance_mt = {
 -- @constructorfct gears.timer
 function timer.new(args)
     args = args or {}
-    local ret = object()
+    local ret = object {
+        enable_properties   = true,
+        enable_auto_signals = true,
+    }
+
+    gtable.crush(ret, timer, true)
 
     rawset(ret, "_private", { timeout = 0 })
 
@@ -187,8 +197,6 @@ function timer.new(args)
             ret._private[key] = value
         end
     }))
-
-    setmetatable(ret, timer_instance_mt)
 
     for k, v in pairs(args) do
         ret[k] = v
