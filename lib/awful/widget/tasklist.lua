@@ -26,9 +26,9 @@
 --
 -- **Customizing the tasklist:**
 --
--- The `tasklist` created by `rc.lua` use the default values for almost
--- everything. However, it is possible to override each aspects to create a
--- very different widget. Here's an example that create a tasklist similar to
+-- The `tasklist` created by `rc.lua` uses the default values for almost
+-- everything. However, it is possible to override each aspect to create a
+-- very different widget. Here's an example that creates a tasklist similar to
 -- the default one, but with an explicit layout and some spacing widgets:
 --
 --@DOC_wibox_awidget_tasklist_rounded_EXAMPLE@
