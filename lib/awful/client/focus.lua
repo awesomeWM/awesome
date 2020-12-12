@@ -174,7 +174,9 @@ function focus.bydirection(dir, c, stacked)
         local cltbl = client.visible(sel.screen, stacked)
         local geomtbl = {}
         for i,cl in ipairs(cltbl) do
-            geomtbl[i] = cl:geometry()
+            if focus.filter(cl) then
+                geomtbl[i] = cl:geometry()
+            end
         end
 
         local target = grect.get_in_direction(dir, geomtbl, sel:geometry())
@@ -211,7 +213,9 @@ function focus.global_bydirection(dir, c, stacked)
             local cltbl = client.visible(screen.focused(), stacked)
             local geomtbl = {}
             for i,cl in ipairs(cltbl) do
-                geomtbl[i] = cl:geometry()
+                if focus.filter(cl) then
+                    geomtbl[i] = cl:geometry()
+                end
             end
             local target = grect.get_in_direction(dir, geomtbl, scr.geometry)
 
