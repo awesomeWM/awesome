@@ -615,7 +615,7 @@ end
 function titlebar.show(args, position, resize_client)
     local client = nil
 
-    if type(args) == 'table' and type(args.geometry) == 'function' then
+    if type(args.geometry) == 'function' then
         gdebug.deprecate(
             "The `c` paramater is deprecated, use `args.client`.",
             { deprecated_in = 5 })
@@ -665,7 +665,7 @@ end
 function titlebar.hide(args, position, resize_client)
     local client = nil
 
-    if type(args) == 'table' and type(args.geometry) == 'function' then
+    if type(args.geometry) == 'function' then
         gdebug.deprecate(
             "The `c` paramater is deprecated, use `args.client`.",
             { deprecated_in = 5 })
@@ -724,7 +724,7 @@ end
 function titlebar.toggle(args, position, resize_client)
     local client = nil
 
-    if type(args) == 'table' and type(args.geometry) == 'function' then
+    if type(args.geometry) == 'function' then
         gdebug.deprecate(
             "The `c` paramater is deprecated, use `args.client`.",
             { deprecated_in = 5 })
