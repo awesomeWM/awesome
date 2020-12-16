@@ -587,8 +587,10 @@ local function new(c, args)
     if ((lay and lay == floating) or c.floating) and args.resize_client then
         if position == "top" or position == "bottom" then
             c.height = c.height - size
+            if position == "top" then c.y = c.y + size end
         elseif position == "right" or position == "left" then
             c.width = c.width - size
+            if position == "left" then c.x = c.x + size end
         end
     end
 
@@ -697,8 +699,10 @@ function titlebar.hide(args, position, resize_client)
 
         if position == "top" or position == "bottom" then
             client.height = client.height + tb_size
+            if position == "top" then client.y = client.y - tb_size end
         elseif position == "right" or position == "left" then
             client.width = client.width + tb_size
+            if position == "left" then client.x = client.x - tb_size end
         end
     end
 
