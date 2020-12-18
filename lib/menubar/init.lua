@@ -70,12 +70,18 @@ end
 -- @beautiful beautiful.menubar_bg_focus
 -- @param color
 
+--- Menubar font.
+-- @beautiful beautiful.menubar_font
+-- @param[opt=beautiful.font] font
+
 
 -- menubar
 local menubar = { menu_entries = {} }
 menubar.menu_gen = require("menubar.menu_gen")
 menubar.utils = require("menubar.utils")
-local compute_text_width = menubar.utils.compute_text_width
+local compute_text_width = function(text, s)
+    return wibox.widget.textbox.get_markup_geometry(text, s, theme.menubar_font)['width']
+end
 
 -- Options section
 
@@ -243,7 +249,7 @@ local function get_current_page(all_items, query, scr)
     local current_page = {}
     for i, item in ipairs(all_items) do
         item.width = item.width or
-            compute_text_width(item.name, scr) +
+            compute_text_width(label(item), scr) +
             (item.icon and instance.geometry.height or 0) + list_interspace
         if width_sum + item.width > available_space then
             if current_item < i then
@@ -449,6 +455,7 @@ function menubar.show(scr)
     local bg_color = theme.menubar_bg_normal or theme.menu_bg_normal or theme.bg_normal
     local border_width = theme.menubar_border_width or theme.menu_border_width or 0
     local border_color = theme.menubar_border_color or theme.menu_border_color
+    local font = theme.menubar_font or theme.font
 
     if not instance then
         -- Add to each category the name of its key in all_categories
@@ -467,6 +474,7 @@ function menubar.show(scr)
                 fg = fg_color,
                 border_width = border_width,
                 border_color = border_color,
+                font = font,
             },
             widget = common_args.w,
             prompt = awful.widget.prompt(),
@@ -490,7 +498,7 @@ function menubar.show(scr)
     local geometry = menubar.geometry
     instance.geometry = {x = geometry.x or scrgeom.x,
                              y = geometry.y or scrgeom.y,
-                             height = geometry.height or gmath.round(theme.get_font_height() * 1.5),
+                             height = geometry.height or gmath.round(theme.get_font_height(font) * 1.5),
                              width = (geometry.width or scrgeom.width) - border_width * 2}
     instance.wibox:geometry(instance.geometry)
 
