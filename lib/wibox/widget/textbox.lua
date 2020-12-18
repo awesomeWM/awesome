@@ -381,6 +381,7 @@ end
 -- @tparam[opt=nil] integer|screen s The screen on which the textbox would be displayed.
 -- @tparam[opt=beautiful.font] string font The font description as string.
 -- @treturn table Geometry (width, height) hashtable.
+-- @staticfct wibox.widget.textbox.get_markup_geometry
 function textbox.get_markup_geometry(text, s, font)
     font = font or beautiful.font
     local pctx = PangoCairo.font_map_get_default():create_context()
