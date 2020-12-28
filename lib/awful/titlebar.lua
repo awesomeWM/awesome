@@ -627,7 +627,7 @@ function titlebar.show(args, position, resize_client)
     assert(type(args) == "table")
 
     for k, v in pairs {
-        postion = position,
+        position = position,
         resize_client = resize_client
     } do
         gdebug.deprecate(
@@ -677,7 +677,7 @@ function titlebar.hide(args, position, resize_client)
     assert(type(args) == "table")
 
     for k, v in pairs {
-        postion = position,
+        position = position,
         resize_client = resize_client
     } do
         gdebug.deprecate(
@@ -736,7 +736,7 @@ function titlebar.toggle(args, position, resize_client)
     assert(type(args) == "table")
 
     for k, v in pairs {
-        postion = position,
+        position = position,
         resize_client = resize_client
     } do
         gdebug.deprecate(
