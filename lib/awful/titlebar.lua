@@ -649,7 +649,10 @@ function titlebar.show(args, position, resize_client)
 
     tb_args.resize_client = resize_client
 
-    new(client, tb_args)
+    local _, size = get_titlebar_function(client, position)(client)
+    if size == 0 then
+        new(client, tb_args)
+    end
 end
 
 --- Hide a client's titlebar.
