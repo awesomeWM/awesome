@@ -586,11 +586,13 @@ local function new(c, args)
     local lay = c.screen.selected_tag and c.screen.selected_tag.layout or nil
     if ((lay and lay == floating) or c.floating) and args.resize_client then
         if position == "top" or position == "bottom" then
-            c.height = c.height - size
-            if position == "top" then c.y = c.y + size end
+            local tb_height = ret.widget.height or 0
+            c.height = c.height - tb_height
+            if position == "top" then c.y = c.y + tb_height end
         elseif position == "right" or position == "left" then
-            c.width = c.width - size
-            if position == "left" then c.x = c.x + size end
+            local tb_width = ret.widget.width or 0
+            c.width = c.width - tb_width
+            if position == "left" then c.x = c.x + tb_width end
         end
     end
 
