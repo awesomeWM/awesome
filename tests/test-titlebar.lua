@@ -170,9 +170,8 @@ local steps = {
 
         local c = client.get()[1]
 
-        -- Save current client dimentions
-        local h = c.height
-        local w = c.width
+        -- Save current client geometries
+        local x, y, h, w = c.x, c.y, c.height, c.width
 
         -- First show all titlebars, then hide them
         for _,method in pairs { 'show', 'hide' } do
@@ -183,8 +182,8 @@ local steps = {
                     resize_client = true
                 }
 
-                -- client size should be unmodified thanks to resize_client = true
-                assert(h == c.height and w == c.width)
+                -- client geometries should be unmodified
+                assert(x == c.x and y == c.y and h == c.height and w == c.width)
             end
         end
 
