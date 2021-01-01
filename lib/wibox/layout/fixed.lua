@@ -20,45 +20,61 @@ local fixed = {}
 -- @param height The available height.
 function fixed:layout(context, width, height)
     local result = {}
-    local pos,spacing = 0, self._private.spacing
-    local spacing_widget = self._private.spacing_widget
+    local spacing = self._private.spacing or 0
     local is_y = self._private.dir == "y"
     local is_x = not is_y
     local abspace = math.abs(spacing)
     local spoffset = spacing < 0 and 0 or spacing
+    local widgets_nr = #self._private.widgets
+    local spacing_widget
+    local x, y = 0, 0
+
+    spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
 
     for k, v in pairs(self._private.widgets) do
-        local x, y, w, h, _
+        local w, h = width - x, height - y
+
         if is_y then
-            x, y = 0, pos
-            w, h = width, height - pos
-            if k ~= #self._private.widgets or not self._private.fill_space then
-                _, h = base.fit_widget(self, context, v, w, h);
+            if k ~= widgets_nr or not self._private.fill_space then
+                h = select(2, base.fit_widget(self, context, v, w, h))
             end
-            pos = pos + h + spacing
+
+            if y - spacing >= height then
+                -- pop the spacing widget added in previous iteration if used
+                if spacing_widget then
+                    table.remove(result)
+                end
+                break
+            end
         else
-            x, y = pos, 0
-            w, h = width - pos, height
-            if k ~= #self._private.widgets or not self._private.fill_space then
-                w, _ = base.fit_widget(self, context, v, w, h);
+            if k ~= widgets_nr or not self._private.fill_space then
+                w = select(1, base.fit_widget(self, context, v, w, h))
             end
-            pos = pos + w + spacing
+
+            if x - spacing >= width then
+                -- pop the spacing widget added in previous iteration if used
+                if spacing_widget then
+                    table.remove(result)
+                end
+                break
+            end
         end
 
-        if (is_y and pos-spacing > height) or
-            (is_x and pos-spacing > width) then
-            break
-        end
+        -- Place widget
+        table.insert(result, base.place_widget_at(v, x, y, w, h))
 
-        -- Add the spacing widget
-        if k > 1 and abspace > 0 and spacing_widget then
+        x = is_x and x + w + spacing or x
+        y = is_y and y + h + spacing or y
+
+        -- Add the spacing widget (if needed)
+        if k < widgets_nr and spacing_widget then
             table.insert(result, base.place_widget_at(
                 spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
                 is_x and abspace or w, is_y and abspace or h
             ))
         end
-        table.insert(result, base.place_widget_at(v, x, y, w, h))
     end
+
     return result
 end
 

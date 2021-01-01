@@ -78,7 +78,6 @@ describe("wibox.layout.fixed", function()
                     assert.widget_layout(layout, { 100, 20 }, {
                         p(first,  0,  0, 100, 10),
                         p(second, 0, 10, 100, 10),
-                        p(third,  0, 20, 100,  0),
                     })
                 end)
             end)
@@ -168,6 +167,14 @@ describe("wibox.layout.fixed", function()
                 describe("and without enough space", function()
                     it("fit", function()
                         assert.widget_fit(layout, { 15, 20 }, { 15, 20 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 15, 20 }, {
+                            p(first,  0, 0, 15, 10),
+                            p(spacing_widget,  0, 5, 15, 5),
+                            p(second, 0, 5, 15, 15),
+                        })
                     end)
                 end)
             end) -- , negative spacing
