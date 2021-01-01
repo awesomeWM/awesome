@@ -263,16 +263,17 @@ end
 function fixed:fit(context, orig_width, orig_height)
     local width_left, height_left = orig_width, orig_height
     local spacing = self._private.spacing or 0
+    local widgets_nr = #self._private.widgets
     local is_y = self._private.dir == "y"
     local used_max = 0
 
     -- when no widgets exist the function can be called with orig_width or
     -- orig_height equal to nil. Exit early in this case.
-    if #self._private.widgets == 0 then
+    if widgets_nr == 0 then
         return 0, 0
     end
 
-    for _, v in pairs(self._private.widgets) do
+    for k, v in pairs(self._private.widgets) do
         local w, h = base.fit_widget(self, context, v, width_left, height_left)
         local max
 
@@ -288,23 +289,33 @@ function fixed:fit(context, orig_width, orig_height)
             used_max = max
         end
 
-        if width_left <= 0 or height_left <= 0 then
+        if k < widgets_nr then
             if is_y then
-                height_left = 0
+                height_left = height_left - spacing
             else
-                width_left = 0
+                width_left = width_left - spacing
+            end
+        end
+
+        if width_left <= 0 or height_left <= 0 then
+            -- this complicated two lines determine whether we're out-of-space
+            -- because of spacing, or if the last widget doesn't fit in
+            if is_y then
+                 height_left = k < widgets_nr and height_left + spacing or height_left
+                 height_left = height_left < 0 and 0 or height_left
+            else
+                 width_left = k < widgets_nr and width_left + spacing or width_left
+                 width_left = width_left < 0 and 0 or width_left
             end
             break
         end
     end
 
-    local total_spacing = spacing * (#self._private.widgets-1)
-
     if is_y then
-        return used_max, orig_height - height_left + total_spacing
+        return used_max, orig_height - height_left
     end
 
-    return orig_width - width_left + total_spacing, used_max
+    return orig_width - width_left, used_max
 end
 
 function fixed:reset()
