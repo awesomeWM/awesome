@@ -261,40 +261,50 @@ end
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function fixed:fit(context, orig_width, orig_height)
-    local width, height = orig_width, orig_height
-    local used_in_dir, used_max = 0, 0
+    local width_left, height_left = orig_width, orig_height
+    local spacing = self._private.spacing or 0
+    local is_y = self._private.dir == "y"
+    local used_max = 0
+
+    -- when no widgets exist the function can be called with orig_width or
+    -- orig_height equal to nil. Exit early in this case.
+    if #self._private.widgets == 0 then
+        return 0, 0
+    end
 
     for _, v in pairs(self._private.widgets) do
-        local w, h = base.fit_widget(self, context, v, width, height)
-        local in_dir, max
-        if self._private.dir == "y" then
-            max, in_dir = w, h
-            height = height - in_dir
+        local w, h = base.fit_widget(self, context, v, width_left, height_left)
+        local max
+
+        if is_y then
+            max = w
+            height_left = height_left - h
         else
-            in_dir, max = w, h
-            width = width - in_dir
+            max = h
+            width_left = width_left - w
         end
+
         if max > used_max then
             used_max = max
         end
-        used_in_dir = used_in_dir + in_dir
 
-        if width <= 0 or height <= 0 then
-            if self._private.dir == "y" then
-                used_in_dir = orig_height
+        if width_left <= 0 or height_left <= 0 then
+            if is_y then
+                height_left = 0
             else
-                used_in_dir = orig_width
+                width_left = 0
             end
             break
         end
     end
 
-    local spacing = self._private.spacing * (#self._private.widgets-1)
+    local total_spacing = spacing * (#self._private.widgets-1)
 
-    if self._private.dir == "y" then
-        return used_max, used_in_dir + spacing
+    if is_y then
+        return used_max, orig_height - height_left + total_spacing
     end
-    return used_in_dir + spacing, used_max
+
+    return orig_width - width_left + total_spacing, used_max
 end
 
 function fixed:reset()
