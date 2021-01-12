@@ -29,7 +29,9 @@ pass arguments to `cmake`, please use the `CMAKE_ARGS` environment variable. For
 instance:
 
     CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/opt/awesome" make
-
+    
+cmake argument for debian:
+`"-DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=None -DCMAKE_INSTALL_SYSCONFDIR=/etc -DCMAKE_INSTALL_LOCALSTATEDIR=/var -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_LIBDIR=lib/x86_64-linux-gnu -DSYSCONFDIR=/etc"`
 
 ### Installing current git master as a package receipts
 
@@ -49,6 +51,8 @@ sudo apt build-dep awesome
 git clone https://github.com/awesomewm/awesome
 cd awesome
 make package
+cd build
+make distclean package CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_BUILD_TYPE=None -DCMAKE_INSTALL_SYSCONFDIR=/etc -DCMAKE_INSTALL_LOCALSTATEDIR=/var -DCMAKE_EXPORT_NO_PACKAGE_REGISTRY=ON -DCMAKE_FIND_PACKAGE_NO_PACKAGE_REGISTRY=ON -DCMAKE_VERBOSE_MAKEFILE=ON -DCMAKE_INSTALL_LIBDIR=lib/x86_64-linux-gnu -DSYSCONFDIR=/etc"
 sudo apt install *.deb
 ```
 
@@ -186,4 +190,4 @@ Online documentation is available [here](https://awesomewm.org/apidoc/).
 
 The project is licensed under GNU General Public License v2 or later.
 You can read it online at ([v2](http://www.gnu.org/licenses/gpl-2.0.html)
-or [v3](http://www.gnu.org/licenses/gpl.html)).
+or [v3](http://www.gnu.org/licenses/gpl.html)). 
