@@ -48,10 +48,11 @@ makepkg -fsri
 sudo apt build-dep awesome
 git clone https://github.com/awesomewm/awesome
 cd awesome
-make package
+make package CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/usr -DCMAKE_INSTALL_SYSCONFDIR=/etc -DSYSCONFDIR=/etc"
+cd build
 sudo apt install *.deb
 ```
-
+Replace * with the name of your Awesome Debian package.
 
 ### Build dependencies
 
@@ -113,10 +114,12 @@ Additionally, the following optional dependencies exist:
 ## Running Awesome
 
 You can directly select Awesome from your display manager. If not, you can
-add the following line to your `.xinitrc` to start Awesome using `startx`
+add the following line to the end of your `.xinitrc` to start Awesome using `startx`
 or to `.xsession` to start Awesome using your display manager:
 
     exec awesome
+    
+make sure this .xinit file is in your home directory. Do this by typing `vim ~/.xinitrc` and add the line above
 
 In order to connect Awesome to a specific display, make sure that
 the `DISPLAY` environment variable is set correctly, e.g.:
