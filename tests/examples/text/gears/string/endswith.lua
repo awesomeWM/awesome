@@ -10,3 +10,6 @@ res = gears.string.endswith(test,"do")
 print(tostring(res))
 assert(res == false) --DOC_HIDE
 
+res = gears.string.endswith(nil,"it")
+print(tostring(res))
+assert(res == false) --DOC_HIDE
