@@ -3582,7 +3582,7 @@ luaA_client_set_skip_taskbar(lua_State *L, client_t *c)
 static int
 luaA_client_get_name(lua_State *L, client_t *c)
 {
-    lua_pushstring(L, c->name ? c->name : c->alt_name);
+    lua_pushstring(L, NONULL(c->name ? c->name : c->alt_name));
     return 1;
 }
 
