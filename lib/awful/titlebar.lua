@@ -648,11 +648,9 @@ function titlebar.show(args, position, resize_client)
                 if position == "top" or position == "bottom" then
                     local tb_height = tb.drawable:geometry().height
                     client.height = client.height - tb_height
-                    if position == "top" then client.y = client.y + tb_height end
                 elseif position == "right" or position == "left" then
                     local tb_width = tb.drawable:geometry().width
                     client.width = client.width - tb_width
-                    if position == "left" then client.x = client.x + tb_width end
                 end
             end
         end
@@ -706,10 +704,8 @@ function titlebar.hide(args, position, resize_client)
 
         if position == "top" or position == "bottom" then
             client.height = client.height + tb_size
-            if position == "top" then client.y = client.y - tb_size end
         elseif position == "right" or position == "left" then
             client.width = client.width + tb_size
-            if position == "left" then client.x = client.x - tb_size end
         end
     end
 
