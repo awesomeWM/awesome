@@ -583,19 +583,6 @@ local function new(c, args)
     ret.setup = base.widget.setup
     ret.get_children_by_id = get_children_by_id
 
-    local lay = c.screen.selected_tag and c.screen.selected_tag.layout or nil
-    if ((lay and lay == floating) or c.floating) and args.resize_client then
-        if position == "top" or position == "bottom" then
-            local tb_height = ret.widget.height or 0
-            c.height = c.height - tb_height
-            if position == "top" then c.y = c.y + tb_height end
-        elseif position == "right" or position == "left" then
-            local tb_width = ret.widget.width or 0
-            c.width = c.width - tb_width
-            if position == "left" then c.x = c.x + tb_width end
-        end
-    end
-
     c._private = c._private or {}
     c._private.titlebars = bars
 
@@ -653,7 +640,22 @@ function titlebar.show(args, position, resize_client)
 
     local _, size = get_titlebar_function(client, position)(client)
     if size == 0 then
-        new(client, tb_args)
+        local tb = new(client, tb_args)
+
+        if client._private.titlebars[position] then
+            local lay = client.screen.selected_tag and client.screen.selected_tag.layout or nil
+            if ((lay and lay == floating) or client.floating) and args.resize_client then
+                if position == "top" or position == "bottom" then
+                    local tb_height = tb.drawable:geometry().height
+                    client.height = client.height - tb_height
+                    if position == "top" then client.y = client.y + tb_height end
+                elseif position == "right" or position == "left" then
+                    local tb_width = tb.drawable:geometry().width
+                    client.width = client.width - tb_width
+                    if position == "left" then client.x = client.x + tb_width end
+                end
+            end
+        end
     end
 end
 
