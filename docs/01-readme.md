@@ -52,26 +52,30 @@ make package
 sudo apt install *.deb
 ```
 
-#### NixOS (overlay in configuration.nix)
+#### NixOS (put this in configuration.nix)
+
 ```nix
+
 # Overlay bellow will build AwesomeWM from selected commit
 # NOTE: Manually change revision (commit numbers) on every update.
 
-nixpkgs.overlays = [ 
-(self: super: {
-  awesome = super.awesome.overrideAttrs (old: {
-    src = super.fetchFromGitHub {
-      owner = "awesomewm";
-      repo = "awesome";
-      rev = "4319b161103a81403ba3516924e86e13ff33c036";
-      sha256 = "1p7c3cmdy0iyk28fgc579rkzfhnwn1i1b541rs2nw80h1xzs1g80";
+  nixpkgs.overlays = [
+    (self: super: {
+      awesome = super.awesome.overrideAttrs (old: {
+        src = super.fetchFromGitHub {
+          owner = "awesomewm";
+          repo = "awesome";
+          rev = "4319b161103a81403ba3516924e86e13ff33c036";
+          sha256 = "1p7c3cmdy0iyk28fgc579rkzfhnwn1i1b541rs2nw80h1xzs1g80";
         };
-    });
-  })
-];
+      });
+    })
+  ];
 
 services.xserver.windowManager.awesome.enable = true;
+
 ```
+
 ### Build dependencies
 
 Awesome has the following dependencies (besides a more-or-less standard POSIX
