@@ -72,7 +72,7 @@ sudo apt install *.deb
     })
   ];
 
-services.xserver.windowManager.awesome.enable = true;
+  services.xserver.windowManager.awesome.enable = true;
 
 ```
 
