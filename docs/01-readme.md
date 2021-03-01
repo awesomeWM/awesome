@@ -30,51 +30,8 @@ instance:
 
     CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/opt/awesome" make
 
-
 ### Installing current git master as a package receipts
-
-#### Arch Linux AUR
-
-```
-sudo pacman -S --needed base-devel git
-git clone https://aur.archlinux.org/awesome-git.git
-cd awesome-git
-makepkg -fsri
-```
-
-#### Debian-based
-
-```
-sudo apt build-dep awesome
-git clone https://github.com/awesomewm/awesome
-cd awesome
-make package
-sudo apt install *.deb
-```
-
-#### NixOS (put this in configuration.nix)
-
-```nix
-
-# Overlay bellow will build AwesomeWM from selected commit
-# NOTE: Manually change revision (commit numbers) on every update.
-
-  nixpkgs.overlays = [
-    (self: super: {
-      awesome = super.awesome.overrideAttrs (old: {
-        src = super.fetchFromGitHub {
-          owner = "awesomewm";
-          repo = "awesome";
-          rev = "4319b161103a81403ba3516924e86e13ff33c036";
-          sha256 = "1p7c3cmdy0iyk28fgc579rkzfhnwn1i1b541rs2nw80h1xzs1g80";
-        };
-      });
-    })
-  ];
-
-  services.xserver.windowManager.awesome.enable = true;
-
-```
+installation guide can be found in [10-installation-guide.md](/docs/10-installation-guide.md)
 
 ### Build dependencies
 
