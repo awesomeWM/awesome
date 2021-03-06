@@ -4,6 +4,11 @@ local rules = require("ruled.client")
 local spawn = require("awful.spawn")
 local gdebug = require("gears.debug")
 
+local lua_executable = os.getenv("LUA_EXECUTABLE")
+if lua_executable == nil or lua_executable == "" then
+    lua_executable = "lua"
+end
+
 local tiny_client_code_template = [[
 pcall(require, 'luarocks.loader')
 local Gtk, class = require('lgi').require('Gtk'), 'client'
@@ -18,8 +23,8 @@ function app:on_activate()
 end
 app:run {''}
 ]]
-local tiny_client = {os.getenv("LUA_EXECUTABLE"), "-e", string.format(tiny_client_code_template, "")}
-local tiny_client_undecorated = {os.getenv("LUA_EXECUTABLE"), "-e",
+local tiny_client = { lua_executable, "-e", string.format(tiny_client_code_template, "") }
+local tiny_client_undecorated = { lua_executable, "-e",
     string.format(tiny_client_code_template, [[
 window.decorated = false
 ]])
