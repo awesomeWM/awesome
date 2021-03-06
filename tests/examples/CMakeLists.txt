@@ -32,7 +32,7 @@ endif()
 
 if (DO_COVERAGE)
   execute_process(
-    COMMAND env "SOURCE_DIRECTORY=${TOP_SOURCE_DIR}" lua -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
+    COMMAND env "SOURCE_DIRECTORY=${TOP_SOURCE_DIR}" ${LUA_EXECUTABLE} -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
     RESULT_VARIABLE TEST_RESULT
     ERROR_VARIABLE  TEST_ERROR
     ERROR_STRIP_TRAILING_WHITESPACE)
