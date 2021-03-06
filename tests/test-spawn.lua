@@ -11,7 +11,7 @@ local exit_yay, exit_snd = nil, nil
 -- * spawn with startup notification is covered by test-spawn-snid.lua
 
 local tiny_client = function(class)
-    return {"lua", "-e", [[
+    return {os.getenv("LUA_EXECUTABLE"), "-e", [[
 local lgi = require 'lgi'
 local Gtk = lgi.require('Gtk')
 local class = ']]..class..[['

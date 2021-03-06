@@ -18,8 +18,8 @@ function app:on_activate()
 end
 app:run {''}
 ]]
-local tiny_client = {"lua", "-e", string.format(tiny_client_code_template, "")}
-local tiny_client_undecorated = {"lua", "-e",
+local tiny_client = {os.getenv("LUA_EXECUTABLE"), "-e", string.format(tiny_client_code_template, "")}
+local tiny_client_undecorated = {os.getenv("LUA_EXECUTABLE"), "-e",
     string.format(tiny_client_code_template, [[
 window.decorated = false
 ]])

@@ -106,7 +106,7 @@ local pipe
 local function init()
     if initialized then return end
     initialized = true
-    local cmd = { "lua", "-e", test_client_source }
+    local cmd = { os.getenv("LUA_EXECUTABLE"), "-e", test_client_source }
     local _, _, stdin, stdout, stderr = awesome.spawn(cmd, false, true, true, true)
     pipe = Gio.UnixOutputStream.new(stdin, true)
     stdout = Gio.UnixInputStream.new(stdout, true)
