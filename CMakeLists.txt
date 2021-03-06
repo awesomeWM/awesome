@@ -427,7 +427,7 @@ add_custom_target(check-themes
 add_dependencies(check check-themes)
 
 add_custom_target(check-requires
-    lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
+    ${LUA_EXECUTABLE} "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Checking use of require()"
     USES_TERMINAL
