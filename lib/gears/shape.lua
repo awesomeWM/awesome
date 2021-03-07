@@ -5,7 +5,8 @@
 -- background, a margin, a mask or a drawable shape bounding.
 --
 -- The functions exposed by this module always take a cairo context as first
--- parameter followed by a width and height. Individual functions may take additional parameters for their specific implementions.
+-- parameter followed by a width and height. Individual functions may take
+-- additional parameters for their specific implementions.
 --
 -- The functions provided by this module only create a path in the content.
 -- to actually draw the content, use `cr:fill()`, `cr:mask()`, `cr:clip()` or
