@@ -3,7 +3,7 @@
 local runner = require("_runner")
 local spawn = require("awful.spawn")
 
-local lua_executable = os.getenv("LUA_EXECUTABLE")
+local lua_executable = os.getenv("LUA")
 if lua_executable == nil or lua_executable == "" then
     lua_executable = "lua"
 end

@@ -8,7 +8,7 @@ local lgi = require("lgi")
 local Gio = lgi.Gio
 local GdkPixbuf = lgi.GdkPixbuf
 
-local lua_executable = os.getenv("LUA_EXECUTABLE")
+local lua_executable = os.getenv("LUA")
 if lua_executable == nil or lua_executable == "" then
     lua_executable = "lua"
 end

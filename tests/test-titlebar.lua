@@ -4,7 +4,7 @@ local rules = require("ruled.client")
 local spawn = require("awful.spawn")
 local gdebug = require("gears.debug")
 
-local lua_executable = os.getenv("LUA_EXECUTABLE")
+local lua_executable = os.getenv("LUA")
 if lua_executable == nil or lua_executable == "" then
     lua_executable = "lua"
 end
