@@ -204,7 +204,7 @@ local function new(...)
     return ret
 end
 
-function stack.mt:__call(_, ...)
+function stack.mt:__call(...)
     return new(...)
 end
 

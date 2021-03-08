@@ -277,7 +277,7 @@ local function new(widget)
     return ret
 end
 
-function radialprogressbar.mt:__call(_, ...)
+function radialprogressbar.mt:__call(...)
     return new(...)
 end
 

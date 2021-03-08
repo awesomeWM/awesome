@@ -534,7 +534,7 @@ local function new(args)
     return ret
 end
 
-function slider.mt:__call(_, ...)
+function slider.mt:__call(...)
     return new(...)
 end
 

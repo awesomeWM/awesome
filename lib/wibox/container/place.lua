@@ -199,8 +199,8 @@ local function new(widget, halign, valign)
     return ret
 end
 
-function place.mt:__call(_, ...)
-    return new(_, ...)
+function place.mt:__call(...)
+    return new(...)
 end
 
 --@DOC_widget_COMMON@
