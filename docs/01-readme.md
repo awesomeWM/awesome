@@ -8,34 +8,42 @@ Awesome is a highly configurable, next generation framework window manager for X
 
 After extracting the dist tarball, run:
 
-    make
+```sh
+make
+```
 
 This will create a build directory, run `cmake` in it and build Awesome.
 
 After building is finished, you can either install via `make install`:
 
-    make install  # you might need root permissions
+```sh
+make install  # you might need root permissions
+```
 
 or by auto-generating a .deb or .rpm package, for easy removal later on:
 
-    make package
+```sh
+make package
 
-    sudo dpkg -i awesome-x.y.z.deb
-    # or
-    sudo rpm -Uvh awesome-x.y.z.rpm
+sudo dpkg -i awesome-x.y.z.deb
+# or
+sudo rpm -Uvh awesome-x.y.z.rpm
+```
 
 NOTE: Awesome uses [`cmake`](https://cmake.org) to build. In case you want to
 pass arguments to `cmake`, please use the `CMAKE_ARGS` environment variable. For
 instance:
 
-    CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/opt/awesome" make
+```sh
+CMAKE_ARGS="-DCMAKE_INSTALL_PREFIX=/opt/awesome" make
+```
 
 
 ### Installing current git master as a package receipts
 
 #### Arch Linux AUR
 
-```
+```sh
 sudo pacman -S --needed base-devel git
 git clone https://aur.archlinux.org/awesome-git.git
 cd awesome-git
@@ -44,7 +52,7 @@ makepkg -fsri
 
 #### Debian-based
 
-```
+```sh
 sudo apt build-dep awesome
 git clone https://github.com/awesomewm/awesome
 cd awesome
@@ -116,12 +124,16 @@ You can directly select Awesome from your display manager. If not, you can
 add the following line to your `.xinitrc` to start Awesome using `startx`
 or to `.xsession` to start Awesome using your display manager:
 
-    exec awesome
+```sh
+exec awesome
+```
 
 In order to connect Awesome to a specific display, make sure that
 the `DISPLAY` environment variable is set correctly, e.g.:
 
-    DISPLAY=foo.bar:1 exec awesome
+```sh
+DISPLAY=foo.bar:1 exec awesome
+```
 
 (This will start Awesome on display `:1` of the host foo.bar.)
 
@@ -145,12 +157,16 @@ problem.
 
 You can call `awesome` with `gdb` like this:
 
-    DISPLAY=:2 gdb awesome
+```sh
+DISPLAY=:2 gdb awesome
+```
 
 Then in `gdb` set any arguments and run it:
 
-    (gdb) set args --replace
-    (gdb) run
+```
+(gdb) set args --replace
+(gdb) run
+```
 
 ## Asking questions
 
