@@ -138,5 +138,5 @@ Individual test categories can be run as well:
 * `make check-qa`: Run `luacheck` against the Lua library
 * `make check-unit`: Run unit tests with `busted` against the Lua library. You can also run `busted <options> ./spec` if you want to specify options for `busted`.
 * `make check-requires`: Check for invalid `require()` calls.
-* `make check-examples`: Run integration tests within the examples in `./tests/examples'.
+* `make check-examples`: Run integration tests within the examples in `./tests/examples`.
 * `make check-themes`: Test themes.
