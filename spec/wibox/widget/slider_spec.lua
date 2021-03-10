@@ -14,7 +14,7 @@ describe("wibox.widget.slider", function()
 
     describe("constructor", function()
         it("applies arguments", function()
-            local widget = slider({ value = 10 })
+            widget = slider({ value = 10 })
 
             assert.is.equal(widget.value, 10)
         end)
