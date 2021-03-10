@@ -533,32 +533,34 @@ local function drill(ids, content)
         end
     end
 
-    -- Add all widgets.
-    for k = 1, max do
-        -- ipairs cannot be used on sparse tables.
-        local v, id2, e = widgets[k], id, nil
-        if v then
-            -- It is another declarative container, parse it.
-            if (not v.is_widget) and (v.widget or v.layout) then
-                e, id2 = drill(ids, v)
-                widgets[k] = e
-            elseif (not v.is_widget) and is_callable(v) then
-                 widgets[k] = v()
-            end
-            base.check_widget(widgets[k])
+    if widgets and max > 0 then
+        -- Add all widgets.
+        for k = 1, max do
+            -- ipairs cannot be used on sparse tables.
+            local v, id2, e = widgets[k], id, nil
+            if v then
+                -- It is another declarative container, parse it.
+                if (not v.is_widget) and (v.widget or v.layout) then
+                    e, id2 = drill(ids, v)
+                    widgets[k] = e
+                elseif (not v.is_widget) and is_callable(v) then
+                     widgets[k] = v()
+                end
+                base.check_widget(widgets[k])
 
-            -- Place the widget in the access table.
-            if id2 then
-                l  [id2] = e
-                ids[id2] = ids[id2] or {}
-                table.insert(ids[id2], e)
+                -- Place the widget in the access table.
+                if id2 then
+                    l  [id2] = e
+                    ids[id2] = ids[id2] or {}
+                    table.insert(ids[id2], e)
+                end
             end
         end
-    end
-    -- Replace all children (if any) with the new ones.
-    if widgets then
+
+        -- Replace all children (if any) with the new ones.
         l:set_children(widgets)
     end
+
     return l, id
 end
 
