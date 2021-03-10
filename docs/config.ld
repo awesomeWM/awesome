@@ -83,6 +83,7 @@ topics={
     '07-my-first-awesome.md',
     '08-client-layout-system.md',
     '09-options.md',
+    '10-building-and-testing.md',
     '16-using-cairo.md',
     '17-porting-tips.md',
     '90-FAQ.md',
