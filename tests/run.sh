@@ -13,7 +13,7 @@
 set -e
 
 export SHELL=/bin/sh
-export HOME=/dev/null
+export HOME="${TMP:-/tmp}"
 
 # Parse options.
 usage() {
@@ -88,6 +88,8 @@ fi
 AWESOME_CLIENT="$source_dir/utils/awesome-client"
 D=:5
 SIZE="${TESTS_SCREEN_SIZE:-1024x768}"
+# Seconds after when awesome gets killed.
+TEST_TIMEOUT=${TEST_TIMEOUT:-30}
 
 # Set up some env vars
 # Disable GDK's screen scaling support
@@ -133,7 +135,7 @@ echo "awesome_log: $awesome_log"
 
 wait_until_success() {
     if (( verbose )); then set +x; fi
-    wait_count=60  # 60*0.05s => 3s.
+    wait_count=$(echo "${TEST_TIMEOUT} / 0.05" | bc)
     while true; do
         set +e
         eval reply="\$($2)"
@@ -195,12 +197,14 @@ start_awesome() {
 
     # Wait until the interface for awesome-client is ready (D-Bus interface).
     # Do this with dbus-send so that we can specify a low --reply-timeout
-    wait_until_success "wait for awesome startup via awesome-client" "dbus-send --reply-timeout=100 --dest=org.awesomewm.awful --print-reply / org.awesomewm.awful.Remote.Eval 'string:return 1' 2>&1"
+    wait_until_success "wait for awesome startup via awesome-client" "dbus-send --reply-timeout=${TEST_TIMEOUT} --dest=org.awesomewm.awful --print-reply / org.awesomewm.awful.Remote.Eval 'string:return 1' 2>&1"
 }
 
-if command -v tput >/dev/null; then
-    color_red() { tput setaf 1; }
-    color_reset() { tput sgr0; }
+# Only print colors when stdout is connected to a terminal.
+# When it is piped/redirected, skip the color codes.
+if [ -t 1 ]; then
+    color_red() { echo -e "\e[31m"; }
+    color_reset() { echo -e "\e[0m"; }
 else
     color_red() { :; }
     color_reset() { :; }
@@ -208,8 +212,6 @@ fi
 
 count_tests=0
 errors=()
-# Seconds after when awesome gets killed.
-TEST_TIMEOUT=${TEST_TIMEOUT:-30}
 
 for f in $tests; do
     echo "== Running $f =="

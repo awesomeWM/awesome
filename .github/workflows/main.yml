@@ -1,0 +1,425 @@
+name: Build & Test
+
+on:
+  # Trigger on push to branches `master` and `3.5`.
+  push:
+    branches: [ master, 3.5 ]
+  # Trigger on pull request events for PRs that have `master` as their target branch
+  pull_request:
+    branches: [ master ]
+
+  # Allow running the workflow manually
+  workflow_dispatch:
+
+defaults:
+  run:
+    # GitHub Actions adds `errexit` and `pipefail` by default, but we add `xtrace`
+    # to improve debugging some of the longer scripts.
+    shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+
+jobs:
+  main:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-20.04
+    name: ${{ matrix.test_name }}
+
+    strategy:
+      # Let other jobs continue even if one of them fails
+      fail-fast: false
+      matrix:
+        test_name:
+          - "codecov-lua5.3"
+          - "coveralls-lua5.2"
+          - "lua5.1"
+          - "luajit"
+          - "oldlgi-lua5.2"
+        include:
+          - test_name: "codecov-lua5.3"
+            lua_version: "5.3"
+            lua_name: "lua5.3"
+            coverage: "codecov"
+            manual_screens: true
+
+          - test_name: "coveralls-lua5.2"
+            lua_version: "5.2"
+            lua_name: "lua5.2"
+            coverage: "coveralls"
+            manual_screens: true
+
+          - test_name: "lua5.1"
+            lua_version: "5.1"
+            lua_name: "lua5.1"
+
+          - test_name: "luajit"
+            lua_version: "5.1"
+            lua_name: "luajit"
+            lua_library: "/usr/lib/x86_64-linux-gnu/libluajit-5.1.so"
+            lua_include: "/usr/include/luajit-2.1"
+            luarocks_args: "--lua-suffix=jit-2.1.0-beta3"
+
+          # Lua 5.2 with older lgi and screen size not divisible by 2.
+          - test_name: "oldlgi-lua5.2"
+            lua_version: "5.2"
+            lua_name: "lua5.2"
+            lgi_version: "0.8.0"
+            tests_screen_size: "1921x1079"
+            check_qa: true
+            empty_theme_while_loading: true
+            # SOURCE_DATE_EPOCH: used for stable dates during build.
+            source_date_epoch: "1893456000"
+            test_prev_commits: true
+
+    env:
+      LUA: ${{ matrix.lua_version }}
+      LUAINCLUDE: /usr/include/lua${{ matrix.lua_version }}
+      LUALIBRARY: /usr/lib/x86_64-linux-gnu/liblua${{ matrix.lua_version }}.so
+      TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size || '' }}
+      SOURCE_DATE_EPOCH: ${{ matrix.source_date_epoch || '' }}
+      TEST_TIMEOUT: '100'
+      CI: 'true'
+
+    steps:
+      # Create a cache invalidation key based on the current year + week.
+      # This way, packages will be checked for updates once every week.
+      - name: Get Date
+        id: get-date
+        run: echo "::set-output name=date::$(/bin/date -u "+%Y%W")"
+
+      - name: Create apt cache directory
+        run: mkdir /tmp/apt
+
+      - name: Cache apt packages
+        id: cache-apt
+        uses: actions/cache@v2
+        with:
+          path: /tmp/apt/*.deb
+          # The trailing number serves as a version flag that can be incremented
+          # to invalidate the cache after changing the list of packages.
+          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-apt-3
+
+      - name: Download apt packages
+        if: steps.cache-apt.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --download-only -y --no-install-recommends \
+            asciidoctor \
+            cmake \
+            dbus-x11 \
+            gettext \
+            gir1.2-gtk-3.0 \
+            gir1.2-pango-1.0 \
+            git \
+            libdbus-1-dev \
+            libgirepository1.0-dev \
+            libnotify-bin \
+            libpango1.0-dev \
+            libstartup-notification0-dev \
+            libx11-xcb-dev \
+            libxcb-cursor-dev \
+            libxcb-icccm4-dev \
+            libxcb-keysyms1-dev \
+            libxcb-randr0-dev \
+            libxcb-shape0-dev \
+            libxcb-util0-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xinerama0-dev \
+            libxcb-xkb-dev \
+            libxcb-xrm-dev \
+            libxcb-xtest0-dev \
+            libxdg-basedir-dev \
+            libxkbcommon-dev \
+            libxkbcommon-x11-dev \
+            wmctrl \
+            x11-apps \
+            xcb-proto \
+            xdotool \
+            xorg \
+            xserver-xephyr \
+            xterm \
+            xutils-dev \
+            xvfb \
+            zsh \
+            lua-discount
+          sudo mv /var/cache/apt/archives/*.deb /tmp/apt/
+
+      - name: Install downloaded packages
+        run: sudo dpkg -i /tmp/apt/*.deb
+
+      - name: Install Lua packages
+        run: |
+          if [ "${{ matrix.lua_name }}" = "luajit" ]; then
+            sudo apt-get install libluajit-5.1-dev luajit
+          fi
+          sudo apt-get install liblua${{ matrix.lua_version }}-dev lua${{ matrix.lua_version }}
+
+      - name: Cache luarocks
+        id: cache-luarocks
+        uses: actions/cache@v2
+        with:
+          path: /tmp/luarocks
+          # The build input for luarocks changes per test, so we need separate caches
+          key: ${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.5.0
+
+      - name: Install fresh Luarocks
+        if: steps.cache-luarocks.outputs.cache-hit != 'true'
+        run: |
+          wget -O /tmp/luarocks.tar.gz https://github.com/luarocks/luarocks/archive/v3.5.0.tar.gz
+          mkdir /tmp/luarocks
+          tar -xf /tmp/luarocks.tar.gz -C /tmp/luarocks --strip-components=1
+          cd /tmp/luarocks
+          ./configure --lua-version=${{ matrix.lua_version }} --with-lua-include=${LUAINCLUDE} ${{ matrix.luarocks_args }}
+          make build
+          sudo make install
+
+      - name: Install cached Luarocks
+        if: steps.cache-luarocks.outputs.cache-hit == 'true'
+        run: |
+          cd /tmp/luarocks
+          sudo make install
+
+      - name: Cache xcb-errors
+        id: cache-xcb-errors
+        uses: actions/cache@v2
+        with:
+          path: /tmp/xcb-errors
+          # xcb-errors doesn't have versioned releases, so we checkout and cache by commit.
+          # Make sure to keep this in sync with the `git checkout` below.
+          key: ${{ runner.os }}-xcb-errors-5d660ebe872cadcdc85de9d6f9afe05de629c030
+
+      - name: Install fresh xcb-errors
+        if: steps.cache-xcb-errors.outputs.cache-hit != 'true'
+        run: |
+          git clone --recursive https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git /tmp/xcb-errors
+          cd /tmp/xcb-errors
+          git checkout 5d660ebe872cadcdc85de9d6f9afe05de629c030
+          ./autogen.sh --prefix=/usr
+          make
+          sudo make install
+
+      - name: Install cached xcb-errors
+        if: steps.cache-xcb-errors.outputs.cache-hit == 'true'
+        run: |
+          cd /tmp/xcb-errors
+          sudo make install
+
+      - name: Install rocks
+        run: |
+          sudo -H luarocks install lgi ${{ matrix.lgi_version }}
+          sudo -H luarocks install ldoc
+          sudo -H luarocks install busted
+
+      - name: Install QA check rocks
+        if: matrix.check_qa
+        run: |
+          sudo -H luarocks install luacheck
+          sudo -H luarocks install depgraph
+
+      - name: Install cluacov rock
+        if: matrix.coverage != ''
+        run: sudo -H luarocks install cluacov
+
+      - name: Install coveralls rock
+        if: matrix.coverage == 'coveralls'
+        run: sudo -H luarocks install luacov-coveralls
+
+      - name: Install codecov.io uploader
+        if: matrix.coverage == 'codecov'
+        run: wget -O /tmp/codecov-bash https://codecov.io/bash
+
+      # Check out repository to ${{ github.workspace }}
+      # Automatically picks the current branch/PR
+      - uses: actions/checkout@v2
+
+      - name: Create Build Environment
+        run: cmake -E make_directory -B "${{ github.workspace }}/build"
+
+      - name: Build Awesome version string
+        run: |
+          AWESOME_VERSION=""
+
+          # If this workflow is triggered by a pull request, we get a base branch.
+          # Otherwise, check if the current commit has a meaningful name.
+          if [ -n "${{ github.base_ref }}" ]; then
+            AWESOME_VERSION="${{ github.base_ref }}"
+          else
+            AWESOME_VERSION="$(git rev-parse --abbrev-ref HEAD)"
+          fi
+
+          AWESOME_VERSION="${AWESOME_VERSION}-g$(git rev-parse --short HEAD)"
+
+          if [ "${{ github.event_name }}" == "pull_request" &&  -n "${{ matrix.test_prev_commits }}" ]; then
+            AWESOME_VERSION="${AWESOME_VERSION}-PR${{ github.event.number }}"
+          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+            AWESOME_VERSION="v9999-PR${{ github.event.number }}"
+          fi
+
+          echo "AWESOME_VERSION=${AWESOME_VERSION}" >> ${GITHUB_ENV}
+
+      - name: Configure CMake
+        run: |
+          cmake -S ${{ github.workspace }} -B "${{ github.workspace}}/build" \
+            -DAWESOME_VERSION=$AWESOME_VERSION \
+            -DLUA_LIBRARY=${{ matrix.lua_library || env.LUALIBRARY }} \
+            -DLUA_INCLUDE_DIR=${{ matrix.lua_include_dir || env.LUAINCLUDE }} \
+            -DGENERATE_DOC=${{ matrix.build_api_doc && 'ON' || 'OFF' }} \
+            -DGENERATE_MANPAGES=${{ matrix.build_api_doc && 'ON' || 'OFF' }} \
+            -DDO_COVERAGE=${{ matrix.coverage != '' && 'ON' || 'OFF' }} \
+            -DTEST_MANUAL_SCREENS=${{ matrix.manual_screens }} \
+            -DSTRICT_TESTS=true \
+            -DCMAKE_C_FLAGS="-Werror"
+
+      # Break beautiful so that trying to access the theme before `beautiful.init()` causes an error
+      - name: Patch beautiful for an empty default theme
+        if: matrix.empty_theme_while_loading
+        run: |
+          sed -i -e 's/theme = {}/theme = setmetatable({}, { __index = function() error("May not access theme before beautiful.init()") end })/' lib/beautiful/init.lua
+          grep -q 'May not access' lib/beautiful/init.lua
+
+      - name: Build
+        run: cd "${{ github.workspace }}/build" && make
+
+      # Executable needs to be run once to provide coverage results
+      - name: Install and run
+        run: |
+          cd "${{ github.workspace }}/build"
+          sudo make install
+          awesome --version
+
+      - name: Run integration tests
+        run: cd "${{ github.workspace }}/build" && make check-integration
+
+      - name: Run unit tests
+        run: cd "${{ github.workspace }}/build" && make check-unit
+
+      - name: Upload code coverage report
+        if: matrix.coverage == 'codecov'
+        run: |
+          luacov
+          bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
+
+      - name: Run examples tests
+        if: matrix.coverage != ''
+        run: cd "${{ github.workspace }}/build" && make check-examples
+
+      - name: Upload code coverage report
+        if: matrix.coverage == 'codecov'
+        run: |
+          luacov
+          bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
+
+      - name: Run requires tests
+        if: matrix.coverage != ''
+        run: cd "${{ github.workspace }}/build" && make check-requires
+
+      - name: Upload code coverage report
+        if: matrix.coverage == 'codecov'
+        run: |
+          luacov
+          bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
+
+      - name: Run themes tests
+        # TODO: This fails for older LGI versions.
+        if: matrix.lgi_version == ''
+        run: cd "${{ github.workspace }}/build" && make check-themes
+
+      - name: Upload code coverage report
+        if: matrix.coverage == 'codecov'
+        run: |
+          luacov
+          bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
+
+      - name: Upload awesome binary coverage report
+        if: matrix.coverage == 'codecov'
+        run: |
+          # Report coverage for each .gcno file separately.
+          # gcov will create .gcov files for the same source (e.g. for
+          # globalconf.h from awesome.c.gcno and event.c.gcno).
+          i=0
+          cd "${{ github.workspace }}/build"
+          find -path "*/lgi-check.dir" -prune -o \( -name '*.gcno' -print \) | while read -r gcno; do
+            gcov -pb "$gcno"
+
+            mkdir gcov.$(( ++i ))
+            mv *.gcov "gcov.$i"
+
+            # Delete any files for /usr.
+            # They are not relevant and might cause "Invalid path part" errors
+            # with Code Climate.
+            find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
+          done
+
+          # Upload to Codecov.
+          bash /tmp/codecov-bash -X gcov -X coveragepy -F gcov
+
+      - name: Merge coverage
+        if: matrix.coverage == 'coveralls'
+        # Coveralls doesn't support GitHub Actions with `service_name` + `service_job_id` (yet?),
+        # but `luacov-coveralls` behaves as if they did by default.
+        # We need to explicitly remove the `service_name`, so that Coveralls uses the
+        # `repo_token` instead.
+        # See "Referencing a repository": https://docs.coveralls.io/api-introduction
+        run: |
+          luacov-coveralls \
+            --verbose \
+            --merge \
+            --repo-token ${{ secrets.COVERALLS_REPO_TOKEN }} \
+            --service-name ""
+
+      # `check-qa` is the only test that doesn't get a coverage report, so it has to run after all of that.
+      - name: Run qa tests
+        if: matrix.check_qa
+        run: cd "${{ github.workspace }}/build" && make check-qa
+
+      # Check each commit separately (to make git-bisect less annoying).
+      - name: Test previous commits
+        if: matrix.test_prev_commits && github.event_name == 'pull_request'
+        run: |
+          # `actions/checkout` creates a shallow repo (`--depth 1`) by default,
+          # which is fine for everything up until now. But we need individual commits now.
+          # And we only want to unshallow now, to not slow down the checkout for other jobs.
+          git fetch --unshallow
+
+          rev_list="$(git rev-list --bisect-all origin/${{ github.base_ref }}..origin/${{ github.head_ref }})"
+          commits="$(echo "$rev_list" | grep -v 'dist=0' | cut -d' ' -f 1)"
+          n="$(echo "$commits" | wc -l)"
+
+          echo "Testing $n commits: $commits"
+
+          failed=""
+          for commit in $commits; do
+            echo "Testing commit $commit"
+
+            # Some files are updated when compiling...
+            git reset --hard
+            git checkout --force "$commit"
+            git --no-pager show --stat --oneline
+
+            cmake -S ${{ github.workspace }} -B "${{ github.workspace}}/build" \
+              -DAWESOME_VERSION=$AWESOME_VERSION \
+              -DLUA_EXECUTABLE=`which ${{ matrix.lua_name }}` \
+              -DLUA_LIBRARY=${{ matrix.lua_library || env.LUALIBRARY }} \
+              -DLUA_INCLUDE_DIR=${{ matrix.lua_include_dir || env.LUAINCLUDE }} \
+              -DGENERATE_DOC=OFF \
+              -DGENERATE_MANPAGES=OFF \
+              -DDO_COVERAGE=OFF \
+              -DTEST_MANUAL_SCREENS=${{ matrix.manual_screens }} \
+              -DSTRICT_TESTS=true \
+              -DCMAKE_C_FLAGS="-Werror"
+
+            cd "${{ github.workspace}}/build"
+            if ! ( make && make check-unit ); then
+              failed="$failed $commit"
+            fi
+          done
+
+          git checkout -qf ${{ github.head_ref }}
+          if [ -n "$failed" ]; then
+            echo "Checks failed for these commits:"
+
+            for c in $failed; do
+              git show --no-patch --pretty="%h %s (%an, %ad)" "$c"
+            done
+
+            exit 1
+          fi
+
