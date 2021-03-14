@@ -456,6 +456,16 @@ add_custom_tag {
     },
 }
 
+-- Define the supermodule class.
+-- This tag should be used at the module level. All properties from the
+-- supermodule will be recursively added to the module by our ldoc template.
+-- @supermodule supermodule
+add_custom_tag {
+    name = "supermodule",
+    hiden = true,
+    auto_subtags = false
+}
+
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 

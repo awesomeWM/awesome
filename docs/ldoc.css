@@ -503,3 +503,18 @@ pre .url { color: #272fc2; text-decoration: underline; }
 .index_guides div a:hover {
     background-color: #99b3ec;
 }
+
+/* Inheritance diagram */
+.inheritance .inheritance__level {
+    list-style: none;
+}
+
+.inheritance .inheritance__level__node::before {
+    content: "↳";
+}
+
+.inheritance .inheritance__level__node--root::before {
+    /* simulate the spacing of the arrow character */
+    content: "   ";
+    white-space: pre;
+}

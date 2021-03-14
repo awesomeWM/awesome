@@ -43,6 +43,29 @@
 # local html_space = function(s) return s:gsub(" ", "%%20") end
 # local no_underscores = function(s) return s:gsub("_", " ") end
 
+# --------- modules hierarchy -------------
+# local hierarchy = {}
+# local curr = module
+# while curr do
+#     hierarchy[#hierarchy + 1] = curr
+#     -- no need to do anything more if there is no explicite @supermodule
+#     if not curr.tags.supermodule then break end
+#     local super = curr.tags.supermodule[1] -- only consider one way inheritance
+#     local found = false
+#     for kind, mods, type in ldoc.kinds() do
+#         for mod in mods() do
+#             local name = display_name(mod)
+#             if name == super then
+#                 curr = mod
+#                 found = true
+#             end
+#             if found then break end
+#         end
+#         if found then break end
+#     end
+#     if not found then curr = nil end
+# end
+
 <!-- Menu -->
 
 <div id="navigation">
@@ -109,6 +132,36 @@
 <h1>Module: <code>$(module.name)</code></h1>
 <p>$(M(module.summary,module))</p>
 <p>$(M(module.description,module))</p>
+
+# if module.tags.supermodule or module.tags.knownusage then
+    <h3>Class Hierarchy</h3>
+    <div class="inheritance">
+# local function draw_hierary_recursifly(i)
+    <ul class="inheritance__level">
+#   if i == #hierarchy then
+        <li class="inheritance__level__node inheritance__level__node inheritance__level__node--root">
+#   else
+        <li class="inheritance__level__node inheritance__level__node">
+#   end
+#   local mod = hierarchy[i]
+#   local name = display_name(hierarchy[i])
+#   if mod == module then
+            <strong>$(name)</strong>
+#   else
+            <a href="$(ldoc.ref_to_module(mod))">$(name)</a>
+#   end
+        </li>
+#   if i > 1 then
+        <li>
+#           draw_hierary_recursifly(i - 1)
+        </li>
+#   end
+    </ul>
+# end
+# draw_hierary_recursifly(#hierarchy)
+    </div>
+# end
+
 #   if module.tags.include then
         $(M(ldoc.include_file(module.tags.include)))
 #   end
