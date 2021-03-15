@@ -66,6 +66,57 @@
 #     if not found then curr = nil end
 # end
 
+# --------- merge modules content with supermodules -------------
+# local all_module_kinds = {}
+# if module then
+# for kind,items in module.kinds() do
+#     local myitems = {}
+#     for item in items() do
+#         myitems[#myitems + 1] = item
+#      end
+#     all_module_kinds[#all_module_kinds + 1] = { kind = kind,  items = myitems }
+# end
+# local filtered_kinds = { "Constructors", "Static module functions",
+#   "Functions", "Methods", "lib.gears.object.properties Functions" }
+# for supermodule in iter(hierarchy) do
+#     for kind,items in supermodule.kinds() do
+#         local ignored = false
+#         for _,filtered in ldoc.pairs(filtered_kinds) do
+#             if kind == filtered then
+#                 ignored = true
+#                 break
+#             end
+#         end
+#         if not ignored then
+#             local curr_kind = nil
+#             for k in iter(all_module_kinds) do
+#                 if k.kind == kind then
+#                     curr_kind = k
+#                     break
+#                 end
+#             end
+#             if not curr_kind then
+#                 curr_kind  = { kind = kind, items = {} }
+#                 all_module_kinds[#all_module_kinds + 1] = curr_kind
+#             end
+#             for item in items() do
+#                 local tobeadded = true
+#                 for i in iter(curr_kind.items) do
+#                     if item == i then
+#                         tobeadded = false
+#                         break
+#                     end
+#                 end
+#                 if tobeadded then
+#                     item.inherited = true -- force inherited status
+#                     curr_kind.items[#curr_kind.items + 1] = item
+#                 end
+#             end
+#         end
+#     end
+# end
+# end
+
 <!-- Menu -->
 
 <div id="navigation">
@@ -82,7 +133,8 @@
 # if module and not ldoc.no_summary and #module.items > 0 then
 <h2>Contents</h2>
 <ul>
-# for kind,items in module.kinds() do
+# for k in iter(all_module_kinds) do
+#  local kind = k.kind
 #  if not kind:match("^ldoc_skip") then
 <li><a href="#$(no_spaces(kind))">$(kind)</a></li>
 # end
@@ -196,7 +248,8 @@
 # if not ldoc.no_summary then
 # -- bang out the tables of item types for this module (e.g Functions, Tables, etc)
 # local last_kind = ""
-# for kind,items in module.kinds() do
+# for k in iter(all_module_kinds) do
+#  local kind = k.kind
 #  if not kind:match("^ldoc_skip") then
 #   if last_kind ~= "" then
 </table>
@@ -204,7 +257,7 @@
 <h2><a href="#$(no_spaces(kind))">$(kind)</a></h2>
 <table class="function_list">
 #  end
-#  for item in items() do
+#  for item in iter(k.items) do
 #   local dn = display_name(item)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
     <tr>
@@ -240,7 +293,8 @@
 # --- function parameters or table fields.
 # local show_return = not ldoc.no_return_or_parms
 # local show_parms, last_kind = show_return, ""
-# for kind, items in module.kinds() do
+# for k in iter(all_module_kinds) do
+#  local kind = k.kind
 #   local kitem = module.kinds:get_item(kind)
 #   local has_description = kitem and ldoc.descript(kitem) ~= ""
 #   if not kind:match("^ldoc_skip") then
@@ -264,7 +318,7 @@
 #  if not kind:match("^ldoc_skip") then
     <dl class="function">
 #  end
-#  for item in items() do
+#  for item in iter(k.items) do
     <dt>
     <a name = "$(item.name)"></a>
     <strong>$(display_name(item))</strong>
