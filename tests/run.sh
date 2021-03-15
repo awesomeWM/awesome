@@ -185,6 +185,20 @@ fi
 start_awesome() {
     cd "$build_dir"
 
+    # On some systems clients from a test may still linger for a while until they
+    # are fully killed. Since this can affect susequent tests, we wait until all
+    # of them are gone.
+    # The check command needs to call `xlsclients` twice:
+    # 1. Test the stdout of `xlsclients` and make sure there are no clients left.
+    # 2. Check and fail if `xlsclients` itself fails. Print its stderr, if any.
+    # This is due to the fact that, if `xlsclient` return non-0, the `wc` would
+    # still report `0`. The order of commands makes sure that `xlsclient` is only
+    # called twice when needed. If there are still clients left, the `[` will
+    # shotcurcuit.
+    wait_until_success \
+        'wait for X clients from previous test to close' \
+        "[ \$(DISPLAY="$D" xlsclients | wc -l) -eq 0 ] && DISPLAY="$D" xlsclients > /dev/null"
+
     # Kill awesome after $TEST_TIMEOUT seconds (e.g. for errors during test setup).
     # SOURCE_DIRECTORY is used by .luacov.
     DISPLAY="$D" SOURCE_DIRECTORY="$source_dir" \

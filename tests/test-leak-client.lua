@@ -85,12 +85,25 @@ local steps = {
             -- Test that we have a client and that it's invalid (tostring()
             -- causes an "invalid object" error)
             local success, msg = pcall(function() tostring(objs[1]) end)
-            assert(not success)
+            assert(not success, msg)
             assert(msg:find("invalid object"), msg)
 
             -- Check that it is garbage-collectable
             collectgarbage("collect")
-            assert(#objs == 0)
+
+            -- On GitHub Actions, it can take a while for clients to be killed
+            -- properly.
+            local tries = 0
+            while (#objs > 0 and tries < 60) do
+                os.execute("sleep 1")
+                tries = tries + 1
+            end
+
+            if tries > 0 then
+                print("Took approx. " .. tries .. " seconds to clean leaked client")
+            end
+
+            assert(#objs == 0, "still clients left after garbage collect")
             return true
         end
     end,
