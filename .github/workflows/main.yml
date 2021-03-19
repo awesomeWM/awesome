@@ -32,7 +32,7 @@ jobs:
           - "coveralls-lua5.2"
           - "lua5.1"
           - "luajit"
-          - "oldlgi-lua5.2"
+          - "fixed-lgi-lua5.2"
         include:
           - test_name: "codecov-lua5.3"
             lua_version: "5.3"
@@ -57,11 +57,11 @@ jobs:
             lua_include: "/usr/include/luajit-2.1"
             luarocks_args: "--lua-suffix=jit-2.1.0-beta3"
 
-          # Lua 5.2 with older lgi and screen size not divisible by 2.
-          - test_name: "oldlgi-lua5.2"
+          # Lua 5.2 with fixed lgi version and screen size not divisible by 2.
+          - test_name: "fixed-lgi-lua5.2"
             lua_version: "5.2"
             lua_name: "lua5.2"
-            lgi_version: "0.8.0"
+            lgi_version: "0.9.2"
             tests_screen_size: "1921x1079"
             check_qa: true
             empty_theme_while_loading: true
@@ -318,8 +318,6 @@ jobs:
           bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
 
       - name: Run themes tests
-        # TODO: This fails for older LGI versions.
-        if: matrix.lgi_version == ''
         run: cd "${{ github.workspace }}/build" && make check-themes
 
       - name: Upload code coverage report
