@@ -291,42 +291,24 @@ jobs:
       - name: Run unit tests
         run: cd "${{ github.workspace }}/build" && make check-unit
 
-      - name: Upload code coverage report
-        if: matrix.coverage == 'codecov'
-        run: |
-          luacov
-          bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
-
       - name: Run examples tests
         if: matrix.coverage != ''
         run: cd "${{ github.workspace }}/build" && make check-examples
-
-      - name: Upload code coverage report
-        if: matrix.coverage == 'codecov'
-        run: |
-          luacov
-          bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
 
       - name: Run requires tests
         if: matrix.coverage != ''
         run: cd "${{ github.workspace }}/build" && make check-requires
 
-      - name: Upload code coverage report
-        if: matrix.coverage == 'codecov'
-        run: |
-          luacov
-          bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
-
       - name: Run themes tests
         run: cd "${{ github.workspace }}/build" && make check-themes
 
-      - name: Upload code coverage report
+      - name: Upload Lua code coverage report
         if: matrix.coverage == 'codecov'
         run: |
           luacov
           bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
 
-      - name: Upload awesome binary coverage report
+      - name: Upload C code coverage report
         if: matrix.coverage == 'codecov'
         run: |
           # Report coverage for each .gcno file separately.
