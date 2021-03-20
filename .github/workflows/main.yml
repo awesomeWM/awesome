@@ -95,7 +95,7 @@ jobs:
           path: /tmp/apt/*.deb
           # The trailing number serves as a version flag that can be incremented
           # to invalidate the cache after changing the list of packages.
-          key: ${{ runner.os }}-${{ steps.get-date.outputs.date }}-apt-3
+          key: ${{ github.workflow }}-${{ runner.os }}-${{ steps.get-date.outputs.date }}-apt-3
 
       - name: Download apt packages
         if: steps.cache-apt.outputs.cache-hit != 'true'
@@ -158,7 +158,7 @@ jobs:
         with:
           path: /tmp/luarocks
           # The build input for luarocks changes per test, so we need separate caches
-          key: ${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.5.0
+          key: ${{ github.workflow }}-${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.5.0
 
       - name: Install fresh Luarocks
         if: steps.cache-luarocks.outputs.cache-hit != 'true'
@@ -184,7 +184,7 @@ jobs:
           path: /tmp/xcb-errors
           # xcb-errors doesn't have versioned releases, so we checkout and cache by commit.
           # Make sure to keep this in sync with the `git checkout` below.
-          key: ${{ runner.os }}-xcb-errors-5d660ebe872cadcdc85de9d6f9afe05de629c030
+          key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-5d660ebe872cadcdc85de9d6f9afe05de629c030
 
       - name: Install fresh xcb-errors
         if: steps.cache-xcb-errors.outputs.cache-hit != 'true'
@@ -261,8 +261,8 @@ jobs:
             -DAWESOME_VERSION=$AWESOME_VERSION \
             -DLUA_LIBRARY=${{ matrix.lua_library || env.LUALIBRARY }} \
             -DLUA_INCLUDE_DIR=${{ matrix.lua_include_dir || env.LUAINCLUDE }} \
-            -DGENERATE_DOC=${{ matrix.build_api_doc && 'ON' || 'OFF' }} \
-            -DGENERATE_MANPAGES=${{ matrix.build_api_doc && 'ON' || 'OFF' }} \
+            -DGENERATE_DOC=OFF \
+            -DGENERATE_MANPAGES=OFF \
             -DDO_COVERAGE=${{ matrix.coverage != '' && 'ON' || 'OFF' }} \
             -DTEST_MANUAL_SCREENS=${{ matrix.manual_screens }} \
             -DSTRICT_TESTS=true \
