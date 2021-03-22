@@ -99,6 +99,7 @@ end
 local function client_widget(c, col, label)
     local geo = c:geometry()
     local bw = c.border_width or beautiful.border_width or 0
+    local bc = c.border_color or beautiful.border_color
 
     local l = wibox.layout.align.vertical()
     l.fill_space = true
@@ -144,7 +145,7 @@ local function client_widget(c, col, label)
             layout = wibox.layout.stack
         },
         border_width = bw,
-        border_color = beautiful.border_color,
+        border_color = bc,
         shape_clip   = true,
         fg           = beautiful.fg_normal or "#000000",
         bg           = col,
