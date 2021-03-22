@@ -4,7 +4,7 @@ local awful = {tag = require("awful.tag"), layout = require("awful.layout") } --
 screen[1]._resize {x = 0, width = 128, height = 96} --DOC_HIDE
 
 
-function awful.spawn(_, args) --DOC_HIDE
+function awful.spawn(_) --DOC_HIDE
     local c = client.gen_fake{x = 10, y = 10, height=50, width=50} --DOC_HIDE
     c:tags{screen[1].tags[1]} --DOC_HIDE
 end --DOC_HIDE
