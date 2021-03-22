@@ -7,6 +7,34 @@ describe("gears.table", function()
         assert.is.same(gtable.keys(t), { 1, 2, "a" })
     end)
 
+    describe("gears.table.count_keys", function()
+        it("counts keys in an empty table", function()
+            local t = {}
+            assert.is.same(gtable.count_keys(t), 0)
+        end)
+
+        it("counts keys in a sparse array", function()
+            local t = { 1, nil, 3 }
+            assert.is.same(gtable.count_keys(t), 2)
+        end)
+
+        it("counts keys in a regular array", function()
+            local t = { 1, 2, 3 }
+            assert.is.same(gtable.count_keys(t), 3)
+        end)
+
+        it("counts keys in a hash table", function()
+            local t = { a = 1, b = "2", c = true }
+            assert.is.same(gtable.count_keys(t), 3)
+        end)
+
+        it("counts keys in a mixed table", function()
+            local t = { 1, a = 2, nil, 4 }
+            assert.is.same(gtable.count_keys(t), 3)
+        end)
+
+    end)
+
     it("table.keys_filter", function()
         local t = { "a", 1, function() end, false}
         assert.is.same(gtable.keys_filter(t, "number", "function"), { 2, 3 })
