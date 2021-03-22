@@ -242,11 +242,28 @@ local function gen_cls(c,results)
     return ret
 end
 
+local function get_all_tag_clients(t)
+    local s = t.screen
+
+    local clients = gtable.clone(t:clients(), false)
+
+    for _, c in ipairs(s.clients) do
+        if c.sticky then
+            if not gtable.hasitem(clients, c) then
+                table.insert(clients, c)
+            end
+        end
+    end
+
+    return clients
+end
+
 local function fake_arrange(tag)
     local cls,results,flt = {},setmetatable({},{__mode="k"}),{}
-    local _, l = tag.screen, tag.layout
+    local l = tag.layout
     local focus, focus_wrap = capi.client.focus, nil
-    for _ ,c in ipairs (tag:clients()) do
+
+    for _ ,c in ipairs (get_all_tag_clients(tag)) do
         -- Handle floating client separately
         if not c.minimized then
             local floating = c.floating
@@ -758,7 +775,7 @@ function module.display_tags()
                     master_width_factor = t.master_width_factor,
                     client_geo          = fake_arrange(t),
                 })
-                assert(#st[#st].client_geo == #t:clients())
+                assert(#st[#st].client_geo == #get_all_tag_clients(t))
             end
             table.insert(ret, {tags=st})
         end

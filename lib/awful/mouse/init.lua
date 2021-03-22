@@ -31,12 +31,25 @@ local mouse = {
 mouse.object = {}
 mouse.wibox = {}
 
---- The default snap distance.
+--- The default distance before snapping clients together.
+--
+-- @DOC_screen_client_snap_EXAMPLE@
+--
 -- @tfield integer awful.mouse.snap.default_distance
 -- @tparam[opt=8] integer default_distance
 -- @see awful.mouse.snap
 
+--- The default distance before activating screen edge snap.
+-- @tfield integer awful.mouse.snap.aerosnap_distance
+-- @tparam[opt=16] integer default_distance
+-- @see awful.mouse.snap
+
 --- Enable screen edges snapping.
+--
+--
+--
+--@DOC_awful_placement_aero_snap_EXAMPLE@
+--
 -- @tfield[opt=true] boolean awful.mouse.snap.edge_enabled
 
 --- Enable client to client snapping.
@@ -57,9 +70,9 @@ mouse.wibox = {}
 -- @beautiful beautiful.snap_shape
 -- @tparam function shape A `gears.shape` compatible function
 
---- The gap between snapped contents.
+--- The gap between snapped clients.
 -- @beautiful beautiful.snapper_gap
--- @tparam number (default: 0)
+-- @tparam[opt=0] number snapper_gap
 
 --- Get the client object under the pointer.
 -- @deprecated awful.mouse.client_under_pointer

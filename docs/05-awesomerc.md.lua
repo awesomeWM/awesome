@@ -18,10 +18,15 @@ The Awesome API is distributed across many libraries (also called modules).
 Here are the modules that we import:
 
 <table class='widget_list' border=1>
+  <tr style='font-weight: bold;'>
+   <th align='center'>Library</th>
+   <th align='center'>Description</th>
+  </tr>
   <tr><td>`gears`</td><td>Utilities such as color parsing and objects</td></tr>
   <tr><td>`wibox`</td><td>Awesome own generic widget framework</td></tr>
   <tr><td>`awful`</td><td>Everything related to window managment</td></tr>
   <tr><td>`naughty`</td><td>Notifications</td></tr>
+  <tr><td>`ruled`</td><td>Define declarative rules on various events</td></tr>
   <tr><td>`menubar`</td><td>XDG (application) menu implementation</td></tr>
   <tr><td>`beautiful`</td><td>Awesome theme module</td></tr>
 </table>

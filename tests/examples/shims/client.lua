@@ -1,4 +1,5 @@
 local gears_obj = require("gears.object")
+local grect = require("gears.geometry").rectangle
 
 local clients = {}
 
@@ -71,6 +72,7 @@ function client.gen_fake(args)
     ret.valid = true
     ret.size_hints = {}
     ret._border_width = 1
+    ret._tags = args and args.tags or nil
     ret.icon_sizes = {{16,16}}
     ret.name = "Example Client"
     ret._private._struts = { top = 0, right = 0, left = 0, bottom = 0 }
@@ -98,7 +100,14 @@ function client.gen_fake(args)
 
     -- Emulate capi.client.geometry
     function ret:geometry(new)
-        if new then
+        local new_full = new and {
+            x      = new.x or ret.x,
+            y      = new.y or ret.y,
+            width  = new.width  or ret.width,
+            height = new.height or ret.height,
+        } or nil
+
+        if new and not grect.are_equal(ret, new_full) then
             for k,v in pairs(new) do
                 ret[k] = v
                 ret:emit_signal("property::"..k, v)
@@ -128,6 +137,12 @@ function client.gen_fake(args)
     -- Used for screenshots, hide the current client position
     function ret:_hide()
         ret._old_geo[#ret._old_geo]._hide = true
+    end
+
+    function ret:_hide_all()
+        for _, geo in ipairs(ret._old_geo) do
+            geo._hide = true
+        end
     end
 
     function ret:get_xproperty()

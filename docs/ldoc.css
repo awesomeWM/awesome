@@ -482,3 +482,24 @@ pre .url { color: #272fc2; text-decoration: underline; }
     color: rgb(128, 128, 128);
     border-radius: 7px;
 }
+
+.index_guides div {
+    margin: 0 auto;
+    display: table;
+    margin-bottom: 10px;
+}
+
+.index_guides div a {
+    display: inline-block;
+    border: solid 1px #cccccc;
+    width: 200px;
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.index_guides div a:hover {
+    background-color: #99b3ec;
+}
