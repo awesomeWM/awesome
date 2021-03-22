@@ -2,6 +2,11 @@
 local gtable = require("gears.table")
 
 describe("gears.table", function()
+    it("table.keys", function()
+        local t = { 1, a = 2, 3 }
+        assert.is.same(gtable.keys(t), { 1, 2, "a" })
+    end)
+
     it("table.keys_filter", function()
         local t = { "a", 1, function() end, false}
         assert.is.same(gtable.keys_filter(t, "number", "function"), { 2, 3 })
