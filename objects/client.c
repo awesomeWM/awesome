@@ -667,6 +667,8 @@ lua_class_t client_class;
  * cause several other changes to the state in order to ensure that
  * a client's position and its screen are consistent.
  *
+ * @DOC_sequences_client_screen_EXAMPLE@
+ *
  * @property screen
  * @tparam screen screen
  * @propemits false false
@@ -714,18 +716,79 @@ lua_class_t client_class;
  * @property border_width
  * @tparam integer border_width
  * @propemits false false
+ * @usebeautiful beautiful.border_width_active
+ * @usebeautiful beautiful.border_width_normal
+ * @usebeautiful beautiful.border_width_new
+ * @usebeautiful beautiful.border_width_urgent
+ * @usebeautiful beautiful.border_width_floating
+ * @usebeautiful beautiful.border_width_floating_active
+ * @usebeautiful beautiful.border_width_floating_normal
+ * @usebeautiful beautiful.border_width_floating_new
+ * @usebeautiful beautiful.border_width_floating_urgent
+ * @usebeautiful beautiful.border_width_maximized
+ * @usebeautiful beautiful.border_width_maximized_active
+ * @usebeautiful beautiful.border_width_maximized_normal
+ * @usebeautiful beautiful.border_width_maximized_new
+ * @usebeautiful beautiful.border_width_maximized_urgent
+ * @usebeautiful beautiful.border_width_fullscreen
+ * @usebeautiful beautiful.border_width_fullscreen_active
+ * @usebeautiful beautiful.border_width_fullscreen_normal
+ * @usebeautiful beautiful.border_width_fullscreen_new
+ * @usebeautiful beautiful.border_width_fullscreen_urgent
+ * @usebeautiful beautiful.fullscreen_hide_border Hide the border on fullscreen clients.
+ * @usebeautiful beautiful.maximized_hide_border Hide the border on maximized clients.
  * @see request::border
+ * @see awful.permissions.update_border
+ * @see border_color
  */
 
 /**
  * The client border color.
  *
+ * @DOC_awful_client_border_width_EXAMPLE@
+ *
+ * Note that setting this directly will override and disable all related theme
+ * variables.
+ *
  * @property border_color
  * @tparam color border_color Any string, gradients and patterns will be converted to a
  *  cairo pattern.
  * @propemits false false
+ * @usebeautiful beautiful.border_color_marked The fallback color when the
+ *  client is marked.
+ * @usebeautiful beautiful.border_color_active The fallback color when the
+ *  client is active (focused).
+ * @usebeautiful beautiful.border_color_normal The fallback color when the
+ *  client isn't active/floating/new/urgent/maximized/floating/fullscreen.
+ * @usebeautiful beautiful.border_color_new The fallback color when the
+ *  client is new.
+ * @usebeautiful beautiful.border_color_urgent The fallback color when the
+ *  client is urgent.
+ * @usebeautiful beautiful.border_color_floating The fallback color when the
+ *  client is floating and the other colors are not set.
+ * @usebeautiful beautiful.border_color_floating_active The color when the
+ *  client is floating and is active (focused).
+ * @usebeautiful beautiful.border_color_floating_normal The color when the
+ *  client is floating and not new/urgent/active.
+ * @usebeautiful beautiful.border_color_floating_new
+ * @usebeautiful beautiful.border_color_floating_urgent The color when the
+ *  client is floating and urgent.
+ * @usebeautiful beautiful.border_color_maximized
+ * @usebeautiful beautiful.border_color_maximized_active
+ * @usebeautiful beautiful.border_color_maximized_normal
+ * @usebeautiful beautiful.border_color_maximized_new
+ * @usebeautiful beautiful.border_color_maximized_urgent The color when the
+ *  client is urbent and maximized.
+ * @usebeautiful beautiful.border_color_fullscreen
+ * @usebeautiful beautiful.border_color_fullscreen_active
+ * @usebeautiful beautiful.border_color_fullscreen_normal
+ * @usebeautiful beautiful.border_color_fullscreen_new
+ * @usebeautiful beautiful.border_color_fullscreen_urgent The color when the
+ *  client is fullscreen and urgent.
  * @see request::border
+ * @see awful.permissions.update_border
  * @see gears.color
+ * @see border_width
  */
 
 /**
@@ -735,6 +798,22 @@ lua_class_t client_class;
  * @tparam boolean urgent
  * @propemits false false
  * @see request::border
+ * @usebeautiful beautiful.border_color_urgent The fallback color when the
+ *  client is urgent.
+ * @usebeautiful beautiful.border_color_floating_urgent The color when the
+ *  client is floating and urgent.
+ * @usebeautiful beautiful.border_color_maximized_urgent The color when the
+ *  client is urbent and maximized.
+ * @usebeautiful beautiful.border_color_fullscreen_urgent The color when the
+ *  client is fullscreen and urgent.
+ * @usebeautiful beautiful.border_width_urgent The fallback border width when
+ *  the client is urgent.
+ * @usebeautiful beautiful.border_width_floating_urgent The border width when
+ *  the client is floating and urgent.
+ * @usebeautiful beautiful.border_width_maximized_urgent The border width when
+ *  the client is maximized and urgent.
+ * @usebeautiful beautiful.border_width_fullscreen_urgent The border width when
+ *  the client is fullscreen and urgent.
  */
 
 /**
