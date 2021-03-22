@@ -169,6 +169,8 @@ end
 --
 -- This is functionally equivalent, but faster than `#gears.table.keys(t)`.
 --
+-- @DOC_text_gears_table_count_keys_EXAMPLE@
+--
 -- @tparam table t The table for which to count the keys.
 -- @treturn number The number of keys in the table.
 -- @staticfct gears.table.count_keys
