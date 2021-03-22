@@ -1,4 +1,4 @@
---DOC_HIDE DOC_GEN_IMAGE --DOC_HEADER
+--DOC_HIDE --DOC_GEN_IMAGE --DOC_HEADER
 local parent = ... --DOC_NO_USAGE --DOC_HIDE
 local awful = {--DOC_HIDE
     button = require("awful.button"), --DOC_HIDE
