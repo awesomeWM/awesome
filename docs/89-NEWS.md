@@ -45,6 +45,7 @@ This document was last updated at commit v4.3-197-g9085ed631.
   Lua code using `io.popen`. Usage of `io.popen` is still strongly discouraged.
 * `wibox{ input_passthrough = true }` now works correctly. Previously, the
   property could only be set on already-constructed wiboxes.
+* Remove unused first parameter from multiple widget constructors: `wibox.container.place`,  `wibox.container.radialprogressbar`,  `wibox.layout.stack`,  `wibox.widget.slider`.
 
 ## Behavior changes
 
