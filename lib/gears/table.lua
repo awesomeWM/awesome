@@ -149,7 +149,7 @@ function gtable.find_first_key(t, matcher, ordered)
 end
 
 
---- Get a sorted table with all integer keys from a table.
+--- Get a sorted table with all keys from a table.
 --
 -- @tparam table t The table for which the keys to get.
 -- @treturn table A table with keys.
