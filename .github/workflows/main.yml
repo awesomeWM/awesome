@@ -27,12 +27,6 @@ jobs:
       # Let other jobs continue even if one of them fails
       fail-fast: false
       matrix:
-        test_name:
-          - "codecov-lua5.3"
-          - "coveralls-lua5.2"
-          - "lua5.1"
-          - "luajit"
-          - "fixed-lgi-lua5.2"
         include:
           - test_name: "codecov-lua5.3"
             lua_version: "5.3"
