@@ -403,3 +403,4 @@ jobs:
             exit 1
           fi
 
+# vim: filetype=yaml:expandtab:shiftwidth=2:tabstop=2
