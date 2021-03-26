@@ -28,17 +28,14 @@ jobs:
         id: get-date
         run: echo "::set-output name=date::$(/bin/date -u "+%Y%W")"
 
-      - name: Create apt cache directory
-        run: mkdir /tmp/apt
-
       - name: Cache apt packages
         id: cache-apt
         uses: actions/cache@v2
         with:
-          path: /tmp/apt/*.deb
+          path: /var/cache/apt/archives
           # The trailing number serves as a version flag that can be incremented
           # to invalidate the cache after changing the list of packages.
-          key: ${{ github.workflow }}-${{ runner.os }}-${{ steps.get-date.outputs.date }}-apt-2
+          key: ${{ github.workflow }}-${{ runner.os }}-${{ steps.get-date.outputs.date }}-apt-3
 
       - name: Download apt packages
         if: steps.cache-apt.outputs.cache-hit != 'true'
@@ -75,11 +72,10 @@ jobs:
             xutils-dev \
             liblua5.3-dev \
             lua5.3
-          sudo mv /var/cache/apt/archives/*.deb /tmp/apt/
 
       - name: Install downloaded packages
         run: |
-          sudo dpkg -i /tmp/apt/*.deb
+          sudo dpkg -i /var/cache/apt/archives/*.deb
 
       - name: Cache luarocks
         id: cache-luarocks
