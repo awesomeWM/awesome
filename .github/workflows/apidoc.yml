@@ -114,8 +114,6 @@ jobs:
 
       - name: Build Awesome version string
         run: |
-          AWESOME_VERSION=""
-
           # If this workflow is triggered by a pull request, we get a base branch.
           # Otherwise, check if the current commit has a meaningful name.
           if [ -n "${{ github.base_ref }}" ]; then

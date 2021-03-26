@@ -65,10 +65,10 @@ jobs:
 
     env:
       LUA: ${{ matrix.lua_version }}
-      LUAINCLUDE: /usr/include/lua${{ matrix.lua_version }}
-      LUALIBRARY: /usr/lib/x86_64-linux-gnu/liblua${{ matrix.lua_version }}.so
-      TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size || '' }}
-      SOURCE_DATE_EPOCH: ${{ matrix.source_date_epoch || '' }}
+      LUAINCLUDE: ${{ matrix.lua_include || format('/usr/include/lua{0}', matrix.lua_version) }}
+      LUALIBRARY: ${{ matrix.lua_library || format('/usr/lib/x86_64-linux-gnu/liblua{0}.so', matrix.lua_version) }}
+      TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }}
+      SOURCE_DATE_EPOCH: ${{ matrix.source_date_epoch }}
       TEST_TIMEOUT: '100'
       CI: 'true'
 
@@ -209,7 +209,7 @@ jobs:
           sudo -H luarocks install depgraph
 
       - name: Install cluacov rock
-        if: matrix.coverage != ''
+        if: matrix.coverage
         run: sudo -H luarocks install cluacov
 
       - name: Install coveralls rock
@@ -229,8 +229,6 @@ jobs:
 
       - name: Build Awesome version string
         run: |
-          AWESOME_VERSION=""
-
           # If this workflow is triggered by a pull request, we get a base branch.
           # Otherwise, check if the current commit has a meaningful name.
           if [ -n "${{ github.base_ref }}" ]; then
@@ -253,11 +251,11 @@ jobs:
         run: |
           cmake -S ${{ github.workspace }} -B "${{ github.workspace}}/build" \
             -DAWESOME_VERSION=$AWESOME_VERSION \
-            -DLUA_LIBRARY=${{ matrix.lua_library || env.LUALIBRARY }} \
-            -DLUA_INCLUDE_DIR=${{ matrix.lua_include_dir || env.LUAINCLUDE }} \
+            -DLUA_LIBRARY=$LUALIBRARY \
+            -DLUA_INCLUDE_DIR=$LUAINCLUDE \
             -DGENERATE_DOC=OFF \
             -DGENERATE_MANPAGES=OFF \
-            -DDO_COVERAGE=${{ matrix.coverage != '' && 'ON' || 'OFF' }} \
+            -DDO_COVERAGE=${{ matrix.coverage }} \
             -DTEST_MANUAL_SCREENS=${{ matrix.manual_screens }} \
             -DSTRICT_TESTS=true \
             -DCMAKE_C_FLAGS="-Werror"
@@ -286,11 +284,11 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-unit
 
       - name: Run examples tests
-        if: matrix.coverage != ''
+        if: matrix.coverage
         run: cd "${{ github.workspace }}/build" && make check-examples
 
       - name: Run requires tests
-        if: matrix.coverage != ''
+        if: matrix.coverage
         run: cd "${{ github.workspace }}/build" && make check-requires
 
       - name: Run themes tests
@@ -370,9 +368,8 @@ jobs:
 
             cmake -S ${{ github.workspace }} -B "${{ github.workspace}}/build" \
               -DAWESOME_VERSION=$AWESOME_VERSION \
-              -DLUA_EXECUTABLE=`which ${{ matrix.lua_name }}` \
-              -DLUA_LIBRARY=${{ matrix.lua_library || env.LUALIBRARY }} \
-              -DLUA_INCLUDE_DIR=${{ matrix.lua_include_dir || env.LUAINCLUDE }} \
+              -DLUA_LIBRARY=$LUALIBRARY \
+              -DLUA_INCLUDE_DIR=$LUAINCLUDE \
               -DGENERATE_DOC=OFF \
               -DGENERATE_MANPAGES=OFF \
               -DDO_COVERAGE=OFF \
