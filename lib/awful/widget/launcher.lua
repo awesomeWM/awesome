@@ -11,6 +11,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @widgetmod awful.widget.launcher
+-- @supermodule awful.widget.button
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -49,10 +50,6 @@ end
 function launcher.mt:__call(...)
     return launcher.new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(launcher, launcher.mt)
 

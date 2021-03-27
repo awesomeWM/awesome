@@ -7,6 +7,7 @@
 -- @copyright 2009 Julien Danjou
 -- @copyright 2018 Aire-One
 -- @widgetmod awful.widget.prompt
+-- @supermodule wibox.container.background
 ---------------------------------------------------------------------------
 
 --- The prompt foreground color.
@@ -157,10 +158,6 @@ end
 function widgetprompt.mt:__call(...)
     return widgetprompt.new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(widgetprompt, widgetprompt.mt)
 

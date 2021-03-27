@@ -1,7 +1,10 @@
+---------------------------------------------------------------------------
 --- Container showing the icon of a client.
 -- @author Uli Schlachter
 -- @copyright 2017 Uli Schlachter
 -- @widgetmod awful.widget.clienticon
+-- @supermodule wibox.widget.base
+---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
 local surface = require("gears.surface")
@@ -122,10 +125,6 @@ client.connect_signal("property::icon", function(c)
         end
     end
 end)
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(clienticon, {
     __call = function(_, ...)
