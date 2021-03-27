@@ -259,6 +259,7 @@
 #  end
 #  for item in iter(k.items) do
 #   local dn = display_name(item)
+#   local inherited = item.inherited or (item.baseclass ~= module.name)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
     <tr>
 #   if item.display_type and not item.compact_signature then
@@ -272,8 +273,8 @@
 #     end
       </td>
 #   end
-      <td colspan="$(item.inherited and 1 or 2)" class="summary">$(M(item.summary,item))</td>
-#   if item.inherited then
+      <td colspan="$(inherited and 1 or 2)" class="summary">$(M(item.summary,item))</td>
+#   if inherited then
       <td class="baseclass" $(nowrap)>
         Inherited from $(item.baseclass)
       </td>
@@ -332,8 +333,8 @@
     <span class="proptype">$(item.display_type)</span>
 #   end
     <span class="baseclass" $(nowrap)>
-#   if item.inherited then
-    &middot;&nbsp;Inherited from $(item.baseclass)
+#   if item.inherited or (item.baseclass ~= module.name) then
+    &middot;&nbsp;Inherited from $(M(item.baseclass, item))
 #   end
 #   if item.extra_summary then
 #       for _, col in ldoc.ipairs(item.extra_summary) do
