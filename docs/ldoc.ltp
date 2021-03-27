@@ -102,7 +102,7 @@
 #             for item in items() do
 #                 local tobeadded = true
 #                 for i in iter(curr_kind.items) do
-#                     if item == i then
+#                     if item.name == i.name then
 #                         tobeadded = false
 #                         break
 #                     end
