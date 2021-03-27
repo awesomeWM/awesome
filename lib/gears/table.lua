@@ -176,7 +176,7 @@ end
 -- @staticfct gears.table.count_keys
 function gtable.count_keys(t)
     local count = 0
-    for _, _ in pairs(t) do
+    for _ in pairs(t) do
         count = count + 1
     end
     return count
