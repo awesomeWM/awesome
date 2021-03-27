@@ -20,6 +20,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2014, 2017 Emmanuel Lepage Vallee
 -- @widgetmod wibox.widget.separator
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 local beautiful = require( "beautiful"         )
 local base      = require( "wibox.widget.base" )
@@ -214,10 +215,6 @@ local function new(args)
     rawset(ret, "draw", draw)
     return ret
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(separator, { __call = function(_, ...) return new(...) end })
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

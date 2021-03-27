@@ -4,6 +4,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @widgetmod wibox.widget.textclock
+-- @supermodule wibox.widget.textbox
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -125,10 +126,6 @@ end
 function textclock.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(textclock, textclock.mt)
 

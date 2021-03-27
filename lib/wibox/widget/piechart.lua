@@ -8,6 +8,7 @@
 -- @author Emmanuel Lepage Valle
 -- @copyright 2012 Emmanuel Lepage Vallee
 -- @widgetmod wibox.widget.piechart
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local color     = require( "gears.color"       )
@@ -259,10 +260,6 @@ local function new(data_list)
 
     return ret
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(module, { __call = function(_, ...) return new(...) end })
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

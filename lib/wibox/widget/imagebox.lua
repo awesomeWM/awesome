@@ -21,6 +21,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @widgetmod wibox.widget.imagebox
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local lgi = require("lgi")
@@ -289,10 +290,6 @@ end
 function imagebox.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(imagebox, imagebox.mt)
 
