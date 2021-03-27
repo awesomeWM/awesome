@@ -14,6 +14,7 @@
 -- @author getzze
 -- @copyright 2017 getzze
 -- @layoutmod wibox.layout.grid
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -960,10 +961,6 @@ function grid.mt:__call(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(grid, grid.mt)
 

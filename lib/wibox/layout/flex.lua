@@ -4,6 +4,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @layoutmod wibox.layout.flex
+-- @supermodule wibox.layout.fixed
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -207,10 +208,6 @@ function flex.vertical(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return flex
 

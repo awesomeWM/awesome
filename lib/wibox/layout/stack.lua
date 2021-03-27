@@ -12,6 +12,7 @@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @layoutmod wibox.layout.stack
+-- @supermodule wibox.layout.fixed
 ---------------------------------------------------------------------------
 
 local base  = require("wibox.widget.base" )
@@ -209,10 +210,6 @@ function stack.mt:__call(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(stack, stack.mt)
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

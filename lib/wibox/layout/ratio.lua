@@ -7,6 +7,7 @@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @layoutmod wibox.layout.ratio
+-- @supermodule wibox.layout.flex
 ---------------------------------------------------------------------------
 
 local base  = require("wibox.widget.base" )
@@ -523,10 +524,6 @@ function ratio.vertical(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return ratio
 
