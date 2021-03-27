@@ -5,6 +5,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @containermod wibox.container.rotate
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local error = error
@@ -148,10 +149,6 @@ end
 function rotate.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(rotate, rotate.mt)
 

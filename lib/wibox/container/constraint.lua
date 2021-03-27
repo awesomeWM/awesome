@@ -5,6 +5,7 @@
 -- @author Lukáš Hrázký
 -- @copyright 2012 Lukáš Hrázký
 -- @containermod wibox.container.constraint
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -175,10 +176,6 @@ end
 function constraint.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(constraint, constraint.mt)
 

@@ -6,6 +6,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @containermod wibox.container.background
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -483,10 +484,6 @@ end
 function background.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(background, background.mt)
 
