@@ -210,6 +210,7 @@ end, true)
 --- Set a widget's visibility.
 -- @tparam boolean b Whether the widget is visible.
 -- @method wibox.widget.base:set_visible
+-- @hidden
 function base.widget:set_visible(b)
     if b ~= self._private.visible then
         self._private.visible = b
@@ -246,6 +247,7 @@ end
 --- Is the widget visible?
 -- @treturn boolean
 -- @method wibox.widget.base:get_visible
+-- @hidden
 function base.widget:get_visible()
     return self._private.visible or false
 end
@@ -254,6 +256,7 @@ end
 -- @tparam number o The opacity to use (a number from 0 (transparent) to 1
 -- (opaque)).
 -- @method wibox.widget.base:set_opacity
+-- @hidden
 function base.widget:set_opacity(o)
     if o ~= self._private.opacity then
         self._private.opacity = o
@@ -264,6 +267,7 @@ end
 --- Get the widget's opacity.
 -- @treturn number The opacity (between 0 (transparent) and 1 (opaque)).
 -- @method wibox.widget.base:get_opacity
+-- @hidden
 function base.widget:get_opacity()
     return self._private.opacity
 end
@@ -273,6 +277,7 @@ end
 --   `:fit` method is used.
 -- @see wibox.widget.base:fit_widget
 -- @method wibox.widget.base:set_forced_width
+-- @hidden
 function base.widget:set_forced_width(width)
     if width ~= self._private.forced_width then
         self._private.forced_width = width
@@ -289,6 +294,7 @@ end
 -- @treturn[opt] number The forced width (nil if automatic).
 -- @see fit_widget
 -- @method wibox.widget.base:get_forced_width
+-- @hidden
 function base.widget:get_forced_width()
     return self._private.forced_width
 end
@@ -298,6 +304,7 @@ end
 --   `:fit` method is used.
 -- @see wibox.widget.base:fit_widget
 -- @method wibox.widget.base:set_height
+-- @hidden
 function base.widget:set_forced_height(height)
     if height ~= self._private.forced_height then
         self._private.forced_height = height
@@ -313,6 +320,7 @@ end
 -- actual size is during a `mouse::enter`, `mouse::leave` or button event.
 -- @treturn[opt] number The forced height (nil if automatic).
 -- @method wibox.widget.base:get_forced_height
+-- @hidden
 function base.widget:get_forced_height()
     return self._private.forced_height
 end
@@ -322,6 +330,7 @@ end
 -- This method should be re-implemented by the relevant widgets.
 -- @treturn table children The children.
 -- @method wibox.widget.base:get_children
+-- @hidden
 function base.widget:get_children()
     return {}
 end
@@ -332,6 +341,7 @@ end
 -- all layout and container widgets.
 -- @tparam table children A table composed of valid widgets.
 -- @method wibox.widget.base:set_children
+-- @hidden
 function base.widget:set_children(children) -- luacheck: no unused
     -- Nothing on purpose
 end
@@ -352,6 +362,7 @@ end
 -- its children, contains (directly or indirectly) itself.
 -- @treturn table children The children.
 -- @method wibox.widget.base:get_all_children
+-- @hidden
 function base.widget:get_all_children()
     local ret = {}
     digg_children(ret, self)
@@ -762,6 +773,7 @@ end
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html).
 -- @tparam table args A table containing the widget's disposition.
 -- @method wibox.widget.base:setup
+-- @hidden
 function base.widget:setup(args)
     local f,ids = self.set_widget or self.add or self.set_first,{}
     local w, id = drill(ids, args)
