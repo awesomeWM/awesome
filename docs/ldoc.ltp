@@ -72,7 +72,7 @@
 # for kind,items in module.kinds() do
 #     local myitems = {}
 #     for item in items() do
-#         myitems[#myitems + 1] = item
+#       myitems[#myitems + 1] = item
 #      end
 #     all_module_kinds[#all_module_kinds + 1] = { kind = kind,  items = myitems }
 # end
@@ -257,7 +257,7 @@
 <h2><a href="#$(no_spaces(kind))">$(kind)</a></h2>
 <table class="function_list">
 #  end
-#  for item in iter(k.items) do
+#  for item in iter(k.items) do if not item.tags.hidden then
 #   local dn = display_name(item)
 #   local inherited = item.inherited or (item.baseclass ~= module.name)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
@@ -280,7 +280,7 @@
       </td>
 #   end
     </tr>
-#  end -- for items
+#  end end -- for items
 # last_kind = kind
 #end -- for kinds
 </table>
@@ -319,7 +319,7 @@
 #  if not kind:match("^ldoc_skip") then
     <dl class="function">
 #  end
-#  for item in iter(k.items) do
+#  for item in iter(k.items) do if not item.tags.hidden then
     <dt>
     <a name = "$(item.name)"></a>
     <strong>$(display_name(item))</strong>
@@ -479,7 +479,7 @@
     </span>
 
 </dd>
-# end -- for items
+# end end -- for items
 #  last_kind = kind
 # end -- for kinds
 </dl>

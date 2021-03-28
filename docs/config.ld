@@ -462,7 +462,16 @@ add_custom_tag {
 -- @supermodule supermodule
 add_custom_tag {
     name = "supermodule",
-    hiden = true,
+    hidden = true,
+    auto_subtags = false
+}
+
+-- Mark the item ad hidden.
+-- This tag should be used to hide items from the documentation.
+-- @hidden
+add_custom_tag {
+    name = "hidden",
+    hidden = true,
     auto_subtags = false
 }
 
