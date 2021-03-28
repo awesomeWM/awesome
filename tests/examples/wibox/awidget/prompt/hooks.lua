@@ -24,7 +24,6 @@ local gfs       = require("gears.filesystem") --DOC_HIDE
         -- Spawn method to spawn in the current tag
         {{"Mod1"   }, "Return", function(command)
             clear(awful.spawn(command,{
-                intrusive = true,
                 tag       = mouse.screen.selected_tag
             }))
         end},
