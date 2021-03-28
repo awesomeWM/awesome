@@ -8,6 +8,11 @@ local lgi = require("lgi")
 local Gio = lgi.Gio
 local GdkPixbuf = lgi.GdkPixbuf
 
+local lua_executable = os.getenv("LUA")
+if lua_executable == nil or lua_executable == "" then
+    lua_executable = "lua"
+end
+
 local header = [[
 local lgi = require("lgi")
 local Gdk = lgi.Gdk
@@ -48,7 +53,7 @@ runner.run_steps{
 
     -- Clear the clipboard to get to a known state
     function()
-        spawn.with_line_callback({ "lua", "-e", acquire_and_clear_clipboard },
+        spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
             { exit = function() continue = true end })
         return true
     end,
@@ -79,7 +84,7 @@ runner.run_steps{
 
         -- Now set the clipboard to some text
         continue = false
-        spawn.with_line_callback({ "lua", "-e", acquire_clipboard_text },
+        spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard_text },
             { stdout = function(line)
                 assert(line == "initialisation done",
                     "Unexpected line: " .. line)
@@ -143,7 +148,7 @@ runner.run_steps{
 
         -- Now set the clipboard to an image
         continue = false
-        spawn.with_line_callback({ "lua", "-e", acquire_clipboard_pixbuf },
+        spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard_pixbuf },
             { stdout = function(line)
                 assert(line == "initialisation done",
                     "Unexpected line: " .. line)
