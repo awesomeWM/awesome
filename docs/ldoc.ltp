@@ -259,7 +259,7 @@
 #  end
 #  for item in iter(k.items) do if not item.tags.hidden then
 #   local dn = display_name(item)
-#   local inherited = item.inherited or (item.baseclass ~= module.name)
+#   local inherited = (item.baseclass ~= module.name)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
     <tr>
 #   if item.display_type and not item.compact_signature then
@@ -333,7 +333,7 @@
     <span class="proptype">$(item.display_type)</span>
 #   end
     <span class="baseclass" $(nowrap)>
-#   if item.inherited or (item.baseclass ~= module.name) then
+#   if item.baseclass ~= module.name then
     &middot;&nbsp;Inherited from $(M(item.baseclass, item))
 #   end
 #   if item.extra_summary then
