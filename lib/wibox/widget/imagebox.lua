@@ -161,7 +161,7 @@ end
 --
 -- The image can be a file, a cairo image surface, or an rsvg handle object
 -- (see the [image property](#image)).
--- @method imagebox:set_image
+-- @method set_image
 -- @tparam image image The image to render.
 -- @treturn boolean `true` on success, `false` if the image cannot be used.
 -- @usage my_imagebox:set_image(beautiful.awesome_icon)
@@ -224,7 +224,7 @@ end
 -- Any other parameters will be passed to the clip shape function.
 --
 -- @tparam function|gears.shape clip_shape A `gears_shape` compatible shape function.
--- @method imagebox:set_clip_shape
+-- @method set_clip_shape
 -- @see gears.shape
 -- @see clip_shape
 function imagebox:set_clip_shape(clip_shape, ...)
@@ -243,7 +243,7 @@ end
 --- Should the image be resized to fit into the available space?
 -- @tparam boolean allowed If `false`, the image will be clipped, else it will
 --   be resized to fit into the available space.
--- @method imagebox:set_resize
+-- @method set_resize
 function imagebox:set_resize(allowed)
     self._private.resize_forbidden = not allowed
     self:emit_signal("widget::redraw_needed")
