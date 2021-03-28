@@ -13,22 +13,31 @@ local data = { --DOC_HIDE
 
 
 local l = wibox.layout { --DOC_HIDE
-    forced_height = 100, --DOC_HIDE
-    forced_width  = 100, --DOC_HIDE
+    forced_height = 200, --DOC_HIDE
+    forced_width  = 200, --DOC_HIDE
     spacing       = 5, --DOC_HIDE
     layout        = wibox.layout.flex.vertical --DOC_HIDE
 } --DOC_HIDE
 
-for _, width in ipairs {1, 2, 3, 10} do
+--DOC_NEWLINE
+
+local shapes = {
+    gears.shape.squircle,
+    gears.shape.octogon,
+    gears.shape.rounded_bar,
+    gears.shape.arrow
+}
+
+--DOC_NEWLINE
+
+for _, shape in ipairs(shapes) do
     local w = --DOC_HIDE
 
     wibox.widget {
         max_value = 29, --DOC_HIDE
-        step_width   = width,
+        step_width   = 5,
         step_spacing = 1,
-        step_shape   = function(cr, s_width, height)
-            gears.shape.rounded_rect(cr, s_width, height, 2)
-        end,
+        step_shape   = shape,
         widget       = wibox.widget.graph,
     }
 

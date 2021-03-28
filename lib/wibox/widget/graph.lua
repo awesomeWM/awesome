@@ -27,9 +27,20 @@ local beautiful = require("beautiful")
 
 local graph = { mt = {} }
 
+--- Set the graph border_width.
+--
+--@DOC_wibox_widget_graph_border_width_EXAMPLE@
+--
+-- @property border_width
+-- @tparam number border_width
+-- @propemits true false
+-- @see border_color
+
 --- Set the graph border color.
 --
 -- If the value is nil, no border will be drawn.
+--
+--@DOC_wibox_widget_graph_border_color_EXAMPLE@
 --
 -- @property border_color
 -- @tparam gears.color border_color The border color to set.
@@ -39,6 +50,8 @@ local graph = { mt = {} }
 
 --- Set the graph foreground color.
 --
+--@DOC_wibox_widget_graph_color_EXAMPLE@
+--
 -- @property color
 -- @tparam color color The graph color.
 -- @usebeautiful beautiful.graph_fg
@@ -47,6 +60,8 @@ local graph = { mt = {} }
 
 --- Set the graph background color.
 --
+--@DOC_wibox_widget_graph_background_color_EXAMPLE@
+--
 -- @property background_color
 -- @tparam gears.color background_color The graph background color.
 -- @usebeautiful beautiful.graph_bg
@@ -54,6 +69,8 @@ local graph = { mt = {} }
 -- @see gears.color
 
 --- Set the maximum value the graph should handle.
+--
+-- @DOC_wibox_widget_graph_max_value_EXAMPLE@
 --
 -- If "scale" is also set, the graph never scales up below this value, but it
 -- automatically scales down to make all data fit.
@@ -64,6 +81,8 @@ local graph = { mt = {} }
 
 --- The minimum value.
 --
+-- @DOC_wibox_widget_graph_min_value_EXAMPLE@
+--
 -- Note that the min_value is not supported when used along with the stack
 -- property.
 -- @property min_value
@@ -71,6 +90,8 @@ local graph = { mt = {} }
 -- @propemits true false
 
 --- Set the graph to automatically scale its values. Default is false.
+--
+--@DOC_wibox_widget_graph_scale1_EXAMPLE@
 --
 -- @property scale
 -- @tparam boolean scale
@@ -90,11 +111,15 @@ local graph = { mt = {} }
 --
 -- Note that it isn't supported when used along with stacked graphs.
 --
+--@DOC_wibox_widget_graph_step_spacing_EXAMPLE@
+--
 -- @property step_spacing
 -- @tparam[opt=0] number step_spacing
 -- @propemits true false
 
 --- The step shape.
+--
+--@DOC_wibox_widget_graph_step_shape_EXAMPLE@
 --
 -- @property step_shape
 -- @tparam[opt=rectangle] gears.shape|function step_shape
@@ -103,6 +128,7 @@ local graph = { mt = {} }
 
 --- Set the graph to draw stacks. Default is false.
 --
+--@DOC_wibox_widget_graph_stacked_EXAMPLE@
 -- @property stack
 -- @tparam boolean stack
 -- @propemits true false
@@ -130,7 +156,7 @@ local graph = { mt = {} }
 local properties = { "width", "height", "border_color", "stack",
                      "stack_colors", "color", "background_color",
                      "max_value", "scale", "min_value", "step_shape",
-                     "step_spacing", "step_width" }
+                     "step_spacing", "step_width", "border_width" }
 
 function graph.draw(_graph, _, cr, width, height)
     local max_value = _graph._private.max_value
@@ -141,8 +167,9 @@ function graph.draw(_graph, _, cr, width, height)
     local step_shape = _graph._private.step_shape
     local step_spacing = _graph._private.step_spacing or 0
     local step_width = _graph._private.step_width or 1
+    local bw = _graph._private.border_width or 1
 
-    cr:set_line_width(1)
+    cr:set_line_width(bw)
 
     -- Draw the background first
     cr:set_source(color(_graph._private.background_color or beautiful.graph_bg or "#000000aa"))
@@ -150,9 +177,10 @@ function graph.draw(_graph, _, cr, width, height)
 
     -- Account for the border width
     cr:save()
+
     if _graph._private.border_color then
-        cr:translate(1, 1)
-        width, height = width - 2, height - 2
+        cr:translate(bw, bw)
+        width, height = width - 2*bw, height - 2*bw
     end
 
     -- Draw a stacked graph
@@ -239,10 +267,10 @@ function graph.draw(_graph, _, cr, width, height)
     -- Draw the border last so that it overlaps already drawn values
     if _graph._private.border_color then
         -- We decremented these by two above
-        width, height = width + 2, height + 2
+        width, height = width + 2*bw, height + 2*bw
 
         -- Draw the border
-        cr:rectangle(0.5, 0.5, width - 1, height - 1)
+        cr:rectangle(bw/2, bw/2, width - bw, height - bw)
         cr:set_source(color(_graph._private.border_color or beautiful.graph_border_color or "#ffffff"))
         cr:stroke()
     end
@@ -277,7 +305,7 @@ function graph:add_value(value, group)
     table.insert(values, value)
 
     local border_width = 0
-    if self._private.border_color then border_width = 2 end
+    if self._private.border_color then border_width = self._private.border_width*2 end
 
     -- Ensure we never have more data than we can draw
     while #values > self._private.width - border_width do
