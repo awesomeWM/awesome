@@ -59,6 +59,7 @@ local traceback = debug.traceback
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 local glib = require("lgi").GLib
 local object = require("gears.object")
+local gtable = require("gears.table")
 local protected_call = require("gears.protected_call")
 local gdebug = require("gears.debug")
 
@@ -87,11 +88,11 @@ local timer = { mt = {} }
 -- @method start
 -- @emits start
 function timer:start()
-    if self.data.source_id ~= nil then
+    if self._private.source_id ~= nil then
         gdebug.print_error(traceback("timer already started"))
         return
     end
-    self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
+    self._private.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self._private.timeout * 1000, function()
         protected_call(self.emit_signal, self, "timeout")
         return true
     end)
@@ -102,12 +103,12 @@ end
 -- @method stop
 -- @emits stop
 function timer:stop()
-    if self.data.source_id == nil then
+    if self._private.source_id == nil then
         gdebug.print_error(traceback("timer not started"))
         return
     end
-    glib.source_remove(self.data.source_id)
-    self.data.source_id = nil
+    glib.source_remove(self._private.source_id)
+    self._private.source_id = nil
     self:emit_signal("stop")
 end
 
@@ -118,7 +119,7 @@ end
 -- @emits start
 -- @emits stop
 function timer:again()
-    if self.data.source_id ~= nil then
+    if self._private.source_id ~= nil then
         self:stop()
     end
     self:start()
@@ -134,24 +135,28 @@ end
 -- @param number
 -- @propemits true false
 
-local timer_instance_mt = {
-    __index = function(self, property)
-        if property == "timeout" then
-            return self.data.timeout
-        elseif property == "started" then
-            return self.data.source_id ~= nil
-        end
+function timer:get_timeout()
+    return self._private.timeout
+end
 
-        return timer[property]
-    end,
+function timer:get_started()
+    return self._private.source_id ~= nil
+end
 
-    __newindex = function(self, property, value)
-        if property == "timeout" then
-            self.data.timeout = tonumber(value)
-            self:emit_signal("property::timeout", value)
-        end
+function timer:set_started(value)
+    if value == self:get_started() then return end
+
+    if value then
+        self:start()
+    else
+        self:stop()
     end
-}
+end
+
+function timer:set_timeout(value)
+    self._private.timeout = tonumber(value)
+    self:emit_signal("property::timeout", value)
+end
 
 --- Create a new timer object.
 -- @tparam table args Arguments.
@@ -165,10 +170,33 @@ local timer_instance_mt = {
 -- @constructorfct gears.timer
 function timer.new(args)
     args = args or {}
-    local ret = object()
+    local ret = object {
+        enable_properties   = true,
+        enable_auto_signals = true,
+    }
 
-    ret.data = { timeout = 0 } --TODO v5 rename to ._private
-    setmetatable(ret, timer_instance_mt)
+    gtable.crush(ret, timer, true)
+
+    rawset(ret, "_private", { timeout = 0 })
+
+    -- Preserve backward compatibility with Awesome 4.0-4.3 use of "data"
+    -- rather then "_private".
+    rawset(ret, "data", setmetatable({}, {
+        __index = function(_, key)
+            gdebug.deprecate(
+                "gears.timer.data is deprecated, use normal properties",
+                {deprecated_in=5}
+            )
+            return ret._private[key]
+        end,
+        __newindex = function(_, key, value)
+            gdebug.deprecate(
+                "gears.timer.data is deprecated, use normal properties",
+                {deprecated_in=5}
+            )
+            ret._private[key] = value
+        end
+    }))
 
     for k, v in pairs(args) do
         ret[k] = v

@@ -373,50 +373,6 @@ Code:
         layout = wibox.layout.fixed.horizontal,
     }
 
-
-
-### Accessing widgets
-
-For each widget or container, it is possible to add an `identifier` attribute
-so that it can be accessed later.
-
-Widgets defined using `setup` can be accessed using these methods:
-
-* Avoiding the issue by using externally created widgets
-* Using `my_wibox.my_first_widget.my_second_widget` style access
-* Using JavaScript like `my_wibox:get_children_by_id("my_second_widget")[1]`
-
-The first method mixes the imperative and declarative syntax, and makes the code
-less readable. The second is a little verbose and only works if every node in
-the chain has a valid identifier. The last one doesn't require long paths,
-but it is not easy to get a specific instance if multiple widgets have the
-same identifier.
-
-WARNING: The widget identifier must not use a reserved name. This includes all
-method names, existing widget attributes, `layout` and `widget`. Names should
-also respect the Lua variable conventions (case-sensitive, alphanumeric,
-underscore characters and non-numeric first character).
-
-Code:
-
-    s.mywibox : setup {
-        {
-            id     = "second",
-            widget = wibox.widget.textbox
-        },
-        {
-            id     = "third",
-            widget = wibox.widget.textbox
-        },
-        id     = "first",
-        layout = wibox.layout.fixed.horizontal,
-    }
-
-    s.mywibox.first.second:set_markup("changed!")
-    s.mywibox:get_children_by_id("third")[1]:set_markup("Also changed!")
-
-
-
 ### Extending the system
 
 This system is very flexible. Each section attribute (the entries with string
@@ -518,3 +474,99 @@ necessary for three reasons:
    at a later time (by the parent widget).
  * The code is highly redundant and some of the logic is delegated to the parent
    widget to simplify everything.
+
+## Accessing and updating widgets
+
+There is 3 main ways to update the widgets. Each is best suited for it's own niche.
+Choose the one that better suites the style of your code.
+
+### Imperative
+
+For each widget or container, it is possible to add an `identifier` attribute
+so that it can be accessed later.
+
+Widgets defined using `setup` can be accessed using these methods:
+
+* Avoiding the issue by using externally created widgets
+* Using `my_wibox.my_first_widget.my_second_widget` style access
+* Using JavaScript like `my_wibox:get_children_by_id("my_second_widget")[1]`
+
+The first method mixes the imperative and declarative syntax, and makes the code
+less readable. The second is a little verbose and only works if every node in
+the chain has a valid identifier. The last one doesn't require long paths,
+but it is not easy to get a specific instance if multiple widgets have the
+same identifier.
+
+WARNING: The widget identifier must not use a reserved name. This includes all
+method names, existing widget attributes, `layout` and `widget`. Names should
+also respect the Lua variable conventions (case-sensitive, alphanumeric,
+underscore characters and non-numeric first character).
+
+Code:
+
+    s.mywibox : setup {
+        {
+            id     = "second",
+            widget = wibox.widget.textbox
+        },
+        {
+            id     = "third",
+            widget = wibox.widget.textbox
+        },
+        id     = "first",
+        layout = wibox.layout.fixed.horizontal,
+    }
+
+    s.mywibox.first.second:set_markup("changed!")
+    s.mywibox:get_children_by_id("third")[1]:set_markup("Also changed!")
+
+### Reactive
+
+![Reactive update](../images/gears_reactive.svg)
+
+Think of reactive programming like Excel/Spreadsheets. You define rules or even
+business logic that will automatically be re-evaluated every time the data it
+uses changes. In the background, this rewrites the function and automatically
+creates all the signal connections. Lua is not a reactive language, so it has it's
+limits and you should read the rules defined in the `gears.reactive` documentation
+carefully. However, when it works, it is by far the simplest way to update a
+widget defined using the declarative syntax.
+
+#### Reactive expressions
+
+A reactive expression is just a function wrapped by a `gears.reactive` object. This
+will introspect the content and write all the boilerplate. Note that this *only* works
+in declarative trees. It *cannot* be mixed with the imperative API.
+
+@DOC_wibox_decl_doc_reactive_expr1_EXAMPLE@
+
+Unlike QML, AwesomeWM also support extracting reactive blocks out of the tree:
+
+@DOC_wibox_decl_doc_reactive_expr2_EXAMPLE@
+
+#### Watcher objects
+
+`gears.watcher` objects poll files or command at an interval. They do so using
+background threads, so it wont affect performance much. They can be attached
+directly to a widget or used with a `gears.connection` as demonstrated below.
+Using `gears.connection` is preferred when the value is needed by multiple
+widgets (see the CPU graph example later in this document).
+
+@DOC_wibox_widget_progressbar_watcher_EXAMPLE@
+
+### Declarative
+
+The other way to interact with widgets is by creating `gears.connection` objects.
+They can be added in your declarative widget tree like this:
+
+@DOC_wibox_decl_doc_connection_EXAMPLE@
+
+It is also possible to use them to bind non-widget objects with widgets:
+
+@DOC_wibox_decl_doc_connection3_EXAMPLE@
+
+One useful feature is that when the `gears.connection` has a callback, it has
+direct access to all `id`s as variables or using `get_children_by_id`:
+
+@DOC_wibox_decl_doc_connection5_EXAMPLE@
+
