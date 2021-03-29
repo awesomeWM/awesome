@@ -184,17 +184,24 @@
 <h1>Module: <code>$(module.name)</code></h1>
 <p>$(M(module.summary,module))</p>
 <p>$(M(module.description,module))</p>
-
+#   if module.usage then
+#     local li,il = use_li(module.usage)
+    <h3>Usage:</h3>
+    <ul>
+#     for usage in iter(module.usage) do
+        $(li)<pre class="example">$(ldoc.escape(usage))</pre>$(il)
+#     end -- for
+    </ul>
+#   end -- if usage
+<div class="extra-header">
 # if module.tags.supermodule or module.tags.knownusage then
+  <div class="extra-header__section">
     <h3>Class Hierarchy</h3>
     <div class="inheritance">
 # local function draw_hierary_recursifly(i)
-    <ul class="inheritance__level">
-#   if i == #hierarchy then
-        <li class="inheritance__level__node inheritance__level__node inheritance__level__node--root">
-#   else
-        <li class="inheritance__level__node inheritance__level__node">
-#   end
+#   local is_root_level = (i == #hierarchy)
+    <ul class="inheritance__level $(is_root_level and 'inheritance__level--root' or '')">
+        <li class="inheritance__level__node $(is_root_level and 'inheritance__level__node--root' or '')">
 #   local mod = hierarchy[i]
 #   local name = display_name(hierarchy[i])
 #   if mod == module then
@@ -209,7 +216,7 @@
         </li>
 #   end
     </ul>
-# end
+# end -- module.tags.supermodule
 # draw_hierary_recursifly(#hierarchy)
     </div>
 # end
@@ -217,32 +224,37 @@
 #   if module.tags.include then
         $(M(ldoc.include_file(module.tags.include)))
 #   end
-#   if module.see then
-#     local li,il = use_li(module.see)
-    <h3>See also:</h3>
-    <ul>
-#     for see in iter(module.see) do
-         $(li)<a href="$(ldoc.href(see))">$(see.label)</a>$(il)
-#    end -- for
-    </ul>
-#   end -- if see
-#   if module.usage then
-#     local li,il = use_li(module.usage)
-    <h3>Usage:</h3>
-    <ul>
-#     for usage in iter(module.usage) do
-        $(li)<pre class="example">$(ldoc.escape(usage))</pre>$(il)
-#     end -- for
-    </ul>
-#   end -- if usage
+  </div>
 #   if module.info then
+  <div class="extra-header__section">
     <h3>Info:</h3>
     <ul>
 #     for tag, value in module.info:iter() do
-        <li><strong>$(tag)</strong>: $(M(value,module))</li>
+            <li><strong>$(tag)</strong>: $(M(value,module))</li>
 #     end
     </ul>
+  </div>
 #   end -- if module.info
+#   if module.see then
+  <div class="extra-header__section">
+#     local li,il = use_li(module.see)
+    <h3>See also:</h3>
+#     if #module.see > 1 then
+    <ul>
+#     else
+    <p>
+#     end
+#     for see in iter(module.see) do
+         $(li)<a href="$(ldoc.href(see))">$(see.label)</a>$(il)
+#    end -- for
+#     if #module.see > 1 then
+    </ul>
+#     else
+    </p>
+#     end
+  </div>
+#   end -- if see
+</div>
 
 
 # if not ldoc.no_summary then
@@ -275,7 +287,7 @@
 #   end
       <td colspan="$(inherited and 1 or 2)" class="summary">$(M(item.summary,item))</td>
 #   if inherited then
-      <td class="baseclass" $(nowrap)>
+      <td class="baseclass" nowrap>
         Inherited from $(item.baseclass)
       </td>
 #   end

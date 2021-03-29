@@ -509,6 +509,10 @@ pre .url { color: #272fc2; text-decoration: underline; }
     list-style: none;
 }
 
+.inheritance .inheritance__level--root {
+    padding-left: 0;
+}
+
 .inheritance .inheritance__level__node::before {
     content: "↳";
 }
@@ -517,4 +521,14 @@ pre .url { color: #272fc2; text-decoration: underline; }
     /* simulate the spacing of the arrow character */
     content: "   ";
     white-space: pre;
+}
+
+.extra-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.extra-header__section {
+    flex-grow: 1;
 }
