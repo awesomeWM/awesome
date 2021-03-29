@@ -8,6 +8,7 @@
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @layoutmod wibox.layout.ratio
 -- @supermodule wibox.layout.flex
+-- @see 03-declarative-layout.md
 ---------------------------------------------------------------------------
 
 local base  = require("wibox.widget.base" )
