@@ -16,6 +16,16 @@ local gtable = require("gears.table")
 
 local flex = {}
 
+-- {{{ Override inherited properties we want to hide
+
+--- From `wibox.layout.fixed`.
+-- @property fill_space
+-- @tparam boolean fill_space
+-- @propemits true false
+-- @hidden
+
+-- }}}
+
 --- Add some widgets to the given fixed layout.
 --
 -- @tparam widget ... Widgets that should be added (must at least be one).
