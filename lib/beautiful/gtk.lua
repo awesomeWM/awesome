@@ -70,7 +70,8 @@ function gtk.get_theme_variables()
 
     local result = {}
     local _gtk_status, Gtk = pcall(function()
-        return require('lgi').Gtk
+        local lgi = require('lgi')
+        return lgi.require('Gtk', '3.0')
     end)
     if not _gtk_status or not Gtk then
         gears_debug.print_warning(
