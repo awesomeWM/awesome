@@ -25,10 +25,10 @@ have not opened any programs. On the top right you see the time/date and a
 symbol showing the current layout. You can also click on the symbol to change
 the active layout.
 
-One of the big advantages of Awesome over other tiling window managers is its good
-mouse support. Awesome can act as a full floating window manager (almost like
-openbox) if you want. For this basic tutorial we will mainly focus on keyboard
-control, so let's learn some key bindings now.
+One of the big advantages of Awesome over other tiling window managers is its
+good mouse support. Awesome can act as a full floating window manager (almost
+like openbox) if you want. For this basic tutorial we will mainly focus on
+keyboard control, so let's learn some key bindings now.
 
 Let's open a terminal: press *Mod4+Enter*. Mod4 is your "Windows key", the key
 between Ctrl and Alt. You can change the modkey if you want, but we'll get to
@@ -87,7 +87,9 @@ this line in your theme file:
 
     theme.wallpaper = themes_path.."default/background.png"
 
-The default uses a path relative to `themes_path` by using the `..` operator to join two strings together. To just set it to an absolute path for example, you could do:
+The default uses a path relative to `themes_path` by using the `..` operator to
+join two strings together. To just set it to an absolute path for example,
+you could do:
 
     theme.wallpaper = "/usr/share/backgrounds/my-awesome-wallpaper.png"
 
