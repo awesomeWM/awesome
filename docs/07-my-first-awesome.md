@@ -65,20 +65,18 @@ overview now also provides a cheat sheet for controlling Vim.
 
 ## Change the theme
 
-Awesome has four themes you can choose from: *default*, *sky*, *xresources*, and
-*zenburn*.
+Awesome has four builtin themes you can choose from: *default*, *sky*,
+*xresources*, and *zenburn*.
 
-To change the theme, open your rc.lua and edit this line near the beginning of
-the file:
+To change the theme, open your `rc.lua`, find this line near the beginning of
+the file, and change `default` to one of the other values mentioned:
 
     beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
-For this tutorial we will stick with the default theme.
-
-Now we will customize the theme. Copy
-`/usr/share/awesome/themes/default/theme.lua` to `~/.config/awesome/` and change
-the above line in your theme like this (remember to replace `USER` with your
-user name):
+However, for this tutorial we will copy and customize the default theme.
+Copy `/usr/share/awesome/themes/default/theme.lua` to `~/.config/awesome/`
+and change the line shown above in `rc.lua` like this. Make sure to replace
+`USER` with your user name.
 
     beautiful.init("/home/USER/.config/awesome/theme.lua")
 
