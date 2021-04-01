@@ -230,14 +230,16 @@ end
 -- `first_index` has to be specified.
 --
 -- @tparam table t The input table.
--- @param value A value from the table.
--- @tparam[opt=1] number step_size How many element forward (or backward) to pick.
--- @tparam[opt=nil] function filter An optional function. When it returns
---  `false`, the element are skipped until a match if found. It takes the value
---  as its sole parameter.
+-- @param value The start value. Must be an element of the input table `t`.
+-- @tparam[opt=1] number step_size The amount to increment the index by.
+--   When this is negative, the function will cycle through the table backwards.
+-- @tparam[opt=nil] function filter An optional filter function. It receives a
+--   value from the table as parameter and should return a boolean. If it
+--   returns `false`, the value is skipped and `cycle_value` tries the next one.
 -- @tparam[opt=1] number start_at Where to start the lookup from.
--- @return The value. If no element match, then `nil` is returned.
--- @treturn number|nil The element (if any) key.
+-- @return The next eligible value. If no value matches, `nil` is returned.
+-- @treturn number|nil If a value is found, this is its index within the input
+--   table.
 -- @staticfct gears.table.cycle_value
 function gtable.cycle_value(t, value, step_size, filter, start_at)
     local k = gtable.hasitem(t, value, true, start_at)
@@ -400,3 +402,5 @@ function gtable.map(f, tbl)
 end
 
 return gtable
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
