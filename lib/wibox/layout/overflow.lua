@@ -1,3 +1,14 @@
+---------------------------------------------------------------------------
+-- A layout that allows its children to take more space than what's available
+-- in the surrounding container. If the content does exceed the available
+-- size, a scrollbar is added and scrolling behavior enabled.
+--
+--@DOC_wibox_layout_defaults_overflow_EXAMPLE@
+-- @author Lucas Schwiderski
+-- @copyright 2021 Lucas Schwiderski
+-- @layoutmod wibox.layout.overflow
+---------------------------------------------------------------------------
+
 local base = require('wibox.widget.base')
 local fixed = require('wibox.layout.fixed')
 local separator = require('wibox.widget.separator')
@@ -8,6 +19,8 @@ local mousegrabber = mousegrabber
 
 local overflow = { mt = {} }
 
+-- Determine the required space to draw the layout's children and, if necessary,
+-- the scrollbar.
 function overflow:fit(context, orig_width, orig_height)
     local widgets = self._private.widgets
     local num_widgets = #widgets
@@ -69,7 +82,8 @@ function overflow:fit(context, orig_width, orig_height)
     end
 end
 
--- Adapted version of `wibox.layout.fixed.layout`
+-- Layout children, scrollbar and spacing widgets.
+-- Only those widgets that are currently visible will be placed.
 function overflow:layout(context, orig_width, orig_height)
     local result = {}
     local is_y = self._private.dir == "y"
@@ -248,12 +262,38 @@ function overflow:before_draw_children(_, cr, width, height)
     cr:clip()
 end
 
+
+--- The amount of units to advance per scroll event.
+-- This affects calls to `scroll` and the default mouse wheel handler.
+--
+-- The default is `10`.
+--
+-- @property step
+-- @tparam number step The step size.
+-- @see set_step
+
+--- Set the step size.
+--
+-- @method overflow:set_step
+-- @tparam number step The step size.
+-- @see step
 function overflow:set_step(step)
     self._private.step = step
     -- We don't need to emit enything here, since changing step only really
     -- takes effect the next time the user scrolls
 end
 
+
+--- Scroll the layout's content by `amount * step`.
+-- A positive amount scroll down/right, a negative amount scrolls up/left.
+--
+-- @method overflow:scroll
+-- @tparam number amount The amount to scroll by.
+-- @emits property::overflow::position
+-- @emitstparam property::overflow::position number position The new position.
+-- @emits widget::layout_changed
+-- @emits widget::redraw_needed
+-- @see step
 function overflow:scroll(amount)
     if amount == 0 then
         return
@@ -265,6 +305,23 @@ function overflow:scroll(amount)
     self:set_position(pos)
 end
 
+
+--- The scroll position.
+-- The position is represented as a fraction from `0` to `1`.
+--
+-- @property position
+-- @tparam number position The position.
+-- @propemits true false
+-- @see set_position
+
+--- Set the current scroll position.
+--
+-- @method overflow:set_position
+-- @tparam number position The new position.
+-- @propemits true false
+-- @emits widget::layout_changed
+-- @emits widget::redraw_needed
+-- @see position
 function overflow:set_position(pos)
     local current = self._private.position
     local interval = self._private.used_in_dir - self._private.avail_in_dir
@@ -284,10 +341,35 @@ function overflow:set_position(pos)
     self:emit_signal("property::position", pos)
 end
 
+
+--- Get the current scroll position.
+--
+-- @method overflow:get_position
+-- @treturn number position The current position.
+-- @see position
 function overflow:get_position()
     return self._private.position
 end
 
+
+--- The scrollbar width.
+-- For horizontal scrollbars, this is the scrollbar height
+--
+-- The default is `5`.
+--
+-- @property scrollbar_width
+-- @tparam number scrollbar_width The scrollbar width.
+-- @propemits true false
+-- @see set_scrollbar_width
+
+--- Set the scrollbar width.
+--
+-- @method overflow:set_scrollbar_width
+-- @tparam number scrollbar_width The new scrollbar width.
+-- @propemits true false
+-- @emits widget::layout_changed
+-- @emits widget::redraw_needed
+-- @see scrollbar_width
 function overflow:set_scrollbar_width(width)
     if self._private.scrollbar_width == width then
         return
@@ -299,6 +381,27 @@ function overflow:set_scrollbar_width(width)
     self:emit_signal("property::scrollbar_width", width)
 end
 
+
+--- The scrollbar position.
+--
+-- For horizontal scrollbars, this can be `"top"` or `"bottom"`,
+-- for vertical scrollbars this can be `"left"` or `"right"`.
+--
+-- The default is `"left"`/`"bottom"`.
+--
+-- @property scrollbar_position
+-- @tparam string scrollbar_position The scrollbar position.
+-- @propemits true false
+-- @see set_scrollbar_position
+
+--- Set the scrollbar position.
+--
+-- @method overflow:set_scrollbar_position
+-- @tparam string scrollbar_position The new scrollbar position.
+-- @propemits true false
+-- @emits widget::layout_changed
+-- @emits widget::redraw_needed
+-- @see scrollbar_position
 function overflow:set_scrollbar_position(position)
     if self._private.scrollbar_position == position then
         return
@@ -310,6 +413,26 @@ function overflow:set_scrollbar_position(position)
     self:emit_signal("property::scrollbar_position", position)
 end
 
+
+--- The scrollbar visibility.
+-- If this is set to `false`, no scrollbar will be rendered, even if the layout's
+-- content overflows. Mouse wheel scrolling will work regardless.
+--
+-- The default is `true`.
+--
+-- @property scrollbar_enabled
+-- @tparam boolean scrollbar_enabled The scrollbar visibility.
+-- @propemits true false
+-- @see set_scrollbar_enabled
+
+--- Enable or disable the scrollbar visibility.
+--
+-- @method overflow:set_scrollbar_enabled
+-- @tparam boolean scrollbar_enabled The new scrollbar visibility.
+-- @propemits true false
+-- @emits widget::layout_changed
+-- @emits widget::redraw_needed
+-- @see scrollbar_enabled
 function overflow:set_scrollbar_enabled(enabled)
     if self._private.scrollbar_enabled == enabled then
         return
@@ -321,6 +444,8 @@ function overflow:set_scrollbar_enabled(enabled)
     self:emit_signal("property::scrollbar_enabled", enabled)
 end
 
+-- Wraps a callback function for `mousegrabber` that is capable of
+-- updating the scroll position.
 local function build_grabber(container)
     local is_y = container._private.dir == "y"
     local bar_interval = container._private.avail_in_dir - container._private.bar_length
@@ -340,6 +465,7 @@ local function build_grabber(container)
     end
 end
 
+-- Applies a mouse button signal using `build_grabber` to a scrollbar widget.
 local function apply_scrollbar_mouse_signal(container, w)
     w:connect_signal('button::press', function(_, _, _, button_id)
         if button_id ~= 1 then
@@ -349,6 +475,26 @@ local function apply_scrollbar_mouse_signal(container, w)
     end)
 end
 
+
+--- The scrollbar widget.
+-- This widget is rendered as the scrollbar element.
+--
+-- The default is `awful.widget.separator{ shape = gears.shape.rectangle }`.
+--
+-- @property scrollbar_widget
+-- @tparam widget scrollbar_widget The scrollbar widget.
+-- @propemits true false
+-- @see set_scrollbar_widget
+
+--- Set the scrollbar widget.
+--
+-- This will also apply the mouse button handler.
+--
+-- @method overflow:set_scrollbar_widget
+-- @tparam widget scrollbar_widget The new scrollbar widget.
+-- @propemits true false
+-- @emits widget::layout_changed
+-- @see scrollbar_widget
 function overflow:set_scrollbar_widget(widget)
     local w = base.make_widget_from_value(widget)
 
@@ -391,17 +537,35 @@ local function new(dir, ...)
     return ret
 end
 
+
+--- Returns a new horizontal overflow layout.
+-- Child widgets are placed similar to `wibox.layout.fixed`, except that
+-- they may take as much width as they want. If the total width of all child
+-- widgets exceeds the width available whithin the layout's outer container
+-- a scrollbar will be added and scrolling behavior enabled.
+-- @tparam widget ... Widgets that should be added to the layout.
+-- @constructorfct wibox.layout.overflow.horizontal
 function overflow.horizontal(...)
     return new("horizontal", ...)
 end
 
+
+--- Returns a new vertical overflow layout.
+-- Child widgets are placed similar to `wibox.layout.fixed`, except that
+-- they may take as much height as they want. If the total height of all child
+-- widgets exceeds the height available whithin the layout's outer container
+-- a scrollbar will be added and scrolling behavior enabled.
+-- @tparam widget ... Widgets that should be added to the layout.
+-- @constructorfct wibox.layout.fixed.horizontal
 function overflow.vertical(...)
     return new("vertical", ...)
 end
 
-function overflow.mt:__call(...)
-        return new(...)
-end
+--@DOC_fixed_COMMON@
+
+--@DOC_widget_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(overflow, overflow.mt)
 
