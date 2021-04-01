@@ -165,6 +165,23 @@ function gtable.keys(t)
     return keys
 end
 
+--- Get the number of keys in a table, both integer and string indicies.
+--
+-- This is functionally equivalent, but faster than `#gears.table.keys(t)`.
+--
+-- @DOC_text_gears_table_count_keys_EXAMPLE@
+--
+-- @tparam table t The table for which to count the keys.
+-- @treturn number The number of keys in the table.
+-- @staticfct gears.table.count_keys
+function gtable.count_keys(t)
+    local count = 0
+    for _ in pairs(t) do
+        count = count + 1
+    end
+    return count
+end
+
 --- Filter a table's keys for certain content type.
 --
 -- @tparam table t The table to retrieve the keys for.
