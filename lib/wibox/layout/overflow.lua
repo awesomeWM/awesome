@@ -357,6 +357,8 @@ end
 --
 -- The default is `5`.
 --
+--@DOC_wibox_layout_overflow_scrollbar_width_EXAMPLE@
+--
 -- @property scrollbar_width
 -- @tparam number scrollbar_width The scrollbar width.
 -- @propemits true false
@@ -386,8 +388,9 @@ end
 --
 -- For horizontal scrollbars, this can be `"top"` or `"bottom"`,
 -- for vertical scrollbars this can be `"left"` or `"right"`.
---
 -- The default is `"left"`/`"bottom"`.
+--
+--@DOC_wibox_layout_overflow_scrollbar_position_EXAMPLE@
 --
 -- @property scrollbar_position
 -- @tparam string scrollbar_position The scrollbar position.
@@ -481,6 +484,8 @@ end
 --
 -- The default is `awful.widget.separator{ shape = gears.shape.rectangle }`.
 --
+--@DOC_wibox_layout_overflow_scrollbar_widget_EXAMPLE@
+--
 -- @property scrollbar_widget
 -- @tparam widget scrollbar_widget The scrollbar widget.
 -- @propemits true false
@@ -560,6 +565,48 @@ end
 function overflow.vertical(...)
     return new("vertical", ...)
 end
+
+
+--- Add spacing between each layout widgets.
+--
+-- This behaves just like in `wibox.layout.fixed`:
+--
+--@DOC_wibox_layout_fixed_spacing_EXAMPLE@
+--
+-- @property spacing
+-- @tparam number spacing Spacing between widgets.
+-- @propemits true false
+-- @see wibox.layout.fixed
+
+
+--- The widget used to fill the spacing between the layout elements.
+-- By default, no widget is used.
+--
+-- This behaves just like in `wibox.layout.fixed`:
+--
+--@DOC_wibox_layout_fixed_spacing_widget_EXAMPLE@
+--
+-- @property spacing_widget
+-- @tparam widget spacing_widget
+-- @propemits true false
+-- @see wibox.layout.fixed
+
+
+--- Set the layout's fill_space property.
+--
+-- If this property is `true`, widgets
+-- take all space in the non-scrolling directing (e.g. `width` for vertical
+-- scrolling). If `false`, they will only take as much as they need for their
+-- content.
+--
+-- The default is `true`.
+--
+--@DOC_wibox_layout_overflow_fill_space_EXAMPLE@
+--
+-- @property fill_space
+-- @tparam boolean fill_space
+-- @propemits true false
+
 
 --@DOC_fixed_COMMON@
 
