@@ -95,18 +95,20 @@ Build URL: https://travis-ci.com/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
 git commit -m "[relevant] $COMMIT_MSG"
 
 # Commit the irrelevant changes.
-mv .git ../doc
-cd ../doc
+#FIXME April 2021: Some unknown change caused the line below to misbehave.
+#FIXME Hopefully, this change will be reverted soon.
+#FIXME mv .git ../doc
+#FIXME cd ../doc
 git add --all .
 git commit -m "[boilerplate] $COMMIT_MSG"
 
 # Reorder/swap commits, to have "relevant" after "boilerplate".
 # This makes it show up earlier in the Github interface etc.
-git tag _old
-git reset --hard HEAD~2
-git cherry-pick _old _old~1
+#FIXME git tag _old
+#FIXME git reset --hard HEAD~2
+#FIXME git cherry-pick _old _old~1
 RELEVANT_REV="$(git rev-parse --short HEAD)"
-git tag -d _old
+#FIXME git tag -d _old
 
 git checkout "$BRANCH"
 OLD_REV="$(git rev-parse --short HEAD)"
@@ -132,9 +134,14 @@ Tree:   https://github.com/awesomeWM/awesome/commits/${LAST_COMMIT}"
     fi
 fi
 git merge --no-ff -m "$MERGE_COMMIT_MSG" merged-update
+echo BEGIN DEBUG LOG
+git log --graph | head -n 100
+echo END DEBUG LOG
 NEW_REV="$(git rev-parse --short HEAD)"
 
 git push origin "$BRANCH" 2>&1 | sed "s/$GH_APIDOC_TOKEN/GH_APIDOC_TOKEN/g"
+
+echo PUSHED WITH RET CODE $?
 
 # Generate compare view links.
 # NOTE: use "\n" for line endings, not real ones for valid json!
