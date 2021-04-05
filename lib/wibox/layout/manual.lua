@@ -8,6 +8,7 @@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @layoutmod wibox.layout.manual
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 local gtable = require("gears.table")
 local base = require("wibox.widget.base")
@@ -244,9 +245,5 @@ local function new_manual(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(manual_layout, {__call=function(_,...) return new_manual(...) end})

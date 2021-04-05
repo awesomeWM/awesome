@@ -1,10 +1,12 @@
 ---------------------------------------------------------------------------
 --
 --@DOC_wibox_widget_defaults_textbox_EXAMPLE@
+--
 -- @author Uli Schlachter
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
 -- @widgetmod wibox.widget.textbox
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -372,10 +374,6 @@ end
 function textbox.mt.__call(_, ...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(textbox, textbox.mt)
 

@@ -5,6 +5,7 @@
 -- @author Uli Schlachter
 -- @copyright 2017 Uli Schlachter
 -- @containermod awful.widget.only_on_screen
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local type = type
@@ -128,10 +129,6 @@ capi.screen.connect_signal("property::outputs", function()
         end
     end
 end)
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(only_on_screen, only_on_screen.mt)
 

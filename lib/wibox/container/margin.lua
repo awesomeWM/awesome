@@ -5,6 +5,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @containermod wibox.container.margin
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local pairs = pairs
@@ -237,10 +238,6 @@ end
 function margin.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(margin, margin.mt)
 

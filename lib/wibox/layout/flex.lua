@@ -4,6 +4,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @layoutmod wibox.layout.flex
+-- @supermodule wibox.layout.fixed
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -14,6 +15,16 @@ local gmath = require("gears.math")
 local gtable = require("gears.table")
 
 local flex = {}
+
+-- {{{ Override inherited properties we want to hide
+
+--- From `wibox.layout.fixed`.
+-- @property fill_space
+-- @tparam boolean fill_space
+-- @propemits true false
+-- @hidden
+
+-- }}}
 
 --- Add some widgets to the given fixed layout.
 --
@@ -207,10 +218,6 @@ function flex.vertical(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return flex
 

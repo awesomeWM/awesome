@@ -14,6 +14,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @widgetmod wibox.widget.graph
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -412,10 +413,6 @@ end
 function graph.mt:__call(...)
     return graph.new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(graph, graph.mt)
 

@@ -6,6 +6,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @widgetmod awful.widget.button
+-- @supermodule wibox.widget.imagebox
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -64,10 +65,6 @@ end
 function button.mt:__call(...)
     return button.new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(button, button.mt)
 

@@ -4,6 +4,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @layoutmod wibox.layout.fixed
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -380,10 +381,6 @@ function fixed:get_spacing()
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return fixed
 
