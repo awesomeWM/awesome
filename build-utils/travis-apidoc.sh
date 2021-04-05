@@ -8,7 +8,7 @@
 #
 # NOTE: stdout/stderr might/should be discarded to not leak sensitive information.
 
-echo "Post-processing (API) documentation."
+echo "Post-processing (API) documentation. DEBUG 2021"
 echo "TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST"
 echo "TRAVIS_BRANCH: $TRAVIS_BRANCH"
 
@@ -109,6 +109,10 @@ git commit -m "[boilerplate] $COMMIT_MSG"
 #FIXME git cherry-pick _old _old~1
 RELEVANT_REV="$(git rev-parse --short HEAD)"
 #FIXME git tag -d _old
+
+echo BEGIN BEFORE CHECKOUT
+git log --graph | head -n 100
+echo END BEFORE CHECKOUT $RELEVANT_REV
 
 git checkout "$BRANCH"
 OLD_REV="$(git rev-parse --short HEAD)"
