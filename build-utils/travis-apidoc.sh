@@ -8,7 +8,7 @@
 #
 # NOTE: stdout/stderr might/should be discarded to not leak sensitive information.
 
-echo "Post-processing (API) documentation. DEBUG 2021"
+echo "Post-processing (API) documentation."
 echo "TRAVIS_PULL_REQUEST: $TRAVIS_PULL_REQUEST"
 echo "TRAVIS_BRANCH: $TRAVIS_BRANCH"
 
@@ -95,27 +95,21 @@ Build URL: https://travis-ci.com/awesomeWM/awesome/builds/${TRAVIS_BUILD_ID}"
 git commit -m "[relevant] $COMMIT_MSG"
 
 # Commit the irrelevant changes.
-#FIXME April 2021: Some unknown change caused the line below to misbehave.
-#FIXME Hopefully, this change will be reverted soon.
-#FIXME mv .git ../doc
-#FIXME cd ../doc
+mv .git ../doc
+cd ../doc
 git add --all .
-echo BEGIN BEFORE boilerplate
 BOILERPLATE_FAILED=0
 git commit -m "[boilerplate] $COMMIT_MSG" || export BOILERPLATE_FAILED=1
-echo END AFTER boilerplate $BOILERPLATE_FAILED
 
 # Reorder/swap commits, to have "relevant" after "boilerplate".
 # This makes it show up earlier in the Github interface etc.
-#FIXME git tag _old
-#FIXME git reset --hard HEAD~2
-#FIXME git cherry-pick _old _old~1
-RELEVANT_REV="$(git rev-parse --short HEAD)"
-#FIXME git tag -d _old
-
-echo BEGIN BEFORE CHECKOUT
-git log --graph | head -n 100
-echo END BEFORE CHECKOUT $RELEVANT_REV
+if [  "$BOILERPLATE_FAILED" == "0" ]; then
+    git tag _old
+    git reset --hard HEAD~2
+    git cherry-pick _old _old~1
+    RELEVANT_REV="$(git rev-parse --short HEAD)"
+    git tag -d _old
+fi
 
 git checkout "$BRANCH"
 OLD_REV="$(git rev-parse --short HEAD)"
@@ -141,14 +135,9 @@ Tree:   https://github.com/awesomeWM/awesome/commits/${LAST_COMMIT}"
     fi
 fi
 git merge --no-ff -m "$MERGE_COMMIT_MSG" merged-update
-echo BEGIN DEBUG LOG
-git log --graph | head -n 100
-echo END DEBUG LOG
 NEW_REV="$(git rev-parse --short HEAD)"
 
 git push origin "$BRANCH" 2>&1 | sed "s/$GH_APIDOC_TOKEN/GH_APIDOC_TOKEN/g"
-
-echo PUSHED WITH RET CODE $?
 
 # Generate compare view links.
 # NOTE: use "\n" for line endings, not real ones for valid json!
