@@ -335,3 +335,4 @@ after_success:
       test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
       luacov-coveralls --verbose --merge
     fi
+  - echo "The build finished normally"
