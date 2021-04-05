@@ -288,7 +288,8 @@ script:
       travis_run_in_fold "make.check-qa" make check-qa
     fi
   - |
-    if [ "$TEST_PREV_COMMITS" = 1 ] && ! [ "$TRAVIS_PULL_REQUEST" = false ]; then
+    if [ "$TEST_PREV_COMMITS" = 1 ] && ! [ "$TRAVIS_PULL_REQUEST" = false ] \
+        && ! curl https://api.github.com/repos/awesomeWM/awesome/issues/${TRAVIS_PULL_REQUEST}/labels | grep -q '"name": "ci:skip_prev_commits"'; then
       set -e
       # Check each commit separately (to make git-bisect less annoying).
       # Fix Travis' commit range (https://github.com/travis-ci/travis-ci/issues/4596).
