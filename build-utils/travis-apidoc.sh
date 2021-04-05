@@ -100,7 +100,10 @@ git commit -m "[relevant] $COMMIT_MSG"
 #FIXME mv .git ../doc
 #FIXME cd ../doc
 git add --all .
-git commit -m "[boilerplate] $COMMIT_MSG"
+echo BEGIN BEFORE boilerplate
+BOILERPLATE_FAILED=0
+git commit -m "[boilerplate] $COMMIT_MSG" || export BOILERPLATE_FAILED=1
+echo END AFTER boilerplate $BOILERPLATE_FAILED
 
 # Reorder/swap commits, to have "relevant" after "boilerplate".
 # This makes it show up earlier in the Github interface etc.
