@@ -147,19 +147,13 @@ In order for your login screen or, to be more precise, your display manager, to 
 
 Run the following command to create the file:
 
-`echo '[Desktop Entry]
-
+```echo '[Desktop Entry]
 Name=awesome
-
 Comment=Highly configurable framework window manager
-
 TryExec=awesome
-
 Exec=awesome
-
 Type=Application
-
-' | sudo tee /usr/share/xsessions/awesome.desktop`
+' | sudo tee /usr/share/xsessions/awesome.desktop```
 
 
 ### Debugging tips
