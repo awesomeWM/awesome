@@ -158,7 +158,7 @@ Type=Application
 ```
 
 
-### Debugging tips
+## Debugging tips
 
 You can call `awesome` with `gdb` like this:
 
