@@ -141,7 +141,7 @@ If Awesome does not start or the configuration file is not producing the
 desired results the user should examine this file to gain insight into the
 problem.
 
-# Awesome not an option in your desktop selection? Try this.
+### Awesome not an option in your desktop selection? Try this.
 
 In order for your login screen or, to be more precise, your display manager, to display this button, it needs to find an awesome.desktop file inside /usr/share/xsessions/. When installing AwesomeWM from source, this file is not installed automatically.
 
