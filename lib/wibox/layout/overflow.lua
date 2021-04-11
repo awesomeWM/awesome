@@ -46,7 +46,7 @@ function overflow:fit(context, orig_width, orig_height)
     -- First, determine widget sizes.
     -- Only when the content doesn't fit and needs scrolling should
     -- we reduce content size to make space for a scrollbar.
-    for _, widget in pairs(widgets) do
+    for _, widget in ipairs(widgets) do
         local w, h = base.fit_widget(self, context, widget, width, height)
 
         if is_y then
@@ -191,7 +191,7 @@ function overflow:layout(context, orig_width, orig_height)
         end
     end
 
-    for i, w in pairs(widgets) do
+    for i, w in ipairs(widgets) do
         local content_x, content_y
         local content_w, content_h = base.fit_widget(self, context, w, width, height)
 
