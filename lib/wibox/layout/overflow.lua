@@ -272,7 +272,7 @@ end
 -- @tparam number step The step size.
 -- @see set_step
 
---- Set the step size.
+-- Set the step size.
 --
 -- @method overflow:set_step
 -- @tparam number step The step size.
@@ -314,7 +314,7 @@ end
 -- @propemits true false
 -- @see set_position
 
---- Set the current scroll position.
+-- Set the current scroll position.
 --
 -- @method overflow:set_position
 -- @tparam number position The new position.
@@ -364,7 +364,7 @@ end
 -- @propemits true false
 -- @see set_scrollbar_width
 
---- Set the scrollbar width.
+-- Set the scrollbar width.
 --
 -- @method overflow:set_scrollbar_width
 -- @tparam number scrollbar_width The new scrollbar width.
@@ -397,7 +397,7 @@ end
 -- @propemits true false
 -- @see set_scrollbar_position
 
---- Set the scrollbar position.
+-- Set the scrollbar position.
 --
 -- @method overflow:set_scrollbar_position
 -- @tparam string scrollbar_position The new scrollbar position.
@@ -428,7 +428,7 @@ end
 -- @propemits true false
 -- @see set_scrollbar_enabled
 
---- Enable or disable the scrollbar visibility.
+-- Enable or disable the scrollbar visibility.
 --
 -- @method overflow:set_scrollbar_enabled
 -- @tparam boolean scrollbar_enabled The new scrollbar visibility.
@@ -491,7 +491,7 @@ end
 -- @propemits true false
 -- @see set_scrollbar_widget
 
---- Set the scrollbar widget.
+-- Set the scrollbar widget.
 --
 -- This will also apply the mouse button handler.
 --
