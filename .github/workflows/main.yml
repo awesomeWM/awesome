@@ -352,7 +352,8 @@ jobs:
           commits="$(echo "$rev_list" | grep -v 'dist=0' | cut -d' ' -f 1)"
           n="$(echo "$commits" | wc -l)"
 
-          echo "Testing $n commits: $commits"
+          echo "Testing $n commits:"
+          echo "$commits" | xargs -I{} git log -1 --pretty='%h %s' {}
 
           failed=""
           for commit in $commits; do
