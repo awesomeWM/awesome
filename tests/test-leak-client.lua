@@ -88,22 +88,20 @@ local steps = {
             assert(not success, msg)
             assert(msg:find("invalid object"), msg)
 
-            -- Check that it is garbage-collectable
-            collectgarbage("collect")
-
             -- On GitHub Actions, it can take a while for clients to be killed
             -- properly.
             local tries = 0
             while (#objs > 0 and tries < 60) do
+                collectgarbage("collect")
                 os.execute("sleep 1")
                 tries = tries + 1
             end
 
+            assert(#objs == 0, "still clients left after garbage collect")
             if tries > 0 then
                 print("Took approx. " .. tries .. " seconds to clean leaked client")
             end
 
-            assert(#objs == 0, "still clients left after garbage collect")
             return true
         end
     end,
