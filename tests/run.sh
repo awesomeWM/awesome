@@ -68,7 +68,6 @@ else
     tests="$this_dir/test*.lua"
 fi
 
-# Travis.
 if [ "$CI" = true ]; then
     HEADLESS=1
     TEST_PAUSE_ON_ERRORS=0

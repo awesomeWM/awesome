@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Process (API) docs after a successful build on Travis (via ../.travis.yml).
+# Process (API) docs after a successful build on GitHub Actions.
 #
 # Updated/changed documentation for "master" is pushed to gh-pages.
 # In case of pull requests or other branches, it will get added to a separate branch.
@@ -63,7 +63,7 @@ cat > ../doc/README.md <<END
 
 This repository contains the built API documentation for the
 [awesome](https://github.com/awesomeWM/awesome) window manager. It is
-automatically updated via Travis when the master branch changes. Hence:
+automatically updated via GitHub Actions when the master branch changes. Hence:
 
 ## Do NOT send pull requests here
 
