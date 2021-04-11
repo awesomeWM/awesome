@@ -360,9 +360,8 @@ jobs:
             echo "Testing commit $commit"
 
             # Some files are updated when compiling...
-            git reset --hard
             git checkout --force "$commit"
-            git --no-pager show --stat --oneline
+            git show --stat --oneline
 
             cmake -S ${{ github.workspace }} -B "${{ github.workspace}}/build" \
               -DAWESOME_VERSION=$AWESOME_VERSION \
@@ -381,7 +380,7 @@ jobs:
             fi
           done
 
-          git checkout -qf ${{ github.head_ref }}
+          git checkout --quiet --force ${{ github.head_ref }}
           if [ -n "$failed" ]; then
             echo "Checks failed for these commits:"
 

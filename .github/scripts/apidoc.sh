@@ -93,6 +93,7 @@ $LAST_COMMIT_MSG
 
 Commits: https://github.com/awesomeWM/awesome/compare/${GITHUB_BASE_REF}..${GITHUB_HEAD_REF}
 Build URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+
 git commit -m "[relevant] $COMMIT_MSG"
 
 # Commit the irrelevant changes.
