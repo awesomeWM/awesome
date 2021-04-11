@@ -388,7 +388,7 @@ end
 --
 -- For horizontal scrollbars, this can be `"top"` or `"bottom"`,
 -- for vertical scrollbars this can be `"left"` or `"right"`.
--- The default is `"left"`/`"bottom"`.
+-- The default is `"right"`/`"bottom"`.
 --
 --@DOC_wibox_layout_overflow_scrollbar_position_EXAMPLE@
 --
