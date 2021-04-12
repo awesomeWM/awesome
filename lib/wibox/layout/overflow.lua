@@ -53,25 +53,19 @@ function overflow:fit(context, orig_width, orig_height)
             used_max = math.max(used_max, w)
             used_in_dir = used_in_dir + h
         else
-            used_in_dir = used_in_dir + w
             used_max = math.max(used_max, h)
+            used_in_dir = used_in_dir + w
         end
     end
 
     local spacing = self._private.spacing * (num_widgets - 1)
     used_in_dir = used_in_dir + spacing
 
-    local need_scrollbar = used_in_dir > avail_in_dir and scrollbar_enabled
+    local need_scrollbar = scrollbar_enabled and used_in_dir > avail_in_dir
 
-    -- If the direction perpendicular to scrolling (e.g. width in vertical
-    -- scrolling) is not fully covered by any of the widgets, we can add our
-    -- scrollbar width to that value. Otherwise widget size will be reduced
-    -- during `layout` to make space for the scrollbar.
-    if need_scrollbar
-        and (
-            (is_y and used_max < orig_width)
-            or (not is_y and used_max < orig_height)
-        ) then
+    -- Even if `used_max == orig_(width|height)` already, `base.fit_widget`
+    -- will clamp return values, so we can "overextend" here.
+    if need_scrollbar then
         used_max = used_max + scrollbar_width
     end
 
@@ -114,8 +108,8 @@ function overflow:layout(context, orig_width, orig_height)
             used_max = math.max(used_max, w)
             used_in_dir = used_in_dir + h
         else
-            used_in_dir = used_in_dir + w
             used_max = math.max(used_max, h)
+            used_in_dir = used_in_dir + w
         end
     end
 
