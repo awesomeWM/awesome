@@ -561,7 +561,7 @@ end
 -- widgets exceeds the height available whithin the layout's outer container
 -- a scrollbar will be added and scrolling behavior enabled.
 -- @tparam widget ... Widgets that should be added to the layout.
--- @constructorfct wibox.layout.fixed.horizontal
+-- @constructorfct wibox.layout.overflow.horizontal
 function overflow.vertical(...)
     return new("vertical", ...)
 end
@@ -576,6 +576,7 @@ end
 -- @property spacing
 -- @tparam number spacing Spacing between widgets.
 -- @propemits true false
+-- @baseclass wibox.layout.fixed
 -- @see wibox.layout.fixed
 
 
@@ -589,6 +590,7 @@ end
 -- @property spacing_widget
 -- @tparam widget spacing_widget
 -- @propemits true false
+-- @baseclass wibox.layout.fixed
 -- @see wibox.layout.fixed
 
 
@@ -605,6 +607,7 @@ end
 --
 -- @property fill_space
 -- @tparam boolean fill_space
+-- @baseclass wibox.layout.fixed
 -- @propemits true false
 
 
