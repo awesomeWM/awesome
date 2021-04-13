@@ -31,6 +31,10 @@
 #include "common/lualib.h"
 #include "common/luaclass.h"
 
+#if LUA_VERSION_NUM > 503
+print("Awesome doesn't support Lua versions newer than 5.3, please refer to https://awesomewm.org/apidoc/documentation/10-building-and-testing.md.html#Building")
+#endif
+
 #define luaA_deprecate(L, repl) \
     do { \
         luaA_warn(L, "%s: This function is deprecated and will be removed, see %s", \

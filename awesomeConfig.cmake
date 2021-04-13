@@ -71,6 +71,13 @@ if (NOT LUA_FOUND)
         "You might want to hint it using the LUA_DIR environment variable, "
         "or set the LUA_INCLUDE_DIR / LUA_LIBRARY CMake variables.")
 endif()
+
+set(LUA_FULL_VERSION "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}.${LUA_VERSION_PATCH}")
+if(LUA_FULL_VERSION VERSION_EQUAL 5.4.0 OR LUA_FULL_VERSION VERSION_GREATER 5.4.0 )
+    message(FATAL_ERROR "Awesome doesn't support Lua versions newer than 5.3, please refer to"
+                        "https://awesomewm.org/apidoc/documentation/10-building-and-testing.md.html#Building")
+endif()
+
 # }}}
 
 # {{{ Check if documentation can be build
