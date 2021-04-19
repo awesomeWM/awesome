@@ -107,6 +107,8 @@ end
 -- * *center* (default)
 -- * *bottom*
 --
+--@DOC_wibox_container_place_valign_EXAMPLE@
+--
 -- @property valign
 -- @tparam[opt="center"] string valign
 -- @propemits true false
@@ -118,6 +120,8 @@ end
 -- * *left*
 -- * *center* (default)
 -- * *right*
+--
+--@DOC_wibox_container_place_halign_EXAMPLE@
 --
 -- @property halign
 -- @tparam[opt="center"] string halign
@@ -169,6 +173,8 @@ end
 
 --- Stretch the contained widget so it takes all the vertical space.
 --
+--@DOC_wibox_container_place_content_fill_vertical_EXAMPLE@
+--
 -- @property content_fill_vertical
 -- @tparam[opt=false] boolean content_fill_vertical
 -- @propemits true false
@@ -180,6 +186,8 @@ function place:set_content_fill_vertical(value)
 end
 
 --- Stretch the contained widget so it takes all the horizontal space.
+--
+--@DOC_wibox_container_place_content_fill_horizontal_EXAMPLE@
 --
 -- @property content_fill_horizontal
 -- @tparam[opt=false] boolean content_fill_horizontal

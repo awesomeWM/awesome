@@ -22,7 +22,7 @@ for _, i in ipairs {true, false} do
             horizontal_crop = i,
             widget          = wibox.container.tile
         },
-        bg     = "#ff0000",
+        bg     = beautiful.bg_normal,
         widget = wibox.container.background
     }
 
