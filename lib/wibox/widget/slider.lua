@@ -325,7 +325,7 @@ function slider:draw(_, cr, width, height)
 
     local handle_height, handle_width = height, self._private.handle_width
         or beautiful.slider_handle_width
-        or height/2
+        or math.floor(height/2)
 
     local handle_border_width = self._private.handle_border_width
         or beautiful.slider_handle_border_width
@@ -363,7 +363,7 @@ function slider:draw(_, cr, width, height)
         end
     else
         bar_height = bar_height or beautiful.slider_bar_height or height
-        y_offset   = (height - bar_height)/2
+        y_offset   = math.floor((height - bar_height)/2)
     end
 
 
@@ -380,8 +380,10 @@ function slider:draw(_, cr, width, height)
     bar_shape(cr, width - x_offset - right_margin, bar_height or height)
 
     if bar_active_color and type(bar_color) == "string" and type(bar_active_color) == "string" then
-        local bar_active_width = active_rate * (width - x_offset - right_margin)
+        local bar_active_width = math.floor(
+            active_rate * (width - x_offset - right_margin)
             - (handle_width - handle_border_width/2) * (active_rate - 0.5)
+        )
         cr:set_source(color.create_pattern{
             type        = "linear",
             from        = {0,0},
@@ -453,7 +455,7 @@ function slider:draw(_, cr, width, height)
 
     -- Get the widget size back to it's non-transfored value
     local min, _, interval = get_extremums(self)
-    local rel_value = ((value-min)/interval) * (width-handle_width)
+    local rel_value = math.floor(((value-min)/interval) * (width-handle_width))
 
     cr:translate(x_offset + rel_value, y_offset)
 
