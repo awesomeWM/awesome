@@ -1,5 +1,10 @@
 local spawn = require("awful.spawn")
 
+local lua_executable = os.getenv("LUA")
+if lua_executable == nil or lua_executable == "" then
+    lua_executable = "lua"
+end
+
 -- This file provide a simple, yet flexible, test client.
 -- It is used to test the `ruled.client`
 
@@ -106,7 +111,7 @@ local pipe
 local function init()
     if initialized then return end
     initialized = true
-    local cmd = { "lua", "-e", test_client_source }
+    local cmd = { lua_executable, "-e", test_client_source }
     local _, _, stdin, stdout, stderr = awesome.spawn(cmd, false, true, true, true)
     pipe = Gio.UnixOutputStream.new(stdin, true)
     stdout = Gio.UnixInputStream.new(stdout, true)

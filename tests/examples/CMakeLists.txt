@@ -17,7 +17,7 @@ endif()
 cmake_minimum_required(VERSION 3.0.0)
 
 # Get and update the LUA_PATH so the scripts can be executed without awesome.
-execute_process(COMMAND lua -e "p = package.path:gsub(';', '\\\\;'); io.stdout:write(p)"
+execute_process(COMMAND ${LUA_EXECUTABLE} -e "p = package.path:gsub(';', '\\\\;'); io.stdout:write(p)"
     OUTPUT_VARIABLE "LUA_PATH_")
 
 # Allow to use the example tests by themselves.
@@ -32,7 +32,7 @@ endif()
 
 if (DO_COVERAGE)
   execute_process(
-    COMMAND env "SOURCE_DIRECTORY=${TOP_SOURCE_DIR}" lua -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
+    COMMAND env "SOURCE_DIRECTORY=${TOP_SOURCE_DIR}" ${LUA_EXECUTABLE} -e "require('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')"
     RESULT_VARIABLE TEST_RESULT
     ERROR_VARIABLE  TEST_ERROR
     ERROR_STRIP_TRAILING_WHITESPACE)
@@ -40,9 +40,9 @@ if (DO_COVERAGE)
     message(${TEST_ERROR})
     message(FATAL_ERROR "Failed to run luacov.runner.")
   endif()
-  set(LUA_COV_RUNNER lua "-erequire('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')")
+  set(LUA_COV_RUNNER ${LUA_EXECUTABLE} "-erequire('luacov.runner')('${TOP_SOURCE_DIR}/.luacov')")
 else()
-  set(LUA_COV_RUNNER lua)
+  set(LUA_COV_RUNNER ${LUA_EXECUTABLE})
 endif()
 
 if (STRICT_TESTS)

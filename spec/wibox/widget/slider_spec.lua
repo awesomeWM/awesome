@@ -12,6 +12,14 @@ describe("wibox.widget.slider", function()
         widget = slider()
     end)
 
+    describe("constructor", function()
+        it("applies arguments", function()
+            widget = slider({ value = 10 })
+
+            assert.is.equal(widget.value, 10)
+        end)
+    end)
+
     describe("signal property::value", function()
         local property_value = nil
         before_each(function()

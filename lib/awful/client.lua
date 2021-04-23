@@ -1531,13 +1531,13 @@ function client.object.activate(c, args)
     elseif new_args.action and new_args.action == "mouse_resize" then
         amousec.resize(c)
     elseif new_args.action and new_args.action == "mouse_center" then
-        local coords, geo = mouse.mouse.coords(), c:geometry()
+        local coords, geo = capi.mouse.coords(), c:geometry()
         coords.width, coords.height = 1,1
 
         if not grect.area_intersect_area(geo, coords) then
             -- Do not use `awful.placement` to avoid an useless circular
             -- dependency. Centering is *very* simple.
-            mouse.mouse.coords {
+            capi.mouse.coords {
                 x = geo.x + math.ceil(geo.width /2),
                 y = geo.y + math.ceil(geo.height/2)
             }

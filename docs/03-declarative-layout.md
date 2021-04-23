@@ -1,6 +1,12 @@
-# The AwesomeWM widget system
+# The Widget system
 
 This document explains how to define, place and manage widgets.
+
+## The default configuration
+
+This is what the widgets present in the default configuration are named:
+
+@DOC_awful_popup_defaultconfig_EXAMPLE@
 
 ## The default widgets
 
@@ -28,7 +34,59 @@ configurable rules.
 
 @DOC_layout_WIDGET_LIST@
 
-### Other
+### Awful widgets
+
+This modules contains the higher level window manager widgets. Since most of them
+are used by the default config, here is how it maps:
+
+@DOC_awful_wibar_defaultwibar_EXAMPLE@
+
+@DOC_awidget_WIDGET_LIST@
+
+### Titlebar widgets
+
+The titlebar comes with some convinient default widgets. It simplify the most
+basic "Windows/macOS" like titlebars.
+
+@DOC_awful_titlebar_defaulttitlebar_EXAMPLE@
+
+Note that titlebars can also be added on
+each side. This is how "active" titlebars (click to resize) can be implemented.
+The default `rc.lua` does not add active borders:
+
+![](../images/client_geo.svg)
+
+<table class="widget_list" border="1">
+ <tr>
+   <th>Widget</th><th>Description</th>
+ </tr>
+ <tr>
+  <td>`awful.titlebar.widget.iconwidget`</td><td>The client icon (see `client.icon`)</td>
+ </tr>
+ <tr>
+  <td>`awful.titlebar.widget.titlewidget`</td><td>The client title (see `client.name`)</td>
+ </tr>
+ <tr>
+  <td>`awful.titlebar.widget.floatingbutton`</td><td> Toggle the floating (toggled) vs. tiling mode (untoggled). </td>
+ </tr>
+ <tr>
+  <td>`awful.titlebar.widget.maximizedbutton`</td><td>Toggle the maximized mode (toggled). Note that this is the<br/>"full" maximized mode, not vertical or horizontal maximization.<br/>See `client.maximized`.</td>
+ </tr>
+ <tr>
+  <td>`awful.titlebar.widget.stickybutton`</td><td>When toggled, a client will be displayed in all (screen) tags. See `client.sticky`)</td>
+ </tr>
+ <tr>
+  <td>`awful.titlebar.widget.ontopbutton`</td><td>When toggled, the client will be part of the `ontop` layer (see `client.ontop`).</td>
+ </tr>
+ <tr>
+  <td>`awful.titlebar.widget.closebutton`</td><td></td>
+ </tr>
+ <tr>
+  <td>`titlebar.widget.minimizebutton`</td><td></td>
+ </tr>
+</table>
+
+### Notification widgets
 
 Notifications also have their own widgets.
 

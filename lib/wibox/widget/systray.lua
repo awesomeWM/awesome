@@ -2,6 +2,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @widgetmod wibox.widget.systray
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local wbase = require("wibox.widget.base")
@@ -223,10 +224,6 @@ function systray.mt:__call(...)
     end
     return instance
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(systray, systray.mt)
 

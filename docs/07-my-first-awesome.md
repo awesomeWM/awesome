@@ -25,10 +25,10 @@ have not opened any programs. On the top right you see the time/date and a
 symbol showing the current layout. You can also click on the symbol to change
 the active layout.
 
-One of the big advantages of Awesome over other tiling window managers is its good
-mouse support. Awesome can act as a full floating window manager (almost like
-openbox) if you want. For this basic tutorial we will mainly focus on keyboard
-control, so let's learn some key bindings now.
+One of the big advantages of Awesome over other tiling window managers is its
+good mouse support. Awesome can act as a full floating window manager (almost
+like openbox) if you want. For this basic tutorial we will mainly focus on
+keyboard control, so let's learn some key bindings now.
 
 Let's open a terminal: press *Mod4+Enter*. Mod4 is your "Windows key", the key
 between Ctrl and Alt. You can change the modkey if you want, but we'll get to
@@ -65,20 +65,18 @@ overview now also provides a cheat sheet for controlling Vim.
 
 ## Change the theme
 
-Awesome has four themes you can choose from: *default*, *sky*, *xresources*, and
-*zenburn*.
+Awesome has four builtin themes you can choose from: *default*, *sky*,
+*xresources*, and *zenburn*.
 
-To change the theme, open your rc.lua and edit this line near the beginning of
-the file:
+To change the theme, open your `rc.lua`, find this line near the beginning of
+the file, and change `default` to one of the other values mentioned:
 
     beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
-For this tutorial we will stick with the default theme.
-
-Now we will customize the theme. Copy
-`/usr/share/awesome/themes/default/theme.lua` to `~/.config/awesome/` and change
-the above line in your theme like this (remember to replace `USER` with your
-user name):
+However, for this tutorial we will copy and customize the default theme.
+Copy `/usr/share/awesome/themes/default/theme.lua` to `~/.config/awesome/`
+and change the line shown above in `rc.lua` like this. Make sure to replace
+`USER` with your user name.
 
     beautiful.init("/home/USER/.config/awesome/theme.lua")
 
@@ -89,7 +87,9 @@ this line in your theme file:
 
     theme.wallpaper = themes_path.."default/background.png"
 
-The default uses a path relative to `themes_path` by using the `..` operator to join two strings together. To just set it to an absolute path for example, you could do:
+The default uses a path relative to `themes_path` by using the `..` operator to
+join two strings together. To just set it to an absolute path for example,
+you could do:
 
     theme.wallpaper = "/usr/share/backgrounds/my-awesome-wallpaper.png"
 

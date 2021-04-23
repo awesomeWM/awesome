@@ -21,6 +21,7 @@
 -- @author Uli Schlachter (based on ideas from Saleur Geoffrey)
 -- @copyright 2015 Uli Schlachter
 -- @containermod wibox.container.scroll
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local cache = require("gears.cache")
@@ -548,10 +549,6 @@ function scroll.step_functions.waiting_nonlinear_back_and_forth(elapsed, size, v
     end
     return (size - visible_size) * state
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return scroll
 

@@ -1,9 +1,46 @@
 ---------------------------------------------------------------------------
 --- Text clock widget.
 --
+-- The `wibox.widget.textclock` widget is part of the Awesome WM's widget
+-- system (see @{03-declarative-layout.md}).
+--
+-- This widget displays a text clock formatted by the
+-- [GLib Date Time format](https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format)
+-- and [GTimeZone](https://developer.gnome.org/glib/stable/glib-GTimeZone.html#g-time-zone-new).
+--
+-- The `wibox.widget.textclock` inherits from `wibox.widget.textbox`. It means
+-- that, once created, the user will receive a derivated instance of
+-- `wibox.widget.textbox` associated with a private `gears.timer` to manage
+-- timed updates of the displayed clock.
+--
+-- Use a `wibox.widget.textclock`
+-- ---
+--
+-- @DOC_wibox_widget_defaults_textclock_EXAMPLE@
+--
+-- Alternatively, you can declare the `textclock` widget using the
+-- declarative pattern (Both codes are strictly equivalent):
+--
+-- @DOC_wibox_widget_declarative-pattern_textclock_EXAMPLE@
+--
+-- The GLib DateTime format
+-- ---
+--
+-- The time displayed by the textclock widget can be formated by the GLib
+-- DateTime format.
+--
+-- Here is a short list with commonly used format specifiers (extracted from
+-- the Glib API references):
+--
+--@DOC_glib_timedate_format_COMMON@
+--
+-- You can read more on the GLib DateTime format in the
+-- [GLib documentation](https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format).
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @widgetmod wibox.widget.textclock
+-- @supermodule wibox.widget.textbox
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -125,10 +162,6 @@ end
 function textclock.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(textclock, textclock.mt)
 

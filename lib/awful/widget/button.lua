@@ -1,15 +1,12 @@
 ---------------------------------------------------------------------------
 -- A simple button widget.
 --
---    button.buttons = {
---        awful.button({}, 1, nil, function ()
---            print("Mouse was clicked")
---        end)
---    }
+-- @DOC_wibox_awidget_defaults_button_EXAMPLE@
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @widgetmod awful.widget.button
+-- @supermodule wibox.widget.imagebox
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -18,6 +15,7 @@ local imagebox = require("wibox.widget.imagebox")
 local widget = require("wibox.widget.base")
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
+local gtable = require("gears.table")
 
 local button = { mt = {} }
 
@@ -25,10 +23,13 @@ local button = { mt = {} }
 -- a real button.
 --
 -- @constructorfct awful.widget.button
--- @param args Widget arguments. "image" is the image to display.
+-- @tparam table args Widget arguments.
+-- @tparam string args.image "image" is the image to display (mandatory).
+-- @tparam table args.buttons The buttons.
 -- @return A textbox widget configured as a button.
 function button.new(args)
-    if not args or not args.image then
+    args = args or {}
+    if not args.image then
         return widget.empty_widget()
     end
 
@@ -47,10 +48,14 @@ function button.new(args)
     end
     w:set_image(args.image)
 
-    w.buttons = {
+    local btns = gtable.clone(args.buttons or {}, false)
+
+    table.insert(btns,
         abutton({}, 1, function () orig_set_image(w, img_press) end,
                        function () orig_set_image(w, img_release) end)
-    }
+    )
+
+    w.buttons = btns
 
     w:connect_signal("mouse::leave", function(self) orig_set_image(self, img_release) end)
 
@@ -60,10 +65,6 @@ end
 function button.mt:__call(...)
     return button.new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(button, button.mt)
 

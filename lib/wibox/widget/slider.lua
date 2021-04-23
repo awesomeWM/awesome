@@ -7,6 +7,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2015 Grigory Mishchenko, 2016 Emmanuel Lepage Vallee
 -- @widgetmod wibox.widget.slider
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -534,13 +535,9 @@ local function new(args)
     return ret
 end
 
-function slider.mt:__call(_, ...)
+function slider.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(slider, slider.mt)
 

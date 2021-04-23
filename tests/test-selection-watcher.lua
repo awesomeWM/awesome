@@ -3,6 +3,11 @@
 local runner = require("_runner")
 local spawn = require("awful.spawn")
 
+local lua_executable = os.getenv("LUA")
+if lua_executable == nil or lua_executable == "" then
+    lua_executable = "lua"
+end
+
 local header = [[
 local lgi = require("lgi")
 local Gdk = lgi.Gdk
@@ -62,7 +67,7 @@ runner.run_steps{
     -- Clear the clipboard to get to a known state
     function()
         check_state(0, 0)
-        spawn.with_line_callback({ "lua", "-e", acquire_and_clear_clipboard },
+        spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
             { exit = function() continue = true end })
         return true
     end,
@@ -81,7 +86,7 @@ runner.run_steps{
 
         -- Set the clipboard
         continue = false
-        spawn.with_line_callback({ "lua", "-e", acquire_clipboard },
+        spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard },
             { stdout = function(line)
                 assert(line == "initialisation done",
                     "Unexpected line: " .. line)
@@ -100,7 +105,7 @@ runner.run_steps{
 
         -- Now clear the clipboard again
         continue = false
-        spawn.with_line_callback({ "lua", "-e", acquire_and_clear_clipboard },
+        spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
             { exit = function() continue = true end })
 
         return true

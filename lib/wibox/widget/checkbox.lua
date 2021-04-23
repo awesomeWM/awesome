@@ -9,6 +9,7 @@
 -- @author Emmanuel Lepage Valle
 -- @copyright 2010 Emmanuel Lepage Vallee
 -- @widgetmod wibox.widget.checkbox
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local color     = require( "gears.color"       )
@@ -302,10 +303,6 @@ local function new(checked, args)
 
     return ret
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable({}, { __call = function(_, ...) return new(...) end})
 

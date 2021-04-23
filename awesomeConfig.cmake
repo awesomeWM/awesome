@@ -33,6 +33,7 @@ macro(a_find_program var prg req)
     endif()
 endmacro()
 
+a_find_program(LUA_EXECUTABLE lua TRUE)
 a_find_program(GIT_EXECUTABLE git FALSE)
 # programs needed for man pages
 a_find_program(ASCIIDOCTOR_EXECUTABLE asciidoctor FALSE)
@@ -374,7 +375,7 @@ add_custom_command(TARGET setup_directories
 
 add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/06-appearance.md
-        COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
+        COMMAND ${LUA_EXECUTABLE} ${SOURCE_DIR}/docs/06-appearance.md.lua
         ${BUILD_DIR}/docs/06-appearance.md
         DEPENDS
             lgi-check-run
@@ -385,7 +386,7 @@ add_custom_command(
 foreach(RULE_TYPE client tag screen notification)
     add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/common/${RULE_TYPE}_rules_index.ldoc
-        COMMAND lua ${SOURCE_DIR}/docs/build_rules_index.lua
+        COMMAND ${LUA_EXECUTABLE} ${SOURCE_DIR}/docs/build_rules_index.lua
             ${BUILD_DIR}/docs/common/${RULE_TYPE}_rules_index.ldoc
             ${RULE_TYPE}
 
@@ -405,7 +406,7 @@ endforeach()
 add_custom_command(
         OUTPUT ${BUILD_DIR}/awesomerc.lua ${BUILD_DIR}/docs/05-awesomerc.md
             ${BUILD_DIR}/script_files/rc.lua
-        COMMAND lua ${SOURCE_DIR}/docs/05-awesomerc.md.lua
+        COMMAND ${LUA_EXECUTABLE} ${SOURCE_DIR}/docs/05-awesomerc.md.lua
         ${BUILD_DIR}/docs/05-awesomerc.md ${SOURCE_DIR}/awesomerc.lua
         ${BUILD_DIR}/awesomerc.lua
         ${BUILD_DIR}/script_files/rc.lua
@@ -414,7 +415,7 @@ add_custom_command(
 
 add_custom_command(
         OUTPUT ${BUILD_DIR}/script_files/theme.lua
-        COMMAND lua ${SOURCE_DIR}/docs/sample_theme.lua ${BUILD_DIR}/script_files/
+        COMMAND ${LUA_EXECUTABLE} ${SOURCE_DIR}/docs/sample_theme.lua ${BUILD_DIR}/script_files/
 )
 
 # Create a target for the auto-generated awesomerc.lua and other files

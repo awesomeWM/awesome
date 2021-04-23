@@ -46,9 +46,11 @@ function object.add_signal()
 end
 
 --- Connect to a signal.
+--
 --@DOC_text_gears_object_signal_EXAMPLE@
--- @tparam string name The name of the signal
--- @tparam function func The callback to call when the signal is emitted
+--
+-- @tparam string name The name of the signal.
+-- @tparam function func The callback to call when the signal is emitted.
 -- @method connect_signal
 function object:connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
@@ -92,10 +94,16 @@ local function make_the_gc_obey(func)
     return func
 end
 
---- Connect to a signal weakly. This allows the callback function to be garbage
--- collected and automatically disconnects the signal when that happens.
--- @tparam string name The name of the signal
--- @tparam function func The callback to call when the signal is emitted
+--- Connect to a signal weakly.
+--
+-- This allows the callback function to be garbage collected and
+-- automatically disconnects the signal when that happens.
+-- **Warning:**
+-- Only use this function if you really, really, really know what you
+-- are doing.
+--
+-- @tparam string name The name of the signal.
+-- @tparam function func The callback to call when the signal is emitted.
 -- @method weak_connect_signal
 function object:weak_connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
@@ -104,9 +112,9 @@ function object:weak_connect_signal(name, func)
     sig.weak[func] = make_the_gc_obey(func)
 end
 
---- Disonnect to a signal.
--- @tparam string name The name of the signal
--- @tparam function func The callback that should be disconnected
+--- Disonnect from a signal.
+-- @tparam string name The name of the signal.
+-- @tparam function func The callback that should be disconnected.
 -- @method disconnect_signal
 function object:disconnect_signal(name, func)
     local sig = find_signal(self, name)
@@ -118,8 +126,8 @@ end
 --
 -- @tparam string name The name of the signal
 -- @param ... Extra arguments for the callback functions. Each connected
---   function receives the object as first argument and then any extra arguments
---   that are given to emit_signal()
+--   function receives the object as first argument and then any extra
+--   arguments that are given to emit_signal()
 -- @method emit_signal
 function object:emit_signal(name, ...)
     local sig = find_signal(self, name)

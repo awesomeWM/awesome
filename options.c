@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <getopt.h>
+#include <basedir_fs.h>
 
 #define KEY_VALUE_BUF_MAX 64
 #define READ_BUF_MAX 127
@@ -71,7 +72,7 @@ push_arg(string_array_t *args, char *value, size_t *len)
  * Support both shebang and modeline modes.
  */
 bool
-options_init_config(char *execpath, char *configpath, int *init_flags, string_array_t *paths)
+options_init_config(xdgHandle *xdg, char *execpath, char *configpath, int *init_flags, string_array_t *paths)
 {
     /* The different state the parser can have. */
     enum {
@@ -105,7 +106,27 @@ options_init_config(char *execpath, char *configpath, int *init_flags, string_ar
     string_array_init(&argv);
     string_array_append(&argv, a_strdup(execpath));
 
-    FILE *fp = fopen(configpath, "r");
+    FILE *fp = NULL;
+
+    /* It is too early to know which config works. So we assume
+     * the first one found is the one to use for the modeline. This
+     * may or may not end up being the config that works. However since
+     * knowing if the config works requires to load it, and loading must
+     * be done only after the modeline is parsed, this is the best we can
+     * do
+     */
+    if (!configpath) {
+        const char *xdg_confpath = xdgConfigFind("awesome/rc.lua", xdg);
+
+        /* xdg_confpath is "string1\0string2\0string3\0\0" */
+        if (xdg_confpath && *xdg_confpath)
+            fp = fopen(xdg_confpath, "r");
+        else
+            fp = fopen(AWESOME_DEFAULT_CONF, "r");
+
+        p_delete(&xdg_confpath);
+    } else
+        fp = fopen(configpath, "r");
 
     /* Share the error codepath with parsing errors */
     if (!fp)
@@ -402,7 +423,7 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
     char *confpath = NULL;
     int opt;
 
-    while((opt = getopt_long(argc, argv, "vhkc:arml:",
+    while((opt = getopt_long(argc, argv, "vhfkc:arms:l:",
                              long_options, NULL)) != -1) {
         switch(opt)
         {

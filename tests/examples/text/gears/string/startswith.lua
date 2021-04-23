@@ -9,3 +9,7 @@ assert(res == true) --DOC_HIDE
 res = gears.string.startswith(test,"it")
 print(tostring(res)) -- print boolean value
 assert(res == false) --DOC_HIDE
+
+res = gears.string.startswith(nil,"do")
+print(tostring(res)) -- print boolean value
+assert(res == false) --DOC_HIDE

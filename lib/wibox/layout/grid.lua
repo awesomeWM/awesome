@@ -14,6 +14,7 @@
 -- @author getzze
 -- @copyright 2017 getzze
 -- @layoutmod wibox.layout.grid
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -692,7 +693,7 @@ end
 -- getting the common property returns the directional property
 -- defined by the `orientation` property
 for _, prop in ipairs(dir_properties) do
-    for _,dir in ipairs{"horizontal_, vertical_"} do
+    for _,dir in ipairs{"horizontal", "vertical"} do
         local dir_prop = dir .. "_" .. prop
         grid["set_"..dir_prop] = function(self, value)
             if self._private[dir_prop] ~= value then
@@ -960,10 +961,6 @@ function grid.mt:__call(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(grid, grid.mt)
 

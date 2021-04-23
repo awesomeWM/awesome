@@ -20,7 +20,7 @@ merge=true
 use_markdown_titles=true
 wrap=true
 full_description = [[
-Welcome to the documentation for the awesome window manager. Below you find an
+Welcome to the documentation for the Awesome window manager. Below you find an
 overview of the individual parts which links to the full documentation.
 
 If you are a new user, you may want to read @{07-my-first-awesome.md} to get
@@ -28,6 +28,49 @@ started. In @{05-awesomerc.md}, the default configuration is explained.
 
 If you already used awesome in the past, @{89-NEWS.md} and @{17-porting-tips.md}
 should be useful for you.
+
+### Default configuration components name:
+
+<center><img src="../doc/images/AUTOGEN_awful_popup_defaultconfig.svg"></center>
+
+### Guides
+
+<div class="index_guides">
+    <div>
+        <a href="../doc/documentation/07-my-first-awesome.md.html">Getting started</a>
+        <a href="../doc/documentation/90-FAQ.md.html">FAQ</a>
+        <a href="../doc/documentation/01-readme.md.html">Read me</a>
+        <a href="../doc/documentation/89-NEWS.md.html">NEWS</a>
+    </div>
+    <div>
+        <a href="../doc/documentation/03-declarative-layout.md.html">The widget system</a>
+        <a href="../doc/documentation/09-options.md.html">Startup options</a>
+        <a href="../doc/documentation/05-awesomerc.md.html">The default rc.lua</a>
+        <a href="../doc/documentation/08-client-layout-system.md.html">Window management</a>
+    </div>
+</div>
+
+## Major libraries
+
+AwesomeWM ship multiple libraries. Here is an overview of the purpose and scope
+of those libraries.
+
+<table class='widget_list' border=1>
+  <tr style='font-weight: bold;'>
+   <th align='center'>Library</th>
+   <th align='center'>Description</th>
+  </tr>
+  <tr><td>`gears`</td><td>Utilities such as color parsing and objects</td></tr>
+  <tr><td>`wibox`</td><td>Awesome own generic widget framework</td></tr>
+  <tr><td>`awful`</td><td>Everything related to window managment</td></tr>
+  <tr><td>`awful.widget`</td><td>Window management related widgets</td></tr>
+  <tr><td>`awful.layout`</td><td>The default stateless client tiling module.</td></tr>
+  <tr><td>`ruled`</td><td>Define declarative rules on various events</td></tr>
+  <tr><td>`naughty`</td><td>Notifications</td></tr>
+  <tr><td>`menubar`</td><td>XDG (application) menu implementation</td></tr>
+  <tr><td>`beautiful`</td><td>Awesome theme module</td></tr>
+</table>
+
 ]]
 topics={
     '00-authors.md',
@@ -38,7 +81,9 @@ topics={
     '05-awesomerc.md',
     '06-appearance.md',
     '07-my-first-awesome.md',
+    '08-client-layout-system.md',
     '09-options.md',
+    '10-building-and-testing.md',
     '16-using-cairo.md',
     '17-porting-tips.md',
     '90-FAQ.md',
@@ -409,6 +454,25 @@ add_custom_tag {
     table  = {
         "Class", "Permission", "Context", "Default", "Description"
     },
+}
+
+-- Define the supermodule class.
+-- This tag should be used at the module level. All properties from the
+-- supermodule will be recursively added to the module by our ldoc template.
+-- @supermodule supermodule
+add_custom_tag {
+    name = "supermodule",
+    hidden = true,
+    auto_subtags = false
+}
+
+-- Mark the item ad hidden.
+-- This tag should be used to hide items from the documentation.
+-- @hidden
+add_custom_tag {
+    name = "hidden",
+    hidden = true,
+    auto_subtags = false
 }
 
 -- More fitting section names

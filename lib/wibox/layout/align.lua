@@ -4,6 +4,7 @@
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @layoutmod wibox.layout.align
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local table = table
@@ -319,10 +320,6 @@ function align.vertical(top, middle, bottom)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return align
 

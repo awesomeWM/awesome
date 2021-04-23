@@ -385,7 +385,7 @@ function util.linecount(text)
     return gstring.linecount(text)
 end
 
---- Get a sorted table with all integer keys from a table
+--- Get a sorted table with all keys from a table.
 -- @deprecated util.table.keys
 -- @param t the table for which the keys to get
 -- @return A table with keys

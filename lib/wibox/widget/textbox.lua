@@ -1,10 +1,12 @@
 ---------------------------------------------------------------------------
 --
 --@DOC_wibox_widget_defaults_textbox_EXAMPLE@
+--
 -- @author Uli Schlachter
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
 -- @widgetmod wibox.widget.textbox
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -188,7 +190,7 @@ end
 function textbox:set_markup(text)
     local success, message = self:set_markup_silently(text)
     if not success then
-        gdebug.print_error(message)
+        gdebug.print_error(debug.traceback("Error parsing markup: "..message.."\nFailed with string: '"..text.."'"))
     end
 end
 

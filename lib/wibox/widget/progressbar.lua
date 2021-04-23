@@ -18,6 +18,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @widgetmod wibox.widget.progressbar
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -519,10 +520,6 @@ end
 function progressbar.mt:__call(...)
     return progressbar.new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(progressbar, progressbar.mt)
 

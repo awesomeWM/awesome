@@ -355,6 +355,44 @@ table.insert(steps, function()
     return true
 end)
 
+-- Check tag:clear()
+table.insert(steps, function()
+    screen[1].tags[1]:view_only()
+    mouse.coords {
+        x = screen[1].geometry.x + 1,
+        y = screen[1].geometry.y + 1,
+    }
+
+    awful.spawn("xterm")
+    awful.spawn("xterm")
+
+    return true
+end)
+
+table.insert(steps, function()
+    if #screen[1].tags[1]:clients() ~= 2 then return end
+
+    local old_clients = screen[1].tags[1]:clients()
+
+    local clear_called, untagged = false, 0
+
+    screen[1].tags[1]:connect_signal("cleared", function() clear_called = true end)
+    screen[1].tags[1]:connect_signal("untagged", function()
+        untagged = untagged + 1
+    end)
+
+    screen[1].tags[1]:clear{}
+    assert(#screen[1].tags[1]:clients() == 0)
+    assert(clear_called)
+    assert(untagged == 2)
+
+    for _, c in ipairs(old_clients) do
+        assert(#c:tags() > 0)
+    end
+
+    return true
+end)
+
 require("_runner").run_steps(steps)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -6,6 +6,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @widgetmod awful.widget.layoutbox
+-- @supermodule wibox.layout.fixed
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable

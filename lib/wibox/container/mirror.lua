@@ -5,6 +5,7 @@
 -- @author dodo
 -- @copyright 2012 dodo
 -- @containermod wibox.container.mirror
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local type = type
@@ -128,10 +129,6 @@ end
 function mirror.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(mirror, mirror.mt)
 

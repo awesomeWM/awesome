@@ -8,6 +8,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2013 Emmanuel Lepage Vallee
 -- @containermod wibox.container.radialprogressbar
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -277,13 +278,9 @@ local function new(widget)
     return ret
 end
 
-function radialprogressbar.mt:__call(_, ...)
+function radialprogressbar.mt:__call(...)
     return new(...)
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(radialprogressbar, radialprogressbar.mt)
 

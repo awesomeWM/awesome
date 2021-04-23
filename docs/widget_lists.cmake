@@ -52,5 +52,6 @@ endfunction()
 generate_widget_list( "container" )
 generate_widget_list( "layout"    )
 generate_widget_list( "widget"    )
+generate_widget_list( "awidget"   )
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

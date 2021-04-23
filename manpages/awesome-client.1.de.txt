@@ -28,18 +28,18 @@ Das Modul 'awful.remote' muss geladen sein, um diesen Befehl zu benutzen.
 BEISPIELE
 ---------
 ....
-$ awesome-client 'return 1+1, "Hello, world"\
+$ awesome-client 'return 1+1, "Hello, world"'
    double 2
    string "Hello, world"
 
 # Das folgende Beispiel erzeugt keine Ausgabe auf der Kommandozeile,
 # sondern zeigt eine Benachrichtigung an.
 $ awesome-client '
-> naughty = require("naughty")
-> naughty.notify({
-> title="CLI-Benachrichtigung",
-> text="Dies ist eine Benachrichtigung von der Kommandozeile!"})
-> '
+  naughty = require("naughty")
+  naughty.notify({
+  title="CLI-Benachrichtigung",
+  text="Dies ist eine Benachrichtigung von der Kommandozeile!"})
+'
 
 # Starte eine lesen-ausführen-ausgeben-Schleife (REPL).
 # In diesem Modus wird jede Zeile zu awesome geschickt; auf die selbe Art

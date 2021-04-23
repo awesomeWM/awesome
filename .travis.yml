@@ -239,7 +239,9 @@ script:
         && grep -q 'May not access' lib/beautiful/init.lua
     fi
   - |
-    set -e
+    trap 'echo ERR CODE $? from $BASH_COMMAND : $LINENO' ERR
+    trap 'echo EXIT CODE $? from $BASH_COMMAND : $LINENO' EXIT
+    set -ex
     if [ -n "$BUILD_IN_DIR" ]; then
       # Explicitly remove the Makefile to not build from the src dir accidentally.
       rm Makefile
@@ -289,7 +291,7 @@ script:
     fi
   - |
     if [ "$TEST_PREV_COMMITS" = 1 ] && ! [ "$TRAVIS_PULL_REQUEST" = false ]; then
-      set -e
+      set -ex
       # Check each commit separately (to make git-bisect less annoying).
       # Fix Travis' commit range (https://github.com/travis-ci/travis-ci/issues/4596).
       commit_range="${TRAVIS_COMMIT_RANGE/.../..}"
@@ -330,8 +332,11 @@ after_success:
   - if [ "$BUILD_APIDOC" = "true" ]; then build-utils/travis-apidoc.sh; fi
   # Push code coverage information
   - |
-    set -e
+    trap 'echo ERR CODE $? from $BASH_COMMAND : $LINENO' ERR
+    trap 'echo EXIT CODE $? from $BASH_COMMAND : $LINENO' EXIT
+    set -ex
     if [ "$DO_COVERAGE" = "coveralls" ]; then
       test -f build/luacov.stats.out || { echo 'build/luacov.stats.out does not exist.'; return 1; }
       luacov-coveralls --verbose --merge
     fi
+  - echo "The build finished normally"
