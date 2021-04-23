@@ -475,7 +475,7 @@ function widget.new(args)
                 table.insert(((i<available_height_items) and new_keys or overlap_leftovers), keys[i])
             end
             keys = new_keys
-            table.insert(keys, {key=markup.fg(self.modifiers_fg, "▽"), description=""})
+            table.insert(keys, {key="▽", description=""})
         end
         if not current_column then
             current_column = {layout=wibox.layout.fixed.vertical()}
@@ -495,13 +495,13 @@ function widget.new(args)
                 local key_label = ""
                 if key.keylist and #key.keylist > 1 then
                     for each_key_idx, each_key in ipairs(key.keylist) do
-                        key_label = key_label .. each_key
+                        key_label = key_label .. gstring.xml_escape(each_key)
                         if each_key_idx ~= #key.keylist then
                             key_label = key_label .. markup.fg(self.modifiers_fg, '/')
                         end
                     end
                 elseif key.key then
-                    key_label = key.key
+                    key_label = gstring.xml_escape(key.key)
                 end
                 local rendered_hotkey = markup.font(self.font,
                     modifiers .. key_label .. " "
