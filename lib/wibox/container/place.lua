@@ -23,13 +23,8 @@ local align_fct = {
 }
 align_fct.top, align_fct.bottom = align_fct.left, align_fct.right
 
--- Layout this layout
-function place:layout(context, width, height)
-
-    if not self._private.widget then
-        return
-    end
-
+-- Shared with some subclasses like the `tiled` and `scaled` modules.
+function place:_layout(context, width, height)
     local w, h = base.fit_widget(self, context, self._private.widget, width, height)
 
     if self._private.content_fill_horizontal then
@@ -44,6 +39,21 @@ function place:layout(context, width, height)
     local halign = self._private.halign or "center"
 
     local x, y = align_fct[halign](w, width), align_fct[valign](h, height)
+
+    -- Sub pixels makes everything blurry. This is now what people expect.
+    x, y = math.floor(x), math.floor(y)
+
+    return x, y, w, h
+end
+
+-- Layout this layout
+function place:layout(context, width, height)
+
+    if not self._private.widget then
+        return
+    end
+
+    local x, y, w, h = self:_layout(context, width, height)
 
     return { base.place_widget_at(self._private.widget, x, y, w, h) }
 end
@@ -97,6 +107,8 @@ end
 -- * *center* (default)
 -- * *bottom*
 --
+--@DOC_wibox_container_place_valign_EXAMPLE@
+--
 -- @property valign
 -- @tparam[opt="center"] string valign
 -- @propemits true false
@@ -108,6 +120,8 @@ end
 -- * *left*
 -- * *center* (default)
 -- * *right*
+--
+--@DOC_wibox_container_place_halign_EXAMPLE@
 --
 -- @property halign
 -- @tparam[opt="center"] string halign
@@ -159,6 +173,8 @@ end
 
 --- Stretch the contained widget so it takes all the vertical space.
 --
+--@DOC_wibox_container_place_content_fill_vertical_EXAMPLE@
+--
 -- @property content_fill_vertical
 -- @tparam[opt=false] boolean content_fill_vertical
 -- @propemits true false
@@ -170,6 +186,8 @@ function place:set_content_fill_vertical(value)
 end
 
 --- Stretch the contained widget so it takes all the horizontal space.
+--
+--@DOC_wibox_container_place_content_fill_horizontal_EXAMPLE@
 --
 -- @property content_fill_horizontal
 -- @tparam[opt=false] boolean content_fill_horizontal

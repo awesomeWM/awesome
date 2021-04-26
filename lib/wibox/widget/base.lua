@@ -384,6 +384,9 @@ function base.set_widget_common(self, widget)
     end
 
     self._private.widget = w
+
+    self:emit_signal("property::widget")
+
     self:emit_signal("widget::layout_changed")
 end
 
