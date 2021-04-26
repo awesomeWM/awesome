@@ -15,12 +15,12 @@ local function cell_centered_widget(widget)
     }
 end
 
-local function build_ib(size, resize)
+local function build_ib(size, factor)
     return cell_centered_widget(wibox.widget {
         {
-            resize = resize,
             forced_height = size,
             forced_width = size,
+            max_scaling_factor = factor,
             image  = beautiful.awesome_icon,
             widget = wibox.widget.imagebox
         },
@@ -40,13 +40,13 @@ local l = wibox.widget {
 }
 parent:add(l)
 
-l:add_widget_at(cell_centered_widget(wibox.widget.textbox('resize = true')), 1, 1)
-l:add_widget_at(cell_centered_widget(wibox.widget.textbox('resize = false')), 2, 1)
+l:add_widget_at(cell_centered_widget(wibox.widget.textbox('max_scaling_factor = nil')), 1, 1)
+l:add_widget_at(cell_centered_widget(wibox.widget.textbox('max_scaling_factor = 2')), 2, 1)
 l:add_widget_at(cell_centered_widget(wibox.widget.textbox('imagebox size')), 3, 1)
 
 for i,size in ipairs({16, 32, 64}) do
-    l:add_widget_at(build_ib(size, true), 1, i + 1)
-    l:add_widget_at(build_ib(size, false), 2, i + 1)
+    l:add_widget_at(build_ib(size, nil), 1, i + 1)
+    l:add_widget_at(build_ib(size, 2), 2, i + 1)
     l:add_widget_at(cell_centered_widget(wibox.widget.textbox(size..'x'..size)), 3, i + 1)
 end
 
