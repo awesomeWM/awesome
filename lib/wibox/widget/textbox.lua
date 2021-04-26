@@ -375,6 +375,26 @@ function textbox.mt.__call(_, ...)
     return new(...)
 end
 
+--- Get geometry of text label, as if textbox would be created for it on the screen.
+--
+-- @tparam string text The text content, pango markup supported.
+-- @tparam[opt=nil] integer|screen s The screen on which the textbox would be displayed.
+-- @tparam[opt=beautiful.font] string font The font description as string.
+-- @treturn table Geometry (width, height) hashtable.
+function textbox.get_markup_geometry(text, s, font)
+    font = font or beautiful.font
+    local pctx = PangoCairo.font_map_get_default():create_context()
+    local playout = Pango.Layout.new(pctx)
+    playout:set_font_description(beautiful.get_font(font))
+    local dpi_scale = beautiful.xresources.get_dpi(s)
+    pctx:set_resolution(dpi_scale)
+    playout:context_changed()
+    local attr, parsed = Pango.parse_markup(text, -1, 0)
+    playout.attributes, playout.text = attr, parsed
+    local _, logical = playout:get_pixel_extents()
+    return logical
+end
+
 return setmetatable(textbox, textbox.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
