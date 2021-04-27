@@ -455,7 +455,7 @@ function menubar.show(scr)
     local bg_color = theme.menubar_bg_normal or theme.menu_bg_normal or theme.bg_normal
     local border_width = theme.menubar_border_width or theme.menu_border_width or 0
     local border_color = theme.menubar_border_color or theme.menu_border_color
-    local font = theme.menubar_font or theme.font
+    local font = theme.menubar_font or theme.font or "Monospace 10"
 
     if not instance then
         -- Add to each category the name of its key in all_categories
