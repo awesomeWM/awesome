@@ -72,22 +72,94 @@ end
 function imagebox:draw(_, cr, width, height)
     if width == 0 or height == 0 or not self._private.default then return end
 
-    -- Set the clip
-    if self._private.clip_shape then
-        cr:clip(self._private.clip_shape(cr, width, height, unpack(self._private.clip_args)))
-    end
+    -- For valign = "top" and halign = "left"
+    local translate = {
+        x = 0,
+        y = 0,
+    }
+
+    local w, h = self._private.default.width, self._private.default.height
 
     if not self._private.resize_forbidden then
-        -- Let's scale the image so that it fits into (width, height)
-        local w, h = self._private.default.width, self._private.default.height
-        local aspect = math.min(width / w, height / h)
-        cr:scale(aspect, aspect)
+        -- That's for the "fit" policy.
+        local aspects = {
+            w = width / w,
+            h = height / h
+        }
+
+        local policy = {
+            w = self._private.horizontal_fit_policy or "auto",
+            h = self._private.vertical_fit_policy or "auto"
+        }
+
+        for _, aspect in ipairs {"w", "h"} do
+            if policy[aspect] == "auto" then
+                aspects[aspect] = math.min(width / w, height / h)
+            elseif policy[aspect] == "none" then
+                aspects[aspect] = 1
+            end
+        end
+
+        if self._private.halign == "center" then
+            translate.x = math.floor((width - w*aspects.w)/2)
+        elseif self._private.halign == "right" then
+            translate.x = math.floor(width - (w*aspects.w))
+        end
+
+        if self._private.valign == "center" then
+            translate.y = math.floor((height - h*aspects.h)/2)
+        elseif self._private.valign == "bottom" then
+            translate.y = math.floor(height - (h*aspects.h))
+        end
+
+        cr:translate(translate.x, translate.y)
+
+        -- Before using the scale, make sure it is below the threshold.
+        local threshold, max_factor = self._private.max_scaling_factor, math.max(aspects.w, aspects.h)
+
+        if threshold and threshold > 0 and threshold < max_factor then
+            aspects.w = (aspects.w*threshold)/max_factor
+            aspects.h = (aspects.h*threshold)/max_factor
+        end
+
+        -- Set the clip
+        if self._private.clip_shape then
+            cr:clip(self._private.clip_shape(cr, w*aspects.w, h*aspects.h, unpack(self._private.clip_args)))
+        end
+
+        cr:scale(aspects.w, aspects.h)
+    else
+        if self._private.halign == "center" then
+            translate.x = math.floor((width - w)/2)
+        elseif self._private.halign == "right" then
+            translate.x = math.floor(width - w)
+        end
+
+        if self._private.valign == "center" then
+            translate.y = math.floor((height - h)/2)
+        elseif self._private.valign == "bottom" then
+            translate.y = math.floor(height - h)
+        end
+
+        cr:translate(translate.x, translate.y)
+
+        -- Set the clip
+        if self._private.clip_shape then
+            cr:clip(self._private.clip_shape(cr, w, h, unpack(self._private.clip_args)))
+        end
     end
 
     if self._private.handle then
         self._private.handle:render_cairo(cr)
     else
         cr:set_source_surface(self._private.image, 0, 0)
+
+        local filter = self._private.scaling_quality
+
+        if filter then
+            cr:get_source():set_filter(cairo.Filter[filter:upper()])
+        end
+
         cr:paint()
     end
 end
@@ -212,6 +284,8 @@ end
 -- A clip shape define an area where the content is displayed and one where it
 -- is trimmed.
 --
+-- @DOC_wibox_widget_imagebox_clip_shape_EXAMPLE@
+--
 -- @property clip_shape
 -- @tparam function|gears.shape clip_shape A `gears.shape` compatible shape function.
 -- @propemits true false
@@ -252,6 +326,156 @@ function imagebox:set_resize(allowed)
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::resize", allowed)
+end
+
+--- Set the horizontal fit policy.
+--
+-- Values are:
+--
+--  * **auto**: Honor the `resize` varible and preserve the aspect ratio (default).
+--  * **none**: Do not resize at all.
+--  * **fit**: Resize to the widget width.
+--
+-- Here is the result for a 22x32 image:
+--
+-- @DOC_wibox_widget_imagebox_horizontal_fit_policy_EXAMPLE@
+--
+--  @property horizontal_fit_policy
+--  @tparam[opt=auto] string horizontal_fit_policy
+--  @propemits true false
+--  @see vertical_fit_policy
+--  @see resize
+
+--- Set the vertical fit policy.
+-- Values are:
+--
+--  * **auto**: Honor the `resize` varible and preserve the aspect ratio (default).
+--  * **none**: Do not resize at all.
+--  * **fit**: Resize to the widget height.
+--
+-- Here is the result for a 32x22 image:
+--
+-- @DOC_wibox_widget_imagebox_vertical_fit_policy_EXAMPLE@
+--
+-- @property vertical_fit_policy
+-- @tparam[opt=auto] string horizontal_fit_policy
+-- @propemits true false
+-- @see horizontal_fit_policy
+-- @see resize
+
+
+--- The vertical alignment.
+--
+-- Possible values are:
+--
+-- * *top*
+-- * *center* (default)
+-- * *bottom*
+--
+-- @DOC_wibox_widget_imagebox_valign_EXAMPLE@
+--
+-- @property valign
+-- @tparam string avlign
+-- @propemits true false
+-- @see wibox.container.place
+-- @see halign
+
+--- The horizontal alignment.
+--
+-- Possible values are:
+--
+-- * *left*
+-- * *center* (default)
+-- * *right*
+--
+-- @DOC_wibox_widget_imagebox_halign_EXAMPLE@
+--
+-- @property halign
+-- @tparam string halign
+-- @propemits true false
+-- @see wibox.container.place
+-- @see valign
+
+--- The maximum scaling factor.
+--
+-- If an image is scaled too much, it gets very blurry. This
+-- property allows to limit the scaling. Use the `valign` and
+-- `halign` to control how the image will be aligned.
+--
+-- In the example below, the original size is 22x22
+--
+-- @DOC_wibox_widget_imagebox_max_scaling_factor_EXAMPLE@
+--
+-- @property max_scaling_factor
+-- @tparam number max_scaling_factor
+-- @propemits true false
+-- @see valign
+-- @see halign
+-- @see scaling_quality
+
+--- Set the scaling aligorithm.
+--
+-- Depending on how the image is used, what is the "correct" way to
+-- scale can change. For example, upscaling a pixel art image should
+-- not make it blurry. However, scaling up a photo should not make it
+-- blocky.
+--
+--<table class='widget_list' border=1>
+-- <tr style='font-weight: bold;'>
+--  <th align='center'>Value</th>
+--  <th align='center'>Description</th>
+-- </tr>
+-- <tr><td>fast</td><td>A high-performance filter</td></tr>
+-- <tr><td>good</td><td>A reasonable-performance filter</td></tr>
+-- <tr><td>best</td><td>The highest-quality available</td></tr>
+-- <tr><td>nearest</td><td>Nearest-neighbor filtering (blocky)</td></tr>
+-- <tr><td>bilinear</td><td>Linear interpolation in two dimensions</td></tr>
+--</table>
+--
+-- The image used in the example below has a resolution of 32x22 and is intentionally
+-- blocky to highlight the difference. It is zoomed by a factor of 3.
+--
+-- @DOC_wibox_widget_imagebox_scaling_quality_EXAMPLE@
+--
+-- @property scaling_quality
+-- @tparam string scaling_quality Either `fast`, `good`, `best`, `nearest` or `bilinear`.
+-- @propemits true false
+-- @see resize
+-- @see horizontal_fit_policy
+-- @see vertical_fit_policy
+-- @see max_scaling_factor
+
+local defaults = {
+    halign                = "left",
+    valign                = "top",
+    horizontal_fit_policy = "auto",
+    vertical_fit_policy   = "auto",
+    max_scaling_factor    = 0,
+    scaling_quality       = "good"
+}
+
+local function get_default(prop, value)
+    if value == nil then return defaults[prop] end
+
+    return value
+end
+
+for prop in pairs(defaults) do
+    imagebox["set_"..prop] = function(self, value)
+        if value == self._private[prop] then return end
+
+        self._private[prop] = get_default(prop, value)
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("property::"..prop, self._private[prop])
+    end
+
+    imagebox["get_"..prop] = function(self)
+        if self._private[prop] == nil then
+            return defaults[prop]
+        end
+
+        return self._private[prop]
+    end
 end
 
 --- Returns a new `wibox.widget.imagebox` instance.
