@@ -21,45 +21,61 @@ local fixed = {}
 -- @param height The available height.
 function fixed:layout(context, width, height)
     local result = {}
-    local pos,spacing = 0, self._private.spacing
-    local spacing_widget = self._private.spacing_widget
+    local spacing = self._private.spacing or 0
     local is_y = self._private.dir == "y"
     local is_x = not is_y
     local abspace = math.abs(spacing)
     local spoffset = spacing < 0 and 0 or spacing
+    local widgets_nr = #self._private.widgets
+    local spacing_widget
+    local x, y = 0, 0
+
+    spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
 
     for k, v in pairs(self._private.widgets) do
-        local x, y, w, h, _
+        local w, h = width - x, height - y
+
         if is_y then
-            x, y = 0, pos
-            w, h = width, height - pos
-            if k ~= #self._private.widgets or not self._private.fill_space then
-                _, h = base.fit_widget(self, context, v, w, h);
+            if k ~= widgets_nr or not self._private.fill_space then
+                h = select(2, base.fit_widget(self, context, v, w, h))
             end
-            pos = pos + h + spacing
+
+            if y - spacing >= height then
+                -- pop the spacing widget added in previous iteration if used
+                if spacing_widget then
+                    table.remove(result)
+                end
+                break
+            end
         else
-            x, y = pos, 0
-            w, h = width - pos, height
-            if k ~= #self._private.widgets or not self._private.fill_space then
-                w, _ = base.fit_widget(self, context, v, w, h);
+            if k ~= widgets_nr or not self._private.fill_space then
+                w = select(1, base.fit_widget(self, context, v, w, h))
             end
-            pos = pos + w + spacing
+
+            if x - spacing >= width then
+                -- pop the spacing widget added in previous iteration if used
+                if spacing_widget then
+                    table.remove(result)
+                end
+                break
+            end
         end
 
-        if (is_y and pos-spacing > height) or
-            (is_x and pos-spacing > width) then
-            break
-        end
+        -- Place widget
+        table.insert(result, base.place_widget_at(v, x, y, w, h))
 
-        -- Add the spacing widget
-        if k > 1 and abspace > 0 and spacing_widget then
+        x = is_x and x + w + spacing or x
+        y = is_y and y + h + spacing or y
+
+        -- Add the spacing widget (if needed)
+        if k < widgets_nr and spacing_widget then
             table.insert(result, base.place_widget_at(
                 spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
                 is_x and abspace or w, is_y and abspace or h
             ))
         end
-        table.insert(result, base.place_widget_at(v, x, y, w, h))
     end
+
     return result
 end
 
@@ -262,40 +278,61 @@ end
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function fixed:fit(context, orig_width, orig_height)
-    local width, height = orig_width, orig_height
-    local used_in_dir, used_max = 0, 0
+    local width_left, height_left = orig_width, orig_height
+    local spacing = self._private.spacing or 0
+    local widgets_nr = #self._private.widgets
+    local is_y = self._private.dir == "y"
+    local used_max = 0
 
-    for _, v in pairs(self._private.widgets) do
-        local w, h = base.fit_widget(self, context, v, width, height)
-        local in_dir, max
-        if self._private.dir == "y" then
-            max, in_dir = w, h
-            height = height - in_dir
+    -- when no widgets exist the function can be called with orig_width or
+    -- orig_height equal to nil. Exit early in this case.
+    if widgets_nr == 0 then
+        return 0, 0
+    end
+
+    for k, v in pairs(self._private.widgets) do
+        local w, h = base.fit_widget(self, context, v, width_left, height_left)
+        local max
+
+        if is_y then
+            max = w
+            height_left = height_left - h
         else
-            in_dir, max = w, h
-            width = width - in_dir
+            max = h
+            width_left = width_left - w
         end
+
         if max > used_max then
             used_max = max
         end
-        used_in_dir = used_in_dir + in_dir
 
-        if width <= 0 or height <= 0 then
-            if self._private.dir == "y" then
-                used_in_dir = orig_height
+        if k < widgets_nr then
+            if is_y then
+                height_left = height_left - spacing
             else
-                used_in_dir = orig_width
+                width_left = width_left - spacing
+            end
+        end
+
+        if width_left <= 0 or height_left <= 0 then
+            -- this complicated two lines determine whether we're out-of-space
+            -- because of spacing, or if the last widget doesn't fit in
+            if is_y then
+                 height_left = k < widgets_nr and height_left + spacing or height_left
+                 height_left = height_left < 0 and 0 or height_left
+            else
+                 width_left = k < widgets_nr and width_left + spacing or width_left
+                 width_left = width_left < 0 and 0 or width_left
             end
             break
         end
     end
 
-    local spacing = self._private.spacing * (#self._private.widgets-1)
-
-    if self._private.dir == "y" then
-        return used_max, used_in_dir + spacing
+    if is_y then
+        return used_max, orig_height - height_left
     end
-    return used_in_dir + spacing, used_max
+
+    return orig_width - width_left, used_max
 end
 
 function fixed:reset()
