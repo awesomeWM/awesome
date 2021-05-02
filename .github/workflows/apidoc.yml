@@ -70,6 +70,7 @@ jobs:
             libxkbcommon-dev \
             libxkbcommon-x11-dev \
             xutils-dev \
+            lua-discount \
             liblua5.3-dev \
             lua5.3
 
