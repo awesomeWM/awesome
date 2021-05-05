@@ -31,10 +31,10 @@ wibox.widget {
     group_colors = colors,
     step_width   = 1,
     step_spacing = 3, -- Leave free space for shifted bars
-    group_start  = function(cr, group_idx, options)
+    group_start  = function(self, context, cr, group_idx) --luacheck: no unused
         -- We must set the group color ourselves,
         -- since we have overriden the default behavior.
-        cr:set_source(gears.color(options.graph:pick_data_group_color(group_idx)))
+        cr:set_source(gears.color(self:pick_data_group_color(group_idx)))
         -- Shift each group right for this amount of pixels to prevent overlap
         return group_idx - 1
     end,

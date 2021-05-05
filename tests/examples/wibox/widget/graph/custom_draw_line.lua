@@ -40,7 +40,7 @@ wibox.widget {
         -- Go back to the center
         cr:move_to(mid, 0)
     end,
-    group_finish = function(cr)
+    group_finish = function(_, _, cr)
         cr:set_line_width(1)
         cr:stroke()
     end,
