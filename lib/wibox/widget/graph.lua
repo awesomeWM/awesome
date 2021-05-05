@@ -642,17 +642,16 @@ local function graph_choose_coordinate_system(self, scaling_values, drawn_values
     -- The position of the baseline in value coordinates
     -- It defaults to the usual zero axis
     local baseline_value = self._private.baseline_value or prop_fallbacks.baseline_value
+
     -- Let's map it into widget coordinates
-    local baseline_y = graph_map_value_to_widget_coordinates(
+    local main_baseline_y = graph_map_value_to_widget_coordinates(
         self, baseline_value, min_value, max_value, height
     )
 
-    return min_value, max_value, baseline_y
+    return min_value, max_value, main_baseline_y
 end
 
 local function graph_draw_values(self, cr, width, height, drawn_values_num)
-    local values = self._private.values
-
     local step_spacing = self._private.step_spacing or prop_fallbacks.step_spacing
     local step_width = self._private.step_width or prop_fallbacks.step_width
 
@@ -660,14 +659,14 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
     local cairo_rectangle = cr.rectangle
     local map_coords = graph_map_value_to_widget_coordinates
 
-    local drawn_values, scaling_values = graph_preprocess_values(self, values, drawn_values_num)
+    local drawn_values, scaling_values = graph_preprocess_values(self, self._private.values, drawn_values_num)
     -- If preprocessor returned drawn_values = nil, then simply draw the values we have
-    drawn_values = drawn_values or values
+    drawn_values = drawn_values or self._private.values
     -- If preprocessor returned scaling_values = nil, then
     -- all drawn values need to be examined to determine proper scaling
     scaling_values = scaling_values or drawn_values
 
-    local min_value, max_value, baseline_y = graph_choose_coordinate_system(
+    local min_value, max_value, main_baseline_y = graph_choose_coordinate_system(
         self, scaling_values, drawn_values_num, height
     )
 
@@ -680,25 +679,27 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
     -- pass data pertaining to the same drawing session between callbacks, but
     -- all underscore-prefixed keys are reserved for future use by the widget.
     --
-    -- @table draw_callback_options
     -- @within Advanced drawing fields
-    local options = {
-        _graph = self, -- The graph widget itself.
-        _width = width, -- The width it is being drawn with.
-        _height = height, -- The height it is being drawn with.
-        _step_width = step_width, -- `step_width`, never nil.
-        _step_spacing = step_spacing, -- `step_spacing`, never nil.
-        _group_idx = nil, -- Index of the currently drawn data group.
-    }
+    -- @table draw_callback_options
+    -- @tfield wibox.widget.graph graph The graph widget itself.
+    -- @tfield number width The width it is being drawn with.
+    -- @tfield number height The height it is being drawn with.
+    -- @tfield number|nil group_idx Index of the currently drawn data group.
+    local options = setmetatable({}, { __index = {
+        graph     = self,
+        width     = width,
+        height    = height,
+        group_idx = nil,
+    }})
 
     -- The user callback to call before drawing each data group
     local group_start = self._private.group_start
     if not group_start or type(group_start) == "number" then
         local offset_x = group_start
-        group_start = function(cr, group_idx, options) --luacheck: ignore 431 432
+        group_start = function(cr, group_idx) --luacheck: ignore 431 432
             -- Set the data series' color early, in case the user
             -- wants to do their own painting inside step_shape()
-            cr:set_source(color(options._graph:pick_data_group_color(group_idx)))
+            cr:set_source(color(self:pick_data_group_color(group_idx)))
             -- Pass the user-given constant group offset, if any
             return offset_x
         end
@@ -721,14 +722,14 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
             local pristine_transform = cr:get_matrix()
             local cairo_translate = cr.translate
             local cairo_set_matrix = cr.set_matrix
-            step_hook = function(cr, x, value_y, baseline_y, step_width, _options) --luacheck: ignore 431 432 212/_.*
+            step_hook = function(_, x, value_y, baseline_y, _step_width)
                 local step_height = baseline_y - value_y
                 if not (step_height == step_height) then
                     return -- is NaN
                 end
                 -- Shift to the bar beginning
                 cairo_translate(cr, x, value_y)
-                step_shape(cr, step_width, step_height)
+                step_shape(cr, _step_width, step_height)
                 -- Undo the shift
                 cairo_set_matrix(cr, pristine_transform)
             end
@@ -740,7 +741,7 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
 
     for group_idx, group_values in ipairs(drawn_values) do
         if graph_should_draw_data_group(self, group_idx) then
-            options._group_idx = group_idx
+            options.group_idx = group_idx
             -- group_start() callback prepares context for drawing a data group.
             -- It can give us a horizontal offset for all data group bars.
             local offset_x = group_start(cr, group_idx, options)
@@ -755,7 +756,7 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
                 -- The coordinate of the i-th bar's left edge
                 local x = (i-1)*(step_width + step_spacing) + offset_x
 
-                local base_y = baseline_y
+                local base_y = main_baseline_y
                 if prev_y then
                     -- Draw from where the previous stacked series left off
                     base_y = prev_y[i] or base_y

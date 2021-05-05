@@ -45,15 +45,15 @@ local function curvaceous(cr, x, y, b, step_width, options, draw_line)
     local interpolate = bezier.cubic_from_derivative_and_points_min_stretch
 
     local state = options.curvaceous_state
-    if not state or state.last_group ~= options._group_idx then
+    if not state or state.last_group ~= options.group_idx then
         -- New data series is being drawn, reset state.
-        state = { last_group = options._group_idx, x = x, y = y, b = b }
+        state = { last_group = options.group_idx, x = x, y = y, b = b }
         options.curvaceous_state = state
         return
     end
 
     -- Compute if the bar needs to be cut due to spacing and how much
-    local step_spacing = options._step_spacing
+    local step_spacing = options.graph.step_spacing
     local step_fraction = step_spacing ~= 0 and step_width/(step_width+step_spacing)
 
     -- Get coordinates from the previous step

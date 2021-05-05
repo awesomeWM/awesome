@@ -34,7 +34,7 @@ wibox.widget {
     group_start  = function(cr, group_idx, options)
         -- We must set the group color ourselves,
         -- since we have overriden the default behavior.
-        cr:set_source(gears.color(options._graph:pick_data_group_color(group_idx)))
+        cr:set_source(gears.color(options.graph:pick_data_group_color(group_idx)))
         -- Shift each group right for this amount of pixels to prevent overlap
         return group_idx - 1
     end,
