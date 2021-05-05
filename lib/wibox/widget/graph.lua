@@ -242,7 +242,7 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_custom_draw_outline_EXAMPLE@
 --
 -- @property group_start
--- @within Advanced drawing
+-- @within Advanced drawing properties
 -- @tparam function|number|nil group_start
 -- @propemits true false
 
@@ -262,7 +262,7 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_custom_draw_group_shift_EXAMPLE@
 --
 -- @callback group_start_callback
--- @within Advanced drawing
+-- @within Advanced drawing callbacks
 -- @tparam cairo.Context cr Cairo context
 -- @tparam number group_idx The index of the currently drawn data group
 -- @tparam @{draw_callback_options} options Additional info (@{draw_callback_options})
@@ -279,7 +279,7 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_custom_draw_line_EXAMPLE@
 --
 -- @property group_finish
--- @within Advanced drawing
+-- @within Advanced drawing properties
 -- @tparam function|nil group_finish
 -- @propemits true false
 
@@ -293,7 +293,7 @@ local graph = { mt = {} }
 -- painting has taken place. This callback is supposed to do something about it.
 --
 -- @callback group_finish_callback
--- @within Advanced drawing
+-- @within Advanced drawing callbacks
 -- @tparam cairo.Context cr Cairo context
 -- @tparam number group_idx The index of the currently drawn data group
 -- @tparam @{draw_callback_options} options Additional info (@{draw_callback_options})
@@ -309,9 +309,10 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_bezier_curve_EXAMPLE@
 --
 -- @property step_hook
--- @within Advanced drawing
+-- @within Advanced drawing properties
 -- @tparam function|nil step_hook
 -- @propemits true false
+-- @see gears.math
 
 --- User callback for drawing a value.
 --
@@ -342,7 +343,7 @@ local graph = { mt = {} }
 -- for graphs with values smaller than `baseline_value`.
 --
 -- @callback step_hook_callback
--- @within Advanced drawing
+-- @within Advanced drawing callbacks
 -- @tparam cairo.Context cr Cairo context
 -- @tparam number x The horizontal coordinate of the left edge of the bar.
 -- @tparam number value_y The vertical coordinate corresponding to the drawn value.
@@ -680,7 +681,7 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
     -- all underscore-prefixed keys are reserved for future use by the widget.
     --
     -- @table draw_callback_options
-    -- @within Advanced drawing
+    -- @within Advanced drawing fields
     local options = {
         _graph = self, -- The graph widget itself.
         _width = width, -- The width it is being drawn with.

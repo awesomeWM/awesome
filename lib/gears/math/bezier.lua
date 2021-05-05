@@ -20,6 +20,7 @@ local bezier = {}
 -- @treturn[1] number The value of `B(t)`.
 -- @treturn[2] nil `nil`, if c is empty.
 -- @staticfct gears.math.bezier.curve_evaluate_at
+-- @see wibox.widget.graph.step_hook
 function bezier.curve_evaluate_at(c, t)
     local from = c
     local tmp = {nil, nil, nil, nil}
@@ -45,6 +46,7 @@ end
 -- @treturn {number,...} The table of control points for `B_left`.
 -- @treturn {number,...} The table of control points for `B_right`.
 -- @staticfct gears.math.bezier.curve_split_at
+-- @see wibox.widget.graph.step_hook
 function bezier.curve_split_at(c, t)
     local coefs_left, coefs_right = {}, {}
     local from = c
@@ -73,6 +75,7 @@ end
 -- @treturn[1] {number,...} The table of control points of `B^(n)(t)`.
 -- @treturn[2] nil If n is less than 0.
 -- @staticfct gears.math.bezier.curve_derivative
+-- @see wibox.widget.graph.step_hook
 function bezier.curve_derivative(c, n)
     n = n or 1
     if n < 0 then
@@ -121,6 +124,7 @@ end
 -- @treturn[2] nil nil, if n is less than 0.
 -- @treturn[3] number|nil The value of the zero parameter, if c is empty.
 -- @staticfct gears.math.bezier.curve_derivative_at
+-- @see wibox.widget.graph.step_hook
 function bezier.curve_derivative_at(c, t, n, zero)
     local d = bezier.curve_derivative(c, n)
     if not d then
@@ -140,6 +144,7 @@ end
 -- @treturn[1] number The value of `B'(0)`.
 -- @treturn[2] number|nil The value of the zero parameter, if c is empty.
 -- @staticfct gears.math.bezier.curve_derivative_at_zero
+-- @see wibox.widget.graph.step_hook
 function bezier.curve_derivative_at_zero(c, zero)
     local l = #c
     if l < 2 then
@@ -158,6 +163,7 @@ end
 -- @treturn[1] number The value of `B'(1)`.
 -- @treturn[2] number|nil The value of the zero parameter, if c is empty.
 -- @staticfct gears.math.bezier.curve_derivative_at_one
+-- @see wibox.widget.graph.step_hook
 function bezier.curve_derivative_at_one(c, zero)
     local l = #c
     if l < 2 then
@@ -176,6 +182,7 @@ end
 -- @tparam {number,...} c The table of control points of the curve B.
 -- @treturn {number,...} The table of control points of the curve Q.
 -- @staticfct gears.math.bezier.curve_elevate_degree
+-- @see wibox.widget.graph.step_hook
 function bezier.curve_elevate_degree(c)
     local ret = {c[1]}
     local len = #c
@@ -213,6 +220,7 @@ end
 -- @treturn number c2
 -- @treturn number c3
 -- @staticfct gears.math.bezier.cubic_through_points
+-- @see wibox.widget.graph.step_hook
 function bezier.cubic_through_points(p0, p1, p2, p3)
     if not p1 then
         return p0, p0, p0, p0
@@ -246,6 +254,7 @@ end
 -- @treturn number c2
 -- @treturn number c3
 -- @staticfct gears.math.bezier.cubic_from_points_and_derivatives
+-- @see wibox.widget.graph.step_hook
 function bezier.cubic_from_points_and_derivatives(d0, p0, p3, d3)
     local c1 = p0 + d0/3
     local c2 = p3 - d3/3
@@ -271,6 +280,7 @@ end
 -- @treturn number c2
 -- @treturn number c3
 -- @staticfct gears.math.bezier.cubic_from_derivative_and_points_min_stretch
+-- @see wibox.widget.graph.step_hook
 function bezier.cubic_from_derivative_and_points_min_stretch(d0, p0, p3)
     local c1 = p0 + d0/3
     local c2 = (2*p0 - c1 + 3*p3) / 4
@@ -295,6 +305,7 @@ end
 -- @treturn number c2
 -- @treturn number c3
 -- @staticfct gears.math.bezier.cubic_from_derivative_and_points_min_strain
+-- @see wibox.widget.graph.step_hook
 function bezier.cubic_from_derivative_and_points_min_strain(d, p0, p3)
     local c1 = p0 + d/3
     local c2 = (c1 + p3) / 2
@@ -320,6 +331,7 @@ end
 -- @treturn number c2
 -- @treturn number c3
 -- @staticfct gears.math.bezier.cubic_from_derivative_and_points_min_jerk
+-- @see wibox.widget.graph.step_hook
 function bezier.cubic_from_derivative_and_points_min_jerk(d, p0, p3)
     local c1 = p0 + d/3
     local c2 = c1 + (p3 - p0) / 3
