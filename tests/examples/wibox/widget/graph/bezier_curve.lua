@@ -41,8 +41,9 @@ local colors = {
 local bezier = require("gears.math.bezier")
 --DOC_NEWLINE
 
-local function curvaceous(cr, x, y, b, step_width, options, draw_line)
+local function curvaceous(cr, x, y, b, options, draw_line)
     local interpolate = bezier.cubic_from_derivative_and_points_min_stretch
+    local step_width = options.graph.step_width
 
     local state = options.curvaceous_state
     if not state or state.last_group ~= options.group_idx then
@@ -149,9 +150,9 @@ wibox.widget {
     stack        = false,
     group_colors = colors,
     step_width   = 15,
-    step_hook    = function(cr, x, value_y, baseline_y, step_width, options)
+    step_hook    = function(cr, x, value_y, baseline_y, options)
         -- Draw the curve for the previous step
-        curvaceous(cr, x, value_y, baseline_y, step_width, options, true)
+        curvaceous(cr, x, value_y, baseline_y, options, true)
         -- Draw a tick for this step
         if value_y == value_y then
             cr:move_to(x, value_y - 2)

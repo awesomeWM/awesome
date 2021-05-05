@@ -349,7 +349,6 @@ local graph = { mt = {} }
 -- @tparam number value_y The vertical coordinate corresponding to the drawn value.
 -- Can be a NaN.
 -- @tparam number baseline_y The vertical coordinate corresponding to the baseline.
--- @tparam number step_width Same as `step_width` (but never nil).
 -- @tparam @{draw_callback_options} options Additional info (@{draw_callback_options}).
 -- @see step_hook
 
@@ -722,14 +721,14 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
             local pristine_transform = cr:get_matrix()
             local cairo_translate = cr.translate
             local cairo_set_matrix = cr.set_matrix
-            step_hook = function(_, x, value_y, baseline_y, _step_width)
+            step_hook = function(_, x, value_y, baseline_y)
                 local step_height = baseline_y - value_y
                 if not (step_height == step_height) then
                     return -- is NaN
                 end
                 -- Shift to the bar beginning
                 cairo_translate(cr, x, value_y)
-                step_shape(cr, _step_width, step_height)
+                step_shape(cr, step_width, step_height)
                 -- Undo the shift
                 cairo_set_matrix(cr, pristine_transform)
             end
@@ -768,7 +767,7 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
 
                 if step_hook then
                     -- step_hook() is expected to handle NaNs itself
-                    step_hook(cr, x, value_y, base_y, step_width, options)
+                    step_hook(cr, x, value_y, base_y, options)
                 elseif not_nan then
                     cairo_rectangle(cr, x, value_y, step_width, base_y - value_y)
                 end
