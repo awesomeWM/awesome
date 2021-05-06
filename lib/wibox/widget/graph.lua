@@ -682,13 +682,19 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
     --
     -- @within Advanced drawing fields
     -- @table draw_callback_options
+    -- @tfield number _step_width `step_width` for the current step.
+    -- @tfield number _step_spacing = step_spacing, -- `step_spacing` for the current step.
+    -- @tfield number _width The width of the values draw area.
+    -- @tfield number _height The height of the values draw area.
+    -- @tfield number _group_idx Index of the currently drawn data group.
+    -- @tfield wibox.widget.graph _graph The graph widget itself, explicitly named.
     local options = {
-        _graph = self, -- The graph widget itself.
-        _width = width, -- The width it is being drawn with.
-        _height = height, -- The height it is being drawn with.
-        _step_width = step_width, -- `step_width`, never nil.
-        _step_spacing = step_spacing, -- `step_spacing`, never nil.
-        _group_idx = nil, -- Index of the currently drawn data group.
+        _step_width = step_width,
+        _step_spacing = step_spacing,
+        _width = width,
+        _height = height,
+        _group_idx = nil, -- will be set later
+        _graph = self,
     }
 
     -- The user callback to call before drawing each data group
