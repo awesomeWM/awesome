@@ -650,7 +650,7 @@ local function graph_choose_coordinate_system(self, scaling_values, drawn_values
     return min_value, max_value, baseline_y
 end
 
-local function graph_draw_values(self, cr, width, height, drawn_values_num)
+local function graph_draw_values(self, context, cr, width, height, drawn_values_num)
     local values = self._private.values
 
     local step_spacing = self._private.step_spacing or prop_fallbacks.step_spacing
@@ -688,14 +688,14 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
     -- @tfield number _height The height of the values draw area.
     -- @tfield number _group_idx Index of the currently drawn data group.
     -- @tfield wibox.widget.graph _graph The graph widget itself, explicitly named.
-    local options = {
+    local options = setmetatable({
         _step_width = step_width,
         _step_spacing = step_spacing,
         _width = width,
         _height = height,
         _group_idx = nil, -- will be set later
         _graph = self,
-    }
+    }, {__index = context})
 
     -- The user callback to call before drawing each data group
     local group_start = self._private.group_start
@@ -799,7 +799,7 @@ local function graph_draw_values(self, cr, width, height, drawn_values_num)
     end
 end
 
-function graph:draw(_, cr, width, height)
+function graph:draw(context, cr, width, height)
     local border_width = self._private.border_width or prop_fallbacks.border_width
     local drawn_values_num = self:compute_drawn_values_num(width-2*border_width)
 
@@ -822,7 +822,7 @@ function graph:draw(_, cr, width, height)
         local values_width = width - 2*border_width
         local values_height = height - 2*border_width
 
-        graph_draw_values(self, cr, values_width, values_height, drawn_values_num)
+        graph_draw_values(self, context, cr, values_width, values_height, drawn_values_num)
 
         -- Undo the cr:translate() for the border and step shapes
         cr:restore()

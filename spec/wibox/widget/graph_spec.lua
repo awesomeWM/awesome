@@ -585,6 +585,8 @@ describe("wibox.widget.graph", function()
             -- Ensure it's integer.
             assert.is.equal(math.floor(options._group_idx), options._group_idx)
             assert.is.equal(widget, options._graph)
+            -- It also contains the draw context
+            assert.is.equal("fake context", options.fake_context)
         end
 
         describe("property step_hook()", function()
