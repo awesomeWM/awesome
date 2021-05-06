@@ -38,7 +38,7 @@ wibox.widget {
     step_width   = 9,
     step_shape   = gears.shape.rounded_bar,
     group_start  = 0.5, -- Make vertical lines sharper
-    group_finish = function(_, _, cr)
+    group_finish = function(cr)
         cr:set_line_width(1)
         cr:stroke()
     end,
@@ -53,7 +53,7 @@ wibox.widget {
     step_width   = 9,
     step_shape   = gears.shape.rounded_bar,
     group_start  = 0.5, -- Make vertical lines sharper
-    group_finish = function(_, _, cr)
+    group_finish = function(cr)
         cr:fill_preserve()
         cr:set_source(gears.color("#ffffff"))
         cr:set_line_width(1)

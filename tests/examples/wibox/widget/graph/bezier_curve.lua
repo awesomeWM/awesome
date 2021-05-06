@@ -41,20 +41,19 @@ local colors = {
 local bezier = require("gears.math.bezier")
 --DOC_NEWLINE
 
-local function curvaceous(self, context, cr, x, y, b, draw_line)
+local function curvaceous(cr, x, y, b, step_width, options, draw_line)
     local interpolate = bezier.cubic_from_derivative_and_points_min_stretch
-    local step_width = self.step_width
 
-    local state = context.curvaceous_state
-    if not state or state.last_group ~= context.group_idx then
+    local state = options.curvaceous_state
+    if not state or state.last_group ~= options._group_idx then
         -- New data series is being drawn, reset state.
-        state = { last_group = context.group_idx, x = x, y = y, b = b }
-        context.curvaceous_state = state
+        state = { last_group = options._group_idx, x = x, y = y, b = b }
+        options.curvaceous_state = state
         return
     end
 
     -- Compute if the bar needs to be cut due to spacing and how much
-    local step_spacing = self.step_spacing
+    local step_spacing = options._step_spacing
     local step_fraction = step_spacing ~= 0 and step_width/(step_width+step_spacing)
 
     -- Get coordinates from the previous step
@@ -129,7 +128,7 @@ wibox.widget {
     step_spacing = 5,
     step_hook    = curvaceous,
     group_start  = 0.5, -- Make vertical 1px-width lines sharper
-    group_finish = function(_, _, cr)
+    group_finish = function(cr)
         -- Paint the colored bars
         cr:fill_preserve()
         -- Paint a semi-black outline around bars
@@ -150,9 +149,9 @@ wibox.widget {
     stack        = false,
     group_colors = colors,
     step_width   = 15,
-    step_hook    = function(self, context, cr, x, value_y, baseline_y)
+    step_hook    = function(cr, x, value_y, baseline_y, step_width, options)
         -- Draw the curve for the previous step
-        curvaceous(self, context, cr, x, value_y, baseline_y, true)
+        curvaceous(cr, x, value_y, baseline_y, step_width, options, true)
         -- Draw a tick for this step
         if value_y == value_y then
             cr:move_to(x, value_y - 2)
@@ -160,7 +159,7 @@ wibox.widget {
         end
     end,
     group_start  = 0.5, -- Make vertical 1px-width lines sharper
-    group_finish = function(_, _, cr)
+    group_finish = function(cr)
         -- Paint all lines
         cr:set_line_width(1)
         cr:stroke()
