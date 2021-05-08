@@ -13,7 +13,7 @@
 set -e
 
 export SHELL=/bin/sh
-export HOME="${TMP:-/tmp}"
+export HOME=/dev/null
 
 # Parse options.
 usage() {
