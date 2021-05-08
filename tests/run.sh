@@ -134,7 +134,7 @@ echo "awesome_log: $awesome_log"
 
 wait_until_success() {
     if (( verbose )); then set +x; fi
-    wait_count=$(echo "${TEST_TIMEOUT} / 0.05" | bc)
+    wait_count=$((${TEST_TIMEOUT} * 20))
     while true; do
         set +e
         eval reply="\$($2)"
