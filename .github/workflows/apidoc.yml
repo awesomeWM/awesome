@@ -21,6 +21,10 @@ jobs:
   main:
     runs-on: ubuntu-20.04
 
+    env:
+      # Used for stable dates in documentation examples. See #2070.
+      SOURCE_DATE_EPOCH: "1893456000"
+
     steps:
       # Create a cache invalidation key based on the current year + week.
       # This way, packages will be checked for updates once every week.

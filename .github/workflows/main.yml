@@ -59,8 +59,6 @@ jobs:
             tests_screen_size: "1921x1079"
             check_qa: true
             empty_theme_while_loading: true
-            # SOURCE_DATE_EPOCH: used for stable dates during build.
-            source_date_epoch: "1893456000"
             test_prev_commits: true
 
     env:
@@ -68,7 +66,6 @@ jobs:
       LUAINCLUDE: ${{ matrix.lua_include || format('/usr/include/lua{0}', matrix.lua_version) }}
       LUALIBRARY: ${{ matrix.lua_library || format('/usr/lib/x86_64-linux-gnu/liblua{0}.so', matrix.lua_version) }}
       TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }}
-      SOURCE_DATE_EPOCH: ${{ matrix.source_date_epoch }}
       TEST_TIMEOUT: '100'
       CI: 'true'
 
