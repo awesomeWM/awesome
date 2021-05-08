@@ -71,7 +71,6 @@ jobs:
       SOURCE_DATE_EPOCH: ${{ matrix.source_date_epoch }}
       TEST_TIMEOUT: '100'
       CI: 'true'
-      XCB_ERRORS_SHA: '5d660ebe872cadcdc85de9d6f9afe05de629c030'
 
     steps:
       # Create a cache invalidation key based on the current year + week.
@@ -173,16 +172,13 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/xcb-errors
-          # xcb-errors doesn't have versioned releases, so we checkout and cache by commit.
-          # Make sure to keep this in sync with the `git checkout` below.
-          key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-${{ env.XCB_ERRORS_SHA }}
+          key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-1.0
 
       - name: Install fresh xcb-errors
         if: steps.cache-xcb-errors.outputs.cache-hit != 'true'
         run: |
-          git clone --recursive https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git /tmp/xcb-errors
+          git clone --recursive --depth 1 --branch 1.0 https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git /tmp/xcb-errors
           cd /tmp/xcb-errors
-          git checkout ${{ env.XCB_ERRORS_SHA }}
           ./autogen.sh --prefix=/usr
           make
           sudo make install
