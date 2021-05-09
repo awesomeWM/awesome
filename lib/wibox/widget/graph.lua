@@ -650,6 +650,30 @@ local function graph_choose_coordinate_system(self, scaling_values, drawn_values
     return min_value, max_value, baseline_y
 end
 
+local function default_group_start_impl(cr, group_idx, options)
+    -- Set the data series' color early, in case the user
+    -- wants to do their own painting inside step_shape()
+    cr:set_source(color(options._graph:pick_data_group_color(group_idx)))
+    -- Pass the user-given constant group offset, if any
+    return options._graph._private.group_start
+end
+
+local function default_group_finish_impl(cr, _group_idx, _options) --luacheck: ignore 212/_.*
+    cr:fill()
+end
+
+local function default_step_hook_impl(cr, x, value_y, baseline_y, step_width, options)
+    local step_height = baseline_y - value_y
+    if not (step_height == step_height) then
+        return -- is NaN
+    end
+    -- Shift to the bar beginning
+    options._cairo_translate(cr, x, value_y)
+    options._graph._private.step_shape(cr, step_width, step_height)
+    -- Undo the shift
+    options._cairo_set_matrix(cr, options._pristine_transform)
+end
+
 local function graph_draw_values(self, context, cr, width, height, drawn_values_num)
     local values = self._private.values
 
@@ -700,22 +724,13 @@ local function graph_draw_values(self, context, cr, width, height, drawn_values_
     -- The user callback to call before drawing each data group
     local group_start = self._private.group_start
     if not group_start or type(group_start) == "number" then
-        local offset_x = group_start
-        group_start = function(cr, group_idx, options) --luacheck: ignore 431 432
-            -- Set the data series' color early, in case the user
-            -- wants to do their own painting inside step_shape()
-            cr:set_source(color(options._graph:pick_data_group_color(group_idx)))
-            -- Pass the user-given constant group offset, if any
-            return offset_x
-        end
+        group_start = default_group_start_impl
     end
 
     -- The user callback to call after drawing each data group
     local group_finish = self._private.group_finish
     if not group_finish then
-        group_finish = function(cr, _group_idx, _options) --luacheck: ignore 432 212/_.*
-            cr:fill()
-        end
+        group_finish = default_group_finish_impl
     end
 
     -- The user callback for drawing each data bar
@@ -724,20 +739,10 @@ local function graph_draw_values(self, context, cr, width, height, drawn_values_
         local step_shape = self._private.step_shape
         if step_shape then
             -- Preserve the transform centered at the top-left corner of the graph
-            local pristine_transform = cr:get_matrix()
-            local cairo_translate = cr.translate
-            local cairo_set_matrix = cr.set_matrix
-            step_hook = function(cr, x, value_y, baseline_y, step_width, _options) --luacheck: ignore 431 432 212/_.*
-                local step_height = baseline_y - value_y
-                if not (step_height == step_height) then
-                    return -- is NaN
-                end
-                -- Shift to the bar beginning
-                cairo_translate(cr, x, value_y)
-                step_shape(cr, step_width, step_height)
-                -- Undo the shift
-                cairo_set_matrix(cr, pristine_transform)
-            end
+            options._pristine_transform = cr:get_matrix()
+            options._cairo_translate = cr.translate
+            options._cairo_set_matrix = cr.set_matrix
+            step_hook = default_step_hook_impl
         end
     end
 
