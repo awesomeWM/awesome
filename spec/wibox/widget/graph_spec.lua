@@ -522,6 +522,34 @@ describe("wibox.widget.graph", function()
                 assert.spy(widget.step_shape).was_called(1)
             end)
 
+            it("is called only between group_start() and group_end()", function()
+                local inside_group = nil
+                widget.group_start = spy.new(function(_, group_idx)
+                    assert.is_nil(inside_group)
+                    inside_group = group_idx
+                end)
+                widget.group_finish = spy.new(function(_, group_idx)
+                    assert.is_equal(group_idx, inside_group)
+                    inside_group = nil
+                end)
+                widget.step_shape = spy.new(function()
+                    assert.is_number(inside_group)
+                end)
+
+                push_data(widget, data)
+                push_data(widget, data2, 3)
+
+                widget:draw(context, cr, unpack(dimensions))
+
+                -- Callbacks should have been called for each data group,
+                -- including the empty second group,
+                assert.spy(widget.group_start).was_called(3)
+                assert.spy(widget.step_shape).was_called(#data + #data2)
+                assert.spy(widget.group_finish).was_called(3)
+                -- and group_finish() was the last of them.
+                assert.is_nil(inside_group)
+            end)
+
             it("is disabled by falsy group_colors", function()
                 -- TODO: if should_draw_data_group() gets decided on,
                 -- this should be rewritten in terms of it and
@@ -539,6 +567,105 @@ describe("wibox.widget.graph", function()
                 assert.spy(widget.step_shape).was_called(#data2)
             end)
         end) -- end describe(step_shape)
+
+        local function validate_draw_callback_options(options, group_idx, step_width)
+            if step_width then
+                -- Compare with the value passed as a parameter.
+                assert.is.equal(step_width, options._step_width)
+            end
+            assert.is.number(options._step_width)
+            assert.is.number(options._step_spacing)
+            assert.is.number(options._width)
+            assert.is.number(options._height)
+            assert.is.number(options._group_idx)
+            if group_idx then
+                -- Compare with the value passed as a parameter.
+                assert.is.equal(group_idx, options._group_idx)
+            end
+            -- Ensure it's integer.
+            assert.is.equal(math.floor(options._group_idx), options._group_idx)
+            assert.is.equal(widget, options._graph)
+        end
+
+        describe("property group_start()", function()
+            it("is called by draw() for each data group", function()
+                widget.group_start = spy.new()
+                -- Not used, when there are no data groups.
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_start).was_not.called()
+                -- Used once for each data group (even empty ones, as it
+                -- happens, though that is not really necessary).
+                -- But I'm testing for it here too, so that possible
+                -- future behavior change can be detected, and it can
+                -- be decided, if it's ok to break.
+                push_data(widget, data, 1)
+                push_data(widget, data2, 3)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_start).was_called(3)
+                assert.spy(widget.group_start).was_called_with(cr, 1, match.is_table())
+                assert.spy(widget.group_start).was_called_with(cr, 2, match.is_table())
+                assert.spy(widget.group_start).was_called_with(cr, 3, match.is_table())
+            end)
+
+            it("receives proper arguments from draw()", function()
+                widget.group_start = spy.new(function(_, group_idx, options)
+                    validate_draw_callback_options(options, group_idx)
+                end)
+                push_data(widget, data)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_start).was_called_with(cr, 1, match.is_table())
+            end)
+
+            it("'s errors are not silenced by draw()", function()
+                widget.group_start = spy.new(function() assert(false) end)
+                push_data(widget, data)
+
+                assert.has.errors(function()
+                   widget:draw(context, cr, unpack(dimensions))
+                end)
+                assert.spy(widget.group_start).was_called(1)
+            end)
+        end) -- end describe(group_start)
+
+        describe("property group_finish()", function()
+            it("is called by draw() for each data group", function()
+                widget.group_finish = spy.new()
+                -- Not used, when there are no data groups.
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_finish).was_not.called()
+                -- Used once for each data group (even empty ones, as it
+                -- happens, though that is not really necessary).
+                -- But I'm testing for it here too, so that possible
+                -- future behavior change can be detected, and it can
+                -- be decided, if it's ok to break.
+                push_data(widget, data, 1)
+                push_data(widget, data2, 3)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_finish).was_called(3)
+                assert.spy(widget.group_finish).was_called_with(cr, 1, match.is_table())
+                assert.spy(widget.group_finish).was_called_with(cr, 2, match.is_table())
+                assert.spy(widget.group_finish).was_called_with(cr, 3, match.is_table())
+            end)
+
+            it("receives proper arguments from draw()", function()
+                widget.group_finish = spy.new(function(_, group_idx, options)
+                    validate_draw_callback_options(options, group_idx)
+                end)
+                push_data(widget, data)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_finish).was_called_with(cr, 1, match.is_table())
+            end)
+
+            it("'s errors are not silenced by draw()", function()
+                widget.group_finish = spy.new(function() assert(false) end)
+                push_data(widget, data)
+
+                assert.has.errors(function()
+                   widget:draw(context, cr, unpack(dimensions))
+                end)
+                assert.spy(widget.group_finish).was_called(1)
+            end)
+        end) -- end describe(group_finish)
 
         describe("method compute_drawn_values_num()", function()
             it("'s default implementation computes things correctly", function()
@@ -843,6 +970,18 @@ describe("wibox.widget.graph", function()
                     assert.is.equal(3, magic_color_used)
                     assert.spy(s).was_called(9)
                     s:clear()
+                    -- Also used, when group_start is set to number,
+                    assert.is_nil(widget.group_start)
+                    widget.group_start = 3
+                    widget:draw(context, cr, unpack(dimensions))
+                    assert.is.equal(5, magic_color_used)
+                    assert.spy(s).was_called(4)
+                    s:clear()
+                    -- but not when group_start is set to function.
+                    widget.group_start = function() end
+                    widget:draw(context, cr, unpack(dimensions))
+                    assert.is.equal(5, magic_color_used)
+                    assert.spy(s).was_not_called()
                 end)
 
                 it("'s returned color is set early, so as to be available in the corresponding step_shape()", function()
