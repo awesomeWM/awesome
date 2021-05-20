@@ -14,6 +14,7 @@ local data = { --DOC_HIDE
 local w1 = --DOC_HIDE
 wibox.widget {
     max_value = 30,
+    forced_height = 20, --DOC_HIDE
     widget    = wibox.widget.graph,
 }
 
@@ -23,6 +24,7 @@ local w2 = --DOC_HIDE
 wibox.widget {
     min_value = 10,
     max_value = 30,
+    forced_height = 20, --DOC_HIDE
     widget    = wibox.widget.graph,
 }
 

@@ -21,9 +21,9 @@ for _, color in ipairs {"#ff0000", "#00ff00", "#0000ff", "#ff00ff" } do
     local w = --DOC_HIDE
 
     wibox.widget {
-        max_value = 29,
         color     = color,
         widget    = wibox.widget.graph,
+        max_value = 29, --DOC_HIDE
         border_width  = 2, --DOC_HIDE
         margins       = 5, --DOC_HIDE
     }

@@ -22,9 +22,9 @@ for _, width in ipairs { 1, 2, 4, 10 } do
     local w = --DOC_HIDE
 
     wibox.widget {
-        max_value     = 30,
-        border_width  = width, --DOC_HIDE
+        border_width  = width,
         border_color  = beautiful.border_color,
+        max_value     = 30, --DOC_HIDE
         margins       = 5, --DOC_HIDE
         widget        = wibox.widget.graph,
     }
