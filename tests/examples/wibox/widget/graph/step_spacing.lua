@@ -22,10 +22,10 @@ for _, spacing in ipairs {0, 2, 4, 10} do
     local w = --DOC_HIDE
 
     wibox.widget {
-        border_width  = 2, --DOC_HIDE
-        margins          = 5, --DOC_HIDE
-        max_value    = 29,
         step_spacing = spacing,
+        max_value    = 29, --DOC_HIDE
+        border_width = 2, --DOC_HIDE
+        margins      = 5, --DOC_HIDE
         widget       = wibox.widget.graph,
     }
 
