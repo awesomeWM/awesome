@@ -595,18 +595,42 @@ function client.object.move_to_screen(self, s)
     end
 end
 
---- Tag a client with the set of current tags.
+--- Find suitable tags for newly created clients.
+--
+-- In most cases, the functionality you're actually looking for as a user will
+-- either be
+--
+--    c:tags(c.screen.selected_tags)
+--
+-- or
+--
+--    local s = awful.screen.focused()
+--    c:move_to_screen(s)
+--    c:tags(s.selected_tags)
+--
+-- Despite its naming, this is primarily used to tag newly created clients.
+-- As such, this method has no effect when applied to a client that already has
+-- tags assigned (except for emitting `property::tag`).
+--
+-- Additionally, while it is a rare case, if the client's screen has no selected
+-- tags at the point of calling this method, it will fall back to the screen's
+-- full set of tags.
+--
 -- @method to_selected_tags
 -- @see screen.selected_tags
 function client.object.to_selected_tags(self)
     local tags = {}
 
+    -- From the client's current tags, find the ones that
+    -- belong to the client's screen
     for _, t in ipairs(self:tags()) do
         if get_screen(t.screen) == get_screen(self.screen) then
             table.insert(tags, t)
         end
     end
 
+    -- If no tags were found,
+    -- choose the screen's selected tags, if any, or all of the screens tags
     if self.screen then
         if #tags == 0 then
             tags = self.screen.selected_tags
@@ -617,6 +641,7 @@ function client.object.to_selected_tags(self)
         end
     end
 
+    -- Prevent clients from becoming untagged
     if #tags ~= 0 then
         self:tags(tags)
     end
