@@ -1159,10 +1159,13 @@ end
 
 --- Change window factor of a client.
 --
+-- This will emit `property::windowfact` on the specific tag object
+-- `c.screen.selected_tag`.
+--
 -- @legacylayout awful.client.incwfact
--- @tparam number add Amount to increase/decrease the client's window factor.
+-- @tparam number add Amount to increase/decrease the client's window factor by.
 --   Should be between `-current_window_factor` and something close to
---   infinite.  The normalisation then ensures that the sum of all factors is 1.
+--   infinite. Normalisation then ensures that the sum of all factors is 1.
 -- @tparam client c the client.
 -- @emits property::windowfact
 function client.incwfact(add, c)
