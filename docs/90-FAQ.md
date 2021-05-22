@@ -53,6 +53,19 @@ provide a theme daemon. For more information about how to manage the
 look and feel of applications, refer to the
 [Arch Linux Wiki](https://wiki.archlinux.org/index.php/Category:Eye_candy).
 
+### Awesome doesn't show up on my login screen
+
+There have been cases where Awesome wasn't correctly registered with the display manager,
+usually due to a missing `.desktop` file.
+
+To fix such issues, copy `awesome.desktop` from the root of [the repository](https://github.com/awesomeWM/awesome/) to `/usr/share/xsessions/`.
+
+```shell
+curl https://raw.githubusercontent.com/awesomeWM/awesome/master/awesome.desktop | sudo tee /usr/share/xsessions/awesome.desktop
+```
+
+If you installed Awesome through a package manager, you might want to check if the package includes that file and, if not, notify the maintainer to add it as appropriate.
+
 ## Configuration
 
 ### How to change the default window management layout?
