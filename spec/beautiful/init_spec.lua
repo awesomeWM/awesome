@@ -12,8 +12,8 @@ describe("beautiful init", function()
 
     -- Check beautiful.get_font and get_merged_font
     it('Check beautiful.get_font', function()
-        assert.is_same(beautiful.get_font("Monospace Bold 12"),
-            beautiful.get_merged_font("Monospace 12", "Bold"))
+        assert.is_same(beautiful.get_font("Monospace Bold 12"):to_string(),
+            beautiful.get_merged_font("Monospace 12", "Bold"):to_string())
     end)
 
     -- Check beautiful.get_font_height
