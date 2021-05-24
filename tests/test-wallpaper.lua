@@ -133,6 +133,15 @@ end
 return true
 end)
 
+-- Make sure passing `nil` doesn't crash Awesome.
+table.insert(steps, function()
+
+root._wallpaper(nil)
+root.wallpaper(nil)
+
+return true
+end)
+
 
 runner.run_steps(steps)
 
