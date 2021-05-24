@@ -65,8 +65,13 @@ overview now also provides a cheat sheet for controlling Vim.
 
 ## Change the theme
 
-Awesome has four builtin themes you can choose from: *default*, *sky*,
-*xresources*, and *zenburn*.
+Awesome has multiple builtin themes you can choose from:
+
+* *default*
+* *gtk*
+* *sky*
+* *xresources*
+* *zenburn*
 
 To change the theme, open your `rc.lua`, find this line near the beginning of
 the file, and change `default` to one of the other values mentioned:

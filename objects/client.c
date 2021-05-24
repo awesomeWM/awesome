@@ -750,9 +750,13 @@ lua_class_t client_class;
  * Note that setting this directly will override and disable all related theme
  * variables.
  *
+ * Setting a transparent color (e.g. to implement dynamic borders without size
+ * changes) is supported, but requires the color to be set to `#00000000`
+ * specifically. Other RGB colors with an alpha of `0` won't work.
+ *
  * @property border_color
- * @tparam color border_color Any string, gradients and patterns will be converted to a
- *  cairo pattern.
+ * @tparam color border_color Any string, gradient or pattern definition that
+ *  can be converted to a cairo pattern.
  * @propemits false false
  * @usebeautiful beautiful.border_color_marked The fallback color when the
  *  client is marked.
