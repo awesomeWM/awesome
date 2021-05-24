@@ -121,7 +121,7 @@ function wallpaper.set(pattern)
     if not cairo.Pattern:is_type_of(pattern) then
         error("wallpaper.set() called with an invalid argument")
     end
-    root.wallpaper(pattern._native)
+    root.wallpaper(pattern)
 end
 
 --- Set a centered wallpaper.
