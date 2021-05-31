@@ -341,9 +341,9 @@ function mouse.remove_client_mousebinding(button)
     return false
 end
 
-for _, b in ipairs {"left", "right", "middle"} do
+for k, b in ipairs {"left", "middle", "right"} do
     mouse.object["is_".. b .."_mouse_button_pressed"] = function()
-        return capi.mouse.coords().buttons[1]
+        return capi.mouse.coords().buttons[k]
     end
 end
 
@@ -367,6 +367,10 @@ end)
 capi.mouse.set_index_miss_handler(function(_,key)
     if mouse.object["get_"..key] then
         return mouse.object["get_"..key]()
+    elseif mouse.object[key] and key:sub(1, 3) == "is_" then
+        return mouse.object[key]()
+    elseif mouse.object[key] then
+        return mouse.object[key]
     else
         return props[key]
     end
