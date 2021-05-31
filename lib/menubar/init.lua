@@ -70,12 +70,15 @@ end
 -- @beautiful beautiful.menubar_bg_focus
 -- @param color
 
+--- Menubar font.
+-- @beautiful beautiful.menubar_font
+-- @param[opt=beautiful.font] font
+
 
 -- menubar
 local menubar = { menu_entries = {} }
 menubar.menu_gen = require("menubar.menu_gen")
 menubar.utils = require("menubar.utils")
-local compute_text_width = menubar.utils.compute_text_width
 
 -- Options section
 
@@ -119,10 +122,9 @@ menubar.right_label = "▶▶"
 -- @tfield[opt="◀◀"] string left_label
 menubar.left_label = "◀◀"
 
--- awful.widget.common.list_update adds three times a margin of dpi(4)
--- for each item:
--- @tfield number list_interspace
-local list_interspace = theme.xresources.apply_dpi(4) * 3
+-- awful.widget.common.list_update adds spacing of dpi(4) between items.
+-- @tfield number list_spacing
+local list_spacing = theme.xresources.apply_dpi(4)
 
 --- Allows user to specify custom parameters for prompt.run function
 -- (like colors). This will merge with the default parameters, overriding affected values.
@@ -149,7 +151,7 @@ end
 
 --- Get how the menu item should be displayed.
 -- @param o The menu item.
--- @return item name, item background color, background image, item icon.
+-- @return item name, item background color, background image, item icon, item args.
 local function label(o)
     local fg_color = theme.menubar_fg_normal or theme.menu_fg_normal or theme.fg_normal
     local bg_color = theme.menubar_bg_normal or theme.menu_bg_normal or theme.bg_normal
@@ -160,7 +162,8 @@ local function label(o)
     return colortext(gstring.xml_escape(o.name), fg_color),
            bg_color,
            nil,
-           o.icon
+           o.icon,
+           o.icon and {icon_size=instance.geometry.height}
 end
 
 local function load_count_table()
@@ -225,6 +228,11 @@ end
 -- @tparam number|screen scr Screen
 -- @return table List of items for current page.
 local function get_current_page(all_items, query, scr)
+
+    local compute_text_width = function(text, s)
+        return wibox.widget.textbox.get_markup_geometry(text, s, instance.font)['width']
+    end
+
     scr = get_screen(scr)
     if not instance.prompt.width then
         instance.prompt.width = compute_text_width(instance.prompt.prompt, scr)
@@ -235,16 +243,19 @@ local function get_current_page(all_items, query, scr)
     if not menubar.right_label_width then
         menubar.right_label_width = compute_text_width(menubar.right_label, scr)
     end
+    local border_width = theme.menubar_border_width or theme.menu_border_width or 0
     local available_space = instance.geometry.width - menubar.right_margin -
         menubar.right_label_width - menubar.left_label_width -
-        compute_text_width(query, scr) - instance.prompt.width
+        compute_text_width(query..' ', scr) - instance.prompt.width - border_width * 2
+        -- space character is added as input cursor placeholder
 
     local width_sum = 0
     local current_page = {}
     for i, item in ipairs(all_items) do
-        item.width = item.width or
-            compute_text_width(item.name, scr) +
-            (item.icon and instance.geometry.height or 0) + list_interspace
+        item.width = item.width or (
+            compute_text_width(label(item), scr) +
+            (item.icon and (instance.geometry.height + list_spacing) or 0) + list_spacing * 2
+        )
         if width_sum + item.width > available_space then
             if current_item < i then
                 table.insert(current_page, { name = menubar.right_label, icon = nil })
@@ -449,6 +460,7 @@ function menubar.show(scr)
     local bg_color = theme.menubar_bg_normal or theme.menu_bg_normal or theme.bg_normal
     local border_width = theme.menubar_border_width or theme.menu_border_width or 0
     local border_color = theme.menubar_border_color or theme.menu_border_color
+    local font = theme.menubar_font or theme.font or "Monospace 10"
 
     if not instance then
         -- Add to each category the name of its key in all_categories
@@ -467,11 +479,13 @@ function menubar.show(scr)
                 fg = fg_color,
                 border_width = border_width,
                 border_color = border_color,
+                font = font,
             },
             widget = common_args.w,
             prompt = awful.widget.prompt(),
             query = nil,
             count_table = nil,
+            font = font,
         }
         local layout = wibox.layout.fixed.horizontal()
         layout:add(instance.prompt)
@@ -490,7 +504,7 @@ function menubar.show(scr)
     local geometry = menubar.geometry
     instance.geometry = {x = geometry.x or scrgeom.x,
                              y = geometry.y or scrgeom.y,
-                             height = geometry.height or gmath.round(theme.get_font_height() * 1.5),
+                             height = geometry.height or gmath.round(theme.get_font_height(font) * 1.5),
                              width = (geometry.width or scrgeom.width) - border_width * 2}
     instance.wibox:geometry(instance.geometry)
 
