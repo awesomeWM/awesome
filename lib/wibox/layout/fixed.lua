@@ -33,39 +33,71 @@ function fixed:layout(context, width, height)
     spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
 
     for k, v in pairs(self._private.widgets) do
-        local w, h = width - x, height - y
+        local w, h, local_spacing = width - x, height - y, spacing
+
+        -- Some widget might be zero sized either because this is their
+        -- minimum space or just because they are really empty. In this case,
+        -- they must still be added to the layout. Otherwise, if their size
+        -- change and this layout is resizable, they are lost "forever" until
+        -- a full relayout is called on this fixed layout object.
+        local zero = false
 
         if is_y then
             if k ~= widgets_nr or not self._private.fill_space then
                 h = select(2, base.fit_widget(self, context, v, w, h))
+                zero = h == 0
             end
 
             if y - spacing >= height then
                 -- pop the spacing widget added in previous iteration if used
                 if spacing_widget then
                     table.remove(result)
+
+                    -- Avoid adding zero-sized widgets at an out-of-bound
+                    -- position.
+                    y = y - spacing
                 end
-                break
+
+                -- Never display "random" widgets as soon as a non-zero sized
+                -- one doesn't fit.
+                if not zero then
+                    break
+                end
             end
         else
             if k ~= widgets_nr or not self._private.fill_space then
                 w = select(1, base.fit_widget(self, context, v, w, h))
+                zero = w == 0
             end
 
             if x - spacing >= width then
                 -- pop the spacing widget added in previous iteration if used
                 if spacing_widget then
                     table.remove(result)
+
+                    -- Avoid adding zero-sized widgets at an out-of-bound
+                    -- position.
+                    x = x - spacing
                 end
-                break
+
+                -- Never display "random" widgets as soon as a non-zero sized
+                -- one doesn't fit.
+                if not zero then
+                    break
+                end
             end
         end
 
-        -- Place widget
+        if zero then
+            local_spacing = 0
+        end
+
+        -- Place widget, even if it has zero width/height. Otherwise
+        -- any layout change for zero-sized widget would become invisible.
         table.insert(result, base.place_widget_at(v, x, y, w, h))
 
-        x = is_x and x + w + spacing or x
-        y = is_y and y + h + spacing or y
+        x = is_x and x + w + local_spacing or x
+        y = is_y and y + h + local_spacing or y
 
         -- Add the spacing widget (if needed)
         if k < widgets_nr and spacing_widget then
