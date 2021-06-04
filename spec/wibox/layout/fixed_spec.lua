@@ -78,6 +78,7 @@ describe("wibox.layout.fixed", function()
                     assert.widget_layout(layout, { 100, 20 }, {
                         p(first,  0,  0, 100, 10),
                         p(second, 0, 10, 100, 10),
+                        p(third, 0, 20, 100, 0),
                     })
                 end)
             end)
@@ -121,6 +122,7 @@ describe("wibox.layout.fixed", function()
                             p(first,  0, 0, 100, 10),
                             p(spacing_widget,  0, 10, 100, 10),
                             p(second, 0, 20, 100, 15),
+                            p(third, 0, 35, 100, 0),
                         })
                     end)
                 end)
