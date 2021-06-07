@@ -1,6 +1,8 @@
 local root = {_tags={}}
 
 local gtable = require("gears.table")
+local cairo  = require( "lgi" ).cairo
+
 
 function root:tags()
     return root._tags
@@ -167,6 +169,24 @@ function root._write_string(string, c)
     if c then
         client.focus = old_c
     end
+end
+
+function root._wallpaper(pattern)
+    if not pattern then return root._wallpaper_surface end
+
+    -- Make a copy because `:finish()` is called by `root.wallpaper` to avoid
+    -- a memory leak in the "real" backend.
+    local target = cairo.ImageSurface(cairo.Format.RGB32, root.size())
+    local cr     = cairo.Context(target)
+
+    cr:set_source(pattern)
+    cr:rectangle(0, 0, root.size())
+    cr:fill()
+
+    root._wallpaper_pattern = cairo.Pattern.create_for_surface(target)
+    root._wallpaper_surface = target
+
+    return target
 end
 
 
