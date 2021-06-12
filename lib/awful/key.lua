@@ -24,21 +24,6 @@ local gobject = require("gears.object")
 -- @property key
 -- @param string
 
---- A group of keys.
---
--- The valid keygroups are:
---
--- * **numrow**: The row above the letters in the US PC-105/PC-104 keyboards
---   and its derivative. This is usually the number 1-9 followed by 0.
--- * **arrows**: The Left/Right/Top/Bottom keys usually located right of the
---   spacebar.
--- * **fkeys**: The keys F1 through F12 located at the topmost row of any
---   keyboard, plus F13 through F35 on specialist keyboards.
--- * **numpad**: The number keys on the keypad to the right of the letters and
---   the arrow keys. Not present in every keyboard.
---
--- @property keygroup
-
 --- The table of modifier keys.
 --
 -- A modifier, such as `Control` are a predetermined set of keys that can be
@@ -98,6 +83,32 @@ local gobject = require("gears.object")
 local key = { mt = {}, hotkeys = {} }
 
 local reverse_map = setmetatable({}, {__mode="k"})
+
+--- The keygroups names.
+--
+-- It can be used instead of keygroup names.
+--
+-- Values associated to each property of this table are string:
+--
+-- - **NUMROW** = `"numrow"`: The row above the letters in the US PC-105/PC-104 keyboards and
+-- its derivative. This is usually the number 1-9 followed by 0.
+--
+-- - **ARROWS** = `"arrows"`: The Left/Right/Top/Bottom keys usually located right of the
+-- spacebar.
+--
+-- - **FKEYS** = `"fkeys"`: The keys F1 through F12 located at the topmost row of any
+-- keyboard, plus F13 through F35 on specialist keyboards.
+--
+-- - **NUMPAD** = `"numpad"`: The number keys on the keypad to the right of the letters and
+-- the arrow keys. Not present in every keyboard.
+--
+-- @table keygroup
+key.keygroup = {
+    NUMROW = 'numrow', -- The number row.
+    ARROWS = 'arrows', -- The directionnal arrows.
+    FKEYS = 'fkeys', -- The function keys.
+    NUMPAD = 'numpad', -- The numpad keys.
+}
 
 function key:set_key(k)
     for _, v in ipairs(self) do
