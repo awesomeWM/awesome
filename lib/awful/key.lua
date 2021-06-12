@@ -216,11 +216,13 @@ end
 --
 -- @constructorfct2 awful.key
 -- @tparam table args
--- @tparam function args.key The key to trigger an event. It can be the character
---  itself of `#+keycode` (**mandatory**).
--- @tparam function args.modifiers A list of modifier keys.  Valid modifiers are:
---  `Any`, `Mod1`, Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
---  This argument is (**mandatory**).
+-- @tparam string args.key The key to trigger an event. It can be the character
+--   itself of `#+keycode`.
+-- @tparam[opt] string args.keygroup The keygroup to trigger an event. This
+--   parameter must be used as a replacement for the `key` parameter. See
+--   @{awful.key.keygroup}.
+-- @tparam table args.modifiers A list of modifier keys.  Valid modifiers are:
+--   `Any`, `Mod1`, Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
 -- @tparam function args.on_press Callback for when the key is pressed.
 -- @tparam function args.on_release Callback for when the key is released.
 
