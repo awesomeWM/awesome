@@ -231,7 +231,18 @@
     <h3>Info:</h3>
     <ul>
 #     for tag, value in module.info:iter() do
-            <li><strong>$(tag)</strong>: $(M(value,module))</li>
+#           if tag == 'Author' then
+                <li>
+                    <strong>Originally authored by</strong>: $(M(value,module))<br />
+                    <small>(Full contributors list available on
+                    <a href="https://github.com/awesomeWM/awesome/graphs/contributors">
+                        our github project)
+                    </a></small>
+
+                </li>
+#           else
+                <li><strong>$(tag)</strong>: $(M(value,module))</li>
+#           end
 #     end
     </ul>
   </div>
