@@ -1,6 +1,51 @@
 ---------------------------------------------------------------------------
 --- Create easily new key objects ignoring certain modifiers.
 --
+-- A key object can be used by @{awful.keyboard} and @{client} to define
+-- keybindings.
+--
+-- Use awful.key to define a keybinding
+-- ---
+--
+-- This example shows how to define a basic key object:
+--
+--    awful.key({ "Mod4", "Shift" }, 'a',
+--      function () print("The `Mod4` + `Shift` + `a` combo is pressed") end,
+--      function () print("The `Mod4` + `Shift` + `a` combo is released") end)
+--
+-- This example shows how to define the same basic key object with the
+-- declarative pattern:
+--
+--    awful.key {
+--      modifiers = { "Mod4", "Shift" },
+--      key = 'a',
+--      on_press = function ()
+--         print("The `Mod4` + `Shift` + `a` combo is pressed")
+--      end,
+--      on_release = function ()
+--         print("The `Mod4` + `Shift` + `a` combo is released")
+--      end
+--    }
+--
+-- This second example of a key definition uses the numrow keygroup. In this
+-- example, we define a key object, that select the tag to show according to
+-- the key index from the numrow.
+--
+--    local show_tag_by_numrow_index = awful.key {
+--      modifiers = { "Mod4" },
+--      keygroup = awful.key.keygroup.NUMROW,
+--      description = "only view tag",
+--      group = "tag",
+--      on_press = function (index)
+--         local screen = awful.screen.focused()
+--         local tag = screen.tags[index]
+--
+--         if tag then
+--             tag:view_only()
+--         end
+--      end
+--    }
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2018 Emmanuel Lepage Vallee
