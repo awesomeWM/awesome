@@ -58,9 +58,21 @@ if not rawget(screen, "no_outline") then
     end
 end
 
+-- Draw the wallpaper (if any).
+if root._wallpaper_pattern then
+    cr:set_source_rgb(1,0,0)
+    cr:set_line_width(2)
+    cr:rectangle(0, 0, root.size())
+    cr:stroke()
+    cr:set_source(root._wallpaper_pattern)
+    cr:rectangle(0, 0, root.size())
+    cr:fill()
+    cr:paint()
+end
+
+
 cr:set_line_width(beautiful.border_width/2)
 cr:set_source(color(beautiful.border_color))
-
 
 
 local rect = {x1 = 0 ,y1 = 0 , x2 = 0 , y2 = 0}
