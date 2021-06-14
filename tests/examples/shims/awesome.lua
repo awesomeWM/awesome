@@ -118,6 +118,10 @@ awesome._modifiers = {
      },
 }
 
+function awesome._get_key_name(key)
+    return key
+end
+
 awesome._active_modifiers = {}
 
 return awesome
