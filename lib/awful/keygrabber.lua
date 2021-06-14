@@ -474,11 +474,19 @@ function keygrabber:start()
 end
 
 --- Stop the keygrabber.
+--
+-- Also stops any `timeout`.
+--
 -- @method stop
 -- @emits stopped
 -- @emits property::current_instance
 function keygrabber:stop(_stop_key, _stop_mods) -- (at)function disables ldoc params
     keygrab.stop(self.grabber)
+
+    local timer = self._private.timer
+    if timer and timer.started then
+        timer:stop()
+    end
 
     if self.stop_callback then
         self.stop_callback(

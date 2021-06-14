@@ -99,11 +99,13 @@ function timer:start()
 end
 
 --- Stop the timer.
+--
+-- Does nothing if the timer isn't running.
+--
 -- @method stop
 -- @emits stop
 function timer:stop()
     if self.data.source_id == nil then
-        gdebug.print_error(traceback("timer not started"))
         return
     end
     glib.source_remove(self.data.source_id)
