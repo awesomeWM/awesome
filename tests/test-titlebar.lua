@@ -165,6 +165,37 @@ local steps = {
 
         return true
     end,
+    function()
+        if #client.get() ~= 0 then return end
+        spawn(tiny_client, { titlebars_enabled = true })
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 then return end
+
+        local c = client.get()[1]
+
+        -- Save current client geometries
+        local x, y, h, w = c.x, c.y, c.height, c.width
+
+        -- First show all titlebars, then hide them
+        for _,method in pairs { 'show', 'hide' } do
+            for _,position in pairs { 'top', 'bottom', 'left', 'right' } do
+                titlebar[method] {
+                    client = c,
+                    position = position,
+                    resize_client = true
+                }
+
+                -- client geometries should be unmodified
+                assert(x == c.x and y == c.y and h == c.height and w == c.width)
+            end
+        end
+
+        c:kill()
+
+        return true
+    end,
 }
 
 runner.run_steps(steps)

@@ -26,6 +26,9 @@ local drawable = require("wibox.drawable")
 local imagebox = require("wibox.widget.imagebox")
 local textbox = require("wibox.widget.textbox")
 local base = require("wibox.widget.base")
+local floating = require("awful.layout.suit.floating")
+local gdebug = require("gears.debug")
+
 local capi = {
     client = client
 }
@@ -472,8 +475,10 @@ end
 -- @tparam[opt=false] boolean hide_all Hide all titlebars except `keep`
 -- @tparam string keep Keep the titlebar at this position.
 -- @tparam string context The reason why this was called.
+-- @tparam[opt=false] boolean resize_client Resize the client to give space to
+--   the titlebar.
 -- @treturn boolean If the titlebars were loaded
-local function load_titlebars(c, hide_all, keep, context)
+local function load_titlebars(c, hide_all, keep, context, resize_client)
     if c._request_titlebars_called then return false end
 
     c:emit_signal("request::titlebars", context, {})
@@ -483,7 +488,11 @@ local function load_titlebars(c, hide_all, keep, context)
         -- anyway.
         for _, tb in ipairs {"top", "bottom", "left", "right"} do
             if tb ~= keep then
-                titlebar.hide(c, tb)
+                titlebar.hide {
+                    client = c,
+                    position = tb,
+                    resize_client = resize_client
+                }
             end
         end
     end
@@ -511,6 +520,8 @@ end
 -- @tparam[opt=font.height*1.5] number args.size The height of the titlebar.
 -- @tparam[opt=top] string args.position" values are `top`,
 -- `left`, `right` and `bottom`.
+-- @tparam[opt=false] boolean args.resize_client Resize the client to give
+--   space to the titlebar.
 -- @tparam[opt=top] string args.bg_normal
 -- @tparam[opt=top] string args.bg_focus
 -- @tparam[opt=top] string args.bgimage_normal
@@ -579,46 +590,184 @@ local function new(c, args)
 end
 
 --- Show a client's titlebar.
--- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of "left",
---   "right", "top", "bottom". Default is "top".
--- @staticfct awful.titlebar.show
+-- @tparam table args
+-- @tparam client args.client The client whose titlebar is modified.
+-- @tparam[opt="top"] string args.position The position of the titlebar. Must
+--   be one of "left", "right", "top", "bottom".
+-- @tparam[opt=false] boolean args.resize_client Resize the client to give
+--   space to the titlebar.
+-- @param[opt="top"] position **DEPRECATED** use `args.position` instead.
+-- @tparam[opt=false] boolean resize_client **DEPRECATED** use `args.resize_client` instead.
 -- @request client titlebars show granted Called when `awful.titlebar.show` is
---  called.
-function titlebar.show(c, position)
-    position = position or "top"
-    if load_titlebars(c, true, position, "show") then return end
-    local bars = all_titlebars[c]
+--   called.
+-- @staticfct awful.titlebar.show
+function titlebar.show(args, position, resize_client)
+    local client = nil
+
+    if type(args.geometry) == 'function' then
+        gdebug.deprecate(
+            "The `c` paramater is deprecated, use `args.client`.",
+            { deprecated_in = 5 })
+
+        client = args
+        args = {}
+    end
+
+    assert(type(args) == "table")
+
+    for k, v in pairs {
+        position = position,
+        resize_client = resize_client
+    } do
+        gdebug.deprecate(
+            "The `" .. k .. "` paramater is deprecated, use `args." .. k .. "`.",
+            { deprecated_in = 5 })
+
+        args[k] = v
+    end
+
+    client = client or args.client
+    position = args.position or "top"
+    resize_client = args.resize_client or false
+
+    if load_titlebars(client, true, position, "show", resize_client) then return end
+
+    local bars = all_titlebars[client]
     local data = bars and bars[position]
-    local args = data and data.args
-    new(c, args)
+    local tb_args = data and data.args or {}
+
+    tb_args.resize_client = resize_client
+
+    local _, size = get_titlebar_function(client, position)(client)
+    if size == 0 then
+        local tb = new(client, tb_args)
+
+        if client._private.titlebars[position] then
+            local lay = client.screen.selected_tag and client.screen.selected_tag.layout or nil
+            if ((lay and lay == floating) or client.floating) and args.resize_client then
+                if position == "top" or position == "bottom" then
+                    local tb_height = tb.drawable:geometry().height
+                    client.height = client.height - tb_height
+                elseif position == "right" or position == "left" then
+                    local tb_width = tb.drawable:geometry().width
+                    client.width = client.width - tb_width
+                end
+            end
+        end
+    end
 end
 
 --- Hide a client's titlebar.
--- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of "left",
---   "right", "top", "bottom". Default is "top".
+-- @tparam table args
+-- @tparam client args.client The client whose titlebar is modified.
+-- @tparam[opt="top"] string args.position The position of the titlebar. Must
+--   be one of "left", "right", "top", "bottom".
+-- @tparam[opt=false] boolean args.resize_client Resize the client to fill the
+--   space used by the titlebar.
+-- @param[opt="top"] position **DEPRECATED** use `args.position` instead.
+-- @tparam[opt=false] boolean resize_client **DEPRECATED** use `args.resize_client` instead.
 -- @staticfct awful.titlebar.hide
-function titlebar.hide(c, position)
-    position = position or "top"
-    get_titlebar_function(c, position)(c, 0)
+function titlebar.hide(args, position, resize_client)
+    local client = nil
+
+    if type(args.geometry) == 'function' then
+        gdebug.deprecate(
+            "The `c` paramater is deprecated, use `args.client`.",
+            { deprecated_in = 5 })
+
+        client = args
+        args = {}
+    end
+
+    assert(type(args) == "table")
+
+    for k, v in pairs {
+        position = position,
+        resize_client = resize_client
+    } do
+        gdebug.deprecate(
+            "The `" .. k .. "` paramater is deprecated, use `args." .. k .. "`.",
+            { deprecated_in = 5 })
+
+        args[k] = v
+    end
+
+    client = client or args.client
+    position = args.position or "top"
+    resize_client = args.resize_client or false
+
+    local tb = get_titlebar_function(client, position)
+    local lay = client.screen.selected_tag and client.screen.selected_tag.layout or nil
+
+    if ((lay and lay == floating) or client.floating) and resize_client then
+        local _, tb_size = tb(client)
+
+        if position == "top" or position == "bottom" then
+            client.height = client.height + tb_size
+        elseif position == "right" or position == "left" then
+            client.width = client.width + tb_size
+        end
+    end
+
+    tb(client, 0)
 end
 
 --- Toggle a client's titlebar, hiding it if it is visible, otherwise showing it.
--- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of "left",
---   "right", "top", "bottom". Default is "top".
+-- @tparam table args
+-- @tparam client args.client The client whose titlebar is modified.
+-- @tparam[opt="top"] string args.position The position of the titlebar. Must
+--   be one of "left", "right", "top", "bottom".
+--@tparam[opt=false] boolean args.resize_client Resize the client to fill the
+--   space used by the titlebar / give space to the titlebar.
+-- @param[opt="top"] position **DEPRECATED** use `args.position` instead.
+-- @tparam[opt=false] boolean resize_client **DEPRECATED** use `args.resize_client` instead.
 -- @staticfct awful.titlebar.toggle
 -- @request client titlebars toggle granted Called when `awful.titlebar.toggle` is
 --  called.
-function titlebar.toggle(c, position)
-    position = position or "top"
-    if load_titlebars(c, true, position, "toggle") then return end
-    local _, size = get_titlebar_function(c, position)(c)
+function titlebar.toggle(args, position, resize_client)
+    local client = nil
+
+    if type(args.geometry) == 'function' then
+        gdebug.deprecate(
+            "The `c` paramater is deprecated, use `args.client`.",
+            { deprecated_in = 5 })
+
+        client = args
+        args = {}
+    end
+
+    assert(type(args) == "table")
+
+    for k, v in pairs {
+        position = position,
+        resize_client = resize_client
+    } do
+        gdebug.deprecate(
+            "The `" .. k .. "` paramater is deprecated, use `args." .. k .. "`.",
+            { deprecated_in = 5 })
+
+        args[k] = v
+    end
+
+    client = client or args.client
+    position = args.position or "top"
+    resize_client = args.resize_client or false
+
+    if load_titlebars(client, true, position, "toggle", resize_client) then return end
+    local _, size = get_titlebar_function(client, position)(client)
+
     if size == 0 then
-        titlebar.show(c, position)
+        titlebar.show {
+            client = client,
+            position = position,
+            resize_client = resize_client
+        }
     else
-        titlebar.hide(c, position)
+        titlebar.hide {
+            client = client,
+            position = position,
+            resize_client = resize_client
+        }
     end
 end
 
