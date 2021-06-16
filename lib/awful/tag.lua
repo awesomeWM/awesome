@@ -349,7 +349,7 @@ function tag.find_fallback(screen, invalids)
     end
 end
 
---- When all clients are removed from the tag.
+--- Emitted when all clients are removed from the tag.
 -- @signal cleared
 -- @see clear
 
@@ -1841,20 +1841,25 @@ capi.client.connect_signal("untagged", client_untagged)
 capi.client.connect_signal("tagged", client_tagged)
 capi.tag.connect_signal("request::select", tag.object.view_only)
 
---- True when a tagged client is urgent
+--- Emitted when the number of urgent clients on this tag changes.
 -- @signal property::urgent
+-- @param boolean `true` if there is at least one urgent client on the tag.
 -- @see client.urgent
 
---- The number of urgent tagged clients
+--- Emitted when the number of urgent clients on this tag changes.
 -- @signal property::urgent_count
+-- @param integer The number of urgent clients on the tag.
 -- @see client.urgent
 
 --- Emitted when a screen is removed.
+--
 -- This can be used to salvage existing tags by moving them to a new
--- screen (or creating a virtual screen). By default, there is no
--- handler for this request. The tags will be deleted. To prevent
--- this, an handler for this request must simply set a new screen
+-- screen (or creating a virtual screen).
+--
+-- By default, there is no handler for this request and the tags will be deleted.
+-- To prevent this, an handler for this request must simply set a new screen
 -- for the tag.
+--
 -- @signal request::screen
 -- @tparam string context Why it was called.
 
