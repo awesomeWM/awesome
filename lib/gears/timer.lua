@@ -194,13 +194,17 @@ function timer.new(args)
     return ret
 end
 
---- Create a timeout for calling some callback function.
--- When the callback function returns true, it will be called again after the
--- same timeout. If false is returned, no more calls will be done. If the
--- callback function causes an error, no more calls are done.
+--- Create a simple timer for calling the `callback` function continuously.
+--
+-- This is a small wrapper around `gears.timer`, that creates a timer based on
+-- `callback`.
+-- The timer will run continuously and call `callback` every `timeout` seconds.
+-- It is stopped when `callback` returns `false`, when `callback` throws an
+-- error or when `stop` is called on the return value.
+--
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to run.
--- @treturn timer The timer object that was set up.
+-- @treturn timer The new timer object.
 -- @staticfct gears.timer.start_new
 -- @see gears.timer.weak_start_new
 function timer.start_new(timeout, callback)
@@ -215,14 +219,18 @@ function timer.start_new(timeout, callback)
     return t
 end
 
---- Create a timeout for calling some callback function.
--- This function is almost identical to `gears.timer.start_new`. The only difference
--- is that this does not prevent the callback function from being garbage
--- collected. After the callback function was collected, the timer returned
--- will automatically be stopped.
+--- Create a simple timer for calling the `callback` function continuously.
+--
+-- This function is almost identical to `gears.timer.start_new`. The only
+-- difference is that this does not prevent the callback function from being
+-- garbage collected.
+-- In addition to the conditions in `gears.timer.start_new`,
+-- this timer will also stop if `callback` was garbage collected since the
+-- previous run.
+--
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to start.
--- @treturn timer The timer object that was set up.
+-- @treturn timer The new timer object.
 -- @staticfct gears.timer.weak_start_new
 -- @see gears.timer.start_new
 function timer.weak_start_new(timeout, callback)
