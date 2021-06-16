@@ -315,7 +315,7 @@ lua_class_t client_class;
  * @classsignal
  */
 
-/** When the tag requests to be moved to a tag or needs a new tag.
+/** When the client requests to be moved to a tag or needs a new tag.
  *
  * @signal request::tag
  * @classsignal
