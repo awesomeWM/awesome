@@ -35,28 +35,29 @@ mouse.wibox = {}
 --
 -- @DOC_screen_client_snap_EXAMPLE@
 --
--- @tfield integer awful.mouse.snap.default_distance
+-- @tfield integer snap.default_distance
 -- @tparam[opt=8] integer default_distance
 -- @see awful.mouse.snap
 
 --- The default distance before activating screen edge snap.
--- @tfield integer awful.mouse.snap.aerosnap_distance
--- @tparam[opt=16] integer default_distance
+-- @tfield integer snap.aerosnap_distance
+-- @tparam[opt=16] integer aerosnap_distance
 -- @see awful.mouse.snap
 
 --- Enable screen edges snapping.
 --
---
---
 --@DOC_awful_placement_aero_snap_EXAMPLE@
 --
--- @tfield[opt=true] boolean awful.mouse.snap.edge_enabled
+-- @tfield[opt=true] boolean snap.edge_enabled
+-- @tparam boolean edge_enabled
 
 --- Enable client to client snapping.
--- @tfield[opt=true] boolean awful.mouse.snap.client_enabled
+-- @tfield[opt=true] boolean snap.client_enabled
+-- @tparam boolean client_enabled
 
 --- Enable changing tag when a client is dragged to the edge of the screen.
--- @tfield[opt=false] integer awful.mouse.drag_to_tag.enabled
+-- @tfield[opt=false] boolean drag_to_tag.enabled
+-- @tparam boolean enabled
 
 --- The snap outline background color.
 -- @beautiful beautiful.snap_bg
