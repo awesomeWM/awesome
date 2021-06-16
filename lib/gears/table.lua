@@ -39,27 +39,31 @@ function gtable.join(...)
     return ret
 end
 
---- Override elements in the first table by the one in the second.
+--- Override elements in the target table with values from the source table.
 --
 -- Note that this method doesn't copy entries found in `__index`.
+-- Nested tables are copied by reference and not recursed into.
 --
--- @tparam table t the table to be overriden
--- @tparam table set the table used to override members of `t`
--- @tparam[opt=false] bool raw Use rawset (avoid the metatable)
--- @treturn table t (for convenience)
+-- @tparam table target The target table. Values from `source` will be copied
+--   into this table.
+-- @tparam table source The source table. Its values will be copied into
+--   `target`.
+-- @tparam[opt=false] bool raw If `true`, values will be assigned with `rawset`.
+--   This will bypass metamethods on `target`.
+-- @treturn table The target table.
 -- @staticfct gears.table.crush
-function gtable.crush(t, set, raw)
+function gtable.crush(target, source, raw)
     if raw then
-        for k, v in pairs(set) do
-            rawset(t, k, v)
+        for k, v in pairs(source) do
+            rawset(target, k, v)
         end
     else
-        for k, v in pairs(set) do
-            t[k] = v
+        for k, v in pairs(source) do
+            target[k] = v
         end
     end
 
-    return t
+    return target
 end
 
 --- Pack all elements with an integer key into a new table.
@@ -225,7 +229,8 @@ end
 --- Clone a table.
 --
 -- @tparam table t The table to clone.
--- @tparam[opt=true] bool deep Create a deep clone?
+-- @tparam[opt=true] bool deep If `true`, recurse into nested tables to create
+--   a deep clone.
 -- @treturn table A clone of `t`.
 -- @staticfct gears.table.clone
 function gtable.clone(t, deep)
@@ -306,17 +311,23 @@ function gtable.iterate(t, filter, start)
     end
 end
 
---- Merge items from one table to another one.
+--- Merge items from one table into another one.
 --
--- @tparam table t The container table
--- @tparam table set The mixin table.
--- @treturn table (for convenience).
+-- Note that this only considers the array part of `source` (same semantics
+-- as `ipairs`).
+-- Nested tables are copied by reference and not recursed into.
+--
+-- @tparam table target The target table. Values from `source` will be copied
+--   into this table.
+-- @tparam table source The source table. Its values will be copied into
+--   `target`.
+-- @treturn table The target table.
 -- @staticfct gears.table.merge
-function gtable.merge(t, set)
-    for _, v in ipairs(set) do
-        table.insert(t, v)
+function gtable.merge(target, source)
+    for _, v in ipairs(source) do
+        table.insert(target, v)
     end
-    return t
+    return target
 end
 
 --- Update the `target` table with entries from the `new` table.
