@@ -414,7 +414,7 @@ end
 
 --- Map a function to a table.
 --
--- The function is applied to each value on the table, returning a modified
+-- The function is applied to each value in the table, returning a modified
 -- table.
 --
 -- @tparam function f The function to be applied to each value in the table.

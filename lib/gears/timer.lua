@@ -249,7 +249,7 @@ function timer.run_delayed_calls_now()
     delayed_calls = {}
 end
 
---- Call the given function at the end of the current main loop iteration
+--- Call the given function at the end of the current main loop iteration.
 -- @tparam function callback The function that should be called
 -- @param ... Arguments to the callback function
 -- @staticfct gears.timer.delayed_call
