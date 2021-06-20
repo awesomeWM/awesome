@@ -514,9 +514,7 @@ end
 -- values for the client (`c`) and the titlebar position (`args.position`),
 -- the previous titlebar will be removed and replaced by the new one.
 --
---    awful.titlebar(c)
---    awful.titlebar(c, { position = "left" })
---    awful.titlebar(c, { bg_normal = beautiful.fg, fg_normal = beautiful.bg })
+-- @DOC_awful_titlebar_constructor_EXAMPLE@
 --
 -- @tparam client c The client the titlebar will be attached to.
 -- @tparam[opt={}] table args A table with extra arguments for the titlebar.

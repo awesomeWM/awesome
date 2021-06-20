@@ -219,33 +219,12 @@ lua_class_t tag_class;
  * It is emitted on the global `tag` class rather than individual tag objects.
  * This default handler is part of `rc.lua`:
  *
- *    tag.connect_signal("request::default_layouts", function()
- *        awful.layout.append_default_layouts({
- *            awful.layout.suit.floating,
- *            awful.layout.suit.tile,
- *            awful.layout.suit.tile.left,
- *            awful.layout.suit.tile.bottom,
- *            awful.layout.suit.tile.top,
- *            awful.layout.suit.fair,
- *            awful.layout.suit.fair.horizontal,
- *            awful.layout.suit.spiral,
- *            awful.layout.suit.spiral.dwindle,
- *            awful.layout.suit.max,
- *            awful.layout.suit.max.fullscreen,
- *            awful.layout.suit.magnifier,
- *            awful.layout.suit.corner.nw,
- *        })
- *    end)
+ * @DOC_awful_tag_request_default_layouts_EXAMPLE@
  *
  * External modules can also use this signal to dynamically add additional
  * default layouts.
  *
- *    tag.connect_signal("request::default_layouts", function()
- *        awful.layout.append_default_layouts({
- *            custom_module.layout_1,
- *            custom_module.layout_2,
- *        })
- *    end)
+ * @DOC_awful_tag_module_default_layouts_EXAMPLE@
  *
  * @signal request::default_layouts
  * @tparam string context The context (currently always "startup").
