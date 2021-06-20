@@ -342,7 +342,8 @@ lua_class_t client_class;
  * @classsignal
  */
 
-/** Emitted during startup to gather the default client mousebindings.
+/** Emitted once to request default client mousebindings during the initial
+ * startup sequence.
  *
  * This signal gives all modules a chance to register their default client
  * mousebindings.
@@ -355,7 +356,8 @@ lua_class_t client_class;
  * @classsignal
 */
 
-/** Emitted once when AwesomeWM starts to add default keybindings.
+/** Emitted once to request default client keybindings during the initial
+ * startup sequence.
  *
  * This signal gives all modules a chance to register their default client
  * keybindings.
