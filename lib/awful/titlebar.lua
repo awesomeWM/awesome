@@ -511,8 +511,8 @@ end
 -- value of `args.position`).
 --
 -- If this constructor is called again with the same
--- values for `c` and `args.position` as a previous call, the previous titlebar
--- will be removed and replaced by the new one.
+-- values for the client (`c`) and the titlebar position (`args.position`),
+-- the previous titlebar will be removed and replaced by the new one.
 --
 --    awful.titlebar(c)
 --    awful.titlebar(c, { position = "left" })
@@ -523,15 +523,15 @@ end
 -- @tparam[opt=font.height*1.5] number args.size The size of the titlebar. Will
 --   be interpreted as `height` for horizontal titlebars or as `width` for
 --   vertical titlebars.
--- @tparam[opt=top] string args.position Possible values are `top`,
--- `left`, `right` and `bottom`.
--- @tparam string args.bg_normal
--- @tparam string args.bg_focus
--- @tparam string args.bgimage_normal
--- @tparam string args.bgimage_focus
--- @tparam string args.fg_normal
--- @tparam string args.fg_focus
--- @tparam string args.font
+-- @tparam[opt="top"] string args.position Possible values are `"top"`,
+-- `"left"`, `"right"` and `"bottom"`.
+-- @tparam[opt] string args.bg_normal
+-- @tparam[opt] string args.bg_focus
+-- @tparam[opt] string args.bgimage_normal
+-- @tparam[opt] string args.bgimage_focus
+-- @tparam[opt] string args.fg_normal
+-- @tparam[opt] string args.fg_focus
+-- @tparam[opt] string args.font
 -- @constructorfct awful.titlebar
 -- @treturn wibox.drawable The newly created titlebar object.
 local function new(c, args)
@@ -595,8 +595,8 @@ end
 
 --- Show the client's titlebar.
 -- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of `left`,
---   `right`, `top`, `bottom`. Default is `top`.
+-- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
+--   `"right"`, `"top"`, `"bottom"`.
 -- @staticfct awful.titlebar.show
 -- @request client titlebars show granted Called when `awful.titlebar.show` is
 --  called.
@@ -611,8 +611,8 @@ end
 
 --- Hide the client's titlebar.
 -- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of `left`,
---   `right`, `top`, `bottom`. Default is `top`.
+-- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
+--   `"right"`, `"top"`, `"bottom"`.
 -- @staticfct awful.titlebar.hide
 function titlebar.hide(c, position)
     position = position or "top"
@@ -621,8 +621,8 @@ end
 
 --- Toggle the client's titlebar, hiding it if it is visible, otherwise showing it.
 -- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of `left`,
---   `right`, `top`, `bottom`. Default is `top`.
+-- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
+--   `"right"`, `"top"`, `"bottom"`.
 -- @staticfct awful.titlebar.toggle
 -- @request client titlebars toggle granted Called when `awful.titlebar.toggle` is
 --  called.
@@ -702,9 +702,9 @@ end
 --
 -- A button widget displays an image and reacts to
 -- mouse clicks. Please note that the caller has to make sure that this widget
--- gets redrawn when needed by calling the returned widget's `update()` function.
+-- gets redrawn when needed by calling the returned widget's `:update()` method.
 -- The selector function should return a value describing a state. If the value
--- is a boolean, either `active` or `inactive` are used. The actual image is
+-- is a boolean, either `"active"` or `"inactive"` are used. The actual image is
 -- then found in the theme as `titlebar_[name]_button_[normal/focus]_[state]`.
 -- If that value does not exist, the focused state is ignored for the next try.
 --

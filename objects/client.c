@@ -158,7 +158,8 @@ lua_class_t client_class;
  * @classsignal
  */
 
-/** Emitted before `manage`, after `unmanage`, and when clients swap.
+/** Emitted before `request::manage`, after `request::unmanage`,
+ * and when clients swap.
  * @signal list
  * @classsignal
  */
@@ -408,12 +409,12 @@ lua_class_t client_class;
  * The focused `client` or nil (in case there is none).
  *
  * It is not recommended to set the focused client using
- * this property. Please use `c:activate{}` instead of
+ * this property. Please use @{client.activate} instead of
  * `client.focus = c`. Setting the focus directly bypasses
  * all the filters and emits fewer signals, which tend to
  * cause unwanted side effects and make it harder to alter
  * the code behavior in the future. It usually takes *more*
- * code to use this rather than `:activate{}` because all
+ * code to use this rather than @{client.activate} because all
  * the boilerplate code (such as `c:raise()`) needs to be
  * added everywhere.
  *

@@ -200,7 +200,7 @@ end
 -- `callback`.
 -- The timer will run continuously and call `callback` every `timeout` seconds.
 -- It is stopped when `callback` returns `false`, when `callback` throws an
--- error or when `stop` is called on the return value.
+-- error or when the `:stop()` method is called on the return value.
 --
 -- @tparam number timeout Timeout in seconds (e.g. 1.5).
 -- @tparam function callback Function to run.
@@ -257,7 +257,7 @@ function timer.run_delayed_calls_now()
     delayed_calls = {}
 end
 
---- Call the given function at the end of the current main loop iteration.
+--- Call the given function at the end of the current GLib event loop iteration.
 -- @tparam function callback The function that should be called
 -- @param ... Arguments to the callback function
 -- @staticfct gears.timer.delayed_call

@@ -311,7 +311,7 @@ function gtable.iterate(t, filter, start)
     end
 end
 
---- Merge items from one table into another one.
+--- Merge items from the source table into the target table.
 --
 -- Note that this only considers the array part of `source` (same semantics
 -- as `ipairs`).
