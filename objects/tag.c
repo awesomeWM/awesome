@@ -205,7 +205,7 @@
 
 lua_class_t tag_class;
 
-/** When a tag requests to be selected.
+/** Emitted when a tag requests to be selected.
  * @signal request::select
  * @tparam string context The reason why it was called.
  * @request tag select ewmh granted When the client request to be moved to a
@@ -214,11 +214,17 @@ lua_class_t tag_class;
  */
 
 /**
- * This signal is emitted to fill the list of default layouts.
+ * This signal is emitted to request the list of default layouts.
  *
  * It is emitted on the global `tag` class rather than individual tag objects.
- * The default handler is part of `rc.lua`. New modules can also use this signal
- * to dynamically add new layouts to the list of default layouts.
+ * This default handler is part of `rc.lua`:
+ *
+ * @DOC_awful_tag_request_default_layouts_EXAMPLE@
+ *
+ * External modules can also use this signal to dynamically add additional
+ * default layouts.
+ *
+ * @DOC_awful_tag_module_default_layouts_EXAMPLE@
  *
  * @signal request::default_layouts
  * @tparam string context The context (currently always "startup").
@@ -240,12 +246,12 @@ lua_class_t tag_class;
  * @tparam table hints A, currently empty, table with hints.
  */
 
-/** When a client gets tagged with this tag.
+/** Emitted when a client gets tagged with this tag.
  * @signal tagged
  * @tparam client c The tagged client.
  */
 
-/** When a client gets untagged with this tag.
+/** Emitted when a client gets untagged with this tag.
  * @signal untagged
  * @tparam client c The untagged client.
  */

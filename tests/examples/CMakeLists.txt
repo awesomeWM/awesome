@@ -88,13 +88,27 @@ function(escape_string variable content escaped_content line_prefix)
     string(REGEX REPLACE "\n" ";" var_lines "${variable}")
 
     set(tmp_output ${content})
+    set(section OFF)
     foreach (LINE ${var_lines})
 
         # ;; will drop the line, but " ;" will create an empty line
         string(REGEX REPLACE "--DOC_NEWLINE" " " LINE "${LINE}")
 
-        if(NOT LINE MATCHES "^.*--DOC_[A-Z]+")
+        # Check for section start marker
+        if(LINE MATCHES "^.*--DOC_HIDE_START")
+            set(section ON)
+        endif()
+
+        # Pick lines that are not specified to be hidden
+        if((NOT LINE MATCHES "^.*--DOC_[A-Z]+") AND (NOT section))
             set(tmp_output ${tmp_output}\n${DOC_LINE_PREFIX}${line_prefix}${LINE})
+        endif()
+
+        # If we found a start marker previously, look for an end marker.
+        # Do this after picking the lines to ensure that lines with
+        # `--DOC_HIDE_END` are omitted
+        if(section AND (LINE MATCHES "^.*--DOC_HIDE_END"))
+            set(section OFF)
         endif()
     endforeach()
 

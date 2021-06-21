@@ -50,7 +50,7 @@ end --DOC_HIDE
 parent:add(wibox.layout {--DOC_HIDE
     {--DOC_HIDE
         {--DOC_HIDE
-            markup = "<b>clamp_bars=false</b>",--DOC_HIDE
+            markup = "<b>clamp_bars = false</b>",--DOC_HIDE
             widget = wibox.widget.textbox,--DOC_HIDE
         },--DOC_HIDE
         w_unclamped,--DOC_HIDE
@@ -58,7 +58,7 @@ parent:add(wibox.layout {--DOC_HIDE
     },--DOC_HIDE
     {--DOC_HIDE
         {--DOC_HIDE
-            markup = "<b>clamp_bars=true</b>",--DOC_HIDE
+            markup = "<b>clamp_bars = true</b>",--DOC_HIDE
             widget = wibox.widget.textbox,--DOC_HIDE
         },--DOC_HIDE
         w_clamped,--DOC_HIDE

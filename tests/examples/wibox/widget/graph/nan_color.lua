@@ -83,7 +83,7 @@ parent:add(wibox.layout {--DOC_HIDE
     },--DOC_HIDE
     {--DOC_HIDE
         {--DOC_HIDE
-            markup = "<b>nan_indication=false</b>",--DOC_HIDE
+            markup = "<b>nan_indication = false</b>",--DOC_HIDE
             widget = wibox.widget.textbox,--DOC_HIDE
         },--DOC_HIDE
         w_false,--DOC_HIDE
