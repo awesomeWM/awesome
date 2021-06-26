@@ -4,7 +4,6 @@ local awful = { titlebar = require("awful.titlebar"),
               }
 local beautiful = require("beautiful")
 local wibox = require("wibox")
-local gears = {table = require("gears.table")}
 
 screen[1]._resize { width = 646, height = 182 }
 
