@@ -260,7 +260,7 @@ end
 function base.widget:set_opacity(o)
     if o ~= self._private.opacity then
         self._private.opacity = o
-        self:emit_signal("widget::redraw")
+        self:emit_signal("widget::redraw_needed")
     end
 end
 

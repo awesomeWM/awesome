@@ -87,6 +87,65 @@ describe("wibox.widget.base", function()
             assert.is_true(called2)
         end)
     end)
+
+    describe("Setters emit signals", function()
+        local widget
+        local signal_called
+        local callback = function () signal_called = true end
+
+        before_each(function()
+            widget = base.make_widget()
+            signal_called = false
+        end)
+
+        it("'set_visible' calls 'widget::layout_changed'", function()
+            widget:connect_signal("widget::layout_changed", callback)
+            widget:set_visible(false)
+            assert.is_true(signal_called)
+        end)
+
+        it("'set_visible' calls 'widget::redraw_needed'", function()
+            widget:connect_signal("widget::redraw_needed", callback)
+            widget:set_visible(false)
+            assert.is_true(signal_called)
+        end)
+
+        it("'set_opacity' calls 'widget::redraw_needed'", function()
+            widget:connect_signal("widget::redraw_needed", callback)
+            widget:set_opacity(0)
+            assert.is_true(signal_called)
+        end)
+
+        it("'set_forced_width' calls 'widget::layout_changed'", function()
+            widget:connect_signal("widget::layout_changed", callback)
+            widget:set_forced_width(0)
+            assert.is_true(signal_called)
+        end)
+
+        it("'set_forced_height' calls 'widget::layout_changed'", function()
+            widget:connect_signal("widget::layout_changed", callback)
+            widget:set_forced_height(0)
+            assert.is_true(signal_called)
+        end)
+
+        it("'set_widget_common' calls 'property::widget'", function()
+            -- Implement `set_widget`
+            rawset(widget, "set_widget", base.set_widget_common)
+
+            widget:connect_signal("property::widget", callback)
+            widget:set_widget(base.make_widget())
+            assert.is_true(signal_called)
+        end)
+
+        it("'set_widget_common' calls 'widget::layout_changed'", function()
+            -- Implement `set_widget`
+            rawset(widget, "set_widget", base.set_widget_common)
+
+            widget:connect_signal("widget::layout_changed", callback)
+            widget:set_widget(base.make_widget())
+            assert.is_true(signal_called)
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
