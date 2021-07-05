@@ -47,11 +47,36 @@ local opposite_margin = {
     right  = "left"
 }
 
+local align_map = {
+    top      = "left",
+    left     = "top",
+    bottom   = "right",
+    right    = "bottom",
+    centered = "centered"
+}
+
 --- If the wibar needs to be stretched to fill the screen.
 -- @property stretch
 -- @tparam boolean stretch
 -- @propbeautiful
 -- @propemits true false
+-- see align
+
+--- How to align non-stretched wibars.
+--
+-- Values are:
+--
+--  * top
+--  * bottom
+--  * left
+--  * right
+--  * centered
+--
+-- @property align
+-- @tparam string align
+-- @propbeautiful
+-- @propemits true false
+-- @see stretch
 
 --- Margins on each side of the wibar.
 --
@@ -119,6 +144,10 @@ local opposite_margin = {
 -- @beautiful beautiful.wibar_margins
 -- @tparam number|table margins
 
+--- The wibar's alignments.
+-- @beautiful beautiful.wibar_align
+-- @tparam string align
+
 
 -- Compute the margin on one side
 local function get_margin(w, position, auto_stop)
@@ -165,16 +194,30 @@ local function get_margins(w)
 end
 
 -- Create the placement function
-local function gen_placement(position, stretch)
+local function gen_placement(position, align, stretch)
     local maximize = (position == "right" or position == "left") and
         "maximize_vertically" or "maximize_horizontally"
 
-    return placement[position] + (stretch and placement[maximize] or nil)
+    local corner = nil
+
+    if align ~= "centered" then
+        if position == "right" or position == "left" then
+            corner = placement[align .. "_" .. position]
+                or placement[align_map[align] .. "_" .. position]
+        else
+            corner = placement[position .. "_" .. align]
+                or placement[position .. "_" .. align_map[align]]
+        end
+    end
+
+    corner = corner or placement[position]
+
+    return corner + (stretch and placement[maximize] or nil)
 end
 
 -- Attach the placement function.
-local function attach(wb, align)
-    gen_placement(align, wb._stretch)(wb, {
+local function attach(wb, position)
+    gen_placement(position, wb._private.align, wb._stretch)(wb, {
         attach          = true,
         update_workarea = true,
         margins         = get_margins(wb)
@@ -309,6 +352,21 @@ end
 
 function awfulwibar.get_margins(self)
     return self._private.meta_margins
+end
+
+
+function awfulwibar.get_align(self)
+    return self._private.align
+end
+
+function awfulwibar.set_align(self, value)
+    assert(align_map[value])
+
+    self._private.align = value
+
+    attach(self, self.position)
+
+    self:emit_signal("property::align", value)
 end
 
 --- Remove a wibar.
@@ -471,7 +529,7 @@ function awfulwibar.new(args)
     -- The C code scans the table directly, so metatable magic cannot be used.
     for _, prop in ipairs {
         "border_width", "border_color", "font", "opacity", "ontop", "cursor",
-        "bgimage", "bg", "fg", "type", "stretch", "shape", "margins"
+        "bgimage", "bg", "fg", "type", "stretch", "shape", "margins", "align"
     } do
         if (args[prop] == nil) and beautiful["wibar_"..prop] ~= nil then
             args[prop] = beautiful["wibar_"..prop]
@@ -479,6 +537,8 @@ function awfulwibar.new(args)
     end
 
     local w = wibox(args)
+
+    w._private.align = (args.align and align_map[args.align]) and args.align or "centered"
 
     w._private.margins = {
         left   = 0,
@@ -492,6 +552,9 @@ function awfulwibar.new(args)
     w.screen   = screen
     w._screen  = screen --HACK When a screen is removed, then getbycoords wont work
     w._stretch = args.stretch == nil and has_to_stretch or args.stretch
+
+    w.get_align = awfulwibar.get_align
+    w.set_align = awfulwibar.set_align
 
     w.get_position = get_position
     w.set_position = set_position
