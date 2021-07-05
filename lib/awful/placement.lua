@@ -184,6 +184,10 @@ local function compose(...)
             attach(d, ret, args)
         end
 
+        -- Cleanup the override because otherwise it might leak into
+        -- future calls.
+        rawset(args, "override_geometry", nil)
+
         return last_geo, rets
     end, "compose")
 
