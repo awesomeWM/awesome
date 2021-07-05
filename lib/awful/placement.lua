@@ -280,6 +280,30 @@ local outer_positions = {
     bottom_middle = function(r, w, _) return {x=r.x-w/2+r.width/2, y=r.y                }, "middle" end,
 }
 
+-- Map the opposite side for a string
+local opposites = {
+    top    = "bottom",
+    bottom = "top",
+    left   = "right",
+    right  = "left",
+    width  = "height",
+    height = "width",
+    x      = "y",
+    y      = "x",
+}
+
+-- List reletvant sides for each orientation.
+local struts_orientation_to_sides = {
+    horizontal = { "top" , "bottom" },
+    vertical   = { "left", "right"  }
+}
+
+-- Map orientation to the length components (width/height).
+local orientation_to_length = {
+    horizontal = "width",
+    vertical   = "height"
+}
+
 --- Add a context to the arguments.
 -- This function extend the argument table. The context is used by some
 -- internal helper methods. If there already is a context, it has priority and
@@ -481,8 +505,8 @@ wibox_update_strut = function(d, position, args)
     end
 
     -- Detect horizontal or vertical drawables
-    local geo      = area_common(d)
-    local vertical = geo.width < geo.height
+    local geo         = area_common(d)
+    local orientation = geo.width < geo.height and "vertical" or "horizontal"
 
     -- Look into the `position` string to find the relevants sides to crop from
     -- the workarea
@@ -490,17 +514,12 @@ wibox_update_strut = function(d, position, args)
 
     local m = get_decoration(args)
 
-    if vertical then
-        for _, v in ipairs {"right", "left"} do
-            if (not position) or position:match(v) then
-                struts[v] = geo.width + m[v]
-            end
-        end
-    else
-        for _, v in ipairs {"top", "bottom"} do
-            if (not position) or position:match(v) then
-                struts[v] = geo.height + m[v]
-            end
+    for _, v in ipairs(struts_orientation_to_sides[orientation]) do
+        if (not position) or position:match(v) then
+            -- Add the "short" rectangle lenght then the above and below margins.
+            struts[v] = geo[opposites[orientation_to_length[orientation]]]
+                + m[v]
+                + m[opposites[v]]
         end
     end
 
