@@ -28,6 +28,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local gdebug = require("gears.debug")
 local placement = require("awful.placement")
+local gtable = require("gears.table")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -39,9 +40,26 @@ local awfulwibar = { mt = {} }
 -- It's an array so it is ordered.
 local wiboxes = setmetatable({}, {__mode = "v"})
 
+local opposite_margin = {
+    top    = "bottom",
+    bottom = "top",
+    left   = "right",
+    right  = "left"
+}
+
 --- If the wibar needs to be stretched to fill the screen.
 -- @property stretch
 -- @tparam boolean stretch
+-- @propbeautiful
+-- @propemits true false
+
+--- Margins on each side of the wibar.
+--
+-- It can either be a table if `top`, `bottom`, `left`, `right` or a
+-- single number.
+--
+-- @property margins
+-- @tparam number|table margins
 -- @propbeautiful
 -- @propemits true false
 
@@ -97,6 +115,11 @@ local wiboxes = setmetatable({}, {__mode = "v"})
 -- @beautiful beautiful.wibar_shape
 -- @tparam gears.shape shape
 
+--- The wibar's margins.
+-- @beautiful beautiful.wibar_margins
+-- @tparam number|table margins
+
+
 -- Compute the margin on one side
 local function get_margin(w, position, auto_stop)
     local h_or_w = (position == "top" or position == "bottom") and "height" or "width"
@@ -108,7 +131,15 @@ local function get_margin(w, position, auto_stop)
 
         if v.position == position and v.screen == w.screen and v.visible then
             ret = ret + v[h_or_w]
+
+            local wb_margins = v.margins
+
+            if wb_margins then
+                ret = ret + wb_margins[position] + wb_margins[opposite_margin[position]]
+            end
+
         end
+
     end
 
     return ret
@@ -120,9 +151,9 @@ local function get_margins(w)
     local position = w.position
     assert(position)
 
-    local margins = {left=0, right=0, top=0, bottom=0}
+    local margins = gtable.clone(w._private.margins)
 
-    margins[position] = get_margin(w, position, true)
+    margins[position] =  margins[position] + get_margin(w, position, true)
 
     -- Avoid overlapping wibars
     if position == "left" or position == "right" then
@@ -240,6 +271,46 @@ local function set_stretch(w, value)
     w:emit_signal("property::stretch", value)
 end
 
+
+function awfulwibar.set_margins(w, value)
+    if type(value) == "number" then
+        value = {
+            top = value,
+            bottom = value,
+            right = value,
+            left = value,
+        }
+    end
+
+   value = value or {
+        left   = 0,
+        right  = 0,
+        top    = 0,
+        bottom = 0
+    }
+
+    w._private.margins = value
+
+    attach(w, w.position)
+
+    w:emit_signal("property::margins", value)
+end
+
+-- Allow each margins to be set individually.
+local function meta_margins(self)
+    return setmetatable({}, {
+        __index = self._private.margins,
+        __newindex = function(_, k, v)
+            self._private.margins[k] = v
+            awfulwibar.set_margins(self, self._private.margins)
+        end
+    })
+end
+
+function awfulwibar.get_margins(self)
+    return self._private.meta_margins
+end
+
 --- Remove a wibar.
 -- @method remove
 
@@ -265,7 +336,7 @@ end
 -- @deprecated awful.wibar.get_position
 -- @return The wibox position.
 function awfulwibar.get_position(wb)
-    gdebug.deprecate("Use wb:get_position() instead of awful.wibar.get_position", {deprecated_in=4})
+    gdebug.deprecate("Use wb.position instead of awful.wibar.get_position", {deprecated_in=4})
     return get_position(wb)
 end
 
@@ -275,7 +346,7 @@ end
 -- @param screen This argument is deprecated, use wb.screen directly.
 -- @deprecated awful.wibar.set_position
 function awfulwibar.set_position(wb, position, screen) --luacheck: no unused args
-    gdebug.deprecate("Use wb:set_position(position) instead of awful.wibar.set_position", {deprecated_in=4})
+    gdebug.deprecate("Use `wb.position = position` instead of awful.wibar.set_position", {deprecated_in=4})
 
     set_position(wb, position)
 end
@@ -400,7 +471,7 @@ function awfulwibar.new(args)
     -- The C code scans the table directly, so metatable magic cannot be used.
     for _, prop in ipairs {
         "border_width", "border_color", "font", "opacity", "ontop", "cursor",
-        "bgimage", "bg", "fg", "type", "stretch", "shape"
+        "bgimage", "bg", "fg", "type", "stretch", "shape", "margins"
     } do
         if (args[prop] == nil) and beautiful["wibar_"..prop] ~= nil then
             args[prop] = beautiful["wibar_"..prop]
@@ -408,6 +479,15 @@ function awfulwibar.new(args)
     end
 
     local w = wibox(args)
+
+    w._private.margins = {
+        left   = 0,
+        right  = 0,
+        top    = 0,
+        bottom = 0
+    }
+    w._private.meta_margins = meta_margins(w)
+
 
     w.screen   = screen
     w._screen  = screen --HACK When a screen is removed, then getbycoords wont work
@@ -419,6 +499,10 @@ function awfulwibar.new(args)
     w.get_stretch = get_stretch
     w.set_stretch = set_stretch
     w.remove      = remove
+
+    w.get_margins = awfulwibar.get_margins
+    w.set_margins = awfulwibar.set_margins
+    awfulwibar.set_margins(w, args.margins)
 
     if args.visible == nil then w.visible = true end
 
