@@ -1,21 +1,35 @@
 local gears_obj = require("gears.object")
 local gears_tab = require("gears.table")
+local grect = require("gears.geometry").rectangle
 
 local screen, meta = awesome._shim_fake_class()
 screen._count, screen._deleted = 0, {}
+
+local function get_drawin_screen(s, d)
+    return grect.area_intersect_area (s.geometry, {
+        x      = d:geometry().x,
+        y      = d:geometry().y,
+        width  = 1,
+        height = 1
+    })
+end
 
 local function compute_workarea(s)
     local struts = {top=0,bottom=0,left=0,right=0}
 
     for _, c in ipairs(drawin.get()) do
-        for k,v in pairs(struts) do
-            struts[k] = v + (c:struts()[k] or 0)
+        if get_drawin_screen(s, c) then
+            for k,v in pairs(struts) do
+                struts[k] = v + (c:struts()[k] or 0)
+            end
         end
     end
 
     for _, c in ipairs(client.get()) do
-        for k,v in pairs(struts) do
-            struts[k] = v + (c:struts()[k] or 0)
+        if c.screen == s then
+            for k,v in pairs(struts) do
+                struts[k] = v + (c:struts()[k] or 0)
+            end
         end
     end
 
