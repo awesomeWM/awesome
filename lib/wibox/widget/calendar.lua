@@ -147,7 +147,7 @@ local function create_month(props, date)
 
     local num_columns  = props.week_numbers and 8 or 7
     local start_column = num_columns - 6
-    local num_rows     = last_day.day // 7
+    local num_rows     = 4
     if last_day.day > 28 then
         num_rows = num_rows + 1
         if column_fday >= 6 then
