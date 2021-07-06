@@ -92,6 +92,14 @@ local align_map = {
 -- @beautiful beautiful.wibar_stretch
 -- @tparam boolean stretch
 
+--- Allow or deny the tiled clients to cover the wibar.
+--
+-- @property update_workarea
+-- @tparam[opt=true] boolean update_workarea
+-- @propemits true false
+-- @see client.struts
+-- @see screen.workarea
+
 --- The wibar border width.
 -- @beautiful beautiful.wibar_border_width
 -- @tparam integer border_width
@@ -219,7 +227,7 @@ end
 local function attach(wb, position)
     gen_placement(position, wb._private.align, wb._stretch)(wb, {
         attach          = true,
-        update_workarea = true,
+        update_workarea = wb._private.update_workarea,
         margins         = get_margins(wb)
     })
 end
@@ -316,6 +324,19 @@ function awfulwibar.set_stretch(w, value)
     attach(w, w.position)
 
     w:emit_signal("property::stretch", value)
+end
+
+
+function awfulwibar.get_update_workarea(w)
+    return w._private.update_workarea
+end
+
+function awfulwibar.set_update_workarea(w, value)
+    w._private.update_workarea = value
+
+    attach(w, w.position)
+
+    w:emit_signal("property::update_workarea", value)
 end
 
 
@@ -540,6 +561,8 @@ function awfulwibar.new(args)
         bottom = 0
     }
     w._private.meta_margins = meta_margins(w)
+
+    w._private.update_workarea = true
 
     -- `w` needs to be inserted in `wiboxes` before reattach or its own offset
     -- will not be taken into account by the "older" wibars when `reattach` is
