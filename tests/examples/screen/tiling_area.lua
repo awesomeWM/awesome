@@ -27,5 +27,5 @@ return {
     factor                = 2    ,
     show_boxes            = false,
     highlight_tiling_area = true ,
-    draw_wibar            = wibar,
+    draw_wibars           = {wibar},
 }
