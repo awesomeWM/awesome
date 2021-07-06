@@ -1,11 +1,13 @@
 ---------------------------------------------------------------------------
---- Wibox module for awful.
+--- The main AwesomeWM "bar" module.
+--
 -- This module allows you to easily create wibox and attach them to the edge of
 -- a screen.
 --
 --@DOC_awful_wibar_default_EXAMPLE@
 --
 -- You can even have vertical bars too.
+--
 --@DOC_awful_wibar_left_EXAMPLE@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
@@ -56,6 +58,9 @@ local align_map = {
 }
 
 --- If the wibar needs to be stretched to fill the screen.
+--
+-- @DOC_awful_wibar_stretch_EXAMPLE@
+--
 -- @property stretch
 -- @tparam boolean stretch
 -- @propbeautiful
@@ -72,6 +77,8 @@ local align_map = {
 --  * right
 --  * centered
 --
+--  @DOC_awful_wibar_align_EXAMPLE@
+--
 -- @property align
 -- @tparam string align
 -- @propbeautiful
@@ -83,16 +90,25 @@ local align_map = {
 -- It can either be a table if `top`, `bottom`, `left`, `right` or a
 -- single number.
 --
+-- @DOC_awful_wibar_margins_EXAMPLE@
+--
 -- @property margins
 -- @tparam number|table margins
 -- @propbeautiful
 -- @propemits true false
 
 --- If the wibar needs to be stretched to fill the screen.
+--
 -- @beautiful beautiful.wibar_stretch
 -- @tparam boolean stretch
 
 --- Allow or deny the tiled clients to cover the wibar.
+--
+-- In the example below, we can see that the first screen workarea
+-- shrunk by the height of the wibar while the second screen is
+-- unchanged.
+--
+-- @DOC_screen_wibar_workarea_EXAMPLE@
 --
 -- @property update_workarea
 -- @tparam[opt=true] boolean update_workarea
@@ -101,6 +117,15 @@ local align_map = {
 -- @see screen.workarea
 
 --- If there is both vertical and horizontal wibar, give more space to vertical ones.
+--
+-- By default, if multiple wibars risk overlapping, it will be resolved
+-- by giving more space to the horizontal one:
+--
+-- ![wibar position](../images/AUTOGEN_awful_wibar_position.svg)
+--
+-- If this variable is to to `true`, it will behave like:
+--
+-- @DOC_awful_wibar_position2_EXAMPLE@
 --
 -- @beautiful beautiful.wibar_favor_vertical
 -- @tparam[opt=false] boolean favor_vertical
@@ -262,6 +287,8 @@ end
 -- * right
 -- * top
 -- * bottom
+--
+-- @DOC_awful_wibar_position_EXAMPLE@
 --
 -- @property position
 -- @tparam string position Either "left", right", "top" or "bottom"
@@ -502,6 +529,9 @@ end
 -- @tparam[opt=nil] table args
 -- @tparam string args.position The position.
 -- @tparam string args.stretch If the wibar need to be stretched to fill the screen.
+-- @tparam boolean args.update_workarea Allow or deny the tiled clients to cover the wibar.
+-- @tparam string args.align How to align non-stretched wibars.
+-- @tparam table|number args.margins The wibar margins.
 --@DOC_wibox_constructor_COMMON@
 -- @return The new wibar
 -- @constructorfct awful.wibar
