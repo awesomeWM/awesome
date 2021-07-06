@@ -147,13 +147,26 @@ local function create_month(props, date)
 
     local num_columns  = props.week_numbers and 8 or 7
     local start_column = num_columns - 6
+
+    -- Compute number of rows
+    -- There are at least 4 weeks in a month
     local num_rows     = 4
+    -- On every month but february on non bisextile years
     if last_day.day > 28 then
+        -- The number of days span over at least 5 weeks
         num_rows = num_rows + 1
+
+        -- On month with 30+ days add 1 week if:
+        -- - if 30 days and the first day is a sunday
+        -- - if 31 days and the first days is at least saturday
         if column_fday >= 6 then
-            num_rows = num_rows + 1
+            if last_day.day == 30 and column_fday == 7 or last_day.day == 31 then
+                num_rows = num_rows + 1
+            end
         end
+    -- If the first day of february is anything but a monday
     elseif column_fday > 1 then
+        -- Span over 5 weeks
         num_rows = num_rows + 1
     end
 
