@@ -100,6 +100,11 @@ local align_map = {
 -- @see client.struts
 -- @see screen.workarea
 
+--- If there is both vertical and horizontal wibar, give more space to vertical ones.
+--
+-- @beautiful beautiful.wibar_favor_vertical
+-- @tparam[opt=false] boolean favor_vertical
+
 --- The wibar border width.
 -- @beautiful beautiful.wibar_border_width
 -- @tparam integer border_width
@@ -193,9 +198,12 @@ local function get_margins(w)
     margins[position] =  margins[position] + get_margin(w, position, true)
 
     -- Avoid overlapping wibars
-    if position == "left" or position == "right" then
+    if (position == "left" or position == "right") and not beautiful.wibar_favor_vertical then
         margins.top    = get_margin(w, "top"   )
         margins.bottom = get_margin(w, "bottom")
+    elseif (position == "top" or position == "bottom") and beautiful.wibar_favor_vertical then
+        margins.left  = get_margin(w, "left" )
+        margins.right = get_margin(w, "right")
     end
 
     return margins
