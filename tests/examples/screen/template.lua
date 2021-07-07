@@ -15,6 +15,8 @@ local args = loadfile(file_path)() or 10
 args = args or {}
 args.factor = args.factor or 10
 
+local SCALE_FACTOR = 0.66
+
 local factor, img, cr = 1/args.factor
 
 require("gears.timer").run_delayed_calls_now()
@@ -470,7 +472,7 @@ local function draw_struts(s)
     if left > 0 then
         draw_hruler(
             s,
-            s.geometry.y*0.66,
+            s.geometry.y*SCALE_FACTOR,
             get_text_height(),
             {x = s.geometry.x+tr_x*2, width = left, color = colors.gaps.."66", align = true},
             1
@@ -481,7 +483,7 @@ local function draw_struts(s)
         draw_vruler(
             s,
             get_text_height()*1.5,
-            s.geometry.x*0.66,
+            s.geometry.x*SCALE_FACTOR,
             {y=s.geometry.y+tr_y*(1/factor), height = top, color = colors.gaps.."66", align = true},
             1
         )
@@ -490,7 +492,7 @@ local function draw_struts(s)
     if right > 0 then
         draw_hruler(
             s,
-            s.geometry.y*0.66,
+            s.geometry.y*SCALE_FACTOR,
             get_text_height(),
             {x = s.geometry.x, width = left, color = colors.gaps.."66", align = true},
             1
@@ -501,7 +503,7 @@ local function draw_struts(s)
         draw_vruler(
             s,
             get_text_height()*1.5,
-            s.geometry.x*0.66,
+            s.geometry.x*SCALE_FACTOR,
             {
                 y      = s.geometry.y+tr_y*(1/factor)+s.geometry.height - bottom,
                 height = bottom,
@@ -689,7 +691,7 @@ evaluate_translation(
 local sew, seh = screen._get_extents()
 sew, seh = sew/args.factor + (screen.count()-1)*10+2, seh/args.factor+2
 
-sew, seh = sew + tr_x, seh + 0.66*tr_y
+sew, seh = sew + tr_x, seh + SCALE_FACTOR*tr_y
 
 sew, seh = sew + 5*get_text_height(), seh + 5*get_text_height()
 
@@ -697,7 +699,7 @@ img = cairo.SvgSurface.create(image_path..".svg", sew, seh)
 cr  = cairo.Context(img)
 
 -- Instead of adding origin offset everywhere, translate the viewport.
-cr:translate(tr_x, tr_y * 0.66)
+cr:translate(tr_x, tr_y * SCALE_FACTOR)
 
 -- Draw the various areas.
 for k=1, screen.count() do
