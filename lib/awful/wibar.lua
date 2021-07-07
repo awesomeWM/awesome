@@ -71,11 +71,11 @@ local align_map = {
 --
 -- Values are:
 --
---  * top
---  * bottom
---  * left
---  * right
---  * centered
+--  * `"top"`
+--  * `"bottom"`
+--  * `"left"`
+--  * `"right"`
+--  * `"centered"`
 --
 --  @DOC_awful_wibar_align_EXAMPLE@
 --
@@ -87,8 +87,8 @@ local align_map = {
 
 --- Margins on each side of the wibar.
 --
--- It can either be a table if `top`, `bottom`, `left`, `right` or a
--- single number.
+-- It can either be a table with `top`, `bottom`, `left` and `right`
+-- properties, or a single number that apply to all fourth sides.
 --
 -- @DOC_awful_wibar_margins_EXAMPLE@
 --
@@ -385,12 +385,12 @@ function awfulwibar.set_margins(w, value)
         }
     end
 
-   value = value or {
+   value = gtable.crush({
         left   = 0,
         right  = 0,
         top    = 0,
         bottom = 0
-    }
+    }, value or {}, true)
 
     w._private.margins = value
 
