@@ -1,6 +1,7 @@
 local awful = require("awful")
 local test_client = require("_client")
 local runner = require("_runner")
+local gtable = require("gears.table")
 local cruled = require("ruled.client")
 
 -- This test makes some assumptions about the no_overlap behavior which may not
@@ -51,9 +52,16 @@ local function add_client(args)
     local data = {}
     table.insert(client_data, data)
     local client_index = #client_data
+
+    local old_c = {}
+
+    for _, c in ipairs(client.get()) do
+        old_c[c] = true
+    end
+
     table.insert(tests, function(count)
         local name = string.format("client%010d", client_index)
-        if count <= 1 then
+        if count == 1 then
             data.prev_client_count = #client.get()
             local geometry = args.geometry(mouse.screen.workarea)
             test_client(class, name, args.sn_rules, nil, nil, {
@@ -67,8 +75,13 @@ local function add_client(args)
         elseif #client.get() > data.prev_client_count then
             local c = data.c
             if not c then
-                c = client.get()[1]
-                assert(c.name == name)
+                for _, cc in ipairs(client.get()) do
+                    if not old_c[cc] then
+                        c = cc
+                        break
+                    end
+                end
+                assert(c and c.name == name)
                 data.c = c
             end
             local test = args.test or default_test

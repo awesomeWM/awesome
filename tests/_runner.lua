@@ -122,7 +122,7 @@ function runner.run_steps(steps, options)
                 step = step+1
                 step_count = 0
                 wait = options.wait_per_step / 0.1
-                t.timeout = 0
+                t.timeout = 0.1
                 t:again()
             else
                 -- All steps finished, we are done.

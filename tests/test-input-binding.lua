@@ -237,18 +237,16 @@ for _, type_name in ipairs { "key", "button" } do
 
             assert(#c[type_name.."s"] == 0)
 
-            c:kill()
-
-            return true
-        end)
-
-        -- Cleanup (otherwise there is a race with the root.buttons tests)
-        table.insert(steps, function()
-            if #mouse.screen.clients ~= 0 then return end
-
             return true
         end)
     end
+
+    -- Cleanup (otherwise there is a race with the root.buttons tests)
+    table.insert(steps, function()
+        if #mouse.screen.clients == 0 then return true end
+
+        mouse.screen.clients[1]:kill()
+    end)
 end
 
 local exe1, exe2, exe3, exe4 = false, false, false, false
