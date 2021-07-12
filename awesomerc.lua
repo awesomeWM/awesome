@@ -109,15 +109,20 @@ mytextclock = wibox.widget.textclock()
 
 -- @DOC_WALLPAPER@
 screen.connect_signal("request::wallpaper", function(s)
-    -- Wallpaper
-    if beautiful.wallpaper then
-        local wallpaper = beautiful.wallpaper
-        -- If wallpaper is a function, call it with the screen
-        if type(wallpaper) == "function" then
-            wallpaper = wallpaper(s)
-        end
-        gears.wallpaper.maximized(wallpaper, s, true)
-    end
+    awful.wallpaper {
+        screen = s,
+        widget = {
+            {
+                image  = beautiful.wallpaper,
+                resize = true,
+                widget = wibox.widget.imagebox,
+            },
+            valign = "center",
+            halign = "center",
+            tiled  = false,
+            widget = wibox.container.tile,
+        }
+    }
 end)
 
 -- @DOC_FOR_EACH_SCREEN@

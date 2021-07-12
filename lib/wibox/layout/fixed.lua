@@ -70,7 +70,7 @@ function fixed:layout(context, width, height)
                 zero = w == 0
             end
 
-            if x - spacing >= width then
+            if x - spacing >= width and not zero then
                 -- pop the spacing widget added in previous iteration if used
                 if spacing_widget then
                     table.remove(result)
