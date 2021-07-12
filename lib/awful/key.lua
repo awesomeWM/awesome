@@ -1,6 +1,27 @@
 ---------------------------------------------------------------------------
 --- Create easily new key objects ignoring certain modifiers.
 --
+-- A key object can be used by @{awful.keyboard} and @{client} to define
+-- keybindings.
+--
+-- Use awful.key to define a keybinding
+-- ---
+--
+-- This example shows how to define a basic key object:
+--
+-- @DOC_text_awful_key_constructor_default_EXAMPLE@
+--
+-- This example shows how to define the same basic key object with the
+-- declarative pattern:
+--
+-- @DOC_text_awful_key_constructor_declarative_EXAMPLE@
+--
+-- This second example of a key definition uses the numrow keygroup. In this
+-- example, we define a key object, that select the tag to show according to
+-- the key index from the numrow.
+--
+-- @DOC_text_awful_key_constructor_keygroup_EXAMPLE@
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2018 Emmanuel Lepage Vallee
@@ -23,21 +44,6 @@ local gobject = require("gears.object")
 --
 -- @property key
 -- @param string
-
---- A group of keys.
---
--- The valid keygroups are:
---
--- * **numrow**: The row above the letters in the US PC-105/PC-104 keyboards
---   and its derivative. This is usually the number 1-9 followed by 0.
--- * **arrows**: The Left/Right/Top/Bottom keys usually located right of the
---   spacebar.
--- * **fkeys**: The keys F1 through F12 located at the topmost row of any
---   keyboard, plus F13 through F35 on specialist keyboards.
--- * **numpad**: The number keys on the keypad to the right of the letters and
---   the arrow keys. Not present in every keyboard.
---
--- @property keygroup
 
 --- The table of modifier keys.
 --
@@ -98,6 +104,32 @@ local gobject = require("gears.object")
 local key = { mt = {}, hotkeys = {} }
 
 local reverse_map = setmetatable({}, {__mode="k"})
+
+--- The keygroups names.
+--
+-- It can be used instead of keygroup names.
+--
+-- Values associated to each property of this table are string:
+--
+-- - **NUMROW** = `"numrow"`: The row above the letters in the US PC-105/PC-104 keyboards and
+-- its derivative. This is usually the number 1-9 followed by 0.
+--
+-- - **ARROWS** = `"arrows"`: The Left/Right/Top/Bottom keys usually located right of the
+-- spacebar.
+--
+-- - **FKEYS** = `"fkeys"`: The keys F1 through F12 located at the topmost row of any
+-- keyboard, plus F13 through F35 on specialist keyboards.
+--
+-- - **NUMPAD** = `"numpad"`: The number keys on the keypad to the right of the letters and
+-- the arrow keys. Not present in every keyboard.
+--
+-- @table keygroup
+key.keygroup = {
+    NUMROW = 'numrow', -- The number row.
+    ARROWS = 'arrows', -- The directionnal arrows.
+    FKEYS = 'fkeys', -- The function keys.
+    NUMPAD = 'numpad', -- The numpad keys.
+}
 
 function key:set_key(k)
     for _, v in ipairs(self) do
@@ -216,11 +248,13 @@ end
 --
 -- @constructorfct2 awful.key
 -- @tparam table args
--- @tparam function args.key The key to trigger an event. It can be the character
---  itself of `#+keycode` (**mandatory**).
--- @tparam function args.modifiers A list of modifier keys.  Valid modifiers are:
---  `Any`, `Mod1`, Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
---  This argument is (**mandatory**).
+-- @tparam string args.key The key to trigger an event. It can be the character
+--   itself of `#+keycode`.
+-- @tparam[opt] string args.keygroup The keygroup to trigger an event. This
+--   parameter must be used as a replacement for the `key` parameter. See
+--   @{awful.key.keygroup}.
+-- @tparam table args.modifiers A list of modifier keys.  Valid modifiers are:
+--   `Any`, `Mod1`, Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
 -- @tparam function args.on_press Callback for when the key is pressed.
 -- @tparam function args.on_release Callback for when the key is released.
 
