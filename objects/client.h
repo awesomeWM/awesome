@@ -245,6 +245,7 @@ void client_set_skip_taskbar(lua_State *, int, bool);
 void client_set_motif_wm_hints(lua_State *, int, motif_wm_hints_t);
 void client_focus(client_t *);
 bool client_focus_update(client_t *);
+void client_focus_need_update(void);
 bool client_hasproto(client_t *, xcb_atom_t);
 void client_ignore_enterleave_events(void);
 void client_restore_enterleave_events(void);
