@@ -256,6 +256,7 @@ void client_emit_scanned(void);
 void client_emit_scanning(void);
 drawable_t *client_get_drawable(client_t *, int, int);
 drawable_t *client_get_drawable_offset(client_t *, int *, int *);
+area_t client_get_undecorated_geometry(client_t *);
 
 /** Put client on top of the stack.
  * \param c The client to raise.
