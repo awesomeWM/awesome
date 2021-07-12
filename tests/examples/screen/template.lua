@@ -15,6 +15,8 @@ local args = loadfile(file_path)() or 10
 args = args or {}
 args.factor = args.factor or 10
 
+local SCALE_FACTOR = 0.66
+
 local factor, img, cr = 1/args.factor
 
 require("gears.timer").run_delayed_calls_now()
@@ -160,11 +162,12 @@ local function draw_client(_, c, name, offset, label, alpha)
 end
 
 
-local function compute_ruler(_, rect, name)
-    table.insert(hrulers, {
+local function compute_ruler(s, rect, name)
+    hrulers[s], vrulers[s] = hrulers[s] or {}, vrulers[s] or {}
+    table.insert(hrulers[s], {
         label = name, x = rect.x, width = rect.width
     })
-    table.insert(vrulers, {
+    table.insert(vrulers[s], {
         label = name, y = rect.y, height = rect.height
     })
 end
@@ -309,8 +312,8 @@ end
 
 local function draw_rulers(s)
     -- The table has a maximum of 4 entries, the sort algorithm is irrelevant.
-    while not bubble_sort(hrulers, "x", "width" ) do end
-    while not bubble_sort(vrulers, "y", "height") do end
+    while not bubble_sort(hrulers[s], "x", "width" ) do end
+    while not bubble_sort(vrulers[s], "y", "height") do end
 
     cr:set_line_width(1)
     cr:set_dash(nil)
@@ -320,7 +323,7 @@ local function draw_rulers(s)
 
     dx = get_text_height() + 10
 
-    for k, ruler in ipairs(vrulers) do
+    for k, ruler in ipairs(vrulers[s]) do
         draw_vruler(s, dx, sx, ruler, k)
     end
 
@@ -406,10 +409,6 @@ local function evaluate_translation(draw_gaps, draw_struts, draw_mwfact, draw_cl
     end
 end
 
-local function translate()
-    cr:translate(tr_x, tr_y * 0.66)
-end
-
 local function draw_gaps(s)
     cr:translate(-tr_x, -tr_y)
 
@@ -473,7 +472,7 @@ local function draw_struts(s)
     if left > 0 then
         draw_hruler(
             s,
-            0,
+            s.geometry.y*SCALE_FACTOR,
             get_text_height(),
             {x = s.geometry.x+tr_x*2, width = left, color = colors.gaps.."66", align = true},
             1
@@ -484,7 +483,7 @@ local function draw_struts(s)
         draw_vruler(
             s,
             get_text_height()*1.5,
-            0,
+            s.geometry.x*SCALE_FACTOR,
             {y=s.geometry.y+tr_y*(1/factor), height = top, color = colors.gaps.."66", align = true},
             1
         )
@@ -493,7 +492,7 @@ local function draw_struts(s)
     if right > 0 then
         draw_hruler(
             s,
-            0,
+            s.geometry.y*SCALE_FACTOR,
             get_text_height(),
             {x = s.geometry.x, width = left, color = colors.gaps.."66", align = true},
             1
@@ -504,7 +503,7 @@ local function draw_struts(s)
         draw_vruler(
             s,
             get_text_height()*1.5,
-            0,
+            s.geometry.x*SCALE_FACTOR,
             {
                 y      = s.geometry.y+tr_y*(1/factor)+s.geometry.height - bottom,
                 height = bottom,
@@ -667,8 +666,8 @@ local function draw_info(s)
 end
 
 -- Compute the rulers size.
-for _=1, screen.count() do
-    local s = screen[1]
+for k=1, screen.count() do
+    local s = screen[k]
 
     -- The padding.
     compute_ruler(s, s.tiling_area, "tiling_area")
@@ -692,23 +691,22 @@ evaluate_translation(
 local sew, seh = screen._get_extents()
 sew, seh = sew/args.factor + (screen.count()-1)*10+2, seh/args.factor+2
 
-sew, seh = sew + tr_x, seh + 0.66*tr_y
+sew, seh = sew + tr_x, seh + SCALE_FACTOR*tr_y
 
 sew, seh = sew + 5*get_text_height(), seh + 5*get_text_height()
 
 img = cairo.SvgSurface.create(image_path..".svg", sew, seh)
 cr  = cairo.Context(img)
 
-cr:set_line_width(1.5)
-cr:set_dash({10,4},1)
-
 -- Instead of adding origin offset everywhere, translate the viewport.
-translate()
+cr:translate(tr_x, tr_y * SCALE_FACTOR)
 
 -- Draw the various areas.
 for k=1, screen.count() do
-    local s = screen[1]
+    local s = screen[k]
 
+    cr:set_line_width(1.5)
+    cr:set_dash({10,4},1)
 
     -- The outer geometry.
     draw_area(s, s.geometry, "geometry", (k-1)*10, args.highlight_geometry)
@@ -727,8 +725,10 @@ for k=1, screen.count() do
     draw_rulers(s)
 
     -- Draw the wibar.
-    if args.draw_wibar then
-        draw_struct(s, args.draw_wibar, 'wibar', (k-1)*10, 'Wibar')
+    for _, wibar in ipairs(args.draw_wibars or {}) do
+        if wibar.screen == s then
+            draw_struct(s, wibar, 'wibar', (k-1)*10, 'Wibar')
+        end
     end
 
     local skip_gaps = s.selected_tag
@@ -740,28 +740,30 @@ for k=1, screen.count() do
     -- Draw clients.
     if args.draw_clients then
         for label,c in pairs(args.draw_clients) do
-            local gap = c:tags()[1].gap
-            if args.draw_gaps and gap > 0 and (not c.floating) and not skip_gaps then
-                local proxy = {
-                    x      = c.x - gap,
-                    y      = c.y - gap,
-                    width  = c.width + 2*gap,
-                    height = c.height + 2*gap,
-                }
+            if c.screen == s then
+                local gap = c:tags()[1].gap
+                if args.draw_gaps and gap > 0 and (not c.floating) and not skip_gaps then
+                    local proxy = {
+                        x      = c.x - gap,
+                        y      = c.y - gap,
+                        width  = c.width + 2*gap,
+                        height = c.height + 2*gap,
+                    }
 
-                draw_client(s, proxy, 'gaps', (k-1)*10, nil, "11")
-            elseif args.draw_client_snap and c.floating then
-                local proxy = {
-                    x      = c.x - sd,
-                    y      = c.y - sd,
-                    width  = c.width + 2*sd,
-                    height = c.height + 2*sd,
-                }
+                    draw_client(s, proxy, 'gaps', (k-1)*10, nil, "11")
+                elseif args.draw_client_snap and c.floating then
+                    local proxy = {
+                        x      = c.x - sd,
+                        y      = c.y - sd,
+                        width  = c.width + 2*sd,
+                        height = c.height + 2*sd,
+                    }
 
-                draw_client(s, proxy, 'gaps', (k-1)*10, nil, "11")
+                    draw_client(s, proxy, 'gaps', (k-1)*10, nil, "11")
+                end
+
+                draw_client(s, c, 'tiling_client', (k-1)*10, label)
             end
-
-            draw_client(s, c, 'tiling_client', (k-1)*10, label)
         end
     end
 

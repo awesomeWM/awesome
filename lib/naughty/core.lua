@@ -191,7 +191,9 @@ naughty.notifications = { suspended = { }, _expired = {{}} }
 
 naughty._active = {}
 
-screen.connect_for_each_screen(function(s)
+local function init_screen(s)
+    if naughty.notifications[s] then return end
+
     naughty.notifications[s] = {
         top_left = {},
         top_middle = {},
@@ -201,7 +203,9 @@ screen.connect_for_each_screen(function(s)
         bottom_right = {},
         middle = {},
     }
-end)
+end
+
+screen.connect_for_each_screen(init_screen)
 
 capi.screen.connect_signal("removed", function(scr)
     -- Allow the notifications to be moved to another screen.
@@ -645,6 +649,10 @@ local function register(notification, args)
     end
 
     assert(s)
+
+    if not naughty.notifications[s] then
+        init_screen(get_screen(s))
+    end
 
     -- insert the notification to the table
     table.insert(naughty._active, notification)

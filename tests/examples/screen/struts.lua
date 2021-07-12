@@ -6,7 +6,7 @@ local awful = { --DOC_HIDE
     wibar = require("awful.wibar"), --DOC_HIDE
     tag = require("awful.tag"), --DOC_HIDE
     tag_layout = require("awful.layout.suit.tile") --DOC_HIDE
-}
+} --DOC_HIDE
 
     -- Wibars and docked clients are the main users of the struts.
     local wibar = awful.wibar {
@@ -51,9 +51,9 @@ local clients = { --DOC_HIDE
 } --DOC_HIDE
 
 return { --DOC_HIDE
-    factor                = 2   , --DOC_HIDE
+    factor                = 2, --DOC_HIDE
     show_boxes            = true, --DOC_HIDE
-    draw_wibar            = wibar, --DOC_HIDE
+    draw_wibars           = {wibar}, --DOC_HIDE
     draw_clients          = clients, --DOC_HIDE
     display_screen_info   = false, --DOC_HIDE
     draw_struts           = true, --DOC_HIDE
