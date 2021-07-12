@@ -14,10 +14,10 @@ local tmux = {}
 --
 -- For example:
 --
---     tmux.add_rules_for_terminal({ rule = { name = { "tmux" }}})
+--     tmux.add_rules_for_terminal({ rule = { name = "tmux" }})
 --
 -- will show tmux hotkeys for any window that has 'tmux' in its title.
--- If no rules are provided then tmux hotkeys will be shown always!
+-- If no rules are provided then tmux hotkeys won't be shown.
 -- @function add_rules_for_terminal
 -- @see ruled.client.rules
 -- @tparam table rule Rules to match a window containing a tmux session.
@@ -31,6 +31,9 @@ function tmux.add_rules_for_terminal(rule)
         hotkeys_popup.add_group_rules(group_name, group_data)
     end
 end
+
+-- don't show hotkeys by default
+tmux.add_rules_for_terminal({rule={focusable=false}})
 
 local tmux_keys = {
     ["tmux: sessions"] = {{
