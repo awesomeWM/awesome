@@ -252,6 +252,7 @@ local delayed_calls = {}
 -- @staticfct gears.timer.run_delayed_calls_now
 function timer.run_delayed_calls_now()
     for _, callback in ipairs(delayed_calls) do
+        print("D: awesome: delayed_call: " .. tostring(callback[1]))
         protected_call(unpack(callback))
     end
     delayed_calls = {}
