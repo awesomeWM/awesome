@@ -5,7 +5,7 @@
 -- a `wibox.widget.textbox` on top of a `awful.widget.progressbar` or manage
 -- "pages" where only one is visible at any given moment.
 --
--- The indices are going from 1 (the bottom of the stack) up to the top of
+-- The indices start from 1 (the top of the stack) down to the bottom of
 -- the stack. The order can be changed either using `:swap` or `:raise`.
 --
 --@DOC_wibox_layout_defaults_stack_EXAMPLE@
@@ -75,10 +75,16 @@ function stack:layout(_, width, height)
 
     local h_off, v_off = spacing, spacing
 
-    for _, v in pairs(self._private.widgets) do
+    if self._private.top_only then
+        local v = self._private.widgets[1]
         table.insert(result, base.place_widget_at(v, h_off, v_off, width, height))
-        h_off, v_off = h_off + self._private.h_offset, v_off + self._private.v_offset
-        if self._private.top_only then break end
+    else
+        -- Iterate backwards to draw top (index 1) last so that it appears above other layers
+        for i = #self._private.widgets, 1, -1 do
+            local v = self._private.widgets[i]
+            table.insert(result, base.place_widget_at(v, h_off, v_off, width, height))
+            h_off, v_off = h_off + self._private.h_offset, v_off + self._private.v_offset
+        end
     end
 
     return result
