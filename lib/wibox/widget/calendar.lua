@@ -139,8 +139,36 @@ end
 -- @tparam number|nil date.day Date day
 -- @treturn widget Grid layout
 local function create_month(props, date)
-    local num_rows    = 8
-    local num_columns = props.week_numbers and 8 or 7
+    local start_row    = 3
+    local week_start   = props.start_sunday and 1 or 2
+    local last_day     = os.date("*t", os.time{year=date.year, month=date.month+1, day=0})
+    local month_days   = last_day.day
+    local column_fday  = (last_day.wday - month_days + 1 - week_start ) % 7
+
+    local num_columns  = props.week_numbers and 8 or 7
+    local start_column = num_columns - 6
+
+    -- Compute number of rows
+    -- There are at least 4 weeks in a month
+    local num_rows     = 4
+    -- On every month but february on non bisextile years
+    if last_day.day > 28 then
+        -- The number of days span over at least 5 weeks
+        num_rows = num_rows + 1
+
+        -- On month with 30+ days add 1 week if:
+        -- - if 30 days and the first day is a sunday
+        -- - if 31 days and the first days is at least saturday
+        if column_fday >= 6 then
+            if last_day.day == 30 and column_fday == 7 or last_day.day == 31 then
+                num_rows = num_rows + 1
+            end
+        end
+    -- If the first day of february is anything but a monday
+    elseif column_fday > 1 then
+        -- Span over 5 weeks
+        num_rows = num_rows + 1
+    end
 
     -- Create grid layout
     local layout = grid()
@@ -150,13 +178,6 @@ local function create_month(props, date)
     layout:set_spacing(props.spacing)
     layout:set_forced_num_rows(num_rows)
     layout:set_forced_num_cols(num_columns)
-
-    local start_row    = 3
-    local start_column = num_columns - 6
-    local week_start   = props.start_sunday and 1 or 2
-    local last_day     = os.date("*t", os.time{year=date.year, month=date.month+1, day=0})
-    local month_days   = last_day.day
-    local column_fday  = (last_day.wday - month_days + 1 - week_start ) % 7
 
     --local flags = {"header", "weekdays", "weeknumber", "normal", "focus"}
     local cell_date, t, i, j, w, flag, text
