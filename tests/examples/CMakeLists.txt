@@ -21,7 +21,7 @@ execute_process(COMMAND ${LUA_EXECUTABLE} -e "p = package.path:gsub(';', '\\\\;'
     OUTPUT_VARIABLE "LUA_PATH_")
 
 # Allow to use the example tests by themselves.
-# This was used on Travis for separate coverage reporting, but is not really
+# This was used during CI for separate coverage reporting, but is not really
 # required anymore.
 if(NOT SOURCE_DIR AND ${CMAKE_CURRENT_SOURCE_DIR} MATCHES "/tests/examples")
     get_filename_component(TOP_SOURCE_DIR

@@ -4,6 +4,18 @@ local awful = require("awful")
 local wibox = require("wibox")
 local gtable = require("gears.table")
 
+-- This test has been proven to perform unreliably on GitHub Actions.
+-- The additional Lua process that creates the test client will sometimes
+-- linger for an unpredictable amount of time.
+-- Stalling the step to check for clean-up increases the chance for success,
+-- but does not fix the issue.
+-- See https://github.com/awesomeWM/awesome/pull/3292.
+if os.getenv("GITHUB_ACTIONS") then
+    print("Skipping unreliable test 'test-leak-client'")
+    runner.run_steps { function() return true end }
+    return
+end
+
 -- Create a titlebar and return a table with references to its member widgets.
 local function create_titlebar(c)
     local parts = {}
@@ -85,12 +97,12 @@ local steps = {
             -- Test that we have a client and that it's invalid (tostring()
             -- causes an "invalid object" error)
             local success, msg = pcall(function() tostring(objs[1]) end)
-            assert(not success)
+            assert(not success, msg)
             assert(msg:find("invalid object"), msg)
 
             -- Check that it is garbage-collectable
             collectgarbage("collect")
-            assert(#objs == 0)
+            assert(#objs == 0, "still clients left after garbage collect")
             return true
         end
     end,
