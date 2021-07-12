@@ -24,7 +24,7 @@
 
 #include <stdbool.h>
 
-void awesome_restart(void);
+void awesome_restart(void) __attribute__((noreturn));
 void awesome_atexit(bool restart);
 
 #endif

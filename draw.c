@@ -59,9 +59,9 @@ draw_surface_from_data(int width, int height, uint32_t *data)
     {
         uint8_t a = (data[i] >> 24) & 0xff;
         double alpha = a / 255.0;
-        uint8_t r = ((data[i] >> 16) & 0xff) * alpha;
-        uint8_t g = ((data[i] >>  8) & 0xff) * alpha;
-        uint8_t b = ((data[i] >>  0) & 0xff) * alpha;
+        uint8_t r = (uint8_t) round( ((double)((data[i] >> 16) & 0xff)) * alpha);
+        uint8_t g = (uint8_t) round( ((double)((data[i] >>  8) & 0xff)) * alpha);
+        uint8_t b = (uint8_t) round( ((double)((data[i] >>  0) & 0xff)) * alpha);
         buffer[i] = (a << 24) | (r << 16) | (g << 8) | b;
     }
 
@@ -119,9 +119,9 @@ draw_surface_from_pixbuf(GdkPixbuf *buf)
                 uint8_t b = *row++;
                 uint8_t a = *row++;
                 double alpha = a / 255.0;
-                r = r * alpha;
-                g = g * alpha;
-                b = b * alpha;
+                r = (uint8_t) (r * alpha);
+                g = (uint8_t) (g * alpha);
+                b = (uint8_t) (b * alpha);
                 *cairo++ = (a << 24) | (r << 16) | (g << 8) | b;
             }
         }
@@ -141,8 +141,8 @@ get_surface_size(cairo_surface_t *surface, int *width, int *height)
 
     cairo_clip_extents(cr, &x1, &y1, &x2, &y2);
     cairo_destroy(cr);
-    *width = x2 - x1;
-    *height = y2 - y1;
+    *width  = (int) (x2 - x1);
+    *height = (int) (y2 - y1);
 }
 
 /** Duplicate the specified image surface.

@@ -144,15 +144,8 @@ client_layer_translator(client_t *c)
         return WINDOW_LAYER_IGNORE;
 
     /* then deal with windows type */
-    switch(c->type)
-    {
-      case WINDOW_TYPE_DESKTOP:
-        return WINDOW_LAYER_DESKTOP;
-      default:
-        break;
-    }
-
-    return WINDOW_LAYER_NORMAL;
+    return c->type == WINDOW_TYPE_DESKTOP ?
+        WINDOW_LAYER_DESKTOP : WINDOW_LAYER_NORMAL;
 }
 
 /** Restack clients.

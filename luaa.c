@@ -279,8 +279,8 @@ luaA_restart(lua_State *L)
 static int
 luaA_kill(lua_State *L)
 {
-    int pid = luaL_checknumber(L, 1);
-    int sig = luaA_checknumber_range(L, 2, 0, INT_MAX);
+    int pid = luaA_checkinteger(L, 1);
+    int sig = (int) luaA_checknumber_range(L, 2, 0, INT_MAX);
 
     int result = kill(pid, sig);
     lua_pushboolean(L, result == 0);

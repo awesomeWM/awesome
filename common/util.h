@@ -327,7 +327,7 @@ void _warn(int, const char *, const char *, ...)
 
 const char *a_current_time_str(void);
 
-void a_exec(const char *);
+void a_exec(const char *) __attribute__((noreturn));
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

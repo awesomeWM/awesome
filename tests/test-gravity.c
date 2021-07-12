@@ -217,6 +217,9 @@ static const char *gravity_to_string(xcb_gravity_t gravity) {
         return "SouthEast";
     case XCB_GRAVITY_STATIC:
         return "Static";
+    case XCB_GRAVITY_BIT_FORGET: /*XCB_GRAVITY_WIN_UNMAP*/
+        fprintf(stderr, "Unsupported gravity value %d", (int) gravity);
+        exit(1);
     default:
         fprintf(stderr, "Unknown gravity value %d", (int) gravity);
         exit(1);
@@ -304,6 +307,7 @@ static void check_geometry(int32_t expected_x, int32_t expected_y, uint32_t expe
         offset_x = 0;
         offset_y = 0;
         break;
+    case XCB_GRAVITY_BIT_FORGET:
     default:
         fprintf(stderr, "Unknown gravity!?\n");
         return;
@@ -394,6 +398,7 @@ static void handle_configure_notify(xcb_configure_notify_event_t *ev)
         do_log("Window in state MOVED got ConfigureNotify, going to next state");
         delayed_proceed_with_window();
         return;
+    case TEST_STATE_DONE_GOT_CONFIGURE:
     case TEST_STATE_DONE:
         if (!synthetic)
             return;
@@ -423,7 +428,7 @@ static void wait_for_wm(void)
             (uint32_t[]) { 1, 2, 3, 4 });
     xcb_flush(c);
 
-    while (event = xcb_wait_for_event(c)) {
+    while ((event = xcb_wait_for_event(c))) {
         if ((event->response_type & 0x7f) == XCB_CONFIGURE_NOTIFY) {
             free(event);
             break;
@@ -455,7 +460,7 @@ static void handle_client_message(xcb_client_message_event_t *event)
 
     check(window_state.window == event->window, "Got weird client message?!?");
 
-    if (event->data.data32[0] != (int) window_state.state)
+    if (event->data.data32[0] != (uint32_t) window_state.state)
         return;
 
     window_state.sent_delayed_proceed = false;
@@ -497,6 +502,9 @@ static void handle_client_message(xcb_client_message_event_t *event)
         window_state.window = XCB_NONE;
         window_state.state = TEST_STATE_DONE;
         done = true;
+        return;
+    case TEST_STATE_DONE:
+    case TEST_STATE_DONE_GOT_CONFIGURE:
         return;
     }
 }
