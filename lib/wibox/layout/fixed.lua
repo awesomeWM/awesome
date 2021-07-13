@@ -1,6 +1,22 @@
 ---------------------------------------------------------------------------
+-- A `fixed` layout may be initialized with any number of child widgets, and
+-- during runtime widgets may be added and removed dynamically.
+--
+-- On the main axis, child widgets are given a fixed size of exactly as much
+-- space as they ask for. The layout will then resize according to the sum of
+-- all child widgets. If the space available to the layout is not enough to
+-- include all child widgets, the excessive ones are not drawn at all.
+--
+-- Additionally, the layout allows adding empty spacing or even placing a custom
+-- spacing widget between the child widget.
+--
+-- On its secondary axis, the layout's size is determined by the largest child
+-- widget. Smaller child widgets are then placed with the same size.
+-- Therefore, child widgets may ignore their `forced_width` or `forced_height`
+-- properties for vertical and horizontal layouts respectively.
 --
 --@DOC_wibox_layout_defaults_fixed_EXAMPLE@
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @layoutmod wibox.layout.fixed
@@ -409,22 +425,16 @@ local function get_layout(dir, widget1, ...)
     return ret
 end
 
---- Returns a new horizontal fixed layout. Each widget will get as much space as it
--- asks for and each widget will be drawn next to its neighboring widget.
--- Widgets can be added via :add() or as arguments to this function.
--- Note that widgets ignore `forced_height`. They will use the preferred/minimum width
--- on the horizontal axis, and a stretched height on the vertical axis.
+--- Creates and returns a new horizontal fixed layout.
+--
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @constructorfct wibox.layout.fixed.horizontal
 function fixed.horizontal(...)
     return get_layout("x", ...)
 end
 
---- Returns a new vertical fixed layout. Each widget will get as much space as it
--- asks for and each widget will be drawn next to its neighboring widget.
--- Widgets can be added via :add() or as arguments to this function.
--- Note that widgets ignore `forced_width`. They will use the preferred/minimum height
--- on the vertical axis, and a stretched width on the horizontal axis.
+--- Creates and returns a new vertical fixed layout.
+--
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @constructorfct wibox.layout.fixed.vertical
 function fixed.vertical(...)
