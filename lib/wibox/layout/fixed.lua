@@ -32,7 +32,7 @@ function fixed:layout(context, width, height)
 
     spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
 
-    for k, v in pairs(self._private.widgets) do
+    for index, widget in pairs(self._private.widgets) do
         local w, h, local_spacing = width - x, height - y, spacing
 
         -- Some widget might be zero sized either because this is their
@@ -43,8 +43,8 @@ function fixed:layout(context, width, height)
         local zero = false
 
         if is_y then
-            if k ~= widgets_nr or not self._private.fill_space then
-                h = select(2, base.fit_widget(self, context, v, w, h))
+            if index ~= widgets_nr or not self._private.fill_space then
+                h = select(2, base.fit_widget(self, context, widget, w, h))
                 zero = h == 0
             end
 
@@ -65,8 +65,8 @@ function fixed:layout(context, width, height)
                 end
             end
         else
-            if k ~= widgets_nr or not self._private.fill_space then
-                w = select(1, base.fit_widget(self, context, v, w, h))
+            if index ~= widgets_nr or not self._private.fill_space then
+                w = select(1, base.fit_widget(self, context, widget, w, h))
                 zero = w == 0
             end
 
@@ -94,13 +94,13 @@ function fixed:layout(context, width, height)
 
         -- Place widget, even if it has zero width/height. Otherwise
         -- any layout change for zero-sized widget would become invisible.
-        table.insert(result, base.place_widget_at(v, x, y, w, h))
+        table.insert(result, base.place_widget_at(widget, x, y, w, h))
 
         x = is_x and x + w + local_spacing or x
         y = is_y and y + h + local_spacing or y
 
         -- Add the spacing widget (if needed)
-        if k < widgets_nr and spacing_widget then
+        if index < widgets_nr and spacing_widget then
             table.insert(result, base.place_widget_at(
                 spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
                 is_x and abspace or w, is_y and abspace or h
