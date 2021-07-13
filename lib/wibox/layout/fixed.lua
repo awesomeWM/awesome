@@ -102,8 +102,11 @@ function fixed:layout(context, width, height)
         -- Add the spacing widget (if needed)
         if index < widgets_nr and spacing_widget then
             table.insert(result, base.place_widget_at(
-                spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
-                is_x and abspace or w, is_y and abspace or h
+                spacing_widget,
+                is_x and (x - spoffset) or x,
+                is_y and (y - spoffset) or y,
+                is_x and abspace or w,
+                is_y and abspace or h
             ))
         end
     end
