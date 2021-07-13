@@ -285,9 +285,13 @@ function fixed:set(index, widget2)
     return true
 end
 
---- The widget used to fill the spacing between the layout elements.
+--- A widget to insert as a separator between child widgets.
 --
--- By default, no widget is used.
+-- If this property is a valid widget and `spacing` is greater than `0`, a
+-- copy of this widget is inserted between each child widget, with its size in
+-- the layout's main direction determined by `spacing`.
+--
+-- By default no widget is used and any `spacing` is applied as an empty offset.
 --
 --@DOC_wibox_layout_fixed_spacing_widget_EXAMPLE@
 --
@@ -441,7 +445,9 @@ function fixed.vertical(...)
     return get_layout("y", ...)
 end
 
---- Add spacing between each layout widgets.
+--- The amount of space inserted between the child widgets.
+--
+-- If a `spacing_widget` is defined, this value is used for its size.
 --
 --@DOC_wibox_layout_fixed_spacing_EXAMPLE@
 --
