@@ -1,6 +1,25 @@
 ---------------------------------------------------------------------------
+-- The `align` layout has three slots for child widgets. On its main axis, it
+-- will use as much space as is available to it and distribute that to its child
+-- widgets by stretching or shrinking them based on the chosen @{expand}
+-- strategy.
+-- On its secondary axis, the biggest child widget determines the size of the
+-- layout, but smaller widgets will not be stretched to match it.
+--
+-- In its default configuration, the layout will give the first and third
+-- widgets only the minimum space they ask for and it aligns them to the outer
+-- edges. The remaining space between them is made available to the widget in
+-- slot two.
+--
+-- This layout is most commonly used to split content into left/top, center and
+-- right/bottom sections. As such, it is usually seen as the root layout in
+-- @{awful.wibar}.
+--
+-- You may also fill just one or two of the widget slots, the @{expand} algorithm
+-- will adjust accordingly.
 --
 --@DOC_wibox_layout_defaults_align_EXAMPLE@
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @layoutmod wibox.layout.align
@@ -140,8 +159,10 @@ function align:layout(context, width, height)
     return result
 end
 
---- Set the layout's first widget.
--- This is the widget that is at the left/top
+--- The widget in slot one.
+--
+-- This is the widget that is at the left/top.
+--
 -- @property first
 -- @tparam widget first
 -- @propemits true false
@@ -155,7 +176,10 @@ function align:set_first(widget)
     self:emit_signal("property::first", widget)
 end
 
---- Set the layout's second widget. This is the centered one.
+--- The widget in slot two.
+--
+-- This is the centered one.
+--
 -- @property second
 -- @tparam widget second
 -- @propemits true false
@@ -169,8 +193,10 @@ function align:set_second(widget)
     self:emit_signal("property::second", widget)
 end
 
---- Set the layout's third widget.
--- This is the widget that is at the right/bottom
+--- The widget in slot three.
+--
+-- This is the widget that is at the right/bottom.
+--
 -- @property third
 -- @tparam widget third
 -- @propemits true false
@@ -227,23 +253,27 @@ function align:fit(context, orig_width, orig_height)
     return used_in_dir, used_in_other
 end
 
---- Set the expand mode which determines how sub widgets expand to take up
+--- Set the expand mode, which determines how child widgets expand to take up
 -- unused space.
 --
 -- The following values are valid:
 --
--- * "inside" - Default option. Size of outside widgets is determined using
---   their fit function. Second, middle, or center widget expands to fill
---   remaining space.
--- * "outside" - Center widget is sized using its fit function and placed in
---   the center of the allowed space. Outside widgets expand (or contract) to
---   fill remaining space on their side.
--- * "none" - All widgets are sized using their fit function, drawn to only the
---   returned space, or remaining space, whichever is smaller. Center widget
---   gets priority.
+-- * `"inside"`: The widgets in slot one and three are set to their minimal
+--   required size. The widget in slot two is then given the remaining space.
+--   This is the default behaviour.
+-- * `"outside"`: The widget in slot two is set to its minimal required size and
+--   placed in the center of the space available to the layout. The other
+--   widgets are then given the remaining space on either side.
+--   If the center widget requires all available space, the outer widgets are
+--   not drawn at all.
+-- * `"none"`: All widgets are given their minimal required size or the
+--   remaining space, whichever is smaller. The center widget gets priority.
+--
+-- Attempting to set any other value than one of those three will fall back to
+-- `"inside"`.
 --
 -- @property expand
--- @tparam[opt=inside] string mode How to use unused space.
+-- @tparam[opt="inside"] string mode How to use unused space.
 
 function align:set_expand(mode)
     if mode == "none" or mode == "outside" then
@@ -283,14 +313,16 @@ local function get_layout(dir, first, second, third)
     return ret
 end
 
---- Returns a new horizontal align layout. An align layout can display up to
--- three widgets. The widget set via :set_left() is left-aligned. :set_right()
--- sets a widget which will be right-aligned. The remaining space between those
--- two will be given to the widget set via :set_middle().
+--- Returns a new horizontal align layout.
+--
+-- The three widget slots are aligned left, center and right.
+--
+-- Additionally, this creates the aliases `set_left`, `set_middle` and
+-- `set_right` to assign @{first}, @{second} and @{third} respectively.
 -- @constructorfct wibox.layout.align.horizontal
--- @tparam[opt] widget left Widget to be put to the left.
--- @tparam[opt] widget middle Widget to be put to the middle.
--- @tparam[opt] widget right Widget to be put to the right.
+-- @tparam[opt] widget left Widget to be put in slot one.
+-- @tparam[opt] widget middle Widget to be put in slot two.
+-- @tparam[opt] widget right Widget to be put in slot three.
 function align.horizontal(left, middle, right)
     local ret = get_layout("x", left, middle, right)
 
@@ -301,14 +333,16 @@ function align.horizontal(left, middle, right)
     return ret
 end
 
---- Returns a new vertical align layout. An align layout can display up to
--- three widgets. The widget set via :set_top() is top-aligned. :set_bottom()
--- sets a widget which will be bottom-aligned. The remaining space between those
--- two will be given to the widget set via :set_middle().
+--- Returns a new vertical align layout.
+--
+-- The three widget slots are aligned top, center and bottom.
+--
+-- Additionally, this creates the aliases `set_top`, `set_middle` and
+-- `set_bottom` to assign @{first}, @{second} and @{third} respectively.
 -- @constructorfct wibox.layout.align.vertical
--- @tparam[opt] widget top Widget to be put to the top.
--- @tparam[opt] widget middle Widget to be put to the middle.
--- @tparam[opt] widget bottom Widget to be put to the right.
+-- @tparam[opt] widget top Widget to be put in slot one.
+-- @tparam[opt] widget middle Widget to be put in slot two.
+-- @tparam[opt] widget bottom Widget to be put in slot three.
 function align.vertical(top, middle, bottom)
     local ret = get_layout("y", top, middle, bottom)
 
