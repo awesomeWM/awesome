@@ -1,20 +1,20 @@
 ---------------------------------------------------------------------------
--- A widget to display image.
+-- A widget to display an image.
 --
--- The `wibox.widget.imagebox` is part of the Awesome WM's wiboxes system
+-- The `wibox.widget.imagebox` is part of the Awesome WM's widget system
 -- (see @{03-declarative-layout.md}).
 --
 -- This widget displays an image. The image can be a file,
 -- a cairo image surface, or an rsvg handle object (see the
 -- [image property](#image)).
 --
--- Use a `wibox.widget.imagebox`
+-- Examples using a `wibox.widget.imagebox`:
 -- ---
 --
 -- @DOC_wibox_widget_defaults_imagebox_EXAMPLE@
 --
 -- Alternatively, you can declare the `imagebox` widget using the
--- declarative pattern (Both codes are strictly equivalent):
+-- declarative pattern (both variants are strictly equivalent):
 --
 -- @DOC_wibox_widget_declarative-pattern_imagebox_EXAMPLE@
 --
@@ -219,15 +219,14 @@ end
 --
 -- It can can be any of the following:
 --
--- * A `string` : Interpreted as the path to an image file,
--- * A cairo image surface : Directly used as is,
--- * An rsvg handle object : Directly used as is,
--- * `nil` : Unset the image.
+-- * A `string`: Interpreted as a path to an image file
+-- * A cairo image surface: Directly used as-is
+-- * A librsvg handle object: Directly used as-is
+-- * `nil`: Unset the image.
 --
 -- @property image
 -- @tparam image image The image to render.
 -- @propemits false false
--- @see set_image
 
 --- Set the `imagebox` image.
 --
@@ -281,8 +280,9 @@ function imagebox:set_image(image)
 end
 
 --- Set a clip shape for this imagebox.
--- A clip shape define an area where the content is displayed and one where it
--- is trimmed.
+--
+-- A clip shape defines an area and dimension to which the content should be
+-- trimmed.
 --
 -- @DOC_wibox_widget_imagebox_clip_shape_EXAMPLE@
 --
@@ -290,13 +290,13 @@ end
 -- @tparam function|gears.shape clip_shape A `gears.shape` compatible shape function.
 -- @propemits true false
 -- @see gears.shape
--- @see set_clip_shape
 
 --- Set a clip shape for this imagebox.
--- A clip shape define an area where the content is displayed and one where it
--- is trimmed.
 --
--- Any other parameters will be passed to the clip shape function.
+-- A clip shape defines an area and dimensions to which the content should be
+-- trimmed.
+--
+-- Additional parameters will be passed to the clip shape function.
 --
 -- @tparam function|gears.shape clip_shape A `gears_shape` compatible shape function.
 -- @method set_clip_shape
@@ -330,35 +330,38 @@ end
 
 --- Set the horizontal fit policy.
 --
--- Values are:
+-- Valid values are:
 --
---  * **auto**: Honor the `resize` varible and preserve the aspect ratio (default).
---  * **none**: Do not resize at all.
---  * **fit**: Resize to the widget width.
+--  * `"auto"`: Honor the `resize` variable and preserve the aspect ratio.
+--   This is the default behaviour.
+--  * `"none"`: Do not resize at all.
+--  * `"fit"`: Resize to the widget width.
 --
 -- Here is the result for a 22x32 image:
 --
 -- @DOC_wibox_widget_imagebox_horizontal_fit_policy_EXAMPLE@
 --
---  @property horizontal_fit_policy
---  @tparam[opt=auto] string horizontal_fit_policy
---  @propemits true false
---  @see vertical_fit_policy
---  @see resize
+-- @property horizontal_fit_policy
+-- @tparam[opt="auto"] string horizontal_fit_policy
+-- @propemits true false
+-- @see vertical_fit_policy
+-- @see resize
 
 --- Set the vertical fit policy.
--- Values are:
 --
---  * **auto**: Honor the `resize` varible and preserve the aspect ratio (default).
---  * **none**: Do not resize at all.
---  * **fit**: Resize to the widget height.
+-- Valid values are:
+--
+--  * `"auto"`: Honor the `resize` varible and preserve the aspect ratio.
+--   This is the default behaviour.
+--  * `"none"`: Do not resize at all.
+--  * `"fit"`: Resize to the widget height.
 --
 -- Here is the result for a 32x22 image:
 --
 -- @DOC_wibox_widget_imagebox_vertical_fit_policy_EXAMPLE@
 --
 -- @property vertical_fit_policy
--- @tparam[opt=auto] string horizontal_fit_policy
+-- @tparam[opt="auto"] string horizontal_fit_policy
 -- @propemits true false
 -- @see horizontal_fit_policy
 -- @see resize
@@ -368,14 +371,14 @@ end
 --
 -- Possible values are:
 --
--- * *top*
--- * *center* (default)
--- * *bottom*
+-- * `"top"`
+-- * `"center"` (default)
+-- * `"bottom"`
 --
 -- @DOC_wibox_widget_imagebox_valign_EXAMPLE@
 --
 -- @property valign
--- @tparam string avlign
+-- @tparam[opt="center"] string valign
 -- @propemits true false
 -- @see wibox.container.place
 -- @see halign
@@ -384,14 +387,14 @@ end
 --
 -- Possible values are:
 --
--- * *left*
--- * *center* (default)
--- * *right*
+-- * `"left"`
+-- * `"center"` (default)
+-- * `"right"`
 --
 -- @DOC_wibox_widget_imagebox_halign_EXAMPLE@
 --
 -- @property halign
--- @tparam string halign
+-- @tparam[opt="center"] string halign
 -- @propemits true false
 -- @see wibox.container.place
 -- @see valign
@@ -399,8 +402,9 @@ end
 --- The maximum scaling factor.
 --
 -- If an image is scaled too much, it gets very blurry. This
--- property allows to limit the scaling. Use the `valign` and
--- `halign` to control how the image will be aligned.
+-- property allows to limit the scaling.
+-- Use the properties `valign` and `halign` to control how the image will be
+-- aligned.
 --
 -- In the example below, the original size is 22x22
 --
@@ -432,13 +436,15 @@ end
 -- <tr><td>bilinear</td><td>Linear interpolation in two dimensions</td></tr>
 --</table>
 --
--- The image used in the example below has a resolution of 32x22 and is intentionally
--- blocky to highlight the difference. It is zoomed by a factor of 3.
+-- The image used in the example below has a resolution of 32x22 and is
+-- intentionally blocky to highlight the difference.
+-- It is zoomed by a factor of 3.
 --
 -- @DOC_wibox_widget_imagebox_scaling_quality_EXAMPLE@
 --
 -- @property scaling_quality
--- @tparam string scaling_quality Either `fast`, `good`, `best`, `nearest` or `bilinear`.
+-- @tparam string scaling_quality Either `"fast"`, `"good"`, `"best"`,
+--   `"nearest"` or `"bilinear"`.
 -- @propemits true false
 -- @see resize
 -- @see horizontal_fit_policy
