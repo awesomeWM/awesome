@@ -1,24 +1,25 @@
---- Set a widget at a specific index, replace the current one.
+--- Set a widget at a specific index, replacing the current one.
 --
 -- @tparam number index A widget or a widget index
--- @tparam widget widget2 The widget to take the place of the first one
--- @treturn boolean If the operation is successful
+-- @tparam widget widget2 The widget to replace the previous one with
+-- @treturn boolean Returns `true` if the widget was replaced successfully,
+--   `false` otherwise.
 -- @method set
 -- @emits widget::replaced
 -- @emitstparam widget::replaced widget self The layout.
--- @emitstparam widget::replaced widget widget index The inserted widget.
+-- @emitstparam widget::replaced widget widget The inserted widget.
 -- @emitstparam widget::replaced widget previous The previous widget.
 -- @emitstparam widget::replaced number index The replaced index.
 -- @interface layout
 
 --- Replace the first instance of `widget` in the layout with `widget2`.
 --
--- **Signal:** widget::replaced The argument is the new widget and the old one
--- and the index.
 -- @tparam widget widget The widget to replace
 -- @tparam widget widget2 The widget to replace `widget` with
--- @tparam[opt=false] boolean recursive Dig in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
+-- @tparam[opt=false] boolean recursive Recurse into all compatible layouts to
+--   find the widget.
+-- @treturn boolean Returns `true` if the widget was replaced successfully,
+--   `false` otherwise.
 -- @method replace_widget
 -- @emits widget::replaced
 -- @emitstparam widget::replaced widget self The layout.
@@ -31,35 +32,44 @@
 --
 -- @tparam number index1 The first widget index
 -- @tparam number index2 The second widget index
--- @treturn boolean If the operation is successful
+-- @treturn boolean Returns `true` if the widget was replaced successfully,
+--   `false` otherwise.
 -- @method swap
 -- @emits widget::swapped
 -- @emitstparam widget::swapped widget self The layout.
--- @emitstparam widget::swapped widget widget1 index The first widget.
--- @emitstparam widget::swapped widget widget2 index The second widget.
+-- @emitstparam widget::swapped widget widget1 The first widget.
+-- @emitstparam widget::swapped widget widget2 The second widget.
 -- @emitstparam widget::swapped number index1 The first index.
 -- @emitstparam widget::swapped number index1 The second index.
 -- @interface layout
 
 --- Swap 2 widgets in a layout.
--- If widget1 is present multiple time, only the first instance is swapped
--- **Signal:** widget::swapped The arguments are both widgets and both (new) indexes.
--- if the layouts not the same, then only `widget::replaced` will be emitted.
+--
+-- If `widget1` is present multiple time, only the first instance is swapped.
+--
+-- Calls `set` internally, so the signal `widget::replaced` is emitted for both
+-- widgets as well.
+--
 -- @tparam widget widget1 The first widget
 -- @tparam widget widget2 The second widget
--- @tparam[opt=false] boolean recursive Dig in all compatible layouts to find the widget.
--- @treturn boolean If the operation is successful
+-- @tparam[opt=false] boolean recursive Recurse into all compatible layouts to
+--   find the widget.
+-- @treturn boolean Returns `true` if the widget was replaced successfully,
+--   `false` otherwise.
 -- @method swap_widgets
 -- @emits widget::swapped
 -- @emitstparam widget::swapped widget self The layout.
--- @emitstparam widget::swapped widget widget1 index The first widget.
--- @emitstparam widget::swapped widget widget2 index The second widget.
+-- @emitstparam widget::swapped widget widget1 The first widget.
+-- @emitstparam widget::swapped widget widget2 The second widget.
 -- @emitstparam widget::swapped number index1 The first index.
 -- @emitstparam widget::swapped number index1 The second index.
 -- @interface layout
+-- @see set
 
 --- Reset the layout. This removes all widgets from the layout.
 -- @method reset
 -- @emits widget::reset
 -- @emitstparam widget::reset widget self The layout.
 -- @interface layout
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
