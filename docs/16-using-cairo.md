@@ -147,7 +147,7 @@ some examples. Here is the most simple example you can get:
     local cr  = cairo.Context(img)
 
     -- Set a red source
-    cr:set_source(1, 0, 0)
+    cr:set_source_rgb(1, 0, 0)
     -- Alternative:
     cr:set_source(gears.color("#ff0000"))
 

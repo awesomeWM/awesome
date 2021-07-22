@@ -77,7 +77,7 @@
 
 #include <xcb/xcb_atom.h>
 #include <xcb/xcb_aux.h>
-#include "xkb_utf32_to_keysym.c"
+#include "xkb_utf32_to_keysym_compat.c"
 
 #include <unistd.h> /* for gethostname() */
 
@@ -489,7 +489,7 @@ luaA_get_key_name(lua_State *L)
         keysym = keysyms[0];
     }
     else if ((ucs = one_utf8_to_utf32(input, length)) > 0) //syntax #2
-        keysym = xkb_utf32_to_keysym(ucs);
+        keysym = xkb_utf32_to_keysym_compat(ucs);
     else //syntax #3
         keysym = xkb_keysym_from_name(input, XKB_KEYSYM_NO_FLAGS);
 

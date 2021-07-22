@@ -39,16 +39,18 @@ if not rawget(screen, "no_outline") then
     for s in screen do
         cr:save()
         -- Draw the screen outline
-        cr:set_source(color("#00000044"))
-        cr:set_line_width(1.5)
-        cr:set_dash({10,4},1)
-        cr:rectangle(s.geometry.x+0.75,s.geometry.y+0.75,s.geometry.width-1.5,s.geometry.height-1.5)
-        cr:stroke()
+        if s._no_outline ~= true then
+            cr:set_source(color("#00000044"))
+            cr:set_line_width(1.5)
+            cr:set_dash({10,4},1)
+            cr:rectangle(s.geometry.x+0.75,s.geometry.y+0.75,s.geometry.width-1.5,s.geometry.height-1.5)
+            cr:stroke()
 
-        -- Draw the workarea outline
-        cr:set_source(color("#00000033"))
-        cr:rectangle(s.workarea.x,s.workarea.y,s.workarea.width,s.workarea.height)
-        cr:stroke()
+            -- Draw the workarea outline
+            cr:set_source(color("#00000033"))
+            cr:rectangle(s.workarea.x,s.workarea.y,s.workarea.width,s.workarea.height)
+            cr:stroke()
+        end
 
         -- Draw the padding outline
         --TODO
@@ -67,7 +69,7 @@ local rect = {x1 = 0 ,y1 = 0 , x2 = 0 , y2 = 0}
 for _, obj in ipairs {drawin, client} do
     for _, d in ipairs(obj.get()) do
         local w = d.get_wibox and d:get_wibox() or d
-        if w and w.geometry then
+        if w and w.geometry and w.visible then
             local geo = w:geometry()
             rect.x1 = math.min(rect.x1, geo.x                                       )
             rect.y1 = math.min(rect.y1, geo.y                                       )
@@ -97,6 +99,7 @@ end
 local function client_widget(c, col, label)
     local geo = c:geometry()
     local bw = c.border_width or beautiful.border_width or 0
+    local bc = c.border_color or beautiful.border_color
 
     local l = wibox.layout.align.vertical()
     l.fill_space = true
@@ -142,7 +145,7 @@ local function client_widget(c, col, label)
             layout = wibox.layout.stack
         },
         border_width = bw,
-        border_color = beautiful.border_color,
+        border_color = bc,
         shape_clip   = true,
         fg           = beautiful.fg_normal or "#000000",
         bg           = col,
@@ -177,7 +180,7 @@ end
 
 for _, d in ipairs(drawin.get()) do
     local w = d.get_wibox and d:get_wibox() or nil
-    if w then
+    if w and w.visible then
         local geo = w:geometry()
         total_area:add_at(w:to_widget(), {x = geo.x, y = geo.y})
     end

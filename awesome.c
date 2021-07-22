@@ -619,13 +619,14 @@ main(int argc, char **argv)
         bool success = true;
         /* Get the first config that will be tried */
         const char *config = luaA_find_config(&xdg, confpath, true_config_callback);
+        fprintf(stdout, "Checking config '%s'... ", config);
 
         /* Try to parse it */
         lua_State *L = luaL_newstate();
         if(luaL_loadfile(L, config))
         {
             const char *err = lua_tostring(L, -1);
-            fprintf(stderr, "%s\n", err);
+            fprintf(stdout, "\nERROR: %s\n", err);
             success = false;
         }
         p_delete(&config);
@@ -633,19 +634,18 @@ main(int argc, char **argv)
 
         if(!success)
         {
-            fprintf(stderr, "✘ Configuration file syntax error.\n");
             return EXIT_FAILURE;
         }
         else
         {
-            fprintf(stderr, "✔ Configuration file syntax OK.\n");
+            fprintf(stdout, "OK\n");
             return EXIT_SUCCESS;
         }
     }
 
     /* Parse `rc.lua` to see if it has an AwesomeWM modeline */
     if (!(default_init_flags & INIT_FLAG_FORCE_CMD_ARGS))
-        options_init_config(awesome_argv[0], confpath, &default_init_flags, &searchpath);
+        options_init_config(&xdg, awesome_argv[0], confpath, &default_init_flags, &searchpath);
 
     /* Setup pipe for SIGCHLD processing */
     {

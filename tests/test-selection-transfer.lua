@@ -3,6 +3,11 @@
 local runner = require("_runner")
 local spawn = require("awful.spawn")
 
+local lua_executable = os.getenv("LUA")
+if lua_executable == nil or lua_executable == "" then
+    lua_executable = "lua"
+end
+
 -- Assemble data for the large transfer that will be done later
 local large_transfer_piece = "a"
 for _ = 1, 25 do
@@ -86,7 +91,7 @@ runner.run_steps({
             end
         end)
         awesome.sync()
-        spawn.with_line_callback({ "lua", "-e", check_targets_and_text },
+        spawn.with_line_callback({ lua_executable, "-e", check_targets_and_text },
             { stdout = function(line)
                 assert(line == "done", "Unexpected line: " .. line)
                 continue = true
@@ -124,7 +129,7 @@ runner.run_steps({
             end
         end)
         awesome.sync()
-        spawn.with_line_callback({ "lua", "-e", check_targets_and_text },
+        spawn.with_line_callback({ lua_executable, "-e", check_targets_and_text },
             { stdout = function(line)
                 assert(line == "done", "Unexpected line: " .. line)
                 continue = true
@@ -161,7 +166,7 @@ runner.run_steps({
             end
         end)
         awesome.sync()
-        spawn.with_line_callback({ "lua", "-e", check_large_transfer },
+        spawn.with_line_callback({ lua_executable, "-e", check_large_transfer },
             { stdout = function(line)
                 assert(line == "done", "Unexpected line: " .. line)
                 continue = true
@@ -177,7 +182,7 @@ runner.run_steps({
         -- Now test that :release() works
         selection_object:release()
         awesome.sync()
-        spawn.with_line_callback({ "lua", "-e", check_empty_selection },
+        spawn.with_line_callback({ lua_executable, "-e", check_empty_selection },
             { stdout = function(line)
                 assert(line == "done", "Unexpected line: " .. line)
                 continue = true
@@ -196,7 +201,7 @@ runner.run_steps({
             "Failed to acquire the clipboard selection")
         selection_object:connect_signal("release", function() selection_released = true end)
         awesome.sync()
-        spawn.with_line_callback({ "lua", "-e", acquire_and_clear_clipboard },
+        spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
             { exit = function() continue = true end })
         return true
     end,

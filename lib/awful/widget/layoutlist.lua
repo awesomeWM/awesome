@@ -21,6 +21,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2010, 2018 Emmanuel Lepage Vallee
 -- @widgetmod awful.widget.layoutlist
+-- @supermodule wibox.widget.base
 ----------------------------------------------------------------------------
 
 local capi     = {screen = screen, tag = tag}
@@ -443,9 +444,5 @@ local function new(_, args)
 
     return ret
 end
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(module, {__call = new})

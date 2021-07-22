@@ -412,14 +412,14 @@ if ("${TEST_MANUAL_SCREENS}" MATCHES "1")
 endif()
 
 add_custom_target(check-integration
-    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${TESTS_RUN_ENV} ./tests/run.sh \$\${TEST_RUN_ARGS:--W}
+    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' LUA='${LUA_EXECUTABLE}' ${TESTS_RUN_ENV} ./tests/run.sh \$\${TEST_RUN_ARGS:--W}
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Running integration tests"
     DEPENDS ${PROJECT_AWE_NAME}
     USES_TERMINAL)
 add_dependencies(check-integration test-gravity)
 add_custom_target(check-themes
-    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' ${TESTS_RUN_ENV} ./tests/themes/run.sh
+    ${CMAKE_COMMAND} -E env CMAKE_BINARY_DIR='${CMAKE_BINARY_DIR}' LUA='${LUA_EXECUTABLE}' ${TESTS_RUN_ENV} ./tests/themes/run.sh
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Testing themes"
     USES_TERMINAL
@@ -427,7 +427,7 @@ add_custom_target(check-themes
 add_dependencies(check check-themes)
 
 add_custom_target(check-requires
-    lua "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
+    ${LUA_EXECUTABLE} "${CMAKE_SOURCE_DIR}/build-utils/check_for_invalid_requires.lua"
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
     COMMENT "Checking use of require()"
     USES_TERMINAL

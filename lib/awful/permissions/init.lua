@@ -542,7 +542,7 @@ end, "mouse_enter")
 -- depending if the client is tiled, floating, maximized and then from its state
 -- (urgent, new, active, normal)
 --
--- @signalhandler awful.ewmh.update_border
+-- @signalhandler awful.permissions.update_border
 -- @usebeautiful beautiful.border_color_marked
 -- @usebeautiful beautiful.border_color_active
 -- @usebeautiful beautiful.border_color_normal

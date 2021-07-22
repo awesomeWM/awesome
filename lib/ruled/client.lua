@@ -678,7 +678,7 @@ return setmetatable(module, {
     __newindex = function(_, k, v)
         if k == "rules" then
             gdebug.deprecate(
-                "Use ruled.client.append_rules instead awful.rules.rules",
+                "Use ruled.client.append_rules instead of setting awful.rules.rules directly",
                 {deprecated_in=5}
             )
 
@@ -694,7 +694,7 @@ return setmetatable(module, {
                 crules:append_rules("awful.rules", v)
             end
         else
-            rawset(k, v)
+            rawset(module, k, v)
         end
     end,
     __index = function(_, k)

@@ -19,7 +19,6 @@ local glib = lgi.GLib
 local w_textbox = require("wibox.widget.textbox")
 local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
-local gstring = require("gears.string")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local utils = {}
@@ -410,6 +409,8 @@ function utils.parse_dir(dir_path, callback)
     end)
 end
 
+-- luacov: disable
+
 function utils.compute_textbox_width(textbox, s)
     gdebug.deprecate("Use 'width, _ = textbox:get_preferred_size(s)' directly.", {deprecated_in=4})
     s = screen[s or mouse.screen]
@@ -417,15 +418,12 @@ function utils.compute_textbox_width(textbox, s)
     return w
 end
 
---- Compute text width.
--- @tparam str text Text.
--- @tparam number|screen s Screen
--- @treturn int Text width.
--- @staticfct menubar.utils.compute_text_width
-function utils.compute_text_width(text, s)
-    local w, _ = w_textbox(gstring.xml_escape(text)):get_preferred_size(s)
-    return w
+function utils.compute_text_width(text, s, font)
+    gdebug.deprecate("Use 'width = textbox.get_markup_geometry(text, s, font)['width']'.", {deprecated_in=4})
+    return w_textbox.get_markup_geometry(text, s, font)['width']
 end
+
+-- luacov: enable
 
 return utils
 

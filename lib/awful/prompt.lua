@@ -114,7 +114,6 @@ local io = io
 local table = table
 local math = math
 local ipairs = ipairs
-local pcall = pcall
 local capi =
 {
     selection = selection
@@ -258,6 +257,11 @@ local function history_add(id, command)
 end
 
 
+local function have_multibyte_char_at(text, position)
+    return text:sub(position, position):wlen() == -1
+end
+
+
 --- Draw the prompt text with a cursor.
 -- @tparam table args The table of arguments.
 -- @field text The text.
@@ -285,10 +289,14 @@ local function prompt_text_with_cursor(args)
         text_start = gstring.xml_escape(text)
         text_end = ""
     else
-        char = gstring.xml_escape(text:sub(args.cursor_pos, args.cursor_pos))
+        local offset = 0
+        if have_multibyte_char_at(text, args.cursor_pos) then
+            offset = 1
+        end
+        char = gstring.xml_escape(text:sub(args.cursor_pos, args.cursor_pos + offset))
         spacer = " "
         text_start = gstring.xml_escape(text:sub(1, args.cursor_pos - 1))
-        text_end = gstring.xml_escape(text:sub(args.cursor_pos + 1))
+        text_end = gstring.xml_escape(text:sub(args.cursor_pos + 1 + offset))
     end
 
     local cursor_color = gcolor.ensure_pango_color(args.cursor_color)
@@ -544,9 +552,9 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
     local function update()
         textbox:set_font(font)
         textbox:set_markup(prompt_text_with_cursor{
-                               text = command, text_color = inv_col, cursor_color = cur_col,
-                               cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
-                               prompt = prettyprompt, highlighter =  highlighter })
+           text = command, text_color = inv_col, cursor_color = cur_col,
+           cursor_pos = cur_pos, cursor_ul = cur_ul, selectall = selectall,
+           prompt = prettyprompt, highlighter =  highlighter })
     end
 
     grabber = keygrabber.run(
@@ -663,6 +671,9 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
             elseif key == "b" then
                 if cur_pos > 1 then
                     cur_pos = cur_pos - 1
+                    if have_multibyte_char_at(command, cur_pos) then
+                        cur_pos = cur_pos - 1
+                    end
                 end
             elseif key == "d" then
                 if cur_pos <= #command then
@@ -711,12 +722,20 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                 end
             elseif key == "f" then
                 if cur_pos <= #command then
-                    cur_pos = cur_pos + 1
+                    if have_multibyte_char_at(command, cur_pos) then
+                        cur_pos = cur_pos + 2
+                    else
+                        cur_pos = cur_pos + 1
+                    end
                 end
             elseif key == "h" then
                 if cur_pos > 1 then
-                    command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
-                    cur_pos = cur_pos - 1
+                    local offset = 0
+                    if have_multibyte_char_at(command, cur_pos - 1) then
+                        offset = 1
+                    end
+                    command = command:sub(1, cur_pos - 2 - offset) .. command:sub(cur_pos)
+                    cur_pos = cur_pos - 1 - offset
                 end
             elseif key == "k" then
                 command = command:sub(1, cur_pos - 1)
@@ -844,8 +863,12 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                 cur_pos = #command + 1
             elseif key == "BackSpace" then
                 if cur_pos > 1 then
-                    command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
-                    cur_pos = cur_pos - 1
+                    local offset = 0
+                    if have_multibyte_char_at(command, cur_pos - 1) then
+                        offset = 1
+                    end
+                    command = command:sub(1, cur_pos - 2 - offset) .. command:sub(cur_pos)
+                    cur_pos = cur_pos - 1 - offset
                 end
             elseif key == "Delete" then
                 command = command:sub(1, cur_pos - 1) .. command:sub(cur_pos + 1)
@@ -889,22 +912,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
             selectall = nil
         end
 
-        local success = pcall(update)
-        while not success do
-            -- TODO UGLY HACK TODO
-            -- Setting the text failed. Most likely reason is that the user
-            -- entered a multibyte character and pressed backspace which only
-            -- removed the last byte. Let's remove another byte.
-            if cur_pos <= 1 then
-                -- No text left?!
-                break
-            end
-
-            command = command:sub(1, cur_pos - 2) .. command:sub(cur_pos)
-            cur_pos = cur_pos - 1
-            success = pcall(update)
-        end
-
+        update()
         if changed_callback then
             changed_callback(command)
         end

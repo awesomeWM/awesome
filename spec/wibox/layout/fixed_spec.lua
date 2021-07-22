@@ -39,48 +39,149 @@ describe("wibox.layout.fixed", function()
             layout:add(first, second, third)
         end)
 
-        describe("with enough space", function()
-            it("fit", function()
-                assert.widget_fit(layout, { 100, 100 }, { 15, 35 })
+        describe("without spacing", function()
+
+            describe("with enough space", function()
+                it("fit", function()
+                    assert.widget_fit(layout, { 100, 100 }, { 15, 35 })
+                end)
+
+                it("layout", function()
+                    assert.widget_layout(layout, { 100, 100 }, {
+                        p(first,  0,  0, 100, 10),
+                        p(second, 0, 10, 100, 15),
+                        p(third,  0, 25, 100, 10),
+                    })
+                end)
             end)
 
-            it("layout", function()
-                assert.widget_layout(layout, { 100, 100 }, {
-                    p(first,  0,  0, 100, 10),
-                    p(second, 0, 10, 100, 15),
-                    p(third,  0, 25, 100, 10),
-                })
+            describe("without enough height", function()
+                it("fit", function()
+                    assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
+                end)
+
+                it("layout", function()
+                    assert.widget_layout(layout, { 5, 100 }, {
+                        p(first,  0,  0, 5, 10),
+                        p(second, 0, 10, 5, 15),
+                        p(third,  0, 25, 5, 10),
+                    })
+                end)
+            end)
+
+            describe("without enough width", function()
+                it("fit", function()
+                    assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
+                end)
+
+                it("layout", function()
+                    assert.widget_layout(layout, { 100, 20 }, {
+                        p(first,  0,  0, 100, 10),
+                        p(second, 0, 10, 100, 10),
+                        p(third, 0, 20, 100, 0),
+                    })
+                end)
             end)
         end)
 
-        describe("without enough height", function()
-            it("fit", function()
-                assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
+        describe("with spacing", function()
+            local spacing_widget = utils.widget_stub(10, 10)
+
+            before_each(function()
+                layout:set_spacing_widget(spacing_widget)
             end)
 
-            it("layout", function()
-                assert.widget_layout(layout, { 5, 100 }, {
-                    p(first,  0,  0, 5, 10),
-                    p(second, 0, 10, 5, 15),
-                    p(third,  0, 25, 5, 10),
-                })
-            end)
-        end)
+            describe(", positive spacing", function()
+                before_each(function()
+                    layout:set_spacing(10)
+                end)
 
-        describe("without enough width", function()
-            it("fit", function()
-                assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
-            end)
+                describe("and with enough space", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 100 }, { 15, 55 })
+                    end)
 
-            it("layout", function()
-                assert.widget_layout(layout, { 100, 20 }, {
-                    p(first,  0,  0, 100, 10),
-                    p(second, 0, 10, 100, 10),
-                    p(third,  0, 20, 100,  0),
-                })
-            end)
-        end)
-    end)
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 100 }, {
+                            p(first,  0, 0, 100, 10),
+                            p(spacing_widget,  0, 10, 100, 10),
+                            p(second, 0, 20, 100, 15),
+                            p(spacing_widget,  0, 35, 100, 10),
+                            p(third, 0, 45, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("and without enough space", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 45 }, { 15, 35 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 35 }, {
+                            p(first,  0, 0, 100, 10),
+                            p(spacing_widget,  0, 10, 100, 10),
+                            p(second, 0, 20, 100, 15),
+                            p(third, 0, 35, 100, 0),
+                        })
+                    end)
+                end)
+            end) -- , positive spacing
+
+            describe(", negative spacing", function()
+                before_each(function()
+                    layout:set_spacing(-5)
+                end)
+
+                describe("and with more than needed space", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 100 }, { 15, 25 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 100 }, {
+                            p(first,  0, 0, 100, 10),
+                            p(spacing_widget,  0, 5, 100, 5),
+                            p(second, 0, 5, 100, 15),
+                            p(spacing_widget,  0, 15, 100, 5),
+                            p(third, 0, 15, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("and with exactly the needed space", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 15, 25 }, { 15, 25 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 15, 25 }, {
+                            p(first,  0, 0, 15, 10),
+                            p(spacing_widget,  0, 5, 15, 5),
+                            p(second, 0, 5, 15, 15),
+                            p(spacing_widget,  0, 15, 15, 5),
+                            p(third, 0, 15, 15, 10),
+                        })
+                    end)
+                end)
+
+
+                describe("and without enough space", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 15, 20 }, { 15, 20 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 15, 20 }, {
+                            p(first,  0, 0, 15, 10),
+                            p(spacing_widget,  0, 5, 15, 5),
+                            p(second, 0, 5, 15, 15),
+                        })
+                    end)
+                end)
+            end) -- , negative spacing
+        end) -- with spacing
+    end) -- with widgets
 
     describe("emitting signals", function()
         local layout_changed

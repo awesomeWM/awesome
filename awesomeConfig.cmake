@@ -33,6 +33,7 @@ macro(a_find_program var prg req)
     endif()
 endmacro()
 
+a_find_program(LUA_EXECUTABLE lua TRUE)
 a_find_program(GIT_EXECUTABLE git FALSE)
 # programs needed for man pages
 a_find_program(ASCIIDOCTOR_EXECUTABLE asciidoctor FALSE)
@@ -70,6 +71,14 @@ if (NOT LUA_FOUND)
         "You might want to hint it using the LUA_DIR environment variable, "
         "or set the LUA_INCLUDE_DIR / LUA_LIBRARY CMake variables.")
 endif()
+
+set(LUA_FULL_VERSION "${LUA_VERSION_MAJOR}.${LUA_VERSION_MINOR}.${LUA_VERSION_PATCH}")
+# 5.1 <= LUA_VERSION < 5.4
+if(NOT ((LUA_FULL_VERSION VERSION_EQUAL 5.1.0 OR LUA_FULL_VERSION VERSION_GREATER 5.1.0) AND LUA_FULL_VERSION VERSION_LESS 5.4.0))
+    message(FATAL_ERROR "Awesome only supports Lua versions 5.1-5.3, please refer to"
+                        "https://awesomewm.org/apidoc/documentation/10-building-and-testing.md.html#Building")
+endif()
+
 # }}}
 
 # {{{ Check if documentation can be build
@@ -374,7 +383,7 @@ add_custom_command(TARGET setup_directories
 
 add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/06-appearance.md
-        COMMAND lua ${SOURCE_DIR}/docs/06-appearance.md.lua
+        COMMAND ${LUA_EXECUTABLE} ${SOURCE_DIR}/docs/06-appearance.md.lua
         ${BUILD_DIR}/docs/06-appearance.md
         DEPENDS
             lgi-check-run
@@ -385,7 +394,7 @@ add_custom_command(
 foreach(RULE_TYPE client tag screen notification)
     add_custom_command(
         OUTPUT ${BUILD_DIR}/docs/common/${RULE_TYPE}_rules_index.ldoc
-        COMMAND lua ${SOURCE_DIR}/docs/build_rules_index.lua
+        COMMAND ${LUA_EXECUTABLE} ${SOURCE_DIR}/docs/build_rules_index.lua
             ${BUILD_DIR}/docs/common/${RULE_TYPE}_rules_index.ldoc
             ${RULE_TYPE}
 
@@ -405,7 +414,7 @@ endforeach()
 add_custom_command(
         OUTPUT ${BUILD_DIR}/awesomerc.lua ${BUILD_DIR}/docs/05-awesomerc.md
             ${BUILD_DIR}/script_files/rc.lua
-        COMMAND lua ${SOURCE_DIR}/docs/05-awesomerc.md.lua
+        COMMAND ${LUA_EXECUTABLE} ${SOURCE_DIR}/docs/05-awesomerc.md.lua
         ${BUILD_DIR}/docs/05-awesomerc.md ${SOURCE_DIR}/awesomerc.lua
         ${BUILD_DIR}/awesomerc.lua
         ${BUILD_DIR}/script_files/rc.lua
@@ -414,7 +423,7 @@ add_custom_command(
 
 add_custom_command(
         OUTPUT ${BUILD_DIR}/script_files/theme.lua
-        COMMAND lua ${SOURCE_DIR}/docs/sample_theme.lua ${BUILD_DIR}/script_files/
+        COMMAND ${LUA_EXECUTABLE} ${SOURCE_DIR}/docs/sample_theme.lua ${BUILD_DIR}/script_files/
 )
 
 # Create a target for the auto-generated awesomerc.lua and other files

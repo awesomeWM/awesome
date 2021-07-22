@@ -3,6 +3,11 @@
 local runner = require("_runner")
 local spawn = require("awful.spawn")
 
+local lua_executable = os.getenv("LUA")
+if lua_executable == nil or lua_executable == "" then
+    lua_executable = "lua"
+end
+
 local spawns_done = 0
 local async_spawns_done = 0
 local exit_yay, exit_snd = nil, nil
@@ -11,7 +16,7 @@ local exit_yay, exit_snd = nil, nil
 -- * spawn with startup notification is covered by test-spawn-snid.lua
 
 local tiny_client = function(class)
-    return {"lua", "-e", [[
+    return { lua_executable, "-e", [[
 local lgi = require 'lgi'
 local Gtk = lgi.require('Gtk')
 local class = ']]..class..[['

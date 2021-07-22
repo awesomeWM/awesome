@@ -98,15 +98,18 @@ git commit -m "[relevant] $COMMIT_MSG"
 mv .git ../doc
 cd ../doc
 git add --all .
-git commit -m "[boilerplate] $COMMIT_MSG"
+BOILERPLATE_FAILED=0
+git commit -m "[boilerplate] $COMMIT_MSG" || export BOILERPLATE_FAILED=1
 
 # Reorder/swap commits, to have "relevant" after "boilerplate".
 # This makes it show up earlier in the Github interface etc.
-git tag _old
-git reset --hard HEAD~2
-git cherry-pick _old _old~1
-RELEVANT_REV="$(git rev-parse --short HEAD)"
-git tag -d _old
+if [  "$BOILERPLATE_FAILED" == "0" ]; then
+    git tag _old
+    git reset --hard HEAD~2
+    git cherry-pick _old _old~1
+    RELEVANT_REV="$(git rev-parse --short HEAD)"
+    git tag -d _old
+fi
 
 git checkout "$BRANCH"
 OLD_REV="$(git rev-parse --short HEAD)"

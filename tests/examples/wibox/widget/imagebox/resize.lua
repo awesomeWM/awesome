@@ -16,12 +16,19 @@ local function cell_centered_widget(widget)
 end
 
 local function build_ib(size, resize)
-    return cell_centered_widget({
-        resize = resize,
-        forced_width = size,
-        forced_height = size,
-        image  = beautiful.awesome_icon,
-        widget = wibox.widget.imagebox
+    return cell_centered_widget(wibox.widget {
+        {
+            resize = resize,
+            forced_height = size,
+            forced_width = size,
+            image  = beautiful.awesome_icon,
+            widget = wibox.widget.imagebox
+        },
+        forced_width  = size + 2,
+        forced_height = size + 2,
+        color         = beautiful.border_color,
+        margins       = 1,
+        widget        = wibox.container.margin
     })
 end
 

@@ -1,0 +1,28 @@
+--<table class='widget_list' border=1>
+-- <tr>
+--   <th align='center'>Format</th>
+--   <th align='center'>Description</th>
+-- </tr>
+--   <tr><td>%a</td><td>The abbreviated weekday name according to the current locale</td></tr>
+--   <tr><td>%A</td><td>the full weekday name according to the current locale</td></tr>
+--   <tr><td>%b</td><td>The abbreviated month name according to the current locale</td></tr>
+--   <tr><td>%B</td><td>The full month name according to the current locale</td></tr>
+--   <tr><td>%d</td><td>The day of the month as a decimal number (range 01 to 31)</td></tr>
+--   <tr><td>%e</td><td>The day of the month as a decimal number (range 1 to 31)</td></tr>
+--   <tr><td>%F</td><td>Equivalent to %Y-%m-%d (the ISO 8601 date format)</td></tr>
+--   <tr><td>%H</td><td>The hour as a decimal number using a 24-hour clock (range 00 to 23)</td></tr>
+--   <tr><td>%I</td><td>The hour as a decimal number using a 12-hour clock (range 01 to 12)</td></tr>
+--   <tr><td>%k</td><td>The hour (24-hour clock) as a decimal number (range 0 to 23); single digits are preceded by a blank</td></tr>
+--   <tr><td>%l</td><td>The hour (12-hour clock) as a decimal number (range 1 to 12); single digits are preceded by a blank</td></tr>
+--   <tr><td>%m</td><td>The month as a decimal number (range 01 to 12)</td></tr>
+--   <tr><td>%M</td><td>The minute as a decimal number (range 00 to 59)</td></tr>
+--   <tr><td>%p</td><td>Either "AM" or "PM" according to the given time value, or the corresponding strings for the current locale. Noon is treated as "PM" and midnight as "AM".</td></tr>
+--   <tr><td>%P</td><td>Like %p but lowercase: "am" or "pm" or a corresponding string for the current locale</td></tr>
+--   <tr><td>%r</td><td>The time in a.m. or p.m. notation</td></tr>
+--   <tr><td>%R</td><td>The time in 24-hour notation (%H:%M)</td></tr>
+--   <tr><td>%S</td><td>The second as a decimal number (range 00 to 60)</td></tr>
+--   <tr><td>%T</td><td>The time in 24-hour notation with seconds (%H:%M:%S)</td></tr>
+--   <tr><td>%y</td><td>The year as a decimal number without the century</td></tr>
+--   <tr><td>%Y</td><td>The year as a decimal number including the century</td></tr>
+--   <tr><td>%%</td><td>A literal % character</td></tr>
+-- </table>

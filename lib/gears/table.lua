@@ -39,27 +39,31 @@ function gtable.join(...)
     return ret
 end
 
---- Override elements in the first table by the one in the second.
+--- Override elements in the target table with values from the source table.
 --
 -- Note that this method doesn't copy entries found in `__index`.
+-- Nested tables are copied by reference and not recursed into.
 --
--- @tparam table t the table to be overriden
--- @tparam table set the table used to override members of `t`
--- @tparam[opt=false] bool raw Use rawset (avoid the metatable)
--- @treturn table t (for convenience)
+-- @tparam table target The target table. Values from `source` will be copied
+--   into this table.
+-- @tparam table source The source table. Its values will be copied into
+--   `target`.
+-- @tparam[opt=false] bool raw If `true`, values will be assigned with `rawset`.
+--   This will bypass metamethods on `target`.
+-- @treturn table The target table.
 -- @staticfct gears.table.crush
-function gtable.crush(t, set, raw)
+function gtable.crush(target, source, raw)
     if raw then
-        for k, v in pairs(set) do
-            rawset(t, k, v)
+        for k, v in pairs(source) do
+            rawset(target, k, v)
         end
     else
-        for k, v in pairs(set) do
-            t[k] = v
+        for k, v in pairs(source) do
+            target[k] = v
         end
     end
 
-    return t
+    return target
 end
 
 --- Pack all elements with an integer key into a new table.
@@ -149,7 +153,7 @@ function gtable.find_first_key(t, matcher, ordered)
 end
 
 
---- Get a sorted table with all integer keys from a table.
+--- Get a sorted table with all keys from a table.
 --
 -- @tparam table t The table for which the keys to get.
 -- @treturn table A table with keys.
@@ -163,6 +167,23 @@ function gtable.keys(t)
         return type(a) == type(b) and a < b or false
     end)
     return keys
+end
+
+--- Get the number of keys in a table, both integer and string indicies.
+--
+-- This is functionally equivalent, but faster than `#gears.table.keys(t)`.
+--
+-- @DOC_text_gears_table_count_keys_EXAMPLE@
+--
+-- @tparam table t The table for which to count the keys.
+-- @treturn number The number of keys in the table.
+-- @staticfct gears.table.count_keys
+function gtable.count_keys(t)
+    local count = 0
+    for _ in pairs(t) do
+        count = count + 1
+    end
+    return count
 end
 
 --- Filter a table's keys for certain content type.
@@ -208,7 +229,8 @@ end
 --- Clone a table.
 --
 -- @tparam table t The table to clone.
--- @tparam[opt=true] bool deep Create a deep clone?
+-- @tparam[opt=true] bool deep If `true`, recurse into nested tables to create
+--   a deep clone.
 -- @treturn table A clone of `t`.
 -- @staticfct gears.table.clone
 function gtable.clone(t, deep)
@@ -230,14 +252,16 @@ end
 -- `first_index` has to be specified.
 --
 -- @tparam table t The input table.
--- @param value A value from the table.
--- @tparam[opt=1] number step_size How many element forward (or backward) to pick.
--- @tparam[opt=nil] function filter An optional function. When it returns
---  `false`, the element are skipped until a match if found. It takes the value
---  as its sole parameter.
+-- @param value The start value. Must be an element of the input table `t`.
+-- @tparam[opt=1] number step_size The amount to increment the index by.
+--   When this is negative, the function will cycle through the table backwards.
+-- @tparam[opt=nil] function filter An optional filter function. It receives a
+--   value from the table as parameter and should return a boolean. If it
+--   returns `false`, the value is skipped and `cycle_value` tries the next one.
 -- @tparam[opt=1] number start_at Where to start the lookup from.
--- @return The value. If no element match, then `nil` is returned.
--- @treturn number|nil The element (if any) key.
+-- @return The next eligible value. If no value matches, `nil` is returned.
+-- @treturn number|nil If a value is found, this is its index within the input
+--   table.
 -- @staticfct gears.table.cycle_value
 function gtable.cycle_value(t, value, step_size, filter, start_at)
     local k = gtable.hasitem(t, value, true, start_at)
@@ -287,17 +311,23 @@ function gtable.iterate(t, filter, start)
     end
 end
 
---- Merge items from one table to another one.
+--- Merge items from the source table into the target table.
 --
--- @tparam table t The container table
--- @tparam table set The mixin table.
--- @treturn table (for convenience).
+-- Note that this only considers the array part of `source` (same semantics
+-- as `ipairs`).
+-- Nested tables are copied by reference and not recursed into.
+--
+-- @tparam table target The target table. Values from `source` will be copied
+--   into this table.
+-- @tparam table source The source table. Its values will be copied into
+--   `target`.
+-- @treturn table The target table.
 -- @staticfct gears.table.merge
-function gtable.merge(t, set)
-    for _, v in ipairs(set) do
-        table.insert(t, v)
+function gtable.merge(target, source)
+    for _, v in ipairs(source) do
+        table.insert(target, v)
     end
-    return t
+    return target
 end
 
 --- Update the `target` table with entries from the `new` table.
@@ -384,7 +414,7 @@ end
 
 --- Map a function to a table.
 --
--- The function is applied to each value on the table, returning a modified
+-- The function is applied to each value in the table, returning a modified
 -- table.
 --
 -- @tparam function f The function to be applied to each value in the table.
@@ -400,3 +430,5 @@ function gtable.map(f, tbl)
 end
 
 return gtable
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

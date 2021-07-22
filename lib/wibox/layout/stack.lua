@@ -12,6 +12,7 @@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @layoutmod wibox.layout.stack
+-- @supermodule wibox.layout.fixed
 ---------------------------------------------------------------------------
 
 local base  = require("wibox.widget.base" )
@@ -116,11 +117,11 @@ end
 -- @method raise
 -- @tparam number index the widget index to raise
 function stack:raise(index)
-    if (not index) or self._private.widgets[index] then return end
+    if (not index) or (not self._private.widgets[index]) then return end
 
     local w = self._private.widgets[index]
     table.remove(self._private.widgets, index)
-    table.insert(self._private.widgets, w)
+    table.insert(self._private.widgets, 1, w)
 
     self:emit_signal("widget::layout_changed")
 end
@@ -170,14 +171,22 @@ end
 
 function stack:set_horizontal_offset(value)
     self._private.h_offset = value
-    self:emit_signal("widget::horizontal_offset")
-    self:emit_signal("property::top_only", value)
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::horizontal_offset", value)
+end
+
+function stack:get_horizontal_offset()
+    return self._private.h_offset
 end
 
 function stack:set_vertical_offset(value)
     self._private.v_offset = value
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::vertical_offset", value)
+end
+
+function stack:get_vertical_offset()
+    return self._private.v_offset
 end
 
 --- Create a new stack layout.
@@ -196,15 +205,11 @@ local function new(...)
     return ret
 end
 
-function stack.mt:__call(_, ...)
+function stack.mt:__call(...)
     return new(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(stack, stack.mt)
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

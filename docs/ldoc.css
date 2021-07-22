@@ -482,3 +482,53 @@ pre .url { color: #272fc2; text-decoration: underline; }
     color: rgb(128, 128, 128);
     border-radius: 7px;
 }
+
+.index_guides div {
+    margin: 0 auto;
+    display: table;
+    margin-bottom: 10px;
+}
+
+.index_guides div a {
+    display: inline-block;
+    border: solid 1px #cccccc;
+    width: 200px;
+    margin-left: 10px;
+    margin-right: 10px;
+    text-align: center;
+    padding-top: 20px;
+    padding-bottom: 20px;
+}
+
+.index_guides div a:hover {
+    background-color: #99b3ec;
+}
+
+/* Inheritance diagram */
+.inheritance .inheritance__level {
+    list-style: none;
+}
+
+.inheritance .inheritance__level--root {
+    padding-left: 0;
+}
+
+.inheritance .inheritance__level__node::before {
+    content: "↳";
+}
+
+.inheritance .inheritance__level__node--root::before {
+    /* simulate the spacing of the arrow character */
+    content: "   ";
+    white-space: pre;
+}
+
+.extra-header {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+}
+
+.extra-header__section {
+    flex-grow: 1;
+}

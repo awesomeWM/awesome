@@ -839,7 +839,7 @@ static const struct codepair keysymtab[] = {
     { 0x20ac, 0x20ac }, /*                    EuroSign € EURO SIGN */
 };
 
-static xkb_keysym_t xkb_utf32_to_keysym(uint32_t ucs)
+static xkb_keysym_t xkb_utf32_to_keysym_compat(uint32_t ucs)
 {
     /* first check for Latin-1 characters (1:1 mapping) */
     if ((ucs >= 0x0020 && ucs <= 0x007e) ||

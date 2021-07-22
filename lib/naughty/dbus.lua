@@ -341,6 +341,8 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
             args._unique_sender = sender
 
             notification = nnotif(args)
+
+            notification:connect_signal("destroyed", function(_, r) args.destroy(r) end)
         end
 
         invocation:return_value(GLib.Variant("(u)", { notification.id }))

@@ -19,6 +19,7 @@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @popupmod awful.popup
+-- @supermodule wibox
 ---------------------------------------------------------------------------
 local wibox     = require( "wibox"           )
 local gtable    = require( "gears.table"     )

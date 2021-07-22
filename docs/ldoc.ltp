@@ -43,6 +43,80 @@
 # local html_space = function(s) return s:gsub(" ", "%%20") end
 # local no_underscores = function(s) return s:gsub("_", " ") end
 
+# --------- modules hierarchy -------------
+# local hierarchy = {}
+# local curr = module
+# while curr do
+#     hierarchy[#hierarchy + 1] = curr
+#     -- no need to do anything more if there is no explicite @supermodule
+#     if not curr.tags.supermodule then break end
+#     local super = curr.tags.supermodule[1] -- only consider one way inheritance
+#     local found = false
+#     for kind, mods, type in ldoc.kinds() do
+#         for mod in mods() do
+#             local name = display_name(mod)
+#             if name == super then
+#                 curr = mod
+#                 found = true
+#             end
+#             if found then break end
+#         end
+#         if found then break end
+#     end
+#     if not found then curr = nil end
+# end
+
+# --------- merge modules content with supermodules -------------
+# local all_module_kinds = {}
+# if module then
+# for kind,items in module.kinds() do
+#     local myitems = {}
+#     for item in items() do
+#       myitems[#myitems + 1] = item
+#      end
+#     all_module_kinds[#all_module_kinds + 1] = { kind = kind,  items = myitems }
+# end
+# local filtered_kinds = { "Constructors", "Static module functions",
+#   "Functions", "Methods", "lib.gears.object.properties Functions" }
+# for supermodule in iter(hierarchy) do
+#     for kind,items in supermodule.kinds() do
+#         local ignored = false
+#         for _,filtered in ldoc.pairs(filtered_kinds) do
+#             if kind == filtered then
+#                 ignored = true
+#                 break
+#             end
+#         end
+#         if not ignored then
+#             local curr_kind = nil
+#             for k in iter(all_module_kinds) do
+#                 if k.kind == kind then
+#                     curr_kind = k
+#                     break
+#                 end
+#             end
+#             if not curr_kind then
+#                 curr_kind  = { kind = kind, items = {} }
+#                 all_module_kinds[#all_module_kinds + 1] = curr_kind
+#             end
+#             for item in items() do
+#                 local tobeadded = true
+#                 for i in iter(curr_kind.items) do
+#                     if item.name == i.name then
+#                         tobeadded = false
+#                         break
+#                     end
+#                 end
+#                 if tobeadded then
+#                     item.inherited = true -- force inherited status
+#                     curr_kind.items[#curr_kind.items + 1] = item
+#                 end
+#             end
+#         end
+#     end
+# end
+# end
+
 <!-- Menu -->
 
 <div id="navigation">
@@ -59,7 +133,8 @@
 # if module and not ldoc.no_summary and #module.items > 0 then
 <h2>Contents</h2>
 <ul>
-# for kind,items in module.kinds() do
+# for k in iter(all_module_kinds) do
+#  local kind = k.kind
 #  if not kind:match("^ldoc_skip") then
 <li><a href="#$(no_spaces(kind))">$(kind)</a></li>
 # end
@@ -109,18 +184,6 @@
 <h1>Module: <code>$(module.name)</code></h1>
 <p>$(M(module.summary,module))</p>
 <p>$(M(module.description,module))</p>
-#   if module.tags.include then
-        $(M(ldoc.include_file(module.tags.include)))
-#   end
-#   if module.see then
-#     local li,il = use_li(module.see)
-    <h3>See also:</h3>
-    <ul>
-#     for see in iter(module.see) do
-         $(li)<a href="$(ldoc.href(see))">$(see.label)</a>$(il)
-#    end -- for
-    </ul>
-#   end -- if see
 #   if module.usage then
 #     local li,il = use_li(module.usage)
     <h3>Usage:</h3>
@@ -130,20 +193,81 @@
 #     end -- for
     </ul>
 #   end -- if usage
+    <div class="extra-header">
+# if module.tags.supermodule then
+  <div class="extra-header__section">
+    <h3>Class Hierarchy</h3>
+    <div class="inheritance">
+# local function draw_hierary_recursifly(i)
+#   local is_root_level = (i == #hierarchy)
+    <ul class="inheritance__level $(is_root_level and 'inheritance__level--root' or '')">
+        <li class="inheritance__level__node $(is_root_level and 'inheritance__level__node--root' or '')">
+#   local mod = hierarchy[i]
+#   local name = display_name(hierarchy[i])
+#   if mod == module then
+            <strong>$(name)</strong>
+#   else
+            <a href="$(ldoc.ref_to_module(mod))">$(name)</a>
+#   end
+        </li>
+#   if i > 1 then
+        <li>
+#           draw_hierary_recursifly(i - 1)
+        </li>
+#   end
+    </ul>
+# end -- function draw_hierary_recursifly
+# draw_hierary_recursifly(#hierarchy)
+    </div>
+  </div>
+# end -- module.tags.supermodule
+
+#   if module.tags.include then
+        $(M(ldoc.include_file(module.tags.include)))
+#   end
+
 #   if module.info then
+  <div class="extra-header__section">
     <h3>Info:</h3>
     <ul>
 #     for tag, value in module.info:iter() do
-        <li><strong>$(tag)</strong>: $(M(value,module))</li>
+#           if tag == 'Author' then
+                <li>
+                    <strong>Originally authored by</strong>: $(M(value,module))<br />
+                    <small>(Full contributors list available on
+                    <a href="https://github.com/awesomeWM/awesome/graphs/contributors">
+                        our github project)
+                    </a></small>
+
+                </li>
+#           else
+                <li><strong>$(tag)</strong>: $(M(value,module))</li>
+#           end
 #     end
     </ul>
+  </div>
 #   end -- if module.info
+
+#   if module.see then
+  <div class="extra-header__section">
+#     local li,il = use_li(module.see)
+#     local list_or_p =(#module.see > 1) and 'ul' or 'p'
+    <h3>See also:</h3>
+    <$(list_or_p)>
+#     for see in iter(module.see) do
+         $(li)<a href="$(ldoc.href(see))">$(see.label)</a>$(il)
+#    end -- for
+    </$(list_or_p)>
+  </div>
+#   end -- if module.see
+</div>
 
 
 # if not ldoc.no_summary then
 # -- bang out the tables of item types for this module (e.g Functions, Tables, etc)
 # local last_kind = ""
-# for kind,items in module.kinds() do
+# for k in iter(all_module_kinds) do
+#  local kind = k.kind
 #  if not kind:match("^ldoc_skip") then
 #   if last_kind ~= "" then
 </table>
@@ -151,8 +275,9 @@
 <h2><a href="#$(no_spaces(kind))">$(kind)</a></h2>
 <table class="function_list">
 #  end
-#  for item in items() do
+#  for item in iter(k.items) do if not item.tags.hidden then
 #   local dn = display_name(item)
+#   local inherited = (item.baseclass ~= module.name)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
     <tr>
 #   if item.display_type and not item.compact_signature then
@@ -166,14 +291,14 @@
 #     end
       </td>
 #   end
-      <td colspan="$(item.inherited and 1 or 2)" class="summary">$(M(item.summary,item))</td>
-#   if item.inherited then
-      <td class="baseclass" $(nowrap)>
+      <td colspan="$(inherited and 1 or 2)" class="summary">$(M(item.summary,item))</td>
+#   if inherited then
+      <td class="baseclass" nowrap>
         Inherited from $(item.baseclass)
       </td>
 #   end
     </tr>
-#  end -- for items
+#  end end -- for items
 # last_kind = kind
 #end -- for kinds
 </table>
@@ -187,7 +312,8 @@
 # --- function parameters or table fields.
 # local show_return = not ldoc.no_return_or_parms
 # local show_parms, last_kind = show_return, ""
-# for kind, items in module.kinds() do
+# for k in iter(all_module_kinds) do
+#  local kind = k.kind
 #   local kitem = module.kinds:get_item(kind)
 #   local has_description = kitem and ldoc.descript(kitem) ~= ""
 #   if not kind:match("^ldoc_skip") then
@@ -211,7 +337,7 @@
 #  if not kind:match("^ldoc_skip") then
     <dl class="function">
 #  end
-#  for item in items() do
+#  for item in iter(k.items) do if not item.tags.hidden then
     <dt>
     <a name = "$(item.name)"></a>
     <strong>$(display_name(item))</strong>
@@ -225,8 +351,8 @@
     <span class="proptype">$(item.display_type)</span>
 #   end
     <span class="baseclass" $(nowrap)>
-#   if item.inherited then
-    &middot;&nbsp;Inherited from $(item.baseclass)
+#   if item.baseclass ~= module.name then
+    &middot;&nbsp;Inherited from $(M(item.baseclass, item))
 #   end
 #   if item.extra_summary then
 #       for _, col in ldoc.ipairs(item.extra_summary) do
@@ -371,7 +497,7 @@
     </span>
 
 </dd>
-# end -- for items
+# end end -- for items
 #  last_kind = kind
 # end -- for kinds
 </dl>

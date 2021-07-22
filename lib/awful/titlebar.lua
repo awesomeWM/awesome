@@ -505,20 +505,33 @@ local function get_children_by_id(self, name)
 end
 
 
---- Get a client's titlebar.
--- @tparam client c The client for which a titlebar is wanted.
+--- Create a new titlebar for the given client.
+--
+-- Every client can hold up to four titlebars, one for each side (i.e. each
+-- value of `args.position`).
+--
+-- If this constructor is called again with the same
+-- values for the client (`c`) and the titlebar position (`args.position`),
+-- the previous titlebar will be removed and replaced by the new one.
+--
+-- @DOC_awful_titlebar_constructor_EXAMPLE@
+--
+-- @tparam client c The client the titlebar will be attached to.
 -- @tparam[opt={}] table args A table with extra arguments for the titlebar.
--- @tparam[opt=font.height*1.5] number args.size The height of the titlebar.
--- @tparam[opt=top] string args.position" values are `top`,
--- `left`, `right` and `bottom`.
--- @tparam[opt=top] string args.bg_normal
--- @tparam[opt=top] string args.bg_focus
--- @tparam[opt=top] string args.bgimage_normal
--- @tparam[opt=top] string args.bgimage_focus
--- @tparam[opt=top] string args.fg_normal
--- @tparam[opt=top] string args.fg_focus
--- @tparam[opt=top] string args.font
+-- @tparam[opt=font.height*1.5] number args.size The size of the titlebar. Will
+--   be interpreted as `height` for horizontal titlebars or as `width` for
+--   vertical titlebars.
+-- @tparam[opt="top"] string args.position Possible values are `"top"`,
+-- `"left"`, `"right"` and `"bottom"`.
+-- @tparam[opt] string args.bg_normal
+-- @tparam[opt] string args.bg_focus
+-- @tparam[opt] string args.bgimage_normal
+-- @tparam[opt] string args.bgimage_focus
+-- @tparam[opt] string args.fg_normal
+-- @tparam[opt] string args.fg_focus
+-- @tparam[opt] string args.font
 -- @constructorfct awful.titlebar
+-- @treturn wibox.drawable The newly created titlebar object.
 local function new(c, args)
     args = args or {}
     local position = args.position or "top"
@@ -578,10 +591,10 @@ local function new(c, args)
     return ret
 end
 
---- Show a client's titlebar.
+--- Show the client's titlebar.
 -- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of "left",
---   "right", "top", "bottom". Default is "top".
+-- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
+--   `"right"`, `"top"`, `"bottom"`.
 -- @staticfct awful.titlebar.show
 -- @request client titlebars show granted Called when `awful.titlebar.show` is
 --  called.
@@ -594,20 +607,20 @@ function titlebar.show(c, position)
     new(c, args)
 end
 
---- Hide a client's titlebar.
+--- Hide the client's titlebar.
 -- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of "left",
---   "right", "top", "bottom". Default is "top".
+-- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
+--   `"right"`, `"top"`, `"bottom"`.
 -- @staticfct awful.titlebar.hide
 function titlebar.hide(c, position)
     position = position or "top"
     get_titlebar_function(c, position)(c, 0)
 end
 
---- Toggle a client's titlebar, hiding it if it is visible, otherwise showing it.
+--- Toggle the client's titlebar, hiding it if it is visible, otherwise showing it.
 -- @param c The client whose titlebar is modified
--- @param[opt] position The position of the titlebar. Must be one of "left",
---   "right", "top", "bottom". Default is "top".
+-- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
+--   `"right"`, `"top"`, `"bottom"`.
 -- @staticfct awful.titlebar.toggle
 -- @request client titlebars toggle granted Called when `awful.titlebar.toggle` is
 --  called.
@@ -649,12 +662,15 @@ local function update_on_signal(c, signal, widget)
     table.insert(widgets, widget)
 end
 
---- Create a new titlewidget. A title widget displays the name of a client.
+--- Create a new title widget.
+--
+-- A title widget displays the name of a client.
 -- Please note that this returns a textbox and all of textbox' API is available.
 -- This way, you can e.g. modify the font that is used.
+--
 -- @param c The client for which a titlewidget should be created.
 -- @return The title widget.
--- @staticfct awful.titlebar.widget.titlewidget
+-- @constructorfct awful.titlebar.widget.titlewidget
 function titlebar.widget.titlewidget(c)
     local ret = textbox()
     local function update()
@@ -667,30 +683,36 @@ function titlebar.widget.titlewidget(c)
     return ret
 end
 
---- Create a new icon widget. An icon widget displays the icon of a client.
+--- Create a new icon widget.
+--
+-- An icon widget displays the icon of a client.
 -- Please note that this returns an imagebox and all of the imagebox' API is
 -- available. This way, you can e.g. disallow resizes.
+--
 -- @param c The client for which an icon widget should be created.
 -- @return The icon widget.
--- @staticfct awful.titlebar.widget.iconwidget
+-- @constructorfct awful.titlebar.widget.iconwidget
 function titlebar.widget.iconwidget(c)
     return clienticon(c)
 end
 
---- Create a new button widget. A button widget displays an image and reacts to
+--- Create a new button widget.
+--
+-- A button widget displays an image and reacts to
 -- mouse clicks. Please note that the caller has to make sure that this widget
--- gets redrawn when needed by calling the returned widget's update() function.
+-- gets redrawn when needed by calling the returned widget's `:update()` method.
 -- The selector function should return a value describing a state. If the value
--- is a boolean, either "active" or "inactive" are used. The actual image is
--- then found in the theme as "titlebar_[name]_button_[normal/focus]_[state]".
+-- is a boolean, either `"active"` or `"inactive"` are used. The actual image is
+-- then found in the theme as `titlebar_[name]_button_[normal/focus]_[state]`.
 -- If that value does not exist, the focused state is ignored for the next try.
+--
 -- @param c The client for which a button is created.
 -- @tparam string name Name of the button, used for accessing the theme and
 --   in the tooltip.
 -- @param selector A function that selects the image that should be displayed.
 -- @param action Function that is called when the button is clicked.
 -- @return The widget
--- @staticfct awful.titlebar.widget.button
+-- @constructorfct awful.titlebar.widget.button
 function titlebar.widget.button(c, name, selector, action)
     local ret = imagebox()
 
@@ -778,7 +800,7 @@ end
 
 --- Create a new float button for a client.
 -- @param c The client for which the button is wanted.
--- @staticfct awful.titlebar.widget.floatingbutton
+-- @constructorfct awful.titlebar.widget.floatingbutton
 function titlebar.widget.floatingbutton(c)
     local widget = titlebar.widget.button(c, "floating", aclient.object.get_floating, aclient.floating.toggle)
     update_on_signal(c, "property::floating", widget)
@@ -787,7 +809,7 @@ end
 
 --- Create a new maximize button for a client.
 -- @param c The client for which the button is wanted.
--- @staticfct awful.titlebar.widget.maximizedbutton
+-- @constructorfct awful.titlebar.widget.maximizedbutton
 function titlebar.widget.maximizedbutton(c)
     local widget = titlebar.widget.button(c, "maximized", function(cl)
         return cl.maximized
@@ -800,7 +822,7 @@ end
 
 --- Create a new minimize button for a client.
 -- @param c The client for which the button is wanted.
--- @staticfct awful.titlebar.widget.minimizebutton
+-- @constructorfct awful.titlebar.widget.minimizebutton
 function titlebar.widget.minimizebutton(c)
     local widget = titlebar.widget.button(c, "minimize",
                                           function() return "" end,
@@ -811,14 +833,14 @@ end
 
 --- Create a new closing button for a client.
 -- @param c The client for which the button is wanted.
--- @staticfct awful.titlebar.widget.closebutton
+-- @constructorfct awful.titlebar.widget.closebutton
 function titlebar.widget.closebutton(c)
     return titlebar.widget.button(c, "close", function() return "" end, function(cl) cl:kill() end)
 end
 
 --- Create a new ontop button for a client.
 -- @param c The client for which the button is wanted.
--- @staticfct awful.titlebar.widget.ontopbutton
+-- @constructorfct awful.titlebar.widget.ontopbutton
 function titlebar.widget.ontopbutton(c)
     local widget = titlebar.widget.button(c, "ontop",
                                           function(cl) return cl.ontop end,
@@ -829,7 +851,7 @@ end
 
 --- Create a new sticky button for a client.
 -- @param c The client for which the button is wanted.
--- @staticfct awful.titlebar.widget.stickybutton
+-- @constructorfct awful.titlebar.widget.stickybutton
 function titlebar.widget.stickybutton(c)
     local widget = titlebar.widget.button(c, "sticky",
                                           function(cl) return cl.sticky end,

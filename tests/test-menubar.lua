@@ -10,14 +10,10 @@ function menubar.refresh(...)
     orig_refresh(...)
 end
 
--- XXX We are building Lua 5.3 with -DLUA_USE_APICHECK=1 and this catches some
--- bugs in lgi. Thus, do not run this test with Lua 5.3 until lgi is fixed.
--- We run into the same bug when doing code-coverage analysis, supposedly
--- because the additional GC activity means that something which is GC-able when
--- it should not gets collected too early.
--- This test also sporadically errors on LuaJIT ("attempt to call a number
+-- XXX This test sporadically errors on LuaJIT ("attempt to call a number
 -- value"). This might be a different issue, but still, disable the test.
-if _VERSION == "Lua 5.3" or debug.gethook() or jit then --luacheck: globals jit
+-- And also breaks other tests due to weirdness of older lgi version.
+if os.getenv('LGIVER') == '0.8.0' or jit then --luacheck: globals jit
     print("Skipping this test since it would just fail.")
     runner.run_steps { function() return true end }
     return

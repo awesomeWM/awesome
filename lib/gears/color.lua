@@ -341,9 +341,7 @@ end
 -- @return Recolored image.
 -- @staticfct gears.color.recolor_image
 function color.recolor_image(image, new_color)
-    if type(image) == 'string' then
-        image = surface.duplicate_surface(image)
-    end
+    image = surface.duplicate_surface(image)
     local cr = cairo.Context.create(image)
     cr:set_source(color.create_pattern(new_color))
     cr:mask(cairo.Pattern.create_for_surface(image), 0, 0)

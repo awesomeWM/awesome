@@ -5,6 +5,17 @@
 
 local textbox = require("wibox.widget.textbox")
 
+local test_dpi_value = 192
+_G.screen = {
+    { geometry = { x = 0, y = 0, width = 1920, height = 1080 }, index = 1, dpi=test_dpi_value },
+}
+local beautiful = require("beautiful")
+local xresources = require("beautiful.xresources")
+beautiful.font = 'Monospace 10'
+xresources.get_dpi = function(_) return test_dpi_value end
+package.loaded["beautiful"] = beautiful
+package.loaded["beautiful.xresources"] = xresources
+
 describe("wibox.widget.textbox", function()
     local widget
     before_each(function()
@@ -113,6 +124,29 @@ describe("wibox.widget.textbox", function()
             assert.is.equal(2, layout_changed)
         end)
     end)
+
+    describe("auxiliary", function()
+
+        it("can compute text geometry w/default font", function()
+            local text = "<b><i>test</i></b>"
+            local s = 1
+            local pango_geometry = textbox.get_markup_geometry(text, s)
+            local actual_textbox_width, actual_textbox_height = textbox(text):get_preferred_size(s)
+            assert.is.equal(pango_geometry.width, actual_textbox_width)
+            assert.is.equal(pango_geometry.height, actual_textbox_height)
+        end)
+
+        it("can compute text geometry w/hardcoded font", function()
+            local text = "<span font='Monospace 16'><b><i>test</i></b></span>"
+            local s = 1
+            local pango_geometry = textbox.get_markup_geometry(text, s)
+            local actual_textbox_width, actual_textbox_height = textbox(text):get_preferred_size(s)
+            assert.is.equal(pango_geometry.width, actual_textbox_width)
+            assert.is.equal(pango_geometry.height, actual_textbox_height)
+        end)
+
+    end)
+
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

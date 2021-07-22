@@ -196,7 +196,7 @@ function focus.global_bydirection(dir, c, stacked)
     local scr = get_screen(sel and sel.screen or screen.focused())
 
     -- change focus inside the screen
-    focus.bydirection(dir, sel)
+    focus.bydirection(dir, sel, stacked)
 
     -- if focus not changed, we must change screen
     if sel == capi.client.focus then

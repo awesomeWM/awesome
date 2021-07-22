@@ -1,12 +1,14 @@
 ---------------------------------------------------------------------------
 --- A layout filling all the available space. Each widget is assigned a
 -- ratio (percentage) of the total space. Multiple methods are available to
--- ajust this ratio.
+-- adjust this ratio.
 --
 --@DOC_wibox_layout_defaults_ratio_EXAMPLE@
 -- @author Emmanuel Lepage Vallee
 -- @copyright 2016 Emmanuel Lepage Vallee
 -- @layoutmod wibox.layout.ratio
+-- @supermodule wibox.layout.flex
+-- @see 03-declarative-layout.md
 ---------------------------------------------------------------------------
 
 local base  = require("wibox.widget.base" )
@@ -56,10 +58,10 @@ local function gen_sum(self, i_s, i_e)
 end
 
 -- The ratios are expressed as percentages. For this to work, the sum of all
--- ratio must be 1. This function attempt to ajust them. Space can be taken
+-- ratio must be 1. This function attempt to adjust them. Space can be taken
 -- from or added to a ratio when widgets are being added or removed. If a
 -- specific ratio must be enforced for a widget, it has to be done with the
--- `ajust_ratio` method after each insertion or deletion
+-- `adjust_ratio` method after each insertion or deletion
 local function normalize(self)
     local count = #self._private.widgets
     if count == 0 then return end
@@ -229,7 +231,7 @@ end
 -- do nothing.
 --
 -- @method inc_widget_ratio
--- @tparam widget widget The widget to ajust
+-- @tparam widget widget The widget to adjust
 -- @tparam number increment An floating point value between -1 and 1 where the
 --   end result is within 0 and 1
 function ratio:inc_widget_ratio(widget, increment)
@@ -282,7 +284,7 @@ end
 --- Set the ratio of `widget` to `percent`.
 --
 -- @method set_widget_ratio
--- @tparam widget widget The widget to ajust.
+-- @tparam widget widget The widget to adjust.
 -- @tparam number percent A floating point value between 0 and 1.
 function ratio:set_widget_ratio(widget, percent)
     local index = self:index(widget)
@@ -293,14 +295,14 @@ end
 --- Update all widgets to match a set of a ratio.
 -- The sum of before, itself and after must be 1 or nothing will be done.
 --
---@DOC_wibox_layout_ratio_ajust_ratio_EXAMPLE@
+--@DOC_wibox_layout_ratio_adjust_ratio_EXAMPLE@
 --
--- @method ajust_ratio
+-- @method adjust_ratio
 -- @tparam number index The index of the widget to change
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
 -- @tparam number after The sum of the ratio after the widget
-function ratio:ajust_ratio(index, before, itself, after)
+function ratio:adjust_ratio(index, before, itself, after)
     if not self._private.widgets[index] or not before or not itself or not after then
         return
     end
@@ -334,17 +336,56 @@ function ratio:ajust_ratio(index, before, itself, after)
 
     self:emit_signal("widget::layout_changed")
 end
+--- Update all widgets to match a set of a ratio.
+--
+-- This method is kept for backwards compatibility, please use `:adjust_ratio` instead.
+-- @see wibox.layout.ratio.adjust_ratio
+-- @deprecated wibox.layout.ratio.ajust_ratio
+-- @tparam number index The index of the widget to change
+-- @tparam number index The index of the widget to change
+-- @tparam number before The sum of the ratio before the widget
+-- @tparam number before The sum of the ratio before the widget
+-- @tparam number itself The ratio for "widget"
+-- @tparam number itself The ratio for "widget"
+-- @tparam number after The sum of the ratio after the widget
+-- @tparam number after The sum of the ratio after the widget
+function ratio:ajust_ratio(...)
+    require('gears.debug').deprecate(
+        "Use `:adjust_ratio` rather than `:ajust_ratio`",
+        { deprecated_in = 5 }
+    )
+    return self:adjust_ratio(...)
+end
 
 --- Update all widgets to match a set of a ratio.
 --
--- @method ajust_widget_ratio
--- @tparam widget widget The widget to ajust
+-- @method adjust_widget_ratio
+-- @tparam widget widget The widget to adjust
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
 -- @tparam number after The sum of the ratio after the widget
-function ratio:ajust_widget_ratio(widget, before, itself, after)
+function ratio:adjust_widget_ratio(widget, before, itself, after)
     local index = self:index(widget)
-    self:ajust_ratio(index, before, itself, after)
+    self:adjust_ratio(index, before, itself, after)
+end
+--- Update all widgets to match a set of a ratio.
+--
+-- This method is kept for backwards compatibility, please use `:adjust_widget_ratio` instead.
+-- @see wibox.layout.ratio.adjust_widget_ratio
+-- @deprecated wibox.layout.ratio.ajust_widget_ratio
+-- @tparam widget widget The widget to adjust
+-- @tparam number before The sum of the ratio before the widget
+-- @tparam number before The sum of the ratio before the widget
+-- @tparam number itself The ratio for "widget"
+-- @tparam number itself The ratio for "widget"
+-- @tparam number after The sum of the ratio after the widget
+-- @tparam number after The sum of the ratio after the widget
+function ratio:ajust_widget_ratio(...)
+    require('gears.debug').deprecate(
+        "Use `:adjust_widget_ratio` rather than `:ajust_widget_ratio`",
+        { deprecated_in = 5 }
+    )
+    return self:adjust_widget_ratio(...)
 end
 
 --- Add some widgets to the given fixed layout.
@@ -484,10 +525,6 @@ function ratio.vertical(...)
 end
 
 --@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return ratio
 

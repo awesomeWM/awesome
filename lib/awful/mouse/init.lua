@@ -31,19 +31,33 @@ local mouse = {
 mouse.object = {}
 mouse.wibox = {}
 
---- The default snap distance.
--- @tfield integer awful.mouse.snap.default_distance
+--- The default distance before snapping clients together.
+--
+-- @DOC_screen_client_snap_EXAMPLE@
+--
+-- @tfield integer snap.default_distance
 -- @tparam[opt=8] integer default_distance
 -- @see awful.mouse.snap
 
+--- The default distance before activating screen edge snap.
+-- @tfield integer snap.aerosnap_distance
+-- @tparam[opt=16] integer aerosnap_distance
+-- @see awful.mouse.snap
+
 --- Enable screen edges snapping.
--- @tfield[opt=true] boolean awful.mouse.snap.edge_enabled
+--
+--@DOC_awful_placement_aero_snap_EXAMPLE@
+--
+-- @tfield[opt=true] boolean snap.edge_enabled
+-- @tparam boolean edge_enabled
 
 --- Enable client to client snapping.
--- @tfield[opt=true] boolean awful.mouse.snap.client_enabled
+-- @tfield[opt=true] boolean snap.client_enabled
+-- @tparam boolean client_enabled
 
 --- Enable changing tag when a client is dragged to the edge of the screen.
--- @tfield[opt=false] integer awful.mouse.drag_to_tag.enabled
+-- @tfield[opt=false] boolean drag_to_tag.enabled
+-- @tparam boolean enabled
 
 --- The snap outline background color.
 -- @beautiful beautiful.snap_bg
@@ -57,9 +71,9 @@ mouse.wibox = {}
 -- @beautiful beautiful.snap_shape
 -- @tparam function shape A `gears.shape` compatible function
 
---- The gap between snapped contents.
+--- The gap between snapped clients.
 -- @beautiful beautiful.snapper_gap
--- @tparam number (default: 0)
+-- @tparam[opt=0] number snapper_gap
 
 --- Get the client object under the pointer.
 -- @deprecated awful.mouse.client_under_pointer
@@ -328,9 +342,9 @@ function mouse.remove_client_mousebinding(button)
     return false
 end
 
-for _, b in ipairs {"left", "right", "middle"} do
+for k, b in ipairs {"left", "middle", "right"} do
     mouse.object["is_".. b .."_mouse_button_pressed"] = function()
-        return capi.mouse.coords().buttons[1]
+        return capi.mouse.coords().buttons[k]
     end
 end
 
@@ -354,6 +368,10 @@ end)
 capi.mouse.set_index_miss_handler(function(_,key)
     if mouse.object["get_"..key] then
         return mouse.object["get_"..key]()
+    elseif mouse.object[key] and key:sub(1, 3) == "is_" then
+        return mouse.object[key]()
+    elseif mouse.object[key] then
+        return mouse.object[key]
     else
         return props[key]
     end

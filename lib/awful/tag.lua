@@ -349,6 +349,45 @@ function tag.find_fallback(screen, invalids)
     end
 end
 
+--- Emitted when all clients are removed from the tag.
+-- @signal cleared
+-- @see clear
+
+--- Remove all tagged clients.
+--
+-- @DOC_sequences_tag_clear_EXAMPLE@
+--
+-- @method clear
+-- @tparam table args The arguments.
+-- @tparam tag args.fallback_tag A fallback tag.
+-- @tparam[opt=false] boolean args.allow_untagged Allow the untagged clients to remain untagged.
+-- @emits cleared After all clients have been untagged.
+-- @emits untagged For each currently tagged clients.
+-- @emitstparam untagged client c The untagged client.
+function tag.object.clear(self, args)
+    args = args or {}
+
+    local clients = self:clients()
+
+    -- Clear
+    self:clients({})
+
+    if #clients > 0 and not args.allow_untagged then
+        local target_scr = get_screen(tag.getproperty(self, "screen"))
+        local fallback_tag = args.fallback_tag or tag.find_fallback(target_scr, {self})
+
+        if not fallback_tag then return end
+
+        for _, c in ipairs(clients) do
+            if #c:tags() == 0 then
+                c:tags({fallback_tag})
+            end
+        end
+    end
+
+    self:emit_signal("cleared")
+end
+
 --- Delete a tag.
 --
 -- To delete the current tag:
@@ -674,6 +713,13 @@ end
 -- See the layout suit documentation for information about how the master width
 -- factor is used.
 --
+-- @DOC_screen_mwfact_EXAMPLE@
+--
+-- When multiple columns are used, the master width remains the same, but
+-- the other columns split the remaining space among them:
+--
+-- @DOC_screen_mwfact2_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::mwfact* (deprecated)
@@ -685,6 +731,7 @@ end
 -- @see column_count
 -- @see master_fill_policy
 -- @see gap
+-- @see awful.tag.incmwfact
 
 function tag.object.set_master_width_factor(t, mwfact)
     if mwfact >= 0 and mwfact <= 1 then
@@ -1049,8 +1096,16 @@ end
 
 --- The gap (spacing, also called `useless_gap`) between clients.
 --
--- This property allow to waste space on the screen in the name of style,
+-- This property allows to waste space on the screen in the name of style,
 -- unicorns and readability.
+--
+-- In this example, the value of `gap` is set to 20:
+--
+-- @DOC_screen_gaps_EXAMPLE@
+--
+-- Compared to setting to the (very high) value of 50:
+--
+-- @DOC_screen_gaps2_EXAMPLE@
 --
 -- **Signal:**
 --
@@ -1059,6 +1114,7 @@ end
 -- @property gap
 -- @param number The value has to be greater than zero.
 -- @see gap_single_client
+-- @see awful.tag.incgap
 
 function tag.object.set_gap(t, useless_gap)
     if useless_gap >= 0 then
@@ -1102,12 +1158,26 @@ end
 
 --- Enable gaps for a single client.
 --
+-- If the gaps are used purely for readability when multiple
+-- clients are tiled, then it may make sense to disable it
+-- when there is only a single client (to recover that space).
+-- In that case, set `gap_single_client` to `false`.
+--
+-- Default (with a 20px gap):
+--
+-- @DOC_screen_gap_single_client_true_EXAMPLE@
+--
+-- when set to false:
+--
+-- @DOC_screen_gap_single_client_false_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::gap\_single\_client*
 --
 -- @property gap_single_client
 -- @param boolean Enable gaps for a single client
+-- @see awful.tag.incgap
 
 function tag.object.set_gap_single_client(t, gap_single_client)
     tag.setproperty(t, "gap_single_client", gap_single_client == true)
@@ -1156,11 +1226,25 @@ end
 
 --- Set size fill policy for the master client(s).
 --
+-- Some multi-column layouts can be configured so that the space is
+-- redistributed when there is not enough clients to fill all columns.
+--
 -- ** Possible values**:
 --
 -- * *expand*: Take all the space
--- * *master_width_factor*: Only take the ratio defined by the
+-- * *master\_width\_factor*: Only take the ratio defined by the
 --   `master_width_factor`
+--
+-- This is the default behavior of the `tile.left` layout (*expand*):
+--
+-- @DOC_screen_mfpol2_EXAMPLE@
+--
+-- This is what happends when set to `master_width_factor`:
+--
+-- @DOC_screen_mfpol_EXAMPLE@
+--
+-- The remaining space that would have been used for the second column is
+-- redistributed on both side.
 --
 -- **Signal:**
 --
@@ -1168,6 +1252,7 @@ end
 --
 -- @property master_fill_policy
 -- @param string "expand" or "master_width_factor"
+-- @see awful.tag.togglemfpol
 
 function tag.object.get_master_fill_policy(t)
     return tag.getproperty(t, "master_fill_policy")
@@ -1237,6 +1322,7 @@ end
 --
 -- @property master_count
 -- @param integer nmaster Only positive values are accepted
+-- @see awful.tag.incnmaster
 
 function tag.object.set_master_count(t, nmaster)
     if nmaster >= 0 then
@@ -1304,12 +1390,16 @@ end
 
 --- Set the tag icon.
 --
+-- @DOC_wibox_awidget_taglist_icon_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::icon*
 --
 -- @property icon
 -- @tparam path|surface icon The icon
+-- @see awful.widget.taglist
+-- @see gears.surface
 
 -- accessors are implicit.
 
@@ -1344,6 +1434,8 @@ end
 
 --- Set the number of columns.
 --
+-- @DOC_sequences_tag_column_count_EXAMPLE@
+--
 -- **Signal:**
 --
 -- * *property::ncol* (deprecated)
@@ -1351,6 +1443,7 @@ end
 --
 -- @property column_count
 -- @tparam integer ncol Has to be greater than 1
+-- @see awful.tag.incncol
 
 function tag.object.set_column_count(t, ncol)
     if ncol >= 1 then
@@ -1748,20 +1841,25 @@ capi.client.connect_signal("untagged", client_untagged)
 capi.client.connect_signal("tagged", client_tagged)
 capi.tag.connect_signal("request::select", tag.object.view_only)
 
---- True when a tagged client is urgent
+--- Emitted when the number of urgent clients on this tag changes.
 -- @signal property::urgent
+-- @param boolean `true` if there is at least one urgent client on the tag.
 -- @see client.urgent
 
---- The number of urgent tagged clients
+--- Emitted when the number of urgent clients on this tag changes.
 -- @signal property::urgent_count
+-- @param integer The number of urgent clients on the tag.
 -- @see client.urgent
 
 --- Emitted when a screen is removed.
+--
 -- This can be used to salvage existing tags by moving them to a new
--- screen (or creating a virtual screen). By default, there is no
--- handler for this request. The tags will be deleted. To prevent
--- this, an handler for this request must simply set a new screen
+-- screen (or creating a virtual screen).
+--
+-- By default, there is no handler for this request and the tags will be deleted.
+-- To prevent this, an handler for this request must simply set a new screen
 -- for the tag.
+--
 -- @signal request::screen
 -- @tparam string context Why it was called.
 

@@ -25,7 +25,8 @@ local capi = {
 }
 
 local module = {
-    default_distance = 8
+    default_distance  = 8,
+    aerosnap_distance = 16
 }
 
 local placeholder_w = nil
@@ -258,7 +259,7 @@ resize.add_move_callback(function(c, geo, args)
     -- Screen edge snapping (areosnap)
     if (module.edge_enabled ~= false)
       and args and (args.snap == nil or args.snap) then
-        detect_areasnap(c, 16)
+        detect_areasnap(c, module.aerosnap_distance)
     end
 
     -- Snapping between clients

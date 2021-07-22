@@ -10,6 +10,7 @@ for k, pos in ipairs{ --DOC_HIDE
 local c1 = client.gen_fake {--DOC_HIDE
     x = screen[k].geometry.x+40, --DOC_HIDE
     y = screen[k].geometry.y+40, width=75, height=50, screen=screen[k]} --DOC_HIDE
+    c1:_hide_all() --DOC_HIDE
     placement.maximize(c1, {axis = pos ~= "" and pos or nil}) --DOC_HIDE
 
     if k == 1 then --DOC_HIDE

@@ -116,7 +116,7 @@ end
 -- @tparam string sub String to check for.
 -- @staticfct gears.string.startswith
 function gstring.startswith(str, sub)
-    return string.sub(str, 1, string.len(sub)) == sub
+    return str and (string.sub(str, 1, string.len(sub)) == sub) or false
 end
 
 --- Check if a string ends with another string.
@@ -126,7 +126,7 @@ end
 -- @treturn boolean `true` if string ends with specified string
 -- @staticfct gears.string.endswith
 function gstring.endswith(str, sub)
-    return sub == "" or string.sub(str,-string.len(sub)) == sub
+    return str and (sub == "" or string.sub(str,-string.len(sub)) == sub) or false
 end
 
 return gstring

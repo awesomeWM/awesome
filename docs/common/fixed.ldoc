@@ -58,7 +58,7 @@
 -- @emitstparam widget::swapped number index1 The second index.
 -- @interface layout
 
---- Reset a ratio layout. This removes all widgets from the layout.
+--- Reset the layout. This removes all widgets from the layout.
 -- @method reset
 -- @emits widget::reset
 -- @emitstparam widget::reset widget self The layout.

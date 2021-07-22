@@ -136,7 +136,7 @@ lua_class_t client_class;
  * @table awful.client.object
  */
 
-/** AwesomeWM is about to scan for existing clients.
+/** Emitted when AwesomeWM is about to scan for existing clients.
  *
  * Connect to this signal when code needs to be executed after screens are
  * initialized, but before clients are added.
@@ -145,7 +145,7 @@ lua_class_t client_class;
  * @classsignal
  */
 
-/** AwesomeWM is done scanning for clients.
+/** Emitted when AwesomeWM is done scanning for clients.
  *
  * This is emitted before the `startup` signal and after the `scanning` signal.
  *
@@ -153,23 +153,24 @@ lua_class_t client_class;
  * @classsignal
  */
 
-/** When a client gains focus.
+/** Emitted when a client gains focus.
  * @signal focus
  * @classsignal
  */
 
-/** Before manage, after unmanage, and when clients swap.
+/** Emitted before `request::manage`, after `request::unmanage`,
+ * and when clients swap.
  * @signal list
  * @classsignal
  */
 
-/** When 2 clients are swapped
+/** Emitted when 2 clients are swapped
  * @tparam client client The other client
  * @tparam boolean is_source If self is the source or the destination of the swap
  * @signal swapped
  */
 
-/** When a new client appears and gets managed by Awesome.
+/** Emitted when a new client appears and gets managed by Awesome.
  *
  * This request should be implemented by code which track the client. It isn't
  * recommended to use this to initialize the client content. This use case is
@@ -188,7 +189,7 @@ lua_class_t client_class;
  * @classsignal
  */
 
-/** When a client is going away.
+/** Emitted when a client is going away.
  *
  * Each places which store `client` objects in non-weak table or whose state
  * depend on the current client should answer this request.
@@ -216,32 +217,32 @@ lua_class_t client_class;
  * @deprecatedsignal unmanage
  */
 
-/** When a mouse button is pressed in a client.
+/** Emitted when a mouse button is pressed in a client.
  * @signal button::press
  */
 
-/** When a mouse button is released in a client.
+/** Emitted when a mouse button is released in a client.
  *
  * @signal button::release
  */
 
-/** When the mouse enters a client.
+/** Emitted when the mouse enters a client.
  *
  * @signal mouse::enter
  */
 
-/** When the mouse leaves a client.
+/** Emitted when the mouse leaves a client.
  *
  * @signal mouse::leave
  */
 
 /**
- * When the mouse moves within a client.
+ * Emitted when the mouse moves within a client.
  *
  * @signal mouse::move
  */
 
-/** When a client should get activated (focused and/or raised).
+/** Emitted when a client should get activated (focused and/or raised).
  *
  * **Contexts are:**
  *
@@ -279,7 +280,7 @@ lua_class_t client_class;
  * @classsignal
  */
 
-/** When an event could lead to the client being activated.
+/** Emitted when an event could lead to the client being activated.
  *
  * This is an layer "on top" of `request::activate` for event which are not
  * actual request for activation/focus, but where "it would be nice" if the
@@ -300,7 +301,7 @@ lua_class_t client_class;
  *
  */
 
-/** When something request a client geometry to be modified.
+/** Emitted when something request a client's geometry to be modified.
  *
  * @signal request::geometry
  * @tparam client c The client
@@ -315,23 +316,39 @@ lua_class_t client_class;
  * @classsignal
  */
 
-/** When the tag requests to be moved to a tag or needs a new tag.
+/** Emitted when a client requests to be moved to a tag or needs a new tag.
  *
  * @signal request::tag
+ * @tparam client c The client requesting a new tag.
  * @classsignal
  */
 
-/** When the client requests to become urgent.
+/** Emitted when any client's `urgent` property changes.
+ *
+ * Emitted both when `urgent = true` and `urgent = false`, so you will likely
+ * want to check `c.urgent` within the signal callback.
+ *
+ *    client.connect_signal("property::urgent", function(c)
+ *        if c.urgent then
+ *            naughty.notify {
+ *                title = "Urgent client",
+ *                message = c.name,
+ *            }
+ *        end
+ *    end)
  *
  * @signal request::urgent
+ * @tparam client c The client whose property changed.
  * @classsignal
  */
 
-/** Emitted during startup to gather the default client mousebindings.
+/** Emitted once to request default client mousebindings during the initial
+ * startup sequence.
  *
- * This signals gives a chance to all module to register new client keybindings.
- * Assuming the client rules does not overwrite them with the `keys` property,
- * they will be added to all clients.
+ * This signal gives all modules a chance to register their default client
+ * mousebindings.
+ * They will then be added to all new clients, unless rules overwrite them via
+ * the `buttons` property.
  *
  * @signal request::default_mousebindings
  * @tparam string context The reason why the signal was sent (currently always
@@ -339,41 +356,30 @@ lua_class_t client_class;
  * @classsignal
 */
 
-/** Emitted during startup to gather the default client keybindings.
+/** Emitted once to request default client keybindings during the initial
+ * startup sequence.
  *
- * This signals gives a chance to all module to register new client keybindings.
- * Assuming the client rules does not overwrite them with the `keys` property,
- * they will be added to all clients.
+ * This signal gives all modules a chance to register their default client
+ * keybindings.
+ * They will then be added to all new clients, unless rules overwrite them via
+ * the `keys` property.
  *
  * @signal request::default_keybindings
  * @tparam string context The reason why the signal was sent (currently always
- *  `startup`).
- * @classsignal
- */
-
-/** Sent once when AwesomeWM starts to add default keybindings.
- *
- * Keybindings can be set directly on clients. Actually, older version of
- * AwesomeWM did that through the rules. However this makes it impossible for
- * auto-configured modules to add their own keybindings. Using the signals,
- * `rc.lua` or any module can cleanly manage keybindings.
- *
- * @signal request::default_keybindings
- * @tparam string context The context (currently always "startup").
  * @classsignal
  * @request client default_keybindings startup granted Sent when AwesomeWM starts.
  */
 
-/** When a client gets tagged.
+/** Emitted when a client gets tagged.
  * @signal tagged
  * @tparam tag t The tag object.
  */
 
-/** When a client gets unfocused.
+/** Emitted when a client gets unfocused.
  * @signal unfocus
  */
 
-/** When a client gets untagged.
+/** Emitted when a client gets untagged.
  * @signal untagged
  * @tparam tag t The tag object.
  */
@@ -404,13 +410,13 @@ lua_class_t client_class;
 /**
  * The focused `client` or nil (in case there is none).
  *
- * It is not recommanded to set the focused client using
- * this property. Please use `c:activate{}` instead of
+ * It is not recommended to set the focused client using
+ * this property. Please use @{client.activate} instead of
  * `client.focus = c`. Setting the focus directly bypasses
  * all the filters and emits fewer signals, which tend to
  * cause unwanted side effects and make it harder to alter
  * the code behavior in the future. It usually takes *more*
- * code to use this rather than `:activate{}` because all
+ * code to use this rather than @{client.activate} because all
  * the boilerplate code (such as `c:raise()`) needs to be
  * added everywhere.
  *
@@ -591,12 +597,12 @@ lua_class_t client_class;
  */
 
 /**
- * The machine client is running on.
+ * The machine the client is running on.
  *
- * X11 windows can "live" in another computer but shown
+ * X11 windows can "live" in one computer but be shown
  * in another one. This is called "network transparency"
  * and is either used directly by allowing remote windows
- * using the `xhosts` command for using proxies such as
+ * using the `xhosts` command or using proxies such as
  * `ssh -X` or `ssh -Y`.
  *
  * According to EWMH, this property contains the value
@@ -622,7 +628,7 @@ lua_class_t client_class;
  * This property holds the client icon closest to the size configured via
  * @{awesome.set_preferred_icon_size}.
  *
- * It is not a path or an "real" file. Rather, it is already a bitmap surface.
+ * It is not a path or a "real" file. Rather, it is already a bitmap surface.
  *
  * Typically you would want to use @{awful.widget.clienticon} to get this as a
  * widget.
@@ -649,6 +655,14 @@ lua_class_t client_class;
  * The available sizes of client icons. This is a table where each entry
  * contains the width and height of an icon.
  *
+ * Example:
+ *
+ *    {
+ *      { 24, 24 },
+ *      { 32, 32 },
+ *      { 64, 64 },
+ *    }
+ *
  * @property icon_sizes
  * @tparam table sizes
  * @propemits false false
@@ -666,6 +680,8 @@ lua_class_t client_class;
  * once. Changing the screen directly will affect the tags and may
  * cause several other changes to the state in order to ensure that
  * a client's position and its screen are consistent.
+ *
+ * @DOC_sequences_client_screen_EXAMPLE@
  *
  * @property screen
  * @tparam screen screen
@@ -714,18 +730,83 @@ lua_class_t client_class;
  * @property border_width
  * @tparam integer border_width
  * @propemits false false
+ * @usebeautiful beautiful.border_width_active
+ * @usebeautiful beautiful.border_width_normal
+ * @usebeautiful beautiful.border_width_new
+ * @usebeautiful beautiful.border_width_urgent
+ * @usebeautiful beautiful.border_width_floating
+ * @usebeautiful beautiful.border_width_floating_active
+ * @usebeautiful beautiful.border_width_floating_normal
+ * @usebeautiful beautiful.border_width_floating_new
+ * @usebeautiful beautiful.border_width_floating_urgent
+ * @usebeautiful beautiful.border_width_maximized
+ * @usebeautiful beautiful.border_width_maximized_active
+ * @usebeautiful beautiful.border_width_maximized_normal
+ * @usebeautiful beautiful.border_width_maximized_new
+ * @usebeautiful beautiful.border_width_maximized_urgent
+ * @usebeautiful beautiful.border_width_fullscreen
+ * @usebeautiful beautiful.border_width_fullscreen_active
+ * @usebeautiful beautiful.border_width_fullscreen_normal
+ * @usebeautiful beautiful.border_width_fullscreen_new
+ * @usebeautiful beautiful.border_width_fullscreen_urgent
+ * @usebeautiful beautiful.fullscreen_hide_border Hide the border on fullscreen clients.
+ * @usebeautiful beautiful.maximized_hide_border Hide the border on maximized clients.
  * @see request::border
+ * @see awful.permissions.update_border
+ * @see border_color
  */
 
 /**
  * The client border color.
  *
+ * @DOC_awful_client_border_width_EXAMPLE@
+ *
+ * Note that setting this directly will override and disable all related theme
+ * variables.
+ *
+ * Setting a transparent color (e.g. to implement dynamic borders without size
+ * changes) is supported, but requires the color to be set to `#00000000`
+ * specifically. Other RGB colors with an alpha of `0` won't work.
+ *
  * @property border_color
- * @tparam color border_color Any string, gradients and patterns will be converted to a
- *  cairo pattern.
+ * @tparam color border_color Any string, gradient or pattern definition that
+ *  can be converted to a cairo pattern.
  * @propemits false false
+ * @usebeautiful beautiful.border_color_marked The fallback color when the
+ *  client is marked.
+ * @usebeautiful beautiful.border_color_active The fallback color when the
+ *  client is active (focused).
+ * @usebeautiful beautiful.border_color_normal The fallback color when the
+ *  client isn't active/floating/new/urgent/maximized/floating/fullscreen.
+ * @usebeautiful beautiful.border_color_new The fallback color when the
+ *  client is new.
+ * @usebeautiful beautiful.border_color_urgent The fallback color when the
+ *  client is urgent.
+ * @usebeautiful beautiful.border_color_floating The fallback color when the
+ *  client is floating and the other colors are not set.
+ * @usebeautiful beautiful.border_color_floating_active The color when the
+ *  client is floating and is active (focused).
+ * @usebeautiful beautiful.border_color_floating_normal The color when the
+ *  client is floating and not new/urgent/active.
+ * @usebeautiful beautiful.border_color_floating_new
+ * @usebeautiful beautiful.border_color_floating_urgent The color when the
+ *  client is floating and urgent.
+ * @usebeautiful beautiful.border_color_maximized
+ * @usebeautiful beautiful.border_color_maximized_active
+ * @usebeautiful beautiful.border_color_maximized_normal
+ * @usebeautiful beautiful.border_color_maximized_new
+ * @usebeautiful beautiful.border_color_maximized_urgent The color when the
+ *  client is urbent and maximized.
+ * @usebeautiful beautiful.border_color_fullscreen
+ * @usebeautiful beautiful.border_color_fullscreen_active
+ * @usebeautiful beautiful.border_color_fullscreen_normal
+ * @usebeautiful beautiful.border_color_fullscreen_new
+ * @usebeautiful beautiful.border_color_fullscreen_urgent The color when the
+ *  client is fullscreen and urgent.
  * @see request::border
+ * @see awful.permissions.update_border
  * @see gears.color
+ * @see border_width
  */
 
 /**
@@ -735,6 +816,22 @@ lua_class_t client_class;
  * @tparam boolean urgent
  * @propemits false false
  * @see request::border
+ * @usebeautiful beautiful.border_color_urgent The fallback color when the
+ *  client is urgent.
+ * @usebeautiful beautiful.border_color_floating_urgent The color when the
+ *  client is floating and urgent.
+ * @usebeautiful beautiful.border_color_maximized_urgent The color when the
+ *  client is urbent and maximized.
+ * @usebeautiful beautiful.border_color_fullscreen_urgent The color when the
+ *  client is fullscreen and urgent.
+ * @usebeautiful beautiful.border_width_urgent The fallback border width when
+ *  the client is urgent.
+ * @usebeautiful beautiful.border_width_floating_urgent The border width when
+ *  the client is floating and urgent.
+ * @usebeautiful beautiful.border_width_maximized_urgent The border width when
+ *  the client is maximized and urgent.
+ * @usebeautiful beautiful.border_width_fullscreen_urgent The border width when
+ *  the client is fullscreen and urgent.
  */
 
 /**
@@ -815,6 +912,12 @@ lua_class_t client_class;
  * @propemits false false
  * @request client geometry fullscreen granted When the client must be resized
  *  because it became (or stop being) fullscreen.
+ * @see maximized_horizontal
+ * @see maximized_vertical
+ * @see immobilized_horizontal
+ * @see immobilized_vertical
+ * @see maximized
+
  */
 
 /**
@@ -828,6 +931,11 @@ lua_class_t client_class;
  * @request client geometry maximized granted When the client must be resized
  *  because it became (or stop being) maximized.
  * @see request::border
+ * @see maximized_horizontal
+ * @see maximized_vertical
+ * @see fullscreen
+ * @see immobilized_horizontal
+ * @see immobilized_vertical
  */
 
 /**
@@ -840,6 +948,11 @@ lua_class_t client_class;
  * @propemits false false
  * @request client geometry maximized_horizontal granted When the client must be resized
  *  because it became (or stop being) maximized horizontally.
+ * @see maximized_vertical
+ * @see fullscreen
+ * @see immobilized_horizontal
+ * @see immobilized_vertical
+ * @see maximized
  */
 
 /**
@@ -852,6 +965,11 @@ lua_class_t client_class;
  * @propemits false false
  * @request client geometry maximized_vertical granted When the client must be resized
  *  because it became (or stop being) maximized vertically.
+ * @see maximized_horizontal
+ * @see fullscreen
+ * @see immobilized_horizontal
+ * @see immobilized_vertical
+ * @see maximized
  */
 
 /**
@@ -993,6 +1111,8 @@ lua_class_t client_class;
  * Please note that AwesomeWM implements `sticky` clients
  * per screens rather than globally like some other
  * implementations.
+ *
+ * @DOC_sequences_client_sticky_EXAMPLE@
  *
  * @property sticky
  * @tparam boolean sticky
@@ -1223,6 +1343,13 @@ lua_class_t client_class;
  * should reserve for itself.
  *
  * This corresponds to EWMH's `_NET_WM_STRUT` and `_NET_WM_STRUT_PARTIAL`.
+ *
+ * In the example below, 2 object affect the workarea (using their struts):
+ *
+ * * The top wibar add a `top=24`
+ * * The bottom-left client add `bottom=100, left=100`
+ *
+ * @DOC_screen_struts_EXAMPLE@
  *
  * @tparam table struts A table with new strut values, or none.
  * @treturn table A table with strut values.
@@ -3380,7 +3507,7 @@ HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
  * @tparam integer geo.x The horizontal position.
  * @tparam integer geo.y The vertical position.
  * @tparam integer geo.width The width.
- * @tparam integer geo.width The height.
+ * @tparam integer geo.height The height.
  * @treturn table A table with client geometry and coordinates.
  * @method geometry
  * @see struts
@@ -3582,7 +3709,7 @@ luaA_client_set_skip_taskbar(lua_State *L, client_t *c)
 static int
 luaA_client_get_name(lua_State *L, client_t *c)
 {
-    lua_pushstring(L, c->name ? c->name : c->alt_name);
+    lua_pushstring(L, NONULL(c->name ? c->name : c->alt_name));
     return 1;
 }
 

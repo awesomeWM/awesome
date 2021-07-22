@@ -41,9 +41,20 @@ describe('helper functions', function()
         assert.are_equal('<span property1="foo">', get_tag(sample_markup))
     end)
 end)
+describe('helper functions multibyte', function()
+    local sample_markup = 'Сперва<span property1="foo">Высокоосвещенный</span>Конечный'
+    it('main', function()
+        assert.are_equal('Сперва', get_first_part(sample_markup))
+        assert.are_equal('Высокоосвещенный', get_highlighted_part(sample_markup))
+        assert.are_equal('Конечный', get_last_part(sample_markup))
+        assert.are_equal('СперваВысокоосвещенныйКонечный', get_prompt_text(sample_markup))
+        assert.are_equal('<span property1="foo">', get_tag(sample_markup))
+    end)
+end)
+
 
 local function enter_text(callback, text)
-    for char in string.gmatch(text, '.') do
+  for char in string.gmatch(text, '([%z\1-\127\194-\244][\128-\191]*)') do
       callback({}, char, 'press')
       callback({}, char, 'release')
   end
@@ -62,7 +73,20 @@ insulate('main', function ()
     }
     -- luacheck: globals string
     function string.wlen(self)
-          return #self
+        local _, string_length = string.gsub(self, "[^\128-\193]", "")
+        local byte = string.byte(self)
+        if (
+            #self > 0 and string_length == 0
+        ) or (
+            byte and
+            (
+                (byte >= 194 and byte <= 244)
+            ) and
+            string_length == 1 and #self == 1
+        ) then
+            return -1
+        end
+        return string_length
     end
     local keygrabber = require("awful.keygrabber")
     package.loaded['awful.keygrabber'] = mock(keygrabber, true)
@@ -171,6 +195,40 @@ insulate('main', function ()
             prompt_callback({}, 'Left', 'press')
             assert_prompt_text('comman', 'd', ' ')
         end)
+        it('moving cursor readline', function()
+            prompt.run{
+                textbox = atextbox,
+            }
+            enter_text(prompt_callback, 'command')
+            prompt_callback({'Control'}, 'a', 'press')
+            assert_prompt_text('', 'c', 'ommand ')
+
+            prompt_callback({'Control'}, 'f', 'press')
+            assert_prompt_text('c', 'o', 'mmand ')
+
+            prompt_callback({'Control'}, 'e', 'press')
+            assert_prompt_text('command', ' ', '')
+
+            prompt_callback({'Control'}, 'b', 'press')
+            assert_prompt_text('comman', 'd', ' ')
+        end)
+        it('moving cursor readline multibyte', function()
+            prompt.run{
+                textbox = atextbox,
+            }
+            enter_text(prompt_callback, 'кокаинум')
+            prompt_callback({'Control'}, 'a', 'press')
+            assert_prompt_text('', 'к', 'окаинум ')
+
+            prompt_callback({'Control'}, 'f', 'press')
+            assert_prompt_text('к', 'о', 'каинум ')
+
+            prompt_callback({'Control'}, 'e', 'press')
+            assert_prompt_text('кокаинум', ' ', '')
+
+            prompt_callback({'Control'}, 'b', 'press')
+            assert_prompt_text('кокаину', 'м', ' ')
+        end)
         it('backspace', function()
             prompt.run{
                 textbox = atextbox,
@@ -191,6 +249,70 @@ insulate('main', function ()
             prompt_callback({}, 'Right', 'press')
             prompt_callback({}, 'BackSpace', 'press')
             assert_prompt_text('o', 'm', 'an ')
+        end)
+        it('backspace multibyte', function()
+            prompt.run{
+                textbox = atextbox,
+            }
+            enter_text(prompt_callback, 'кокаинум')
+            prompt_callback({}, 'BackSpace', 'press')
+            assert_prompt_text('кокаину', ' ', '')
+
+            prompt_callback({}, 'Home', 'press')
+            prompt_callback({}, 'BackSpace', 'press')
+            assert_prompt_text('', 'к', 'окаину ')
+
+            --@TODO: Left/Right not yet implemented for multibyte chars
+            --prompt_callback({}, 'Right', 'press')
+            --prompt_callback({}, 'BackSpace', 'press')
+            --assert_prompt_text('', 'о', 'каину ')
+
+            --prompt_callback({}, 'Right', 'press')
+            --prompt_callback({}, 'Right', 'press')
+            --prompt_callback({}, 'BackSpace', 'press')
+            --assert_prompt_text('о', 'а', 'ину ')
+        end)
+        it('backspace readline', function()
+            prompt.run{
+                textbox = atextbox,
+            }
+            enter_text(prompt_callback, 'command')
+            prompt_callback({'Control'}, 'h', 'press')
+            assert_prompt_text('comman', ' ', '')
+
+            prompt_callback({'Control'}, 'a', 'press')
+            prompt_callback({'Control'}, 'h', 'press')
+            assert_prompt_text('', 'c', 'omman ')
+
+            prompt_callback({'Control'}, 'f', 'press')
+            prompt_callback({'Control'}, 'h', 'press')
+            assert_prompt_text('', 'o', 'mman ')
+
+            prompt_callback({'Control'}, 'f', 'press')
+            prompt_callback({'Control'}, 'f', 'press')
+            prompt_callback({'Control'}, 'h', 'press')
+            assert_prompt_text('o', 'm', 'an ')
+        end)
+        it('backspace readline multibyte', function()
+            prompt.run{
+                textbox = atextbox,
+            }
+            enter_text(prompt_callback, 'кокаинум')
+            prompt_callback({'Control'}, 'h', 'press')
+            assert_prompt_text('кокаину', ' ', '')
+
+            prompt_callback({'Control'}, 'a', 'press')
+            prompt_callback({'Control'}, 'h', 'press')
+            assert_prompt_text('', 'к', 'окаину ')
+
+            prompt_callback({'Control'}, 'f', 'press')
+            prompt_callback({'Control'}, 'h', 'press')
+            assert_prompt_text('', 'о', 'каину ')
+
+            prompt_callback({'Control'}, 'f', 'press')
+            prompt_callback({'Control'}, 'f', 'press')
+            prompt_callback({'Control'}, 'h', 'press')
+            assert_prompt_text('о', 'а', 'ину ')
         end)
         it('delete', function()
             prompt.run{

@@ -1076,7 +1076,14 @@ table.insert(steps, function()
     assert(naughty.get_by_id(42) ~= n)
 
     -- The timeout
+    local real, called = n.reset_timeout, false
+    n.reset_timeout = function(...)
+        called = true
+        return real(...)
+    end
     naughty.reset_timeout(n, 1337)
+    assert(called)
+    assert(n.timer and n.timer.started)
 
     -- Destroy using the old API
     local old_count = #destroyed
@@ -1254,6 +1261,17 @@ table.insert(steps, function()
     assert(n.box)
 
     return true
+end)
+
+-- Make sure it isn't possible to remove default variables (#3145).
+table.insert(steps, function()
+    naughty.config.defaults = {fake_variable = 24}
+    naughty.config.text = 1337
+    assert(naughty.config.defaults.fake_variable == 24)
+    assert(naughty.config.defaults.timeout == 5)
+    assert(naughty.config.text == 1337)
+
+     return true
 end)
 
 require("_runner").run_steps(steps)

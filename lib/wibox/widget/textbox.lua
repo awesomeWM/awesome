@@ -1,10 +1,12 @@
 ---------------------------------------------------------------------------
 --
 --@DOC_wibox_widget_defaults_textbox_EXAMPLE@
+--
 -- @author Uli Schlachter
 -- @author dodo
 -- @copyright 2010, 2011 Uli Schlachter, dodo
 -- @widgetmod wibox.widget.textbox
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local base = require("wibox.widget.base")
@@ -188,7 +190,7 @@ end
 function textbox:set_markup(text)
     local success, message = self:set_markup_silently(text)
     if not success then
-        gdebug.print_error(message)
+        gdebug.print_error(debug.traceback("Error parsing markup: "..message.."\nFailed with string: '"..text.."'"))
     end
 end
 
@@ -373,9 +375,26 @@ function textbox.mt.__call(_, ...)
     return new(...)
 end
 
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
+--- Get geometry of text label, as if textbox would be created for it on the screen.
+--
+-- @tparam string text The text content, pango markup supported.
+-- @tparam[opt=nil] integer|screen s The screen on which the textbox would be displayed.
+-- @tparam[opt=beautiful.font] string font The font description as string.
+-- @treturn table Geometry (width, height) hashtable.
+-- @staticfct wibox.widget.textbox.get_markup_geometry
+function textbox.get_markup_geometry(text, s, font)
+    font = font or beautiful.font
+    local pctx = PangoCairo.font_map_get_default():create_context()
+    local playout = Pango.Layout.new(pctx)
+    playout:set_font_description(beautiful.get_font(font))
+    local dpi_scale = beautiful.xresources.get_dpi(s)
+    pctx:set_resolution(dpi_scale)
+    playout:context_changed()
+    local attr, parsed = Pango.parse_markup(text, -1, 0)
+    playout.attributes, playout.text = attr, parsed
+    local _, logical = playout:get_pixel_extents()
+    return logical
+end
 
 return setmetatable(textbox, textbox.mt)
 

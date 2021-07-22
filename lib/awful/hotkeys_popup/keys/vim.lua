@@ -173,6 +173,16 @@ local vim_keys = {
             zR="open all",
         }
     }},
+
+    ["VIM: diff"] = {{
+        modifiers = {},
+        keys = {
+            ["do"]="diff obtain",
+            ["dp"]="diff put",
+            ["]c"]="jump next",
+            ["[c"]="jump previous",
+        }
+    }},
 }
 
 hotkeys_popup.add_hotkeys(vim_keys)

@@ -438,7 +438,10 @@ function widget.new(args)
     end
 
     function widget_instance:_create_group_columns(column_layouts, group, keys, s, wibox_height)
-        local line_height = beautiful.get_font_height(self.font)
+        local line_height = math.max(
+            beautiful.get_font_height(self.font),
+            beautiful.get_font_height(self.description_font)
+        )
         local group_label_height = line_height + self.group_margin
         -- -1 for possible pagination:
         local max_height_px = wibox_height - group_label_height
@@ -472,7 +475,7 @@ function widget.new(args)
                 table.insert(((i<available_height_items) and new_keys or overlap_leftovers), keys[i])
             end
             keys = new_keys
-            table.insert(keys, {key=markup.fg(self.modifiers_fg, "▽"), description=""})
+            table.insert(keys, {key="▽", description=""})
         end
         if not current_column then
             current_column = {layout=wibox.layout.fixed.vertical()}
@@ -481,32 +484,39 @@ function widget.new(args)
 
         local function insert_keys(_keys, _add_new_column)
             local max_label_width = 0
-            local max_label_content = ""
             local joined_labels = ""
             for i, key in ipairs(_keys) do
-                local length = string.len(key.key or '') + string.len(key.description or '')
                 local modifiers = key.mod
                 if not modifiers or modifiers == "none" then
                     modifiers = ""
                 else
-                    length = length + string.len(modifiers) + 1 -- +1 for "+" character
                     modifiers = markup.fg(self.modifiers_fg, modifiers.."+")
                 end
+                local key_label = ""
+                if key.keylist and #key.keylist > 1 then
+                    for each_key_idx, each_key in ipairs(key.keylist) do
+                        key_label = key_label .. gstring.xml_escape(each_key)
+                        if each_key_idx ~= #key.keylist then
+                            key_label = key_label .. markup.fg(self.modifiers_fg, '/')
+                        end
+                    end
+                elseif key.key then
+                    key_label = gstring.xml_escape(key.key)
+                end
                 local rendered_hotkey = markup.font(self.font,
-                    modifiers .. (key.key or "") .. " "
+                    modifiers .. key_label .. " "
                 ) .. markup.font(self.description_font,
                     key.description or ""
                 )
-                if length > max_label_width then
-                    max_label_width = length
-                    max_label_content = rendered_hotkey
+                local label_width = wibox.widget.textbox.get_markup_geometry(rendered_hotkey, s).width
+                if label_width > max_label_width then
+                    max_label_width = label_width
                 end
                 joined_labels = joined_labels .. rendered_hotkey .. (i~=#_keys and "\n" or "")
                 end
             current_column.layout:add(wibox.widget.textbox(joined_labels))
-            local max_width, _ = wibox.widget.textbox(max_label_content):get_preferred_size(s)
-            max_width = max_width + self.group_margin
-            if not current_column.max_width or max_width > current_column.max_width then
+            local max_width = max_label_width + self.group_margin
+            if not current_column.max_width or (max_width > current_column.max_width) then
                 current_column.max_width = max_width
             end
             -- +1 for group label:
@@ -591,6 +601,7 @@ function widget.new(args)
             placement = place_func,
             minimum_width = wibox_width,
             minimum_height = wibox_height,
+            screen = s,
         }
 
         local widget_obj = {
