@@ -167,6 +167,10 @@ local instances
 -- @beautiful beautiful.tasklist_disable_task_name
 -- @tparam[opt=false] boolean tasklist_disable_task_name
 
+--- Disable the tasklist client titles for the focused client.
+-- @beautiful beautiful.tasklist_disable_task_name_focus
+-- @tparam[opt=false] boolean tasklist_disable_task_name_focus
+
 --- Disable the extra tasklist client property notification icons.
 --
 -- See the <a href="#status_icons">Status icons</a> section for more details.
@@ -332,6 +336,7 @@ local function tasklist_label(c, args, tb)
     local bg_image_minimize = args.bg_image_minimize or theme.tasklist_bg_image_minimize or theme.bg_image_minimize
     local tasklist_disable_icon = args.tasklist_disable_icon or theme.tasklist_disable_icon or false
     local disable_task_name = args.disable_task_name or theme.tasklist_disable_task_name or false
+    local disable_task_name_focus = args.disable_task_name_focus or theme.tasklist_disable_task_name_focus or (disable_task_name and args.disable_task_name_focus == nil and theme.tasklist_disable_task_name_focus == nil)
     local font = args.font or theme.tasklist_font or theme.font or ""
     local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font or ""
     local font_minimized = args.font_minimized or theme.tasklist_font_minimized or theme.font_minimized or font or ""
@@ -396,9 +401,15 @@ local function tasklist_label(c, args, tb)
 
     if focused then
         bg = bg_focus
-        text = text .. "<span color='"..fg_focus.."'>"..name.."</span>"
         bg_image = bg_image_focus
         font = font_focus
+
+        if not disable_task_name_focus and disable_task_name then
+            name = name .. (gstring.xml_escape(c.name) or gstring.xml_escape("<untitled>"))
+        elseif disable_task_name_focus then
+            name = ""
+        end
+        text = text .. "<span color='"..fg_focus.."'>"..name.."</span>"
 
         if args.shape_focus or theme.tasklist_shape_focus then
             shape = args.shape_focus or theme.tasklist_shape_focus
@@ -535,6 +546,7 @@ end
 -- @tparam[opt='⬌'] string args.style.maximized_horizontal Extra icon when client is maximized_horizontal
 -- @tparam[opt='⬍'] string args.style.maximized_vertical Extra icon when client is maximized_vertical
 -- @tparam[opt=false] boolean args.style.disable_task_name
+-- @tparam[opt=false] boolean args.style.disable_task_name_focus
 -- @tparam[opt=nil] string args.style.font
 -- @tparam[opt=left] string args.style.align *left*, *right* or *center*
 -- @tparam[opt=nil] string args.style.font_focus
