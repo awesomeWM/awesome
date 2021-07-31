@@ -1,80 +1,80 @@
- * <table class='widget_list' border=1>
- * <tr><td>num_glyphs          </td></tr>
- * <tr><td>cursor              </td></tr>
- * <tr><td>arrow               </td></tr>
- * <tr><td>based_arrow_down    </td></tr>
- * <tr><td>based_arrow_up      </td></tr>
- * <tr><td>boat                </td></tr>
- * <tr><td>bogosity            </td></tr>
- * <tr><td>bottom_left_corner  </td></tr>
- * <tr><td>bottom_right_corner </td></tr>
- * <tr><td>bottom_side         </td></tr>
- * <tr><td>bottom_tee          </td></tr>
- * <tr><td>box_spiral          </td></tr>
- * <tr><td>center_ptr          </td></tr>
- * <tr><td>circle              </td></tr>
- * <tr><td>clock               </td></tr>
- * <tr><td>coffee_mug          </td></tr>
- * <tr><td>cross               </td></tr>
- * <tr><td>cross_reverse       </td></tr>
- * <tr><td>crosshair           </td></tr>
- * <tr><td>diamond_cross       </td></tr>
- * <tr><td>dot                 </td></tr>
- * <tr><td>dotbox              </td></tr>
- * <tr><td>double_arrow        </td></tr>
- * <tr><td>draft_large         </td></tr>
- * <tr><td>draft_small         </td></tr>
- * <tr><td>draped_box          </td></tr>
- * <tr><td>exchange            </td></tr>
- * <tr><td>fleur               </td></tr>
- * <tr><td>gobbler             </td></tr>
- * <tr><td>gumby               </td></tr>
- * <tr><td>hand                </td></tr>
- * <tr><td>hand                </td></tr>
- * <tr><td>heart               </td></tr>
- * <tr><td>icon                </td></tr>
- * <tr><td>iron_cross          </td></tr>
- * <tr><td>left_ptr            </td></tr>
- * <tr><td>left_side           </td></tr>
- * <tr><td>left_tee            </td></tr>
- * <tr><td>leftbutton          </td></tr>
- * <tr><td>ll_angle            </td></tr>
- * <tr><td>lr_angle            </td></tr>
- * <tr><td>man                 </td></tr>
- * <tr><td>middlebutton        </td></tr>
- * <tr><td>mouse               </td></tr>
- * <tr><td>pencil              </td></tr>
- * <tr><td>pirate              </td></tr>
- * <tr><td>plus                </td></tr>
- * <tr><td>question_arrow      </td></tr>
- * <tr><td>right_ptr           </td></tr>
- * <tr><td>right_side          </td></tr>
- * <tr><td>right_tee           </td></tr>
- * <tr><td>rightbutton         </td></tr>
- * <tr><td>rtl_logo            </td></tr>
- * <tr><td>sailboat            </td></tr>
- * <tr><td>sb_down_arrow       </td></tr>
- * <tr><td>sb_h_double_arrow   </td></tr>
- * <tr><td>sb_left_arrow       </td></tr>
- * <tr><td>sb_right_arrow      </td></tr>
- * <tr><td>sb_up_arrow         </td></tr>
- * <tr><td>sb_v_double_arrow   </td></tr>
- * <tr><td>shuttle             </td></tr>
- * <tr><td>sizing              </td></tr>
- * <tr><td>spider              </td></tr>
- * <tr><td>spraycan            </td></tr>
- * <tr><td>star                </td></tr>
- * <tr><td>target              </td></tr>
- * <tr><td>tcross              </td></tr>
- * <tr><td>top_left_arrow      </td></tr>
- * <tr><td>top_left_corner     </td></tr>
- * <tr><td>top_right_corner    </td></tr>
- * <tr><td>top_side            </td></tr>
- * <tr><td>top_tee             </td></tr>
- * <tr><td>trek                </td></tr>
- * <tr><td>ul_angle            </td></tr>
- * <tr><td>umbrella            </td></tr>
- * <tr><td>ur_angle            </td></tr>
- * <tr><td>watch               </td></tr>
- * <tr><td>xterm               </td></tr>
- * </table>
+  <div class='flex-list'>
+ * <div>num_glyphs</div>
+ * <div>arrow</div>
+ * <div>based_arrow_down</div>
+ * <div>based_arrow_up</div>
+ * <div>boat</div>
+ * <div>bogosity</div>
+ * <div>bottom_left_corner</div>
+ * <div>bottom_right_corner</div>
+ * <div>bottom_side</div>
+ * <div>bottom_tee</div>
+ * <div>box_spiral</div>
+ * <div>center_ptr</div>
+ * <div>circle</div>
+ * <div>clock</div>
+ * <div>coffee_mug</div>
+ * <div>cross</div>
+ * <div>crosshair</div>
+ * <div>cross_reverse</div>
+ * <div>cursor</div>
+ * <div>diamond_cross</div>
+ * <div>dotbox</div>
+ * <div>dot</div>
+ * <div>double_arrow</div>
+ * <div>draft_large</div>
+ * <div>draft_small</div>
+ * <div>draped_box</div>
+ * <div>exchange</div>
+ * <div>fleur</div>
+ * <div>gobbler</div>
+ * <div>gumby</div>
+ * <div>hand</div>
+ * <div>hand</div>
+ * <div>heart</div>
+ * <div>icon</div>
+ * <div>iron_cross</div>
+ * <div>leftbutton</div>
+ * <div>left_ptr</div>
+ * <div>left_side</div>
+ * <div>left_tee</div>
+ * <div>ll_angle</div>
+ * <div>lr_angle</div>
+ * <div>man</div>
+ * <div>middlebutton</div>
+ * <div>mouse</div>
+ * <div>pencil</div>
+ * <div>pirate</div>
+ * <div>plus</div>
+ * <div>question_arrow</div>
+ * <div>rightbutton</div>
+ * <div>right_ptr</div>
+ * <div>right_side</div>
+ * <div>right_tee</div>
+ * <div>rtl_logo</div>
+ * <div>sailboat</div>
+ * <div>sb_down_arrow</div>
+ * <div>sb_h_double_arrow</div>
+ * <div>sb_left_arrow</div>
+ * <div>sb_right_arrow</div>
+ * <div>sb_up_arrow</div>
+ * <div>sb_v_double_arrow</div>
+ * <div>shuttle</div>
+ * <div>sizing</div>
+ * <div>spider</div>
+ * <div>spraycan</div>
+ * <div>star</div>
+ * <div>target</div>
+ * <div>tcross</div>
+ * <div>top_left_arrow</div>
+ * <div>top_left_corner</div>
+ * <div>top_right_corner</div>
+ * <div>top_side</div>
+ * <div>top_tee</div>
+ * <div>trek</div>
+ * <div>ul_angle</div>
+ * <div>umbrella</div>
+ * <div>ur_angle</div>
+ * <div>watch</div>
+ * <div>xterm</div>
+ * </div>
