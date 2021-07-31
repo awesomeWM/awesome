@@ -121,6 +121,7 @@ local function parse_files(paths, property_name, matcher, name_matcher)
     local exp2 = matcher or "[-*]*[ ]*".. property_name ..".(.+)"
     local exp3 = name_matcher or "[. ](.+)"
 
+    local count = 0
     local names = {} -- Used to check for duplicates
     local ret = {}
 
@@ -165,14 +166,43 @@ local function parse_files(paths, property_name, matcher, name_matcher)
                     else
                         local insert_name = name:gsub("_", "_")
                         if names[insert_name] == nil then
-                            table.insert(ret, {
+                            count = count + 1
+                            table.insert(ret, count, {
                                 file = file,
                                 name = insert_name,
                                 link = get_link(file, var, var:match(exp3):gsub("_", "\\_")),
                                 desc = buffer:gmatch("[-*/ \n]+([^\n.]*)")() or "",
                                 mod  = path_to_module(file)
                             })
-                            names[insert_name] = 1
+                            names[insert_name] = count
+                        else
+                            if type(ret[names[insert_name]].link) ~= "table" then
+                                ret[names[insert_name]].file = {
+                                    ret[names[insert_name]].file,
+                                    file
+                                }
+                                ret[names[insert_name]].link = {
+                                    ret[names[insert_name]].link .. " (" .. ret[names[insert_name]].mod .. ")",
+                                    get_link(file, var, var:match(exp3):gsub("_", "\\_")) .. " (" .. path_to_module(file) .. ")",
+
+                                }
+                                ret[names[insert_name]].desc = {
+                                    ret[names[insert_name]].desc,
+                                    buffer:gmatch("[-*/ \n]+([^\n.]*)")() or ""
+                                }
+                                ret[names[insert_name]].mod = {
+                                    ret[names[insert_name]].mod,
+                                    path_to_module(file)
+                                }
+                            else
+                                table.insert(ret[names[insert_name]].file, file)
+                                table.insert(ret[names[insert_name]].link,
+                                    get_link(file, var, var:match(exp3):gsub("_", "\\_")) .. " (" .. path_to_module(file) .. ")")
+                                table.insert(ret[names[insert_name]].desc,
+                                    buffer:gmatch("[-*/ \n]+([^\n.]*)")() or "")
+                                table.insert(ret[names[insert_name]].mod,
+                                    path_to_module(file))
+                            end
                         end
                     end
 
@@ -195,7 +225,21 @@ local function create_table(entries, columns, prefix)
         local line = "  <tr>"
 
         for _, column in ipairs(columns) do
-            line = line.."<td>"..entry[column].."</td>"
+            if type(entry[column]) == "table" then
+                line = line .. "<td>"
+                local firstline = true
+                for _,v in pairs(entry[column]) do
+                    if not firstline then
+                        line = line .. "<br>"
+                    else
+                        firstline = false
+                    end
+                    line = line .. v
+                end
+                line = line .. "</td>"
+            else
+                line = line.."<td>"..entry[column].."</td>"
+            end
         end
 
         table.insert(lines, prefix..line.."</tr>\n")
