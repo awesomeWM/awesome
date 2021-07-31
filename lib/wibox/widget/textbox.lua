@@ -222,17 +222,22 @@ function textbox:get_text()
     return self._private.layout.text
 end
 
---- Set a textbox ellipsize mode.
+--- Set the text ellipsize mode.
 --
 -- Valid values are:
 --
--- * **start**
--- * **middle**
--- * **end**
+-- * `"start"`
+-- * `"middle"`
+-- * `"end"`
+-- * `"none"`
+--
+-- See Pango for additional details:
+-- [Layout.set_ellipsize](https://docs.gtk.org/Pango/method.Layout.set_ellipsize.html)
+--
+--@DOC_wibox_widget_textbox_ellipsize_EXAMPLE@
 --
 -- @property ellipsize
--- @tparam string mode Where should long lines be shortened? "start", "middle"
---  or "end".
+-- @tparam string mode The ellipsize mode.
 -- @propemits true false
 
 function textbox:set_ellipsize(mode)
