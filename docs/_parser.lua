@@ -121,6 +121,7 @@ local function parse_files(paths, property_name, matcher, name_matcher)
     local exp2 = matcher or "[-*]*[ ]*".. property_name ..".(.+)"
     local exp3 = name_matcher or "[. ](.+)"
 
+    local names = {} -- Used to check for duplicates
     local ret = {}
 
     table.sort(paths)
@@ -162,13 +163,17 @@ local function parse_files(paths, property_name, matcher, name_matcher)
                             "seems to be misformatted. Use `beautiful.namespace_name`"
                         )
                     else
-                        table.insert(ret, {
-                            file = file,
-                            name = name:gsub("_", "_"),
-                            link = get_link(file, var, var:match(exp3):gsub("_", "\\_")),
-                            desc = buffer:gmatch("[-*/ \n]+([^\n.]*)")() or "",
-                            mod  = path_to_module(file),
-                        })
+                        local insert_name = name:gsub("_", "_")
+                        if names[insert_name] == nil then
+                            table.insert(ret, {
+                                file = file,
+                                name = insert_name,
+                                link = get_link(file, var, var:match(exp3):gsub("_", "\\_")),
+                                desc = buffer:gmatch("[-*/ \n]+([^\n.]*)")() or "",
+                                mod  = path_to_module(file)
+                            })
+                            names[insert_name] = 1
+                        end
                     end
 
                     buffer = ""
