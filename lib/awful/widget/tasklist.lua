@@ -169,7 +169,7 @@ local instances
 
 --- Disable the tasklist client titles for the focused client.
 -- @beautiful beautiful.tasklist_disable_task_name_focus
--- @tparam[opt=false] boolean tasklist_disable_task_name_focus
+-- @tparam[opt=value of tasklist_disable_task_name] boolean tasklist_disable_task_name_focus
 
 --- Disable the extra tasklist client property notification icons.
 --
@@ -547,7 +547,7 @@ end
 -- @tparam[opt='⬌'] string args.style.maximized_horizontal Extra icon when client is maximized_horizontal
 -- @tparam[opt='⬍'] string args.style.maximized_vertical Extra icon when client is maximized_vertical
 -- @tparam[opt=false] boolean args.style.disable_task_name
--- @tparam[opt=false] boolean args.style.disable_task_name_focus
+-- @tparam[opt=value of disable_task_name] boolean args.style.disable_task_name_focus
 -- @tparam[opt=nil] string args.style.font
 -- @tparam[opt=left] string args.style.align *left*, *right* or *center*
 -- @tparam[opt=nil] string args.style.font_focus
