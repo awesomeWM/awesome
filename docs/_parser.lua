@@ -165,17 +165,22 @@ local function parse_files(paths, property_name, matcher, name_matcher)
                         )
                     else
                         local insert_name = name:gsub("_", "_")
+                        local link = get_link(file, var, var:match(exp3):gsub("_", "\\_"))
+                        local desc = buffer:gmatch("[-*/ \n]+([^\n.]*)")() or ""
+                        local mod = path_to_module(file)
+
                         if names[insert_name] == nil then
                             count = count + 1
                             table.insert(ret, count, {
                                 file = file,
                                 name = insert_name,
-                                link = get_link(file, var, var:match(exp3):gsub("_", "\\_")),
-                                desc = buffer:gmatch("[-*/ \n]+([^\n.]*)")() or "",
-                                mod  = path_to_module(file)
+                                link = link,
+                                desc = desc,
+                                mod  = mod
                             })
                             names[insert_name] = count
                         else
+                            link = link .. "(" .. mod .. ")"
                             if type(ret[names[insert_name]].link) ~= "table" then
                                 ret[names[insert_name]].file = {
                                     ret[names[insert_name]].file,
@@ -183,25 +188,21 @@ local function parse_files(paths, property_name, matcher, name_matcher)
                                 }
                                 ret[names[insert_name]].link = {
                                     ret[names[insert_name]].link .. " (" .. ret[names[insert_name]].mod .. ")",
-                                    get_link(file, var, var:match(exp3):gsub("_", "\\_")) .. " (" .. path_to_module(file) .. ")",
-
+                                    link
                                 }
                                 ret[names[insert_name]].desc = {
                                     ret[names[insert_name]].desc,
-                                    buffer:gmatch("[-*/ \n]+([^\n.]*)")() or ""
+                                    desc
                                 }
                                 ret[names[insert_name]].mod = {
                                     ret[names[insert_name]].mod,
-                                    path_to_module(file)
+                                    mod
                                 }
                             else
                                 table.insert(ret[names[insert_name]].file, file)
-                                table.insert(ret[names[insert_name]].link,
-                                    get_link(file, var, var:match(exp3):gsub("_", "\\_")) .. " (" .. path_to_module(file) .. ")")
-                                table.insert(ret[names[insert_name]].desc,
-                                    buffer:gmatch("[-*/ \n]+([^\n.]*)")() or "")
-                                table.insert(ret[names[insert_name]].mod,
-                                    path_to_module(file))
+                                table.insert(ret[names[insert_name]].link, link)
+                                table.insert(ret[names[insert_name]].desc, desc)
+                                table.insert(ret[names[insert_name]].mod, mod)
                             end
                         end
                     end
