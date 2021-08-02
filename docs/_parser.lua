@@ -227,17 +227,11 @@ local function create_table(entries, columns, prefix)
 
         for _, column in ipairs(columns) do
             if type(entry[column]) == "table" then
-                line = line .. "<td>"
-                local firstline = true
+                line = line .. "<td><ul>"
                 for _,v in pairs(entry[column]) do
-                    if not firstline then
-                        line = line .. "<br>"
-                    else
-                        firstline = false
-                    end
-                    line = line .. v
+                    line = line .. "<li>" .. v .. "</li>"
                 end
-                line = line .. "</td>"
+                line = line .. "</ul></td>"
             else
                 line = line.."<td>"..entry[column].."</td>"
             end
