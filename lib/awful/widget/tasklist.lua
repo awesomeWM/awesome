@@ -336,6 +336,7 @@ local function tasklist_label(c, args, tb)
     local bg_image_minimize = args.bg_image_minimize or theme.tasklist_bg_image_minimize or theme.bg_image_minimize
     local tasklist_disable_icon = args.tasklist_disable_icon or theme.tasklist_disable_icon or false
     local disable_task_name = args.disable_task_name or theme.tasklist_disable_task_name or false
+    -- Check if option is set, else refere to the value of disable_task_name as default for backward compatibility
     local disable_task_name_focus = args.disable_task_name_focus or theme.tasklist_disable_task_name_focus or (disable_task_name and args.disable_task_name_focus == nil and theme.tasklist_disable_task_name_focus == nil)
     local font = args.font or theme.tasklist_font or theme.font or ""
     local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font or ""
