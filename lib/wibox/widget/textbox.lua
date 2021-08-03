@@ -148,7 +148,7 @@ function textbox:get_height_for_width_at_dpi(width, dpi)
 end
 
 --- Set the text of the textbox.(with
--- [Pango markup](https://developer.gnome.org/pango/stable/pango-Markup.html)).
+-- [Pango markup](https://docs.gtk.org/Pango/pango_markup.html)).
 --
 -- @tparam string text The text to set. This can contain pango markup (e.g.
 --   `<b>bold</b>`). You can use `gears.string.escape` to escape
@@ -178,7 +178,7 @@ function textbox:set_markup_silently(text)
 end
 
 --- Set the text of the textbox (with
--- [Pango markup](https://developer.gnome.org/pango/stable/pango-Markup.html)).
+-- [Pango markup](https://docs.gtk.org/Pango/pango_markup.html)).
 --
 -- @property markup
 -- @tparam string text The text to set. This can contain pango markup (e.g.
