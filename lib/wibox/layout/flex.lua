@@ -1,4 +1,19 @@
 ---------------------------------------------------------------------------
+-- A `flex` layout may be initialized with any number of child widgets, and
+-- during runtime widgets may be added and removed dynamically.
+--
+-- On the main axis, the layout will divide the available space evenly between
+-- all child widgets, without any regard to how much space these widgets might
+-- be asking for.
+--
+-- Just like @{wibox.layout.fixed}, `flex` allows adding spacing between the
+-- widgets, either as an ofset via @{spacing} or with a
+-- @{spacing_widget}.
+--
+-- On its secondary axis, the layout's size is determined by the largest child
+-- widget. Smaller child widgets are then placed with the same size.
+-- Therefore, child widgets may ignore their `forced_width` or `forced_height`
+-- properties for vertical and horizontal layouts respectively.
 --
 --@DOC_wibox_layout_defaults_flex_EXAMPLE@
 -- @author Uli Schlachter
@@ -56,14 +71,18 @@ local flex = {}
 -- @treturn boolean If the operation is successful
 -- @method insert
 -- @emits widget::inserted
--- @emitstparam widget::inserted widget self The fixed layout.
--- @emitstparam widget::inserted widget widget index The inserted widget.
+-- @emitstparam widget::inserted widget self The layout.
+-- @emitstparam widget::inserted widget widget The inserted widget.
 -- @emitstparam widget::inserted number count The widget count.
 -- @interface layout
 
---- The widget used to fill the spacing between the layout elements.
+--- A widget to insert as a separator between child widgets.
 --
--- By default, no widget is used.
+-- If this property is a valid widget and @{spacing} is greater than `0`, a
+-- copy of this widget is inserted between each child widget, with its size in
+-- the layout's main direction determined by @{spacing}.
+--
+-- By default no widget is used and any @{spacing} is applied as an empty offset.
 --
 --@DOC_wibox_layout_flex_spacing_widget_EXAMPLE@
 --
@@ -72,13 +91,16 @@ local flex = {}
 -- @propemits true false
 -- @interface layout
 
---- Add spacing between each layout widgets.
+--- The amount of space inserted between the child widgets.
+--
+-- If a @{spacing_widget} is defined, this value is used for its size.
 --
 --@DOC_wibox_layout_flex_spacing_EXAMPLE@
 --
 -- @property spacing
 -- @tparam number spacing Spacing between widgets.
 -- @propemits true false
+-- @interface layout
 
 function flex:layout(_, width, height)
     local result = {}
@@ -195,10 +217,7 @@ local function get_layout(dir, widget1, ...)
     return ret
 end
 
---- Returns a new horizontal flex layout.
---
--- A flex layout shares the available space.
--- equally among all widgets. Widgets can be added via `:add(widget)`.
+--- Creates and returns a new horizontal flex layout.
 --
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @constructorfct wibox.layout.flex.horizontal
@@ -206,10 +225,7 @@ function flex.horizontal(...)
     return get_layout("horizontal", ...)
 end
 
---- Returns a new vertical flex layout.
---
--- A flex layout shares the available space
--- equally among all widgets. Widgets can be added via `:add(widget)`.
+--- Creates and returns a new vertical flex layout.
 --
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @constructorfct wibox.layout.flex.vertical

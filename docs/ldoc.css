@@ -257,6 +257,23 @@ table th, table td {
     border-bottom-width: 1px;
 }
 
+.flex-list {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.flex-list > div {
+    flex-grow: 1;
+    /* Use base width based on font size
+       to make sure text fits when zooming */
+    width: 9em;
+
+    text-align: center;
+    padding: 10px;
+    margin: 5px;
+    border: 1px solid rgb(193, 204, 228);
+}
+
 #about {
     padding: 15px;
     padding-left: 16em;

@@ -1,6 +1,22 @@
 ---------------------------------------------------------------------------
+-- A `fixed` layout may be initialized with any number of child widgets, and
+-- during runtime widgets may be added and removed dynamically.
+--
+-- On the main axis, child widgets are given a fixed size of exactly as much
+-- space as they ask for. The layout will then resize according to the sum of
+-- all child widgets. If the space available to the layout is not enough to
+-- include all child widgets, the excessive ones are not drawn at all.
+--
+-- Additionally, the layout allows adding empty spacing or even placing a custom
+-- spacing widget between the child widget.
+--
+-- On its secondary axis, the layout's size is determined by the largest child
+-- widget. Smaller child widgets are then placed with the same size.
+-- Therefore, child widgets may ignore their `forced_width` or `forced_height`
+-- properties for vertical and horizontal layouts respectively.
 --
 --@DOC_wibox_layout_defaults_fixed_EXAMPLE@
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @layoutmod wibox.layout.fixed
@@ -32,7 +48,7 @@ function fixed:layout(context, width, height)
 
     spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
 
-    for k, v in pairs(self._private.widgets) do
+    for index, widget in pairs(self._private.widgets) do
         local w, h, local_spacing = width - x, height - y, spacing
 
         -- Some widget might be zero sized either because this is their
@@ -43,8 +59,8 @@ function fixed:layout(context, width, height)
         local zero = false
 
         if is_y then
-            if k ~= widgets_nr or not self._private.fill_space then
-                h = select(2, base.fit_widget(self, context, v, w, h))
+            if index ~= widgets_nr or not self._private.fill_space then
+                h = select(2, base.fit_widget(self, context, widget, w, h))
                 zero = h == 0
             end
 
@@ -65,8 +81,8 @@ function fixed:layout(context, width, height)
                 end
             end
         else
-            if k ~= widgets_nr or not self._private.fill_space then
-                w = select(1, base.fit_widget(self, context, v, w, h))
+            if index ~= widgets_nr or not self._private.fill_space then
+                w = select(1, base.fit_widget(self, context, widget, w, h))
                 zero = w == 0
             end
 
@@ -94,16 +110,19 @@ function fixed:layout(context, width, height)
 
         -- Place widget, even if it has zero width/height. Otherwise
         -- any layout change for zero-sized widget would become invisible.
-        table.insert(result, base.place_widget_at(v, x, y, w, h))
+        table.insert(result, base.place_widget_at(widget, x, y, w, h))
 
         x = is_x and x + w + local_spacing or x
         y = is_y and y + h + local_spacing or y
 
         -- Add the spacing widget (if needed)
-        if k < widgets_nr and spacing_widget then
+        if index < widgets_nr and spacing_widget then
             table.insert(result, base.place_widget_at(
-                spacing_widget, is_x and (x - spoffset) or x, is_y and (y - spoffset) or y,
-                is_x and abspace or w, is_y and abspace or h
+                spacing_widget,
+                is_x and (x - spoffset) or x,
+                is_y and (y - spoffset) or y,
+                is_x and abspace or w,
+                is_y and abspace or h
             ))
         end
     end
@@ -266,9 +285,13 @@ function fixed:set(index, widget2)
     return true
 end
 
---- The widget used to fill the spacing between the layout elements.
+--- A widget to insert as a separator between child widgets.
 --
--- By default, no widget is used.
+-- If this property is a valid widget and `spacing` is greater than `0`, a
+-- copy of this widget is inserted between each child widget, with its size in
+-- the layout's main direction determined by `spacing`.
+--
+-- By default no widget is used and any `spacing` is applied as an empty offset.
 --
 --@DOC_wibox_layout_fixed_spacing_widget_EXAMPLE@
 --
@@ -406,29 +429,25 @@ local function get_layout(dir, widget1, ...)
     return ret
 end
 
---- Returns a new horizontal fixed layout. Each widget will get as much space as it
--- asks for and each widget will be drawn next to its neighboring widget.
--- Widgets can be added via :add() or as arguments to this function.
--- Note that widgets ignore `forced_height`. They will use the preferred/minimum width
--- on the horizontal axis, and a stretched height on the vertical axis.
+--- Creates and returns a new horizontal fixed layout.
+--
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @constructorfct wibox.layout.fixed.horizontal
 function fixed.horizontal(...)
     return get_layout("x", ...)
 end
 
---- Returns a new vertical fixed layout. Each widget will get as much space as it
--- asks for and each widget will be drawn next to its neighboring widget.
--- Widgets can be added via :add() or as arguments to this function.
--- Note that widgets ignore `forced_width`. They will use the preferred/minimum height
--- on the vertical axis, and a stretched width on the horizontal axis.
+--- Creates and returns a new vertical fixed layout.
+--
 -- @tparam widget ... Widgets that should be added to the layout.
 -- @constructorfct wibox.layout.fixed.vertical
 function fixed.vertical(...)
     return get_layout("y", ...)
 end
 
---- Add spacing between each layout widgets.
+--- The amount of space inserted between the child widgets.
+--
+-- If a `spacing_widget` is defined, this value is used for its size.
 --
 --@DOC_wibox_layout_fixed_spacing_EXAMPLE@
 --
