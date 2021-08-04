@@ -37,16 +37,16 @@ should be useful for you.
 
 <div class="index_guides">
     <div>
-        <a href="../doc/documentation/07-my-first-awesome.md.html">Getting started</a>
-        <a href="../doc/documentation/90-FAQ.md.html">FAQ</a>
-        <a href="../doc/documentation/01-readme.md.html">Read me</a>
-        <a href="../doc/documentation/89-NEWS.md.html">NEWS</a>
+        @{07-my-first-awesome.md|Getting started}
+        @{90-FAQ.md|FAQ}
+        @{01-readme.md|Read Me}
+        @{89-NEWS.md|NEWS}
     </div>
     <div>
-        <a href="../doc/documentation/03-declarative-layout.md.html">The widget system</a>
-        <a href="../doc/documentation/09-options.md.html">Startup options</a>
-        <a href="../doc/documentation/05-awesomerc.md.html">The default rc.lua</a>
-        <a href="../doc/documentation/08-client-layout-system.md.html">Window management</a>
+        @{03-declarative-layout.md|The widget system}
+        @{09-options.md|Startup options}
+        @{05-awesomerc.md|The default rc.lua}
+        @{08-client-layout-system.md|Window management}
     </div>
 </div>
 
