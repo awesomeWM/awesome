@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------------
 --- D-Bus module for awful.
 --
--- This module simply request the org.awesomewm.awful name on the D-Bus
--- for futur usage by other awful modules.
+-- This module simply requests the org.awesomewm.awful name on the D-Bus
+-- for future usage by other awful modules.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
