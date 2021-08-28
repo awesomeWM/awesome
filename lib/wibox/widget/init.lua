@@ -25,6 +25,7 @@ local widget = {
     slider = require("wibox.widget.slider");
     calendar = require("wibox.widget.calendar");
     separator = require("wibox.widget.separator");
+    template = require("wibox.widget.template");
 }
 
 setmetatable(widget, {
