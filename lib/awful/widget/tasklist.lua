@@ -96,7 +96,7 @@ local clienticon = require("awful.widget.clienticon")
 local wbackground = require("wibox.container.background")
 
 local function get_screen(s)
-    return s and screen[s]
+    return s and capi.screen[s]
 end
 
 local tasklist = { mt = {} }
