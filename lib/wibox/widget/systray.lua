@@ -30,6 +30,13 @@ local display_on_screen = "primary"
 -- @beautiful beautiful.bg_systray
 -- @param string The color (string like "#ff0000" only)
 
+--- The maximum number of rows for systray icons. Icons will fill the
+-- current column (orthogonally to the systray direction) before
+-- filling the next column.
+--
+-- @beautiful beautiful.systray_max_rows
+-- @tparam[opt=1] integer The positive number of rows
+
 --- The systray icon spacing.
 --
 -- @beautiful beautiful.systray_icon_spacing
@@ -49,6 +56,9 @@ function systray:draw(context, cr, width, height)
 
     local x, y, _, _ = wbase.rect_to_device_geometry(cr, 0, 0, width, height)
     local num_entries = capi.awesome.systray()
+    local max_rows = math.floor(tonumber(beautiful.systray_max_rows) or 1)
+    local rows = math.max(math.min(num_entries, max_rows), 1)
+    local cols = math.ceil(num_entries / rows)
     local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
     local spacing = beautiful.systray_icon_spacing or 0
 
@@ -69,18 +79,17 @@ function systray:draw(context, cr, width, height)
     end
     -- The formula for a given base, spacing, and num_entries for the necessary
     -- space is (draw a picture to convince yourself; this assumes horizontal):
-    --   height = base
-    --   width = (base + spacing) * num_entries - spacing
+    --   height = (base + spacing) * rows - spacing
+    --   width = (base + spacing) * cols - spacing
     -- Now, we check if we are limited by horizontal or vertical space: Which of
     -- the two limits the base size more?
-    if (ortho + spacing) * num_entries - spacing <= in_dir then
-        base = ortho
-    else
+    base = (ortho + spacing) / rows - spacing
+    if (base + spacing) * cols - spacing > in_dir then
         -- Solving the "width" formula above for "base" (with width=in_dir):
-        base = (in_dir + spacing) / num_entries - spacing
+        base = (in_dir + spacing) / cols - spacing
     end
     capi.awesome.systray(context.wibox.drawin, math.ceil(x), math.ceil(y),
-                         base, is_rotated, bg, reverse, spacing)
+                         base, is_rotated, bg, reverse, spacing, rows)
 end
 
 -- Private API. Does not appear in LDoc on purpose. This function is called
@@ -96,23 +105,28 @@ function systray:fit(context, width, height)
     end
 
     local num_entries = capi.awesome.systray()
+    local max_rows = math.floor(tonumber(beautiful.systray_max_rows) or 1)
+    local rows = math.max(math.min(num_entries, max_rows), 1)
+    local cols = math.ceil(num_entries / rows)
     local base = base_size
     local spacing = beautiful.systray_icon_spacing or 0
     if num_entries == 0 then
         return 0, 0
     end
     if base == nil then
-        if width < height then
-            base = width
+        if horizontal then
+            base = math.min(math.floor((height + spacing) / rows) - spacing,
+                            math.floor((width + spacing) / cols) - spacing)
         else
-            base = height
+            base = math.min(math.floor((width + spacing) / rows) - spacing,
+                            math.floor((height + spacing) / cols) - spacing)
         end
     end
     base = base + spacing
     if horizontal then
-        return base * num_entries - spacing, base
+        return base * cols - spacing, base * rows - spacing
     end
-    return base, base * num_entries - spacing
+    return base * rows - spacing, base * cols - spacing
 end
 
 -- Check if the function was called like :foo() or .foo() and do the right thing

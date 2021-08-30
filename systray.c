@@ -272,18 +272,22 @@ luaA_systray_invalidate(void)
 }
 
 static void
-systray_update(int base_size, bool horizontal, bool reverse, int spacing, bool force_redraw)
+systray_update(int base_size, bool horizontal, bool reverse, int spacing, bool force_redraw, int rows)
 {
     if(base_size <= 0)
         return;
 
     /* Give the systray window the correct size */
     int num_entries = systray_num_visible_entries();
-    uint32_t config_vals[4] = { base_size, base_size, 0, 0 };
-    if(horizontal)
-        config_vals[0] = base_size * num_entries + spacing * (num_entries - 1);
-    else
-        config_vals[1] = base_size * num_entries + spacing * (num_entries - 1);
+    int cols = (num_entries + rows - 1) / rows;
+    uint32_t config_vals[4] = { 0, 0, 0, 0 };
+    if(horizontal) {
+        config_vals[0] = base_size * cols + spacing * (cols - 1);
+        config_vals[1] = base_size * rows + spacing * (rows - 1);
+    } else {
+        config_vals[0] = base_size * rows + spacing * (rows - 1);
+        config_vals[1] = base_size * cols + spacing * (cols - 1);
+    }
     xcb_configure_window(globalconf.connection,
                          globalconf.systray.window,
                          XCB_CONFIG_WINDOW_WIDTH | XCB_CONFIG_WINDOW_HEIGHT,
@@ -313,10 +317,21 @@ systray_update(int base_size, bool horizontal, bool reverse, int spacing, bool f
         xcb_map_window(globalconf.connection, em->win);
         if (force_redraw)
             xcb_clear_area(globalconf.connection, 1, em->win, 0, 0, 0, 0);
-        if(horizontal)
-            config_vals[0] += base_size + spacing;
-        else
-            config_vals[1] += base_size + spacing;
+        if (i % rows == rows - 1) {
+            if (horizontal) {
+                config_vals[0] += base_size + spacing;
+                config_vals[1] = 0;
+            } else {
+                config_vals[0] = 0;
+                config_vals[1] += base_size + spacing;
+            }
+        } else {
+            if (horizontal) {
+                config_vals[1] += base_size + spacing;
+            } else {
+                config_vals[0] += base_size + spacing;
+            }
+        }
     }
 }
 
@@ -332,6 +347,7 @@ systray_update(int base_size, bool horizontal, bool reverse, int spacing, bool f
  * \lparam bg Color of the systray background.
  * \lparam revers If true, the systray icon order will be reversed, else default.
  * \lparam spacing The size of the spacing between icons.
+ * \lparam rows Number of rows to display.
  */
 int
 luaA_systray(lua_State *L)
@@ -352,6 +368,7 @@ luaA_systray(lua_State *L)
         const char *bg = luaL_checklstring(L, 6, &bg_len);
         bool revers = lua_toboolean(L, 7);
         int spacing = ceil(luaA_checknumber_range(L, 8, 0, MAX_X11_COORDINATE));
+        int rows = ceil(luaA_checknumber_range(L, 9, 1, INT16_MAX));
         color_t bg_color;
         bool force_redraw = false;
 
@@ -385,7 +402,7 @@ luaA_systray(lua_State *L)
 
         if(systray_num_visible_entries() != 0)
         {
-            systray_update(base_size, horiz, revers, spacing, force_redraw);
+            systray_update(base_size, horiz, revers, spacing, force_redraw, rows);
             xcb_map_window(globalconf.connection,
                            globalconf.systray.window);
         }
