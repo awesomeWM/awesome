@@ -37,8 +37,9 @@ local beautiful = require("beautiful")
 
 local calendar = { mt = {} }
 
-local properties = { "date", "font", "spacing", "week_numbers", "start_sunday", "long_weekdays", "fn_embed" }
-
+local properties = { "date"        , "font"         , "spacing" , "week_numbers",
+                     "start_sunday", "long_weekdays", "fn_embed", "flex_height",
+                   }
 
 --- The calendar font.
 -- @beautiful beautiful.calendar_font
@@ -59,6 +60,11 @@ local properties = { "date", "font", "spacing", "week_numbers", "start_sunday", 
 --- Format the weekdays with three characters instead of two
 -- @beautiful beautiful.calendar_long_weekdays
 -- @param boolean Use three characters for the weekdays instead of two
+
+--- Allow cells to have flexible height.
+-- Flexible height allow cells to adapt their height to fill the empty space at the bottom of the widget.
+-- @beautiful beautiful.flex_height
+-- @param boolean Cells can skretch to fill the empty space.
 
 --- The calendar date.
 --
@@ -116,6 +122,12 @@ local properties = { "date", "font", "spacing", "week_numbers", "start_sunday", 
 -- @param function Function to embed the widget depending on its flag
 -- @property fn_embed
 
+--- Allow cells to have flexible height
+--
+--@DOC_wibox_widget_calendar_flex_height_EXAMPLE@
+--
+-- @param[opt=false] boolean Allow flex height.
+-- @property flex_height
 
 --- Make a textbox
 -- @tparam string text Text of the textbox
@@ -139,24 +151,46 @@ end
 -- @tparam number|nil date.day Date day
 -- @treturn widget Grid layout
 local function create_month(props, date)
-    local num_rows    = 8
-    local num_columns = props.week_numbers and 8 or 7
-
-    -- Create grid layout
-    local layout = grid()
-    layout:set_expand(true)
-    layout:set_expand(true)
-    layout:set_homogeneous(true)
-    layout:set_spacing(props.spacing)
-    layout:set_forced_num_rows(num_rows)
-    layout:set_forced_num_cols(num_columns)
-
     local start_row    = 3
-    local start_column = num_columns - 6
     local week_start   = props.start_sunday and 1 or 2
     local last_day     = os.date("*t", os.time{year=date.year, month=date.month+1, day=0})
     local month_days   = last_day.day
     local column_fday  = (last_day.wday - month_days + 1 - week_start ) % 7
+
+    local num_columns  = props.week_numbers and 8 or 7
+    local start_column = num_columns - 6
+
+    -- Compute number of rows
+    -- There are at least 4 weeks in a month
+    local num_rows     = 4
+    -- On every month but february on non bisextile years
+    if last_day.day > 28 then
+        -- The number of days span over at least 5 weeks
+        num_rows = num_rows + 1
+
+        -- On month with 30+ days add 1 week if:
+        -- - if 30 days and the first day is the last day of the week
+        -- - if 31 days and the first days is at least the second to last day
+        if column_fday >= 5 then
+            if last_day.day == 30 and column_fday == 6 or last_day.day == 31 then
+                num_rows = num_rows + 1
+            end
+        end
+    -- If the first day of february is anything but the first day of the week
+    elseif column_fday > 1 then
+        -- Span over 5 weeks
+        num_rows = num_rows + 1
+    end
+
+    -- Create grid layout
+    local layout = grid()
+    if props.flex_height then
+        layout:set_expand(true)
+    end
+    layout:set_homogeneous(true)
+    layout:set_spacing(props.spacing)
+    layout:set_forced_num_rows(num_rows)
+    layout:set_forced_num_cols(num_columns)
 
     --local flags = {"header", "weekdays", "weeknumber", "normal", "focus"}
     local cell_date, t, i, j, w, flag, text
@@ -331,6 +365,7 @@ local function get_calendar(type, date, font)
     ret._private.week_numbers  = beautiful.calendar_week_numbers or false
     ret._private.start_sunday  = beautiful.calendar_start_sunday or false
     ret._private.long_weekdays = beautiful.calendar_long_weekdays or false
+    ret._private.flex_height   = beautiful.calendar_flex_height or false
     ret._private.fn_embed      = function (w, _) return w end
 
     -- header specific
