@@ -115,22 +115,40 @@ describe("gears.filesystem", function()
             assert.is_true(test_b == "a.png"
                         or test_b == "b.jpg")
 
+            -- Any file found (selected extensions)
+            local test_c = gfs.get_random_file_from_dir(root .. "filesystem_tests", {".png", ".jpg"})
+            assert.is_true(test_c == "a.png"
+                        or test_c == "b.jpg")
+
+            -- Test absolute paths.
+            local test_d = gfs.get_random_file_from_dir(root .. "filesystem_tests", {".png", ".jpg"}, true)
+            assert.is_true(test_d == root .. "filesystem_tests/a.png"
+                        or test_d == root .. "filesystem_tests/b.jpg")
+
+            -- Make sure the paths are generated correctly.
+            assert.is_nil(test_d:match("//"))
+
             -- "." in filename test cases with extensions
-            local test_c = gfs.get_random_file_from_dir(root .. "filesystem_tests/y", {"ext"})
-            assert.is_true(test_c == "filename.ext"
-                         or test_c == ".filename.ext"
-                        or test_c == "file.name.ext"
-                        or test_c == ".file.name.ext")
+            local test_e = gfs.get_random_file_from_dir(root .. "filesystem_tests/y", {"ext"})
+            assert.is_true(test_e == "filename.ext"
+                         or test_e == ".filename.ext"
+                        or test_e == "file.name.ext"
+                        or test_e == ".file.name.ext")
 
             -- "." in filename test cases with no extensions
-            local test_d = gfs.get_random_file_from_dir(root .. "filesystem_tests/y", {""})
-            assert.is_true(test_d == "filename"
-                        or test_d == "filename."
-                        or test_d == "filename.ext."
-                        or test_d == ".filename"
-                        or test_d == ".filename."
-                        or test_d == "file.name.ext."
-                        or test_d == ".file.name.ext.")
+            local test_f = gfs.get_random_file_from_dir(root .. "filesystem_tests/y", {""})
+            assert.is_true(test_f == "filename"
+                        or test_f == "filename."
+                        or test_f == "filename.ext."
+                        or test_f == ".filename"
+                        or test_f == ".filename."
+                        or test_f == "file.name.ext."
+                        or test_f == ".file.name.ext.")
+
+            -- Test invalid directories.
+            local test_g = gfs.get_random_file_from_dir(root .. "filesystem_tests/fake_dir")
+            assert.is_nil(test_g)
+
         end
     end)
 end)
