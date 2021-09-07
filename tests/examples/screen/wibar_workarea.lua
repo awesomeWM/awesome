@@ -11,19 +11,19 @@ local awful = { --DOC_HIDE
 } --DOC_HIDE
 
 local screen1_wibar = awful.wibar {
-    position        = "top",
-    update_workarea = true,
-    height          = 24,
-    screen          = screen[1],
+    position          = "top",
+    restrict_workarea = true,
+    height            = 24,
+    screen            = screen[1],
 }
 
 --DOC_NEWLINE
 
 local screen2_wibar = awful.wibar {
-    position        = "top",
-    update_workarea = false,
-    height          = 24,
-    screen          = screen[2],
+    position          = "top",
+    restrict_workarea = false,
+    height            = 24,
+    screen            = screen[2],
 }
 
 return { --DOC_HIDE

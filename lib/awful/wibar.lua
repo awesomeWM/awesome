@@ -65,7 +65,7 @@ local align_map = {
 -- @tparam boolean stretch
 -- @propbeautiful
 -- @propemits true false
--- see align
+-- @see align
 
 --- How to align non-stretched wibars.
 --
@@ -88,7 +88,7 @@ local align_map = {
 --- Margins on each side of the wibar.
 --
 -- It can either be a table with `top`, `bottom`, `left` and `right`
--- properties, or a single number that apply to all fourth sides.
+-- properties, or a single number that applies to all four sides.
 --
 -- @DOC_awful_wibar_margins_EXAMPLE@
 --
@@ -110,8 +110,8 @@ local align_map = {
 --
 -- @DOC_screen_wibar_workarea_EXAMPLE@
 --
--- @property update_workarea
--- @tparam[opt=true] boolean update_workarea
+-- @property restrict_workarea
+-- @tparam[opt=true] boolean restrict_workarea
 -- @propemits true false
 -- @see client.struts
 -- @see screen.workarea
@@ -260,7 +260,7 @@ end
 local function attach(wb, position)
     gen_placement(position, wb._private.align, wb._stretch)(wb, {
         attach          = true,
-        update_workarea = wb._private.update_workarea,
+        update_workarea = wb._private.restrict_workarea,
         margins         = get_margins(wb)
     })
 end
@@ -362,16 +362,16 @@ function awfulwibar.set_stretch(w, value)
 end
 
 
-function awfulwibar.get_update_workarea(w)
-    return w._private.update_workarea
+function awfulwibar.get_restrict_workarea(w)
+    return w._private.restrict_workarea
 end
 
-function awfulwibar.set_update_workarea(w, value)
-    w._private.update_workarea = value
+function awfulwibar.set_restrict_workarea(w, value)
+    w._private.restrict_workarea = value
 
     attach(w, w.position)
 
-    w:emit_signal("property::update_workarea", value)
+    w:emit_signal("property::restrict_workarea", value)
 end
 
 
@@ -385,12 +385,14 @@ function awfulwibar.set_margins(w, value)
         }
     end
 
-   value = gtable.crush({
+    local old = gtable.crush({
         left   = 0,
         right  = 0,
         top    = 0,
         bottom = 0
-    }, value or {}, true)
+    }, w._private.margins or {}, true)
+
+   value = gtable.crush(old, value or {}, true)
 
     w._private.margins = value
 
@@ -529,7 +531,7 @@ end
 -- @tparam[opt=nil] table args
 -- @tparam string args.position The position.
 -- @tparam string args.stretch If the wibar need to be stretched to fill the screen.
--- @tparam boolean args.update_workarea Allow or deny the tiled clients to cover the wibar.
+-- @tparam boolean args.restrict_workarea Allow or deny the tiled clients to cover the wibar.
 -- @tparam string args.align How to align non-stretched wibars.
 -- @tparam table|number args.margins The wibar margins.
 --@DOC_wibox_constructor_COMMON@
@@ -600,7 +602,7 @@ function awfulwibar.new(args)
     }
     w._private.meta_margins = meta_margins(w)
 
-    w._private.update_workarea = true
+    w._private.restrict_workarea = true
 
     -- `w` needs to be inserted in `wiboxes` before reattach or its own offset
     -- will not be taken into account by the "older" wibars when `reattach` is
