@@ -229,6 +229,10 @@ install:
       travis_fold_end
       return 0
     }
+
+after_install:
+  - luarocks list --porcelain | column -t -s $'\t'
+
 script:
   - if [ "$MANUAL_SCREENS" != "1" ]; then export MANUAL_SCREENS=0; fi
   - export CMAKE_ARGS="-DLUA_LIBRARY=${LUALIBRARY} -D LUA_INCLUDE_DIR=${LUAINCLUDE} -D OVERRIDE_VERSION=$AWESOME_VERSION -D STRICT_TESTS=true -D DO_COVERAGE=$DO_COVERAGE -D TEST_MANUAL_SCREENS=$MANUAL_SCREENS -D CMAKE_C_FLAGS=-Werror"
