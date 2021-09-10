@@ -3,7 +3,8 @@ pull_request_rules:
     conditions:
       - label!=no-mergify
       - '#approved-reviews-by>=2'
-      - status-success=Travis CI - Pull Request
+      - status-success=Build & Test
+      - status-success=Update API docs
       - status-success=codecov/patch
       - status-success=coverage/coveralls
     actions:
