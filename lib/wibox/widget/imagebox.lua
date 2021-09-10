@@ -80,7 +80,7 @@ function imagebox:draw(_, cr, width, height)
 
     local w, h = self._private.default.width, self._private.default.height
 
-    if not self._private.resize_forbidden then
+    if self._private.resize then
         -- That's for the "fit" policy.
         local aspects = {
             w = width / w,
@@ -93,10 +93,14 @@ function imagebox:draw(_, cr, width, height)
         }
 
         for _, aspect in ipairs {"w", "h"} do
-            if policy[aspect] == "auto" then
-                aspects[aspect] = math.min(width / w, height / h)
+            if self._private.upscale == false and (w < width and h < height) then
+                aspects[aspect] = 1
+            elseif self._private.downscale == false and (w >= width and h >= height) then
+                aspects[aspect] = 1
             elseif policy[aspect] == "none" then
                 aspects[aspect] = 1
+            elseif policy[aspect] == "auto" then
+                aspects[aspect] = math.min(width / w, height / h)
             end
         end
 
@@ -169,7 +173,15 @@ function imagebox:fit(_, width, height)
     if not self._private.default then return 0, 0 end
     local w, h = self._private.default.width, self._private.default.height
 
-    if not self._private.resize_forbidden or w > width or h > height then
+    if w <= width and h <= height and self._private.upscale == false then
+        return w, h
+    end
+
+    if (w < width or h < height) and self._private.downscale == false then
+        return w, h
+    end
+
+    if self._private.resize or w > width or h > height then
         local aspect = math.min(width / w, height / h)
         return w * aspect, h * aspect
     end
@@ -311,21 +323,68 @@ function imagebox:set_clip_shape(clip_shape, ...)
 end
 
 --- Should the image be resized to fit into the available space?
+--
+-- Note that `upscale` and `downscale` can affect the value of `resize`.
+-- If conflicting values are passed to the constructor, then the result
+-- is undefined.
+--
 -- @DOC_wibox_widget_imagebox_resize_EXAMPLE@
 -- @property resize
 -- @propemits true false
 -- @tparam boolean resize
 
---- Should the image be resized to fit into the available space?
--- @tparam boolean allowed If `false`, the image will be clipped, else it will
---   be resized to fit into the available space.
--- @method set_resize
--- @hidden
+--- Allow the image to be upscaled (made bigger).
+--
+-- Note that `upscale` and `downscale` can affect the value of `resize`.
+-- If conflicting values are passed to the constructor, then the result
+-- is undefined.
+--
+-- @DOC_wibox_widget_imagebox_upscale_EXAMPLE@
+-- @property upscale
+-- @tparam boolean upscale
+-- @see downscale
+-- @see resize
+
+--- Allow the image to be downscaled (made smaller).
+--
+-- Note that `upscale` and `downscale` can affect the value of `resize`.
+-- If conflicting values are passed to the constructor, then the result
+-- is undefined.
+--
+-- @DOC_wibox_widget_imagebox_downscale_EXAMPLE@
+-- @property downscale
+-- @tparam boolean downscale
+-- @see upscale
+-- @see resize
+
 function imagebox:set_resize(allowed)
-    self._private.resize_forbidden = not allowed
+    self._private.resize = allowed
+
+    if allowed then
+        self._private.downscale = true
+        self._private.upscale = true
+        self:emit_signal("property::downscale", allowed)
+        self:emit_signal("property::upscale", allowed)
+    end
+
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::resize", allowed)
+end
+
+for _, prop in ipairs {"downscale", "upscale" } do
+    imagebox["set_" .. prop] = function(self, allowed)
+        self._private[prop] = allowed
+
+        if self._private.resize ~= (self._private.upscale or self._private.downscale) then
+            self._private.resize = self._private.upscale or self._private.downscale
+            self:emit_signal("property::resize", self._private.resize)
+        end
+
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::"..prop, allowed)
+    end
 end
 
 --- Set the horizontal fit policy.
@@ -506,12 +565,14 @@ local function new(image, resize_allowed, clip_shape, ...)
     local ret = base.make_widget(nil, nil, {enable_properties = true})
 
     gtable.crush(ret, imagebox, true)
+    ret._private.resize = true
 
     if image then
         ret:set_image(image)
     end
+
     if resize_allowed ~= nil then
-        ret:set_resize(resize_allowed)
+        ret.resize = resize_allowed
     end
 
     ret._private.clip_shape = clip_shape
