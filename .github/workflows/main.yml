@@ -324,7 +324,7 @@ jobs:
           luacov-coveralls \
             --verbose \
             --merge \
-            --repo-token ${{ secrets.COVERALLS_REPO_TOKEN }} \
+            --repo-token ${{ secrets.COVERALLS_REPO_TOKEN || github.token }} \
             --service-name ""
 
       # `check-qa` is the only test that doesn't get a coverage report, so it has to run after all of that.
