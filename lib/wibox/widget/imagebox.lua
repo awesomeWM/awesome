@@ -57,11 +57,19 @@ local function load_rsvg_handle(file)
     if not Rsvg then return end
 
     local cache = rsvg_handle_cache[file]
+
     if cache then
         return cache
     end
 
-    local handle, err = Rsvg.Handle.new_from_file(file)
+    local handle, err = nil, nil
+
+    if file:match("<[?]?xml") then
+        handle, err = Rsvg.Handle.new_from_data(file)
+    else
+        handle, err = Rsvg.Handle.new_from_file(file)
+    end
+
     if not err then
         rsvg_handle_cache[file] = handle
         return handle
