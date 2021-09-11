@@ -8,6 +8,10 @@ local surface = require("gears.surface")
 local awall = require("awful.wallpaper")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
+local gdebug = require("gears.debug")
+
+-- This test suite is for a deprecated module.
+gdebug.deprecate = function() end
 
 local steps = {}
 
