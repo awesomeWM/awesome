@@ -146,7 +146,7 @@ if [ "$BRANCH" != "gh-pages" ]; then
     COMPARE_LINKS="$COMPARE_LINKS\nComparison against master (gh-pages): https://github.com/awesomeWM/apidoc/compare/gh-pages...${NEW_REV}"
 fi
 # shellcheck disable=SC2028
-echo "Compare links:\n$COMPARE_LINKS"
+printf %s "Compare links:\n$COMPARE_LINKS"
 
 # Post a comment to the PR.
 if [ "$PR_NUMBER" != false ]; then

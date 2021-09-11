@@ -324,7 +324,7 @@ jobs:
           luacov-coveralls \
             --verbose \
             --merge \
-            --repo-token ${{ secrets.COVERALLS_REPO_TOKEN }} \
+            --repo-token ${{ secrets.COVERALLS_REPO_TOKEN || github.token }} \
             --service-name ""
 
       # `check-qa` is the only test that doesn't get a coverage report, so it has to run after all of that.
@@ -336,12 +336,13 @@ jobs:
       - name: Test previous commits
         if: matrix.test_prev_commits && github.event_name == 'pull_request'
         run: |
+          git remote add fork "${{ github.event.pull_request.head.repo.git_url }}"
           # `actions/checkout` creates a shallow repo (`--depth 1`) by default,
           # which is fine for everything up until now. But we need individual commits now.
           # And we only want to unshallow now, to not slow down the checkout for other jobs.
-          git fetch --unshallow
+          git fetch --unshallow --all
 
-          rev_list="$(git rev-list --bisect-all origin/${{ github.base_ref }}..origin/${{ github.head_ref }})"
+          rev_list="$(git rev-list --bisect-all origin/${{ github.base_ref }}..fork/${{ github.head_ref }})"
           commits="$(echo "$rev_list" | grep -v 'dist=0' | cut -d' ' -f 1)"
           n="$(echo "$commits" | wc -l)"
 
