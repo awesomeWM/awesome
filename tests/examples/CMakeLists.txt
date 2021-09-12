@@ -85,7 +85,9 @@ function(escape_string variable content escaped_content line_prefix)
     if(variable MATCHES "--DOC_HIDE_ALL")
         return()
     endif()
-    string(REGEX REPLACE "\n" ";" var_lines "${variable}")
+
+    string(REGEX REPLACE ";" "&#59" var_lines "${variable}")
+    string(REGEX REPLACE "\n" ";" var_lines "${var_lines}")
 
     set(tmp_output ${content})
     set(section OFF)
@@ -101,7 +103,7 @@ function(escape_string variable content escaped_content line_prefix)
 
         # Pick lines that are not specified to be hidden
         if((NOT LINE MATCHES "^.*--DOC_[A-Z]+") AND (NOT section))
-            set(tmp_output ${tmp_output}\n${DOC_LINE_PREFIX}${line_prefix}${LINE})
+            set(tmp_output "${tmp_output}\n${DOC_LINE_PREFIX}${line_prefix}${LINE}")
         endif()
 
         # If we found a start marker previously, look for an end marker.
@@ -347,7 +349,7 @@ foreach(file ${test_files})
         # variable during the pre-processing.
         # While at it, replace \" created by CMake by ',
         # &quot; wont work in <code>.
-        string(REPLACE "\"" "'" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
+        string(REPLACE "\"" "&#34" ${TEST_NAME} ${ESCAPED_CODE_EXAMPLE})
     endif()
 endforeach()
 
