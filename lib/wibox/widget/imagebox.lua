@@ -48,7 +48,7 @@ end
 
 local imagebox = { mt = {} }
 
-local rsvg_handle_cache = setmetatable({}, { __mode = 'v' })
+local rsvg_handle_cache = setmetatable({}, { __mode = 'k' })
 
 ---Load rsvg handle form image file
 ---@tparam string file Path to svg file.
@@ -56,28 +56,119 @@ local rsvg_handle_cache = setmetatable({}, { __mode = 'v' })
 local function load_rsvg_handle(file)
     if not Rsvg then return end
 
-    local cache = rsvg_handle_cache[file]
+    local cache = (rsvg_handle_cache[file] or {})["handle"]
 
     if cache then
-        return cache
+        return cache, rsvg_handle_cache[file]
     end
 
-    local handle, err = nil, nil
+    local handle, err
 
-    if file:match("<[?]?xml") then
+    if file:match("<[?]?xml") or file:match("<svg") then
         handle, err = Rsvg.Handle.new_from_data(file)
     else
         handle, err = Rsvg.Handle.new_from_file(file)
     end
 
     if not err then
-        rsvg_handle_cache[file] = handle
-        return handle
+        rsvg_handle_cache[file] = rsvg_handle_cache[file] or {}
+        rsvg_handle_cache[file]["handle"] = handle
+        return handle, rsvg_handle_cache[file]
+    end
+end
+
+---Apply cairo surface for given imagebox widget
+local function set_surface(ib, surf)
+    local is_surd_valid = surf.width > 0 and surf.height > 0
+    if not is_surd_valid then return end
+
+    ib._private.default = { width = surf.width, height = surf.height }
+    ib._private.handle = nil
+    ib._private.image = surf
+    return true
+end
+
+---Apply RsvgHandle for given imagebox widget
+local function set_handle(ib, handle, cache)
+    local dim = handle:get_dimensions()
+    local is_handle_valid = dim.width > 0 and dim.height > 0
+    if not is_handle_valid then return end
+
+    ib._private.default = { width = dim.width, height = dim.height }
+    ib._private.handle = handle
+    ib._private.cache = cache
+    ib._private.image = nil
+
+    return true
+end
+
+---Try to load some image object from file then apply it to imagebox.
+---@tparam table ib Imagebox
+---@tparam string file Image file name
+---@tparam function image_loader Function to load image object from file
+---@tparam function image_setter Function to set image object to imagebox
+---@treturn boolean True if image was successfully applied
+local function load_and_apply(ib, file, image_loader, image_setter)
+    local image_applied
+    local object, cache = image_loader(file)
+
+    if object then
+        image_applied = image_setter(ib, object, cache)
+    end
+    return image_applied
+end
+
+---Update the cached size depending on the stylesheet and dpi.
+--
+-- It's necessary because a single RSVG handle can be used by
+-- many imageboxes. So DPI and Stylesheet need to be set each time.
+local function update_dpi(self, ctx)
+    if not self._private.handle then return end
+
+    local dpi = self._private.auto_dpi and
+        ctx.dpi or
+        self._private.dpi or
+        nil
+
+    local need_dpi = dpi and
+        self._private.last_dpi ~= dpi
+
+    local need_style = self._private.handle.set_stylesheet and
+        self._private.stylesheet
+
+    local old_size = self._private.default and self._private.default.width
+
+    if dpi and dpi ~= self._private.cache.dpi then
+        if type(dpi) == "table" then
+            self._private.handle:set_dpi_x_y(dpi.x, dpi.y)
+        else
+            self._private.handle:set_dpi(dpi)
+        end
+    end
+
+    if need_style and self._private.cache.stylesheet ~= self._private.stylesheet then
+        self._private.handle:set_stylesheet(self._private.stylesheet)
+    end
+
+    -- Reload the size.
+    if need_dpi or (need_style and self._private.stylesheet ~= self._private.last_stylesheet) then
+        set_handle(self, self._private.handle, self._private.cache)
+    end
+
+    self._private.last_dpi = dpi
+    self._private.cache.dpi = dpi
+    self._private.last_stylesheet = self._private.stylesheet
+    self._private.cache.stylesheet = self._private.stylesheet
+
+    -- This can happen in the constructor when `dpi` is set after `image`.
+    if old_size and old_size ~= self._private.default.width then
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
     end
 end
 
 -- Draw an imagebox with the given cairo context in the given geometry.
-function imagebox:draw(_, cr, width, height)
+function imagebox:draw(ctx, cr, width, height)
     if width == 0 or height == 0 or not self._private.default then return end
 
     -- For valign = "top" and halign = "left"
@@ -85,6 +176,8 @@ function imagebox:draw(_, cr, width, height)
         x = 0,
         y = 0,
     }
+
+    update_dpi(self, ctx)
 
     local w, h = self._private.default.width, self._private.default.height
 
@@ -177,8 +270,11 @@ function imagebox:draw(_, cr, width, height)
 end
 
 -- Fit the imagebox into the given geometry
-function imagebox:fit(_, width, height)
+function imagebox:fit(ctx, width, height)
     if not self._private.default then return 0, 0 end
+
+    update_dpi(self, ctx)
+
     local w, h = self._private.default.width, self._private.default.height
 
     if w <= width and h <= height and self._private.upscale == false then
@@ -197,44 +293,6 @@ function imagebox:fit(_, width, height)
     return w, h
 end
 
----Apply cairo surface for given imagebox widget
-local function set_surface(ib, surf)
-    local is_surd_valid = surf.width > 0 and surf.height > 0
-    if not is_surd_valid then return end
-
-    ib._private.default = { width = surf.width, height = surf.height }
-    ib._private.handle = nil
-    ib._private.image = surf
-    return true
-end
-
----Apply RsvgHandle for given imagebox widget
-local function set_handle(ib, handle)
-    local dim = handle:get_dimensions()
-    local is_handle_valid = dim.width > 0 and dim.height > 0
-    if not is_handle_valid then return end
-
-    ib._private.default = { width = dim.width, height = dim.height }
-    ib._private.handle = handle
-    ib._private.image = nil
-    return true
-end
-
----Try to load some image object from file then apply it to imagebox.
----@tparam table ib Imagebox
----@tparam string file Image file name
----@tparam function image_loader Function to load image object from file
----@tparam function image_setter Function to set image object to imagebox
----@treturn boolean True if image was successfully applied
-local function load_and_apply(ib, file, image_loader, image_setter)
-    local image_applied
-    local object = image_loader(file)
-    if object then
-        image_applied = image_setter(ib, object)
-    end
-    return image_applied
-end
-
 --- The image rendered by the `imagebox`.
 --
 -- It can can be any of the following:
@@ -245,7 +303,7 @@ end
 -- * `nil`: Unset the image.
 --
 -- @property image
--- @tparam image image The image to render.
+-- @tparam image image The image to render. test
 -- @propemits false false
 
 --- Set the `imagebox` image.
@@ -262,7 +320,10 @@ end
 function imagebox:set_image(image)
     local setup_succeed
 
-    if type(image) == "userdata" then
+    -- Keep the original to prevent the cache from being GCed.
+    self._private.original_iamge = image
+
+    if type(image) == "userdata" and not (Rsvg and Rsvg.Handle:is_type_of(image)) then
         -- This function is not documented to handle userdata objects, but
         -- historically it did, and it did by just assuming they refer to a
         -- cairo surface.
@@ -279,7 +340,8 @@ function imagebox:set_image(image)
         end
     elseif Rsvg and Rsvg.Handle:is_type_of(image) then
         -- try to apply given rsvg handle
-        setup_succeed = set_handle(self, image)
+        rsvg_handle_cache[image] = rsvg_handle_cache[image] or {}
+        setup_succeed = set_handle(self, image, rsvg_handle_cache[image])
     elseif cairo.Surface:is_type_of(image) then
         -- try to apply given cairo surface
         setup_succeed = set_surface(self, image)
@@ -364,6 +426,62 @@ end
 -- @tparam boolean downscale
 -- @see upscale
 -- @see resize
+
+--- Set the SVG CSS stylesheet.
+--
+-- If the image is an SVG (vector graphics), this property allows to set
+-- a CSS stylesheet. It can be used to set colors and much more.
+--
+-- Note that this property is a string, not a path. If the stylesheet is
+-- stored on disk, read the content first.
+--
+--@DOC_wibox_widget_imagebox_stylesheet_EXAMPLE@
+--
+-- @property stylesheet
+-- @tparam string stylesheet
+-- @propemits true false
+
+--- Set the SVG DPI (dot per inch).
+--
+-- Force a specific DPI when rendering the `.svg`. For other file formats,
+-- this does nothing.
+--
+-- It can either be a number of a table containing the `x` and `y` keys.
+--
+-- Please note that DPI and `resize` can "fight" each other and end up
+-- making the image smaller instead of bigger.
+--
+--@DOC_wibox_widget_imagebox_dpi_EXAMPLE@
+--
+-- @property dpi
+-- @tparam number|table dpi
+-- @propemits true false
+-- @see auto_dpi
+
+--- Use the object DPI when rendering the SVG.
+--
+-- By default, the SVG are interpreted as-is. When this property is set,
+-- the screen DPI will be passed to the SVG renderer. Depending on which
+-- tool was used to create the `.svg`, this may do nothing at all. However,
+-- for example, if the `.svg` uses `<text>` elements and doesn't have an
+-- hardcoded stylesheet, the result will differ.
+--
+-- @property auto_dpi
+-- @tparam[opt=false] boolean auto_dpi
+-- @propemits true false
+-- @see dpi
+
+for _, prop in ipairs {"stylesheet", "dpi", "auto_dpi"} do
+    imagebox["set_" .. prop] = function(self, value)
+        -- It will be set in :fit and :draw. The handle is shared
+        -- by multiple imagebox, so it cannot be set just once.
+        self._private[prop] = value
+
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("property::" .. prop)
+    end
+end
 
 function imagebox:set_resize(allowed)
     self._private.resize = allowed
