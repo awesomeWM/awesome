@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1280pt" height="720pt" viewBox="0 0 1280 720" version="1.1">
+    <rect x="0" y="0" width="1280" height="720" style="stroke:none;" class="background"/>
+    <path style=" stroke:none;fill-rule:nonzero;fill:rgb(27.843137%,47.843137%,70.196078%);fill-opacity:1;" d="M 1152 72 L 1224 72 L 1224 144 L 1152 144 Z M 1152 72 " class="logo"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 0 24 L 48 24 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style=" stroke:none;fill-rule:nonzero;" d="M 1152 156 L 1224 156 L 1224 228 L 1152 228 Z M 1152 156 " class="normal"/>
+    <path style="fill:none !important;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 24 48 L 48 48 L 48 72 " transform="matrix(1,0,0,1,1152,72)"  class="background"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 24 84 L 24 132 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 48 84 L 48 132 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style=" stroke:none;fill-rule:nonzero;" d="M 1152 240 L 1224 240 L 1224 312 L 1152 312 Z M 1152 240 " class="normal"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 24 192 L 72 192 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 24 216 L 72 216 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style=" stroke:none;fill-rule:nonzero;" d="M 1152 324 L 1224 324 L 1224 396 L 1152 396 Z M 1152 324 " class="normal"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 24 276 L 72 276 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 0 300 L 48 300 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style=" stroke:none;fill-rule:nonzero;" d="M 1152 408 L 1224 408 L 1224 480 L 1152 480 Z M 1152 408 " class="normal"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 36 360 L 36 384 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style=" stroke:none;fill-rule:nonzero;" d="M 1152 492 L 1224 492 L 1224 564 L 1152 564 Z M 1152 492 " class="normal"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 24 444 L 24 492 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 48 444 L 48 492 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style=" stroke:none;fill-rule:nonzero;" d="M 1152 576 L 1224 576 L 1224 648 L 1152 648 Z M 1152 576 " class="normal"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 24 528 L 72 528 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+    <path style="fill:none;stroke-width:4;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;" d="M 24 552 L 72 552 " transform="matrix(1,0,0,1,1152,72)" class="background"/>
+</svg>

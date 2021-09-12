@@ -8,6 +8,7 @@ local xresources = require("beautiful.xresources")
 local rnotification = require("ruled.notification")
 local dpi = xresources.apply_dpi
 local xrdb = xresources.get_current_theme()
+local gdebug = require("gears.debug")
 local gfs = require("gears.filesystem")
 local themes_path = gfs.get_themes_dir()
 
@@ -126,9 +127,39 @@ local wallpaper_alt_fg = xrdb.color12
 if not is_dark_bg then
     wallpaper_bg, wallpaper_fg = wallpaper_fg, wallpaper_bg
 end
-theme.wallpaper = function(s)
-    return theme_assets.wallpaper(wallpaper_bg, wallpaper_fg, wallpaper_alt_fg, s)
+
+local rsvg = pcall(function() return require("lgi").Rsvg end)
+
+if rsvg then
+    local handle = require("lgi").Rsvg.Handle.new_from_file(
+        themes_path.."xresources/wallpaper.svg"
+    )
+
+    if handle then
+        handle:set_stylesheet([[
+            .normal {
+                fill: ]]..wallpaper_fg..[[;
+            }
+            .background {
+                fill: ]]..wallpaper_bg..[[;
+                stroke: ]]..wallpaper_bg..[[;
+            }
+            .logo {
+                fill: ]]..wallpaper_alt_fg..[[;
+            }
+        ]])
+
+        theme.wallpaper = handle
+    end
+else
+    gdebug.print_warning("Could not load the wallpaper: librsvg is not installed.")
 end
+
+if not theme.wallpaper then
+    theme.wallpaper = themes_path.."xresources/wallpaper.svg"
+end
+
+theme.wallpaper_bg = wallpaper_bg
 
 -- Set different colors for urgent notifications.
 rnotification.connect_signal('request::rules', function()
