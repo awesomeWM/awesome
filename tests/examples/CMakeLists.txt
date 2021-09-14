@@ -258,6 +258,12 @@ function(run_test test_path namespace escaped_content)
                 "\n${expected_output}"
                 "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT "    "
             )
+
+            # Add a <br/> to prevent markdown from merging the usage and output
+            # into a single block.
+            if(tmp_content MATCHES "--DOC_NO_USAGE")
+                set(TEST_DOC_CONTENT "${TEST_DOC_CONTENT}\n${DOC_LINE_PREFIX} **Usage example:**")
+            endif()
         else()
             escape_string(
                 "\n${expected_output}"
