@@ -71,90 +71,97 @@ local function check_screen(s)
     end
 end
 
--- Create notifications in each position.
-table.insert(steps, function()
-    rnotif._clear()
-    add_many(s1)
+for _, legacy_preset in ipairs {true, false} do
 
-    return true
-end)
-
--- Make sure removing notification works.
-table.insert(steps, function()
-
-    remove_at(s1, 2)
-
-    -- Split the screen
-    s1:split()
-
-    s2 = screen[2]
-    assert(s1 ~= s2)
-
-    return true
-end)
-
--- Make sure the notification moved as the screen shrunk.
-table.insert(steps, function()
-    check_screen(s1)
-
-    -- Make sure we can still remove them without errors.
-    remove_at(s1, 2)
-
-    -- Add more!
-    add_many(s2)
-
-    -- Make sure none got moved to the wrong position due to a fallback code
-    -- path triggered by accident. The first few iteration were prone to this.
-    check_screen(s1)
-    check_screen(s2)
-
-    return true
-end)
-
--- Remove everything and see what happens.
-table.insert(steps, function()
-
-    for _=1, 3 do
-        for _, s in ipairs {s1,s2} do
-            remove_at(s, 1)
+    -- Create notifications in each position.
+    table.insert(steps, function()
+        function naughty.get__has_preset_handler()
+            return legacy_preset
         end
-    end
 
-    for _=1, 2 do
-        remove_at(s2, 1)
-    end
+        rnotif._clear()
+        add_many(s1)
 
-    -- And add them again.
-    add_many(s1)
-    add_many(s2)
+        return true
+    end)
 
-    return true
-end)
+    -- Make sure removing notification works.
+    table.insert(steps, function()
 
---local weak = nil --FIXME
+        remove_at(s1, 2)
 
--- Delete a screen and make sure it gets GCed.
-table.insert(steps, function()
-    s2:fake_remove()
+        -- Split the screen
+        s1:split()
 
-    -- Help the weak tables a little.
-    for _, pos in ipairs(positions) do
-        objs[pos][s1] = nil
-    end
+        s2 = screen[2]
+        assert(s1 ~= s2)
 
-    -- Drop our string reference to s2.
-    --weak, s2 = setmetatable({s2}, {__mode="v"}), nil --FIXME
+        return true
+    end)
 
-    return true
-end)
+    -- Make sure the notification moved as the screen shrunk.
+    table.insert(steps, function()
+        check_screen(s1)
 
---FIXME
---table.insert(steps, function()
---    if weak[1] == nil then return true end
---
---    for _=1, 10 do
---        collectgarbage("collect")
---    end
---end)
+        -- Make sure we can still remove them without errors.
+        remove_at(s1, 2)
+
+        -- Add more!
+        add_many(s2)
+
+        -- Make sure none got moved to the wrong position due to a fallback code
+        -- path triggered by accident. The first few iteration were prone to this.
+        check_screen(s1)
+        check_screen(s2)
+
+        return true
+    end)
+
+    -- Remove everything and see what happens.
+    table.insert(steps, function()
+
+        for _=1, 3 do
+            for _, s in ipairs {s1,s2} do
+                remove_at(s, 1)
+            end
+        end
+
+        for _=1, 2 do
+            remove_at(s2, 1)
+        end
+
+        -- And add them again.
+        add_many(s1)
+        add_many(s2)
+
+        return true
+    end)
+
+    local weak = nil
+
+    -- Delete a screen and make sure it gets GCed.
+    table.insert(steps, function()
+        s2:fake_remove()
+
+        -- Help the weak tables a little.
+        for _, pos in ipairs(positions) do
+            objs[pos][s1] = nil
+        end
+
+        -- Drop our string reference to s2.
+        weak, s2 = setmetatable({s2}, {__mode="v"}), nil
+
+        return true
+    end)
+
+    table.insert(steps, function()
+        if weak[1] == nil then return true end
+
+        for _=1, 10 do
+            collectgarbage("collect")
+        end
+    end)
+
+end
 
 require("_runner").run_steps(steps)
