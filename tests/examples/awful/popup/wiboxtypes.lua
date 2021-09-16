@@ -8,6 +8,7 @@ local gears     = require("gears")
 local naughty   = require("naughty")
 local wibox     = require("wibox")
 local beautiful = require("beautiful") --DOC_HIDE
+local assets    = require("beautiful.theme_assets")
 local look      = require("_default_look")
 
 screen[1]._resize {width = 640, height = 480}
@@ -16,6 +17,78 @@ screen[1]._resize {width = 640, height = 480}
 -- and mimic the default config look
 
 local c = client.gen_fake {hide_first=true}
+
+-- Don't use `awful.wallpaper` to avoid rasterizing the background.
+
+local wallpaper = wibox {
+    below = true,
+    shape = gears.shape.octogon,
+    visible = true,
+    bg = "#00000000",
+}
+
+awful.placement.maximize(wallpaper)
+
+wallpaper.widget = wibox.widget {
+    fit = function(_, _, width, height)
+        return width, height
+    end,
+    draw = function(_, _, cr, width, height)
+        cr:translate(width - 80, 60)
+        assets.gen_awesome_name(
+            cr, height - 40, "#ffffff", beautiful.bg_normal, beautiful.bg_normal
+        )
+    end,
+    widget = wibox.widget.base.make_widget()
+}
+
+local p = awful.popup {
+    widget = wibox.widget {
+        { text   = "Item", widget = wibox.widget.textbox },
+        {
+            {
+                text   = "Selected",
+                widget = wibox.widget.textbox
+            },
+            bg = beautiful.bg_highlight,
+            widget = wibox.container.background
+        },
+        { text   = "Item", widget = wibox.widget.textbox },
+        forced_width = 100,
+        widget = wibox.layout.fixed.vertical
+    },
+    border_color = beautiful.border_color,
+    border_width = 1,
+    x = 50,
+    y = 200,
+}
+
+
+p:_apply_size_now()
+require("gears.timer").run_delayed_calls_now()
+p._drawable._do_redraw()
+
+require("gears.timer").delayed_call(function()
+    -- Get the 4th textbox
+    local list = p:find_widgets(30, 40)
+    mouse.coords {x= 120, y=225}
+    mouse.push_history()
+    local textboxinstance = list[#list]
+
+    local p2 = awful.popup {
+        widget = wibox.widget {
+            text = "Submenu",
+            forced_height = 20,
+            forced_width = 70,
+            widget = wibox.widget.textbox
+        },
+        border_color  = beautiful.border_color,
+        preferred_positions = "right",
+        border_width  = 1,
+    }
+    p2:move_next_to(textboxinstance, "right")
+end)
+
 
 c:geometry {
     x      = 50,
@@ -97,6 +170,7 @@ wibox {
     width = 50,
     height = 50,
     shape = gears.shape.octogon,
+    visible = true,
     color = "#0000ff",
     x = 570,
     y = 410,
@@ -188,13 +262,17 @@ create_info("awful.tooltip", 30, 130, 100, 30)
 create_info("awful.popup", 450, 240, 100, 30)
 create_info("naughty.layout.box", 255, 110, 130, 30)
 create_info("Standard `wibox`", 420, 420, 130, 30)
+create_info("awful.wallpaper", 420, 330, 110, 30)
+create_info("awful.menu", 60, 270, 80, 30)
 
 create_line(150, 10, 150, 55)
 create_line(75, 100, 75, 135)
 create_line(545, 432, 575, 432)
 create_line(500, 165, 500, 245)
-create_line(390, 250, 450, 250)
+create_line(380, 250, 450, 250)
 create_line(190, 365, 255, 365)
 create_line(320, 60, 320, 110)
+create_line(525, 345, 570, 345)
+create_line(100, 240, 100, 270)
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

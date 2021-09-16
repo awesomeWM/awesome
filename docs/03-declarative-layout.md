@@ -124,6 +124,10 @@ to an object such as the mouse.
 The `naughty.layout.box` allows to provide custom widgets to use within the
 notifications.
 
+The `awful.wallpaper` provides a non-intereactive "backgroud" for one or more
+`screen`. While it uses normal widget, it will not automatically be repainted
+if they change. It will also not provide any mouse events.
+
 Finally, the `awful.titlebar`, while not technically a real `wibox`, acts
 exactly the same way and allows to attach widgets on each side of clients.
 
