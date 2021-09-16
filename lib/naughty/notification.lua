@@ -882,7 +882,15 @@ local function select_legacy_preset(n, args)
     ))
 
     for k, v in pairs(n.preset) do
-        n._private[k] = v
+        -- Don't keep a strong reference to the screen, Lua 5.1 GC wont be
+        -- smart enough to unwind the mess of circular weak references.
+        if k ~= "screen" then
+            n._private[k] = v
+        end
+    end
+
+    if n.preset.screen then
+        n._private.weak_screen[1] = capi.screen[n.preset.screen]
     end
 end
 
