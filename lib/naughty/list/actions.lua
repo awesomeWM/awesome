@@ -337,7 +337,10 @@ local function new(_, args)
     update_style(wdg)
 
     wdg._private.default_buttons = gtable.join(
-        abutton({ }, 1, function(a) a:invoke(args.notification) end)
+        abutton({ }, 1, function(a)
+            local notif = wdg._private.notification or args.notification
+            a:invoke(notif)
+        end)
     )
 
     return wdg
