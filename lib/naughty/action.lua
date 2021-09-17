@@ -57,7 +57,13 @@ local action = {}
 -- @propemits true false
 
 --- When a notification is invoked.
+--
+-- Note that it is possible to call `:invoke()` without a notification object.
+-- It is possible the `notification` parameter will be nil.
+--
 -- @signal invoked
+-- @tparam naughty.action action The action.
+-- @tparam naughty.notification|nil notification The notification, if known.
 
 function action:get_selected()
     return self._private.selected
