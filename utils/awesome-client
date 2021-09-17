@@ -11,7 +11,7 @@ then
     # than bash's "read" itself.
     # It can be disabled/overridden using 'AWESOME_RLWRAP= awesome-client'.
     if [ -z "${AWESOME_RLWRAP+x}" ]; then
-        AWESOME_RLWRAP="$(which rlwrap 2>/dev/null)"
+        AWESOME_RLWRAP="$(command -v rlwrap 2>/dev/null)"
     fi
     if [ -n "$AWESOME_RLWRAP" ]
     then
@@ -28,7 +28,7 @@ fi
 
 DBUS_SEND=dbus-send
 
-which ${DBUS_SEND} > /dev/null
+command -v ${DBUS_SEND} > /dev/null
 if test $? = 1
 then
     echo "E: Unable to find" ${DBUS_SEND}
