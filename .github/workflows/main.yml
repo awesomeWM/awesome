@@ -380,7 +380,7 @@ jobs:
             fi
           done
 
-          git checkout --quiet --force ${{ github.head_ref }}
+          git checkout --quiet --force fork/${{ github.head_ref }}
           if [ -n "$failed" ]; then
             echo "Checks failed for these commits:"
 
