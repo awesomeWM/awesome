@@ -35,7 +35,7 @@ local clients = {
 return {
     factor                = 2    ,
     show_boxes            = true,
-    draw_wibar            = wibar,
+    draw_wibars           = {wibar},
     draw_clients          = clients,
     display_screen_info   = false,
     draw_gaps             = true,

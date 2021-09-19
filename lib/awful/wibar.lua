@@ -1,11 +1,13 @@
 ---------------------------------------------------------------------------
---- Wibox module for awful.
+--- The main AwesomeWM "bar" module.
+--
 -- This module allows you to easily create wibox and attach them to the edge of
 -- a screen.
 --
 --@DOC_awful_wibar_default_EXAMPLE@
 --
 -- You can even have vertical bars too.
+--
 --@DOC_awful_wibar_left_EXAMPLE@
 --
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
@@ -28,6 +30,7 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 local gdebug = require("gears.debug")
 local placement = require("awful.placement")
+local gtable = require("gears.table")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -39,15 +42,93 @@ local awfulwibar = { mt = {} }
 -- It's an array so it is ordered.
 local wiboxes = setmetatable({}, {__mode = "v"})
 
+local opposite_margin = {
+    top    = "bottom",
+    bottom = "top",
+    left   = "right",
+    right  = "left"
+}
+
+local align_map = {
+    top      = "left",
+    left     = "top",
+    bottom   = "right",
+    right    = "bottom",
+    centered = "centered"
+}
+
 --- If the wibar needs to be stretched to fill the screen.
+--
+-- @DOC_awful_wibar_stretch_EXAMPLE@
+--
 -- @property stretch
 -- @tparam boolean stretch
 -- @propbeautiful
 -- @propemits true false
+-- @see align
+
+--- How to align non-stretched wibars.
+--
+-- Values are:
+--
+--  * `"top"`
+--  * `"bottom"`
+--  * `"left"`
+--  * `"right"`
+--  * `"centered"`
+--
+--  @DOC_awful_wibar_align_EXAMPLE@
+--
+-- @property align
+-- @tparam string align
+-- @propbeautiful
+-- @propemits true false
+-- @see stretch
+
+--- Margins on each side of the wibar.
+--
+-- It can either be a table with `top`, `bottom`, `left` and `right`
+-- properties, or a single number that applies to all four sides.
+--
+-- @DOC_awful_wibar_margins_EXAMPLE@
+--
+-- @property margins
+-- @tparam number|table margins
+-- @propbeautiful
+-- @propemits true false
 
 --- If the wibar needs to be stretched to fill the screen.
+--
 -- @beautiful beautiful.wibar_stretch
 -- @tparam boolean stretch
+
+--- Allow or deny the tiled clients to cover the wibar.
+--
+-- In the example below, we can see that the first screen workarea
+-- shrunk by the height of the wibar while the second screen is
+-- unchanged.
+--
+-- @DOC_screen_wibar_workarea_EXAMPLE@
+--
+-- @property restrict_workarea
+-- @tparam[opt=true] boolean restrict_workarea
+-- @propemits true false
+-- @see client.struts
+-- @see screen.workarea
+
+--- If there is both vertical and horizontal wibar, give more space to vertical ones.
+--
+-- By default, if multiple wibars risk overlapping, it will be resolved
+-- by giving more space to the horizontal one:
+--
+-- ![wibar position](../images/AUTOGEN_awful_wibar_position.svg)
+--
+-- If this variable is to to `true`, it will behave like:
+--
+-- @DOC_awful_wibar_position2_EXAMPLE@
+--
+-- @beautiful beautiful.wibar_favor_vertical
+-- @tparam[opt=false] boolean favor_vertical
 
 --- The wibar border width.
 -- @beautiful beautiful.wibar_border_width
@@ -97,6 +178,15 @@ local wiboxes = setmetatable({}, {__mode = "v"})
 -- @beautiful beautiful.wibar_shape
 -- @tparam gears.shape shape
 
+--- The wibar's margins.
+-- @beautiful beautiful.wibar_margins
+-- @tparam number|table margins
+
+--- The wibar's alignments.
+-- @beautiful beautiful.wibar_align
+-- @tparam string align
+
+
 -- Compute the margin on one side
 local function get_margin(w, position, auto_stop)
     local h_or_w = (position == "top" or position == "bottom") and "height" or "width"
@@ -108,7 +198,15 @@ local function get_margin(w, position, auto_stop)
 
         if v.position == position and v.screen == w.screen and v.visible then
             ret = ret + v[h_or_w]
+
+            local wb_margins = v.margins
+
+            if wb_margins then
+                ret = ret + wb_margins[position] + wb_margins[opposite_margin[position]]
+            end
+
         end
+
     end
 
     return ret
@@ -120,32 +218,49 @@ local function get_margins(w)
     local position = w.position
     assert(position)
 
-    local margins = {left=0, right=0, top=0, bottom=0}
+    local margins = gtable.clone(w._private.margins)
 
-    margins[position] = get_margin(w, position, true)
+    margins[position] =  margins[position] + get_margin(w, position, true)
 
     -- Avoid overlapping wibars
-    if position == "left" or position == "right" then
+    if (position == "left" or position == "right") and not beautiful.wibar_favor_vertical then
         margins.top    = get_margin(w, "top"   )
         margins.bottom = get_margin(w, "bottom")
+    elseif (position == "top" or position == "bottom") and beautiful.wibar_favor_vertical then
+        margins.left  = get_margin(w, "left" )
+        margins.right = get_margin(w, "right")
     end
 
     return margins
 end
 
 -- Create the placement function
-local function gen_placement(position, stretch)
+local function gen_placement(position, align, stretch)
     local maximize = (position == "right" or position == "left") and
         "maximize_vertically" or "maximize_horizontally"
 
-    return placement[position] + (stretch and placement[maximize] or nil)
+    local corner = nil
+
+    if align ~= "centered" then
+        if position == "right" or position == "left" then
+            corner = placement[align .. "_" .. position]
+                or placement[align_map[align] .. "_" .. position]
+        else
+            corner = placement[position .. "_" .. align]
+                or placement[position .. "_" .. align_map[align]]
+        end
+    end
+
+    corner = corner or placement[position]
+
+    return corner + (stretch and placement[maximize] or nil)
 end
 
 -- Attach the placement function.
-local function attach(wb, align)
-    gen_placement(align, wb._stretch)(wb, {
+local function attach(wb, position)
+    gen_placement(position, wb._private.align, wb._stretch)(wb, {
         attach          = true,
-        update_workarea = true,
+        update_workarea = wb._private.restrict_workarea,
         margins         = get_margins(wb)
     })
 end
@@ -173,15 +288,23 @@ end
 -- * top
 -- * bottom
 --
+-- @DOC_awful_wibar_position_EXAMPLE@
+--
 -- @property position
 -- @tparam string position Either "left", right", "top" or "bottom"
 -- @propemits true false
 
-local function get_position(wb)
+function awfulwibar.get_position(wb)
     return wb._position or "top"
 end
 
-local function set_position(wb, position, skip_reattach)
+function awfulwibar.set_position(wb, position, screen)
+    if position == wb._position then return end
+
+    if screen then
+        gdebug.deprecate("Use `wb.screen = screen` instead of awful.wibar.set_position", {deprecated_in=4})
+    end
+
     -- Detach first to avoid any uneeded callbacks
     if wb.detach_callback then
         wb.detach_callback()
@@ -192,14 +315,12 @@ local function set_position(wb, position, skip_reattach)
 
     -- Move the wibar to the end of the list to avoid messing up the others in
     -- case there is stacked wibars on one side.
-    if wb._position then
-        for k, w in ipairs(wiboxes) do
-            if w == wb then
-                table.remove(wiboxes, k)
-            end
+    for k, w in ipairs(wiboxes) do
+        if w == wb then
+            table.remove(wiboxes, k)
         end
-        table.insert(wiboxes, wb)
     end
+    table.insert(wiboxes, wb)
 
     -- In case the position changed, it may be necessary to reset the size
     if (wb._position == "left" or wb._position == "right")
@@ -218,7 +339,7 @@ local function set_position(wb, position, skip_reattach)
 
     -- A way to skip reattach is required when first adding a wibar as it's not
     -- in the `wiboxes` table yet and can't be added until it's attached.
-    if not skip_reattach then
+    if not wb._private.skip_reattach then
         -- Changing the position will also cause the other margins to be invalidated.
         -- For example, adding a wibar to the top will change the margins of any left
         -- or right wibars. To solve, this, they need to be re-attached.
@@ -228,11 +349,11 @@ local function set_position(wb, position, skip_reattach)
     wb:emit_signal("property::position", position)
 end
 
-local function get_stretch(w)
+function awfulwibar.get_stretch(w)
     return w._stretch
 end
 
-local function set_stretch(w, value)
+function awfulwibar.set_stretch(w, value)
     w._stretch = value
 
     attach(w, w.position)
@@ -240,10 +361,89 @@ local function set_stretch(w, value)
     w:emit_signal("property::stretch", value)
 end
 
+
+function awfulwibar.get_restrict_workarea(w)
+    return w._private.restrict_workarea
+end
+
+function awfulwibar.set_restrict_workarea(w, value)
+    w._private.restrict_workarea = value
+
+    attach(w, w.position)
+
+    w:emit_signal("property::restrict_workarea", value)
+end
+
+
+function awfulwibar.set_margins(w, value)
+    if type(value) == "number" then
+        value = {
+            top = value,
+            bottom = value,
+            right = value,
+            left = value,
+        }
+    end
+
+    local old = gtable.crush({
+        left   = 0,
+        right  = 0,
+        top    = 0,
+        bottom = 0
+    }, w._private.margins or {}, true)
+
+   value = gtable.crush(old, value or {}, true)
+
+    w._private.margins = value
+
+    attach(w, w.position)
+
+    w:emit_signal("property::margins", value)
+end
+
+-- Allow each margins to be set individually.
+local function meta_margins(self)
+    return setmetatable({}, {
+        __index = self._private.margins,
+        __newindex = function(_, k, v)
+            self._private.margins[k] = v
+            awfulwibar.set_margins(self, self._private.margins)
+        end
+    })
+end
+
+function awfulwibar.get_margins(self)
+    return self._private.meta_margins
+end
+
+
+function awfulwibar.get_align(self)
+    return self._private.align
+end
+
+function awfulwibar.set_align(self, value, screen)
+    if value == "center" then
+        gdebug.deprecate("awful.wibar.align(wb, 'center' is deprecated, use 'centered'", {deprecated_in=4})
+        value = "centered"
+    end
+
+    if screen then
+        gdebug.deprecate("awful.wibar.align 'screen' argument is deprecated", {deprecated_in=4})
+    end
+
+    assert(align_map[value])
+
+    self._private.align = value
+
+    attach(self, self.position)
+
+    self:emit_signal("property::align", value)
+end
+
 --- Remove a wibar.
 -- @method remove
 
-local function remove(self)
+function awfulwibar.remove(self)
     self.visible = false
 
     if self.detach_callback then
@@ -260,26 +460,6 @@ local function remove(self)
     self._screen = nil
 end
 
---- Get a wibox position if it has been set, or return top.
--- @param wb The wibox
--- @deprecated awful.wibar.get_position
--- @return The wibox position.
-function awfulwibar.get_position(wb)
-    gdebug.deprecate("Use wb:get_position() instead of awful.wibar.get_position", {deprecated_in=4})
-    return get_position(wb)
-end
-
---- Put a wibox on a screen at this position.
--- @param wb The wibox to attach.
--- @param position The position: top, bottom left or right.
--- @param screen This argument is deprecated, use wb.screen directly.
--- @deprecated awful.wibar.set_position
-function awfulwibar.set_position(wb, position, screen) --luacheck: no unused args
-    gdebug.deprecate("Use wb:set_position(position) instead of awful.wibar.set_position", {deprecated_in=4})
-
-    set_position(wb, position)
-end
-
 --- Attach a wibox to a screen.
 --
 -- This function has been moved to the `awful.placement` module. Calling this
@@ -290,7 +470,7 @@ end
 -- @param screen The screen to attach to
 -- @see awful.placement
 -- @deprecated awful.wibar.attach
-function awfulwibar.attach(wb, position, screen) --luacheck: no unused args
+local function legacy_attach(wb, position, screen) --luacheck: no unused args
     gdebug.deprecate("awful.wibar.attach is deprecated, use the 'attach' property"..
         " of awful.placement. This method doesn't do anything anymore",
         {deprecated_in=4}
@@ -319,7 +499,7 @@ end
 --  directly.
 -- @deprecated awful.wibar.align
 -- @see awful.placement.align
-function awfulwibar.align(wb, align, screen) --luacheck: no unused args
+local function legacy_align(wb, align, screen) --luacheck: no unused args
     if align == "center" then
         gdebug.deprecate("awful.wibar.align(wb, 'center' is deprecated, use 'centered'", {deprecated_in=4})
         align = "centered"
@@ -351,6 +531,9 @@ end
 -- @tparam[opt=nil] table args
 -- @tparam string args.position The position.
 -- @tparam string args.stretch If the wibar need to be stretched to fill the screen.
+-- @tparam boolean args.restrict_workarea Allow or deny the tiled clients to cover the wibar.
+-- @tparam string args.align How to align non-stretched wibars.
+-- @tparam table|number args.margins The wibar margins.
 --@DOC_wibox_constructor_COMMON@
 -- @return The new wibar
 -- @constructorfct awful.wibar
@@ -400,7 +583,7 @@ function awfulwibar.new(args)
     -- The C code scans the table directly, so metatable magic cannot be used.
     for _, prop in ipairs {
         "border_width", "border_color", "font", "opacity", "ontop", "cursor",
-        "bgimage", "bg", "fg", "type", "stretch", "shape"
+        "bgimage", "bg", "fg", "type", "stretch", "shape", "margins", "align"
     } do
         if (args[prop] == nil) and beautiful["wibar_"..prop] ~= nil then
             args[prop] = beautiful["wibar_"..prop]
@@ -409,25 +592,37 @@ function awfulwibar.new(args)
 
     local w = wibox(args)
 
-    w.screen   = screen
-    w._screen  = screen --HACK When a screen is removed, then getbycoords wont work
-    w._stretch = args.stretch == nil and has_to_stretch or args.stretch
+    w._private.align = (args.align and align_map[args.align]) and args.align or "centered"
 
-    w.get_position = get_position
-    w.set_position = set_position
+    w._private.margins = {
+        left   = 0,
+        right  = 0,
+        top    = 0,
+        bottom = 0
+    }
+    w._private.meta_margins = meta_margins(w)
 
-    w.get_stretch = get_stretch
-    w.set_stretch = set_stretch
-    w.remove      = remove
-
-    if args.visible == nil then w.visible = true end
+    w._private.restrict_workarea = true
 
     -- `w` needs to be inserted in `wiboxes` before reattach or its own offset
     -- will not be taken into account by the "older" wibars when `reattach` is
     -- called. `skip_reattach` is required.
-    w:set_position(position, true)
+    w._private.skip_reattach = true
 
-    table.insert(wiboxes, w)
+
+    w.screen   = screen
+    w._screen  = screen --HACK When a screen is removed, then getbycoords wont work
+    w._stretch = args.stretch == nil and has_to_stretch or args.stretch
+
+    if args.visible == nil then w.visible = true end
+
+    gtable.crush(w, awfulwibar, true)
+    gtable.crush(w, args, false)
+
+    -- Now, let set_position behave normally.
+    w._private.skip_reattach = false
+
+    awfulwibar.set_margins(w, args.margins)
 
     -- Force all the wibars to be moved
     reattach(w)
@@ -453,6 +648,14 @@ end)
 
 function awfulwibar.mt:__call(...)
     return awfulwibar.new(...)
+end
+
+function awfulwibar.mt:__index(_, k)
+    if k == "align" then
+        return legacy_align
+    elseif k == "attach" then
+        return legacy_attach
+    end
 end
 
 --@DOC_wibox_COMMON@

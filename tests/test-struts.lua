@@ -9,6 +9,9 @@ local parent, small
 
 local twibar, bwibar, lwibar, rwibar = screen.primary.mywibox
 
+-- Track garbage collection.
+local wibars = setmetatable({screen.primary.mywibox}, {__mode="v"})
+
 -- Pretty print issues
 local function print_expected()
     local wa, sa = mouse.screen.workarea, mouse.screen.geometry
@@ -219,6 +222,9 @@ table.insert(steps, function()
     bwibar = wibar {position = "bottom", bg = "#00ff00"}
     lwibar = wibar {position = "left"  , bg = "#0000ff"}
     rwibar = wibar {position = "right" , bg = "#ff00ff"}
+    table.insert(wibars, bwibar)
+    table.insert(wibars, lwibar)
+    table.insert(wibars, rwibar)
 
     validate_wibar_geometry()
 
@@ -469,6 +475,16 @@ table.insert(steps, function()
     rwibar:remove()
     twibar:remove()
 
+    -- Make sure the placement doesn't hold a reference.
+    bwibar, lwibar, rwibar, twibar = nil, nil, nil, nil
+    screen.primary.mywibox = nil
+
+    for _=1, 3 do
+        collectgarbage("collect")
+    end
+
+    assert(not next(wibars))
+
     return true
 end)
 
@@ -497,18 +513,22 @@ table.insert(steps, function()
     lwibar = wibar{position = "top", screen = s, height = 15,
         visible = true, bg = "#660066"}
     lwibar:setup(wdg2)
+    table.insert(wibars, lwibar)
 
     rwibar = wibar{position = "top", screen = s, height = 15,
         visible = true, bg = "#660000"}
     rwibar:setup(wdg2)
+    table.insert(wibars, rwibar)
 
     bwibar = wibar{position = "left", screen = s, ontop = true, width = 64,
         visible = true, bg = "#006600"}
     bwibar:setup(wdg)
+    table.insert(wibars, bwibar)
 
     twibar = wibar{position = "bottom", screen = s,
         height = 15, bg = "#666600"}
     twibar:setup(wdg2)
+    table.insert(wibars, twibar)
 
     test_workarea(s.geometry, s.workarea, 64, 0, 30, 15)
     validate_wibar_geometry()
@@ -532,6 +552,36 @@ table.insert(steps, function()
 
     test_workarea(s.geometry, s.workarea, 0, 0, 0, 0)
     validate_wibar_geometry()
+
+    return true
+end)
+
+-- Test resizing wibars.
+table.insert(steps, function()
+    -- Make sure the placement doesn't hold a reference.
+    bwibar, lwibar, rwibar, twibar = nil, nil, nil, nil
+
+    for _=1, 3 do
+        collectgarbage("collect")
+    end
+
+    assert(not next(wibars))
+
+    twibar = wibar{position = "top", screen = s, height = 15,
+        visible = true, bg = "#660066"}
+
+    assert(twibar.height == 15)
+
+    twibar.height = 64
+    assert(twibar.height == 64)
+
+    twibar:geometry { height = 128 }
+    assert(twibar.height == 128)
+
+    local old_width = twibar.width
+    twibar.width = 42
+    assert(twibar.width == old_width)
+
 
     return true
 end)
