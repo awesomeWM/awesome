@@ -46,6 +46,19 @@ local function init_screen(s)
     return by_position[s]
 end
 
+local function disconnect(self)
+    if self._private.notification then
+        self._private.notification:disconnect_signal("destroyed",
+            self._private.destroy_callback)
+
+        self._private.notification:disconnect_signal("property::margin",
+            self._private.update)
+
+        self._private.notification:disconnect_signal("property::suspended",
+            self._private.hide)
+    end
+end
+
 ascreen.connect_for_each_screen(init_screen)
 
 -- Manually cleanup to help the GC.
@@ -95,8 +108,6 @@ local function update_position(position, preset)
             -- The first entry is aligned to the workarea, then the following to the
             -- previous widget.
             placement[k==1 and position:gsub("_middle", "") or "next_to"](wdg, args)
-
-            wdg.visible = true
         end
     end
 end
@@ -118,6 +129,8 @@ local function finish(self)
     end
 
     update_position(self.position, preset)
+
+    disconnect(self)
 end
 
 -- It isn't a good idea to use the `attach` `awful.placement` property. If the
@@ -264,23 +277,27 @@ local function init(self, notification)
 
     table.insert(init_screen(s)[position], self)
 
-    local function update() update_position(position, preset) end
+    self._private.update = function() update_position(position, preset) end
+    self._private.hide = function(_, value)
+        if value then
+            finish(self)
+        end
+    end
 
-    self:connect_signal("property::geometry", update)
-    notification:connect_signal("property::margin", update)
-    notification:connect_signal("destroyed", self._private.destroy_callback)
+    self:connect_signal("property::geometry", self._private.update)
+    notification:weak_connect_signal("property::margin", self._private.update)
+    notification:weak_connect_signal("property::suspended", self._private.hide)
+    notification:weak_connect_signal("destroyed", self._private.destroy_callback)
 
     update_position(position, preset)
 
+    self.visible = true
 end
 
 function box:set_notification(notif)
     if self._private.notification == notif then return end
 
-    if self._private.notification then
-        self._private.notification:disconnect_signal("destroyed",
-            self._private.destroy_callback)
-    end
+    disconnect(self)
 
     init(self, notif)
 
