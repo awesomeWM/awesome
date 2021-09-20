@@ -256,7 +256,7 @@ local new1, new2 = nil, nil
 
 -- Check that you can add new default key/mousebindings at any time.
 table.insert(steps, function()
-    assert(#mouse.screen.clients == 0)
+    if #mouse.screen.clients > 0 then return end
 
     new1 = module.key {
         key       = "a",
