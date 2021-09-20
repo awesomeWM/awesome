@@ -343,6 +343,12 @@ jobs:
           git fetch --unshallow --all
 
           rev_list="$(git rev-list --bisect-all origin/${{ github.base_ref }}..fork/${{ github.head_ref }})"
+          # The most recent commit has already been tested. So if that's the
+          # only commit in the PR, we can stop here.
+          if [[ $(echo "$rev_list" | wc -l) -lt 2 ]]; then
+            exit 0
+          fi
+
           commits="$(echo "$rev_list" | grep -v 'dist=0' | cut -d' ' -f 1)"
           n="$(echo "$commits" | wc -l)"
 
@@ -374,7 +380,7 @@ jobs:
             fi
           done
 
-          git checkout --quiet --force ${{ github.head_ref }}
+          git checkout --quiet --force fork/${{ github.head_ref }}
           if [ -n "$failed" ]; then
             echo "Checks failed for these commits:"
 
