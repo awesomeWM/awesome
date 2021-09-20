@@ -1033,7 +1033,7 @@ local function create(args)
     end
 
     -- Let all listeners handle the actual visual aspects
-    if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) then
+    if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) and (not naughty.suspended) then
         naughty.emit_signal("request::display" , n, "new", args)
         naughty.emit_signal("request::fallback", n, "new", args)
     end
