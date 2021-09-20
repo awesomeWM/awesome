@@ -62,6 +62,12 @@ screen.connect_for_each_screen(function(s)
     }
 end)
 
+capi.screen.connect_signal("removed", function(s)
+    timer.delayed_call(function()
+        current_notifications[s] = nil
+    end)
+end)
+
 --- Sum heights of notifications at position
 --
 -- @param s Screen to use
