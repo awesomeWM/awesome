@@ -30,10 +30,33 @@ local s1, s2 = mouse.screen, nil
 
 for _, p in ipairs(positions) do
     objs[p] = setmetatable({},{
-        __index=function(t,k) t[k]={};return t[k] end,
+        __index = function(t,k)
+            t[k] = setmetatable({}, {__mode = "kv"})
+            return t[k]
+        end,
         __mode = "k"
     })
 end
+
+local function cleanup(n)
+    -- Wait until there is no notifications left.
+    for _, pos in ipairs(positions) do
+        for s, notifs in pairs(objs[pos]) do
+            for k, n2 in ipairs(notifs) do
+                if n == n2 then
+                    table.remove(notifs, k)
+                    if #notifs == 0 then
+                        objs[pos][s] = nil
+                    end
+                    return
+                end
+            end
+        end
+    end
+end
+
+naughty.connect_signal("property::screen", cleanup)
+naughty.connect_signal("destroyed", cleanup)
 
 local function add_many(s)
     for _, pos in ipairs(positions) do
@@ -143,9 +166,17 @@ for _, legacy_preset in ipairs {true, false} do
     table.insert(steps, function()
         s2:fake_remove()
 
-        -- Help the weak tables a little.
+        return true
+    end)
+
+    -- Check if notifications are moved.
+    table.insert(steps, function()
+        -- Wait until there is no notifications left.
         for _, pos in ipairs(positions) do
-            objs[pos][s1] = nil
+            if #objs[pos][s2] > 0 then
+                collectgarbage("collect")
+                return
+            end
         end
 
         -- Drop our string reference to s2.
@@ -153,6 +184,7 @@ for _, legacy_preset in ipairs {true, false} do
 
         return true
     end)
+
 
     table.insert(steps, function()
         if weak[1] == nil then return true end
