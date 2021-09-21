@@ -714,12 +714,13 @@ function keygrab.run_with_keybindings(args)
             else
                 gdebug.print_warning(
                     "The hook's 3rd parameter has to be a function. " ..
-                        gdebug.dump(v or {})
+                        gdebug.dump_return(v or {})
                 )
             end
         else
             gdebug.print_warning(
-                "The keybindings should be awful.key objects".. gdebug.dump(v or {})
+                "The keybindings should be awful.key objects" ..
+                        gdebug.dump_return(v or {})
             )
         end
     end
