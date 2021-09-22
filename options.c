@@ -444,6 +444,9 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
             if (confpath != NULL)
                 fatal("--config may only be specified once");
             confpath = a_strdup(optarg);
+
+            /* Make sure multi-file config works */
+            string_array_append(paths, g_path_get_dirname(optarg));
             break;
           case 'm':
             /* Validation */
