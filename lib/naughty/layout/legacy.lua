@@ -134,7 +134,7 @@ local function get_offset(s, position, idx, width, height)
     local find_old_to_replace = function()
         for i = 1, idx-1 do
             local n = current_notifications[s][position][i]
-            if n.timeout > 0 then
+            if n and n.timeout > 0 then
                 return n
             end
         end
