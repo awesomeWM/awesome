@@ -51,8 +51,9 @@ local imagebox = { mt = {} }
 local rsvg_handle_cache = setmetatable({}, { __mode = 'k' })
 
 ---Load rsvg handle form image file
----@tparam string file Path to svg file.
----@return Rsvg handle
+-- @tparam string file Path to svg file.
+-- @return Rsvg handle
+-- @treturn table A table where cached data can be stored.
 local function load_rsvg_handle(file)
     if not Rsvg then return end
 
@@ -79,8 +80,8 @@ end
 
 ---Apply cairo surface for given imagebox widget
 local function set_surface(ib, surf)
-    local is_surd_valid = surf.width > 0 and surf.height > 0
-    if not is_surd_valid then return end
+    local is_surf_valid = surf.width > 0 and surf.height > 0
+    if not is_surf_valid then return false end
 
     ib._private.default = { width = surf.width, height = surf.height }
     ib._private.handle = nil
@@ -92,7 +93,7 @@ end
 local function set_handle(ib, handle, cache)
     local dim = handle:get_dimensions()
     local is_handle_valid = dim.width > 0 and dim.height > 0
-    if not is_handle_valid then return end
+    if not is_handle_valid then return false end
 
     ib._private.default = { width = dim.width, height = dim.height }
     ib._private.handle = handle
@@ -303,7 +304,7 @@ end
 -- * `nil`: Unset the image.
 --
 -- @property image
--- @tparam image image The image to render. test
+-- @tparam image image The image to render.
 -- @propemits false false
 
 --- Set the `imagebox` image.
@@ -321,7 +322,7 @@ function imagebox:set_image(image)
     local setup_succeed
 
     -- Keep the original to prevent the cache from being GCed.
-    self._private.original_iamge = image
+    self._private.original_image = image
 
     if type(image) == "userdata" and not (Rsvg and Rsvg.Handle:is_type_of(image)) then
         -- This function is not documented to handle userdata objects, but
