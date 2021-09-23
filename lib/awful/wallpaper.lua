@@ -735,7 +735,7 @@ end
 -- Adding a new wallpaper to a screen will automatically
 -- detach the older one. However there is some case when
 -- it is useful to call this manually. For example, when
--- adding a ned panned wallpaper, it is possible that 2
+-- adding a new panned wallpaper, it is possible that 2
 -- wallpaper will have an overlap.
 --
 -- @method detach
