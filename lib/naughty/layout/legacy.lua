@@ -62,6 +62,12 @@ screen.connect_for_each_screen(function(s)
     }
 end)
 
+capi.screen.connect_signal("removed", function(s)
+    timer.delayed_call(function()
+        current_notifications[s] = nil
+    end)
+end)
+
 --- Sum heights of notifications at position
 --
 -- @param s Screen to use
@@ -128,7 +134,7 @@ local function get_offset(s, position, idx, width, height)
     local find_old_to_replace = function()
         for i = 1, idx-1 do
             local n = current_notifications[s][position][i]
-            if n.timeout > 0 then
+            if n and n.timeout > 0 then
                 return n
             end
         end

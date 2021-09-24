@@ -191,6 +191,10 @@ naughty.notifications = { suspended = { }, _expired = {{}} }
 
 naughty._active = {}
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
 local function init_screen(s)
     if naughty.notifications[s] then return end
 
@@ -218,14 +222,17 @@ capi.screen.connect_signal("removed", function(scr)
             naughty.emit_signal("request::screen", n, "removed", {})
         end
     end
+
+    for _, n in ipairs(naughty._active) do
+        if n._private.args and get_screen(n._private.args.screen) == scr then
+            n._private.args.screen = nil
+        end
+    end
+
     -- Destroy all notifications on this screen
     naughty.destroy_all_notifications({scr})
     naughty.notifications[scr] = nil
 end)
-
-local function get_screen(s)
-    return s and capi.screen[s]
-end
 
 local function remove_from_index(n)
     for _, positions in pairs(naughty.notifications) do

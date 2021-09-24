@@ -160,6 +160,15 @@ end
 -- @staticfct ruled.notification.apply
 function module.apply(n)
     local callbacks, props = {}, {}
+
+    if n.preset then
+        for k, v in pairs(n.preset) do
+            if not n._private[v] then
+                props[k] = v
+            end
+        end
+    end
+
     for _, v in ipairs(nrules._matching_source) do
         v.callback(nrules, n, props, callbacks)
     end

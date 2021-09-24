@@ -570,6 +570,27 @@ function notification:set_timeout(timeout)
     self:emit_signal("property::timeout", timeout)
 end
 
+function notification:get_message()
+    -- This property was called "text" in older versions.
+    -- Some modules like `lain` abused of the presets (they
+    -- had little choice at the time) to set the message on
+    -- an existing popup.
+    local p = rawget(self, "preset") or {}
+    local message = self._private.message or p.message or ""
+
+    if message == "" and p.text and p.text ~= "" then
+        gdebug.deprecate(
+            "Using the preset configuration to set the notification "..
+            "message is not supported. Please use `n.message = 'text'`.",
+            {deprecated_in=5}
+        )
+
+        return p.text
+    end
+
+    return message
+end
+
 function notification:set_text(txt)
     gdebug.deprecate(
         "The `text` attribute is deprecated, use `message`",
@@ -861,7 +882,15 @@ local function select_legacy_preset(n, args)
     ))
 
     for k, v in pairs(n.preset) do
-        n._private[k] = v
+        -- Don't keep a strong reference to the screen, Lua 5.1 GC wont be
+        -- smart enough to unwind the mess of circular weak references.
+        if k ~= "screen" then
+            n._private[k] = v
+        end
+    end
+
+    if n.preset.screen then
+        n._private.weak_screen[1] = capi.screen[n.preset.screen]
     end
 end
 

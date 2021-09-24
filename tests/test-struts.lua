@@ -475,15 +475,29 @@ table.insert(steps, function()
     rwibar:remove()
     twibar:remove()
 
+    for _, w in ipairs(wibars) do
+        assert(not w.visible)
+    end
+
     -- Make sure the placement doesn't hold a reference.
     bwibar, lwibar, rwibar, twibar = nil, nil, nil, nil
     screen.primary.mywibox = nil
 
+    return true
+end)
+
+table.insert(steps, function()
     for _=1, 3 do
         collectgarbage("collect")
     end
 
-    assert(not next(wibars))
+    if next(wibars) then
+        for _, w in ipairs(wibars) do
+            assert(not w.visible)
+        end
+
+        return
+    end
 
     return true
 end)
