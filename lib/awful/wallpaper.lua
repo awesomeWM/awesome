@@ -808,19 +808,24 @@ end
 
 --- Create a wallpaper.
 --
+-- Note that all parameters are not required. Please refer to the
+-- module description and examples to understand parameters usages.
+--
 -- @constructorfct awful.wallpaper
 -- @tparam table args
--- @tparam wibox.widget args.widget The wallpaper widget.
--- @tparam number args.dpi The wallpaper DPI (dots per inch).
--- @tparam screen args.screen The wallpaper screen.
--- @tparam table args.screens A list of screen for this wallpaper.
--- @tparam gears.color args.bg The background color.
--- @tparam gears.color args.fg The foreground color.
--- @tparam gears.color args.uncovered_areas_color The color for the uncovered areas.
--- @tparam boolean args.honor_workarea Honor the workarea.
--- @tparam boolean args.honor_padding Honor the screen padding.
--- @tparam table args.uncovered_areas Returns the list of screen(s) area which won't be covered by the wallpaper.
--- @tparam function|string args.panning_area Defines where the wallpaper is placed when there is multiple screens.
+-- @tparam[opt] wibox.widget args.widget The wallpaper widget.
+-- @tparam[opt] number args.dpi The wallpaper DPI (dots per inch).
+-- @tparam[opt] screen args.screen The wallpaper screen.
+-- @tparam[opt] table args.screens A list of screen for this wallpaper.
+--  Use this parameter as a remplacement for `args.screen` to manage multiscreen wallpaper.
+--  (Note: the expected table should be an array-like table `{screen1, screen2, ...}`)
+-- @tparam[opt] gears.color args.bg The background color.
+-- @tparam[opt] gears.color args.fg The foreground color.
+-- @tparam[opt] gears.color args.uncovered_areas_color The color for the uncovered areas.
+-- @tparam[opt] boolean args.honor_workarea Honor the workarea.
+-- @tparam[opt] boolean args.honor_padding Honor the screen padding.
+-- @tparam[opt] table args.uncovered_areas Returns the list of screen(s) area which won't be covered by the wallpaper.
+-- @tparam[opt] function|string args.panning_area Defines where the wallpaper is placed when there is multiple screens.
 
 local function new(_, args)
     args = args or {}
