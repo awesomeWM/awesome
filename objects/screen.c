@@ -59,6 +59,9 @@
 #include <xcb/xinerama.h>
 #include <xcb/randr.h>
 
+#include <cairo/cairo.h>
+#include <cairo/cairo-xcb.h>
+
 /* The XID that is used on fake screens. X11 guarantees that the top three bits
  * of a valid XID are zero, so this will not clash with anything.
  */
@@ -1655,6 +1658,60 @@ luaA_screen_get_name(lua_State *L, screen_t *s)
     return 1;
 }
 
+/** Get the content of the active screen as a cairo surface
+ *
+ * @return A cairo surface
+ * @staticfct content
+ */
+static int
+luaA_screen_get_content(lua_State *L, screen_t *s)
+{
+
+    cairo_surface_t *root_surface;
+    cairo_surface_t *scrn_surface;
+    cairo_t *scrn_cr;
+
+    area_t *scrn_geom;
+
+    int root_width  = globalconf.screen->width_in_pixels;
+    int root_height = globalconf.screen->height_in_pixels;
+
+    scrn_geom = &(s->geometry);
+
+    root_surface = cairo_xcb_surface_create(globalconf.connection,
+                                            globalconf.screen->root,
+                                            globalconf.default_visual,
+                                            root_width, root_height);
+
+    scrn_surface = cairo_image_surface_create(CAIRO_FORMAT_ARGB32,
+                                        scrn_geom->width, scrn_geom->height);
+    scrn_cr = cairo_create(scrn_surface);
+
+    if(cairo_surface_status(root_surface) != CAIRO_STATUS_SUCCESS ||
+       cairo_surface_status(scrn_surface) != CAIRO_STATUS_SUCCESS){
+      cairo_surface_destroy(root_surface);
+      cairo_surface_destroy(scrn_surface);
+      cairo_destroy(scrn_cr);
+      return 0;
+    }
+
+    cairo_set_source_surface(scrn_cr, root_surface,
+                             -(scrn_geom->x), -(scrn_geom->y));
+    cairo_rectangle(scrn_cr, 0, 0, scrn_geom->width, scrn_geom->height);
+    cairo_fill(scrn_cr);
+
+    cairo_surface_destroy(root_surface);
+    cairo_destroy(scrn_cr);
+
+    lua_pushlightuserdata(L, scrn_surface);
+
+    return 1;
+
+}
+
+
+
+
 /** Get the number of screens.
  *
  * @return The screen count, at least 1.
@@ -1902,6 +1959,10 @@ screen_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_screen_set_name,
                             (lua_class_propfunc_t) luaA_screen_get_name,
                             (lua_class_propfunc_t) luaA_screen_set_name);
+    luaA_class_add_property(&screen_class, "content",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_screen_get_content,
+                            NULL);
 }
 
 /* @DOC_cobject_COMMON@ */
