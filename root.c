@@ -501,15 +501,15 @@ luaA_root_wallpaper(lua_State *L)
 }
 
 
-/** Get the content of the root window as a cairo surface
+/** Get the content of the root window as a cairo surface.
  *
- * @return A cairo surface
- * @staticfct content
+ * @property content
+ * @tparam surface A cairo surface with the root window content (aka the whole surface from every screens).
+ * @see gears.surface
  */
 static int
 luaA_root_get_content(lua_State *L)
 {
-
     cairo_surface_t *surface;
     int width  = globalconf.screen->width_in_pixels;
     int height = globalconf.screen->height_in_pixels;
@@ -521,7 +521,6 @@ luaA_root_get_content(lua_State *L)
 
     lua_pushlightuserdata(L, surface);
     return 1;
-
 }
 
 

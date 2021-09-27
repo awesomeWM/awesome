@@ -1658,15 +1658,15 @@ luaA_screen_get_name(lua_State *L, screen_t *s)
     return 1;
 }
 
-/** Get the content of the active screen as a cairo surface
+/** Get the content of the active screen as a cairo surface.
  *
- * @return A cairo surface
- * @staticfct content
+ * @property content
+ * @tparam surface A cairo surface with the screen content.
+ * @see gears.surface
  */
 static int
 luaA_screen_get_content(lua_State *L, screen_t *s)
 {
-
     cairo_surface_t *root_surface;
     cairo_surface_t *scrn_surface;
     cairo_t *scrn_cr;
@@ -1706,7 +1706,6 @@ luaA_screen_get_content(lua_State *L, screen_t *s)
     lua_pushlightuserdata(L, scrn_surface);
 
     return 1;
-
 }
 
 
