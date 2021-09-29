@@ -23,10 +23,11 @@ local template = {
     queued_updates = {}
 }
 
-function template:_do_update_now(args)
-    if type(self.update_callback) == 'function' then
-        self:update_callback(args)
+function template:_do_update_now()
+    if type(self.update_callback) == "function" then
+        self:update_callback(self.update_args)
     end
+    self.update_args = nil
     template.queued_updates[self] = false
 end
 
@@ -37,23 +38,19 @@ end
 -- is called multiple times during the same GLib event loop, only the first call
 -- will be run.
 -- All arguments are passed to the queued `update_callback` call.
--- @treturn boolean Returns `true` if the update_callback have been queued to be
---   run at the end of the event loop. Returns `false` if there is already an update
---   in the queue (in this case, this new update request is discared).
 function template:update(args)
+    if type(args) == "table" then
+        self.update_args = gtable.crush(gtable.clone(self.update_args or {}, false), args)
+    end
+
     if not template.queued_updates[self] then
-        local update_args = gtable.crush(gtable.clone(self.update_args, false), args or {})
         gtimer.delayed_call(
             function()
-                self:_do_update_now(update_args)
+                self:_do_update_now()
             end
         )
         template.queued_updates[self] = true
-
-        return true
     end
-
-    return false
 end
 
 --- Create a new `wibox.widget.template` instance.
@@ -71,7 +68,6 @@ function template.new(args)
     local widget = wbase.make_widget_from_value(widget_template)
 
     widget.update_callback = args.update_callback
-    widget.update_args = args.update_args or {}
 
     gtable.crush(widget, template, true)
 

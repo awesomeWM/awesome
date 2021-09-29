@@ -50,21 +50,36 @@ describe("wibox.widget.template", function()
 
         it("update parameters", function()
             local spied_update_callback = spy.new(function() end)
-            local args_structure = { foo = "string" }
-            local update_args = { foo = "bar" }
+            local args = { foo = "string" }
 
-            widget.update_args = args_structure
             widget.update_callback = function(...) spied_update_callback(...) end
 
-            widget:update(update_args)
+            widget:update(args)
 
             gtimer.run_delayed_calls_now()
 
             assert.spy(spied_update_callback).was.called_with(
                 match.is_ref(widget),
-                match.is_same_table_struture(widget.update_args)
+                match.is_same(args)
             )
         end)
+
+        it("crush update parameters", function()
+            local spied_update_callback = spy.new(function() end)
+
+            widget.update_callback = function(...) spied_update_callback(...) end
+
+            widget:update { foo = "bar" }
+            widget:update { bar = 10 }
+
+            gtimer.run_delayed_calls_now()
+
+            assert.spy(spied_update_callback).was.called_with(
+                match.is_ref(widget),
+                match.is_same { foo = "bar", bar = 10 }
+            )
+        end)
+
     end)
 end)
 
