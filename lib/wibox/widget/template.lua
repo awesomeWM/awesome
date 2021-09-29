@@ -41,9 +41,8 @@ end
 --   run at the end of the event loop. Returns `false` if there is already an update
 --   in the queue (in this case, this new update request is discared).
 function template:update(args)
-    local update_args = gtable.crush(gtable.clone(self.update_args, false), args or {})
-
     if not template.queued_updates[self] then
+        local update_args = gtable.crush(gtable.clone(self.update_args, false), args or {})
         gtimer.delayed_call(
             function()
                 self:_do_update_now(update_args)
