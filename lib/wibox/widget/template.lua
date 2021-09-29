@@ -16,10 +16,6 @@ local wbase = require("wibox.widget.base")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
 
-local default_update_callback = function()
-    return nil
-end
-
 local default_template_widget = wbase.empty_widget()
 
 local template = {
@@ -28,7 +24,9 @@ local template = {
 }
 
 function template:_do_update_now(args)
-    self:update_callback(args)
+    if type(self.update_callback) == 'function' then
+        self:update_callback(args)
+    end
     template.queued_updates[self] = false
 end
 
@@ -73,7 +71,7 @@ function template.new(args)
 
     local widget = wbase.make_widget_from_value(widget_template)
 
-    widget.update_callback = args.update_callback or default_update_callback
+    widget.update_callback = args.update_callback
     widget.update_args = args.update_args or {}
 
     gtable.crush(widget, template, true)
