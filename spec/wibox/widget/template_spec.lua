@@ -32,7 +32,7 @@ describe("wibox.widget.template", function()
         it("batch calls", function()
             local spied_update_callback = spy.new(function() end)
 
-            widget.update_callback = spied_update_callback
+            widget.update_callback = function(...) spied_update_callback(...) end
 
             -- Multiple calls to update
             widget:update()
@@ -54,7 +54,7 @@ describe("wibox.widget.template", function()
             local update_args = { foo = "bar" }
 
             widget.update_args = args_structure
-            widget.update_callback = spied_update_callback
+            widget.update_callback = function(...) spied_update_callback(...) end
 
             widget:update(update_args)
 
