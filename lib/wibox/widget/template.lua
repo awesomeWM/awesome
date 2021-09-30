@@ -25,9 +25,9 @@ local template = {
 
 function template:_do_update_now()
     if type(self.update_callback) == "function" then
-        self:update_callback(self.update_args)
+        self:update_callback(self._private.update_args)
     end
-    self.update_args = nil
+    self._private.update_args = nil
     template.queued_updates[self] = false
 end
 
@@ -40,7 +40,7 @@ end
 -- All arguments are passed to the queued `update_callback` call.
 function template:update(args)
     if type(args) == "table" then
-        self.update_args = gtable.crush(gtable.clone(self.update_args or {}, false), args)
+        self._private.update_args = gtable.crush(gtable.clone(self._private.update_args or {}, false), args)
     end
 
     if not template.queued_updates[self] then
