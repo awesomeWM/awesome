@@ -6,20 +6,7 @@
 _G.awesome.connect_signal = function() end
 
 local template = require("wibox.widget.template")
-local gtable = require("gears.table")
 local gtimer = require("gears.timer")
-
-local function is_same_table_struture(state, arguments) -- luacheck: ignore unused argument state
-    return function(value)
-        return table.concat(gtable.keys(arguments[1])) == table.concat(gtable.keys(value))
-    end
-end
-
-assert:register(
-    "matcher",
-    "is_same_table_struture",
-    is_same_table_struture
-)
 
 describe("wibox.widget.template", function()
     local widget
