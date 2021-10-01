@@ -207,6 +207,12 @@ end
 --
 -- Reading this (read only) property returns a screenshot of the physical
 -- (Xinerama) screen as a cairo surface.
+--
+-- @DOC_screen_content_EXAMPLE@
+--
+-- @property content
+-- @tparam screen s (self)
+-- @treturn cairo scurface of the screen content
 
 function screen.object.get_content(s)
     local geo = s.geometry
