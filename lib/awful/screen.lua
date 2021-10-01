@@ -19,6 +19,8 @@ local gdebug = require("gears.debug")
 local gmath = require("gears.math")
 local object = require("gears.object")
 local grect =  require("gears.geometry").rectangle
+local gsurf = require("gears.surface")
+local cairo = require("lgi").cairo
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -199,6 +201,22 @@ function screen.object.get_tiling_area(s)
         honor_padding  = true,
         honor_workarea = true,
     }
+end
+
+--- Take a screenshot of the physical screen.
+--
+-- Reading this (read only) property returns a screenshot of the physical
+-- (Xinerama) screen as a cairo surface.
+
+function screen.object.get_content(s)
+    local geo = s.geometry
+    local source = gsurf(root.content())
+    local target = source:create_similar(cairo.Content.COLOR, geo.width, geo.height)
+    local cr = cairo.Context(target)
+    cr:set_source_surface(source, -geo.x, -geo.y)
+    cr:rectangle(0, 0, geo.width, geo.height)
+    cr:fill()
+    return target 
 end
 
 --- Get or set the screen padding.
