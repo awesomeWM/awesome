@@ -511,13 +511,12 @@ static int
 luaA_root_get_content(lua_State *L)
 {
     cairo_surface_t *surface;
-    int width  = globalconf.screen->width_in_pixels;
-    int height = globalconf.screen->height_in_pixels;
 
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.screen->root,
                                        globalconf.default_visual,
-                                       width, height);
+                                       globalconf.screen->width_in_pixels, 
+                                       globalconf.screen->height_in_pixels);
 
     lua_pushlightuserdata(L, surface);
     return 1;
