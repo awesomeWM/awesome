@@ -2,10 +2,11 @@
 local awful =  { wallpaper = require("awful.wallpaper") } --DOC_HIDE
 local wibox = require("wibox") --DOC_HIDE
 local beautiful = require("beautiful") --DOC_HIDE
+local s = screen[1] --DOC_HIDE
 
 
    awful.wallpaper {
-       screen = screen[1], --DOC_HIDE
+       screen = s,
        widget = {
            {
                image  = beautiful.wallpaper,

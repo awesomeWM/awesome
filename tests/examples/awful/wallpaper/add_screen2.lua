@@ -11,7 +11,7 @@ screen._add_screen {x = 322, y = 0, width = 160, height = 96}
 require("_default_look")
 
        local wall = awful.wallpaper {
-           screen = screen[1], --DOC_HIDE
+           screen = screen[1],
            bg     = "#222222",
            widget = wibox.widget {
                 {

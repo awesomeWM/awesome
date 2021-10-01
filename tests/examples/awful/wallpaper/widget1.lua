@@ -4,10 +4,10 @@ local wibox = require("wibox") --DOC_HIDE
 local gears = {color = require("gears.color") } --DOC_HIDE
 
 screen[1]._resize {x = 0, y = 0, width = 320, height = 196} --DOC_HIDE
-
+local s = screen[1] --DOC_HIDE
 
    awful.wallpaper {
-       screen = screen[1], --DOC_HIDE
+       screen = s,
        widget = wibox.widget {
             fit = function(_, width, height)
                 return width, height
