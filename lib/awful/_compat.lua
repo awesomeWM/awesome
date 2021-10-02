@@ -58,6 +58,28 @@ do
     assert(root.object == root_object)
 end
 
+--- The old wallpaper only took native surfaces.
+--
+-- This was a problem for the test backend. The new function takes both
+-- native surfaces and LGI-ified Cairo surfaces.
+function root.wallpaper(pattern)
+    if not pattern then return root._wallpaper() end
+
+    -- Checking for type will either potentially `error()` or always
+    -- return `userdata`. This check will error() when the surface is
+    -- already native.
+    local err = pcall(function() return pattern._native end)
+
+    -- The presence of `root._write_string` means the test backend is
+    -- used. Avoid passing the native surface.
+    if err and not root._write_string then
+        return root._wallpaper(pattern._native)
+    else
+        return root._wallpaper(pattern)
+    end
+end
+
+
 -- root.bottons() used to be a capi function. However this proved confusing
 -- as rc.lua used `awful.button` and `root.buttons()` used capi.button. There
 -- was a little documented hack to "flatten" awful.button into a pair of

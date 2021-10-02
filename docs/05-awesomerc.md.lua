@@ -72,6 +72,17 @@ variables such as `bg_normal`. To get a list of all official variables, see
 the [appearance guide](../documentation/06-appearance.md.html).
 ]]
 
+sections.DOC_WALLPAPER = [[
+The AwesomeWM wallpaper module, `awful.wallpaper` support both per-screen wallpaper
+and wallpaper across multiple screens. In the default configuration, the `"request::wallpaper"` signal
+is emitted everytime a screen is added, moved, resized or when the bars
+(`awful.wibar`) are moved.
+
+This is will suited for single-screen wallpapers. If you wish to use multi-screen wallpaper,
+it is better to create a global wallpaper object and edit it when the screen change. See
+the `add_screen`/`remove_screens` methods and the `screens` property of `awful.wallpaper` for
+examples.
+]]
 
 sections.DOC_DEFAULT_APPLICATIONS = [[
  &nbsp;

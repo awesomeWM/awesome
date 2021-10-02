@@ -172,28 +172,39 @@ end
 -- @tparam string path The directory to search.
 -- @tparam[opt] table exts Specific extensions to limit the search to. eg:`{ "jpg", "png" }`
 --   If ommited, all files are considered.
+-- @tparam[opt=false] boolean absolute_path Return the absolute path instead of the filename.
 -- @treturn string|nil A randomly selected filename from the specified path (with
---   a specified extension if required) or nil if no suitable file is found.
+--   a specified extension if required) or nil if no suitable file is found. If `absolute_path`
+--   is set, then a path is returned instead of a file name.
 -- @staticfct gears.filesystem.get_random_file_from_dir
-function filesystem.get_random_file_from_dir(path, exts)
+function filesystem.get_random_file_from_dir(path, exts, absolute_path)
     local files, valid_exts = {}, {}
 
     -- Transforms { "jpg", ... } into { [jpg] = #, ... }
-    if exts then for i, j in ipairs(exts) do valid_exts[j:lower()] = i end end
+    if exts then for i, j in ipairs(exts) do valid_exts[j:lower():gsub("^[.]", "")] = i end end
 
     -- Build a table of files from the path with the required extensions
     local file_list = Gio.File.new_for_path(path):enumerate_children("standard::*", 0)
+
+    -- This will happen when the directory doesn't exist.
+    if not file_list then return nil end
+
     for file in function() return file_list:next_file() end do
         if file:get_file_type() == "REGULAR" then
             local file_name = file:get_display_name()
+
             if not exts or valid_exts[file_name:lower():match(".+%.(.*)$") or ""] then
                table.insert(files, file_name)
             end
         end
     end
 
+    if #files == 0 then return nil end
+
     -- Return a randomly selected filename from the file table
-    return #files > 0 and files[math.random(#files)] or nil
+    local file = files[math.random(#files)]
+
+    return absolute_path and (path:gsub("[/]*$", "") .. "/" .. file) or file
 end
 
 return filesystem

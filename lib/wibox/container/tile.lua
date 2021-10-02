@@ -31,6 +31,7 @@ function module:draw(context, cr, width, height)
     if not self._private.surface then
         self._private.surface = cairo.ImageSurface(cairo.Format.ARGB32, w+hspace, h+vspace)
         self._private.cr = cairo.Context(self._private.surface)
+        self._private.cr:set_source(cr:get_source())
         self._private.pattern = cairo.Pattern.create_for_surface(self._private.surface)
         self._private.pattern.extend = cairo.Extend.REPEAT
         self._private.cr:translate(math.ceil(hspace), math.ceil(vspace))

@@ -68,7 +68,10 @@ local function add_client(args)
             local c = data.c
             if not c then
                 c = client.get()[1]
-                assert(c.name == name)
+                assert(c.name == name,
+                    "Expected "..name.." got "..c.name.." there is "
+                        ..#client.get().." clients"
+                )
                 data.c = c
             end
             local test = args.test or default_test

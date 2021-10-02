@@ -1,22 +1,7 @@
 ---------------------------------------------------------------------------
 -- Functions for setting the wallpaper.
 --
--- There are two levels of functionality provided by this module:
---
--- The low-level functionality consists of two functions.
--- @{set} an already-prepared wallpaper on all screens and @{prepare_context}
--- prepares things to draw a new wallpaper.
---
--- The low-level API can for example be used to set solid red as a wallpaper
--- (see @{gears.color} for details on the supported syntax):
---
---     gears.wallpaper.set("#ff0000")
---
--- Ontop of these low-level functions, the remaining functions implement more
--- useful functionality. For example, given a screen object `s`, an image can be
--- set as the wallpaper as follows:
---
---     gears.wallpaper.maximized("path/to/image.png", s)
+-- This module is deprecated, please use `awful.wallpaper`.
 --
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
@@ -51,8 +36,10 @@ end
 -- @param s The screen to set the wallpaper on or nil for all screens
 -- @return[1] The available geometry (table with entries width and height)
 -- @return[1] A cairo context that the wallpaper should be drawn to.
--- @staticfct gears.wallpaper.prepare_context
+-- @deprecated gears.wallpaper.prepare_context
 function wallpaper.prepare_context(s)
+    debug.deprecate("Use `awful.wallpaper`", {deprecated_in=5})
+
     s = get_screen(s)
 
     local root_width, root_height = root.size()
@@ -110,8 +97,10 @@ end
 -- @param pattern The wallpaper that should be set. This can be a cairo surface,
 --   a description for gears.color or a cairo pattern.
 -- @see gears.color
--- @staticfct gears.wallpaper.set
+-- @deprecated gears.wallpaper.set
 function wallpaper.set(pattern)
+    debug.deprecate("Use `awful.wallpaper`", {deprecated_in=5})
+
     if cairo.Surface:is_type_of(pattern) then
         pattern = cairo.Pattern.create_for_surface(pattern)
     end
@@ -121,7 +110,7 @@ function wallpaper.set(pattern)
     if not cairo.Pattern:is_type_of(pattern) then
         error("wallpaper.set() called with an invalid argument")
     end
-    root.wallpaper(pattern._native)
+    root.wallpaper(pattern)
 end
 
 --- Set a centered wallpaper.
@@ -132,8 +121,10 @@ end
 --   gears.color. The default is black.
 -- @param scale The scale factor for the wallpaper. Default is 1 (original size).
 -- @see gears.color
--- @staticfct gears.wallpaper.centered
+-- @deprecated gears.wallpaper.centered
 function wallpaper.centered(surf, s, background, scale)
+    debug.deprecate("Use `awful.wallpaper`", {deprecated_in=5})
+
     local geom, cr = wallpaper.prepare_context(s)
     local original_surf = surf
     surf = surface.load_uncached(surf)
@@ -172,8 +163,10 @@ end
 -- @param s The screen whose wallpaper should be set. Can be nil, in which case
 --   all screens are set.
 -- @param offset This can be set to a table with entries x and y.
--- @staticfct gears.wallpaper.tiled
+-- @deprecated gears.wallpaper.tiled
 function wallpaper.tiled(surf, s, offset)
+    debug.deprecate("Use `awful.wallpaper`", {deprecated_in=5})
+
     local _, cr = wallpaper.prepare_context(s)
 
     if offset then
@@ -202,8 +195,10 @@ end
 -- @param ignore_aspect If this is true, the image's aspect ratio is ignored.
 --   The default is to honor the aspect ratio.
 -- @param offset This can be set to a table with entries x and y.
--- @staticfct gears.wallpaper.maximized
+-- @deprecated gears.wallpaper.maximized
 function wallpaper.maximized(surf, s, ignore_aspect, offset)
+    debug.deprecate("Use `awful.wallpaper`", {deprecated_in=5})
+
     local geom, cr = wallpaper.prepare_context(s)
     local original_surf = surf
     surf = surface.load_uncached(surf)
@@ -243,8 +238,10 @@ end
 -- @param background The background color that should be used. Gets handled via
 --   gears.color. The default is black.
 -- @see gears.color
--- @staticfct gears.wallpaper.fit
+-- @deprecated gears.wallpaper.fit
 function wallpaper.fit(surf, s, background)
+    debug.deprecate("Use `awful.wallpaper`", {deprecated_in=5})
+
     local geom, cr = wallpaper.prepare_context(s)
     local original_surf = surf
     surf = surface.load_uncached(surf)
