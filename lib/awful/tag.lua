@@ -266,7 +266,7 @@ end
 --
 -- @constructorfct awful.tag.add
 -- @param name The tag name, a string
--- @param props The tags inital properties, a table
+-- @param props The tags initial properties, a table
 -- @return The created tag
 -- @see tag.delete
 function tag.add(name, props)
@@ -708,7 +708,7 @@ end
 --- The tag master width factor.
 --
 -- The master width factor is one of the 5 main properties used to configure
--- the `layout`. Each layout interpret (or ignore) this property differenly.
+-- the `layout`. Each layout interpret (or ignore) this property differently.
 --
 -- See the layout suit documentation for information about how the master width
 -- factor is used.
@@ -832,7 +832,7 @@ end
 -- The stateful layouts API is the same as stateless, but they are a function
 -- returining a layout instead of a layout itself. They also should have an
 -- `is_dynamic = true` property. If they don't, `awful.tag` will create a new
--- instance everytime the layout is set. If they do, the instance will be
+-- instance every time the layout is set. If they do, the instance will be
 -- cached and re-used.
 --
 --

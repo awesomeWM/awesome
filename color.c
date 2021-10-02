@@ -110,7 +110,7 @@ apply_mask(uint8_t component, uint32_t mask)
  * \param colstr Color specification.
  * \param len The length of colstr (which still MUST be NULL terminated).
  * \param visual The visual for which the color is to be allocated.
- * \return request informations.
+ * \return request information.
  */
 color_init_request_t
 color_init_unchecked(color_t *color, const char *colstr, ssize_t len, xcb_visualtype_t *visual)

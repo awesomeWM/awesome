@@ -653,7 +653,7 @@ static int luaA_get_active_modifiers(lua_State *L)
  *
  * API levels are used to allow newer version of AwesomeWM to alter the behavior
  * and subset deprecated APIs. Using an older API level than the current major
- * version allows to use legacy `rc.lua` with little porting. However, they wont
+ * version allows to use legacy `rc.lua` with little porting. However, they won't
  * be able to use all the new features. Attempting to use a newer feature along
  * with an older API level is not and will not be supported, even if it almost
  * works. Keeping up to date with the newer API levels is highly recommended.
@@ -684,7 +684,7 @@ static int luaA_get_active_modifiers(lua_State *L)
  */
 
 /**
- * Error message for errors that occured during
+ * Error message for errors that occurred during
  *  startup.
  * @tfield string startup_errors
  */

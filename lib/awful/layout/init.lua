@@ -433,7 +433,7 @@ init_layouts = function()
     init_layouts = nil
 end
 
--- "new" is emited before "activate", do it should be the very last opportunity
+-- "new" is emitted before "activate", do it should be the very last opportunity
 -- generate the list of default layout. With dynamic tag, this can happen later
 -- than the first event loop iteration.
 capi.tag.connect_signal("new", init_layouts)

@@ -27,7 +27,7 @@
 -- Using keygrabber for modal keybindings (VI like)
 -- ------------------------------------------------
 --
--- VI-like modal keybindings are trigerred by a key, like `Escape`, followed by
+-- VI-like modal keybindings are triggered by a key, like `Escape`, followed by
 -- either a number, an adjective (or noun) and closed by a verb. For example
 -- `<Escape>+2+t+f` could mean "focus (f) the second (2) tag (t)".
 -- `<Escape>+2+h+t+f` would "focus (f) two (2) tags (t) to the right (h)".
@@ -376,7 +376,7 @@ end
 -- keygrabber. It helps save some boilerplate code in the handler callbacks.
 --
 -- It is useful when a transaction only handle a limited number of keys. If
--- a key unhandled by the transaction is trigerred, the transaction is
+-- a key unhandled by the transaction is triggered, the transaction is
 -- canceled.
 --
 -- @DOC_text_awful_keygrabber_allowed_keys_EXAMPLE@
@@ -403,7 +403,7 @@ end
 -- The keygrabber instance is created when the keygrabber starts. It is an object
 -- mirroring this keygrabber object, but where extra properties can be added. It
 -- is useful to keep some contextual data part of the current transaction without
--- poluting the original object of having extra boilerplate code.
+-- polluting the original object of having extra boilerplate code.
 --
 -- @tfield keygrabber current_instance
 -- @emits property::current_instance
@@ -448,7 +448,7 @@ function keygrabber:start()
 
     self.grabber = keygrab.run(function(...) return runner(self, ...) end)
 
-    -- Ease making keygrabber that wont hang forever if no action is taken.
+    -- Ease making keygrabber that won't hang forever if no action is taken.
     if self.timeout and not self._private.timer then
         self._private.timer = gtimer {
             timeout     = self.timeout,
@@ -603,7 +603,7 @@ end
 -- @tparam table self The current transaction object.
 -- @tparam string stop_key The key(s) that stop the keygrabbing (if any)
 -- @tparam table stop_mods The modifiers key (if any)
--- @tparam sting sequence The recorded key sequence.
+-- @tparam string sequence The recorded key sequence.
 -- @callback stop_callback
 -- @see sequence
 -- @see stop
@@ -661,7 +661,7 @@ end
 -- @tparam[opt] function args.keypressed_callback
 -- @tparam[opt] function args.keyreleased_callback
 -- @tparam[opt=nil] table|nil args.allowed_keys A table with all keys that
---  **wont** stop the keygrabber.
+--  **won't** stop the keygrabber.
 -- @tparam[opt] table args.root_keybindings The root (global) keybindings.
 -- @tparam[opt=false] boolean args.export_keybindings Create root (global) keybindings.
 -- @tparam[opt=false] boolean args.autostart Start the grabbing immediately

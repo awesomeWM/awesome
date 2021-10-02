@@ -331,14 +331,14 @@ options_detect_shebang(int argc, char **argv)
 {
     /* There is no cross-platform ways to check if it is *really* called by a
      * shebang. There is a couple Linux specific hacks which work with the
-     * most common C libraries, but they wont work on *BSD.
+     * most common C libraries, but they won't work on *BSD.
      *
      * On some platforms, the argv is going to be parsed by the OS, in other
      * they will be concatenated in one big string. There is some ambiguities
      * caused by that. For example, `awesome -s foo` and and `#!/bin/awesome -s`
      * are both technically valid if `foo` is a directory in the first and
      * lua file (without extension) in the second. While `-s` with a file
-     * wont work, it is hard to know by looking at the string.
+     * won't work, it is hard to know by looking at the string.
      *
      * The trick to avoid any ambiguity is to just read the file and see if
      * the args match. `options_init_config` will be called later and the args

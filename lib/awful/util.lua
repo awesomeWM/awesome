@@ -30,7 +30,7 @@ local gmath = require("gears.math")
 local util = {}
 util.table = {}
 
---- The default shell used when spawing processes.
+--- The default shell used when spawning processes.
 -- @param string
 util.shell = os.getenv("SHELL") or "/bin/sh"
 
@@ -326,7 +326,7 @@ end
 --
 -- Note that this method doesn't copy entries found in `__index`.
 -- @deprecated util.table.crush
--- @tparam table t the table to be overriden
+-- @tparam table t the table to be overridden
 -- @tparam table set the table used to override members of `t`
 -- @tparam[opt=false] boolean raw Use rawset (avoid the metatable)
 -- @treturn table t (for convenience)

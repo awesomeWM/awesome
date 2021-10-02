@@ -33,7 +33,7 @@ local capi = {screen = screen}
 -- @see gears.surface
 
 -- Actually arrange clients of p.clients for corner layout
--- @param p Mandatory table containing required informations for layouts
+-- @param p Mandatory table containing required information for layouts
 -- (clients to arrange, workarea geometry, etc.)
 -- @param orientation String indicating in which corner is the master window.
 -- Available values are : NE, NW, SW, SE
@@ -81,7 +81,7 @@ local function do_corner(p, orientation)
         column.x = wa.x
     end
     -- At this point, master is in a corner
-    -- but row and column are overlayed in the opposite corner...
+    -- but row and column are overlaied in the opposite corner...
 
     -- Reduce the unprivileged slaves to remove overlay
     -- and define actual width and height

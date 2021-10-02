@@ -47,7 +47,7 @@
 -- `awful.widget.common` also has 2 callbacks to give more control over the widget:
 --
 -- * `create_callback`: Called once after the widget instance is created
--- * `update_callback`: Called everytime the data is refreshed
+-- * `update_callback`: Called every time the data is refreshed
 --
 -- Both callback have the same parameters:
 --
@@ -58,7 +58,7 @@
 --
 -- It is also possible to omit some roles and create an icon only tasklist.
 -- Notice that this example use the `awful.widget.clienticon` widget instead
--- of an `imagebox`. This allows higher resoluton icons to be loaded. This
+-- of an `imagebox`. This allows higher resolution icons to be loaded. This
 -- example reproduces the Windows 10 tasklist look and feel:
 --
 --@DOC_wibox_awidget_tasklist_windows10_EXAMPLE@
@@ -567,7 +567,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
     -- Detect the old function signature
     if argstype == "number" or argstype == "screen" or
       (argstype == "table" and args.index and args == capi.screen[args.index]) then
-        gdebug.deprecate("The `screen` paramater is deprecated, use `args.screen`.",
+        gdebug.deprecate("The `screen` parameter is deprecated, use `args.screen`.",
             {deprecated_in=5})
 
         screen = get_screen(args)
@@ -583,7 +583,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
                         layout          = base_widget
     } do
         gdebug.deprecate("The `awful.widget.tasklist()` `"..k
-            .."` paramater is deprecated, use `args."..k.."`.",
+            .."` parameter is deprecated, use `args."..k.."`.",
         {deprecated_in=5})
         args[k] = v
     end

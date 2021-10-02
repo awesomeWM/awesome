@@ -80,7 +80,7 @@ function root.wallpaper(pattern)
 end
 
 
--- root.bottons() used to be a capi function. However this proved confusing
+-- root.buttons() used to be a capi function. However this proved confusing
 -- as rc.lua used `awful.button` and `root.buttons()` used capi.button. There
 -- was a little documented hack to "flatten" awful.button into a pair of
 -- capi.button. A consequence of this, beside being ugly, was that it was
