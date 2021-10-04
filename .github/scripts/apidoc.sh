@@ -10,7 +10,7 @@
 
 echo "Post-processing (API) documentation."
 echo "PR Number: $PR_NUMBER"
-echo "GITHUB_HEAD_REF: $GITHUB_HEAD_REF"
+echo "GITHUB_HEAD_REF: $GITHUB_REF"
 
 if [ -z "$APIDOC_TOKEN" ]; then
     echo "No APIDOC_TOKEN available. Skipping."
@@ -40,11 +40,11 @@ cd build/apidoc
 # This will re-use already existing branches (updated PR).
 if [ "$PR_NUMBER" != "" ]; then
     BRANCH="pr-$PR_NUMBER"
-elif ["$GITHUB_HEAD_REF" != "" ] && [ "$GITHUB_HEAD_REF" != master ]; then
+elif [ "$GITHUB_REF" != "" ] && [ "$GITHUB_REF" != "refs/heads/master" ]; then
     # Use merge-base of master in branch name, to keep different branches with
     # the same name apart.
     # shellcheck disable=SC2015
-    BRANCH="$GITHUB_HEAD_REF-$(cd "$REPO_DIR" \
+    BRANCH="$GITHUB_REF-$(cd "$REPO_DIR" \
         && git fetch --unshallow origin master \
         && git rev-parse --short "$(git merge-base HEAD FETCH_HEAD || true)" || true)"
 else
@@ -91,7 +91,7 @@ COMMIT_MSG="Update docs for $AWESOME_VERSION via Github Actions
 Last commit message:
 $LAST_COMMIT_MSG
 
-Commits: https://github.com/awesomeWM/awesome/compare/${GITHUB_BASE_REF}..${GITHUB_HEAD_REF}
+Commits: https://github.com/awesomeWM/awesome/compare/${GITHUB_BASE_REF}..${GITHUB_REF}
 Build URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
 git commit -m "[relevant] $COMMIT_MSG"
