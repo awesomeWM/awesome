@@ -150,7 +150,7 @@ jobs:
       - name: Run apidoc script
         env:
           PR_NUMBER: ${{ github.event.number }}
-          APIDOC_TOKEN: ${{ secrets.APIDOC_TOKEN || github.token }}
+          APIDOC_TOKEN: ${{ secrets.AWESOME_ROBOT_TOKEN || github.token }}
         run: .github/scripts/apidoc.sh
 
 # vim: filetype=yaml:expandtab:shiftwidth=2:tabstop=2
