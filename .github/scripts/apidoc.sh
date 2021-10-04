@@ -38,7 +38,7 @@ git clone --depth 1 --branch gh-pages "$REPO_APIDOC" build/apidoc \
 cd build/apidoc
 
 # This will re-use already existing branches (updated PR).
-if [ "$PR_NUMBER" != false ]; then
+if [ "$PR_NUMBER" != "" ]; then
     BRANCH="pr-$PR_NUMBER"
 elif [ "$GITHUB_HEAD_REF" != master ]; then
     # Use merge-base of master in branch name, to keep different branches with
@@ -112,7 +112,7 @@ fi
 
 git checkout "$BRANCH"
 OLD_REV="$(git rev-parse --short HEAD)"
-if [ "$PR_NUMBER" != false ]; then
+if [ "$PR_NUMBER" != "" ]; then
     MERGE_COMMIT_MSG="$COMMIT_MSG
 Pull request: https://github.com/awesomeWM/awesome/pull/${PR_NUMBER}"
 else
@@ -149,7 +149,7 @@ fi
 printf %s "Compare links:\n$COMPARE_LINKS"
 
 # Post a comment to the PR.
-if [ "$PR_NUMBER" != false ]; then
+if [ "$PR_NUMBER" != "" ]; then
     curl -H "Authorization: token $APIDOC_TOKEN" \
         -d "{\"body\": \"Documentation has been updated for this PR.\n\n$COMPARE_LINKS\"}" \
         "https://api.github.com/repos/awesomeWM/awesome/issues/${PR_NUMBER}/comments" \
