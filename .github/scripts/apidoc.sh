@@ -40,7 +40,7 @@ cd build/apidoc
 # This will re-use already existing branches (updated PR).
 if [ "$PR_NUMBER" != "" ]; then
     BRANCH="pr-$PR_NUMBER"
-elif [ "$GITHUB_HEAD_REF" != master ]; then
+elif ["$GITHUB_HEAD_REF" != "" ] && [ "$GITHUB_HEAD_REF" != master ]; then
     # Use merge-base of master in branch name, to keep different branches with
     # the same name apart.
     # shellcheck disable=SC2015
@@ -48,7 +48,7 @@ elif [ "$GITHUB_HEAD_REF" != master ]; then
         && git fetch --unshallow origin master \
         && git rev-parse --short "$(git merge-base HEAD FETCH_HEAD || true)" || true)"
 else
-  BRANCH="gh-pages"
+    BRANCH="gh-pages"
 fi
 if [ "$BRANCH" != "gh-pages" ]; then
     git checkout -b "$BRANCH" "origin/${BRANCH}" 2> /dev/null || git checkout -b "$BRANCH"
