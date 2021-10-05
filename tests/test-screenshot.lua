@@ -29,8 +29,6 @@ Gtk:main{...}
 local tiny_client = { lua_executable, "-e", string.format(
                           tiny_client_code_template, client_dim, client_dim)}
 
--- how to make a GTK window using LGI
-
 -- Split in the screen into 2 distict screens.
 screen[1]:split()
 
@@ -156,6 +154,9 @@ table.insert(steps, function()
         return
     end
 
+    -- Make sure the process finishes. Just `c:kill()` only
+    -- closes the window. Adding some handlers to the GTK "app"
+    -- created some unwanted side effects in the CI.
     awesome.kill(c.pid, 9)
 
     return true

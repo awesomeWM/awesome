@@ -208,11 +208,8 @@ end
 -- Reading this (read only) property returns a screenshot of the physical
 -- (Xinerama) screen as a cairo surface.
 --
--- @DOC_screen_content_EXAMPLE@
---
 -- @property content
--- @tparam screen s (self)
--- @treturn cairo scurface of the screen content
+-- @tparam gears.surface content
 
 function screen.object.get_content(s)
     local geo = s.geometry
@@ -222,7 +219,7 @@ function screen.object.get_content(s)
     cr:set_source_surface(source, -geo.x, -geo.y)
     cr:rectangle(0, 0, geo.width, geo.height)
     cr:fill()
-    return target 
+    return target
 end
 
 --- Get or set the screen padding.
