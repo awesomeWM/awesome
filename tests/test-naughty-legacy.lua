@@ -1074,6 +1074,7 @@ table.insert(steps, function()
     assert(naughty.get_by_id(id) == n)
     assert(naughty.getById(42) ~= n)
     assert(naughty.get_by_id(42) ~= n)
+    assert(naughty.get_by_id(9999) == nil)
 
     -- The timeout
     local real, called = n.reset_timeout, false
