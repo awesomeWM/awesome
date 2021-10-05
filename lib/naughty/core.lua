@@ -394,8 +394,8 @@ end
 -- @staticfct naughty.get_by_id
 function naughty.get_by_id(id)
     -- iterate the notifications to get the notfications with the correct ID
-    for s in pairs(naughty.notifications) do
-        for p in pairs(naughty.notifications[s]) do
+    for s in capi.screen do
+        for p in pairs(naughty.notifications[s] or {}) do
             for _, notification in pairs(naughty.notifications[s][p]) do
                 if notification.id == id then
                     return notification
