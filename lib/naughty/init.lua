@@ -32,7 +32,7 @@ naughty.notification = require("naughty.notification")
 --
 local function screen_fallback()
     if capi.screen.count() == 0 then
-        gdebug.print_warning("An error occurred before a scrren was added")
+        gdebug.print_warning("An error occurred before a screen was added")
 
         -- Private API to scan for screens now.
         if #screen._viewports() == 0 then
