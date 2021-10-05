@@ -115,7 +115,7 @@ local attach
 --- Allow multiple placement functions to be daisy chained.
 -- This also allow the functions to be aware they are being chained and act
 -- upon the previous nodes results to avoid unnecessary processing or deduce
--- extra paramaters/arguments.
+-- extra parameters/arguments.
 local function compose(...)
     local queue = {}
 
@@ -144,7 +144,7 @@ local function compose(...)
         local last_geo = nil
 
         -- As some functions may have to take into account results from
-        -- previously execued ones, add the `composition_results` hint.
+        -- previously executed ones, add the `composition_results` hint.
         args = setmetatable({composition_results=rets}, {__index=args})
 
         -- Only apply the geometry once, not once per chain node, to do this,
@@ -341,7 +341,7 @@ local function get_decoration(args)
         height = offset,
     } or args.offset or {}
 
-    -- Margins are distances on each side to substract from the area`
+    -- Margins are distances on each side to subtract from the area`
     local m = type(args.margins) == "table" and args.margins or {
         left = args.margins or 0 , right  = args.margins or 0,
         top  = args.margins or 0 , bottom = args.margins or 0
@@ -516,7 +516,7 @@ wibox_update_strut = function(d, position, args)
 
     for _, v in ipairs(struts_orientation_to_sides[orientation]) do
         if (not position) or position:match(v) then
-            -- Add the "short" rectangle lenght then the above and below margins.
+            -- Add the "short" rectangle length then the above and below margins.
             struts[v] = geo[opposites[orientation_to_length[orientation]]]
                 + m[v]
                 + m[opposites[v]]
@@ -1476,8 +1476,8 @@ end
 -- @tparam string|table args.preferred_anchors The preferred anchor(s) (in order)
 -- @tparam string args.geometry A geometry inside the other drawable
 -- @treturn table The new geometry
--- @treturn string The choosen position ("left", "right", "top" or "bottom")
--- @treturn string The choosen anchor ("front", "middle" or "back")
+-- @treturn string The chosen position ("left", "right", "top" or "bottom")
+-- @treturn string The chosen anchor ("front", "middle" or "back")
 -- @staticfct awful.placement.next_to
 function placement.next_to(d, args)
     args = add_context(args, "next_to")
@@ -1647,7 +1647,7 @@ function placement.restore(d, args)
     return true
 end
 
---- Skip all preceeding results of placement pipeline for fullscreen clients.
+--- Skip all preceding results of placement pipeline for fullscreen clients.
 --@DOC_awful_placement_skip_fullscreen_EXAMPLE@
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
 -- @tparam[opt={}] table args Other arguments

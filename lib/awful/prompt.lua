@@ -59,7 +59,7 @@
 --
 -- The Awesome prompt also supports adding custom extensions to specific
 -- keyboard keybindings. Those keybindings have precedence over the built-in
--- ones. Therefor, they can be used to override the default ones.
+-- ones. Therefore, they can be used to override the default ones.
 --
 -- *[Example one] Adding pre-configured `awful.spawn` commands:*
 --

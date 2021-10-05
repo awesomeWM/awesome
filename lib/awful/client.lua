@@ -1200,7 +1200,7 @@ end
 --- If the client is dockable.
 --
 -- A dockable client is an application confined to the edge of the screen. The
--- space it occupies is substracted from the `screen.workarea`.
+-- space it occupies is subtracted from the `screen.workarea`.
 --
 -- Clients with a type of "utility", "toolbar" or "dock" are dockable by
 -- default.
@@ -1359,7 +1359,7 @@ end
 
 --- Switch to a client matching the given condition if running, else spawn it.
 -- If multiple clients match the given condition then the next one is
--- focussed.
+-- focused.
 --
 -- @tparam string cmd the command to execute
 -- @tparam function matcher a function that returns true to indicate a matching client
@@ -1674,7 +1674,7 @@ end)
 --- The last geometry when client was floating.
 -- @signal property::floating_geometry
 
---- Emited when a client need to get a titlebar.
+--- Emitted when a client need to get a titlebar.
 -- @signal request::titlebars
 -- @tparam[opt=nil] string content The context (like "rules")
 -- @tparam[opt=nil] table hints Some hints.
@@ -1686,7 +1686,7 @@ end)
 --- The client unmarked signal.
 -- @deprecatedsignal unmarked
 
---- Emited when the border client might need to be update.
+--- Emitted when the border client might need to be update.
 --
 -- The context are:
 --

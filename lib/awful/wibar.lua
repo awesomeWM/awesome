@@ -305,7 +305,7 @@ function awfulwibar.set_position(wb, position, screen)
         gdebug.deprecate("Use `wb.screen = screen` instead of awful.wibar.set_position", {deprecated_in=4})
     end
 
-    -- Detach first to avoid any uneeded callbacks
+    -- Detach first to avoid any unneeded callbacks
     if wb.detach_callback then
         wb.detach_callback()
 
@@ -611,7 +611,7 @@ function awfulwibar.new(args)
 
 
     w.screen   = screen
-    w._screen  = screen --HACK When a screen is removed, then getbycoords wont work
+    w._screen  = screen --HACK When a screen is removed, then getbycoords won't work
     w._stretch = args.stretch == nil and has_to_stretch or args.stretch
 
     if args.visible == nil then w.visible = true end

@@ -70,7 +70,7 @@ end
 --- Always spawn using a shell.
 --
 -- When using the default `exe_callback`, use `awful.spawn.with_shell` instead
--- of `awful.spawn`. Depending on the ammount of customization to your shell
+-- of `awful.spawn`. Depending on the amount of customization to your shell
 -- environment, this can increase startup time.
 -- @property with_shell
 -- @param[opt=false] boolean

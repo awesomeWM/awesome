@@ -244,7 +244,7 @@ else()
     set(SYSCONFDIR ${CMAKE_INSTALL_PREFIX}/etc CACHE PATH "config directory")
 endif()
 
-#If an XDG Config Dir is specificed, use it instead
+#If an XDG Config Dir is specified, use it instead
 #of the default XDG configuration dir.
 if(DEFINED XDG_CONFIG_DIR)
     set(XDG_CONFIG_DIR ${XDG_CONFIG_DIR} CACHE PATH "xdg config directory")

@@ -359,7 +359,7 @@ end
 --        {"Down"  , "Down"  },
 --    }
 --
--- This table is acessed internally by Awesome. Users will usually use key
+-- This table is accessed internally by Awesome. Users will usually use key
 -- bindings with the property `keygroup` instead of accessing this table
 -- directly.
 -- @name awful.key.keygroups

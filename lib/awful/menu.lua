@@ -673,7 +673,7 @@ end
 --------------------------------------------------------------------------------
 
 --- Create a menu popup.
--- @param args Table containing the menu informations.
+-- @param args Table containing the menu information.
 --
 -- * Key items: Table containing the displayed items. Each element is a table by default (when element 'new' is
 --   awful.menu.entry) containing: item name, triggered action (submenu table or function), item icon (optional).

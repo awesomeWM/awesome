@@ -6,7 +6,7 @@
 -- This module provides methods to start programs and supports startup
 -- notifications, which allows for callbacks and applying properties to the
 -- program after it has been launched.  This requires currently that the
--- applicaton supports them.
+-- application supports them.
 --
 -- Frequently asked questions
 -- ===
@@ -59,7 +59,7 @@
 --
 -- If you want to update the text of a `wibox.widget.textbox` with the output
 -- of a shell command, you should use the `awful.spawn.easy_async_with_shell`
--- command. It is strongly recommanded not to use `io.popen` is explained in the
+-- command. It is strongly recommended not to use `io.popen` is explained in the
 -- "Getting a command's output" section. Asynchronous execution is at first a
 -- bit tricky to understand if you never used that before. The example below
 -- should demonstrate how it works.
@@ -72,7 +72,7 @@
 --
 -- The label will display `foo`. But If we do:
 --
---     -- Don't do this, it wont work.
+--     -- Don't do this, it won't work.
 --     -- Assumes /tmp/foo.txt does not exist
 --     awful.spawn.with_shell("sleep 1; echo foo > /tmp/foo.txt")
 --     mylabel.text = io.popen("cat /tmp/foo.txt"):read("*all")
@@ -97,7 +97,7 @@
 -- In this variant, Awesome will not block. Again, like other spawn, you
 -- cannot add code outside of the callback function to use the result of the
 -- command. The code will be executed before the command is finished so the
--- result wont yet be available.
+-- result won't yet be available.
 --
 -- **Getting a command's output**:
 --
@@ -640,7 +640,7 @@ end
 --
 -- This function depends on the startup notification protocol to be correctly
 -- implemented by the command. See `client.startup_id` for more information.
--- Note that this also wont work with shell or terminal commands.
+-- Note that this also won't work with shell or terminal commands.
 --
 -- @tparam string|table cmd The command.
 -- @tparam[opt] table rules The properties that need to be applied to the client.
@@ -670,7 +670,7 @@ end
 --
 -- This function depends on the startup notification protocol to be correctly
 -- implemented by the command. See `client.startup_id` for more information.
--- Note that this also wont work with shell or terminal commands.
+-- Note that this also won't work with shell or terminal commands.
 --
 -- Note that multiple instances can still be spawned if the command is called
 -- faster than the client has time to start.
@@ -700,7 +700,7 @@ local raise_rules = {focus = true, switch_to_tags = true, raise = true}
 --
 -- This function depends on the startup notification protocol to be correctly
 -- implemented by the command. See `client.startup_id` for more information.
--- Note that this also wont work with shell or terminal commands.
+-- Note that this also won't work with shell or terminal commands.
 --
 -- @tparam string|table cmd The command.
 -- @tparam table rules The properties that need to be applied to the client.
