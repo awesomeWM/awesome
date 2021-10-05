@@ -91,7 +91,7 @@ COMMIT_MSG="Update docs for $AWESOME_VERSION via Github Actions
 Last commit message:
 $LAST_COMMIT_MSG
 
-Commits: https://github.com/awesomeWM/awesome/compare/${GITHUB_BASE_REF}..${GITHUB_REF}
+Commits: $GITHUB_COMPARE
 Build URL: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
 
 git commit -m "[relevant] $COMMIT_MSG"
