@@ -500,6 +500,29 @@ luaA_root_wallpaper(lua_State *L)
     return 1;
 }
 
+
+/** Get the content of the root window as a cairo surface.
+ *
+ * @property content
+ * @tparam surface A cairo surface with the root window content (aka the whole surface from every screens).
+ * @see gears.surface
+ */
+static int
+luaA_root_get_content(lua_State *L)
+{
+    cairo_surface_t *surface;
+
+    surface = cairo_xcb_surface_create(globalconf.connection,
+                                       globalconf.screen->root,
+                                       globalconf.default_visual,
+                                       globalconf.screen->width_in_pixels, 
+                                       globalconf.screen->height_in_pixels);
+
+    lua_pushlightuserdata(L, surface);
+    return 1;
+}
+
+
 /** Get the size of the root window.
  *
  * @return Width of the root window.
@@ -608,6 +631,7 @@ const struct luaL_Reg awesome_root_methods[] =
     { "fake_input", luaA_root_fake_input },
     { "drawins", luaA_root_drawins },
     { "_wallpaper", luaA_root_wallpaper },
+    { "content", luaA_root_get_content},
     { "size", luaA_root_size },
     { "size_mm", luaA_root_size_mm },
     { "tags", luaA_root_tags },
