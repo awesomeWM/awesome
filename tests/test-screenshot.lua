@@ -4,9 +4,9 @@
 local wibox = require("wibox")
 local spawn = require("awful.spawn")
 local gsurface = require("gears.surface")
-local lgi = require 'lgi'
+local lgi = require('lgi')
 local cairo = lgi.cairo
-local gdk = lgi.Gdk
+local gdk = lgi.require('Gdk', '3.0')
 
 -- Dummy blue client for the client.content test
 -- the lua_executable portion may need to get ironed out. I need to specify 5.3
@@ -16,8 +16,9 @@ if lua_executable == nil or lua_executable == "" then
 end
 local client_dim = 250
 local tiny_client_code_template = [[
-local Gtk = require('lgi').Gtk
-local Gdk = require('lgi').Gdk
+local lgi = require('lgi')
+local Gdk = lgi.require('Gdk', '3.0')
+local Gtk = lgi.require('Gtk', '3.0')
 local class = 'client'
 window = Gtk.Window {default_width=%d, default_height=%d, title='title'}
 window:set_wmclass(class, class)
