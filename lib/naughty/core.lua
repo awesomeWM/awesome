@@ -292,14 +292,20 @@ local conns = gobject._setup_class_signals(
 
 local function resume()
     properties.suspended = false
-    for _, v in pairs(naughty.notifications.suspended) do
+    for _, v in ipairs(naughty.notifications.suspended) do
         local args = v._private.args
         assert(args)
         v._private.args = nil
 
+        v:emit_signal("property::suspended", false)
+
         naughty.emit_signal("added", v, args)
         naughty.emit_signal("request::display", v, "resume", args)
         if v.timer then v.timer:start() end
+
+        if not v._private.args then
+            v._private.args = args
+        end
     end
     naughty.notifications.suspended = { }
 end
@@ -394,8 +400,8 @@ end
 -- @staticfct naughty.get_by_id
 function naughty.get_by_id(id)
     -- iterate the notifications to get the notfications with the correct ID
-    for s in pairs(naughty.notifications) do
-        for p in pairs(naughty.notifications[s]) do
+    for s in capi.screen do
+        for p in pairs(naughty.notifications[s] or {}) do
             for _, notification in pairs(naughty.notifications[s][p]) do
                 if notification.id == id then
                     return notification
@@ -465,7 +471,7 @@ local function cleanup(self, reason)
     assert(reason, "Use n:destroy() instead of emitting the signal directly")
 
     if properties.suspended then
-        for k, v in pairs(naughty.notifications.suspended) do
+        for k, v in ipairs(naughty.notifications.suspended) do
             if v == self then
                 table.remove(naughty.notifications.suspended, k)
                 break
@@ -505,6 +511,25 @@ naughty.connect_signal("destroyed", cleanup)
 -- Proxy the global suspension state on all notification objects
 local function get_suspended(self)
     return properties.suspended and not self.ignore_suspend
+end
+
+function naughty.set_suspended(value)
+    if properties["suspended"] == value then return end
+
+    properties["suspended"] = value
+
+    if value then
+        for _, n in pairs(naughty._active) do
+            if n.timer and n.timer.started then
+                n.timer:stop()
+            end
+
+            n:emit_signal("property::suspended", true)
+            table.insert(naughty.notifications.suspended, n)
+        end
+    else
+        resume()
+    end
 end
 
 function naughty.set_expiration_paused(p)
@@ -669,8 +694,9 @@ local function register(notification, args)
 
     notification._private.registered = true
 
+    notification._private.args = args
+
     if properties.suspended and not args.ignore_suspend then
-        notification._private.args = args
         table.insert(naughty.notifications.suspended, notification)
     else
         naughty.emit_signal("added", notification, args)
@@ -702,9 +728,6 @@ local function set_index_miss(_, key, value)
     elseif properties[key] ~= nil then
         assert(type(value) == "boolean")
         properties[key] = value
-        if not value then
-            resume()
-        end
 
         naughty.emit_signal("property::"..key, value)
     else
