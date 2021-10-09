@@ -18,7 +18,7 @@ local exit_yay, exit_snd = nil, nil
 local tiny_client = function(class)
     return { lua_executable, "-e", [[
 local lgi = require 'lgi'
-local Gtk = lgi.require('Gtk')
+local Gtk = lgi.require('Gtk', '3.0')
 local class = ']]..class..[['
 
 Gtk.init()
