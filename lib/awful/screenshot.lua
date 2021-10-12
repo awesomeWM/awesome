@@ -107,6 +107,10 @@ end
 -- Currently only sets the screenshot directory, the filename, prefix and the
 -- snipper tool outline color. More initialization can be added as the API
 -- expands.
+-- @function screenshot.init
+-- @tparam string The directory path in which to save screenshots
+-- @tparam string The prefix prepended to the screenshot filenames
+-- @return true or nil depending on success
 function screenshot.init(directory, prefix, color)
   local tmp
 
@@ -315,7 +319,7 @@ local function mg_callback(mouse_data)
         date_time = tostring(os.date("%Y%m%d%H%M%S"))
         fname = dir .. prfx .. date_time .. ".png"
 
-        gears.surface(snip_surf):write_to_png(dir .. prfx .. date_time .. ".png")
+        gears.surface(snip_surf):write_to_png(fname)
 
         if mg_onsuccess_cb then
           mg_onsuccess_cb(fname)  -- This should probably be a separate thread
