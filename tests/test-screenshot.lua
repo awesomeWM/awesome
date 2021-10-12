@@ -105,8 +105,9 @@ local steps = {}
 
 -- Check the whole root window.
 table.insert(steps, function()
-    local img = copy_to_image_surface(root.content(), root.size())
     local root_width, root_height = root.size()
+    local img = copy_to_image_surface(capi.root.content(), root_width,
+                                      root_height)
 
     if get_pixel(img, 100, 100) ~= "#00ff00" then return end
     if get_pixel(img, 2, 2) ~= "#ff0000" then return end
