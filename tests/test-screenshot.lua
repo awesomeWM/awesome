@@ -7,6 +7,9 @@ local gsurface = require("gears.surface")
 local lgi = require('lgi')
 local cairo = lgi.cairo
 local gdk = lgi.require('Gdk', '3.0')
+local capi = {
+    root = _G.root
+}
 
 -- Dummy blue client for the client.content test
 -- the lua_executable portion may need to get ironed out. I need to specify 5.3
