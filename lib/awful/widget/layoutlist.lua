@@ -201,17 +201,6 @@ local layoutlist = {}
 -- @property filter
 -- @param[opt=awful.widget.layoutlist.source.for_screen] function
 
---- The layoutlist buttons.
---
--- The default is:
---
---    gears.table.join(
---        awful.button({ }, 1, awful.layout.set)
---    )
---
--- @property buttons
--- @param table
-
 --- The default foreground (text) color.
 -- @beautiful beautiful.layoutlist_fg_normal
 -- @tparam[opt=nil] string|pattern fg_normal
