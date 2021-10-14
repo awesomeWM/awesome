@@ -125,6 +125,11 @@ function common.list_update(w, buttons, label, data, objects, args)
     for i, o in ipairs(objects) do
         local cache = data[o]
 
+        -- Allow the buttons to be replaced.
+        if cache and cache._buttons ~= buttons then
+            cache = nil
+        end
+
         if not cache then
             cache = (args and args.widget_template) and
                 custom_template(args) or default_template()
@@ -139,6 +144,7 @@ function common.list_update(w, buttons, label, data, objects, args)
                 args.create_callback(cache.primary, o, i, objects)
             end
 
+            cache._buttons = buttons
             data[o] = cache
         elseif cache.update_callback then
             cache.update_callback(cache.primary, o, i, objects)
