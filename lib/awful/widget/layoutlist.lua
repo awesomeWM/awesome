@@ -297,7 +297,10 @@ end
 
 function layoutlist:set_buttons(buttons)
     self._private.buttons = buttons
-    update(self)
+
+    if self._private.layout then
+        update(self)
+    end
 end
 
 function layoutlist:get_buttons()
@@ -365,7 +368,6 @@ end
 --  function to generate the list of layouts.
 -- @tparam[opt] table args.widget_template A custom widget to be used for each action.
 -- @tparam[opt=ascreen.focused()] screen args.screen A screen
--- @tparam[opt=nil] table args.buttons The list of `awful.buttons`.
 -- @tparam[opt={}] table args.style Extra look and feel parameters
 -- @tparam boolean args.style.disable_icon
 -- @tparam boolean args.style.disable_name
