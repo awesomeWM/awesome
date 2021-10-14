@@ -103,4 +103,40 @@ table.insert(steps, function()
     return true
 end)
 
+-- Test `ignore_suspend`.
+table.insert(steps, function()
+    naughty.suspended = true
+    display_count = 0
+
+    notifs[1] = notification {
+        title          = "test3",
+        ignore_suspend = true,
+    }
+
+    notifs[2] = notification {
+        title = "test4"
+    }
+
+    return true
+end)
+
+table.insert(steps, function()
+    if display_count ~= 1 then return end
+
+    notifs[2]:destroy()
+
+    naughty.suspended = false
+
+
+    return true
+end)
+
+table.insert(steps, function()
+    if display_count ~= 1 then return end
+
+    notifs[1]:destroy()
+
+    return true
+end)
+
 require("_runner").run_steps(steps)
