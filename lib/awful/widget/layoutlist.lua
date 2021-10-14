@@ -10,7 +10,7 @@
 --
 --@DOC_awful_widget_layoutlist_popup_EXAMPLE@
 --
--- This example extends 'awful.widget.layoutbox' to show a layout list popup:
+-- This example extends `awful.widget.layoutbox` to show a layout list popup:
 --
 --@DOC_awful_widget_layoutlist_bar_EXAMPLE@
 --
