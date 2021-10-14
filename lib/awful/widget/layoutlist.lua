@@ -36,9 +36,11 @@ local surface  = require("gears.surface")
 
 local module = {}
 
-local default_buttons = gtable.join(
-    abutton({ }, 1, function(a) a.callback() end)
-)
+local default_buttons = {
+    abutton({ }, 1, function(a) a.callback(  ) end),
+    abutton({ }, 4, function() alayout.inc(-1) end),
+	abutton({ }, 5, function() alayout.inc( 1) end),
+}
 
 local function wb_label(item, _, textbox)
     local selected = alayout.get(item.screen) == item.layout
