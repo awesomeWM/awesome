@@ -59,16 +59,18 @@ local modkey = "mod4" --DOC_HIDE
         start_callback = function() layout_popup.visible = true  end,
         stop_callback  = function() layout_popup.visible = false end,
         export_keybindings = true,
-        release_event = "release",
+        stop_event = "release",
         stop_key = {"Escape", "Super_L", "Super_R"},
         keybindings = {
             {{ modkey          } , " " , function()
-                awful.layout.set(gears.table.cycle_value(ll.layouts, ll.current_layout, 1))
+                awful.layout.set((gears.table.cycle_value(ll.layouts, ll.current_layout, 1)))
             end},
             {{ modkey, "Shift" } , " " , function()
-                awful.layout.set(gears.table.cycle_value(ll.layouts, ll.current_layout, -1), nil)
+                awful.layout.set((gears.table.cycle_value(ll.layouts, ll.current_layout, -1)), nil)
             end},
         }
     }
+
+    layout_popup.visible = true --DOC_HIDE
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
