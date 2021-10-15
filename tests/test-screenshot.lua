@@ -94,7 +94,7 @@ local function copy_to_image_surface(content, w, h)
 
     cr:set_source_surface(sur)
     cr:paint()
-    img:finish()
+    img:flush()
 
     return img
 end
