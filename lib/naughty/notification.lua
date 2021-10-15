@@ -523,7 +523,7 @@ function notification:set_id(new_id)
     self:emit_signal("property::id", new_id)
 end
 
--- Return true is `self` is suspended.
+-- Return true if `self` is suspended.
 local function get_suspended(self)
     return naughty.suspended and (not self._private.ignore_suspend)
 end
