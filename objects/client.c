@@ -3090,8 +3090,8 @@ luaA_client_kill(lua_State *L)
  * @tparam client c A client to swap with.
  * @method swap
  * @emits swapped
- * @emitstparam swapped client The other client.
- * @emitstparam swapped boolean `true` when `:swap()` was called
+ * @emitstparam swapped client other The other client.
+ * @emitstparam swapped boolean is_origin `true` when `:swap()` was called
  *  on *self* rather than the other client. `false` when
  *  `:swap()` was called on the other client.
  * @emits list
