@@ -39,14 +39,6 @@ function background._use_fallback_algorithm()
 
         shape(cr, width, height)
 
-        if bw > 0 then
-            cr:save() --Save to avoid messing with the original source
-            cr:set_line_width(bw)
-            cr:set_source(color(self._private.shape_border_color or self._private.foreground or beautiful.fg_normal))
-            cr:stroke_preserve()
-            cr:restore()
-        end
-
         if self._private.background then
             cr:save() --Save to avoid messing with the original source
             cr:set_source(self._private.background)
@@ -61,18 +53,45 @@ function background._use_fallback_algorithm()
             cr:set_source(self._private.foreground)
         end
     end
+
     background.after_draw_children = function(self, _, cr, width, height)
         local bw    = self._private.shape_border_width or 0
         local shape = self._private.shape or gshape.rectangle
 
         if bw > 0 then
             cr:save()
-            cr:translate(bw, bw)
-            width, height = width - 2*bw, height - 2*bw
-            shape(cr, width, height)
-            cr:set_line_width(bw)
+            cr:reset_clip()
+
+            local mat = cr:get_matrix()
+
+            -- Prevent the inner part of the border from being written.
+            local mask = cairo.RecordingSurface(cairo.Content.COLOR_ALPHA,
+                cairo.Rectangle { x = 0, y = 0, width = mat.x0 + width, height = mat.y0 + height })
+
+            local mask_cr = cairo.Context(mask)
+            mask_cr:translate(mat.x0, mat.y0)
+
+            -- Clear the surface.
+            mask_cr:set_operator(cairo.Operator.CLEAR)
+            mask_cr:set_source_rgba(0, 1, 0, 0)
+            mask_cr:paint()
+
+            -- Paint the inner and outer borders.
+            mask_cr:set_operator(cairo.Operator.SOURCE)
+            mask_cr:translate(bw, bw)
+            mask_cr:set_source_rgba(1, 0, 0, 1)
+            mask_cr:set_line_width(2*bw)
+            shape(mask_cr, width - 2*bw, height - 2*bw)
+            mask_cr:stroke_preserve()
+
+            -- Remove the inner part.
+            mask_cr:set_source_rgba(0, 1, 0, 0)
+            mask_cr:set_operator(cairo.Operator.CLEAR)
+            mask_cr:fill()
+            mask:flush()
+
             cr:set_source(color(self._private.shape_border_color or self._private.foreground or beautiful.fg_normal))
-            cr:stroke()
+            cr:mask_surface(mask, 0,0)
             cr:restore()
         end
     end
