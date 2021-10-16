@@ -192,6 +192,24 @@ function client.gen_fake(args)
         assert(not ret.valid)
     end
 
+    function ret:swap(other)
+        local idx1, idx2 = nil, nil
+        for k, c in ipairs(clients) do
+            if c == ret then
+                idx1 = k
+            elseif c == other then
+                idx2 = k
+            end
+        end
+
+        if not (idx1 and idx2) then return end
+
+        clients[idx1], clients[idx2] = other, ret
+        ret:emit_signal("swapped", other, true)
+        other:emit_signal("swapped", ret, false)
+        client.emit_signal("list")
+    end
+
     titlebar_meta(ret)
 
     function ret:tags(new) --FIXME
