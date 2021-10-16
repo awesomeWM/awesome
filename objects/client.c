@@ -727,6 +727,15 @@ lua_class_t client_class;
 /**
  * The client border width.
  *
+ * When manually set (for example, in `ruled.client` rules), this value
+ * will be static. Otherwise, it is controlled by many `beautiful` variables.
+ *
+ * Be careful, the borders are **around** the geometry, not part of it. If
+ * you want more fancy border, use the `awful.titlebar` API to create
+ * titlebars on each side of the client.
+ *
+ * @DOC_awful_client_border_width_EXAMPLE@
+ *
  * @property border_width
  * @tparam integer border_width
  * @propemits false false
@@ -759,7 +768,7 @@ lua_class_t client_class;
 /**
  * The client border color.
  *
- * @DOC_awful_client_border_width_EXAMPLE@
+ * @DOC_awful_client_border_color_EXAMPLE@
  *
  * Note that setting this directly will override and disable all related theme
  * variables.
@@ -3087,6 +3096,9 @@ luaA_client_kill(lua_State *L)
 }
 
 /** Swap a client with another one in global client list.
+ *
+ * @DOC_sequences_client_swap1_EXAMPLE@
+ *
  * @tparam client c A client to swap with.
  * @method swap
  * @emits swapped
