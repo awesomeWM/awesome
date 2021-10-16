@@ -428,7 +428,7 @@ end
 
 --- Get the master window.
 --
--- @legacylayout awful.client.getmaster
+-- @deprecated awful.client.getmaster
 -- @tparam[opt=awful.screen.focused()] screen s The screen.
 -- @treturn client The master client.
 function client.getmaster(s)
@@ -438,22 +438,53 @@ end
 
 --- Set the client as master: put it at the beginning of other windows.
 --
--- @legacylayout awful.client.setmaster
+-- @deprecated awful.client.setmaster
 -- @tparam client c The window to set as master.
 function client.setmaster(c)
-    local cls = gtable.reverse(capi.client.get(c.screen))
-    for _, v in pairs(cls) do
-        c:swap(v)
-    end
+    c:to_primary_section()
 end
 
 --- Set the client as slave: put it at the end of other windows.
--- @legacylayout awful.client.setslave
+-- @deprecated awful.client.setslave
 -- @tparam client c The window to set as slave.
 function client.setslave(c)
-    local cls = capi.client.get(c.screen)
+    c:to_secondary_section()
+end
+
+--- Move the client to the most significant layout position.
+--
+-- This only affects tiled clients. It will shift all other
+-- client to fill the gap caused to by the move.
+--
+-- @DOC_sequences_client_to_primary_EXAMPLE@
+--
+-- @method to_primary_section
+-- @see swap
+-- @see to_secondary_section
+function client.object:to_primary_section()
+    local cls = gtable.reverse(capi.client.get(self.screen))
+
     for _, v in pairs(cls) do
-        c:swap(v)
+        self:swap(v)
+    end
+end
+
+--- Move the client to the least significant layout position.
+--
+-- This only affects tiled clients. It will shift all other
+-- client to fill the gap caused to by the move.
+--
+-- @DOC_sequences_client_to_secondary_EXAMPLE@
+--
+-- @method to_secondary_section
+-- @see swap
+-- @see to_primary_section
+
+function client.object:to_secondary_section()
+    local cls = capi.client.get(self.screen)
+
+    for _, v in pairs(cls) do
+        self:swap(v)
     end
 end
 
