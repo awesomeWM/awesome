@@ -1,7 +1,7 @@
 --DOC_NO_USAGE --DOC_GEN_IMAGE --DOC_ASTERISK
 local awful     = require("awful") --DOC_HIDE
 local wibox     = require("wibox") --DOC_HIDE
-local beautiful = require("beautiful")
+local beautiful = require("beautiful") --DOC_HIDE
 
 screen[1]._resize {width = 480, height = 200} --DOC_HIDE
 
