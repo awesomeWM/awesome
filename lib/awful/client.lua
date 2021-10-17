@@ -168,7 +168,10 @@ function client.jumpto(c, merge)
 end
 
 --- Jump to the given client.
+--
 -- Takes care of focussing the screen, the right tag, etc.
+--
+-- @DOC_sequences_client_jump_to1_EXAMPLE@
 --
 -- @method jump_to
 -- @tparam bool|function merge If true then merge tags (select the client's
@@ -502,6 +505,9 @@ function client.moveresize(x, y, w, h, c)
 end
 
 --- Move/resize a client relative to current coordinates.
+--
+-- @DOC_sequences_client_relative_move1_EXAMPLE@
+--
 -- @method relative_move
 -- @see geometry
 -- @tparam[opt=c.x] number x The relative x coordinate.
@@ -510,10 +516,10 @@ end
 -- @tparam[opt=c.height] number h The relative height.
 function client.object.relative_move(self, x, y, w, h)
     local geometry = self:geometry()
-    geometry['x'] = geometry['x'] + x
-    geometry['y'] = geometry['y'] + y
-    geometry['width'] = geometry['width'] + w
-    geometry['height'] = geometry['height'] + h
+    geometry['x'] = geometry['x'] + (x or geometry.x)
+    geometry['y'] = geometry['y'] + (y or geometry.y)
+    geometry['width'] = geometry['width'] + (w or geometry.width)
+    geometry['height'] = geometry['height'] + (h or geometry.height)
     self:geometry(geometry)
 end
 
@@ -528,6 +534,8 @@ function client.movetotag(target, c)
 end
 
 --- Move a client to a tag.
+--
+-- @DOC_sequences_client_move_to_tag1_EXAMPLE@
 --
 -- @method move_to_tag
 -- @tparam tag target The tag to move the client to.
@@ -559,6 +567,8 @@ function client.toggletag(target, c)
 end
 
 --- Toggle a tag on a client.
+--
+-- @DOC_sequences_client_toggle_tag1_EXAMPLE@
 --
 -- @method toggle_tag
 -- @tparam tag target The tag to move the client to.
@@ -597,6 +607,9 @@ function client.movetoscreen(c, s)
 end
 
 --- Move a client to a screen. Default is next screen, cycling.
+--
+-- @DOC_sequences_client_move_to_screen1_EXAMPLE@
+--
 -- @method move_to_screen
 -- @tparam[opt=c.screen.index+1] screen s The screen, default to current + 1.
 -- @see screen
@@ -646,6 +659,8 @@ end
 -- Additionally, while it is a rare case, if the client's screen has no selected
 -- tags at the point of calling this method, it will fall back to the screen's
 -- full set of tags.
+--
+-- @DOC_sequences_client_to_selected_tags1_EXAMPLE@
 --
 -- @method to_selected_tags
 -- @see screen.selected_tags
@@ -895,6 +910,8 @@ end
 -- did not set them manually. For example, windows with a type different than
 -- normal.
 --
+-- @DOC_sequences_client_floating1_EXAMPLE@
+--
 -- @property floating
 -- @tparam boolean floating The floating state.
 -- @request client border floating granted When a border update is required
@@ -976,6 +993,12 @@ end
 
 --- The x coordinates.
 --
+-- `x` (usually) originate from the top left. `x` does *not* include
+-- the outer client border, but rather where the content and/or titlebar
+-- starts.
+--
+-- @DOC_sequences_client_x1_EXAMPLE@
+--
 -- @property x
 -- @tparam integer x
 -- @emits property::geometry
@@ -983,8 +1006,16 @@ end
 --  geometry (with `x`, `y`, `width`, `height`).
 -- @emits property::x
 -- @emits property::position
+-- @see geometry
+-- @see relative_move
 
 --- The y coordinates.
+--
+-- `y` (usually) originate from the top left. `y` does *not* include
+-- the outer client border, but rather where the content and/or titlebar
+-- starts.
+--
+-- @DOC_sequences_client_y1_EXAMPLE@
 --
 -- @property y
 -- @tparam integer y
@@ -993,8 +1024,12 @@ end
 --  geometry (with `x`, `y`, `width`, `height`).
 -- @emits property::y
 -- @emits property::position
+-- @see geometry
+-- @see relative_move
 
 --- The width of the client.
+--
+-- @DOC_sequences_client_width1_EXAMPLE@
 --
 -- @property width
 -- @tparam integer width
@@ -1003,8 +1038,12 @@ end
 --  geometry (with `x`, `y`, `width`, `height`).
 -- @emits property::width
 -- @emits property::size
+-- @see geometry
+-- @see relative_move
 
 --- The height of the client.
+--
+-- @DOC_sequences_client_height1_EXAMPLE@
 --
 -- @property height
 -- @tparam integer height
@@ -1013,6 +1052,8 @@ end
 --  geometry (with `x`, `y`, `width`, `height`).
 -- @emits property::height
 -- @emits property::size
+-- @see geometry
+-- @see relative_move
 
 -- Add the geometry helpers to match the wibox API
 for _, v in ipairs {"x", "y", "width", "height"} do
@@ -1239,6 +1280,7 @@ end
 -- @property dockable
 -- @tparam boolean dockable The dockable state
 -- @propemits false false
+-- @see struts
 
 function client.object.get_dockable(c)
     local value = client.property.get(c, "dockable")
@@ -1271,7 +1313,7 @@ end
 --- If the client requests not to be decorated with a titlebar.
 --
 -- The motif wm hints allow a client to request not to be decorated by the WM in
--- various ways. This property uses the motif MWM_DECOR_TITLE hint and
+-- various ways. This property uses the motif `MWM_DECOR_TITLE` hint and
 -- interprets it as the client (not) wanting a titlebar.
 --
 -- @property requests_no_titlebar
@@ -1513,6 +1555,8 @@ end, true, true, "keybinding")
 
 --- Set the client shape.
 --
+-- @DOC_awful_client_shape1_EXAMPLE@
+--
 -- @property shape
 -- @tparam gears.shape A gears.shape compatible function.
 -- @propemits true false
@@ -1556,10 +1600,13 @@ end
 --  isn't already within its geometry,
 -- * **toggle_minimization**: If the client is already active, minimize it.
 --
+-- @DOC_sequences_client_activate1_EXAMPLE@
+--
 -- @method activate
 -- @tparam table args
 -- @tparam[opt=other] string args.context Why was this activate called?
--- @tparam[opt=true] boolean args.raise Raise the client to the top of its layer.
+-- @tparam[opt=true] boolean args.raise Raise the client to the top of its layer
+--  and unminimize it (if needed).
 -- @tparam[opt=false] boolean args.force Force the activation even for unfocusable
 --  clients.
 -- @tparam[opt=false] boolean args.switch_to_tags
@@ -1567,6 +1614,7 @@ end
 -- @tparam[opt=false] boolean args.action Once activated, perform an action.
 -- @tparam[opt=false] boolean args.toggle_minimization
 -- @see awful.permissions.add_activate_filter
+-- @see awful.permissions.activate
 -- @see request::activate
 -- @see active
 function client.object.activate(c, args)
@@ -1734,6 +1782,13 @@ end)
 -- @tparam table hints The hints.
 -- @classsignal
 -- @see awful.permissions.update_border
+
+--- Jump to the client that received the urgent hint first.
+--
+-- @staticfct awful.client.urgent.jumpto
+-- @tparam bool|function merge If true then merge tags (select the client's
+--   first tag additionally) when the client is not visible.
+--   If it is a function, it will be called with the client as argument.
 
 -- Add clients during startup to focus history.
 -- This used to happen through permissions.activate, but that only handles visible

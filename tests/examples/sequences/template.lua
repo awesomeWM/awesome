@@ -245,10 +245,18 @@ end
 local function get_all_tag_clients(t)
     local s = t.screen
 
-    local clients = gtable.clone(t:clients(), false)
+    local all_clients = gtable.clone(t:clients(), false)
+
+    local clients = {}
+
+    for _, c in ipairs(all_clients) do
+        if not c.minimized then
+            table.insert(clients, c)
+        end
+    end
 
     for _, c in ipairs(s.clients) do
-        if c.sticky then
+        if c.sticky and not c.minimized then
             if not gtable.hasitem(clients, c) then
                 table.insert(clients, c)
             end
@@ -304,6 +312,7 @@ local function fake_arrange(tag)
     for _, geo_src in ipairs {param.geometries, flt } do
         for c, geo in pairs(geo_src) do
             geo.c = geo.c or c
+            geo.color = geo.c.color
             table.insert(ret, geo)
         end
     end
@@ -332,7 +341,7 @@ local function gen_fake_clients(tag, args)
             local y      = (geom.y*h)/sgeo.height
             local width  = (geom.width*w)/sgeo.width
             local height = (geom.height*h)/sgeo.height
-            cr:set_source(color(geom.c.color or beautiful.bg_normal))
+            cr:set_source(color(geom.color or beautiful.bg_normal))
             cr:rectangle(x,y,width,height)
             cr:fill_preserve()
             cr:set_source(color(geom.c.border_color or beautiful.border_color))

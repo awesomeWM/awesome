@@ -1,0 +1,2 @@
+Client geometry:	110	110	120	100
+Client geometry:	220	220	220	200

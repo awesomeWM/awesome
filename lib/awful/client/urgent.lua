@@ -28,7 +28,7 @@ local data = setmetatable({}, { __mode = 'k' })
 
 -- Get the first client that got the urgent hint.
 --
--- @function awful.urgent.get
+-- @function awful.client.urgent.get
 -- @treturn client.object The first urgent client.
 function urgent.get()
     if #data > 0 then
@@ -46,7 +46,7 @@ end
 
 --- Jump to the client that received the urgent hint first.
 --
--- @function awful.urgent.jumpto
+-- @function awful.client.urgent.jumpto
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client as argument.
@@ -59,7 +59,7 @@ end
 
 -- Adds client to urgent stack.
 --
--- @function awful.urgent.add
+-- @function awful.client.urgent.add
 -- @tparam client c The client object.
 -- @param prop The property which is updated.
 -- @request client border active granted When a client becomes active and is no
@@ -90,7 +90,7 @@ end
 
 -- Remove client from urgent stack.
 --
--- @function awful.urgent.delete
+-- @function awful.client.urgent.delete
 -- @tparam client c The client object.
 function urgent.delete(c)
     for k, cl in ipairs(data) do

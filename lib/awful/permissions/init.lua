@@ -133,7 +133,9 @@ end
 
 --- Activate a window.
 --
--- This sets the focus only if the client is visible.
+-- This sets the focus only if the client is visible. If `raise` is set
+-- in the hints, it will also unminimize the client and move it to the top
+-- of its layer.
 --
 -- It is the default signal handler for `request::activate` on a `client`.
 --
@@ -141,7 +143,8 @@ end
 -- @tparam client c A client to use
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
--- @tparam[opt=false] boolean hints.raise should the client be raised?
+-- @tparam[opt=false] boolean hints.raise should the client be unminimized
+--  and raised?
 -- @tparam[opt=false] boolean hints.switch_to_tag should the client's first tag
 --  be selected if none of the client's tags are selected?
 -- @tparam[opt=false] boolean hints.switch_to_tags Select all tags associated
