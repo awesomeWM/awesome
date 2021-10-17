@@ -26,7 +26,7 @@ end
 
 local data = setmetatable({}, { __mode = 'k' })
 
---- Get the first client that got the urgent hint.
+-- Get the first client that got the urgent hint.
 --
 -- @function awful.urgent.get
 -- @treturn client.object The first urgent client.
@@ -57,7 +57,7 @@ function urgent.jumpto(merge)
     end
 end
 
---- Adds client to urgent stack.
+-- Adds client to urgent stack.
 --
 -- @function awful.urgent.add
 -- @tparam client c The client object.
@@ -88,7 +88,7 @@ function urgent.add(c, prop)
     end
 end
 
---- Remove client from urgent stack.
+-- Remove client from urgent stack.
 --
 -- @function awful.urgent.delete
 -- @tparam client c The client object.
