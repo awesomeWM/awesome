@@ -261,12 +261,9 @@ lua_class_t tag_class;
  *
  * @DOC_sequences_tag_name_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::name*
- *
  * @property name
- * @param string
+ * @tparam string name
+ * @propemits false false
  */
 
 /**
@@ -274,23 +271,17 @@ lua_class_t tag_class;
  *
  * @DOC_sequences_tag_selected_EXAMPLE@
  *
- * **Signal:**
- *
- *  * *property::selected*
- *
  * @property selected
- * @param boolean
+ * @tparam boolean selected
+ * @propemits false false
  */
 
 /**
  * True if the tag is active and can be used.
  *
- * **Signal:**
- *
- *  * *property::activated*
- *
  * @property activated
- * @param boolean
+ * @tparam boolean activated
+ * @propemits false false
  */
 
 /** Get the number of instances.
