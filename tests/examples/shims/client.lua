@@ -62,6 +62,10 @@ function properties.set_screen(self, s)
     self:emit_signal("property::screen")
 end
 
+function properties:get_first_tag()
+    return self:tags()[1]
+end
+
 -- Create fake clients to move around
 function client.gen_fake(args)
     local ret = gears_obj()
@@ -126,7 +130,15 @@ function client.gen_fake(args)
     end
 
     function ret:isvisible()
-        return true
+        if ret.minimized or ret.hidden then return false end
+
+        local vis = false
+
+        for _, tag in ipairs(ret:tags()) do
+            vis = vis or tag.selected
+        end
+
+        return vis
     end
 
     -- Used for screenshots
