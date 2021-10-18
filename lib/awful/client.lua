@@ -257,6 +257,7 @@ end
 -- @tparam[opt] client sel The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn[opt] client|nil A client, or nil if no client is available.
+-- @see client.get
 --
 -- @usage -- focus the next window in the index
 -- awful.client.next(1)
@@ -288,6 +289,11 @@ end
 
 --- Swap a client with another client in the given direction.
 --
+-- This will not cross the screen boundary. If you want this behavior, use
+-- `awful.client.swap.global_bydirection`.
+--
+-- @DOC_sequences_client_swap_bydirection1_EXAMPLE@
+--
 -- @staticfct awful.client.swap.bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
 -- @tparam[opt=focused] client c The client.
@@ -317,6 +323,9 @@ end
 --- Swap a client with another client in the given direction.
 --
 -- Swaps across screens.
+--
+-- @DOC_sequences_client_swap_bydirection2_EXAMPLE@
+--
 -- @staticfct awful.client.swap.global_bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
 -- @tparam[opt] client sel The client.
@@ -358,6 +367,8 @@ end
 
 --- Swap a client by its relative index.
 --
+-- @DOC_sequences_client_swap_byidx1_EXAMPLE@
+--
 -- @staticfct awful.client.swap.byidx
 -- @tparam integer i The index.
 -- @tparam[opt] client c The client, otherwise focused one is used.
@@ -378,6 +389,8 @@ end
 --
 -- This will swap the client from one position to the next
 -- in the layout.
+--
+-- @DOC_sequences_client_cycle1_EXAMPLE@
 --
 -- @staticfct awful.client.cycle
 -- @tparam boolean clockwise True to cycle clients clockwise.
@@ -1068,6 +1081,9 @@ end
 
 
 --- Restore (=unminimize) a random client.
+--
+-- @DOC_sequences_client_restore1_EXAMPLE@
+--
 -- @staticfct awful.client.restore
 -- @tparam screen s The screen to use.
 -- @treturn client The restored client if some client was restored, otherwise nil.
@@ -1803,6 +1819,8 @@ end)
 -- @see awful.permissions.update_border
 
 --- Jump to the client that received the urgent hint first.
+--
+-- @DOC_sequences_client_jump_to_urgent1_EXAMPLE@
 --
 -- @staticfct awful.client.urgent.jumpto
 -- @tparam bool|function merge If true then merge tags (select the client's

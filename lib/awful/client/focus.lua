@@ -57,6 +57,8 @@ end
 
 --- Focus a client by its relative index.
 --
+-- @DOC_sequences_client_focus_byidx1_EXAMPLE@
+--
 -- @function awful.client.focus.byidx
 -- @param i The index.
 -- @tparam[opt] client c The client.
@@ -157,6 +159,8 @@ end
 
 --- Focus a client by the given direction.
 --
+-- @DOC_sequences_client_focus_bydirection1_EXAMPLE@
+--
 -- @tparam string dir The direction, can be either
 --   `"up"`, `"down"`, `"left"` or `"right"`.
 -- @tparam[opt] client c The client.
@@ -184,6 +188,8 @@ function focus.bydirection(dir, c, stacked)
 end
 
 --- Focus a client by the given direction. Moves across screens.
+--
+-- @DOC_sequences_client_focus_bydirection2_EXAMPLE@
 --
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @tparam[opt] client c The client.

@@ -1,0 +1,5 @@
+c1:1, c2:2, c3:3, c4:4, 
+Call focus.byidx
+c1:1, c2:2, c3:3, c4:4, 
+Call focus.byidx
+c1:1, c2:2, c3:3, c4:4, 

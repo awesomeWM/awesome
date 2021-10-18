@@ -312,6 +312,11 @@ local function fake_arrange(tag)
     for _, geo_src in ipairs {param.geometries, flt } do
         for c, geo in pairs(geo_src) do
             geo.c = geo.c or c
+
+            if type(c) == "table" and c.geometry then
+                c:geometry(geo)
+            end
+
             geo.color = geo.c.color
             table.insert(ret, geo)
         end
