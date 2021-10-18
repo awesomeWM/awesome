@@ -2981,7 +2981,7 @@ client_kill(client_t *c)
  *   top to bottom).
  * @treturn table A table with clients.
  * @staticfct get
- * @usage for _, c in client.get() do
+ * @usage for _, c in ipairs(client.get()) do
  *     -- do something
  * end
  */

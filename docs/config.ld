@@ -909,6 +909,7 @@ local show_return = {
     ["function"]    = true,
     constructorfct  = true,
     constructorfct2 = true,
+    legacylayout    = true,
     staticfct       = true,
     method          = true,
     deprecated      = true,

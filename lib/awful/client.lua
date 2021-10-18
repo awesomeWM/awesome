@@ -1116,11 +1116,14 @@ end
 --- Calculate a client's column number, index in that column, and
 -- number of visible clients in this column.
 --
+-- @DOC_screen_wfact4_EXAMPLE@
+--
 -- @legacylayout awful.client.idx
 -- @tparam client c the client
--- @treturn integer col The column number.
--- @treturn integer idx Index of the client in the column.
--- @treturn integer num The number of visible clients in the column.
+-- @treturn table data A table with "col", "idx" and "num" keys.
+-- @treturn integer data.col The column number.
+-- @treturn integer data.idx Index of the client in the column.
+-- @treturn integer data.num The number of visible clients in the column.
 function client.idx(c)
     c = c or capi.client.focus
     if not c then return end
@@ -1175,12 +1178,22 @@ function client.idx(c)
 end
 
 
---- Set the window factor of a client
+--- Define how tall a client should be in the tile layout.
+--
+-- One valid use case for calling this is restoring serialized layouts.
+-- This function is rather fragile and the behavior may not remain the
+-- same across AwesomeWM versions.
+--
+-- When setting a value, make sure the sum remains 1. Otherwise, the
+-- clients will just go offscreen or get negative size.
+--
+-- @DOC_screen_wfact3_EXAMPLE@
 --
 -- @legacylayout awful.client.setwfact
 -- @tparam number wfact the window factor value
 -- @tparam client c the client
--- @emits property::windowfact
+-- @emits property::windowfact Emitted on the c.first_tag object.
+-- @see tag.master_width_factor
 function client.setwfact(wfact, c)
     -- get the currently selected window
     c = c or capi.client.focus
@@ -1233,6 +1246,12 @@ end
 --
 -- This will emit `property::windowfact` on the specific tag object
 -- `c.screen.selected_tag`.
+--
+-- @DOC_screen_wfact1_EXAMPLE@
+--
+-- Changing the gap will make some clients taller:
+--
+-- @DOC_screen_wfact2_EXAMPLE@
 --
 -- @legacylayout awful.client.incwfact
 -- @tparam number add Amount to increase/decrease the client's window factor by.

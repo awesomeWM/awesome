@@ -9,6 +9,7 @@ local cairo = require("lgi").cairo
 local Pango = require("lgi").Pango
 local PangoCairo = require("lgi").PangoCairo
 local color = require("gears.color")
+local aclient = require("awful.client")
 
 -- Let the test request a size and file format
 local args = loadfile(file_path)() or 10
@@ -533,6 +534,45 @@ local function draw_mwfact(s)
     cr:translate(tr_x, tr_y)
 end
 
+local function draw_wfact(s)
+    cr:translate(-tr_x, -tr_y)
+
+    local tags = s.selected_tags
+    local windowfacts = s.selected_tag.windowfact
+    local height  = s.tiling_area.height / SCALE_FACTOR
+
+    local sum, gap = 0, s.selected_tag.gap or 0
+
+    for _, t in ipairs(tags) do
+        for _, c in ipairs(t:clients()) do
+            local info = aclient.idx(c)
+            sum = sum + windowfacts[info.col][info.idx]
+        end
+    end
+
+    local offset = s.tiling_area.y * args.factor + tr_y + (2*gap)
+
+    for i = 1, #windowfacts[1] do
+        draw_vruler(
+            s,
+            0, --s.geometry.x + s.geometry.width,
+            s.geometry.width * factor + 5,
+            {
+                y      = math.floor(offset),
+                height =math.ceil( (height/sum) * windowfacts[1][i]),
+                color  = colors.gaps.."66",
+                align  = true,
+            },
+            1
+        )
+
+        offset = offset + (height/sum * windowfacts[1][i]) + (2*gap)
+    end
+
+    cr:translate(tr_x, tr_y)
+end
+
+
 local function draw_client_snap(s)
     cr:translate(-tr_x, -tr_y)
 
@@ -722,7 +762,9 @@ for k=1, screen.count() do
     draw_area(s, s.tiling_area, "tiling_area", (k-1)*10, args.highlight_tiling_area)
 
     -- Draw the ruler.
-    draw_rulers(s)
+    if args.draw_areas ~= false then
+        draw_rulers(s)
+    end
 
     -- Draw the wibar.
     for _, wibar in ipairs(args.draw_wibars or {}) do
@@ -781,9 +823,14 @@ for k=1, screen.count() do
         draw_gaps(s)
     end
 
-    -- Draw the useless gaps.
+    -- Draw the master width factor gaps.
     if args.draw_mwfact then
         draw_mwfact(s)
+    end
+
+    -- Draw the (rows) width factor.
+    if args.draw_wfact then
+        draw_wfact(s)
     end
 
     -- Draw the snapping areas of floating clients.

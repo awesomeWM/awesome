@@ -1,0 +1,5 @@
+Client #1:	0	1	2
+Client #2:	0	2	2
+Client #3:	1	1	3
+Client #4:	1	2	3
+Client #5:	1	3	3
