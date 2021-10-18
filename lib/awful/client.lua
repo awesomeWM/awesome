@@ -1857,12 +1857,7 @@ end
 -- Connect to "focus" signal, and allow to disable tracking.
 do
     local disabled_count = 1
-    --- Disable history tracking.
-    --
-    -- See `awful.client.focus.history.enable_tracking` to enable it again.
-    -- @treturn int The internal value of `disabled_count` (calls to this
-    --   function without calling `awful.client.focus.history.enable_tracking`).
-    -- @staticfct awful.client.focus.history.disable_tracking
+
     function client.focus.history.disable_tracking()
         disabled_count = disabled_count + 1
         if disabled_count == 1 then
@@ -1871,12 +1866,6 @@ do
         return disabled_count
     end
 
-    --- Enable history tracking.
-    --
-    -- This is the default, but can be disabled
-    -- through `awful.client.focus.history.disable_tracking`.
-    -- @treturn boolean True if history tracking has been enabled.
-    -- @staticfct awful.client.focus.history.enable_tracking
     function client.focus.history.enable_tracking()
         assert(disabled_count > 0)
         disabled_count = disabled_count - 1
@@ -1886,10 +1875,6 @@ do
         return disabled_count == 0
     end
 
-    --- Is history tracking enabled?
-    -- @treturn bool True if history tracking is enabled.
-    -- @treturn int The number of times that tracking has been disabled.
-    -- @staticfct awful.client.focus.history.is_enabled
     function client.focus.history.is_enabled()
         return disabled_count == 0, disabled_count
     end
