@@ -57,6 +57,8 @@ end
 
 --- Focus a client by its relative index.
 --
+-- @DOC_sequences_client_focus_byidx1_EXAMPLE@
+--
 -- @function awful.client.focus.byidx
 -- @param i The index.
 -- @tparam[opt] client c The client.
@@ -157,6 +159,8 @@ end
 
 --- Focus a client by the given direction.
 --
+-- @DOC_sequences_client_focus_bydirection1_EXAMPLE@
+--
 -- @tparam string dir The direction, can be either
 --   `"up"`, `"down"`, `"left"` or `"right"`.
 -- @tparam[opt] client c The client.
@@ -184,6 +188,8 @@ function focus.bydirection(dir, c, stacked)
 end
 
 --- Focus a client by the given direction. Moves across screens.
+--
+-- @DOC_sequences_client_focus_bydirection2_EXAMPLE@
 --
 -- @param dir The direction, can be either "up", "down", "left" or "right".
 -- @tparam[opt] client c The client.
@@ -217,6 +223,26 @@ function focus.global_bydirection(dir, c, stacked)
         end
     end
 end
+
+--- Is history tracking enabled?
+-- @treturn bool True if history tracking is enabled.
+-- @treturn int The number of times that tracking has been disabled.
+-- @function awful.client.focus.history.is_enabled
+
+--- Enable history tracking.
+--
+-- This is the default, but can be disabled
+-- through `awful.client.focus.history.disable_tracking`.
+-- @treturn boolean True if history tracking has been enabled.
+-- @function awful.client.focus.history.enable_tracking
+
+--- Disable history tracking.
+--
+-- See `awful.client.focus.history.enable_tracking` to enable it again.
+-- @treturn int The internal value of `disabled_count` (calls to this
+--   function without calling `awful.client.focus.history.enable_tracking`).
+-- @function awful.client.focus.history.disable_tracking
+
 
 return focus
 

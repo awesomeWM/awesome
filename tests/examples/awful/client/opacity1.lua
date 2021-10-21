@@ -77,19 +77,20 @@ local function gen_client(label)
     c:set_label(label)
     c:emit_signal("request::titlebars")
     c.border_color = beautiful.bg_highlight
+    c.border_width = 2
     counter = counter + 40
 
     return c
 end
 
-    local c1 = gen_client("Border width: 0")
-    local c2 = gen_client("Border width: 2")
-    local c3 = gen_client("Border width: 10")
+    local c1 = gen_client("Opacity: 1")
+    local c2 = gen_client("Opacity: 0.5")
+    local c3 = gen_client("Opacity: 0.1")
 --DOC_HIDE_END
 
-  c1.border_width = 0
-  c2.border_width = 2
-  c3.border_width = 10
+  c1.opacity = 1
+  c2.opacity = 0.5
+  c3.opacity = 0.1
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
 

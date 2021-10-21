@@ -77,19 +77,21 @@ local function gen_client(label)
     c:set_label(label)
     c:emit_signal("request::titlebars")
     c.border_color = beautiful.bg_highlight
+    c.name = label
     counter = counter + 40
 
     return c
 end
 
-    local c1 = gen_client("Border width: 0")
-    local c2 = gen_client("Border width: 2")
-    local c3 = gen_client("Border width: 10")
+    local c1 = gen_client("Client 1 (in tasktar)")
+    local c2 = gen_client("Client 2 (NOT in taskbar)")
+    local c3 = gen_client("Client 3 (in taskbar)")
+
 --DOC_HIDE_END
 
-  c1.border_width = 0
-  c2.border_width = 2
-  c3.border_width = 10
+  c1.skip_taskbar = false
+  c2.skip_taskbar = true
+  c3.skip_taskbar = false
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
 

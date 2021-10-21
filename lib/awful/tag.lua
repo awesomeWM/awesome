@@ -147,13 +147,9 @@ end
 --
 -- The index is the position as shown in the `awful.widget.taglist`.
 --
--- **Signal:**
---
--- * *property::index*
---
 -- @property index
--- @param integer
--- @treturn number The tag index.
+-- @tparam integer index
+-- @propemits false false
 
 function tag.object.set_index(self, idx)
     local scr = get_screen(tag.getproperty(self, "screen"))
@@ -225,7 +221,7 @@ end
 -- @DOC_sequences_tag_swap_EXAMPLE@
 --
 -- @method swap
--- @param tag2 The second tag
+-- @tparam tag tag2 The second tag
 -- @see client.swap
 function tag.object.swap(self, tag2)
     local idx1, idx2 = tag.object.get_index(self), tag.object.get_index(tag2)
@@ -265,8 +261,8 @@ end
 --    })
 --
 -- @constructorfct awful.tag.add
--- @param name The tag name, a string
--- @param props The tags initial properties, a table
+-- @tparam string name The tag name, a string
+-- @tparam[opt=nil] table|nil props The tags initial properties, a table
 -- @return The created tag
 -- @see tag.delete
 function tag.add(name, props)
@@ -338,8 +334,8 @@ end
 
 --- Find a suitable fallback tag.
 -- @staticfct awful.tag.find_fallback
--- @param screen The screen to look for a tag on. [awful.screen.focused()]
--- @param invalids A table of tags we consider unacceptable. [selectedlist(scr)]
+-- @tparam screen screen The screen to look for a tag on. [awful.screen.focused()]
+-- @tparam[opt=nil] table|nil invalids A table of tags considered unacceptable. [selectedlist(scr)]
 function tag.find_fallback(screen, invalids)
     local scr = screen or ascreen.focused()
     local t = invalids or scr.selected_tags
@@ -484,7 +480,7 @@ end
 
 --- Update the tag history.
 -- @staticfct awful.tag.history.update
--- @param obj Screen object.
+-- @tparam screen obj Screen object.
 function tag.history.update(obj)
     local s = get_screen(obj)
     local curtags = s.selected_tags
@@ -525,8 +521,8 @@ end
 
 --- Revert tag history.
 -- @staticfct awful.tag.history.restore
--- @param screen The screen.
--- @param idx Index in history. Defaults to "previous" which is a special index
+-- @tparam screen screen The screen.
+-- @tparam number idx Index in history. Defaults to "previous" which is a special index
 -- toggling between last two selected sets of tags. Number (eg 1) will go back
 -- to the given index in history.
 function tag.history.restore(screen, idx)
@@ -597,12 +593,9 @@ end
 
 --- The tag screen.
 --
--- **Signal:**
---
--- * *property::screen*
---
 -- @property screen
--- @param screen
+-- @tparam screen screen
+-- @propemits false false
 -- @see screen
 
 function tag.object.set_screen(t, s)
@@ -720,13 +713,10 @@ end
 --
 -- @DOC_screen_mwfact2_EXAMPLE@
 --
--- **Signal:**
---
--- * *property::mwfact* (deprecated)
--- * *property::master_width_factor*
---
 -- @property master_width_factor
--- @param number Between 0 and 1
+-- @tparam number master_width_factor Between 0 and 1
+-- @emits property::mwfact When the value changes (deprecated).
+-- @emits property::master_width_factor When the value changes.
 -- @see master_count
 -- @see column_count
 -- @see master_fill_policy
@@ -761,8 +751,8 @@ end
 --- Increase master width factor.
 -- @staticfct awful.tag.incmwfact
 -- @see master_width_factor
--- @param add Value to add to master width factor.
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam number add Value to add to master width factor.
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.incmwfact(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_master_width_factor(t, tag.object.get_master_width_factor(t) + add)
@@ -841,13 +831,10 @@ end
 --
 -- @DOC_screen_taglayout_EXAMPLE@
 --
--- **Signal:**
---
--- * *property::layout*
---
 -- @property layout
--- @see awful.tag.layouts
 -- @tparam layout|function layout A layout table or a constructor function
+-- @propemits false false
+-- @see awful.tag.layouts
 -- @return The layout
 
 --- The (proposed) list of available layouts for this tag.
@@ -862,7 +849,7 @@ end
 -- front of the list.
 --
 -- @property layouts
--- @param table
+-- @tparam table layouts
 -- @request tag layouts awful granted When the `layouts` property is first called
 --  and there is no layouts, then that signal is called.
 -- @see awful.layout.layouts
@@ -1055,12 +1042,9 @@ end
 -- As you can see, the "Volatile" tag has been automatically discarded while
 -- the "Non-volatile" tag is still there (but with zero clients).
 --
--- **Signal:**
---
--- * *property::volatile*
---
 -- @property volatile
--- @param boolean
+-- @tparam boolean volatile
+-- @propemits false false
 -- @see delete
 
 -- Volatile accessors are implicit
@@ -1107,12 +1091,9 @@ end
 --
 -- @DOC_screen_gaps2_EXAMPLE@
 --
--- **Signal:**
---
--- * *property::useless_gap*
---
 -- @property gap
--- @param number The value has to be greater than zero.
+-- @tparam number gap The value has to be greater than zero.
+-- @emits property::useless_gap When the gap changes.
 -- @see gap_single_client
 -- @see awful.tag.incgap
 
@@ -1142,8 +1123,8 @@ end
 --- Increase the spacing between clients
 -- @staticfct awful.tag.incgap
 -- @see gap
--- @param add Value to add to the spacing between clients
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam number add Value to add to the spacing between clients
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.incgap(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_gap(t, tag.object.get_gap(t) + add)
@@ -1171,12 +1152,9 @@ end
 --
 -- @DOC_screen_gap_single_client_false_EXAMPLE@
 --
--- **Signal:**
---
--- * *property::gap\_single\_client*
---
 -- @property gap_single_client
--- @param boolean Enable gaps for a single client
+-- @tparam boolean gap_single_client Enable gaps for a single client
+-- @propemits false false
 -- @see awful.tag.incgap
 
 function tag.object.set_gap_single_client(t, gap_single_client)
@@ -1246,12 +1224,9 @@ end
 -- The remaining space that would have been used for the second column is
 -- redistributed on both side.
 --
--- **Signal:**
---
--- * *property::master_fill_policy*
---
 -- @property master_fill_policy
--- @param string "expand" or "master_width_factor"
+-- @tparam string master_fill_policy "expand" or "master_width_factor"
+-- @propemits false false
 -- @see awful.tag.togglemfpol
 
 function tag.object.get_master_fill_policy(t)
@@ -1315,13 +1290,10 @@ end
 --
 -- @DOC_sequences_tag_master_count_EXAMPLE@
 --
--- **Signal:**
---
--- * *property::nmaster* (deprecated)
--- * *property::master_count*
---
 -- @property master_count
--- @param integer nmaster Only positive values are accepted
+-- @tparam integer master_count nmaster Only positive values are accepted
+-- @emits property::nmaster Deprecated.
+-- @emits property::master_count When the value changes.
 -- @see awful.tag.incnmaster
 
 function tag.object.set_master_count(t, nmaster)
@@ -1337,7 +1309,7 @@ function tag.object.get_master_count(t)
         or defaults.master_count
 end
 
----
+--- The number of master clients.
 -- @deprecated awful.tag.setnmaster
 -- @see master_count
 -- @param nmaster The number of master windows.
@@ -1362,8 +1334,8 @@ end
 --- Increase the number of master windows.
 -- @staticfct awful.tag.incnmaster
 -- @see master_count
--- @param add Value to add to number of master windows.
--- @param[opt] t The tag to modify, if null tag.selected() is used.
+-- @tparam number add Value to add to number of master windows.
+-- @tparam[opt] tag t The tag to modify, if null tag.selected() is used.
 -- @tparam[opt=false] boolean sensible Limit nmaster based on the number of
 --   visible tiled windows?
 function tag.incnmaster(add, t, sensible)
@@ -1392,12 +1364,9 @@ end
 --
 -- @DOC_wibox_awidget_taglist_icon_EXAMPLE@
 --
--- **Signal:**
---
--- * *property::icon*
---
 -- @property icon
 -- @tparam path|surface icon The icon
+-- @propemits false false
 -- @see awful.widget.taglist
 -- @see gears.surface
 
@@ -1407,7 +1376,7 @@ end
 -- @deprecated awful.tag.seticon
 -- @see icon
 -- @param icon the icon to set, either path or image object
--- @param _tag the tag
+-- @tparam tag tag the tag
 function tag.seticon(icon, _tag)
     gdebug.deprecate("Use t.icon = icon instead of awful.tag.seticon", {deprecated_in=4})
 
@@ -1418,7 +1387,7 @@ end
 --- Get the tag icon
 -- @deprecated awful.tag.geticon
 -- @see icon
--- @param _tag the tag
+-- @tparam tag tag the tag
 function tag.geticon(_tag)
     gdebug.deprecate("Use t.icon instead of awful.tag.geticon", {deprecated_in=4})
 
@@ -1436,13 +1405,10 @@ end
 --
 -- @DOC_sequences_tag_column_count_EXAMPLE@
 --
--- **Signal:**
---
--- * *property::ncol* (deprecated)
--- * *property::column_count*
---
 -- @property column_count
 -- @tparam integer ncol Has to be greater than 1
+-- @emits property::ncol Deprecated.
+-- @emits property::column_count When the value changes.
 -- @see awful.tag.incncol
 
 function tag.object.set_column_count(t, ncol)
@@ -1486,8 +1452,8 @@ end
 
 --- Increase number of column windows.
 -- @staticfct awful.tag.incncol
--- @param add Value to add to number of column windows.
--- @param[opt] t The tag to modify, if null tag.selected() is used.
+-- @tparam number add Value to add to number of column windows.
+-- @tparam[opt] tag t The tag to modify, if null tag.selected() is used.
 -- @tparam[opt=false] boolean sensible Limit column_count based on the number
 --   of visible tiled windows?
 function tag.incncol(add, t, sensible)

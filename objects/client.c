@@ -475,10 +475,14 @@ lua_class_t client_class;
  * `_NET_WM_STATE_SKIP_TASKBAR` X11 protocol xproperty. Clients can modify this
  * state through this property.
  *
+ * @DOC_awful_client_skip_tasklist1_EXAMPLE@
+ *
  * @property skip_taskbar
  * @tparam[opt=false] boolean skip_taskbar
  * @propemits false false
  * @see sticky
+ * @see hidden
+ * @see unmanage
  */
 
 /**
@@ -697,16 +701,28 @@ lua_class_t client_class;
  * @tparam boolean hidden
  * @propemits false false
  * @see minimized
+ * @see skip_taskbar
+ * @see unmanage
  */
 
 /**
  * Define it the client must be iconify, i.e. only visible in
  *   taskbar.
  *
+ * Minimized clients are still part of tags and screens, but
+ * they are not displayed. You can unminimize using `c.minimized = false`,
+ * but if you also want to set the focus, it is better to use:
+ *
+ *    c:activate { context = "unminimized", raise = true }
+ *
+ * @DOC_sequences_client_minimize1_EXAMPLE@
+ *
  * @property minimized
  * @tparam boolean minimized
  * @propemits false false
  * @see hidden
+ * @see isvisible
+ * @see activate
  */
 
 /**
@@ -726,6 +742,15 @@ lua_class_t client_class;
 
 /**
  * The client border width.
+ *
+ * When manually set (for example, in `ruled.client` rules), this value
+ * will be static. Otherwise, it is controlled by many `beautiful` variables.
+ *
+ * Be careful, the borders are **around** the geometry, not part of it. If
+ * you want more fancy border, use the `awful.titlebar` API to create
+ * titlebars on each side of the client.
+ *
+ * @DOC_awful_client_border_width_EXAMPLE@
  *
  * @property border_width
  * @tparam integer border_width
@@ -759,7 +784,7 @@ lua_class_t client_class;
 /**
  * The client border color.
  *
- * @DOC_awful_client_border_width_EXAMPLE@
+ * @DOC_awful_client_border_color_EXAMPLE@
  *
  * Note that setting this directly will override and disable all related theme
  * variables.
@@ -810,12 +835,34 @@ lua_class_t client_class;
  */
 
 /**
- * The client urgent state.
+ * Set to `true` when the client ask for attention.
+ *
+ * The urgent state is the visual equivalent of the "bell" noise from
+ * old computer. It is set by the client when their state changed and
+ * they need attention. For example, a chat client will set it when
+ * a new message arrive. Some terminals, like `rxvt-unicode`, will also
+ * set it when calling the `bell` command.
+ *
+ * There is many ways an urgent client can become for visible:
+ *
+ *  * Highlight in the `awful.widget.taglist` and `awful.widget.tasklist`
+ *  * Highlight in the `awful.titlebar`
+ *  * Highlight of the client border color (or width).
+ *  * Accessible using `Mod4+u` in the default config.
+ *  * Emit the `property::urgent` signal.
+ *
+ * @DOC_awful_client_urgent1_EXAMPLE@
  *
  * @property urgent
  * @tparam boolean urgent
  * @propemits false false
+ * @request client border active granted When a client becomes active and is no
+ *  longer urgent.
+ * @request client border inactive granted When a client stop being active and
+ *  is no longer urgent.
+ * @request client border urgent granted When a client stop becomes urgent.
  * @see request::border
+ * @see awful.client.urgent.jumpto
  * @usebeautiful beautiful.border_color_urgent The fallback color when the
  *  client is urgent.
  * @usebeautiful beautiful.border_color_floating_urgent The color when the
@@ -832,6 +879,11 @@ lua_class_t client_class;
  *  the client is maximized and urgent.
  * @usebeautiful beautiful.border_width_fullscreen_urgent The border width when
  *  the client is fullscreen and urgent.
+ * @usebeautiful beautiful.titlebar_fg_urgent
+ * @usebeautiful beautiful.titlebar_bg_urgent
+ * @usebeautiful beautiful.titlebar_bgimage_urgent
+ * @usebeautiful beautiful.fg_urgent
+ * @usebeautiful beautiful.bg_urgent
  */
 
 /**
@@ -866,10 +918,17 @@ lua_class_t client_class;
 /**
  * The client opacity.
  *
+ * The opacity only works when a compositing manager, such as
+ * [picom](https://github.com/yshui/picom/), is used. Otherwise,
+ * the clients will remain opaque.
+ *
+ * @DOC_awful_client_opacity1_EXAMPLE@
+ *
  * @property opacity
  * @tparam number opacity Between 0 (transparent) to 1 (opaque).
  * @propemits false false
  * @see request::border
+ * @see awesome.composite_manager_running
  */
 
 /**
@@ -1356,6 +1415,7 @@ lua_class_t client_class;
  * @method struts
  * @see geometry
  * @see screen.workarea
+ * @see dockable
  */
 
 /** Get or set mouse buttons bindings for a client.
@@ -1364,6 +1424,9 @@ lua_class_t client_class;
  * @tparam table buttons
  * @propemits false false
  * @see awful.button
+ * @see append_mousebinding
+ * @see remove_mousebinding
+ * @see request::default_mousebindings
  */
 
 /** Get the number of instances.
@@ -2913,12 +2976,12 @@ client_kill(client_t *c)
 
 /** Get all clients into a table.
  *
- * @tparam[opt] integer screen A screen number to filter clients on.
+ * @tparam[opt] integer|screen screen A screen number to filter clients on.
  * @tparam[opt] boolean stacked Return clients in stacking order? (ordered from
  *   top to bottom).
  * @treturn table A table with clients.
  * @staticfct get
- * @usage for _, c in client.get() do
+ * @usage for _, c in ipairs(client.get()) do
  *     -- do something
  * end
  */
@@ -3073,7 +3136,9 @@ out:
  *
  * This method can be used to close (kill) a **client** using the
  * X11 protocol. To use the POSIX way to kill a **process**, use
- * `awesome.kill`.
+ * `awesome.kill` (using the client `pid` property).
+ *
+ * @DOC_sequences_client_kill1_EXAMPLE@
  *
  * @method kill
  * @see awesome.kill
@@ -3087,11 +3152,14 @@ luaA_client_kill(lua_State *L)
 }
 
 /** Swap a client with another one in global client list.
+ *
+ * @DOC_sequences_client_swap1_EXAMPLE@
+ *
  * @tparam client c A client to swap with.
  * @method swap
  * @emits swapped
- * @emitstparam swapped client The other client.
- * @emitstparam swapped boolean `true` when `:swap()` was called
+ * @emitstparam swapped client other The other client.
+ * @emitstparam swapped boolean is_origin `true` when `:swap()` was called
  *  on *self* rather than the other client. `false` when
  *  `:swap()` was called on the other client.
  * @emits list
@@ -3141,6 +3209,8 @@ luaA_client_swap(lua_State *L)
 /** Access or set the client tags.
  *
  * Use the `first_tag` field to access the first tag of a client directly.
+ *
+ * @DOC_sequences_client_tags1_EXAMPLE@
  *
  * @tparam table tags_table A table with tags to set, or `nil` to get the
  *   current tags.
@@ -3502,6 +3572,8 @@ HANDLE_TITLEBAR(bottom, CLIENT_TITLEBAR_BOTTOM)
 HANDLE_TITLEBAR(left, CLIENT_TITLEBAR_LEFT)
 
 /** Return or set client geometry.
+ *
+ * @DOC_sequences_client_geometry1_EXAMPLE@
  *
  * @tparam table|nil geo A table with new coordinates, or nil.
  * @tparam integer geo.x The horizontal position.
@@ -4178,6 +4250,9 @@ luaA_client_set_shape_input(lua_State *L, client_t *c)
  * @tparam table keys
  * @propemits false false
  * @see awful.key
+ * @see append_keybinding
+ * @see remove_keybinding
+ * @see request::default_keybindings
  */
 static int
 luaA_client_keys(lua_State *L)

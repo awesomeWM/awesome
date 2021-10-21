@@ -62,6 +62,10 @@ function properties.set_screen(self, s)
     self:emit_signal("property::screen")
 end
 
+function properties:get_first_tag()
+    return self:tags()[1]
+end
+
 -- Create fake clients to move around
 function client.gen_fake(args)
     local ret = gears_obj()
@@ -126,7 +130,15 @@ function client.gen_fake(args)
     end
 
     function ret:isvisible()
-        return true
+        if ret.minimized or ret.hidden then return false end
+
+        local vis = false
+
+        for _, tag in ipairs(ret:tags()) do
+            vis = vis or tag.selected
+        end
+
+        return vis
     end
 
     -- Used for screenshots
@@ -190,6 +202,24 @@ function client.gen_fake(args)
         end
 
         assert(not ret.valid)
+    end
+
+    function ret:swap(other)
+        local idx1, idx2 = nil, nil
+        for k, c in ipairs(clients) do
+            if c == ret then
+                idx1 = k
+            elseif c == other then
+                idx2 = k
+            end
+        end
+
+        if not (idx1 and idx2) then return end
+
+        clients[idx1], clients[idx2] = other, ret
+        ret:emit_signal("swapped", other, true)
+        other:emit_signal("swapped", ret, false)
+        client.emit_signal("list")
     end
 
     titlebar_meta(ret)
@@ -258,10 +288,14 @@ function client.gen_fake(args)
     ret.drawable = ret
 
     -- Make sure the layer properties are not `nil`
-    ret.ontop = false
-    ret.below = false
-    ret.above = false
-    ret.sticky = false
+    local defaults = {
+        ontop     = false,
+        below     = false,
+        above     = false,
+        sticky    = false,
+        urgent    = false,
+        focusable = true,
+    }
 
     -- Declare the deprecated buttons and keys methods.
     function ret:_keys(new)
@@ -289,6 +323,8 @@ function client.gen_fake(args)
         __index     = function(self, key)
             if properties["get_"..key] then
                 return properties["get_"..key](self)
+            elseif defaults[key] ~= nil then
+                return defaults[key]
             end
 
             return meta.__index(self, key)
@@ -299,7 +335,14 @@ function client.gen_fake(args)
                 return properties["set_"..key](self, value)
             end
 
-            return meta.__newindex(self, key, value)
+            if defaults[key] ~= nil then
+                defaults[key] = value
+            else
+                meta.__newindex(self, key, value)
+            end
+
+            ret:emit_signal("property::"..key, value)
+            --client.emit_signal("property::"..key, ret, value)
         end
     })
 

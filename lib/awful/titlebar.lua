@@ -92,6 +92,21 @@ local titlebar = {
 -- @tparam gears.surface|string path
 -- @see gears.surface
 
+--- The urgent titlebar foreground (text) color.
+-- @beautiful beautiful.titlebar_fg_urgent
+-- @param color
+-- @see gears.color
+
+--- The urgent titlebar background color.
+-- @beautiful beautiful.titlebar_bg_urgent
+-- @param color
+-- @see gears.color
+
+--- The urgent titlebar background image image.
+-- @beautiful beautiful.titlebar_bgimage_urgent
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
 --- floating_button_normal.
 -- @beautiful beautiful.titlebar_floating_button_normal
 -- @tparam gears.surface|string path
@@ -443,7 +458,10 @@ local all_titlebars = setmetatable({}, { __mode = 'k' })
 -- Get a color for a titlebar, this tests many values from the array and the theme
 local function get_color(name, c, args)
     local suffix = "_normal"
-    if c.active then
+
+    if c.urgent then
+        suffix = "_urgent"
+    elseif c.active then
         suffix = "_focus"
     end
     local function get(array)
@@ -525,10 +543,12 @@ end
 -- `"left"`, `"right"` and `"bottom"`.
 -- @tparam[opt] string args.bg_normal
 -- @tparam[opt] string args.bg_focus
+-- @tparam[opt] string args.bg_urgent
 -- @tparam[opt] string args.bgimage_normal
 -- @tparam[opt] string args.bgimage_focus
 -- @tparam[opt] string args.fg_normal
 -- @tparam[opt] string args.fg_focus
+-- @tparam[opt] string args.fg_urgent
 -- @tparam[opt] string args.font
 -- @constructorfct awful.titlebar
 -- @treturn wibox.drawable The newly created titlebar object.
@@ -568,6 +588,7 @@ local function new(c, args)
 
         -- Update the colors when focus changes
         c:connect_signal("property::active", update_colors)
+        c:connect_signal("property::urgent", update_colors)
 
         -- Inform the drawable when it becomes invisible
         c:connect_signal("request::unmanage", function()

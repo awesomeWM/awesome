@@ -75,21 +75,51 @@ local function gen_client(label)
     }
     c._old_geo = {c:geometry()}
     c:set_label(label)
-    c:emit_signal("request::titlebars")
-    c.border_color = beautiful.bg_highlight
     counter = counter + 40
+    c.class = label
 
     return c
 end
 
-    local c1 = gen_client("Border width: 0")
-    local c2 = gen_client("Border width: 2")
-    local c3 = gen_client("Border width: 10")
+    local c1 = gen_client("Inactive")
+    local c2 = gen_client("Urgent")
+    local c3 = gen_client("Focus")
+    local c4 = gen_client("Tag")
+
+    c4:tags{screen[1].tags[2]}
 --DOC_HIDE_END
 
-  c1.border_width = 0
-  c2.border_width = 2
-  c3.border_width = 10
+  -- Affects mostly the taglist and tasklist..
+  beautiful.fg_urgent = "#ffffff"
+  beautiful.bg_urgent = "#ff0000"
 
+  --DOC_NEWLINE
+
+  -- Set the client border to be orange and large.
+  beautiful.border_color_urgent = "#ffaa00"
+  beautiful.border_width_urgent = 6
+
+  --DOC_NEWLINE
+
+  -- Set the titlebar green.
+  beautiful.titlebar_bg_urgent = "#00ff00"
+  beautiful.titlebar_fg_urgent = "#000000"
+
+  --DOC_NEWLINE
+
+  -- This client is in the current tag.
+  c2.urgent = true
+
+  --DOC_NEWLINE
+
+  -- This client is in a deselected tag.
+  c4.urgent = true
+
+--DOC_HIDE_START
+  c1:emit_signal("request::titlebars")
+  c2:emit_signal("request::titlebars")
+  c3:emit_signal("request::titlebars")
+
+return {honor_titlebar_colors = true}
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
 

@@ -1,9 +1,13 @@
---DOC_NO_USAGE --DOC_GEN_IMAGE --DOC_ASTERISK --DOC_HIDE_START
+--DOC_NO_USAGE --DOC_GEN_IMAGE --DOC_HIDE_START
 local awful     = require("awful")
 local wibox     = require("wibox")
 local beautiful = require("beautiful")
+local gears     = { shape = require("gears.shape") }
 
 screen[1]._resize {width = 480, height = 200}
+
+awful.client.object.set_shape = nil
+awful.client.object.get_shape = nil
 
 local wb = awful.wibar { position = "top" }
 
@@ -74,6 +78,7 @@ local function gen_client(label)
         width  = 230,
     }
     c._old_geo = {c:geometry()}
+    c.border_width = 2
     c:set_label(label)
     c:emit_signal("request::titlebars")
     c.border_color = beautiful.bg_highlight
@@ -82,14 +87,14 @@ local function gen_client(label)
     return c
 end
 
-    local c1 = gen_client("Border width: 0")
-    local c2 = gen_client("Border width: 2")
-    local c3 = gen_client("Border width: 10")
---DOC_HIDE_END
+    local c1 = gen_client("Rectangle (default)")
+    local c2 = gen_client("Rounded rect")
+    local c3 = gen_client("Octogon")
 
-  c1.border_width = 0
-  c2.border_width = 2
-  c3.border_width = 10
+--DOC_HIDE_END
+    c1.shape = gears.shape.rectangle
+    c2.shape = gears.shape.rounded_rect
+    c3.shape = gears.shape.octogon
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
 
