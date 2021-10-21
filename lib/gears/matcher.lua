@@ -133,7 +133,7 @@ end
 
 -- Check if an object matches any part of a rule.
 -- @param o The object.
--- #tparam table rule The rule _match_anyto check.
+-- @tparam table rule The rule to check.
 -- @treturn boolean True if at least one rule is matched, false otherwise.
 -- @method _match_any
 function matcher:_match_any(o, rule)
@@ -145,6 +145,7 @@ function matcher:_match_any(o, rule)
             if type(values) == "boolean" and values then
                 return true
             end
+
 
             for _, value in ipairs(values) do
                 if field_matcher(self, o, field, value) then
@@ -160,7 +161,7 @@ end
 -- Check if an object matches at least one of every part of a rule.
 --
 -- @param o The object.
--- @tparam table rule The rule _match_anyto check.
+-- @tparam table rule The rule to check.
 -- @tparam boolean multi If the entries are table of choices.
 -- @treturn boolean True if all rules are matched.
 -- @method _match_every
@@ -170,7 +171,7 @@ function matcher:_match_every(o, rule)
     for field, values in pairs(rule) do
         local found = false
         for _, value in ipairs(values) do
-            if not field_matcher(self, o, field, value) then
+            if field_matcher(self, o, field, value) then
                 found = true
                 break
             end
