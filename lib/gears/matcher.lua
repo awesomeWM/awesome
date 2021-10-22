@@ -324,7 +324,20 @@ function matcher:add_property_setter(name, f)
 end
 
 local function default_rules_callback(self, o, props, callbacks, rules)
-    for _, entry in ipairs(self:matching_rules(o, rules)) do
+    -- Get all matching rules.
+    local matches = self:matching_rules(o, rules)
+
+    -- Split the main ones from the fallback ones.
+    local main, fallback = {}, {}
+
+    for _, match in ipairs(matches) do
+        table.insert(match.fallback and fallback or main, match)
+    end
+
+    -- Select which set to use.
+    matches = #main > 0 and main or fallback
+
+    for _, entry in ipairs(matches) do
         gtable.crush(props, entry.properties or {})
 
         if entry.callback then
