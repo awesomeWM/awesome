@@ -38,15 +38,16 @@ end
 -- All arguments are passed to the queued `update_callback` call.
 function template:update(args)
     if type(args) == "table" then
-        self._private.update_args = gtable.crush(gtable.clone(self._private.update_args or {}, false), args)
+        self._private.update_args = gtable.crush(
+            gtable.clone(self._private.update_args or {}, false),
+            args
+        )
     end
 
     if not template.queued_updates[self] then
-        gtimer.delayed_call(
-            function()
-                self:_do_update_now()
-            end
-        )
+        gtimer.delayed_call(function()
+            self:_do_update_now()
+        end)
         template.queued_updates[self] = true
     end
 end
