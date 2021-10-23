@@ -16,8 +16,6 @@ local wbase = require("wibox.widget.base")
 local gtable = require("gears.table")
 local gtimer = require("gears.timer")
 
-local default_template_widget = wbase.empty_widget()
-
 local template = {
     mt = {},
     queued_updates = {}
@@ -55,15 +53,16 @@ end
 
 --- Create a new `wibox.widget.template` instance.
 -- @tparam[opt] table args
--- @tparam[opt] table|widget|function args.widget_template The template of widget to use.
+-- @tparam[opt] table|widget|function args.template The widget template to use.
 -- @tparam[opt] function args.update_callback The callback function to update the widget.
 -- @treturn wibox.widget.template The new instance.
 function template.new(args)
     args = args or {}
 
-    local widget_template =
-        type(args.widget_template) == "function" and args.widget_template() or args.widget_template or
-        default_template_widget
+    local widget_template = type(args.template) == "function" and
+        args.template() or
+        args.template or
+        wbase.empty_widget()
 
     local widget = wbase.make_widget_from_value(widget_template)
 
