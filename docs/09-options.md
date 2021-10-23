@@ -55,7 +55,7 @@ To display more deprecation errors, you can increase the API level by 2:
 
 It is possible to make some `.lua` file executable and use the POSIX magic
 prefix (`#!`, often referred as the shebang operator). AwesomeWM will attempt
-to parse the header. Note that for now UTF-8 paths are not supported. A tipical
+to parse the header. Note that for now UTF-8 paths are not supported. A typical
 file header will look like:
 
     #! /usr/bin/env awesome --replace
