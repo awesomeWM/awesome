@@ -133,7 +133,7 @@ end
 
 -- Check if an object matches any part of a rule.
 -- @param o The object.
--- #tparam table rule The rule _match_anyto check.
+-- @tparam table rule The rule to check.
 -- @treturn boolean True if at least one rule is matched, false otherwise.
 -- @method _match_any
 function matcher:_match_any(o, rule)
@@ -145,6 +145,7 @@ function matcher:_match_any(o, rule)
             if type(values) == "boolean" and values then
                 return true
             end
+
 
             for _, value in ipairs(values) do
                 if field_matcher(self, o, field, value) then
@@ -160,7 +161,7 @@ end
 -- Check if an object matches at least one of every part of a rule.
 --
 -- @param o The object.
--- @tparam table rule The rule _match_anyto check.
+-- @tparam table rule The rule to check.
 -- @tparam boolean multi If the entries are table of choices.
 -- @treturn boolean True if all rules are matched.
 -- @method _match_every
@@ -170,7 +171,7 @@ function matcher:_match_every(o, rule)
     for field, values in pairs(rule) do
         local found = false
         for _, value in ipairs(values) do
-            if not field_matcher(self, o, field, value) then
+            if field_matcher(self, o, field, value) then
                 found = true
                 break
             end
@@ -323,7 +324,20 @@ function matcher:add_property_setter(name, f)
 end
 
 local function default_rules_callback(self, o, props, callbacks, rules)
-    for _, entry in ipairs(self:matching_rules(o, rules)) do
+    -- Get all matching rules.
+    local matches = self:matching_rules(o, rules)
+
+    -- Split the main ones from the fallback ones.
+    local main, fallback = {}, {}
+
+    for _, match in ipairs(matches) do
+        table.insert(match.fallback and fallback or main, match)
+    end
+
+    -- Select which set to use.
+    matches = #main > 0 and main or fallback
+
+    for _, entry in ipairs(matches) do
         gtable.crush(props, entry.properties or {})
 
         if entry.callback then
