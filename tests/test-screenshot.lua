@@ -7,6 +7,9 @@ local gsurface = require("gears.surface")
 local lgi = require('lgi')
 local cairo = lgi.cairo
 local gdk = lgi.require('Gdk', '3.0')
+local capi = {
+    root = _G.root
+}
 
 -- Dummy blue client for the client.content test
 -- the lua_executable portion may need to get ironed out. I need to specify 5.3
@@ -91,7 +94,7 @@ local function copy_to_image_surface(content, w, h)
 
     cr:set_source_surface(sur)
     cr:paint()
-    img:finish()
+    img:flush()
 
     return img
 end
@@ -105,8 +108,9 @@ local steps = {}
 
 -- Check the whole root window.
 table.insert(steps, function()
-    local img = copy_to_image_surface(root.content(), root.size())
     local root_width, root_height = root.size()
+    local img = copy_to_image_surface(capi.root.content(), root_width,
+                                      root_height)
 
     if get_pixel(img, 100, 100) ~= "#00ff00" then return end
     if get_pixel(img, 2, 2) ~= "#ff0000" then return end

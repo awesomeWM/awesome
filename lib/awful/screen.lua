@@ -213,8 +213,9 @@ end
 
 function screen.object.get_content(s)
     local geo = s.geometry
-    local source = gsurf(root.content())
-    local target = source:create_similar(cairo.Content.COLOR, geo.width, geo.height)
+    local source = gsurf(capi.root.content())
+    local target = source:create_similar(cairo.Content.COLOR, geo.width,
+                                         geo.height)
     local cr = cairo.Context(target)
     cr:set_source_surface(source, -geo.x, -geo.y)
     cr:rectangle(0, 0, geo.width, geo.height)
