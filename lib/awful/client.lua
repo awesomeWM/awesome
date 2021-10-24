@@ -850,7 +850,6 @@ end
 
 --- Return if a client has a fixed size or not.
 --
--- This property is read only.
 -- @property is_fixed
 -- @tparam[opt=false] boolean is_fixed The fixed size state
 -- @propemits false false
@@ -877,7 +876,6 @@ end
 -- Does the client have a fixed horizontal position and width, i.e. is it
 -- fullscreen, maximized, or horizontally maximized?
 --
--- This property is read only.
 -- @property immobilized_horizontal
 -- @tparam[opt=false] boolean immobilized_horizontal The immobilized state
 -- @readonly
@@ -894,7 +892,6 @@ end
 -- Does the client have a fixed vertical position and width, i.e. is it
 -- fullscreen, maximized, or vertically maximized?
 --
--- This property is read only.
 -- @property immobilized_vertical
 -- @tparam[opt=false] boolean immobilized_vertical The immobilized state
 -- @readonly
