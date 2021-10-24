@@ -171,8 +171,6 @@
  *
  *  * *property::geometry*
  *
- * **Immutable:** true
- *
  * @DOC_screen_geometry_EXAMPLE@
  *
  * @property geometry
@@ -209,7 +207,6 @@
  *
  *     screen[1].answer = 42
  *
- * **Immutable:** true
  * @property index
  * @param integer
  * @see screen

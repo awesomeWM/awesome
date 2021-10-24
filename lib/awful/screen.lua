@@ -181,7 +181,7 @@ end
 
 --- The area where clients can be tiled.
 --
--- This property holds the (read only) area where clients can be tiled. Use
+-- This property holds the area where clients can be tiled. Use
 -- the `padding` property, `wibox.struts` and `client.struts` to modify this
 -- area.
 --
@@ -206,7 +206,7 @@ end
 
 --- Take a screenshot of the physical screen.
 --
--- Reading this (read only) property returns a screenshot of the physical
+-- Reading this property returns a screenshot of the physical
 -- (Xinerama) screen as a cairo surface.
 --
 -- @property content
@@ -303,7 +303,6 @@ end
 --
 --  * *property::outputs*
 --
--- **Immutable:** true
 -- @property outputs
 -- @param table
 -- @tfield table table.name A table with the screen name as key (like `eDP1` on a laptop)
