@@ -449,6 +449,7 @@ lua_class_t client_class;
  * @property window
  * @tparam integer window
  * @propemits false false
+ * @readonly
  */
 
 /**
@@ -522,6 +523,7 @@ lua_class_t client_class;
  * @property type
  * @tparam string type
  * @propemits false false
+ * @readonly
  * @see ruled.client
  */
 
@@ -550,6 +552,7 @@ lua_class_t client_class;
  * @property class
  * @tparam string class
  * @propemits false false
+ * @readonly
  * @see instance
  * @see ruled.client
  */
@@ -576,6 +579,7 @@ lua_class_t client_class;
  * @property instance
  * @tparam string instance
  * @propemits false false
+ * @readonly
  * @see class
  * @see ruled.client
  */
@@ -588,6 +592,7 @@ lua_class_t client_class;
  * @property pid
  * @tparam integer pid
  * @propemits false false
+ * @readonly
  */
 
 /**
@@ -596,6 +601,7 @@ lua_class_t client_class;
  * @property role
  * @tparam string role
  * @propemits false false
+ * @readonly
  * @see instance
  * @see class
  */
@@ -616,6 +622,7 @@ lua_class_t client_class;
  * @property machine
  * @tparam string machine
  * @propemits false false
+ * @readonly
  */
 
 /**
@@ -624,6 +631,7 @@ lua_class_t client_class;
  * @property icon_name
  * @tparam string icon_name
  * @propemits false false
+ * @readonly
  */
 
 /**
@@ -670,6 +678,7 @@ lua_class_t client_class;
  * @property icon_sizes
  * @tparam table sizes
  * @propemits false false
+ * @readonly
  * @see awful.widget.clienticon
  * @see get_icon
  */
@@ -912,6 +921,7 @@ lua_class_t client_class;
  *
  * @property content
  * @tparam surface content
+ * @readonly
  * @see gears.surface
  */
 
@@ -1048,6 +1058,7 @@ lua_class_t client_class;
  * @property transient_for
  * @tparam client transient_for
  * @propemits false false
+ * @readonly
  * @see modal
  * @see type
  * @see is_transient_for
@@ -1064,6 +1075,7 @@ lua_class_t client_class;
  * @property group_window
  * @tparam integer group_window
  * @propemits false false
+ * @readonly
  * @see leader_window
  */
 
@@ -1075,6 +1087,7 @@ lua_class_t client_class;
  * @property leader_window
  * @tparam number leader_window
  * @propemits false false
+ * @readonly
  * @see transient_for
  * @see modal
  * @see group_window
@@ -1127,6 +1140,7 @@ lua_class_t client_class;
  * @tparam[opt] integer|nil hints.base_width
  * @tparam[opt] integer|nil hints.base_height
  * @propemits false false
+ * @readonly
  * @see size_hints_honor
  * @see geometry
  */
@@ -1162,6 +1176,7 @@ lua_class_t client_class;
  *  `full_application_modal` or `unknown`.
  * @tparam[opt] boolean hints.status.tearoff_window
  * @propemits false false
+ * @readonly
  */
 
 /**
@@ -1283,6 +1298,7 @@ lua_class_t client_class;
  * @property client_shape_bounding
  * @tparam surface client_shape_bounding
  * @propemits false false
+ * @readonly
  * @see shape_bounding
  * @see shape_clip
  * @see shape_input
@@ -1299,6 +1315,7 @@ lua_class_t client_class;
  * @property client_shape_clip
  * @tparam surface client_shape_clip
  * @propemits false false
+ * @readonly
  * @see shape_bounding
  * @see shape_clip
  * @see shape_input
@@ -1379,6 +1396,7 @@ lua_class_t client_class;
  * @property valid
  * @tparam boolean valid
  * @propemits false false
+ * @readonly
  * @see kill
  */
 
@@ -1392,6 +1410,7 @@ lua_class_t client_class;
  * @property first_tag
  * @tparam tag first_tag
  * @propemits false false
+ * @readonly
  * @see tags
  */
 

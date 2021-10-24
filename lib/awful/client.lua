@@ -854,6 +854,7 @@ end
 -- @property is_fixed
 -- @tparam[opt=false] boolean is_fixed The fixed size state
 -- @propemits false false
+-- @readonly
 -- @see size_hints
 -- @see size_hints_honor
 
@@ -879,6 +880,7 @@ end
 -- This property is read only.
 -- @property immobilized_horizontal
 -- @tparam[opt=false] boolean immobilized_horizontal The immobilized state
+-- @readonly
 -- @see maximized
 -- @see maximized_horizontal
 -- @see fullscreen
@@ -895,6 +897,7 @@ end
 -- This property is read only.
 -- @property immobilized_vertical
 -- @tparam[opt=false] boolean immobilized_vertical The immobilized state
+-- @readonly
 -- @see maximized
 -- @see maximized_vertical
 -- @see fullscreen
@@ -1757,6 +1760,7 @@ pcommon.setup_grant(client.object, "client")
 -- @tparam boolean active
 -- @request client border active granted When a client becomes active.
 -- @request client border inactive granted When a client stop being active.
+-- @readonly
 -- @see activate
 -- @see request::activate
 -- @see awful.permissions.add_activate_filter
