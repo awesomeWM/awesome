@@ -181,6 +181,7 @@
  * @tfield integer table.y The vertical position
  * @tfield integer table.width The width
  * @tfield integer table.height The height
+ * @readonly
  */
 
 /**
@@ -212,6 +213,7 @@
  * @property index
  * @param integer
  * @see screen
+ * @readonly
  */
 
 /**
@@ -236,6 +238,7 @@
  * @tfield integer table.y The vertical position
  * @tfield integer table.width The width
  * @tfield integer table.height The height
+ * @readonly
  */
 
 

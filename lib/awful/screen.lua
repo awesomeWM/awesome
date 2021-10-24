@@ -193,6 +193,7 @@ end
 -- @tparam number tiling_area.y
 -- @tparam number tiling_area.width
 -- @tparam number tiling_area.height
+-- @readonly
 -- @see padding
 -- @see get_bounding_geometry
 
@@ -210,6 +211,7 @@ end
 --
 -- @property content
 -- @tparam gears.surface content
+-- @readonly
 
 function screen.object.get_content(s)
     local geo = s.geometry
@@ -310,6 +312,7 @@ end
 -- @tfield integer table.name The output name.
 -- @tfield integer table.viewport_id The identifier of the viewport this output
 --  corresponds to.
+-- @readonly
 
 function screen.object.get_outputs(s)
     local ret = {}
@@ -555,12 +558,13 @@ end
 
 --- A list of all tags on the screen.
 --
--- This property is read only, use `tag.screen`, `awful.tag.add`,
+-- Use `tag.screen`, `awful.tag.add`,
 -- `awful.tag.new` or `t:delete()` to alter this list.
 --
 -- @property tags
 -- @param table
 -- @treturn table A table with all available tags.
+-- @readonly
 
 function screen.object.get_tags(s, unordered)
     local tags = {}
@@ -584,6 +588,7 @@ end
 -- @property selected_tags
 -- @param table
 -- @treturn table A table with all selected tags.
+-- @readonly
 -- @see tag.selected
 -- @see client.to_selected_tags
 
@@ -603,6 +608,7 @@ end
 -- @property selected_tag
 -- @param tag
 -- @treturn ?tag The first selected tag or nil.
+-- @readonly
 -- @see tag.selected
 -- @see selected_tags
 
@@ -753,10 +759,12 @@ end
 --- The lowest density DPI from all of the (physical) outputs.
 -- @property minimum_dpi
 -- @param number the DPI value.
+-- @readonly
 
 --- The highest density DPI from all of the (physical) outputs.
 -- @property maximum_dpi
 -- @param number the DPI value.
+-- @readonly
 
 --- The preferred DPI from all of the (physical) outputs.
 --
@@ -765,6 +773,7 @@ end
 --
 -- @property preferred_dpi
 -- @param number the DPI value.
+-- @readonly
 
 --- The maximum diagonal size in millimeters.
 --
