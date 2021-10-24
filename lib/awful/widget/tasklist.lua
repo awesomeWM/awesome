@@ -376,12 +376,8 @@ local function tasklist_label(c, args, tb)
     end
 
     if not disable_task_name then
-        if c.minimized then
-            name = name .. (gstring.xml_escape(c.icon_name) or gstring.xml_escape(c.name) or
-                            gstring.xml_escape("<untitled>"))
-        else
-            name = name .. (gstring.xml_escape(c.name) or gstring.xml_escape("<untitled>"))
-        end
+        name = name .. (gstring.xml_escape(c.name) or gstring.xml_escape(c.icon_name) or
+                        gstring.xml_escape("<untitled>"))
     end
 
     local focused = c.active
