@@ -314,10 +314,10 @@ function layoutlist:set_base_layout(layout)
         layout or wibox.layout.fixed.horizontal
     )
 
-    if self._private.layout.set_spacing then
-        self._private.layout:set_spacing(
-            self._private.style.spacing or beautiful.layoutlist_spacing or 0
-        )
+    local spacing = self._private.style.spacing or beautiful.tasklist_spacing
+
+    if self._private.layout.set_spacing and spacing then
+        self._private.layout:set_spacing(spacing)
     end
 
     assert(self._private.layout.is_widget)
@@ -415,11 +415,15 @@ local function new(_, args)
 
     reload_cache(ret)
 
-    -- Apply all args properties
-    gtable.crush(ret, args)
+    -- Apply all args properties. Make sure "set_layout" doesn't override
+    -- the widget `layout` method.
+    local l = args.layout
+    args.layout = nil
+    gtable.crush(ret, args, false)
+    args.layout = l
 
     if not ret._private.layout then
-        ret:set_base_layout()
+        ret:set_base_layout(args.layout)
     end
 
     assert(ret._private.layout)
