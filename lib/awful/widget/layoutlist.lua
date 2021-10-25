@@ -400,6 +400,8 @@ local function update_common()
 end
 
 local function new(_, args)
+    args = args or {}
+
     local ret = wibox.widget.base.make_widget(nil, nil, {
         enable_properties = true,
     })
