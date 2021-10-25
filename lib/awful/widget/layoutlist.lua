@@ -363,7 +363,7 @@ end
 --- Create a layout list.
 --
 -- @tparam table args
--- @tparam widget args.layout The widget layout (not to be confused with client
+-- @tparam widget args.base_layout The widget layout (not to be confused with client
 --  layout).
 -- @tparam table args.buttons A table with buttons binding to set.
 -- @tparam[opt=awful.widget.layoutlist.source.for_screen] function args.source A
