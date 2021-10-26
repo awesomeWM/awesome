@@ -338,6 +338,10 @@ end
 -- @propbeautiful
 
 function textbox:set_font(font)
+    if font == self._private.font then return end
+
+    self._private.font = font
+
     self._private.layout:set_font_description(beautiful.get_font(font))
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
