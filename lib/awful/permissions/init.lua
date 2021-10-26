@@ -631,10 +631,16 @@ function permissions.update_border(c, context)
     end
 
     if not c._private._user_border_width then
-        c._border_width = beautiful["border_width"..suffix]
+        local bw = beautiful["border_width"..suffix]
             or beautiful["border_width"..fallback1]
             or beautiful["border_width"..fallback2]
-            or beautiful.border_width
+
+        -- The default `awful.permissions.geometry` handler removes the border.
+        if (not bw) and (c.fullscreen or c.maximized) then
+            bw = 0
+        end
+
+        c._border_width = bw or beautiful.border_width
     end
 
     if not c._private._user_border_color then
