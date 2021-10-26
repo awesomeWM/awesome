@@ -3,6 +3,7 @@ local titlebar = require("awful.titlebar")
 local rules = require("ruled.client")
 local spawn = require("awful.spawn")
 local gdebug = require("gears.debug")
+local textbox = require("wibox.widget.textbox")
 
 local lua_executable = os.getenv("LUA")
 if lua_executable == nil or lua_executable == "" then
@@ -17,10 +18,8 @@ window = Gtk.Window {default_width=100, default_height=100, title='title'}
 %s
 window:set_wmclass(class, class)
 local app = Gtk.Application {}
-function app:on_activate()
-    window.application = self
-    window:show_all()
-end
+window:show_all()
+Gtk:main{...}
 app:run {''}
 ]]
 local tiny_client = { lua_executable, "-e", string.format(tiny_client_code_template, "") }
@@ -30,11 +29,20 @@ window.decorated = false
 ]])
 }
 
+local found_font = nil
+
 -- Use the test client props
 local dep = gdebug.deprecate
 gdebug.deprecate = function() end
 rules.rules = {}
 gdebug.deprecate = dep
+
+local function kill_client(c)
+    -- Make sure the process finishes. Just `c:kill()` only
+    -- closes the window. Adding some handlers to the GTK "app"
+    -- created some unwanted side effects in the CI.
+    awesome.kill(c.pid, 9)
+end
 
 -- Too bad there's no way to disconnect the rc.lua request::titlebars function
 
@@ -69,7 +77,7 @@ local steps = {
         titlebar.toggle(c, "top")
         assert(c.height == 100)
 
-        c:kill()
+        kill_client(c)
 
         return true
     end,
@@ -100,7 +108,7 @@ local steps = {
 
         assert(c.width == 100 and c.height == h)
 
-        c:kill()
+        kill_client(c)
 
         return true
     end,
@@ -119,7 +127,7 @@ local steps = {
         assert(c.width == 100 and c.height > 100)
         assert(c._request_titlebars_called)
 
-        c:kill()
+        kill_client(c)
 
         return true
     end,
@@ -140,7 +148,7 @@ local steps = {
         assert(c.width == 100 and c.height > 100)
         assert(c._request_titlebars_called)
 
-        c:kill()
+        kill_client(c)
 
         return true
     end,
@@ -161,7 +169,26 @@ local steps = {
         assert(not c._request_titlebars_called)
         assert(c.width == 100 and c.height == 100)
 
-        c:kill()
+        function textbox:set_font(value)
+            found_font = value
+        end
+
+        local args = {size = 40, font = "sans 10", position = "bottom"}
+        titlebar(c, args).widget = titlebar.widget.titlewidget(c)
+
+        return true
+    end,
+    function()
+        local c = client.get()[1]
+
+        assert(found_font == "sans 10")
+
+        kill_client(c)
+
+        return true
+    end,
+    function()
+        if #client.get() > 0 then return end
 
         return true
     end,
