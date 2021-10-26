@@ -466,7 +466,7 @@ add_custom_tag {
     auto_subtags = false
 }
 
--- Mark the item ad hidden.
+-- Mark the item as hidden.
 -- This tag should be used to hide items from the documentation.
 -- @hidden
 add_custom_tag {
