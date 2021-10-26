@@ -643,6 +643,9 @@ local function generate_summary(item)
             has_show_more = v.showcount or has_show_more
         end
     end
+    if item.tags.readonly then
+        ret[#ret+1] = {title = "read only"}
+    end
 
     item.extra_summary = #ret > 0 and ret or nil
     item.has_show_more = has_show_more
