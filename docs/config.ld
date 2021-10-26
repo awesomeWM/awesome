@@ -475,6 +475,14 @@ add_custom_tag {
     auto_subtags = false
 }
 
+-- Mark the item as readonly.
+-- This tag should be used to mark readonly properties.
+-- @readonly
+add_custom_tag {
+    name = "readonly",
+    hidden = true,
+    auto_subtags = false
+}
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
