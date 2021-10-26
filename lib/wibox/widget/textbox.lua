@@ -332,6 +332,37 @@ end
 
 --- Set a textbox font.
 --
+-- There is multiple valid font string representation. The most precise is
+-- [XFT](https://wiki.archlinux.org/title/X_Logical_Font_Description). It
+-- is also possible to use the family name, followed by the face and size
+-- such as `Monospace Bold 10`. This script lists the fonts present
+-- on your system:
+--
+--    #!/usr/bin/env lua
+--
+--    local lgi = require("lgi")
+--    local pangocairo = lgi.PangoCairo
+--
+--    local font_map = pangocairo.font_map_get_default()
+--
+--    for k, v in pairs(font_map:list_families()) do
+--        print(v:get_name(), "monospace?: "..tostring(v:is_monospace()))
+--        for k2, v2 in ipairs(v:list_faces()) do
+--            print("    ".. v2:get_face_name())
+--        end
+--    end
+--
+-- Save this script somewhere on your system, `chmod +x` it and run it. It
+-- will list something like:
+--
+--    Sans    monospace?: false
+--        Regular
+--        Bold
+--        Italic
+--        Bold Italic
+--
+-- In this case, the font could be `Sans 10` or `Sans Bold Italic 10`.
+--
 -- @property font
 -- @tparam string font The font description as string.
 -- @propemits true false
