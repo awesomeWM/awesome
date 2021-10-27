@@ -245,7 +245,7 @@ local layoutlist = {}
 
 --- The space between the layouts.
 -- @beautiful beautiful.layoutlist_spacing
--- @tparam[opt=0] number spacing The spacing between tasks.
+-- @tparam[opt=0] number spacing The spacing between layouts.
 
 --- The default layoutlist elements shape.
 -- @beautiful beautiful.layoutlist_shape
@@ -316,7 +316,7 @@ function layoutlist:set_base_layout(layout)
 
     if self._private.layout.set_spacing then
         self._private.layout:set_spacing(
-            self._private.style.spacing or beautiful.tasklist_spacing or 0
+            self._private.style.spacing or beautiful.layoutlist_spacing or 0
         )
     end
 
