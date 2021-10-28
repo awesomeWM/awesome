@@ -5,6 +5,8 @@ local clients = {}
 
 local client, meta = awesome._shim_fake_class()
 
+rawset(client, "_autotags", true)
+
 -- Keep an history of the geometry for validation and images
 local function push_geometry(c)
     table.insert(c._old_geo, c:geometry())
@@ -227,15 +229,18 @@ function client.gen_fake(args)
     function ret:tags(new) --FIXME
         if new then
             ret._tags = new
+            ret:emit_signal("property::tags")
         end
 
         if ret._tags then
             return ret._tags
         end
 
-        for _, t in ipairs(root._tags) do
-            if t.screen == ret.screen then
-                return {t}
+        if client._autotags then
+            for _, t in ipairs(root._tags) do
+                if t.screen == ret.screen then
+                    return {t}
+                end
             end
         end
 
@@ -330,7 +335,6 @@ function client.gen_fake(args)
             return meta.__index(self, key)
         end,
         __newindex = function(self, key, value)
-
             if properties["set_"..key] then
                 return properties["set_"..key](self, value)
             end

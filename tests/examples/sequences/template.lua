@@ -342,10 +342,11 @@ local function gen_fake_clients(tag, args)
         if not tag.client_geo then return end
 
         for _, geom in ipairs(tag.client_geo) do
-            local x      = (geom.x*w)/sgeo.width
-            local y      = (geom.y*h)/sgeo.height
+            local x      = ( (geom.x - sgeo.x) * w)/sgeo.width
+            local y      = ( (geom.y - sgeo.y) * h)/sgeo.height
             local width  = (geom.width*w)/sgeo.width
             local height = (geom.height*h)/sgeo.height
+
             cr:set_source(color(geom.color or beautiful.bg_normal))
             cr:rectangle(x,y,width,height)
             cr:fill_preserve()
@@ -552,7 +553,7 @@ local function gen_screens(l, screens, args)
 
     local ret = wibox.layout.manual()
 
-    local sreen_copies = {}
+    local screen_copies = {}
 
     -- Keep a copy because it can change.
     local rw, rh = root.size()
@@ -571,7 +572,7 @@ local function gen_screens(l, screens, args)
             scr_cpy[prop] = s[prop]
         end
 
-        table.insert(sreen_copies, scr_cpy)
+        table.insert(screen_copies, scr_cpy)
     end
 
     function ret:fit()
@@ -581,7 +582,7 @@ local function gen_screens(l, screens, args)
     end
 
     -- Add the rulers.
-    for _, s in ipairs(sreen_copies) do
+    for _, s in ipairs(screen_copies) do
         ret:add_at(
             gen_ruler("vertical"  , 1/screen_scale_factor, margins),
             {x=margins.left+s.x/screen_scale_factor, y =margins.top/2}
@@ -601,21 +602,28 @@ local function gen_screens(l, screens, args)
     end
 
     -- Print an outline for the screens
-    for k, s in ipairs(sreen_copies) do
+    for k, s in ipairs(screen_copies) do
         s.widget = wibox.widget.base.make_widget()
 
         local wb = gen_fake_taglist_wibar(screens[k].tags)
         wb.forced_width = s.width/screen_scale_factor
 
-        -- The clients have an absolute geometry, transform to relative.
-        if screens[k].tags[1] then
-            for _, geo in ipairs(screens[k].tags[1].client_geo) do
-                geo.x = geo.x - s.x
-                geo.y = geo.y - s.y
+        local sel = nil
+
+        -- AwesomeWM always use the layout from the first selected tag.
+        for _, t in ipairs(screens[k].tags) do
+            if t.selected then
+                sel = t
+                break
             end
         end
 
-        local clients_w = gen_fake_clients(screens[k].tags[1], args)
+        -- Fallback because some older examples don't select tags.
+        if not sel then
+            sel = screens[k].tags[1]
+        end
+
+        local clients_w = gen_fake_clients(sel, args)
 
         local content = wibox.widget {
             wb,
@@ -642,9 +650,9 @@ local function gen_screens(l, screens, args)
         end
 
         function s.widget:after_draw_children(_, cr)
-            if args.display_mouse and mouse.screen.index == s.index then
-                local rel_x = mouse.coords().x - s.x
-                local rel_y = mouse.coords().y - s.y
+            if args.display_mouse and screens[k].cursor_screen == s.index then
+                local rel_x = screens[k].cursor_position.x - s.x
+                local rel_y = screens[k].cursor_position.y - s.y
                 draw_mouse(cr, rel_x/screen_scale_factor+5, rel_y/screen_scale_factor+5)
             end
         end
@@ -698,6 +706,12 @@ local function gen_timeline(args)
     l.fit = fixed_fit2
 
     l:add(gen_label("Begin"))
+
+    -- Run the some steps of the Initialization.
+    client.emit_signal("scanning")
+
+    -- Finish the initialization.
+    awesome.startup = false --luacheck: ignore
 
     for _, event in ipairs(history) do
         local ret = event.callback()
@@ -791,7 +805,11 @@ function module.display_tags()
                 })
                 assert(#st[#st].client_geo == #get_all_tag_clients(t))
             end
-            table.insert(ret, {tags=st})
+            table.insert(ret, {
+                tags            = st,
+                cursor_screen   = mouse.screen.index,
+                cursor_position = gtable.clone(mouse.coords())
+            })
         end
         return ret
     end

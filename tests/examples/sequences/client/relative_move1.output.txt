@@ -1,2 +1,3 @@
-Client geometry:	110	110	120	100
-Client geometry:	220	220	220	200
+Client geometry:	4	10	60	50
+Client geometry:	104	110	60	50
+Client geometry:	104	110	160	150

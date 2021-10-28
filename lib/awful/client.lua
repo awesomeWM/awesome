@@ -523,16 +523,16 @@ end
 --
 -- @method relative_move
 -- @see geometry
--- @tparam[opt=c.x] number x The relative x coordinate.
--- @tparam[opt=c.y] number y The relative y coordinate.
--- @tparam[opt=c.width] number w The relative width.
--- @tparam[opt=c.height] number h The relative height.
+-- @tparam[opt=0] number x The relative x coordinate.
+-- @tparam[opt=0] number y The relative y coordinate.
+-- @tparam[opt=0] number w The relative width.
+-- @tparam[opt=0] number h The relative height.
 function client.object.relative_move(self, x, y, w, h)
     local geometry = self:geometry()
-    geometry['x'] = geometry['x'] + (x or geometry.x)
-    geometry['y'] = geometry['y'] + (y or geometry.y)
-    geometry['width'] = geometry['width'] + (w or geometry.width)
-    geometry['height'] = geometry['height'] + (h or geometry.height)
+    geometry['x'] = geometry['x'] + (x or 0)
+    geometry['y'] = geometry['y'] + (y or 0)
+    geometry['width'] = geometry['width'] + (w or 0)
+    geometry['height'] = geometry['height'] + (h or 0)
     self:geometry(geometry)
 end
 
