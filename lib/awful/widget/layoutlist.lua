@@ -245,7 +245,7 @@ local layoutlist = {}
 
 --- The space between the layouts.
 -- @beautiful beautiful.layoutlist_spacing
--- @tparam[opt=0] number spacing The spacing between tasks.
+-- @tparam[opt=0] number spacing The spacing between layouts.
 
 --- The default layoutlist elements shape.
 -- @beautiful beautiful.layoutlist_shape
@@ -314,10 +314,10 @@ function layoutlist:set_base_layout(layout)
         layout or wibox.layout.fixed.horizontal
     )
 
-    if self._private.layout.set_spacing then
-        self._private.layout:set_spacing(
-            self._private.style.spacing or beautiful.tasklist_spacing or 0
-        )
+    local spacing = self._private.style.spacing or beautiful.tasklist_spacing
+
+    if self._private.layout.set_spacing and spacing then
+        self._private.layout:set_spacing(spacing)
     end
 
     assert(self._private.layout.is_widget)
@@ -363,7 +363,7 @@ end
 --- Create a layout list.
 --
 -- @tparam table args
--- @tparam widget args.layout The widget layout (not to be confused with client
+-- @tparam widget args.base_layout The widget layout (not to be confused with client
 --  layout).
 -- @tparam table args.buttons A table with buttons binding to set.
 -- @tparam[opt=awful.widget.layoutlist.source.for_screen] function args.source A
@@ -400,6 +400,8 @@ local function update_common()
 end
 
 local function new(_, args)
+    args = args or {}
+
     local ret = wibox.widget.base.make_widget(nil, nil, {
         enable_properties = true,
     })
@@ -413,11 +415,15 @@ local function new(_, args)
 
     reload_cache(ret)
 
-    -- Apply all args properties
-    gtable.crush(ret, args)
+    -- Apply all args properties. Make sure "set_layout" doesn't override
+    -- the widget `layout` method.
+    local l = args.layout
+    args.layout = nil
+    gtable.crush(ret, args, false)
+    args.layout = l
 
     if not ret._private.layout then
-        ret:set_base_layout()
+        ret:set_base_layout(args.layout)
     end
 
     assert(ret._private.layout)

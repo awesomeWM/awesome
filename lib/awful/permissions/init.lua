@@ -608,32 +608,39 @@ end, "mouse_enter")
 function permissions.update_border(c, context)
     if not pcommon.check(c, "client", "border", context) then return end
 
-    local suffix, fallback = "", ""
+    local suffix, fallback1, fallback2 = "", ""
 
     -- Add the sub-namespace.
     if c.fullscreen then
-        suffix, fallback = "_fullscreen", "_fullscreen"
+        suffix, fallback1 = "_fullscreen", "_fullscreen"
     elseif c.maximized then
-        suffix, fallback = "_maximized", "_maximized"
+        suffix, fallback1 = "_maximized", "_maximized"
     elseif c.floating then
-        suffix, fallback = "_floating", "_floating"
+        suffix, fallback1 = "_floating", "_floating"
     end
 
     -- Add the state suffix.
     if c.urgent then
-        suffix = suffix .. "_urgent"
+        suffix, fallback2 = suffix .. "_urgent", "_urgent"
     elseif c.active then
-        suffix = suffix .. "_active"
+        suffix, fallback2 = suffix .. "_active", "_active"
     elseif context == "added" then
-        suffix = suffix .. "_new"
+        suffix, fallback2 = suffix .. "_new", "_new"
     else
-        suffix = suffix .. "_normal"
+        suffix, fallback2 = suffix .. "_normal", "_normal"
     end
 
     if not c._private._user_border_width then
-        c._border_width = beautiful["border_width"..suffix]
-            or beautiful["border_width"..fallback]
-            or beautiful.border_width
+        local bw = beautiful["border_width"..suffix]
+            or beautiful["border_width"..fallback1]
+            or beautiful["border_width"..fallback2]
+
+        -- The default `awful.permissions.geometry` handler removes the border.
+        if (not bw) and (c.fullscreen or c.maximized) then
+            bw = 0
+        end
+
+        c._border_width = bw or beautiful.border_width
     end
 
     if not c._private._user_border_color then
@@ -657,8 +664,12 @@ function permissions.update_border(c, context)
 
         local tv = beautiful["border_color"..suffix]
 
-        if fallback ~= "" and not tv then
-            tv = beautiful["border_color"..fallback]
+        if (not tv) and fallback1 ~= "" then
+            tv = beautiful["border_color"..fallback1]
+        end
+
+        if (not tv) and (fallback2 ~= "") then
+            tv = beautiful["border_color"..fallback2]
         end
 
         -- The old theme variable did not have "color" in its name.
@@ -688,8 +699,12 @@ function permissions.update_border(c, context)
     if not c._private._user_opacity then
         local tv = beautiful["opacity"..suffix]
 
-        if fallback ~= "" and not tv then
-            tv = beautiful["opacity"..fallback]
+        if fallback1 ~= "" and not tv then
+            tv = beautiful["opacity"..fallback1]
+        end
+
+        if fallback2 ~= "" and not tv then
+            tv = beautiful["opacity"..fallback2]
         end
 
         if tv then

@@ -583,6 +583,7 @@ local function new(c, args)
         bars[position] = {
             args = args,
             drawable = ret,
+            font = args.font or beautiful.titlebar_font,
             update_colors = update_colors
         }
 
@@ -683,6 +684,20 @@ local function update_on_signal(c, signal, widget)
     table.insert(widgets, widget)
 end
 
+--- Honor the font.
+local function draw_title(self, ctx, cr, width, height)
+    if ctx.position and ctx.client then
+        local bars = all_titlebars[ctx.client]
+        local data = bars and bars[ctx.position]
+
+        if data and data.font then
+            self:set_font(data.font)
+        end
+    end
+
+    textbox.draw(self, ctx, cr, width, height)
+end
+
 --- Create a new title widget.
 --
 -- A title widget displays the name of a client.
@@ -694,6 +709,9 @@ end
 -- @constructorfct awful.titlebar.widget.titlewidget
 function titlebar.widget.titlewidget(c)
     local ret = textbox()
+
+    rawset(ret, "draw", draw_title)
+
     local function update()
         ret:set_text(c.name or titlebar.fallback_name)
     end

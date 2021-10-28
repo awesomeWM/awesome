@@ -984,6 +984,7 @@ capi.client.connect_signal("property::fullscreen", update_implicitly_floating)
 capi.client.connect_signal("property::maximized_vertical", update_implicitly_floating)
 capi.client.connect_signal("property::maximized_horizontal", update_implicitly_floating)
 capi.client.connect_signal("property::maximized", update_implicitly_floating)
+capi.client.connect_signal("property::fullscreen", update_implicitly_floating)
 capi.client.connect_signal("property::size_hints", update_implicitly_floating)
 capi.client.connect_signal("request::manage", update_implicitly_floating)
 

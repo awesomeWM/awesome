@@ -3,6 +3,8 @@
 local runner = require("_runner")
 local spawn = require("awful.spawn")
 
+local pids = {}
+
 local lua_executable = os.getenv("LUA")
 if lua_executable == nil or lua_executable == "" then
     lua_executable = "lua"
@@ -67,8 +69,11 @@ runner.run_steps{
     -- Clear the clipboard to get to a known state
     function()
         check_state(0, 0)
-        spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
+        local pid = spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
             { exit = function() continue = true end })
+
+        table.insert(pids, pid)
+
         return true
     end,
 
@@ -86,12 +91,14 @@ runner.run_steps{
 
         -- Set the clipboard
         continue = false
-        spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard },
+        local pid = spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard },
             { stdout = function(line)
                 assert(line == "initialisation done",
                     "Unexpected line: " .. line)
                 continue = true
             end })
+
+        table.insert(pids, pid)
 
         return true
     end,
@@ -105,8 +112,10 @@ runner.run_steps{
 
         -- Now clear the clipboard again
         continue = false
-        spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
+        local pid = spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
             { exit = function() continue = true end })
+
+        table.insert(pids, pid)
 
         return true
     end,
@@ -118,6 +127,13 @@ runner.run_steps{
         end
 
         check_state(2, 1)
+
+        -- There are now "windows", so they have no "clients", however,
+        -- they talk to X11 and wont exit by themselves and must be killed.
+        for _, pid in ipairs(pids) do
+            awesome.kill(pid, 9)
+        end
+
         return true
     end
 }

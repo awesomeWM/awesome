@@ -8,6 +8,8 @@ local lgi = require("lgi")
 local Gio = lgi.Gio
 local GdkPixbuf = lgi.GdkPixbuf
 
+local pids = {}
+
 local lua_executable = os.getenv("LUA")
 if lua_executable == nil or lua_executable == "" then
     lua_executable = "lua"
@@ -53,8 +55,9 @@ runner.run_steps{
 
     -- Clear the clipboard to get to a known state
     function()
-        spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
+        local pid = spawn.with_line_callback({ lua_executable, "-e", acquire_and_clear_clipboard },
             { exit = function() continue = true end })
+        table.insert(pids, pid)
         return true
     end,
 
@@ -84,12 +87,14 @@ runner.run_steps{
 
         -- Now set the clipboard to some text
         continue = false
-        spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard_text },
+        local pid = spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard_text },
             { stdout = function(line)
                 assert(line == "initialisation done",
                     "Unexpected line: " .. line)
                 continue = true
             end })
+
+        table.insert(pids, pid)
 
         return true
     end,
@@ -148,12 +153,14 @@ runner.run_steps{
 
         -- Now set the clipboard to an image
         continue = false
-        spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard_pixbuf },
+        local pid = spawn.with_line_callback({ lua_executable, "-e", acquire_clipboard_pixbuf },
             { stdout = function(line)
                 assert(line == "initialisation done",
                     "Unexpected line: " .. line)
                 continue = true
             end })
+
+        table.insert(pids, pid)
 
         return true
     end,
@@ -192,6 +199,12 @@ runner.run_steps{
         -- Wait for the above check to be done
         if not continue then
             return
+        end
+
+        -- There are now "windows", so they have no "clients", however,
+        -- they talk to X11 and wont exit by themselves and must be killed.
+        for _, pid in ipairs(pids) do
+            awesome.kill(pid, 9)
         end
 
         return true

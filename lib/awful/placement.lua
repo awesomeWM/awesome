@@ -383,7 +383,7 @@ end
 area_common = function(d, new_geo, ignore_border_width, args)
     -- The C side expect no arguments, nil isn't valid
     if new_geo and args.zap_border_width then
-        d.border_width = 0
+        d._border_width = 0
     end
     local geometry = new_geo and d:geometry(new_geo) or d:geometry()
     local border = ignore_border_width and 0 or d.border_width or 0
@@ -1633,7 +1633,7 @@ function placement.restore(d, args)
 
     end
 
-    d.border_width = memento.border_width
+    d._border_width = memento.border_width
 
     -- Don't use the memento as it would be "destructive", since `x`, `y`
     -- and `screen` have to be modified.
