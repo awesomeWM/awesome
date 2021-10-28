@@ -7,10 +7,18 @@ local steps = {}
 
 local parent, small
 
-local twibar, bwibar, lwibar, rwibar = screen.primary.mywibox
+local twibar, bwibar, lwibar, rwibar
+
+-- Remove the original wibar.
+screen.primary.mywibox:remove()
+screen.primary.mywibox = nil
+
+for _=1, 3 do
+    collectgarbage("collect")
+end
 
 -- Track garbage collection.
-local wibars = setmetatable({screen.primary.mywibox}, {__mode="v"})
+local wibars = setmetatable({}, {__mode="v"})
 
 -- Pretty print issues
 local function print_expected()
@@ -55,8 +63,17 @@ local function validate_wibar_geometry()
     end
 end
 
+-- Replace the original wibar.
+table.insert(steps, function()
+    twibar = wibar {position = "top", bg = "#ff0000"}
+
+    return true
+end)
+
 -- Test the struts without using wibars
 table.insert(steps, function()
+    if screen[1].workarea.y == 0 then return end
+
     local sgeo = screen.primary.geometry
 
     -- Manually place at the bottom right
@@ -392,7 +409,7 @@ table.insert(steps, function()
     bwibar.visible = false
     lwibar.visible = false
     rwibar.visible = false
-    screen.primary.mywibox.visible = false
+    twibar.visible = false
 
     -- Spawn a client to test things with
     assert(#client.get() == 0)
@@ -481,7 +498,6 @@ table.insert(steps, function()
 
     -- Make sure the placement doesn't hold a reference.
     bwibar, lwibar, rwibar, twibar = nil, nil, nil, nil
-    screen.primary.mywibox = nil
 
     return true
 end)
