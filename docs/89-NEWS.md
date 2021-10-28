@@ -74,6 +74,8 @@ This document was last updated at commit v4.3-197-g9085ed631.
  * Setting `awful.rules.rules` now append the rules to the existing set.
    Clearing the rules was never officially supported. If you *really* want the
    old behavior, use `awful.rules.rules = {}; awful.rules.rules = my_new_rules`.
+ * `client:relative_move()` now default `nil` values to zero. The previous
+   behavior made no sense.
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes
