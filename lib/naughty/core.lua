@@ -520,12 +520,14 @@ function naughty.set_suspended(value)
 
     if value then
         for _, n in pairs(naughty._active) do
-            if n.timer and n.timer.started then
-                n.timer:stop()
-            end
+            if not n.ignore_suspend then
+                if n.timer and n.timer.started then
+                    n.timer:stop()
+                end
 
-            n:emit_signal("property::suspended", true)
-            table.insert(naughty.notifications.suspended, n)
+                n:emit_signal("property::suspended", true)
+                table.insert(naughty.notifications.suspended, n)
+            end
         end
     else
         resume()

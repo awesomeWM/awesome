@@ -523,6 +523,11 @@ function notification:set_id(new_id)
     self:emit_signal("property::id", new_id)
 end
 
+-- Return true if `self` is suspended.
+local function get_suspended(self)
+    return naughty.suspended and (not self._private.ignore_suspend)
+end
+
 function notification:set_timeout(timeout)
     timeout = timeout or 0
 
@@ -554,7 +559,7 @@ function notification:set_timeout(timeout)
         end)
 
         --FIXME there's still a dependency loop to fix before it works
-        if not self.suspended then
+        if not get_suspended(self) then
             timer_die:start()
         end
 
@@ -636,9 +641,9 @@ for _, prop in ipairs(properties) do
 
         -- When a notification is updated over dbus or by setting a property,
         -- it is usually convenient to reset the timeout.
-        local reset = ((not self.suspended)
+        local reset = ((not self.suspended) or self._private.ignore_suspend)
             and self.auto_reset_timeout ~= false
-            and naughty.auto_reset_timeout)
+            and naughty.auto_reset_timeout
 
         if reset then
             self:reset_timeout()
@@ -774,9 +779,9 @@ function notification.set_actions(self, new_actions)
 
     -- When a notification is updated over dbus or by setting a property,
     -- it is usually convenient to reset the timeout.
-    local reset = ((not self.suspended)
+    local reset = (not get_suspended(self))
         and self.auto_reset_timeout ~= false
-        and naughty.auto_reset_timeout)
+        and naughty.auto_reset_timeout
 
     if reset then
         self:reset_timeout()
@@ -1033,7 +1038,7 @@ local function create(args)
     end
 
     -- Let all listeners handle the actual visual aspects
-    if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) and (not naughty.suspended) then
+    if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) and (not get_suspended(n)) then
         naughty.emit_signal("request::display" , n, "new", args)
         naughty.emit_signal("request::fallback", n, "new", args)
     end
