@@ -466,7 +466,7 @@ add_custom_tag {
     auto_subtags = false
 }
 
--- Mark the item ad hidden.
+-- Mark the item as hidden.
 -- This tag should be used to hide items from the documentation.
 -- @hidden
 add_custom_tag {
@@ -475,6 +475,14 @@ add_custom_tag {
     auto_subtags = false
 }
 
+-- Mark the item as readonly.
+-- This tag should be used to mark readonly properties.
+-- @readonly
+add_custom_tag {
+    name = "readonly",
+    hidden = true,
+    auto_subtags = false
+}
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
 
@@ -634,6 +642,9 @@ local function generate_summary(item)
             ret[#ret+1] = v
             has_show_more = v.showcount or has_show_more
         end
+    end
+    if item.tags.readonly then
+        ret[#ret+1] = {title = "read only"}
     end
 
     item.extra_summary = #ret > 0 and ret or nil

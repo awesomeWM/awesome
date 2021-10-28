@@ -342,6 +342,16 @@ span.inheritance {
     text-align: right;
 }
 
+span.chips--readonly {
+  border: 1px solid #9db9f3;
+  border-radius: 25px;
+  padding: 1px 3px;
+  font-size: 70%;
+  color: #9db9f3;
+  background-color: #FFF;
+  margin-left: 10px;
+}
+
 table.function_list .function_args /*.function_modname*/ {
     color: #94b1ff;
     text-decoration: underline;

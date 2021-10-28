@@ -171,8 +171,6 @@
  *
  *  * *property::geometry*
  *
- * **Immutable:** true
- *
  * @DOC_screen_geometry_EXAMPLE@
  *
  * @property geometry
@@ -181,6 +179,7 @@
  * @tfield integer table.y The vertical position
  * @tfield integer table.width The width
  * @tfield integer table.height The height
+ * @readonly
  */
 
 /**
@@ -208,10 +207,10 @@
  *
  *     screen[1].answer = 42
  *
- * **Immutable:** true
  * @property index
  * @param integer
  * @see screen
+ * @readonly
  */
 
 /**
@@ -236,6 +235,7 @@
  * @tfield integer table.y The vertical position
  * @tfield integer table.width The width
  * @tfield integer table.height The height
+ * @readonly
  */
 
 

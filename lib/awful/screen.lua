@@ -181,7 +181,7 @@ end
 
 --- The area where clients can be tiled.
 --
--- This property holds the (read only) area where clients can be tiled. Use
+-- This property holds the area where clients can be tiled. Use
 -- the `padding` property, `wibox.struts` and `client.struts` to modify this
 -- area.
 --
@@ -193,6 +193,7 @@ end
 -- @tparam number tiling_area.y
 -- @tparam number tiling_area.width
 -- @tparam number tiling_area.height
+-- @readonly
 -- @see padding
 -- @see get_bounding_geometry
 
@@ -205,11 +206,12 @@ end
 
 --- Take a screenshot of the physical screen.
 --
--- Reading this (read only) property returns a screenshot of the physical
+-- Reading this property returns a screenshot of the physical
 -- (Xinerama) screen as a cairo surface.
 --
 -- @property content
 -- @tparam gears.surface content
+-- @readonly
 
 function screen.object.get_content(s)
     local geo = s.geometry
@@ -301,7 +303,6 @@ end
 --
 --  * *property::outputs*
 --
--- **Immutable:** true
 -- @property outputs
 -- @param table
 -- @tfield table table.name A table with the screen name as key (like `eDP1` on a laptop)
@@ -310,6 +311,7 @@ end
 -- @tfield integer table.name The output name.
 -- @tfield integer table.viewport_id The identifier of the viewport this output
 --  corresponds to.
+-- @readonly
 
 function screen.object.get_outputs(s)
     local ret = {}
@@ -555,12 +557,13 @@ end
 
 --- A list of all tags on the screen.
 --
--- This property is read only, use `tag.screen`, `awful.tag.add`,
+-- Use `tag.screen`, `awful.tag.add`,
 -- `awful.tag.new` or `t:delete()` to alter this list.
 --
 -- @property tags
 -- @param table
 -- @treturn table A table with all available tags.
+-- @readonly
 
 function screen.object.get_tags(s, unordered)
     local tags = {}
@@ -584,6 +587,7 @@ end
 -- @property selected_tags
 -- @param table
 -- @treturn table A table with all selected tags.
+-- @readonly
 -- @see tag.selected
 -- @see client.to_selected_tags
 
@@ -603,6 +607,7 @@ end
 -- @property selected_tag
 -- @param tag
 -- @treturn ?tag The first selected tag or nil.
+-- @readonly
 -- @see tag.selected
 -- @see selected_tags
 
@@ -753,10 +758,12 @@ end
 --- The lowest density DPI from all of the (physical) outputs.
 -- @property minimum_dpi
 -- @param number the DPI value.
+-- @readonly
 
 --- The highest density DPI from all of the (physical) outputs.
 -- @property maximum_dpi
 -- @param number the DPI value.
+-- @readonly
 
 --- The preferred DPI from all of the (physical) outputs.
 --
@@ -765,6 +772,7 @@ end
 --
 -- @property preferred_dpi
 -- @param number the DPI value.
+-- @readonly
 
 --- The maximum diagonal size in millimeters.
 --

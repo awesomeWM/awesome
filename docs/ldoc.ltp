@@ -292,7 +292,12 @@
 #     end
       </td>
 #   end
-      <td colspan="$(inherited and 1 or 2)" class="summary">$(M(item.summary,item))</td>
+      <td colspan="$(inherited and 1 or 2)" class="summary">
+        $(M(item.summary,item))
+#   if item.tags.readonly then
+        <span class="chips--readonly">read only</span>
+#   end
+      </td>
 #   if inherited then
       <td class="baseclass" nowrap>
         Inherited from $(item.baseclass)
