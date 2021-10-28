@@ -6,7 +6,6 @@ pull_request_rules:
       - status-success=Build & Test
       - status-success=Update API docs
       - status-success=codecov/patch
-      - status-success=coverage/coveralls
     actions:
       merge:
         method: merge

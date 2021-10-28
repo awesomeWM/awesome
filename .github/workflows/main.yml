@@ -34,10 +34,9 @@ jobs:
             coverage: "codecov"
             manual_screens: true
 
-          - test_name: "coveralls-lua5.2"
+          - test_name: "lua5.2"
             lua_version: "5.2"
             lua_name: "lua5.2"
-            coverage: "coveralls"
             manual_screens: true
 
           - test_name: "lua5.1"
@@ -202,10 +201,6 @@ jobs:
         if: matrix.coverage
         run: sudo -H luarocks install cluacov
 
-      - name: Install coveralls rock
-        if: matrix.coverage == 'coveralls'
-        run: sudo -H luarocks install luacov-coveralls
-
       - name: Install codecov.io uploader
         if: matrix.coverage == 'codecov'
         run: wget -O /tmp/codecov-bash https://codecov.io/bash
@@ -312,20 +307,6 @@ jobs:
 
           # Upload to Codecov.
           bash /tmp/codecov-bash -X gcov -X coveragepy -F gcov
-
-      - name: Merge coverage
-        if: matrix.coverage == 'coveralls'
-        # Coveralls doesn't support GitHub Actions with `service_name` + `service_job_id` (yet?),
-        # but `luacov-coveralls` behaves as if they did by default.
-        # We need to explicitly remove the `service_name`, so that Coveralls uses the
-        # `repo_token` instead.
-        # See "Referencing a repository": https://docs.coveralls.io/api-introduction
-        run: |
-          luacov-coveralls \
-            --verbose \
-            --merge \
-            --repo-token ${{ secrets.COVERALLS_REPO_TOKEN || github.token }} \
-            --service-name ""
 
       # `check-qa` is the only test that doesn't get a coverage report, so it has to run after all of that.
       - name: Run qa tests
