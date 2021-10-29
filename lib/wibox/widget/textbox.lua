@@ -393,12 +393,12 @@ local function new(text, ignore_markup)
     ret._private.dpi = -1
     ret._private.ctx = PangoCairo.font_map_get_default():create_context()
     ret._private.layout = Pango.Layout.new(ret._private.ctx)
+    ret._private.layout:set_font_description(beautiful.get_font(beautiful.font))
 
     ret:set_ellipsize("end")
     ret:set_wrap("word_char")
     ret:set_valign("center")
     ret:set_align("left")
-    ret:set_font(beautiful and beautiful.font)
 
     if text then
         if ignore_markup then
