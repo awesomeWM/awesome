@@ -270,7 +270,6 @@ end)
 table.insert(steps, function(count)
     if count == 1 then return end
 
-    print(paint_width, paint_height, screen[1].geometry.width, screen[1].geometry.height)
     assert(paint_width == screen[1].geometry.width)
     assert(paint_height == screen[1].geometry.height)
 
