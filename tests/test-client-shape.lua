@@ -11,6 +11,18 @@ runner.run_steps{
             assert(type(a) == "number", a)
         end
         if #client.get() == 1 then
+            local c = client.get()[1]
+
+            local geo = c:geometry()
+
+            -- Resize it to test shape change events.
+            c:geometry {
+                x      = geo.x,
+                y      = geo.y,
+                width  = geo.width * 2,
+                height = geo.height * 2,
+            }
+
             return true
         end
     end,
@@ -28,7 +40,14 @@ runner.run_steps{
         assert(not surface.load_silently(c.shape_clip, false))
 
         return true
+    end,
+
+    function()
+        client.get()[1]:kill()
+        return true
     end
+
+
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
