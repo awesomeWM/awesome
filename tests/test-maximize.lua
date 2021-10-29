@@ -371,8 +371,38 @@ gears.table.merge(steps, {
 
         if not c or counter ~= 2 then return end
 
+        c:kill()
+
+        client.disconnect_signal("request::geometry", geometry_handler)
+
+        test_client(nil,nil,nil,nil,nil,{minimize_after=true})
+
         return true
-    end
+    end,
+    function()
+        -- Test minimization.
+        if #client.get() ~= 1 or not client.get()[1].minimized then return end
+
+        assert(client.get()[1].minimized)
+        client.get()[1]:kill()
+
+        return true
+    end,
+    function()
+        if #client.get() > 0 then return end
+
+        test_client(nil,nil,nil,nil,nil,{unminimize_after=true})
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 or client.get()[1].minimized then return end
+
+        assert(not client.get()[1].minimized)
+        client.get()[1]:kill()
+
+        return true
+    end,
 })
 
 runner.run_steps(steps)

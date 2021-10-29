@@ -10,10 +10,11 @@ end
 
 local test_client_source = [[
 pcall(require, 'luarocks.loader')
-local lgi = require 'lgi'
-local Gdk = lgi.require('Gdk')
-local Gtk = lgi.require('Gtk')
-local Gio = lgi.require('Gio')
+local lgi  = require 'lgi'
+local GLib = lgi.require('GLib')
+local Gdk  = lgi.require('Gdk')
+local Gtk  = lgi.require('Gtk')
+local Gio  = lgi.require('Gio')
 Gtk.init()
 
 local function open_window(class, title, options)
@@ -40,6 +41,8 @@ local function open_window(class, title, options)
     end
     if options.maximize_before then
         window:maximize()
+    elseif options.unminimize_after then
+        window:iconify()
     end
     window:set_wmclass(class, class)
     window:show_all()
@@ -47,6 +50,14 @@ local function open_window(class, title, options)
         window:maximize()
     elseif options.unmaximize_after then
         window:unmaximize()
+    elseif options.minimize_after then
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, function()
+            window:iconify()
+        end)
+    elseif options.unminimize_after then
+        GLib.timeout_add(GLib.PRIORITY_DEFAULT, 500, function()
+            window:deiconify()
+        end)
     end
     if options.resize_after_width and options.resize_after_height then
        window:resize(
@@ -152,6 +163,13 @@ return function(class, title, sn_rules, callback, resize_increment, args)
     if args.unmaximize_after then
         options = options .. "unmaximize_after,"
     end
+    if args.unminimize_after then
+        options = options .. "unminimize_after,"
+    end
+    if args.minimize_after then
+        options = options .. "minimize_after,"
+    end
+
     if args.size then
         options = table.concat {
             options,
