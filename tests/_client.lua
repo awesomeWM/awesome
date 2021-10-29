@@ -1,4 +1,5 @@
 local spawn = require("awful.spawn")
+local gtimer = require("gears.timer")
 
 local lua_executable = os.getenv("LUA")
 if lua_executable == nil or lua_executable == "" then
@@ -118,13 +119,15 @@ local lgi = require("lgi")
 local Gio = lgi.require("Gio")
 
 local initialized = false
-local pipe
+local pipe, pid
+
 local function init()
     if initialized then return end
     initialized = true
     local cmd = { lua_executable, "-e", test_client_source }
-    local _, _, stdin, stdout, stderr = awesome.spawn(cmd, false, true, true, true)
-    pipe = Gio.UnixOutputStream.new(stdin, true)
+    local _pid, _, stdin, stdout, stderr = awesome.spawn(cmd, false, true, true, true)
+    pipe =  Gio.UnixOutputStream.new(stdin, true)
+    pid = _pid
     stdout = Gio.UnixInputStream.new(stdout, true)
     stderr = Gio.UnixInputStream.new(stderr, true)
     spawn.read_lines(stdout, function(...) print("_client", ...) end)
@@ -139,7 +142,29 @@ local function get_snid(sn_rules, callback)
     return snid
 end
 
-return function(class, title, sn_rules, callback, resize_increment, args)
+local module = {}
+
+function module.terminate()
+    if not initialized then return end
+
+    for _, c in ipairs(client.get()) do
+        c:kill()
+    end
+
+    pipe:close()
+    initialized, pipe = false, nil
+
+    -- Make a copy to avoid the re-initialized race condition.
+    local original_pid = pid
+
+    gtimer.delayed_call(function()
+        awesome.kill(original_pid, 9)
+    end)
+
+    return true
+end
+
+local function new(_, class, title, sn_rules, callback, resize_increment, args)
     args  = args or {}
     class = class or "test_app"
     title = title or "Awesome test client"
@@ -199,5 +224,7 @@ return function(class, title, sn_rules, callback, resize_increment, args)
 
     return snid
 end
+
+return setmetatable(module, {__call = new })
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
