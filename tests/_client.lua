@@ -14,7 +14,7 @@ pcall(require, 'luarocks.loader')
 local lgi  = require 'lgi'
 local GLib = lgi.require('GLib')
 local Gdk  = lgi.require('Gdk')
-local Gtk  = lgi.require('Gtk')
+local Gtk  = lgi.require('Gtk', '3.0')
 local Gio  = lgi.require('Gio')
 Gtk.init()
 
