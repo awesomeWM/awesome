@@ -739,6 +739,76 @@ function module.arc(cr, width, height, thickness, start_angle, end_angle, start_
     cr:close_path()
 end
 
+--- Overlap 2 rectangles to emulate a shadow effect.
+--
+-- This is intended to be used with either the `wibox.container.margin` or
+-- the `client.shape` to implement MS-DOS and TWM MenuShadowColor "classic"
+-- shadows.
+--
+-- Warning: If `x_offset` or `y_offset` are greater than the width or height
+-- respectively, strange thing will happen.
+--
+-- @DOC_gears_shape_solid_rectangle_shadow_EXAMPLE@
+--
+-- @staticfct gears.shape.solid_rectangle_shadow
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam[opt=5] number x_offset The shadow area horizontal offset.
+-- @tparam[opt=5] number y_offset The shadow area vertical offset.
+function module.solid_rectangle_shadow(cr, w, h, x_offset, y_offset)
+    x_offset, y_offset = x_offset or 5, y_offset or 5
+    w, h = w - math.abs(x_offset), h - math.abs(y_offset)
+
+    -- Get rid of the corner case first.
+    if x_offset == 0 and y_offset == 0 then return module.rectangle(cr, w, h) end
+
+    -- This leaves 2 possibilities, "hole" at top-left or top-right.
+
+    -- Gather the main rectangle geometry.
+    local rect1 = {x0=0, y0=0, x1=w, y1=h}
+    local rect2 = {x0=x_offset, y0=y_offset, x1=w + x_offset, y1=h + y_offset}
+
+    -- Normalize (shift) to {0, 0} -> {w, h}
+    if x_offset < 0 then
+        rect1.x0, rect1.x1 = rect1.x0 - x_offset, rect1.x1 - x_offset
+        rect2.x0, rect2.x1 = rect2.x0 - x_offset, rect2.x1 - x_offset
+    end
+    if y_offset < 0 then
+        rect1.y0, rect1.y1 = rect1.y0 - y_offset, rect1.y1 - y_offset
+        rect2.y0, rect2.y1 = rect2.y0 - y_offset, rect2.y1 - y_offset
+    end
+
+    -- Swap the rectangles if needed.
+    if y_offset < 0 then
+        rect1, rect2 = rect2, rect1
+    end
+
+    if rect1.x0 > rect2.x0 then
+        -- cut at top-right
+        cr:move_to(rect1.x0, rect1.y0)
+        cr:line_to(rect1.x1, rect1.y0)
+        cr:line_to(rect1.x1, rect1.y1)
+        cr:line_to(rect2.x1, rect1.y1)
+        cr:line_to(rect2.x1, rect2.y1)
+        cr:line_to(rect2.x0, rect2.y1)
+        cr:line_to(rect2.x0, rect2.y0)
+        cr:line_to(rect1.x0, rect2.y0)
+        cr:close_path()
+    else
+        -- cut at top-left
+        cr:move_to(rect1.x0, rect1.y0)
+        cr:line_to(rect1.x1, rect1.y0)
+        cr:line_to(rect1.x1, rect2.y0)
+        cr:line_to(rect2.x1, rect2.y0)
+        cr:line_to(rect2.x1, rect2.y1)
+        cr:line_to(rect2.x0, rect2.y1)
+        cr:line_to(rect2.x0, rect1.y1)
+        cr:line_to(rect1.x0, rect1.y1)
+        cr:close_path()
+    end
+end
+
 --- A partial rounded bar. How much of the rounded bar is visible depends on
 -- the given percentage value.
 --
