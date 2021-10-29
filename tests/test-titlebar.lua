@@ -29,7 +29,7 @@ window.decorated = false
 ]])
 }
 
-local found_font = nil
+local found_font, events, next_pos = nil, {}, {}
 
 -- Use the test client props
 local dep = gdebug.deprecate
@@ -43,6 +43,20 @@ local function kill_client(c)
     -- created some unwanted side effects in the CI.
     awesome.kill(c.pid, 9)
 end
+
+local function click()
+    local x, y= next_pos.x, next_pos.y
+    mouse.coords{x=x, y=y}
+    assert(mouse.coords().x == x and mouse.coords().y == y)
+    root.fake_input("button_press", 1)
+    awesome.sync()
+    root.fake_input("button_release", 1)
+    awesome.sync()
+    next_pos = nil
+
+    return true
+end
+
 
 -- Too bad there's no way to disconnect the rc.lua request::titlebars function
 
@@ -182,6 +196,48 @@ local steps = {
         local c = client.get()[1]
 
         assert(found_font == "sans 10")
+
+        -- Test the events.
+        for _, event in ipairs { "button::press", "button::release", "mouse::move" } do
+            c:connect_signal(event, function()
+                table.insert(events, event)
+            end)
+        end
+
+        next_pos = { x = c:geometry().x + 5, y = c:geometry().y + 5 }
+
+        return true
+    end,
+    click,
+    function()
+        if #events == 0 then return end
+
+        events = {}
+
+        local c = client.get()[1]
+
+        next_pos = { x = c:geometry().x + 5, y = c:geometry().y + c:geometry().height - 5 }
+
+        return true
+    end,
+    click,
+    function()
+        if #events == 0 then return end
+
+        local c = client.get()[1]
+
+        next_pos = {
+            x = c:geometry().x + c:geometry().width/2,
+            y = c:geometry().y + c:geometry().height/2
+        }
+
+        return true
+    end,
+    click,
+    function()
+        if #events == 0 then return end
+
+        local c = client.get()[1]
 
         kill_client(c)
 
