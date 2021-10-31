@@ -126,7 +126,11 @@ jobs:
             xutils-dev \
             xvfb \
             zsh \
-            lua-discount
+            lua-discount \
+            fonts-noto-core \
+            fonts-dejavu-core \
+            fonts-roboto-unhinted \
+            fonts-open-sans
 
       - name: Install downloaded packages
         run: sudo dpkg -i /var/cache/apt/archives/*.deb
