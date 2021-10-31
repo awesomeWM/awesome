@@ -402,6 +402,11 @@ add_custom_target(check DEPENDS check-integration)
 add_executable(test-gravity tests/test-gravity.c)
 target_link_libraries(test-gravity
     ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
+
+add_executable(test-systray tests/test-systray.c)
+target_link_libraries(test-systray
+    ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
+
 if(DO_COVERAGE)
     set(TESTS_RUN_ENV DO_COVERAGE=1)
 endif()
