@@ -1,0 +1,4 @@
+sans	0.0	sans	NORMAL	NORMAL
+Roboto, Bold	0.0	Roboto	NORMAL	NORMAL
+DejaVu Sans, Oblique	0.0	DejaVu Sans	NORMAL	OBLIQUE
+Noto Mono, Regular	0.0	Noto Mono	NORMAL	NORMAL
