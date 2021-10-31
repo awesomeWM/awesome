@@ -69,7 +69,7 @@ function background._use_fallback_algorithm()
                 cairo.Rectangle { x = 0, y = 0, width = mat.x0 + width, height = mat.y0 + height })
 
             local mask_cr = cairo.Context(mask)
-            mask_cr:translate(mat.x0, mat.y0)
+            mask_cr:set_matrix(mat)
 
             -- Clear the surface.
             mask_cr:set_operator(cairo.Operator.CLEAR)
