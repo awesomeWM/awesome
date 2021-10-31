@@ -50,7 +50,11 @@ module.progressbar_fg = module.bg_highlight
 
 local f = Pango.FontDescription.from_string("sans 8")
 
-function module.get_font()
+function module.get_font(font)
+    if font then
+        return Pango.FontDescription.from_string(font)
+    end
+
     return f
 end
 
