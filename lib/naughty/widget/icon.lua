@@ -83,10 +83,12 @@ end
 -- @propemits true false
 
 function icon:set_notification(notif)
-    if self._private.notification == notif then return end
+    local old = (self._private.notification or {})[1]
 
-    if self._private.notification then
-        self._private.notification:disconnect_signal("destroyed",
+    if old == notif then return end
+
+    if old then
+        old:disconnect_signal("destroyed",
             self._private.icon_changed_callback)
     end
 
@@ -96,7 +98,7 @@ function icon:set_notification(notif)
         self:set_image(icn)
     end
 
-    self._private.notification = notif
+    self._private.notification = setmetatable({notif}, {__mode="v"})
 
     notif:connect_signal("property::icon", self._private.icon_changed_callback)
     self:emit_signal("property::notification", notif)
@@ -154,10 +156,14 @@ local function new(args)
     local tb = imagebox()
 
     gtable.crush(tb, icon, true)
+    tb._private.notification = {}
 
     function tb._private.icon_changed_callback()
+        local n = tb._private.notification[1]
 
-        local icn = gsurface.load_silently(tb._private.notification.icon)
+        if not n then return end
+
+        local icn = gsurface.load_silently(n.icon)
 
         if icn then
             tb:set_image(icn)

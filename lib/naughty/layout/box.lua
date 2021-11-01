@@ -47,14 +47,16 @@ local function init_screen(s)
 end
 
 local function disconnect(self)
-    if self._private.notification then
-        self._private.notification:disconnect_signal("destroyed",
+    local n = self._private.notification[1]
+
+    if n then
+        n:disconnect_signal("destroyed",
             self._private.destroy_callback)
 
-        self._private.notification:disconnect_signal("property::margin",
+        n:disconnect_signal("property::margin",
             self._private.update)
 
-        self._private.notification:disconnect_signal("property::suspended",
+        n:disconnect_signal("property::suspended",
             self._private.hide)
     end
 end
@@ -102,7 +104,7 @@ local function update_position(position, preset)
                 honor_workarea      = true,
             }
             if k == 1 then
-                args.offset              = get_offset(position, preset)
+                args.offset = get_offset(position, preset)
             end
 
             -- The first entry is aligned to the workarea, then the following to the
@@ -123,14 +125,13 @@ local function finish(self)
         end
     end
 
-    local preset
-    if self.private and self.private.args and self.private.args.notification then
-        preset = self.private.args.notification.preset
-    end
+    local preset = (self._private.notification[1] or {}).preset
 
     update_position(self.position, preset)
 
     disconnect(self)
+
+    self._private.notification = {}
 end
 
 -- It isn't a good idea to use the `attach` `awful.placement` property. If the
@@ -236,21 +237,19 @@ local function generate_widget(args, n)
     end
 
     -- Call `:set_notification` on all children
-    awcommon._set_common_property(w, "notification", n or args.notification)
+    awcommon._set_common_property(w, "notification", n)
 
     return w
 end
 
 local function init(self, notification)
-    local args = self._private.args
-
     local preset = notification.preset or {}
 
-    local position = args.position or notification.position or
+    local position = self._private.position or notification.position or
         preset.position or beautiful.notification_position or "top_right"
 
     if not self.widget then
-        self.widget = generate_widget(self._private.args, notification)
+        self.widget = generate_widget(self._private, notification)
     end
 
     local bg = self._private.widget:get_children_by_id( "background_role" )[1]
@@ -295,20 +294,26 @@ local function init(self, notification)
 end
 
 function box:set_notification(notif)
-    if self._private.notification == notif then return end
+    if self._private.notification[1] == notif then return end
 
     disconnect(self)
 
     init(self, notif)
 
-    self._private.notification = notif
+    self._private.notification = setmetatable({notif}, {__mode="v"})
 
     self:emit_signal("property::notification", notif)
 end
 
+function box:get_notification()
+    return self._private.notification[1]
+end
+
 function box:get_position()
-    if self._private.notification then
-        return self._private.notification:get_position()
+    local n = self._private.notification[1]
+
+    if n then
+        return n:get_position()
     end
 
     return "top_right"
@@ -357,7 +362,9 @@ local function new(args)
     if not new_args.widget then return nil end
 
     local ret = popup(new_args)
-    ret._private.args = new_args
+    ret._private.notification = {}
+    ret._private.widget_template = args.widget_template
+    ret._private.position = args.position
 
     gtable.crush(ret, box, true)
 
@@ -371,8 +378,10 @@ local function new(args)
 
     --TODO remove
     local function hide()
-        if ret._private.notification then
-            ret._private.notification:destroy()
+        local n = ret._private.notification[1]
+
+        if n then
+            n:destroy()
         end
     end
 

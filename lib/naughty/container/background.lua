@@ -46,22 +46,24 @@ end
 -- @propemits true false
 
 function background:set_notification(notif)
-    if self._private.notification == notif then return end
+    local old = self._private.notification[1]
 
-    if self._private.notification then
-        self._private.notification:disconnect_signal("property::bg",
+    if old == notif then return end
+
+    if old then
+        old:disconnect_signal("property::bg",
             self._private.background_changed_callback)
-        self._private.notification:disconnect_signal("property::border_width",
+        old:disconnect_signal("property::border_width",
             self._private.background_changed_callback)
-        self._private.notification:disconnect_signal("property::border_color",
+        old:disconnect_signal("property::border_color",
             self._private.background_changed_callback)
-        self._private.notification:disconnect_signal("property::shape",
+        old:disconnect_signal("property::shape",
             self._private.background_changed_callback)
     end
 
     update_background(notif, self)
 
-    self._private.notification = notif
+    self._private.notification = setmetatable({notif}, {__mode="v"})
 
     notif:connect_signal("property::bg"          , self._private.background_changed_callback)
     notif:connect_signal("property::border_width", self._private.background_changed_callback)
@@ -82,12 +84,13 @@ local function new(args)
     args = args or {}
 
     local bg = wbg()
+    bg._private.notification = {}
     bg:set_border_strategy("inner")
 
     gtable.crush(bg, background, true)
 
     function bg._private.background_changed_callback()
-        update_background(bg._private.notification, bg)
+        update_background(bg._private.notification[1], bg)
     end
 
     if args.notification then
