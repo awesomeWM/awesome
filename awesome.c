@@ -588,7 +588,7 @@ main(int argc, char **argv)
     awesome_argv = argv;
 
     /* Text won't be printed correctly otherwise */
-    setlocale(LC_CTYPE, "");
+    setlocale(LC_ALL, "");
 
     char *confpath = options_detect_shebang(argc, argv);
 
