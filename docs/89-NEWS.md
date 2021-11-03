@@ -76,6 +76,10 @@ This document was last updated at commit v4.3-197-g9085ed631.
    old behavior, use `awful.rules.rules = {}; awful.rules.rules = my_new_rules`.
  * `client:relative_move()` now default `nil` values to zero. The previous
    behavior made no sense.
+ * The tasklist and taglist widgets are no longer directly an instance of
+   it's main layout. Use the `base_layout` property to access the layout.
+   This allows to replace the layout at runtime. The previous behavior
+   was undocumented.
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes

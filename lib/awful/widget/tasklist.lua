@@ -94,6 +94,7 @@ local wmargin = require("wibox.container.margin")
 local wtextbox = require("wibox.widget.textbox")
 local clienticon = require("awful.widget.clienticon")
 local wbackground = require("wibox.container.background")
+local gtable = require("gears.table")
 
 local function get_screen(s)
     return s and screen[s]
@@ -479,7 +480,7 @@ end
 local function tasklist_update(s, w, buttons, filter, data, style, update_function, args)
     local clients = {}
 
-    local source = args and args.source or tasklist.source.all_clients or nil
+    local source = self.source or tasklist.source.all_clients or nil
     local list   = source and source(s, args) or capi.client.get()
 
     for _, c in ipairs(list) do
@@ -496,6 +497,117 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
         widget_template = args.widget_template or default_template,
         create_callback = create_callback,
     })
+end
+
+--- Set the tasklist layout.
+--
+-- @property base_layout
+-- @tparam[opt=wibox.layout.flex.horizontal] wibox.layout base_layout
+-- @see wibox.layout.flex.horizontal
+
+function tasklist:set_base_layout(layout)
+    self._private.base_layout = base.make_widget_from_value(
+        layout or flex.horizontal
+    )
+
+    local spacing = self._private.style.spacing or beautiful.tasklist_spacing
+
+    if self._private.base_layout.set_spacing and spacing then
+        self._private.base_layout:set_spacing(spacing)
+    end
+
+    assert(self._private.base_layout.is_widget)
+
+    self._do_tasklist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::base_layout", layout)
+end
+
+function tasklist:layout(_, width, height)
+    if self._private.base_layout then
+        return { base.place_widget_at(self._private.base_layout, 0, 0, width, height) }
+    end
+end
+
+function tasklist:fit(context, width, height)
+    if not self._private.base_layout then
+        return 0, 0
+    end
+
+    return base.fit_widget(self, context, self._private.base_layout, width, height)
+end
+
+for _, prop in ipairs { "screen", "filter", "update_function", "widget_template", "source"} do
+    tasklist["set_"..prop] = function(self, value)
+        if value == self._private[prop] then return end
+
+        self._private[prop] = value
+
+        self._do_tasklist_update()
+
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("property::"..prop, value)
+    end
+
+    tasklist["get_"..prop] = function(self)
+        return self._private[prop]
+    end
+end
+
+local function update_screen(self, screen, old)
+    if not instances then return end
+
+    if old and instances[old] then
+        for k, w in ipairs(instances[old]) do
+            if w == self then
+                table.remove(instances[old], k)
+                break
+            end
+        end
+    end
+
+    local list = instances[screen]
+
+    if not list then
+        list = setmetatable({}, { __mode = "v" })
+        instances[screen] = list
+    end
+
+    table.insert(list, self)
+end
+
+function tasklist:set_screen(value)
+    value = get_screen(value)
+
+    if value == self._private.screen then return end
+
+    local old = self._private.screen
+
+    self._private.screen = value
+
+    update_screen(self, screen, old)
+
+    self._do_tasklist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::screen", value)
+end
+
+function tasklist:set_widget_template(widget_template)
+    self._private.widget_template = widget_template
+
+    -- Remove the existing instances
+    self._private.data = setmetatable({}, { __mode = 'k' })
+
+    self._do_tasklist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::widget_template", widget_template)
 end
 
 --- Create a new tasklist widget.
@@ -530,7 +642,7 @@ end
 -- @tparam[opt=nil] string args.style.bg_image_focus
 -- @tparam[opt=nil] string args.style.bg_image_urgent
 -- @tparam[opt=nil] string args.style.bg_image_minimize
--- @tparam[opt=nil] boolean args.style.tasklist_disable_icon
+-- @tparam[opt=nil] boolean args.style.disable_icon
 -- @tparam[opt=nil] number args.style.icon_size The size of the icon
 -- @tparam[opt='▪'] string args.style.sticky Extra icon when client is sticky
 -- @tparam[opt='⌃'] string args.style.ontop Extra icon when client is ontop
@@ -563,7 +675,7 @@ end
 -- @param buttons **DEPRECATED** use args.buttons
 -- @param style **DEPRECATED** use args.style
 -- @param update_function **DEPRECATED** use args.update_function
--- @param base_widget **DEPRECATED** use args.base_widget
+-- @param base_widget **DEPRECATED** use args.base_layout
 -- @constructorfct awful.widget.tasklist
 function tasklist.new(args, filter, buttons, style, update_function, base_widget)
     local screen = nil
@@ -596,23 +708,37 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
 
     screen = screen or get_screen(args.screen)
     local uf = args.update_function or common.list_update
-    local w = base.make_widget_from_value(args.layout or flex.horizontal)
 
-    local data = setmetatable({}, { __mode = 'k' })
+    local w = base.make_widget(nil, nil, {
+        enable_properties = true,
+    })
 
-    local spacing = args.style and args.style.spacing or args.layout and args.layout.spacing
-                    or beautiful.tasklist_spacing
-    if w.set_spacing and spacing then
-        w:set_spacing(spacing)
-    end
+    gtable.crush(w._private, {
+        disable_task_name = args.disable_task_name,
+        disable_icon      = args.disable_icon,
+        update_function   = args.update_function,
+        filter            = args.filter,
+        buttons           = args.buttons,
+        style             = args.style or {},
+        screen            = screen,
+        widget_template   = args.widget_template,
+        source            = args.source,
+        data              = setmetatable({}, { __mode = 'k' })
+    })
+
+    gtable.crush(w, tasklist, true)
+    rawset(w, "filter", nil)
+    rawset(w, "source", nil)
 
     local queued_update = false
 
     -- For the tests
     function w._do_tasklist_update_now()
         queued_update = false
-        if screen.valid then
-            tasklist_update(screen, w, args.buttons, args.filter, data, args.style, uf, args)
+        if w._private.screen.valid then
+            tasklist_update(
+                w._private.screen, w, w._private.buttons, w._private.filter, w._private.data, args.style, uf, args
+            )
         end
     end
 
@@ -624,7 +750,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
         end
     end
     function w._unmanage(c)
-        data[c] = nil
+        w._private.data[c] = nil
     end
     if instances == nil then
         instances = setmetatable({}, { __mode = "k" })
@@ -681,17 +807,20 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
             instances[get_screen(s)] = nil
         end)
     end
+
+    tasklist.set_base_layout(w, args.layout or args.base_layout)
+
     w._do_tasklist_update()
-    local list = instances[screen]
-    if not list then
-        list = setmetatable({}, { __mode = "v" })
-        instances[screen] = list
-    end
-    table.insert(list, w)
+
+    update_screen(w, screen)
+
     return w
 end
 
 --- Filtering function to include all clients.
+--
+--@DOC_sequences_client_tasklist_filter_allscreen1_EXAMPLE@
+--
 -- @return true
 -- @filterfunction awful.widget.tasklist.filter.allscreen
 function tasklist.filter.allscreen()
@@ -699,8 +828,11 @@ function tasklist.filter.allscreen()
 end
 
 --- Filtering function to include the clients from all tags on the screen.
--- @param c The client.
--- @param screen The screen we are drawing on.
+--
+--@DOC_sequences_client_tasklist_filter_alltags1_EXAMPLE@
+--
+-- @tparam client c The client.
+-- @tparam screen screen The screen we are drawing on.
 -- @return true if c is on screen, false otherwise
 -- @filterfunction awful.widget.tasklist.filter.alltags
 function tasklist.filter.alltags(c, screen)
@@ -709,8 +841,13 @@ function tasklist.filter.alltags(c, screen)
 end
 
 --- Filtering function to include only the clients from currently selected tags.
--- @param c The client.
--- @param screen The screen we are drawing on.
+--
+-- This is the filter used in the default `rc.lua`.
+--
+--@DOC_sequences_client_tasklist_filter_currenttags1_EXAMPLE@
+--
+-- @tparam client c The client.
+-- @tparam screen screen The screen we are drawing on.
 -- @return true if c is in a selected tag on screen, false otherwise
 -- @filterfunction awful.widget.tasklist.filter.currenttags
 function tasklist.filter.currenttags(c, screen)
