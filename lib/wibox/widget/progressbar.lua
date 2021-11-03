@@ -1,6 +1,11 @@
 ---------------------------------------------------------------------------
 --- A progressbar widget.
 --
+-- ![Components](../images/progressbar.svg)
+--
+-- Common usage examples
+-- =====================
+--
 -- To add text on top of the progressbar, a `wibox.layout.stack` can be used:
 --
 --@DOC_wibox_widget_progressbar_text_EXAMPLE@
@@ -12,6 +17,15 @@
 -- By default, this widget will take all the available size. To prevent this,
 -- a `wibox.container.constraint` widget or the `forced_width`/`forced_height`
 -- properties have to be used.
+--
+-- To have a gradient between 2 colors when the bar reaches a threshold, use
+-- the `gears.color` gradients:
+--
+--@DOC_wibox_widget_progressbar_grad1_EXAMPLE@
+--
+-- The same goes for multiple solid colors:
+--
+--@DOC_wibox_widget_progressbar_grad2_EXAMPLE@
 --
 --@DOC_wibox_widget_defaults_progressbar_EXAMPLE@
 --
@@ -37,13 +51,17 @@ local progressbar = { mt = {} }
 --
 -- If the value is nil, no border will be drawn.
 --
+-- @DOC_wibox_widget_progressbar_border_color_EXAMPLE@
+--
 -- @property border_color
--- @tparam color color The border color to set.
+-- @tparam gears.color color The border color to set.
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.color
 
 --- The progressbar border width.
+--
+-- @DOC_wibox_widget_progressbar_border_width_EXAMPLE@
 --
 -- @property border_width
 -- @tparam number border_width
@@ -54,13 +72,17 @@ local progressbar = { mt = {} }
 --
 -- If the value is nil, no border will be drawn.
 --
+-- @DOC_wibox_widget_progressbar_bar_border_color_EXAMPLE@
+--
 -- @property bar_border_color
--- @tparam color color The border color to set.
+-- @tparam gears.color color The border color to set.
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.color
 
 --- The progressbar inner border width.
+--
+-- @DOC_wibox_widget_progressbar_bar_border_width_EXAMPLE@
 --
 -- @property bar_border_width
 -- @tparam number bar_border_width
@@ -69,16 +91,20 @@ local progressbar = { mt = {} }
 
 --- The progressbar foreground color.
 --
+-- @DOC_wibox_widget_progressbar_color_EXAMPLE@
+--
 -- @property color
--- @tparam color color The progressbar color.
+-- @tparam gears.color color The progressbar color.
 -- @propemits true false
 -- @usebeautiful beautiful.progressbar_fg
 -- @see gears.color
 
 --- The progressbar background color.
 --
+-- @DOC_wibox_widget_progressbar_background_color_EXAMPLE@
+--
 -- @property background_color
--- @tparam color color The progressbar background color.
+-- @tparam gears.color color The progressbar background color.
 -- @propemits true false
 -- @usebeautiful beautiful.progressbar_bg
 -- @see gears.color
@@ -119,29 +145,45 @@ local progressbar = { mt = {} }
 -- @tparam[opt=true] boolean clip
 -- @propemits true false
 
---- The progressbar to draw ticks. Default is false.
+--- The progressbar to draw ticks.
+--
+-- @DOC_wibox_widget_progressbar_ticks_EXAMPLE@
 --
 -- @property ticks
--- @tparam boolean ticks
+-- @tparam[opt=false] boolean ticks
 -- @propemits true false
 
 --- The progressbar ticks gap.
 --
+-- @DOC_wibox_widget_progressbar_ticks_gap_EXAMPLE@
+--
 -- @property ticks_gap
--- @tparam number ticks_gap
+-- @tparam[opt=1] number ticks_gap
 -- @propemits true false
 
 --- The progressbar ticks size.
 --
+-- @DOC_wibox_widget_progressbar_ticks_size_EXAMPLE@
+--
+-- It is also possible to mix this feature with the `bar_shape` property:
+--
+-- @DOC_wibox_widget_progressbar_ticks_size2_EXAMPLE@
+--
 -- @property ticks_size
--- @tparam number ticks_size
+-- @tparam[opt=4] number ticks_size
 -- @propemits true false
 
 --- The maximum value the progressbar should handle.
 --
+-- By default, the value is 1. So the content of `value` is
+-- a percentage.
+--
+-- @DOC_wibox_widget_progressbar_max_value_EXAMPLE@
+--
 -- @property max_value
--- @tparam number max_value
+-- @tparam[opt=1] number max_value
 -- @propemits true false
+-- @see value
 
 --- The progressbar background color.
 --
@@ -187,10 +229,18 @@ local progressbar = { mt = {} }
 
 --- The progressbar margins.
 --
+-- The margins are around the progressbar. If you want to add space between the
+-- bar and the border, use `paddings`.
+--
+-- @DOC_wibox_widget_progressbar_margins2_EXAMPLE@
+--
 -- Note that if the `clip` is disabled, this allows the background to be smaller
 -- than the bar.
 --
--- See the `clip` example.
+-- It is also possible to specify a single number instead of a border for each
+-- direction;
+--
+-- @DOC_wibox_widget_progressbar_margins1_EXAMPLE@
 --
 -- @property margins
 -- @tparam[opt=0] (table|number|nil) margins A table for each side or a number
@@ -201,13 +251,21 @@ local progressbar = { mt = {} }
 -- @propemits false false
 -- @propbeautiful
 -- @see clip
+-- @see padding
+-- @see wibox.container.margin
 
 --- The progressbar padding.
+--
+-- This is the space between the inner bar and the progressbar outer border.
 --
 -- Note that if the `clip` is disabled, this allows the bar to be taller
 -- than the background.
 --
--- See the `clip` example.
+-- @DOC_wibox_widget_progressbar_paddings2_EXAMPLE@
+--
+-- The paddings can also be a single numeric value:
+--
+-- @DOC_wibox_widget_progressbar_paddings1_EXAMPLE@
 --
 -- @property paddings
 -- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
@@ -218,6 +276,7 @@ local progressbar = { mt = {} }
 -- @propemits false false
 -- @propbeautiful
 -- @see clip
+-- @see margins
 
 --- The progressbar margins.
 --
@@ -373,8 +432,8 @@ function progressbar.draw(pbar, _, cr, width, height)
 
     -- Draw the progressbar shape
 
-    local bar_shape = pbar._private.bar_shape or
-        beautiful.progressbar_bar_shape or shape.rectangle
+    local explicit_bar_shape = pbar._private.bar_shape or beautiful.progressbar_bar_shape
+    local bar_shape = explicit_bar_shape or shape.rectangle
 
     local bar_border_width = pbar._private.bar_border_width or
         beautiful.progressbar_bar_border_width or pbar._private.border_width or
@@ -389,20 +448,46 @@ function progressbar.draw(pbar, _, cr, width, height)
     over_drawn_height = over_drawn_height - bar_border_width
     cr:translate(bar_border_width/2, bar_border_width/2)
 
-    bar_shape(cr, rel_x, over_drawn_height)
+    if pbar._private.ticks and explicit_bar_shape then
+        local tr_off = 0
 
-    cr:set_source(color(pbar._private.color or beautiful.progressbar_fg or "#ff0000"))
+        -- Make all the shape and fill later in case the `color` is a gradient.
+        for _=0, width / (ticks_size+ticks_gap)-border_width do
+            bar_shape(cr, ticks_size - (bar_border_width/2), over_drawn_height)
+            cr:translate(ticks_size+ticks_gap, 0)
+            tr_off = tr_off + ticks_size+ticks_gap
+        end
 
-    if bar_border_width > 0 then
-        cr:fill_preserve()
-        cr:set_source(color(bar_border_color))
-        cr:set_line_width(bar_border_width)
-        cr:stroke()
-    else
+        -- Re-align the (potential) color gradients to 0,0.
+        cr:translate(-tr_off, 0)
+
+        if bar_border_width > 0 then
+            cr:set_source(color(bar_border_color))
+            cr:set_line_width(bar_border_width)
+            cr:stroke_preserve()
+        end
+
+        cr:set_source(color(pbar._private.color or beautiful.progressbar_fg or "#ff0000"))
+
         cr:fill()
+    else
+        bar_shape(cr, rel_x, over_drawn_height)
+
+        cr:set_source(color(pbar._private.color or beautiful.progressbar_fg or "#ff0000"))
+
+        if bar_border_width > 0 then
+            cr:fill_preserve()
+            cr:set_source(color(bar_border_color))
+            cr:set_line_width(bar_border_width)
+            cr:stroke()
+        else
+            cr:fill()
+        end
     end
 
-    if pbar._private.ticks then
+    -- Legacy "ticks" bars. It looks horrible, but to avoid breaking the
+    -- behavior, so be it.
+    if pbar._private.ticks  and not explicit_bar_shape then
         for i=0, width / (ticks_size+ticks_gap)-border_width do
             local rel_offset = over_drawn_width / 1 - (ticks_size+ticks_gap) * i
 
@@ -424,9 +509,15 @@ end
 
 --- Set the progressbar value.
 --
+-- By default, unless `max_value` is set, it is number between
+-- zero and one.
+--
+-- @DOC_wibox_widget_progressbar_value_EXAMPLE@
+--
 -- @property value
--- @tparam number value The progress bar value between 0 and 1.
+-- @tparam number value The progress bar value.
 -- @propemits true false
+-- @see max_value
 
 function progressbar:set_value(value)
     value = value or 0
