@@ -1,4 +1,4 @@
---DOC_GEN_IMAGE  --DOC_HIDE_START
+--DOC_GEN_IMAGE  --DOC_HIDE_START --DOC_NO_USAGE
 local parent = ...
 local wibox  = require("wibox")
 
@@ -6,31 +6,31 @@ local l = wibox.layout.fixed.horizontal()
 l.spacing = 5
 
 --DOC_HIDE_END
-for _, size in ipairs { 0, 2, 4, 6 } do
+   for _, size in ipairs { 0, 2, 4, 6 } do
 
-    local pb = --DOC_HIDE
-    wibox.widget {
-        value        = 0.33,
-        border_width = 2,
-        ticks        = true,
-        ticks_size   = size,
-        widget       = wibox.widget.progressbar,
-    }
+       local pb = --DOC_HIDE
+       wibox.widget {
+           value        = 0.33,
+           border_width = 2,
+           ticks        = true,
+           ticks_size   = size,
+           widget       = wibox.widget.progressbar,
+       }
 
-    --DOC_HIDE_START
-    l:add(wibox.widget {
-        pb,
-        {
-            text   = size,
-            align  = "center",
-            widget = wibox.widget.textbox,
-        },
-        forced_height = 30,
-        forced_width  = 75,
-        layout = wibox.layout.stack
-    })
-    --DOC_HIDE_END
-end
+       --DOC_HIDE_START
+       l:add(wibox.widget {
+           pb,
+           {
+               text   = size,
+               align  = "center",
+               widget = wibox.widget.textbox,
+           },
+           forced_height = 30,
+           forced_width  = 75,
+           layout = wibox.layout.stack
+       })
+       --DOC_HIDE_END
+   end
 
 parent:add(l) --DOC_HIDE
 

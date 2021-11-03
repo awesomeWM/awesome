@@ -165,6 +165,10 @@ local progressbar = { mt = {} }
 --
 -- @DOC_wibox_widget_progressbar_ticks_size_EXAMPLE@
 --
+-- It is also possible to mix this feature with the `bar_shape` property:
+--
+-- @DOC_wibox_widget_progressbar_ticks_size2_EXAMPLE@
+--
 -- @property ticks_size
 -- @tparam[opt=4] number ticks_size
 -- @propemits true false
@@ -428,8 +432,8 @@ function progressbar.draw(pbar, _, cr, width, height)
 
     -- Draw the progressbar shape
 
-    local bar_shape = pbar._private.bar_shape or
-        beautiful.progressbar_bar_shape or shape.rectangle
+    local explicit_bar_shape = pbar._private.bar_shape or beautiful.progressbar_bar_shape
+    local bar_shape = explicit_bar_shape or shape.rectangle
 
     local bar_border_width = pbar._private.bar_border_width or
         beautiful.progressbar_bar_border_width or pbar._private.border_width or
@@ -444,20 +448,46 @@ function progressbar.draw(pbar, _, cr, width, height)
     over_drawn_height = over_drawn_height - bar_border_width
     cr:translate(bar_border_width/2, bar_border_width/2)
 
-    bar_shape(cr, rel_x, over_drawn_height)
+    if pbar._private.ticks and explicit_bar_shape then
+        local tr_off = 0
 
-    cr:set_source(color(pbar._private.color or beautiful.progressbar_fg or "#ff0000"))
+        -- Make all the shape and fill later in case the `color` is a gradient.
+        for _=0, width / (ticks_size+ticks_gap)-border_width do
+            bar_shape(cr, ticks_size - (bar_border_width/2), over_drawn_height)
+            cr:translate(ticks_size+ticks_gap, 0)
+            tr_off = tr_off + ticks_size+ticks_gap
+        end
 
-    if bar_border_width > 0 then
-        cr:fill_preserve()
-        cr:set_source(color(bar_border_color))
-        cr:set_line_width(bar_border_width)
-        cr:stroke()
-    else
+        -- Re-align the (potential) color gradients to 0,0.
+        cr:translate(-tr_off, 0)
+
+        if bar_border_width > 0 then
+            cr:set_source(color(bar_border_color))
+            cr:set_line_width(bar_border_width)
+            cr:stroke_preserve()
+        end
+
+        cr:set_source(color(pbar._private.color or beautiful.progressbar_fg or "#ff0000"))
+
         cr:fill()
+    else
+        bar_shape(cr, rel_x, over_drawn_height)
+
+        cr:set_source(color(pbar._private.color or beautiful.progressbar_fg or "#ff0000"))
+
+        if bar_border_width > 0 then
+            cr:fill_preserve()
+            cr:set_source(color(bar_border_color))
+            cr:set_line_width(bar_border_width)
+            cr:stroke()
+        else
+            cr:fill()
+        end
     end
 
-    if pbar._private.ticks then
+    -- Legacy "ticks" bars. It looks horrible, but to avoid breaking the
+    -- behavior, so be it.
+    if pbar._private.ticks  and not explicit_bar_shape then
         for i=0, width / (ticks_size+ticks_gap)-border_width do
             local rel_offset = over_drawn_width / 1 - (ticks_size+ticks_gap) * i
 
