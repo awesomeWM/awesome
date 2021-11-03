@@ -18,6 +18,8 @@ parent:add( --DOC_HIDE
         },
         {
             text   = "50%",
+            valign = "center",
+            align  = "center",
             widget = wibox.widget.textbox,
         },
         layout = wibox.layout.stack
