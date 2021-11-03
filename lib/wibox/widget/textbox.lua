@@ -1,4 +1,5 @@
 ---------------------------------------------------------------------------
+-- A widget to display either plain or HTML text.
 --
 --@DOC_wibox_widget_defaults_textbox_EXAMPLE@
 --
@@ -177,11 +178,23 @@ function textbox:set_markup_silently(text)
     return true
 end
 
---- Set the text of the textbox (with
--- [Pango markup](https://docs.gtk.org/Pango/pango_markup.html)).
+--- Set the HTML text of the textbox.
+--
+-- The main difference between `text` and `markup` is that `markup` is
+-- able to render a small subset of HTML tags. See the
+-- [Pango markup](https://docs.gtk.org/Pango/pango_markup.html)) documentation
+-- to see what is and isn't valid in this property.
+--
+-- @DOC_wibox_widget_textbox_markup1_EXAMPLE@
+--
+-- The `wibox.widget.textbox` colors are usually set by wrapping into a
+-- `wibox.container.background` widget, but can also be done using the
+-- markup:
+--
+-- @DOC_wibox_widget_textbox_markup2_EXAMPLE@
 --
 -- @property markup
--- @tparam string text The text to set. This can contain pango markup (e.g.
+-- @tparam string markup The text to set. This can contain pango markup (e.g.
 --   `<b>bold</b>`). You can use `gears.string.escape` to escape
 --   parts of it.
 -- @propemits true false
@@ -198,7 +211,15 @@ function textbox:get_markup()
     return self._private.markup
 end
 
---- Set a textbox text.
+--- Set a textbox plain text.
+--
+-- This property renders the text as-is, it does not interpret it:
+--
+-- @DOC_wibox_widget_textbox_text1_EXAMPLE@
+--
+-- One exception are the control characters, which are interpreted:
+--
+-- @DOC_wibox_widget_textbox_text2_EXAMPLE@
 --
 -- @property text
 -- @tparam string text The text to display. Pango markup is ignored and shown
@@ -237,7 +258,7 @@ end
 --@DOC_wibox_widget_textbox_ellipsize_EXAMPLE@
 --
 -- @property ellipsize
--- @tparam string mode The ellipsize mode.
+-- @tparam[opt="end"] string mode The ellipsize mode.
 -- @propemits true false
 
 function textbox:set_ellipsize(mode)
@@ -261,8 +282,10 @@ end
 -- * **char**
 -- * **word_char**
 --
+-- @DOC_wibox_widget_textbox_wrap1_EXAMPLE@
+--
 -- @property wrap
--- @tparam string mode Where to wrap? After "word", "char" or "word_char".
+-- @tparam[opt="word_char"] string mode Where to wrap? After "word", "char" or "word_char".
 -- @propemits true false
 
 function textbox:set_wrap(mode)
@@ -286,8 +309,10 @@ end
 -- * **center**
 -- * **bottom**
 --
+--@DOC_wibox_widget_textbox_valign1_EXAMPLE@
+--
 -- @property valign
--- @tparam string mode Where should the textbox be drawn? "top", "center" or
+-- @tparam[opt="center"] string mode Where should the textbox be drawn? "top", "center" or
 --  "bottom".
 -- @propemits true false
 
@@ -312,8 +337,10 @@ end
 -- * **center**
 -- * **right**
 --
+--@DOC_wibox_widget_textbox_align1_EXAMPLE@
+--
 -- @property align
--- @tparam string mode Where should the textbox be drawn? "left", "center" or
+-- @tparam[opt="left"] string mode Where should the textbox be drawn? "left", "center" or
 --  "right".
 -- @propemits true false
 
@@ -363,10 +390,18 @@ end
 --
 -- In this case, the font could be `Sans 10` or `Sans Bold Italic 10`.
 --
+-- Here are examples of several font families:
+--
+--@DOC_wibox_widget_textbox_font1_EXAMPLE@
+--
+-- The font size is a number at the end of the font description string:
+--
+--@DOC_wibox_widget_textbox_font2_EXAMPLE@
+--
 -- @property font
--- @tparam string font The font description as string.
+-- @tparam[opt=beautiful.font] string font The font description as string.
 -- @propemits true false
--- @propbeautiful
+-- @usebeautiful beautiful.font The default font.
 
 function textbox:set_font(font)
     if font == self._private.font then return end
@@ -377,6 +412,10 @@ function textbox:set_font(font)
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::font", font)
+end
+
+function textbox:get_font()
+    return self._private.font
 end
 
 --- Create a new textbox.

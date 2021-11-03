@@ -16,6 +16,7 @@ local w1 = wibox.widget {
 }
 
 l:add(w1) --DOC_HIDE
+--DOC_NEWLINE
 
 -- Use a standard declarative widget construct
 local w2 = wibox.widget {
@@ -32,6 +33,7 @@ local w2 = wibox.widget {
 }
 
 l:add(w2) --DOC_HIDE
+--DOC_NEWLINE
 
 -- Use composed widgets
 local w3 = wibox.widget {
@@ -51,6 +53,7 @@ local w3 = wibox.widget {
 }
 
 l:add(w3) --DOC_HIDE
+--DOC_NEWLINE
 
 -- Use negative spacing to create a powerline effect
 local w4 = wibox.widget {
