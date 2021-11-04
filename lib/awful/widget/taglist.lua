@@ -54,6 +54,7 @@ local gcolor = require("gears.color")
 local gstring = require("gears.string")
 local gdebug = require("gears.debug")
 local base = require("wibox.widget.base")
+local gtable = require("gears.table")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -410,6 +411,46 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
     })
 end
 
+--- Set the taglist layout.
+--
+-- @property base_layout
+-- @tparam[opt=wibox.layout.fixed.horizontal] wibox.layout base_layout
+-- @see wibox.layout.fixed.horizontal
+
+function taglist:set_base_layout(layout)
+    self._private.base_layout = base.make_widget_from_value(
+        layout or fixed.horizontal
+    )
+
+    local spacing = self._private.style.spacing or beautiful.taglist_spacing
+
+    if self._private.base_layout.set_spacing and spacing then
+        self._private.base_layout:set_spacing(spacing)
+    end
+
+    assert(self._private.base_layout.is_widget)
+
+    self._do_taglist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::base_layout", layout)
+end
+
+function taglist:layout(_, width, height)
+    if self._private.base_layout then
+        return { base.place_widget_at(self._private.base_layout, 0, 0, width, height) }
+    end
+end
+
+function taglist:fit(context, width, height)
+    if not self._private.base_layout then
+        return 0, 0
+    end
+
+    return base.fit_widget(self, context, self._private.base_layout, width, height)
+end
+
 --- Create a new taglist widget. The last two arguments (update_function
 -- and layout) serve to customize the layout of the taglist (eg. to
 -- make it vertical). For that, you will need to copy the
@@ -460,7 +501,7 @@ end
 -- @param buttons **DEPRECATED** use args.buttons
 -- @param style **DEPRECATED** use args.style
 -- @param update_function **DEPRECATED** use args.update_function
--- @param base_widget **DEPRECATED** use args.base_widget
+-- @param base_widget **DEPRECATED** use args.base_layout
 -- @constructorfct awful.widget.taglist
 function taglist.new(args, filter, buttons, style, update_function, base_widget)
 
@@ -495,19 +536,29 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
     screen = screen or get_screen(args.screen)
 
     local uf = args.update_function or common.list_update
-    local w = base.make_widget_from_value(args.layout or fixed.horizontal)
 
-    if w.set_spacing and (args.style and args.style.spacing or beautiful.taglist_spacing) then
-        w:set_spacing(args.style and args.style.spacing or beautiful.taglist_spacing)
-    end
+    local w = base.make_widget(nil, nil, {
+        enable_properties = true,
+    })
+
+    gtable.crush(w, taglist, true)
+
+    gtable.crush(w._private, {
+        style = args.style or {},
+        buttons = args.buttons,
+        filter = args.filter,
+        update_function = args.update_function,
+    })
 
     local data = setmetatable({}, { __mode = 'k' })
 
     local queued_update = {}
 
     function w._do_taglist_update_now()
-        if screen.valid then
-            taglist_update(screen, w, args.buttons, args.filter, data, args.style, uf, args)
+        if w._private.screen.valid then
+            taglist_update(
+                w._private.screen, w, w._private.buttons, w._private.filter, data, args.style, uf, args
+            )
         end
         queued_update[screen] = false
     end
@@ -558,6 +609,9 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
             instances[get_screen(s)] = nil
         end)
     end
+
+    w:set_base_layout(args.base_layout or args.layout)
+
     w._do_taglist_update()
     local list = instances[screen]
     if not list then
