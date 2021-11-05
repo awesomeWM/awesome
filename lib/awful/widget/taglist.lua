@@ -391,10 +391,10 @@ local function create_callback(w, t)
     common._set_common_property(w, "tag", t)
 end
 
-local function taglist_update(s, w, buttons, filter, data, style, update_function, args)
+local function taglist_update(s, self, buttons, filter, data, style, update_function, args)
     local tags = {}
 
-    local source = args and args.source or taglist.source.for_screen or nil
+    local source = self._private.source or taglist.source.for_screen or nil
     local list   = source and source(s, args) or s.tags
 
     for _, t in ipairs(list) do
@@ -405,11 +405,16 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
 
     local function label(c) return taglist.taglist_label(c, style) end
 
-    update_function(w, buttons, label, data, tags, {
-        widget_template = args.widget_template,
+    update_function(self._private.base_layout, buttons, label, data, tags, {
+        widget_template = self._private.widget_template,
         create_callback = create_callback,
     })
 end
+
+--- The taglist screen.
+--
+-- @property screen
+-- @tparam screen screen
 
 --- Set the taglist layout.
 --
@@ -449,6 +454,54 @@ function taglist:fit(context, width, height)
     end
 
     return base.fit_widget(self, context, self._private.base_layout, width, height)
+end
+
+--- An alternative function to configure the content.
+--
+-- You should use `widget_template` if it fits your use case first. This
+-- API is very low level.
+--
+-- @property update_function
+-- @tparam function update_function.
+
+--- A function to restrict the content of the taglist.
+--
+-- @property filter
+-- @tparam function filter
+-- @see source
+-- @see awful.widget.taglist.filter.noempty
+-- @see awful.widget.taglist.filter.selected
+-- @see awful.widget.taglist.filter.all
+-- @see awful.widget.taglist.source.for_screen
+
+--- The function used to gather the group of tags.
+--
+-- @property source
+-- @tparam function source
+-- @see filter
+-- @see awful.widget.taglist.source.for_screen
+
+--- A templete used to genetate the individual tag widgets.
+--
+-- @property widget_template
+-- @tparam table widget_template
+
+for _, prop in ipairs { "filter", "update_function", "widget_template", "source", "screen" } do
+    taglist["set_"..prop] = function(self, value)
+        if value == self._private[prop] then return end
+
+        self._private[prop] = value
+
+        self._do_taglist_update()
+
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("property::"..prop, value)
+    end
+
+    taglist["get_"..prop] = function(self)
+        return self._private[prop]
+    end
 end
 
 --- Create a new taglist widget. The last two arguments (update_function
@@ -544,10 +597,13 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
     gtable.crush(w, taglist, true)
 
     gtable.crush(w._private, {
-        style = args.style or {},
-        buttons = args.buttons,
-        filter = args.filter,
+        style           = args.style or {},
+        buttons         = args.buttons,
+        filter          = args.filter,
         update_function = args.update_function,
+        widget_template = args.widget_template,
+        source          = args.source,
+        screen          = screen
     })
 
     local data = setmetatable({}, { __mode = 'k' })
@@ -560,14 +616,14 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
                 w._private.screen, w, w._private.buttons, w._private.filter, data, args.style, uf, args
             )
         end
-        queued_update[screen] = false
+        queued_update[w._private.screen] = false
     end
 
     function w._do_taglist_update()
         -- Add a delayed callback for the first update.
-        if not queued_update[screen] then
+        if not queued_update[w._private.screen] then
             timer.delayed_call(w._do_taglist_update_now)
-            queued_update[screen] = true
+            queued_update[w._private.screen] = true
         end
     end
     if instances == nil then
