@@ -403,6 +403,11 @@ local function taglist_update(s, self, buttons, filter, data, style, update_func
         end
     end
 
+    if self._private.last_count ~= #tags then
+        self:emit_signal("property::count", #tags, self._private.last_count)
+        self._private.last_count = #tags
+    end
+
     local function label(c) return taglist.taglist_label(c, style) end
 
     update_function(self._private.base_layout, buttons, label, data, tags, {
@@ -422,6 +427,13 @@ end
 -- @tparam[opt=wibox.layout.fixed.horizontal] wibox.layout base_layout
 -- @see wibox.layout.fixed.horizontal
 
+--- The current number of tags.
+--
+-- @property count
+-- @readonly
+-- @tparam number The number of tags.
+-- @propemits true false
+
 function taglist:set_base_layout(layout)
     self._private.base_layout = base.make_widget_from_value(
         layout or fixed.horizontal
@@ -440,6 +452,14 @@ function taglist:set_base_layout(layout)
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("property::base_layout", layout)
+end
+
+function taglist:get_count()
+    if not self._private.last_count then
+        self._do_taglist_update_now()
+    end
+
+    return self._private.last_count
 end
 
 function taglist:layout(_, width, height)
