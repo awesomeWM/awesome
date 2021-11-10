@@ -477,7 +477,7 @@ local function create_callback(w, t)
     common._set_common_property(w, "client", t)
 end
 
-local function tasklist_update(s, w, buttons, filter, data, style, update_function, args)
+local function tasklist_update(s, self, buttons, filter, data, style, update_function, args)
     local clients = {}
 
     local source = self.source or tasklist.source.all_clients or nil
@@ -493,8 +493,8 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
 
     local function label(c, tb) return tasklist_label(c, style, tb) end
 
-    update_function(w, buttons, label, data, clients, {
-        widget_template = args.widget_template or default_template,
+    update_function(self._private.base_layout, buttons, label, data, clients, {
+        widget_template = self._private.widget_template or default_template,
         create_callback = create_callback,
     })
 end
@@ -503,7 +503,41 @@ end
 --
 -- @property base_layout
 -- @tparam[opt=wibox.layout.flex.horizontal] wibox.layout base_layout
+-- @propemits true false
 -- @see wibox.layout.flex.horizontal
+
+--- The tasklist screen.
+--
+-- @property screen
+-- @tparam screen screen
+-- @propemits true false
+
+--- A function to narrow down the list of clients.
+--
+-- @property filter
+-- @tparam function filter
+-- @propemits true false
+
+--- A function called when the tasklist is refreshed.
+--
+-- This is a very low level API, prefer `widget_template` whenever
+-- you can.
+--
+-- @property update_function
+-- @tparam function update_function
+-- @propemits true false
+
+--- A template for creating the client widgets.
+--
+-- @property widget_template
+-- @tparam table widget_template
+-- @propemits true false
+
+--- A function to gather the clients to display.
+--
+-- @property source
+-- @tparam function source
+-- @propemits true false
 
 function tasklist:set_base_layout(layout)
     self._private.base_layout = base.make_widget_from_value(
