@@ -7,6 +7,7 @@ local file_path, image_path = ...
 require("_common_template")(...)
 local capi = {client = client, screen = screen}
 local Pango = require("lgi").Pango
+local cairo = require("lgi").cairo
 local PangoCairo = require("lgi").PangoCairo
 require("awful.screen")
 require("awful.tag")
@@ -714,7 +715,9 @@ local function gen_timeline(args)
     awesome.startup = false --luacheck: ignore
 
     for _, event in ipairs(history) do
+        require("gears.timer").run_delayed_calls_now()
         local ret = event.callback()
+        require("gears.timer").run_delayed_calls_now()
         if event.event == "event" then
             l:add(wrap_timeline(gen_vertical_space(5)))
             l:add(wrap_timeline(wibox.widget {
@@ -725,6 +728,8 @@ local function gen_timeline(args)
             gen_noscreen(l, ret[1].tags, args)
         elseif event.event == "tags" and (#ret > 1 or args.display_screen) then
             gen_screens(l, ret, args)
+        elseif event.event == "widget" then
+            l:add(wrap_timeline(ret))
         end
     end
 
@@ -783,6 +788,39 @@ local function wrap_with_arrows(widget)
         fit          = fixed_fit2,
         layout       = wibox.layout.fixed.vertical
     }
+end
+
+-- Use a recording surface to store the widget content.
+function module.display_widget(wdg, width, height, context)
+    local function do_it()
+        context = context or {dpi=96}
+
+        local w, h = wdg:fit(context, width or 9999, height or 9999)
+
+        w, h = math.min(w,  width or 9999), math.min(h, height or 9999)
+
+        local memento = cairo.RecordingSurface(
+            cairo.Content.CAIRO_FORMAT_ARGB32,
+            cairo.Rectangle { x = 0, y = 0, width = w, height = h }
+        )
+
+        local cr = cairo.Context(memento)
+
+        wibox.widget.draw_to_cairo_context(wdg, cr, w, h, context)
+
+        return wibox.widget {
+            fit = function()
+                return w, h+5
+            end,
+            draw = function(_, _, cr2)
+                cr2:translate(0, 5)
+                cr2:set_source_surface(memento)
+                cr2:paint()
+            end
+        }
+    end
+
+    table.insert(history, {event="widget", callback = do_it})
 end
 
 function module.display_tags()
