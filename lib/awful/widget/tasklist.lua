@@ -491,6 +491,11 @@ local function tasklist_update(s, self, buttons, filter, data, style, update_fun
         end
     end
 
+    if self._private.last_count ~= #clients then
+        self:emit_signal("property::count", #clients, self._private.last_count)
+        self._private.last_count = #clients
+    end
+
     local function label(c, tb) return tasklist_label(c, style, tb) end
 
     update_function(self._private.base_layout, buttons, label, data, clients, {
@@ -498,6 +503,13 @@ local function tasklist_update(s, self, buttons, filter, data, style, update_fun
         create_callback = create_callback,
     })
 end
+
+--- The current number of clients.
+--
+-- @property count
+-- @readonly
+-- @tparam number The number of client.
+-- @propemits true false
 
 --- Set the tasklist layout.
 --
@@ -557,6 +569,14 @@ function tasklist:set_base_layout(layout)
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("property::base_layout", layout)
+end
+
+function tasklist:get_count()
+    if not self._private.last_count then
+        self._do_tasklist_update_now()
+    end
+
+    return self._private.last_count
 end
 
 function tasklist:layout(_, width, height)
