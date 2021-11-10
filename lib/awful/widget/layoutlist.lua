@@ -281,10 +281,25 @@ local layoutlist = {}
 -- @property current_layout
 -- @param layout
 
+--- The current number of layouts.
+--
+-- @property count
+-- @readonly
+-- @tparam number The number of layouts.
+-- @propemits true false
+
 function layoutlist:get_layouts()
     local f = self.source or self._private.source or module.source.for_screen
 
-    return f(self.screen)
+    local ret = f(self.screen)
+
+    if self._private.last_count ~= #ret then
+        self:emit_signal("property::count", ret, self._private.last_count)
+
+        self._private.last_count = ret
+    end
+
+    return ret
 end
 
 function layoutlist:get_current_layout()
@@ -327,6 +342,14 @@ function layoutlist:set_base_layout(layout)
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("property::base_layout", layout)
+end
+
+function layoutlist:get_count()
+    if not self._private.last_count then
+        self._do_()
+    end
+
+    return self._private.last_count
 end
 
 function layoutlist:set_widget_template(widget_template)
