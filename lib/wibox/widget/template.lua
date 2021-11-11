@@ -18,13 +18,22 @@ local gtimer = require("gears.timer")
 
 local template = {
     mt = {},
-    queued_updates = {}
+    queued_updates = {},
 }
 
+function template:fit(...)
+    return self._private.widget:fit(...)
+end
+
+function template:draw(...)
+    return self._private.widget:draw(...)
+end
+
 function template:_do_update_now()
-    if type(self.update_callback) == "function" then
-        self:update_callback(self._private.update_args)
+    if type(self._private.update_callback) == "function" then
+        self._private.update_callback(self, self._private.update_args)
     end
+
     self._private.update_args = nil
     template.queued_updates[self] = false
 end
@@ -52,6 +61,46 @@ function template:update(args)
     end
 end
 
+function template:set_template(widget_template)
+    local widget = type(widget_template) == "function" and widget_template()
+        or widget_template
+        or wbase.empty_widget()
+
+    self._private.template = widget
+    self._private.widget = wbase.make_widget_from_value(widget)
+
+    -- We need to connect to these signals to actually redraw the template
+    -- widget when its child needs to.
+    local signals = {
+        "widget::redraw_needed",
+        "widget::layout_changed",
+    }
+    for _, signal in pairs(signals) do
+        self._private.widget:connect_signal(signal, function(...)
+            self:emit_signal(signal, ...)
+        end)
+    end
+
+    self:emit_signal("widget::redraw_needed")
+end
+
+function template:get_widget()
+    return self._private.widget
+end
+
+function template:set_update_callback(update_callback)
+    assert(type(update_callback) == "function" or update_callback == nil)
+
+    self._private.update_callback = update_callback
+end
+
+-- @hidden
+function template:set_update_now(update_now)
+    if update_now then
+        self:update()
+    end
+end
+
 --- Create a new `wibox.widget.template` instance.
 -- @tparam[opt] table args
 -- @tparam[opt] table|widget|function args.template The widget template to use.
@@ -60,21 +109,18 @@ end
 function template.new(args)
     args = args or {}
 
-    local widget_template = type(args.template) == "function" and
-        args.template() or
-        args.template or
-        wbase.empty_widget()
+    local ret = wbase.make_widget(nil, nil, { enable_properties = true })
 
-    local widget = wbase.make_widget_from_value(widget_template)
+    gtable.crush(ret, template, true)
 
-    widget.update_callback = args.update_callback
+    ret:set_template(args.template)
+    ret:set_update_callback(args.update_callback)
+    ret:set_update_now(args.update_now)
 
-    gtable.crush(widget, template, true)
-
-    return widget
+    return ret
 end
 
-function template.mt:__call(...) --luacheck: ignore unused variable self
+function template.mt:__call(...)
     return template.new(...)
 end
 
