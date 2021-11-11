@@ -51,7 +51,7 @@ function template:_do_update_now()
     end
 
     self._private.update_args = nil
-    template.queued_updates[self] = false
+    template.queued_updates[self] = nil
 end
 
 --- Update the widget.
