@@ -117,6 +117,10 @@ function template.new(args)
     ret:set_update_callback(args.update_callback)
     ret:set_update_now(args.update_now)
 
+    if args.buttons then
+        ret:set_buttons(args.buttons)
+    end
+
     return ret
 end
 
