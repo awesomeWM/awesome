@@ -40,7 +40,9 @@ function template:fit(context, width, height)
 end
 
 function template:draw(...)
-    return self._private.widget:draw(...)
+    if type(self._private.widget.draw) == "function" then
+        return self._private.widget:draw(...)
+    end
 end
 
 function template:_do_update_now()
