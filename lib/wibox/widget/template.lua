@@ -21,8 +21,22 @@ local template = {
     queued_updates = {},
 }
 
-function template:fit(...)
-    return self._private.widget:fit(...)
+-- Layout this layout
+function template:layout(_, width, height)
+    if not self._private.widget then
+        return
+    end
+
+    return { wbase.place_widget_at(self._private.widget, 0, 0, width, height) }
+end
+
+-- Fit this layout into the given area.
+function template:fit(context, width, height)
+    if not self._private.widget then
+        return 0, 0
+    end
+
+    return wbase.fit_widget(self, context, self._private.widget, width, height)
 end
 
 function template:draw(...)
