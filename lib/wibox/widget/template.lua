@@ -5,10 +5,27 @@
 -- concrete widget definition. The template widget can be used to build widgets
 -- that the user can customize at their will, thanks to the template mechanism.
 --
+-- Common usage examples
+-- =====================
+--
+-- A basic implementation of the template widget needs a widget definition and
+-- a callback to manage widget updates.
+--
+-- The `:update()` can be called later to update the widget template. Arguments
+-- can be provided to the `:update()` method, it will be forwarded to the
+-- `update_callback` function.
+--
+--@DOC_wibox_widget_template_basic_textbox_EXAMPLE@
+--
+-- Alternatively, you can declare the `template` widget instance using the
+-- declarative pattern (both variants are strictly equivalent):
+--
+--@DOC_wibox_widget_template_basic_textbox_declarative_EXAMPLE@
+--
 -- @author Aire-One
 -- @copyright 2021 Aire-One <aireone@aireone.xyz>
 --
--- @classmod wibox.widget.template
+-- @widgetmod wibox.widget.template
 -- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
