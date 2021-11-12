@@ -22,6 +22,32 @@
 --
 --@DOC_wibox_widget_template_basic_textbox_declarative_EXAMPLE@
 --
+-- Usage in libraries
+-- ==================
+--
+-- (this part is to be completed according to awful.widget comming PRs to implement the widget_template usage)
+--
+-- This widget was designed to be used as a standard way to offer customization
+-- over concrete widget implementation. We use the `wibox.widget.template` as a
+-- base to implement widgets from the `awful.widget` library. This way, it is
+-- easy for the final user to customize the standard widget offered by awesome!
+--
+-- It is possible to use the template widget as a base for a custom 3rd party
+-- widget module to offer more customization to the final user.
+--
+-- Here is an example of implementation for a custom widget inheriting from
+-- `wibox.widget.template` :
+--
+-- The module definition should include a default widget and a builder function
+-- that can build the widget with either, the user values or the default.
+--
+--@DOC_wibox_widget_template_concrete_implementation_module_EXAMPLE@
+--
+-- On the user side, it only requires to call the builder function to get an
+-- instance of the widget.
+--
+--@DOC_wibox_widget_template_concrete_implementation_user_EXAMPLE@
+--
 -- @author Aire-One
 -- @copyright 2021 Aire-One <aireone@aireone.xyz>
 --
