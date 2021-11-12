@@ -38,7 +38,9 @@ local template = {
     queued_updates = {},
 }
 
--- Layout this layout
+-- Layout this layout.
+-- @method layout
+-- @hidden
 function template:layout(_, width, height)
     if not self._private.widget then
         return
@@ -48,6 +50,8 @@ function template:layout(_, width, height)
 end
 
 -- Fit this layout into the given area.
+-- @method fit
+-- @hidden
 function template:fit(context, width, height)
     if not self._private.widget then
         return 0, 0
@@ -56,12 +60,19 @@ function template:fit(context, width, height)
     return wbase.fit_widget(self, context, self._private.widget, width, height)
 end
 
+-- Draw the widget if it's actually a widget instance
+-- @method draw
+-- @hidden
 function template:draw(...)
     if type(self._private.widget.draw) == "function" then
         return self._private.widget:draw(...)
     end
 end
 
+-- Call the update widget method now and clean the queue for this widget
+-- instance.
+-- @method _do_update_now
+-- @hidden
 function template:_do_update_now()
     if type(self._private.update_callback) == "function" then
         self._private.update_callback(self, self._private.update_args)
@@ -78,6 +89,8 @@ end
 -- is called multiple times during the same GLib event loop, only the first call
 -- will be run.
 -- All arguments are passed to the queued `update_callback` call.
+-- @tparam[opt] table args A table to pass to the widget update function.
+-- @method update
 function template:update(args)
     if type(args) == "table" then
         self._private.update_args = gtable.crush(
@@ -94,6 +107,12 @@ function template:update(args)
     end
 end
 
+--- Change the widget template.
+-- @tparam table|widget|function widget_template The new widget to use as a
+--   template.
+-- @method set_template
+-- @emits widget::redraw_needed
+-- @hidden
 function template:set_template(widget_template)
     local widget = type(widget_template) == "function" and widget_template()
         or widget_template
@@ -117,16 +136,33 @@ function template:set_template(widget_template)
     self:emit_signal("widget::redraw_needed")
 end
 
+--- Give the internal widget instance.
+-- @treturn widget The widget instance.
+-- @method get_widget
+-- @hidden
 function template:get_widget()
     return self._private.widget
 end
 
+--- Set the update_callback property.
+-- @tparam function update_callback The new callback function.
+-- @method set_update_callback
+-- @hidden
 function template:set_update_callback(update_callback)
     assert(type(update_callback) == "function" or update_callback == nil)
 
     self._private.update_callback = update_callback
 end
 
+--- Hack to allow automatic update of the widget at construction time.
+-- This is supposed to be a setter for an `update_now` property. This property
+-- however doesn't exist. We use this setter in the scope of the widget
+-- construction from wibox.widget internals to offer an easy way for the user to
+-- ask for the widget to be update right after its construction.
+-- Note : The update is not instantly called, but is registered as a normal
+-- update from the `:update()` method.
+-- @tparam[opt] boolean update_now Update the widget now.
+-- @method set_update_now
 -- @hidden
 function template:set_update_now(update_now)
     if update_now then
@@ -137,8 +173,12 @@ end
 --- Create a new `wibox.widget.template` instance.
 -- @tparam[opt] table args
 -- @tparam[opt] table|widget|function args.template The widget template to use.
--- @tparam[opt] function args.update_callback The callback function to update the widget.
+-- @tparam[opt] function args.update_callback The callback function to update
+--   the widget.
+-- @tparam[opt] boolean args.update_now Update the widget after its
+--   construction. This will call the `:update()` method with no parameter.
 -- @treturn wibox.widget.template The new instance.
+-- @constructorfct wibox.widget.template
 function template.new(args)
     args = args or {}
 
