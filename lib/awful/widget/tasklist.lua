@@ -335,12 +335,12 @@ local function tasklist_label(c, args, tb)
     local bg_image_focus = args.bg_image_focus or theme.tasklist_bg_image_focus or theme.bg_image_focus
     local bg_image_urgent = args.bg_image_urgent or theme.tasklist_bg_image_urgent or theme.bg_image_urgent
     local bg_image_minimize = args.bg_image_minimize or theme.tasklist_bg_image_minimize or theme.bg_image_minimize
-    local tasklist_disable_icon = args.tasklist_disable_icon or theme.tasklist_disable_icon or false
+    local tasklist_disable_icon = args.disable_icon or args.tasklist_disable_icon or theme.tasklist_disable_icon or false
     local disable_task_name = args.disable_task_name or theme.tasklist_disable_task_name or false
-    local font = args.font or theme.tasklist_font or theme.font or ""
-    local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font or ""
-    local font_minimized = args.font_minimized or theme.tasklist_font_minimized or theme.font_minimized or font or ""
-    local font_urgent = args.font_urgent or theme.tasklist_font_urgent or theme.font_urgent or font or ""
+    local font = args.font or theme.tasklist_font or theme.font
+    local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font
+    local font_minimized = args.font_minimized or theme.tasklist_font_minimized or theme.font_minimized or font
+    local font_urgent = args.font_urgent or theme.tasklist_font_urgent or theme.font_urgent or font
     local text = ""
     local name = ""
     local bg

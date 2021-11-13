@@ -251,7 +251,7 @@ function taglist.taglist_label(t, args)
     local taglist_squares_unsel_empty = args.squares_unsel_empty or theme.taglist_squares_unsel_empty
     local taglist_squares_resize = theme.taglist_squares_resize or args.squares_resize or "true"
     local taglist_disable_icon = args.taglist_disable_icon or theme.taglist_disable_icon or false
-    local font = args.font or theme.taglist_font or theme.font or ""
+    local font = args.font or theme.taglist_font or theme.font
     local text = nil
     local sel = capi.client.focus
     local bg_color = nil
@@ -361,7 +361,7 @@ function taglist.taglist_label(t, args)
     end
 
     if not tag.getproperty(t, "icon_only") then
-        text = "<span font_desc='"..font.."'>"
+        text = "<span font_desc='"..(font or "").."'>"
         if fg_color then
             text = text .. "<span color='" .. gcolor.ensure_pango_color(fg_color) ..
                 "'>" .. (gstring.xml_escape(t.name) or "") .. "</span>"
