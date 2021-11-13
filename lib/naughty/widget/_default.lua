@@ -22,7 +22,7 @@ local function notif_size()
     constraint:set_width(beautiful.notification_max_width or dpi(500))
 
     rawset(constraint, "set_notification", function(_, notif)
-        constraint._private.notification = notif
+        constraint._private.notification = setmetatable({notif}, {__mode = "v"})
         local s = false
 
         if notif.width and notif.width ~= beautiful.notification_max_width then
@@ -35,6 +35,10 @@ local function notif_size()
         end
 
         constraint.strategy = s and "exact" or "max"
+    end)
+
+    rawset(constraint, "get_notification", function()
+        return constraint._private.notification[1]
     end)
 
     return constraint

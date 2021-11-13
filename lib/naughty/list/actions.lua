@@ -168,14 +168,16 @@ local function wb_label(action, self)
 end
 
 local function update(self)
-    if not self._private.layout or not self._private.notification then return end
+    local n = self._private.notification[1]
+
+    if not self._private.layout or not n then return end
 
     awcommon.list_update(
         self._private.layout,
         self._private.default_buttons,
         function(o) return wb_label(o, self) end,
         self._private.data,
-        self._private.notification.actions,
+        n.actions,
         {
             widget_template = self._private.widget_template
         }
@@ -229,7 +231,7 @@ local actionlist = {}
 
 
 function actionlist:set_notification(notif)
-    self._private.notification = notif
+    self._private.notification = setmetatable({notif}, {__mode="v"})
 
     if not self._private.layout then
         self._private.layout = wibox.layout.fixed.horizontal()
@@ -329,8 +331,9 @@ local function new(_, args)
     gtable.crush(wdg, actionlist, true)
 
     wdg._private.data = {}
+    wdg._private.notification = {}
 
-    gtable.crush(wdg, args)
+    gtable.crush(wdg, args, false)
 
     wdg._private.style = wdg._private.style or {}
 
@@ -338,7 +341,7 @@ local function new(_, args)
 
     wdg._private.default_buttons = gtable.join(
         abutton({ }, 1, function(a)
-            local notif = wdg._private.notification or args.notification
+            local notif = wdg._private.notification[1]
             a:invoke(notif)
         end)
     )

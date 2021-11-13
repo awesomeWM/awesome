@@ -27,18 +27,20 @@ local message = {}
 -- @propemits true false
 
 function message:set_notification(notif)
-    if self._private.notification == notif then return end
+    local old = self._private.notification[1]
 
-    if self._private.notification then
-        self._private.notification:disconnect_signal("property::message",
+    if old == notif then return end
+
+    if old then
+        old:disconnect_signal("property::message",
             self._private.message_changed_callback)
-        self._private.notification:disconnect_signal("property::fg",
+        old:disconnect_signal("property::fg",
             self._private.message_changed_callback)
     end
 
     markup(self, notif.message, notif.fg, notif.font)
 
-    self._private.notification = notif
+    self._private.notification = setmetatable({notif}, {__mode="v"})
 
     notif:connect_signal("property::message", self._private.message_changed_callback)
     notif:connect_signal("property::fg"     , self._private.message_changed_callback)
@@ -57,16 +59,23 @@ local function new(args)
     local tb = textbox()
     tb:set_wrap("word")
     tb:set_font(beautiful.notification_font)
+    tb._private.notification = {}
 
     gtable.crush(tb, message, true)
 
     function tb._private.message_changed_callback()
-        markup(
-            tb,
-            tb._private.notification.message,
-            tb._private.notification.fg,
-            tb._private.notification.font
-        )
+        local n = tb._private.notification[1]
+
+        if n then
+            markup(
+                tb,
+                n.message,
+                n.fg,
+                n.font
+            )
+        else
+            markup(tb, nil, nil)
+        end
     end
 
     if args.notification then
