@@ -105,41 +105,65 @@ local tasklist = { mt = {} }
 local instances
 
 --- The default foreground (text) color.
+--
+-- @DOC_wibox_awidget_tasklist_style_fg_normal_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_fg_normal
 -- @tparam[opt=nil] string|pattern fg_normal
 -- @see gears.color
 
 --- The default background color.
+--
+-- @DOC_wibox_awidget_tasklist_style_bg_normal_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_bg_normal
 -- @tparam[opt=nil] string|pattern bg_normal
 -- @see gears.color
 
 --- The focused client foreground (text) color.
+--
+-- @DOC_wibox_awidget_tasklist_style_fg_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_fg_focus
 -- @tparam[opt=nil] string|pattern fg_focus
 -- @see gears.color
 
 --- The focused client background color.
+--
+-- @DOC_wibox_awidget_tasklist_style_bg_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_bg_focus
 -- @tparam[opt=nil] string|pattern bg_focus
 -- @see gears.color
 
 --- The urgent clients foreground (text) color.
+--
+-- @DOC_wibox_awidget_tasklist_style_fg_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_fg_urgent
 -- @tparam[opt=nil] string|pattern fg_urgent
 -- @see gears.color
 
 --- The urgent clients background color.
+--
+-- @DOC_wibox_awidget_tasklist_style_bg_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_bg_urgent
 -- @tparam[opt=nil] string|pattern bg_urgent
 -- @see gears.color
 
 --- The minimized clients foreground (text) color.
+--
+-- @DOC_wibox_awidget_tasklist_style_fg_minimize_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_fg_minimize
 -- @tparam[opt=nil] string|pattern fg_minimize
 -- @see gears.color
 
 --- The minimized clients background color.
+--
+-- @DOC_wibox_awidget_tasklist_style_bg_minimize_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_bg_minimize
 -- @tparam[opt=nil] string|pattern bg_minimize
 -- @see gears.color
@@ -161,16 +185,24 @@ local instances
 -- @tparam[opt=nil] string bg_image_minimize
 
 --- Disable the tasklist client icons.
+--
+-- @DOC_wibox_awidget_tasklist_style_disable_icon_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_disable_icon
 -- @tparam[opt=false] boolean tasklist_disable_icon
 
 --- Disable the tasklist client titles.
+--
+-- @DOC_wibox_awidget_tasklist_style_disable_task_name_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_disable_task_name
 -- @tparam[opt=false] boolean tasklist_disable_task_name
 
 --- Disable the extra tasklist client property notification icons.
 --
 -- See the <a href="#status_icons">Status icons</a> section for more details.
+--
+-- @DOC_wibox_awidget_tasklist_style_plain_task_name_EXAMPLE@
 --
 -- @beautiful beautiful.tasklist_plain_task_name
 -- @tparam[opt=false] boolean tasklist_plain_task_name
@@ -578,6 +610,10 @@ end
 
 --- Set the tasklist layout.
 --
+-- This can be used to change the layout based on the number of clients:
+--
+-- @DOC_sequences_client_tasklist_layout1_EXAMPLE@
+--
 -- @property base_layout
 -- @tparam[opt=wibox.layout.flex.horizontal] wibox.layout base_layout
 -- @propemits true false
@@ -585,15 +621,24 @@ end
 
 --- The tasklist screen.
 --
+-- @DOC_sequences_client_tasklist_screen1_EXAMPLE@
+--
 -- @property screen
 -- @tparam screen screen
 -- @propemits true false
 
 --- A function to narrow down the list of clients.
 --
+-- @DOC_sequences_client_tasklist_custom_filter1_EXAMPLE@
+--
 -- @property filter
 -- @tparam function filter
 -- @propemits true false
+-- @see awful.widget.tasklist.filter.allscreen
+-- @see awful.widget.tasklist.filter.alltags
+-- @see awful.widget.tasklist.filter.currenttags
+-- @see awful.widget.tasklist.filter.minimizedcurrenttags
+-- @see awful.widget.tasklist.filter.focused
 
 --- A function called when the tasklist is refreshed.
 --
@@ -606,15 +651,20 @@ end
 
 --- A template for creating the client widgets.
 --
+-- @DOC_sequences_client_tasklist_widget_template1_EXAMPLE@
+--
 -- @property widget_template
 -- @tparam table widget_template
 -- @propemits true false
 
 --- A function to gather the clients to display.
 --
+-- @DOC_sequences_client_tasklist_custom_source1_EXAMPLE@
+--
 -- @property source
 -- @tparam function source
 -- @propemits true false
+-- @see awful.widget.tasklist.source.all_clients
 
 function tasklist:set_base_layout(layout)
     self._private.base_layout = base.make_widget_from_value(
@@ -990,8 +1040,11 @@ function tasklist.filter.currenttags(c, screen)
 end
 
 --- Filtering function to include only the minimized clients from currently selected tags.
--- @param c The client.
--- @param screen The screen we are drawing on.
+--
+--@DOC_sequences_client_tasklist_filter_minimizedcurrenttags1_EXAMPLE@
+--
+-- @tparam client c The client.
+-- @tparam screen screen The screen we are drawing on.
 -- @return true if c is in a selected tag on screen and is minimized, false otherwise
 -- @filterfunction awful.widget.tasklist.filter.minimizedcurrenttags
 function tasklist.filter.minimizedcurrenttags(c, screen)
@@ -1018,8 +1071,11 @@ function tasklist.filter.minimizedcurrenttags(c, screen)
 end
 
 --- Filtering function to include only the currently focused client.
--- @param c The client.
--- @param screen The screen we are drawing on.
+--
+--@DOC_sequences_client_tasklist_filter_focused1_EXAMPLE@
+--
+-- @tparam client c The client.
+-- @tparam screen screen The screen we are drawing on.
 -- @return true if c is focused on screen, false otherwise
 -- @filterfunction awful.widget.tasklist.filter.focused
 function tasklist.filter.focused(c, screen)
