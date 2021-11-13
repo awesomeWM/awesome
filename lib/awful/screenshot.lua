@@ -102,15 +102,16 @@ local function check_prefix(prefix)
   return get_default_prefix()
 end
 
--- Routine to initialize the screenshot object
+--- Routine to initialize the screenshot object
 --
 -- Currently only sets the screenshot directory, the filename, prefix and the
 -- snipper tool outline color. More initialization can be added as the API
 -- expands.
 -- @function screenshot.init
--- @tparam string The directory path in which to save screenshots
--- @tparam string The prefix prepended to the screenshot filenames
--- @return true or nil depending on success
+-- @tparam[opt] string directory The directory path in which to save screenshots
+-- @tparam[opt] string prefix The prefix prepended to the screenshot filenames
+-- @tparam[opt] string color A gears color compatible string
+-- @treturn boolean true or false depending on success
 function screenshot.init(directory, prefix, color)
   local tmp
 
@@ -120,7 +121,7 @@ function screenshot.init(directory, prefix, color)
     ss_dir = tmp
   else
     initialized = nil
-    return nil
+    return false
   end
 
   tmp = check_prefix(prefix)
@@ -130,7 +131,7 @@ function screenshot.init(directory, prefix, color)
   else
     -- Should be unreachable as the default will always be taken
     initialized = nil
-    return nil
+    return false
   end
 
   -- Don't throw out prior init data if only color is misformed
@@ -250,8 +251,10 @@ local function show_frame(geo)
   cr:set_line_width(beautiful.xresources.apply_dpi(line_width))
 
   cr:translate(line_width,line_width)
-  gears.shape.partially_rounded_rect(cr,geo.width-2*line_width,geo.height-2*line_width, false, false, false, false, nil)
-  
+  gears.shape.partially_rounded_rect(cr, geo.width - 2*line_width,
+                                     geo.height - 2*line_width,
+                                     false, false, false, false, nil)
+
   cr:stroke()
 
   frame.shape_bounding = img._native
@@ -341,11 +344,11 @@ local function mg_callback(mouse_data)
   return true
 end
 
--- Take root window screenshots
+--- Take root window screenshots
 --
 -- @function screenshot.root
--- @tparam[opt] string The directory path in which to save screenshots
--- @tparam[opt] string The prefix prepended to the screenshot filenames
+-- @tparam[opt] string directory The directory path in which to save screenshots
+-- @tparam[opt] string prefix The prefix prepended to the screenshot filenames
 -- @treturn string The full path to the successfully written screenshot file
 function screenshot.root(directory, prefix)
   local dir, prfx
@@ -361,12 +364,12 @@ function screenshot.root(directory, prefix)
   end
 end
 
--- Take physical screen screenshots
+--- Take physical screen screenshots
 --
 -- @function screenshot.screen
--- @tparam[opt] string The directory path in which to save screenshots
--- @tparam[opt] string The prefix prepended to the screenshot filenames
--- @tparam[opt] number or screen The index of the screen, or the screen itself
+-- @tparam[opt] string directory The directory path in which to save screenshots
+-- @tparam[opt] string prefix The prefix prepended to the screenshot filenames
+-- @tparam[opt] integer target or screen The index of the screen, or the screen itself
 -- @treturn string The full path to the successfully written screenshot file
 function screenshot.screen(directory, prefix, target)
   local s
@@ -393,11 +396,11 @@ function screenshot.screen(directory, prefix, target)
   end
 end
 
--- Take client window screenshots
+--- Take client window screenshots
 --
 -- @function screenshot.client
--- @tparam[opt] string The directory path in which to save screenshots
--- @tparam[opt] string The prefix prepended to the screenshot filenames
+-- @tparam[opt] string directory The directory path in which to save screenshots
+-- @tparam[opt] string prefix The prefix prepended to the screenshot filenames
 -- @treturn string The full path to the successfully written screenshot file
 function screenshot.client(directory, prefix)
   -- Looking at the properties and functions available, I'm not sure it is
@@ -419,14 +422,14 @@ function screenshot.client(directory, prefix)
   end
 end
 
--- Launch an interactive snipper tool to take cropped shots
+--- Launch an interactive snipper tool to take cropped shots
 --
 -- @function screenshot.snipper
--- @tparam[opt] string The directory path in which to save screenshots
--- @tparam[opt] string The prefix prepended to the screenshot filenames
--- @tparam[opt] function A callback to be run upon successful writing of the
---                       screenshot file with a single argument of the path to
---                       the screenshot file.
+-- @tparam[opt] string directory The directory path in which to save screenshots
+-- @tparam[opt] string prefix The prefix prepended to the screenshot filenames
+-- @tparam[opt] function onsuccess_cb A callback to be run upon successful writing
+--                       of the screenshot file with a single argument of the path
+--                       to the screenshot file.
 function screenshot.snipper(directory, prefix, onsuccess_cb)
   local dir, prfx
   local date_time
@@ -449,12 +452,12 @@ function screenshot.snipper(directory, prefix, onsuccess_cb)
   end  
 end
 
--- Take a cropped screenshot of a defined geometry
+--- Take a cropped screenshot of a defined geometry
 --
 -- @function screenshot.snip
--- @tparam geometry The geometry of the cropped screenshot
--- @tparam[opt] string The directory path in which to save screenshots
--- @tparam[opt] string The prefix prepended to the screenshot filenames
+-- @tparam table geom The geometry of the cropped screenshot
+-- @tparam[opt] string directory The directory path in which to save screenshots
+-- @tparam[opt] string prefix The prefix prepended to the screenshot filenames
 -- @treturn string The full path to the successfully written screenshot file
 function screenshot.snip(geom, directory, prefix)
   local dir, prfx
