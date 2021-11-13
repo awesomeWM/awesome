@@ -211,78 +211,136 @@ local instances
 -- @beautiful beautiful.tasklist_minimized
 -- @tparam[opt=nil] string minimized
 
---- The tasklist font.
--- @beautiful beautiful.tasklist_font
--- @tparam[opt=nil] string font
-
 --- The focused client alignment.
+--
+-- @DOC_wibox_awidget_tasklist_style_align_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_align
 -- @tparam[opt=left] string align *left*, *right* or *center*
 
+--- The tasklist font.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_EXAMPLE@
+--
+-- @beautiful beautiful.tasklist_font
+-- @tparam[opt=nil] string font
+-- @see wibox.widget.textbox.font
+
 --- The focused client title alignment.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_font_focus
 -- @tparam[opt=nil] string font_focus
+-- @see wibox.widget.textbox.font
 
 --- The minimized clients font.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_minimized_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_font_minimized
 -- @tparam[opt=nil] string font_minimized
+-- @see wibox.widget.textbox.font
 
 --- The urgent clients font.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_font_urgent
 -- @tparam[opt=nil] string font_urgent
+-- @see wibox.widget.textbox.font
 
 --- The space between the tasklist elements.
+--
+-- @DOC_wibox_awidget_tasklist_style_spacing_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_spacing
 -- @tparam[opt=0] number spacing The spacing between tasks.
 
 --- The default tasklist elements shape.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape
 -- @tparam[opt=nil] gears.shape shape
 
 --- The default tasklist elements border width.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_width_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_width
 -- @tparam[opt=0] number shape_border_width
 
 --- The default tasklist elements border color.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_color_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_color
 -- @tparam[opt=nil] string|color shape_border_color
 -- @see gears.color
 
 --- The focused client shape.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_focus
 -- @tparam[opt=nil] gears.shape shape_focus
 
 --- The focused client border width.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_focus_border_width_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_width_focus
 -- @tparam[opt=0] number shape_border_width_focus
 
 --- The focused client border color.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_focus_border_width_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_color_focus
 -- @tparam[opt=nil] string|color shape_border_color_focus
 -- @see gears.color
 
 --- The minimized clients shape.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_minimized_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_minimized
 -- @tparam[opt=nil] gears.shape shape_minimized
 
 --- The minimized clients border width.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_width_minimized_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_width_minimized
 -- @tparam[opt=0] number shape_border_width_minimized
 
 --- The minimized clients border color.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_color_minimized_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_color_minimized
 -- @tparam[opt=nil] string|color shape_border_color_minimized
 -- @see gears.color
 
 --- The urgent clients shape.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_urgent
 -- @tparam[opt=nil] gears.shape shape_urgent
 
 --- The urgent clients border width.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_width_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_width_urgent
 -- @tparam[opt=0] number shape_border_width_urgent
 
 --- The urgent clients border color.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_color_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_color_urgent
 -- @tparam[opt=nil] string|color shape_border_color_urgent
 -- @see gears.color
@@ -291,30 +349,36 @@ local instances
 tasklist.filter, tasklist.source = {}, {}
 
 -- This is the same template as awful.widget.common, but with an clienticon widget
-local default_template = {
-    {
+local function default_template(self)
+    local has_no_icon = self._private.style.disable_icon
+        or self._private.style.tasklist_disable_icon
+        or beautiful.tasklist_disable_icon
+
+    return {
         {
-            clienticon,
-            id     = "icon_margin_role",
-            left   = dpi(4),
-            widget = wmargin
-        },
-        {
+            (not has_no_icon) and {
+                clienticon,
+                id     = "icon_margin_role",
+                left   = dpi(4),
+                widget = wmargin
+            } or nil,
             {
-                id     = "text_role",
-                widget = wtextbox,
+                {
+                    id     = "text_role",
+                    widget = wtextbox,
+                },
+                id     = "text_margin_role",
+                left   = dpi(4),
+                right  = dpi(4),
+                widget = wmargin
             },
-            id     = "text_margin_role",
-            left   = dpi(4),
-            right  = dpi(4),
-            widget = wmargin
+            fill_space = true,
+            layout     = wfixed.horizontal
         },
-        fill_space = true,
-        layout     = wfixed.horizontal
-    },
-    id     = "background_role",
-    widget = wbackground
-}
+        id     = "background_role",
+        widget = wbackground
+    }
+end
 
 local function tasklist_label(c, args, tb)
     if not args then args = {} end
@@ -492,14 +556,15 @@ local function tasklist_update(s, self, buttons, filter, data, style, update_fun
     end
 
     if self._private.last_count ~= #clients then
-        self:emit_signal("property::count", #clients, self._private.last_count)
+        local old = self._private.last_count
         self._private.last_count = #clients
+        self:emit_signal("property::count", #clients, old)
     end
 
     local function label(c, tb) return tasklist_label(c, style, tb) end
 
     update_function(self._private.base_layout, buttons, label, data, clients, {
-        widget_template = self._private.widget_template or default_template,
+        widget_template = self._private.widget_template or default_template(self),
         create_callback = create_callback,
     })
 end
