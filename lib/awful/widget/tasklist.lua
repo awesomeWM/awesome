@@ -243,14 +243,6 @@ local instances
 -- @beautiful beautiful.tasklist_minimized
 -- @tparam[opt=nil] string minimized
 
---- The tasklist font.
---
--- @DOC_wibox_awidget_tasklist_style_font_EXAMPLE@
---
--- @beautiful beautiful.tasklist_font
--- @tparam[opt=nil] string font
--- @see wibox.widget.textbox.font
-
 --- The focused client alignment.
 --
 -- @DOC_wibox_awidget_tasklist_style_align_EXAMPLE@
@@ -258,6 +250,13 @@ local instances
 -- @beautiful beautiful.tasklist_align
 -- @tparam[opt=left] string align *left*, *right* or *center*
 
+--- The tasklist font.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_EXAMPLE@
+--
+-- @beautiful beautiful.tasklist_font
+-- @tparam[opt=nil] string font
+-- @see wibox.widget.textbox.font
 
 --- The focused client title alignment.
 --
