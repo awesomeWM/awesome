@@ -404,6 +404,8 @@ target_link_libraries(test-gravity
     ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
 
 add_executable(test-systray tests/test-systray.c)
+add_dependencies(test-systray generated_sources)
+
 target_link_libraries(test-systray
     ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
 
