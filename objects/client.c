@@ -4328,7 +4328,8 @@ luaA_client_get_icon_sizes(lua_State *L, client_t *c)
  *
  * Note that this function tests the provided index and raise an "invalid icon
  * index" error if the provided index doesn't exist in the client's icons list
- * (by raising this error, the function will return `nil` to the caller).
+ * (by raising an error, the function will be stopped and nothing will be
+ * returned to the caller).
  *
  * @tparam interger index The index in the list of icons to get.
  * @treturn surface A lightuserdata for a cairo surface. This reference must be
