@@ -656,6 +656,10 @@ lua_class_t client_class;
  *    cr:set_source_surface(s, 0, 0)
  *    cr:paint()
  *
+ * (Note that `awesome.set_preferred_icon_size` defaults to `0` if it wasn't
+ * set. It means that, by default, the preferred icon provided will be the
+ * smallest available)
+ *
  * @property icon
  * @tparam surface icon
  * @propemits false false
