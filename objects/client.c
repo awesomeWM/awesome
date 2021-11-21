@@ -656,6 +656,10 @@ lua_class_t client_class;
  *    cr:set_source_surface(s, 0, 0)
  *    cr:paint()
  *
+ * (Note that `awesome.set_preferred_icon_size` defaults to `0` if it wasn't
+ * set. It means that, by default, the preferred icon provided will be the
+ * smallest available)
+ *
  * @property icon
  * @tparam surface icon
  * @propemits false false
@@ -4314,10 +4318,25 @@ luaA_client_get_icon_sizes(lua_State *L, client_t *c)
 
 /** Get the client's n-th icon.
  *
+ * The icon index can be deternined by inspecting the `icon_sizes` property first.
+ *
+ * The user has the responsibility to test the value returned by this function
+ * to ensure an icon have been returned.
+ *
+ * It is recommended to use the `awful.widget.clienticon` widget when the
+ * client icon is used in a widget structure.
+ *
+ * Note that this function tests the provided index and raise an "invalid icon
+ * index" error if the provided index doesn't exist in the client's icons list
+ * (by raising an error, the function will be stopped and nothing will be
+ * returned to the caller).
+ *
  * @tparam interger index The index in the list of icons to get.
  * @treturn surface A lightuserdata for a cairo surface. This reference must be
  * destroyed!
  * @method get_icon
+ * @see icon_sizes
+ * @see awful.widget.clienticon
  */
 static int
 luaA_client_get_some_icon(lua_State *L)
