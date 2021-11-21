@@ -46,6 +46,9 @@ local styles = { "year", "month", "yearheader", "monthheader", "header", "weekda
 -- @tparam cell_properties table Table of cell style properties
 
 --- Cell properties.
+--
+-- @DOC_awful_widget_calendar_popup_cell_properties_EXAMPLE@
+--
 -- @field markup Markup function or format string
 -- @field fg_color Text foreground color
 -- @field bg_color Text background color
