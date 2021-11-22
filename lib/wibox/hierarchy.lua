@@ -172,6 +172,10 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
     -- Are there any children which were removed? Their area needs a redraw.
     for _, child in ipairs(old_children) do
         local x, y, w, h = matrix.transform_rectangle(child._matrix_to_device, child:get_draw_extents())
+        x = math.floor(x)
+        y = math.floor(y)
+        w = math.ceil(w)
+        h = math.ceil(h)
         region:union_rectangle(cairo.RectangleInt{
             x = x, y = y, width = w, height = h
         })
