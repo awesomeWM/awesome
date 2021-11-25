@@ -144,8 +144,14 @@ function template:set_template(widget_template)
         or widget_template
         or wbase.empty_widget()
 
+    local widget_instance = wbase.make_widget_from_value(widget)
+
+    if widget_instance then
+        wbase.check_widget(widget_instance)
+    end
+
     self._private.template = widget
-    self._private.widget = wbase.make_widget_from_value(widget)
+    self._private.widget = widget_instance
 
     -- We need to connect to these signals to actually redraw the template
     -- widget when its child needs to.
