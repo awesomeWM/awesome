@@ -216,9 +216,8 @@ function template.new(args)
     ret:set_update_callback(args.update_callback)
     ret:set_update_now(args.update_now)
 
-    if args.buttons then
-        ret:set_buttons(args.buttons)
-    end
+    -- Apply the received buttons, visible, forced_width and so on
+    gtable.crush(ret, args)
 
     return ret
 end
