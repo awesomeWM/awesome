@@ -5,8 +5,8 @@
 
 _G.awesome.connect_signal = function() end
 
-local template = require("wibox.widget.template")
 local gtimer = require("gears.timer")
+local template = require("wibox.widget.template")
 
 describe("wibox.widget.template", function()
     local widget
@@ -15,7 +15,21 @@ describe("wibox.widget.template", function()
         widget = template()
     end)
 
-    describe("widget:update()", function()
+    describe(".new()", function()
+        it("update_now", function()
+            local spied_update_callback = spy.new(function() end)
+
+            template {
+                update_callback = function(...) spied_update_callback(...) end,
+                update_now = true,
+            }
+
+            gtimer.run_delayed_calls_now()
+            assert.spy(spied_update_callback).was.called()
+        end)
+    end)
+
+    describe(":update()", function()
         it("batch calls", function()
             local spied_update_callback = spy.new(function() end)
 
@@ -66,7 +80,6 @@ describe("wibox.widget.template", function()
                 match.is_same { foo = "bar", bar = 10 }
             )
         end)
-
     end)
 end)
 
