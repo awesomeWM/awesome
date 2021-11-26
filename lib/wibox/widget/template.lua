@@ -134,15 +134,13 @@ function template:update(args)
 end
 
 --- Change the widget template.
--- @tparam table|widget|function widget_template The new widget to use as a
+-- @tparam table|widget widget_template The new widget to use as a
 --   template.
 -- @method set_template
 -- @emits widget::redraw_needed
 -- @hidden
 function template:set_template(widget_template)
-    local widget = type(widget_template) == "function" and widget_template()
-        or widget_template
-        or wbase.empty_widget()
+    local widget = widget_template or wbase.empty_widget()
 
     local widget_instance = wbase.make_widget_from_value(widget)
 
@@ -204,7 +202,7 @@ end
 
 --- Create a new `wibox.widget.template` instance.
 -- @tparam[opt] table args
--- @tparam[opt] table|widget|function args.template The widget template to use.
+-- @tparam[opt] table|widget args.template The widget template to use.
 -- @tparam[opt] function args.update_callback The callback function to update
 --   the widget.
 -- @tparam[opt] boolean args.update_now Update the widget after its
