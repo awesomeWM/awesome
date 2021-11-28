@@ -32,7 +32,7 @@ sudo rpm -Uvh awesome-x.y.z.rpm
 
 ### Advanced options and testing
 
-A full list of dependencies, more advanced build options, as well as instructions on how to use the test suite can be found [here](https://awesomewm.org/apidoc/10-building-and-testing.md.html).
+A full list of dependencies, more advanced build options, as well as instructions on how to use the test suite can be found [here](https://awesomewm.org/apidoc/documentation/10-building-and-testing.md.html).
 
 ### Installing current git master as a package receipts
 
