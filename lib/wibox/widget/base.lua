@@ -11,6 +11,7 @@ local matrix = require("gears.matrix")
 local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 local gtable = require("gears.table")
+local wibox = require("wibox")
 local setmetatable = setmetatable
 local pairs = pairs
 local type = type
@@ -700,7 +701,7 @@ local function drill(ids, content)
     if not content then return end
 
     -- Alias `widget` to `layout` as they are handled the same way.
-    content.layout = content.layout or content.widget
+    content.layout = content.layout or content.widget or wibox.layout.fixed.horizontal
 
     -- Make sure the layout is not indexed on a function.
     local layout = type(content.layout) == "function" and  content.layout() or content.layout

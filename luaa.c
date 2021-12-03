@@ -1240,7 +1240,7 @@ luaA_loadrc(const char *confpath)
     const char *err = lua_tostring(L, -1);
     luaA_startup_error(err);
     fprintf(stderr, "%s\n", err);
-    /* An error happened, so reset this. */
+    /* An error occurred, so reset this. */
     conffile = NULL;
     /* Pop luaA_dofunction_on_error() and the error message */
     lua_pop(L, 2);
