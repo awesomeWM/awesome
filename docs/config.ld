@@ -102,6 +102,8 @@ new_type("staticfct", "Static module functions", false, "Parameters")
 new_type("property", "Object properties", false, "Type constraints")
 -- Documentation for objects deprecated properties
 new_type("deprecatedproperty", "Deprecated object properties", false, "Type constraints")
+-- Documentation for objects deprecated methods
+new_type("deprecatedmethod", "Deprecated object methods", false, "Parameters")
 -- Use a custom type for the methods to bypass the faulty ldoc built-in detection.
 -- (yes, the space after Methods *is* on purpose to avoid clashing with ldoc
 --  internal "methods" concept)
@@ -911,25 +913,28 @@ local display_type = {
 
 -- Add the `-> ret_type` annotation.
 local display_return_type = {
-    method    = true,
-    staticfct = true,
+    method           = true,
+    deprecatedmethod = true,
+    staticfct        = true,
 }
 
 -- Show return values.
 local show_return = {
-    ["function"]    = true,
-    constructorfct  = true,
-    constructorfct2 = true,
-    legacylayout    = true,
-    staticfct       = true,
-    method          = true,
-    deprecated      = true,
+    ["function"]     = true,
+    constructorfct   = true,
+    constructorfct2  = true,
+    legacylayout     = true,
+    staticfct        = true,
+    method           = true,
+    deprecated       = true,
+    deprecatedmethod = true,
 }
 
 -- The different type of deprecation.
 local is_deprecated = {
     deprecated         = true,
     deprecatedproperty = true,
+    deprecatedmethod   = true,
     deprecatedsignal   = true,
 }
 
@@ -975,12 +980,12 @@ custom_display_name_handler = function(item, default_handler)
         end
     end
 
-    if is_deprecated[item.type] then
-        return ret .. "<i class=\"deprecated_label\"> [deprecated]</i>"
+    if item.type:match("method") then
+        ret = render_methods(item)
     end
 
-    if item.type == "method" then
-        ret = render_methods(item)
+    if is_deprecated[item.type] then
+        return ret .. "<i class=\"deprecated_label\"> [deprecated]</i>"
     end
 
     -- Get rid of the "module:" in front of method names. It is either wrong or
