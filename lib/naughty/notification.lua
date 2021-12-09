@@ -1029,13 +1029,13 @@ local function create(args)
 
     n.id = n.id or notification._gen_next_id()
 
-    -- Register the notification before requesting a widget
-    n:emit_signal("new", args)
-
     -- The rules are attached to this.
     if naughty._has_preset_handler then
         naughty.emit_signal("request::preset", n, "new", args)
     end
+
+    -- Register the notification before requesting a widget
+    n:emit_signal("new", args)
 
     -- Let all listeners handle the actual visual aspects
     if (not n.ignore) and ((not n.preset) or n.preset.ignore ~= true) and (not get_suspended(n)) then
