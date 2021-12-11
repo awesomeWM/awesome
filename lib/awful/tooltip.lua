@@ -633,6 +633,8 @@ end
 -- @see align
 -- @constructorfct awful.tooltip
 function tooltip.new(args)
+    args = args or {}
+
     -- gears.object, properties are linked to set_/get_ functions
     local self = object {
         enable_properties = true,
