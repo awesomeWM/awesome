@@ -6,6 +6,8 @@
 
 local cairo = require("lgi").cairo
 local hierarchy = require("wibox.hierarchy")
+local gcolor = require("gears.color")
+local beautiful = nil
 
 local widget = {
     base = require("wibox.widget.base");
@@ -55,6 +57,10 @@ end
 function widget.draw_to_svg_file(wdg, path, width, height, context)
     local img = cairo.SvgSurface.create(path, width, height)
     local cr = cairo.Context(img)
+
+    beautiful = beautiful or require("beautiful")
+    cr:set_source(gcolor(beautiful.fg_normal))
+
     widget.draw_to_cairo_context(wdg, cr, width, height, context)
     img:finish()
 end
@@ -70,6 +76,10 @@ end
 function widget.draw_to_image_surface(wdg, width, height, format, context)
     local img = cairo.ImageSurface(format or cairo.Format.ARGB32, width, height)
     local cr = cairo.Context(img)
+
+    beautiful = beautiful or require("beautiful")
+    cr:set_source(gcolor(beautiful.fg_normal))
+
     widget.draw_to_cairo_context(wdg, cr, width, height, context)
     return img
 end

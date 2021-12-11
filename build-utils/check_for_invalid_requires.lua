@@ -62,7 +62,10 @@ local allowed_deps = {
         naughty = true,
     },
     -- TODO: Get rid of these
-    ["gears.surface"]        = { ["wibox.hierarchy"] = true },
+    ["gears.surface"]        = {
+        ["wibox.hierarchy"] = true,
+        beautiful = true,
+    },
 }
 
 -- Turn "foo.bar.baz" into "foo.bar". Returns nil if there is nothing more to
