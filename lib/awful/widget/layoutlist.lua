@@ -33,6 +33,7 @@ local gtable   = require("gears.table")
 local beautiful= require("beautiful")
 local alayout  = require("awful.layout")
 local surface  = require("gears.surface")
+local gcolor   = require("gears.color")
 
 local module = {}
 
@@ -84,7 +85,7 @@ local function wb_label(item, _, textbox)
     local text = ""
 
     if item.name then
-        text = "<span color='"..fg.."'>"..item.name..'</span>'
+        text = "<span color='"..gcolor.ensure_pango_color(fg, "#000000").."'>"..item.name..'</span>'
     end
 
     return text, bg, nil, item.icon, {
