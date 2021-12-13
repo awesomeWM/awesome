@@ -25,9 +25,18 @@ local function logo()
     return img
 end
 
+-- Use a cairo pattern for the foreground to allow improve the
+-- reliability of the find&replace documentation script. This
+-- will be post-processed to ensure the foreground color is
+-- inherited from the browser rather than hardcoded. In turn,
+-- this allows the accessibility mode to work and to define the
+-- color using our CSS template, which allows for light/dark
+-- themes to be implemented with a single image.
+local main_fg = cairo.Pattern.create_rgba(0.005, 0, 0.005, 1)
+
 -- Default theme for the documentation examples
 local module = {
-    fg_normal    = "#000000"  ,
+    fg_normal    = main_fg,
     bg_normal    = "#6181FF7D",
     bg_focus     = "#AA00FF7D",
     bg_highlight = "#AA00FF7D",
@@ -117,8 +126,9 @@ module.layout_cornersw = themes_path.."default/layouts/cornersww.png"
 module.layout_cornerse = themes_path.."default/layouts/cornersew.png"
 
 -- Taglist
-module.taglist_bg_focus = module.bg_highlight
-module.taglist_bg_used  = module.bg_normal
+module.taglist_bg_focus  = module.bg_highlight
+module.taglist_bg_used   = module.bg_normal
+module.taglist_bg_normal = module.bg_normal
 
 
 function module.get()
