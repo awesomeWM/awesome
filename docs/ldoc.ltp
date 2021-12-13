@@ -280,7 +280,7 @@
 #   local dn = display_name(item)
 #   local inherited = (item.baseclass ~= module.name)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
-    <tr>
+    <tr class="summary_row">
 #   if item.display_type and not item.compact_signature then
       <td class="shortname" $(nowrap)><a href="#$(item.name)">$(dn)</a></td>
       <td class="summarytype" nowrap>$(item.display_type)</td>

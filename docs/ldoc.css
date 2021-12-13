@@ -301,26 +301,22 @@ table.module_list td, table.function_list td {
     padding-bottom: 5px;
 }
 table.module_list td.name, table.function_list td.name {
-    background-color: white;
     min-width: 200px;
     border-left-width: 0px;
     border-right-width: 0px;
 }
 table.module_list td.summary, table.function_list td.summary {
-    background-color: white;
     width: 100%;
     border-left-width: 0px;
     border-right: none;
 }
 
 table.function_list td.shortname {
-    background-color: white;
     border-left-width: 0px;
     border-right-width: 0px;
 }
 
 table.function_list td.inheritance {
-    background-color: white;
     border-right-width: 0px;
     border-left-width: 0px;
     color: #a4c7ff;
@@ -338,7 +334,6 @@ span.inheritance {
 }
 
 .summarytype {
-    background-color: white;
     color: #a4c7ff;
     font-size: 85%;
     border-left: none;
@@ -386,7 +381,6 @@ table.function_list .function_named_args {
 }
 
 table.function_list td.baseclass {
-    background-color: white;
     color: #a4c7ff;
     min-width: 200px;
     border-left: none;
@@ -566,4 +560,12 @@ pre .url { color: #272fc2; text-decoration: underline; }
 
 .extra-header__section {
     flex-grow: 1;
+}
+
+.summary_row {
+    background-color: white;
+}
+
+.summary_row:hover {
+    background-color: #f7fbff;
 }
