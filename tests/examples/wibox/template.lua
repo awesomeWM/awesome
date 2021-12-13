@@ -4,6 +4,8 @@ require("_common_template")(...)
 local wibox   = require( "wibox"         )
 local surface = require( "gears.surface" )
 local cairo = require("lgi").cairo
+local color = require("gears.color")
+local beautiful = require("beautiful")
 
 --- Create a copy of the widget frozen in time.
 -- This is useful whe the global state is modified between the time this is
@@ -21,6 +23,8 @@ function _memento(wdg, width, height, context, force) -- luacheck: globals _meme
     )
 
     local cr = cairo.Context(memento)
+
+    cr:set_source(color(beautiful.fg_normal))
 
     wibox.widget.draw_to_cairo_context(wdg, cr, w, h, context)
 

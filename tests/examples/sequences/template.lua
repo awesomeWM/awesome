@@ -96,7 +96,7 @@ local function draw_lines()
         if (not self.widget_pos) or (not self.pager_pos) then return end
 
         cr:set_line_width(1)
-        cr:set_source_rgba(0,0,0,0.3)
+        cr:set_source(color.change_opacity(beautiful.fg_normal, 0.3))
 
         local count = #self.widget_pos
 
@@ -131,7 +131,7 @@ local function gen_vertical_line(args)
     local w = wibox.widget.base.make_widget()
 
     function w:draw(_, cr, w2, h)
-        cr:set_source_rgba(0,0,0,0.5)
+        cr:set_source(color.change_opacity(beautiful.fg_normal, 0.5))
 
         if args.begin then
             cr:rectangle(w2/2-0.5, h/2, 1, h/2)
@@ -147,7 +147,7 @@ local function gen_vertical_line(args)
             cr:arc(w2/2, args.center and h/2 or w2/2 ,bar_size/4, 0, 2*math.pi)
             cr:set_source_rgb(1,1,1)
             cr:fill_preserve()
-            cr:set_source_rgba(0,0,0,0.5)
+            cr:set_source(color.change_opacity(beautiful.fg_normal, 0.5))
             cr:stroke()
         end
     end
@@ -302,7 +302,8 @@ local function fake_arrange(tag)
         focus            = focus_wrap,
         geometries       = setmetatable({}, {__mode = "k"}),
         workarea         = tag.screen.workarea,
-        useless_gap      = tag.gaps or 4,
+        useless_gap      = tag.gaps or beautiful.useless_gap or 4,
+        gap_single_client= tag.gap_single_client or beautiful.gap_single_client or nil,
         apply_size_hints = false,
     }
 
@@ -355,14 +356,14 @@ local function gen_fake_clients(tag, args)
             cr:stroke()
 
             if show_name and type(geom.c) == "table" and geom.c.name then
-                cr:set_source_rgb(0, 0, 0)
+                cr:set_source(beautiful.fg_normal)
                 cr:move_to(x + 2, y + height - 2)
                 cr:show_text(geom.c.name)
             end
         end
 
         -- Draw the screen outline.
-        cr:set_source(color("#00000044"))
+        cr:set_source(color.change_opacity(beautiful.fg_normal, 0.1725))
         cr:set_line_width(1.5)
         cr:set_dash({10,4},1)
         cr:rectangle(0, 0, w, h)
@@ -447,7 +448,7 @@ local function gen_label(text)
 end
 
 local function draw_info(s, cr, factor)
-    cr:set_source_rgba(0, 0, 0, 0.4)
+    cr:set_source(color.change_opacity(beautiful.fg_normal, 0.4))
 
     local pctx    = PangoCairo.font_map_get_default():create_context()
     local playout = Pango.Layout.new(pctx)
@@ -639,7 +640,7 @@ local function gen_screens(l, screens, args)
         end
 
         function s.widget:draw(_, cr, w, h)
-            cr:set_source(color("#00000044"))
+            cr:set_source(color.change_opacity(beautiful.fg_normal, 0.1725))
             cr:set_line_width(1.5)
             cr:set_dash({10,4},1)
             cr:rectangle(1,1,w-2,h-2)

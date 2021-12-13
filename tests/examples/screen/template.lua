@@ -10,6 +10,7 @@ local Pango = require("lgi").Pango
 local PangoCairo = require("lgi").PangoCairo
 local color = require("gears.color")
 local aclient = require("awful.client")
+local beautiful = require("beautiful")
 
 -- Let the test request a size and file format
 local args = loadfile(file_path)() or 10
@@ -79,11 +80,11 @@ local function stripe_pat(col, angle, line_width, spacing)
 end
 
 local colors = {
-    geometry      = "#000000",
+    geometry      = beautiful.fg_normal,
     workarea      = "#0000ff",
     tiling_area   = "#ff0000",
     padding_area  = "#ff0000",
-    wibar         = "#000000",
+    wibar         = beautiful.fg_normal,
     tiling_client = "#ff0000",
     gaps          = "#9900ff",
 }
@@ -94,12 +95,12 @@ local function draw_area(_, rect, name, offset, highlight)
 
     if highlight then
         cr:save()
-        cr:set_source(stripe_pat(colors[name].."22", nil, 1, 3))
+        cr:set_source(stripe_pat(color.change_opacity(colors[name], 0.0863), nil, 1, 3))
         cr:fill_preserve()
         cr:restore()
     end
 
-    cr:set_source(color(colors[name].."44"))
+    cr:set_source(color.change_opacity(colors[name], 0.1725))
     cr:stroke()
 end
 
@@ -115,16 +116,16 @@ local function draw_bounding_area(_, rect, hole, name, offset)
 end
 
 local function draw_solid_area(_, rect, name, offset, alpha)
-    alpha = alpha or "59" -- Defaults to 35%
+    alpha = alpha or 0.2314 -- Defaults to 35%
     local x, y = rect.x*factor+offset, rect.y*factor+offset
     cr:rectangle(x, y, rect.width*factor, rect.height*factor)
 
     cr:save()
-    cr:set_source(color.create_solid_pattern(colors[name] .. alpha))
+    cr:set_source(color.change_opacity(colors[name], alpha))
     cr:fill_preserve()
     cr:restore()
 
-    cr:set_source(color(colors[name].."44"))
+    cr:set_source(color.change_opacity(colors[name], 0.0863))
     cr:stroke()
 end
 
@@ -141,7 +142,7 @@ local function write_on_area_middle(rect, text, offset)
     local _, logical = playout:get_pixel_extents()
     local dx = (rect.x*factor+offset) + (rect.width*factor - logical.width) / 2
     local dy  = (rect.y*factor+offset) + (rect.height*factor - logical.height) / 2
-    cr:set_source_rgb(0, 0, 0)
+    cr:set_source(beautiful.fg_normal)
     cr:move_to(dx, dy)
     cr:show_layout(playout)
 end
@@ -265,7 +266,7 @@ end
 
 local function draw_vruler(s, dx2, sx, ruler, layer)
     local pad = 5+(layer-1)*dx2
-    cr:set_source(color(ruler.color or (colors[ruler.label].."66")))
+    cr:set_source(color(ruler.color or (color.change_opacity(colors[ruler.label], 0.2588))))
     cr:move_to(sx+layer*dx2, ruler.y*factor)
     cr:line_to(sx+layer*dx2, ruler.y*factor+ruler.height*factor)
     cr:stroke()
@@ -291,7 +292,7 @@ end
 
 local function draw_hruler(s, dx2, sy, ruler, layer)
     local pad = 10+(layer-1)*(dx2 or 0)
-    cr:set_source(color(ruler.color or (colors[ruler.label].."66")))
+    cr:set_source(color(ruler.color or (color.change_opacity(colors[ruler.label], 0.2588))))
     cr:move_to(ruler.x*factor, sy+pad)
     cr:line_to(ruler.x*factor+ruler.width*factor, sy+pad)
     cr:stroke()
@@ -426,7 +427,7 @@ local function draw_gaps(s)
                 x     = offset.x+hgap[1]+tr_x,
                 width = math.ceil(hgap[2]-hgap[1]),
                 label = nil,
-                color = colors.gaps.."66",
+                color = color.change_opacity(colors.gaps, 0.2588),
                 align = true
             },
             1
@@ -442,7 +443,7 @@ local function draw_gaps(s)
                 y      = offset.y+vgap[1]+tr_y,
                 height = math.ceil(vgap[2]-vgap[1]),
                 label  = nil,
-                color  = colors.gaps.."66",
+                color  = color.change_opacity(colors.gaps, 0.2588),
                 align  = true
             },
             1
@@ -475,7 +476,12 @@ local function draw_struts(s)
             s,
             s.geometry.y*SCALE_FACTOR,
             get_text_height(),
-            {x = s.geometry.x+tr_x*2, width = left, color = colors.gaps.."66", align = true},
+            {
+                x     = s.geometry.x+tr_x*2,
+                width = left,
+                color = color.change_opacity(colors.gaps, 0.2588),
+                align = true
+            },
             1
         )
     end
@@ -485,7 +491,12 @@ local function draw_struts(s)
             s,
             get_text_height()*1.5,
             s.geometry.x*SCALE_FACTOR,
-            {y=s.geometry.y+tr_y*(1/factor), height = top, color = colors.gaps.."66", align = true},
+            {
+                y      = s.geometry.y+tr_y*(1/factor),
+                height = top,
+                color  = color.change_opacity(colors.gaps, 0.2588),
+                align  = true
+            },
             1
         )
     end
@@ -495,7 +506,12 @@ local function draw_struts(s)
             s,
             s.geometry.y*SCALE_FACTOR,
             get_text_height(),
-            {x = s.geometry.x, width = left, color = colors.gaps.."66", align = true},
+            {
+                x     = s.geometry.x,
+                width = left,
+                color = color.change_opacity(colors.gaps, 0.2588),
+                align = true
+            },
             1
         )
     end
@@ -508,7 +524,7 @@ local function draw_struts(s)
             {
                 y      = s.geometry.y+tr_y*(1/factor)+s.geometry.height - bottom,
                 height = bottom,
-                color  = colors.gaps.."66",
+                color  = color.change_opacity(colors.gaps, 0.2588),
                 align  = true
             },
             1
@@ -528,8 +544,19 @@ local function draw_mwfact(s)
 
     local w1, w2 = math.ceil(width*mwfact), math.ceil(width*(1-mwfact))
 
-    draw_hruler(s, offset, get_text_height(), {x=offset,width=w1,color = colors.gaps.."66", align=true}, 1)
-    draw_hruler(s, offset, get_text_height(), {x=offset+w1,width=w2,color = colors.gaps.."66", align=true}, 1)
+    draw_hruler(s, offset, get_text_height(), {
+        x     = offset,
+        width = w1,
+        color = color.change_opacity(colors.gaps, 0.2588),
+        align = true
+    }, 1)
+
+    draw_hruler(s, offset, get_text_height(), {
+        x     = offset+w1,
+        width = w2,
+        color = color.change_opacity(colors.gaps, 0.2588),
+        align = true
+    }, 1)
 
     cr:translate(tr_x, tr_y)
 end
@@ -560,7 +587,7 @@ local function draw_wfact(s)
             {
                 y      = math.floor(offset),
                 height =math.ceil( (height/sum) * windowfacts[1][i]),
-                color  = colors.gaps.."66",
+                color  = color.change_opacity(colors.gaps, 0.2588),
                 align  = true,
             },
             1
@@ -634,7 +661,7 @@ end
 -- end
 
 local function draw_info(s)
-    cr:set_source_rgb(0, 0, 0)
+    cr:set_source(beautiful.fg_normal)
 
     local pctx     = PangoCairo.font_map_get_default():create_context()
     local playout2 = Pango.Layout.new(pctx)
@@ -792,7 +819,7 @@ for k=1, screen.count() do
                         height = c.height + 2*gap,
                     }
 
-                    draw_client(s, proxy, 'gaps', (k-1)*10, nil, "11")
+                    draw_client(s, proxy, 'gaps', (k-1)*10, nil, 0.0431)
                 elseif args.draw_client_snap and c.floating then
                     local proxy = {
                         x      = c.x - sd,
@@ -801,7 +828,7 @@ for k=1, screen.count() do
                         height = c.height + 2*sd,
                     }
 
-                    draw_client(s, proxy, 'gaps', (k-1)*10, nil, "11")
+                    draw_client(s, proxy, 'gaps', (k-1)*10, nil, 0.0431)
                 end
 
                 draw_client(s, c, 'tiling_client', (k-1)*10, label)
