@@ -38,7 +38,7 @@
 # local use_li = ldoc.use_li
 # local display_name = ldoc.display_name
 # local iter = ldoc.modules.iter
-# local function un_cmake(s) return s:gsub("&#59", ";"):gsub("&#34", '"') end
+# local function un_cmake(s) return s:gsub("&#59", ";"):gsub("&#34", '"'):gsub('&amp;#34', '"') end
 # local function M(txt,item) return ldoc.markup(txt and un_cmake(txt) or nil,item,ldoc.plain) end
 # local nowrap = ldoc.wrap and '' or 'nowrap'
 # local html_space = function(s) return s:gsub(" ", "%%20") end
@@ -180,7 +180,7 @@
 <div id="content">
 
 # if ldoc.body then -- verbatim HTML as contents; 'non-code' entries
-    $(ldoc.body)
+    $(un_cmake(ldoc.body))
 # elseif module then -- module documentation
 <h1>Module: <code>$(module.name)</code></h1>
 <p>$(M(module.summary,module))</p>
