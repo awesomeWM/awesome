@@ -569,3 +569,8 @@ pre .url { color: #272fc2; text-decoration: underline; }
 .summary_row:hover {
     background-color: #f7fbff;
 }
+
+/* CSS for beautiful.fg_normal */
+.svg_stroke, .svg_fill {
+    color: black;
+}

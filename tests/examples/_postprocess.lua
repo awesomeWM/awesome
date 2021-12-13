@@ -25,6 +25,8 @@ if (not i) or (not o) then return end
 
 local line, count = i:read("*line"), 0
 
+local add_link = false
+
 while line do
     -- Deduplicate and concatenate the classes.
     local classes = {}
@@ -60,6 +62,13 @@ while line do
     end
 
     o:write(line .. "\n")
+
+    -- Add the stylesheet.
+    if line:sub(1, 6) == "<?xml " then
+        o:write('<?xml-stylesheet href="../ldoc.css" type="text/css"?>\n')
+    end
+
+    -- Next line.
     line = i:read("*line")
 end
 

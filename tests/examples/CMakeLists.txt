@@ -237,7 +237,7 @@ function(run_test test_path namespace escaped_content)
         set(OUTPUT_RAW_IMAGE_PATH "${RAW_IMAGE_PATH}.svg")
         set(OUTPUT_IMAGE_PATH "${IMAGE_PATH}.svg")
         escape_string(
-            "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.svg)\n"
+            "<object data=\"../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.svg\" alt=\"Usage example\" type=\"image/svg+xml\"></object>\n"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
     else()
