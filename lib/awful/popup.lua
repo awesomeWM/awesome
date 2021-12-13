@@ -367,10 +367,10 @@ end
 
 --- Set the placement function.
 --
--- @tparam[opt=next_to] function|string|boolean The placement function or name
 -- (or false to disable placement)
+--
 -- @property placement
--- @param function
+-- @tparam[opt=next_to] function|string|boolean placement The placement function or name
 -- @propemits true false
 -- @see awful.placement
 
