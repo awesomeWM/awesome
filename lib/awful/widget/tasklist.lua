@@ -14,14 +14,14 @@
 --  <th align='center'>Icon</th>
 --  <th align='center'>Client property</th>
 -- </tr>
--- <tr><td>▪</td><td><a href="./client.html#client.sticky">sticky</a></td></tr>
--- <tr><td>⌃</td><td><a href="./client.html#client.ontop">ontop</a></td></tr>
--- <tr><td>▴</td><td><a href="./client.html#client.above">above</a></td></tr>
--- <tr><td>▾</td><td><a href="./client.html#client.below">below</a></td></tr>
--- <tr><td>✈</td><td><a href="./client.html#client.floating">floating</a></td></tr>
--- <tr><td>+</td><td><a href="./client.html#client.maximized">maximized</a></td></tr>
--- <tr><td>⬌</td><td><a href="./client.html#client.maximized_horizontal">maximized_horizontal</a></td></tr>
--- <tr><td>⬍</td><td><a href="./client.html#client.maximized_vertical">maximized_vertical</a></td></tr>
+-- <tr><td>▪</td><td><a href="../core_components/client.html#sticky">sticky</a></td></tr>
+-- <tr><td>⌃</td><td><a href="../core_components/client.html#ontop">ontop</a></td></tr>
+-- <tr><td>▴</td><td><a href="../core_components/client.html#above">above</a></td></tr>
+-- <tr><td>▾</td><td><a href="../core_components/client.html#below">below</a></td></tr>
+-- <tr><td>✈</td><td><a href="../core_components/client.html#floating">floating</a></td></tr>
+-- <tr><td>+</td><td><a href="../core_components/client.html#maximized">maximized</a></td></tr>
+-- <tr><td>⬌</td><td><a href="../core_components/client.html#maximized_horizontal">maximized_horizontal</a></td></tr>
+-- <tr><td>⬍</td><td><a href="../core_components/client.html#maximized_vertical">maximized_vertical</a></td></tr>
 -- </table>
 --
 -- **Customizing the tasklist:**
