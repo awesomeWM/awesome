@@ -292,17 +292,20 @@
 #     end
       </td>
 #   end
-      <td colspan="$(inherited and 1 or 2)" class="summary">
+      <td class="summary">
         $(M(item.summary,item))
-#   if item.tags.readonly then
-        <span class="chips--readonly">read only</span>
-#   end
       </td>
-#   if inherited then
       <td class="baseclass" nowrap>
-        Inherited from $(item.baseclass)
-      </td>
+#   if item.tags.is_deprecated then
+        <span class="chips">Deprecated</span>
 #   end
+#   if item.tags.readonly then
+        <span class="chips">Read only</span>
+#   end
+#   if inherited then
+        <span class="chips">Inherited from $(item.baseclass)</span>
+#   end
+      </td>
     </tr>
 #  end end -- for items
 # last_kind = kind

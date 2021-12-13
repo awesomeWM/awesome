@@ -346,14 +346,18 @@ span.inheritance {
     text-align: right;
 }
 
-span.chips--readonly {
+span.chips {
   border: 1px solid #9db9f3;
   border-radius: 25px;
-  padding: 1px 3px;
-  font-size: 70%;
+  padding-left: 5pt;
+  padding-right: 5pt;
+  padding-top: 1pt;
+  padding-bottom: 1pt;
+  font-size: 85%;
   color: #9db9f3;
   background-color: #FFF;
   margin-left: 10px;
+  vertical-align: middle;
 }
 
 table.function_list .function_args /*.function_modname*/ {

@@ -591,12 +591,14 @@ local named_args = {
 
 -- Sections which are hidden by default, but visible when clicked.
 local summarize = {
-    emits         = {index = 1, title = "signal"          , count = true },
-    propemits     = {index = 2, title = "signal"          , count = true },
-    usebeautiful  = {index = 3, title = "theme variable"  , count = true },
-    propbeautiful = {index = 4, title = "theme variable"  , count = true },
-    request       = {index = 5, title = "permission"      , count = true },
-    classsignal   = {index = 6, title = "Class level only", count = false},
+    is_deprecated = {index = 1, title = "deprecated"      , count = false},
+    emits         = {index = 2, title = "signal"          , count = true },
+    propemits     = {index = 3, title = "signal"          , count = true },
+    usebeautiful  = {index = 4, title = "theme variable"  , count = true },
+    propbeautiful = {index = 5, title = "theme variable"  , count = true },
+    request       = {index = 6, title = "permission"      , count = true },
+    classsignal   = {index = 7, title = "Class level only", count = false},
+    readonly      = {index = 8, title = "read only"       , count = false},
 }
 
 local delimiter_for_tag = {
@@ -644,9 +646,6 @@ local function generate_summary(item)
             ret[#ret+1] = v
             has_show_more = v.showcount or has_show_more
         end
-    end
-    if item.tags.readonly then
-        ret[#ret+1] = {title = "read only"}
     end
 
     item.extra_summary = #ret > 0 and ret or nil
@@ -939,6 +938,10 @@ local is_deprecated = {
 }
 
 custom_display_name_handler = function(item, default_handler)
+    if is_deprecated[item.type] then
+        item.tags.is_deprecated = {true}
+    end
+
     init_custom_types(item)
 
     local ret = default_handler(item)
@@ -982,10 +985,6 @@ custom_display_name_handler = function(item, default_handler)
 
     if item.type:match("method") then
         ret = render_methods(item)
-    end
-
-    if is_deprecated[item.type] then
-        return ret .. "<i class=\"deprecated_label\"> [deprecated]</i>"
     end
 
     -- Get rid of the "module:" in front of method names. It is either wrong or
