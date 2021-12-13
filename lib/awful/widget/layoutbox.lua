@@ -47,6 +47,7 @@ end
 
 --- Create a layoutbox widget. It draws a picture with the current layout
 -- symbol of the current tag.
+-- @constructorfct awful.widget.layoutbox
 -- @tparam table args The arguments.
 -- @tparam screen args.screen The screen number that the layout will be represented for.
 -- @tparam table args.buttons The `awful.button`s for this layoutbox.
