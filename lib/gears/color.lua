@@ -355,6 +355,22 @@ function color.recolor_image(image, new_color)
     return image
 end
 
+--- Take an input color and set a different opacity.
+--
+-- @staticfct gears.color.change_opacity
+-- @tparam string|pattern input The input color.
+-- @tparam number opacity A floating point number between 0 and 1.
+-- @treturn The new color if successful or `input` if invalid.
+function color.change_opacity(input, opacity)
+    input = color.create_pattern(input)
+
+    local error, r, g, b, _ = input:get_rgba()
+
+    if error ~= "SUCCESS" then return input end
+
+    return cairo.Pattern.create_rgba(r, g, b, opacity)
+end
+
 --- Convert a color back to an hexadecimal color code.
 --
 -- This takes an input color, pattern or gradient and attempt to convert it
