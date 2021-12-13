@@ -820,6 +820,12 @@ end
 -- @param shape A shape function
 -- @return A transformation handle, also act as a shape function
 -- @staticfct gears.shape.transform
+-- @see gears.matrix.translate
+-- @see gears.matrix.scale
+-- @see gears.matrix.rotate
+-- @see gears.matrix.rotate_at
+-- @see gears.matrix.multiply
+-- @see gears.matrix.invert
 function module.transform(shape)
 
     -- Apply the transformation matrix and apply the shape, then restore
