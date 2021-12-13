@@ -867,6 +867,16 @@ local function sanitize_return_type(item, ldoc)
     item.compact_signature = true
 end
 
+-- Work around the fact that tag/awful.tag client/awful.client pages
+-- are merged.
+local function compare_module_name(input, module)
+    for _, mod in ipairs { module, "awful."..module } do
+        if input:sub(1, #mod) == mod then return true end
+    end
+
+    return false
+end
+
 local no_prefix = {
     property           = true,
     signal             = true,
@@ -976,9 +986,11 @@ custom_display_name_handler = function(item, default_handler)
     -- have "just" `bar`. Given we use constructors from metatables, we have no
     -- choice but to use the full function name. It also makes copy/paste easier.
     if add_mod[item.type] then
+        local is_field = item.type == "field" or item.type == "tfield"
+
         if (not ret:find(".", 1, true)) and (not ret:find(":", 1, true))  then
             ret = item.module.name .. "." .. ret
-        elseif item.type == "field" and ret:sub(1, #item.module.name) ~= item.module.name then
+        elseif is_field and not compare_module_name(ret, item.module.name) then
             ret = item.module.name .. "." .. ret
         end
     end
