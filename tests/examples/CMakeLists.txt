@@ -71,7 +71,9 @@ ${LUA_PATH_}")
 set(LUA_COV_RUNNER env -u LUA_PATH_5_1 -u LUA_PATH_5_2 -u LUA_PATH_5_3 "LUA_PATH=${LUA_PATH_}" "AWESOME_THEMES_PATH=${TOP_SOURCE_DIR}/themes/" "SOURCE_DIRECTORY=${TOP_SOURCE_DIR}" ${LUA_COV_RUNNER})
 
 # The documentation images directory.
+set(RAW_IMAGE_DIR "${CMAKE_BINARY_DIR}/raw_images")
 set(IMAGE_DIR "${CMAKE_BINARY_DIR}/doc/images")
+file(MAKE_DIRECTORY "${RAW_IMAGE_DIR}")
 file(MAKE_DIRECTORY "${IMAGE_DIR}")
 
 # Escape potentially multiline strings to be part of the API doc.
@@ -221,6 +223,7 @@ function(run_test test_path namespace escaped_content)
 
     # Get the file name without the extension.
     get_filename_component(${test_path} TEST_FILE_NAME NAME)
+    set(RAW_IMAGE_PATH "${RAW_IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
     set(IMAGE_PATH "${IMAGE_DIR}/AUTOGEN${namespace}_${TEST_FILE_NAME}")
 
     # Read the code and turn it into an usage example.
@@ -231,12 +234,14 @@ function(run_test test_path namespace escaped_content)
 
     # Does the test generate an output image?
     if(tmp_content MATCHES "--DOC_GEN_IMAGE")
+        set(OUTPUT_RAW_IMAGE_PATH "${RAW_IMAGE_PATH}.svg")
         set(OUTPUT_IMAGE_PATH "${IMAGE_PATH}.svg")
         escape_string(
             "![Usage example](../images/AUTOGEN${namespace}_${TEST_FILE_NAME}.svg)\n"
             "${TEST_DOC_CONTENT}" TEST_DOC_CONTENT ""
         )
     else()
+        set(OUTPUT_RAW_IMAGE_PATH "")
         set(OUTPUT_IMAGE_PATH "")
     endif()
 
@@ -294,30 +299,44 @@ function(run_test test_path namespace escaped_content)
     STRING(REPLACE "/" "-" TARGET_NAME ${TARGET_NAME})
     set(EXAMPLE_DOC_TEST_TARGETS ${EXAMPLE_DOC_TEST_TARGETS} ${TARGET_NAME}
         PARENT_SCOPE)
-    add_custom_target(${TARGET_NAME}
-        COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH}
+    add_custom_target(${TARGET_NAME}_RAW
+        COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${RAW_IMAGE_PATH}
         VERBATIM)
 
-    if(NOT ${OUTPUT_IMAGE_PATH} STREQUAL "")
-        file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_IMAGE_PATH}")
+    add_custom_target(${TARGET_NAME}
+        COMMAND "${TOP_SOURCE_DIR}/tests/examples/_postprocess.lua" ${OUTPUT_RAW_IMAGE_PATH} "${OUTPUT_IMAGE_PATH}"
+        VERBATIM
+        DEPENDS ${TARGET_NAME}_RAW "${TOP_SOURCE_DIR}/tests/examples/_postprocess.lua"
+    )
+
+
+    if(NOT ${OUTPUT_RAW_IMAGE_PATH} STREQUAL "")
+        file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_RAW_IMAGE_PATH}")
         if(tmp_content MATCHES "--DOC_GEN_OUTPUT")
             add_custom_command(
-                COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
+                COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${RAW_IMAGE_PATH} ${IGNORE_ERRORS}
                 # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
                 DEPENDS ${template} ${test_path}
-                OUTPUT  ${OUTPUT_IMAGE_PATH}
+                OUTPUT  ${OUTPUT_RAW_IMAGE_PATH}
                 OUTPUT  ${expected_output_path}
                 VERBATIM)
         else()
             add_custom_command(
-                COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${IMAGE_PATH} ${IGNORE_ERRORS}
+                COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} ${RAW_IMAGE_PATH} ${IGNORE_ERRORS}
                 # COMMENT "Running ${rel_test_path} (via ${rel_template}, generating ${rel_output})"
                 DEPENDS ${template} ${test_path}
-                OUTPUT  ${OUTPUT_IMAGE_PATH}
+                OUTPUT  ${OUTPUT_RAW_IMAGE_PATH}
                 VERBATIM)
         endif()
-        set(EXAMPLE_DOC_GENERATED_FILES ${OUTPUT_IMAGE_PATH} ${EXAMPLE_DOC_GENERATED_FILES}
-            PARENT_SCOPE)
+
+        add_custom_command(
+            COMMAND "${TOP_SOURCE_DIR}/tests/examples/_postprocess.lua" ${OUTPUT_RAW_IMAGE_PATH} "${OUTPUT_IMAGE_PATH}"
+            DEPENDS ${template} ${test_path} ${OUTPUT_RAW_IMAGE_PATH} "${TOP_SOURCE_DIR}/tests/examples/_postprocess.lua"
+            OUTPUT  "${OUTPUT_IMAGE_PATH}"
+            VERBATIM)
+
+        set(EXAMPLE_DOC_GENERATED_FILES "${OUTPUT_IMAGE_PATH}" ${EXAMPLE_DOC_GENERATED_FILES} PARENT_SCOPE)
+
     elseif(tmp_content MATCHES "--DOC_GEN_OUTPUT")
         add_custom_command(
             COMMAND "${TOP_SOURCE_DIR}/tests/examples/runner.sh" "${expected_output_path}" ${LUA_COV_RUNNER} ${template} ${test_path} "" ${IGNORE_ERRORS}
@@ -338,7 +357,8 @@ file(GLOB_RECURSE test_files FOLLOW_SYMLINKS LIST_DIRECTORIES false
 # Find and run all test files.
 foreach(file ${test_files})
     if ((NOT "${file}" MATCHES ".*/shims/.*")
-        AND (NOT "${file}" MATCHES ".*/template.lua"))
+        AND (NOT "${file}" MATCHES ".*/template.lua")
+        AND (NOT "${file}" MATCHES ".*/_.*[.]lua"))
 
         # Get the file name without the extension.
         get_filename_component(TEST_FILE_NAME ${file} NAME_WE)
