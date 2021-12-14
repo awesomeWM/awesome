@@ -3,60 +3,15 @@
 Core components relationship
 ===
 
-<table><tr>
-<td valign="top"><table class='widget_list' border=1>
-  <colgroup span="3"></colgroup>
- <tr><th align='center' colspan=3 scope=colgroup>Acquire other objects from a tag</th></tr>
- <tr style='font-weight: bold;'>
-  <th align='center'>Class</th>
-  <th align='center'></th>
-  <th align='center'>Property</th>
- </tr>
-<tr>
-  <td>client</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_tag1.svg"></td>
-  <td>t:clients()</td>
- </tr>
-<tr>
-  <td>screen</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_tag2.svg"></td>
-  <td>t.screen</td>
- </tr>
-</table></td>
-<td valign="top"><table class='widget_list' border=1>
-  <colgroup span="3"></colgroup>
- <tr><th align='center' colspan=3 scope=colgroup>Acquire a tag from other objects</th></tr>
- <tr style='font-weight: bold;'>
-  <th align='center'>Class</th>
-  <th align='center'></th>
-  <th align='center'>Property</th>
- </tr>
-<tr>
-  <td>client</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_tag3.svg"></td>
-  <td>c.tags</td>
- </tr>
-<tr>
-  <td>screen</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_tag4.svg"></td>
-  <td>s.tags</td>
- </tr>
-<tr>
-  <td>screen</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_tag5.svg"></td>
-  <td>s.selected_tag</td>
- </tr>
-<tr>
-  <td>screen</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_tag6.svg"></td>
-  <td>s.selected_tags</td>
- </tr>
-</table></td>
-</tr><tr>
-  <td colspan=2 style="color:#00000044">
-  <b>Legend:</b> <i>c</i>: a client object, <i>t</i>: a tag object,
-  <i>s</i>: a screen object, <i>k</i>: an awful.key object,
-  <i>b</i>: a awful.button object, <i>n</i>: a naughty.notification object
-  </td>
- </tr>
-</table>
+<div class="components-relationship"><div class="components-relationship--diagrams">
+<div class="components-relationship--diagram"><table class='widget_list' border=1><colgroup span="3"></colgroup><tr><th align='center' colspan=3 scope=colgroup>Acquire other objects from a tag</th></tr><tr style='font-weight: bold;'><th align='center'>Class</th><th align='center'></th><th align='center'>Property</th></tr>
+<tr><td>client</td><td><img src="../images/AUTOGEN_uml_nav_tables_tag1.svg"></td><td>t:clients()</td></tr>
+<tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_tag2.svg"></td><td>t.screen</td></tr>
+</table></div>
+<div class="components-relationship--diagram"><table class='widget_list' border=1><colgroup span="3"></colgroup><tr><th align='center' colspan=3 scope=colgroup>Acquire a tag from other objects</th></tr><tr style='font-weight: bold;'><th align='center'>Class</th><th align='center'></th><th align='center'>Property</th></tr>
+<tr><td>client</td><td><img src="../images/AUTOGEN_uml_nav_tables_tag3.svg"></td><td>c.tags</td></tr>
+<tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_tag4.svg"></td><td>s.tags</td></tr>
+<tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_tag5.svg"></td><td>s.selected_tag</td></tr>
+<tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_tag6.svg"></td><td>s.selected_tags</td></tr>
+</table></div>
+</div><div class="components-relationship--legend"><b>Legend:</b> <i>c</i>: a client object, <i>t</i>: a tag object, <i>s</i>: a screen object, <i>k</i>: an awful.key object, <i>b</i>: a awful.button object, <i>n</i>: a naughty.notification object</div></div> <!-- .components-relationship -->

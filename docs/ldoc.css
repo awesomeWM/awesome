@@ -64,6 +64,10 @@ dd > code {
     margin-right: 5px;
 }
 
+#main {
+    display: flex;
+}
+
 #navigation {
     float: left;
     background-color: white;
@@ -183,10 +187,6 @@ table.index td {
 
 #navigation li li a {
     margin: 0px 3px 0px -1em;
-}
-
-#content {
-    margin-left: 14em;
 }
 
 #content p {
@@ -573,4 +573,50 @@ pre .url { color: #272fc2; text-decoration: underline; }
 /* CSS for beautiful.fg_normal */
 .svg_stroke, .svg_fill {
     color: black;
+}
+
+#content > .components-relationship {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.components-relationship--diagrams {
+    display: flex;
+    flex-direction: column;
+}
+
+.components-relationship--diagram {
+    flex-grow: 1;
+    flex-basis: 100%;
+}
+
+.components-relationship--diagram > table {
+    margin: 0;
+    width: 100%;
+}
+
+.components-relationship--diagram + .components-relationship--diagram {
+    margin-top: 15px;
+}
+
+/* on wide displays, put both diagrams next to each other */
+@media all and (min-width: 1100px) {
+    .components-relationship--diagrams {
+        flex-direction: row;
+    }
+
+    .components-relationship--diagram {
+        flex-grow: 1;
+        flex-basis: 50%;
+    }
+
+    .components-relationship--diagram + .components-relationship--diagram {
+        margin-top: 0;
+        margin-left: 15px;
+    }
+}
+
+.components-relationship--legend {
+    color: #00000044;
+    margin-top: 15px;
 }

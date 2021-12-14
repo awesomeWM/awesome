@@ -3,75 +3,18 @@
 Core components relationship
 ===
 
-<table><tr>
-<td valign="top"><table class='widget_list' border=1>
-  <colgroup span="3"></colgroup>
- <tr><th align='center' colspan=3 scope=colgroup>Acquire other objects from a client</th></tr>
- <tr style='font-weight: bold;'>
-  <th align='center'>Class</th>
-  <th align='center'></th>
-  <th align='center'>Property</th>
- </tr>
-<tr>
-  <td>tag</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client1.svg"></td>
-  <td>c.tags</td>
- </tr>
-<tr>
-  <td>screen</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client2.svg"></td>
-  <td>c.screen</td>
- </tr>
-<tr>
-  <td>awful.key</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client3.svg"></td>
-  <td>c:keys()</td>
- </tr>
-<tr>
-  <td>awful.button</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client4.svg"></td>
-  <td>c:buttons()</td>
- </tr>
-</table></td>
-<td valign="top"><table class='widget_list' border=1>
-  <colgroup span="3"></colgroup>
- <tr><th align='center' colspan=3 scope=colgroup>Acquire a client from other objects</th></tr>
- <tr style='font-weight: bold;'>
-  <th align='center'>Class</th>
-  <th align='center'></th>
-  <th align='center'>Property</th>
- </tr>
-<tr>
-  <td>tag</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client5.svg"></td>
-  <td>t:clients()</td>
- </tr>
-<tr>
-  <td>screen</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client6.svg"></td>
-  <td>s.clients</td>
- </tr>
-<tr>
-  <td>screen</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client7.svg"></td>
-  <td>s.hidden_clients</td>
- </tr>
-<tr>
-  <td>screen</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client8.svg"></td>
-  <td>s.tiled_clients</td>
- </tr>
-<tr>
-  <td>mouse</td>
-  <td><img src="../images/AUTOGEN_uml_nav_tables_client9.svg"></td>
-  <td>mouse.current_client</td>
- </tr>
-</table></td>
-</tr><tr>
-  <td colspan=2 style="color:#00000044">
-  <b>Legend:</b> <i>c</i>: a client object, <i>t</i>: a tag object,
-  <i>s</i>: a screen object, <i>k</i>: an awful.key object,
-  <i>b</i>: a awful.button object, <i>n</i>: a naughty.notification object
-  </td>
- </tr>
-</table>
+<div class="components-relationship"><div class="components-relationship--diagrams">
+<div class="components-relationship--diagram"><table class='widget_list' border=1><colgroup span="3"></colgroup><tr><th align='center' colspan=3 scope=colgroup>Acquire other objects from a client</th></tr><tr style='font-weight: bold;'><th align='center'>Class</th><th align='center'></th><th align='center'>Property</th></tr>
+<tr><td>tag</td><td><img src="../images/AUTOGEN_uml_nav_tables_client1.svg"></td><td>c.tags</td></tr>
+<tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_client2.svg"></td><td>c.screen</td></tr>
+<tr><td>awful.key</td><td><img src="../images/AUTOGEN_uml_nav_tables_client3.svg"></td><td>c:keys()</td></tr>
+<tr><td>awful.button</td><td><img src="../images/AUTOGEN_uml_nav_tables_client4.svg"></td><td>c:buttons()</td></tr>
+</table></div>
+<div class="components-relationship--diagram"><table class='widget_list' border=1><colgroup span="3"></colgroup><tr><th align='center' colspan=3 scope=colgroup>Acquire a client from other objects</th></tr><tr style='font-weight: bold;'><th align='center'>Class</th><th align='center'></th><th align='center'>Property</th></tr>
+<tr><td>tag</td><td><img src="../images/AUTOGEN_uml_nav_tables_client5.svg"></td><td>t:clients()</td></tr>
+<tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_client6.svg"></td><td>s.clients</td></tr>
+<tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_client7.svg"></td><td>s.hidden_clients</td></tr>
+<tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_client8.svg"></td><td>s.tiled_clients</td></tr>
+<tr><td>mouse</td><td><img src="../images/AUTOGEN_uml_nav_tables_client9.svg"></td><td>mouse.current_client</td></tr>
+</table></div>
+</div><div class="components-relationship--legend"><b>Legend:</b> <i>c</i>: a client object, <i>t</i>: a tag object, <i>s</i>: a screen object, <i>k</i>: an awful.key object, <i>b</i>: a awful.button object, <i>n</i>: a naughty.notification object</div></div> <!-- .components-relationship -->
