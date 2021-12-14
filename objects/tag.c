@@ -286,7 +286,7 @@ lua_class_t tag_class;
 
 /** Get the number of instances.
  *
- * @return The number of tag objects alive.
+ * @treturn table The number of tag objects alive.
  * @staticfct instances
  */
 
@@ -457,7 +457,7 @@ luaA_tag_new(lua_State *L)
  *
  * @tparam[opt=nil] table clients_table None or a table of clients to set as being tagged with
  *  this tag.
- * @return A table with the clients attached to this tags.
+ * @treturn table A table with the clients attached to this tags.
  * @method clients
  */
 static int

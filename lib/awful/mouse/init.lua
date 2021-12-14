@@ -35,12 +35,12 @@ mouse.wibox = {}
 --
 -- @DOC_screen_client_snap_EXAMPLE@
 --
--- @tfield integer snap.default_distance
+-- @tfield integer awful.mouse.snap.default_distance
 -- @tparam[opt=8] integer default_distance
 -- @see awful.mouse.snap
 
 --- The default distance before activating screen edge snap.
--- @tfield integer snap.aerosnap_distance
+-- @tfield integer awful.mouse.snap.aerosnap_distance
 -- @tparam[opt=16] integer aerosnap_distance
 -- @see awful.mouse.snap
 
@@ -48,15 +48,15 @@ mouse.wibox = {}
 --
 --@DOC_awful_placement_aero_snap_EXAMPLE@
 --
--- @tfield[opt=true] boolean snap.edge_enabled
+-- @tfield[opt=true] boolean awful.mouse.snap.edge_enabled
 -- @tparam boolean edge_enabled
 
 --- Enable client to client snapping.
--- @tfield[opt=true] boolean snap.client_enabled
+-- @tfield[opt=true] boolean awful.mouse.snap.client_enabled
 -- @tparam boolean client_enabled
 
 --- Enable changing tag when a client is dragged to the edge of the screen.
--- @tfield[opt=false] boolean drag_to_tag.enabled
+-- @tfield[opt=false] boolean awful.mouse.drag_to_tag.enabled
 -- @tparam boolean enabled
 
 --- The snap outline background color.
@@ -65,7 +65,7 @@ mouse.wibox = {}
 
 --- The snap outline width.
 -- @beautiful beautiful.snap_border_width
--- @param integer
+-- @tparam integer snap_border_width
 
 --- The snap outline shape.
 -- @beautiful beautiful.snap_shape
@@ -75,9 +75,17 @@ mouse.wibox = {}
 -- @beautiful beautiful.snapper_gap
 -- @tparam[opt=0] number snapper_gap
 
+--- The resize cursor name.
+-- @beautiful beautiful.cursor_mouse_resize
+-- @tparam[opt=cross] string cursor
+
+--- The move cursor name.
+-- @beautiful beautiful.cursor_mouse_move
+-- @tparam[opt=fleur] string cursor
+
 --- Get the client object under the pointer.
 -- @deprecated awful.mouse.client_under_pointer
--- @return The client object under the pointer, if one can be found.
+-- @treturn client|nil The client object under the pointer, if one can be found.
 -- @see current_client
 function mouse.client_under_pointer()
     gdebug.deprecate("Use mouse.current_client instead of awful.mouse.client_under_pointer()", {deprecated_in=4})
@@ -222,15 +230,15 @@ end
 
 --- True if the left mouse button is pressed.
 -- @property is_left_mouse_button_pressed
--- @param boolean
+-- @tparam boolean is_left_mouse_button_pressed
 
 --- True if the right mouse button is pressed.
 -- @property is_right_mouse_button_pressed
--- @param boolean
+-- @tparam boolean is_right_mouse_button_pressed
 
 --- True if the middle mouse button is pressed.
 -- @property is_middle_mouse_button_pressed
--- @param boolean
+-- @tparam boolean is_right_mouse_button_pressed
 
 --- Add an `awful.button` based mousebinding to the global set.
 --
@@ -252,6 +260,7 @@ end
 -- no focused client. If your intent is too add a mousebinding which acts on
 -- the focused client do **not** use this
 --
+-- @staticfct awful.mouse.append_global_mousebindings
 -- @tparam table buttons A table of `awful.button` objects. Optionally, it can have
 --  a `group` entry. If set, the `group` property will be set on all `awful.buttons`
 --  objects.
@@ -387,11 +396,13 @@ end)
 -- @tparam[opt=nil] integer coords_table.y The mouse vertical position
 -- @tparam[opt=false] boolean silent Disable mouse::enter or mouse::leave events that
 --  could be triggered by the pointer when moving.
--- @treturn integer table.x The horizontal position
--- @treturn integer table.y The vertical position
--- @treturn table table.buttons Table containing the status of buttons, e.g. field [1] is true
---  when button 1 is pressed.
+-- @treturn table The coords. It contains the `x`, `y` and `buttons` keys.
+--  `buttons` contains the button number as key and a boolean as value (if it is
+--  pressed).
 -- @staticfct mouse.coords
+-- @see is_left_mouse_button_pressed
+-- @see is_right_mouse_button_pressed
+-- @see is_middle_mouse_button_pressed
 
 capi.client.connect_signal("scanning", function()
     capi.client.emit_signal("request::default_mousebindings", "startup")

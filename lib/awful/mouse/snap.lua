@@ -191,13 +191,15 @@ local function snap_inside(g, sg, snap)
 end
 
 --- Snap a client to the closest client or screen edge.
+--
 -- @function awful.mouse.snap
--- @param c The client to snap.
--- @param snap The pixel to snap clients.
--- @param x The client x coordinate.
--- @param y The client y coordinate.
--- @param fixed_x True if the client isn't allowed to move in the x direction.
--- @param fixed_y True if the client isn't allowed to move in the y direction.
+-- @tparam[opt=client.focus] client c The client to snap.
+-- @tparam integer snap The pixel to snap clients.
+-- @tparam integer x The client x coordinate.
+-- @tparam integer y The client y coordinate.
+-- @tparam boolean fixed_x True if the client isn't allowed to move in the x direction.
+-- @tparam boolean fixed_y True if the client isn't allowed to move in the y direction.
+-- @treturn table The new geometry.
 function module.snap(c, snap, x, y, fixed_x, fixed_y)
     snap = snap or module.default_distance
     c = c or capi.client.focus

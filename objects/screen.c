@@ -167,18 +167,17 @@
 /**
  * The screen coordinates.
  *
- * **Signal:**
- *
- *  * *property::geometry*
+ * The returned table contains the `x`, `y`, `width` and `height` keys.
  *
  * @DOC_screen_geometry_EXAMPLE@
  *
  * @property geometry
- * @param table
- * @tfield integer table.x The horizontal position
- * @tfield integer table.y The vertical position
- * @tfield integer table.width The width
- * @tfield integer table.height The height
+ * @tparam table geometry
+ * @tfield integer table.x The horizontal position.
+ * @tfield integer table.y The vertical position.
+ * @tfield integer table.width The width.
+ * @tfield integer table.height The height.
+ * @propemits false false
  * @readonly
  */
 
@@ -208,7 +207,7 @@
  *     screen[1].answer = 42
  *
  * @property index
- * @param integer
+ * @tparam integer index
  * @see screen
  * @readonly
  */
@@ -222,26 +221,23 @@
  *
  * It can be modified be altering the `wibox` or `client` struts.
  *
- * **Signal:**
- *
- *  * *property::workarea*
- *
  * @DOC_screen_workarea_EXAMPLE@
  *
  * @property workarea
- * @see client.struts
- * @param table
+ * @tparam table workarea
  * @tfield integer table.x The horizontal position
  * @tfield integer table.y The vertical position
  * @tfield integer table.width The width
  * @tfield integer table.height The height
+ * @propemits false false
+ * @see client.struts
  * @readonly
  */
 
 
 /** Get the number of instances.
  *
- * @return The number of screen objects alive.
+ * @treturn table The number of screen objects alive.
  * @staticfct instances
  */
 
@@ -1657,7 +1653,7 @@ luaA_screen_get_name(lua_State *L, screen_t *s)
 
 /** Get the number of screens.
  *
- * @return The screen count, at least 1.
+ * @treturn number The screen count.
  * @staticfct count
  */
 static int
@@ -1683,7 +1679,7 @@ luaA_screen_count(lua_State *L)
  * @tparam integer y Y-coordinate for screen.
  * @tparam integer width width for screen.
  * @tparam integer height height for screen.
- * @return The new screen.
+ * @treturn screen The new screen.
  * @constructorfct fake_add
  */
 static int

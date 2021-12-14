@@ -33,14 +33,6 @@ local cursors = {
     ["mouse.resize_bottom_right"] = "bottom_right_corner",
 }
 
---- The resize cursor name.
--- @beautiful beautiful.cursor_mouse_resize
--- @tparam[opt=cross] string cursor
-
---- The move cursor name.
--- @beautiful beautiful.cursor_mouse_move
--- @tparam[opt=fleur] string cursor
-
 --- Set the resize mode.
 -- The available modes are:
 --

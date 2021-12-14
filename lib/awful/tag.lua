@@ -205,8 +205,8 @@ end
 
 --- Move a tag to an absolute position in the screen[]:tags() table.
 -- @deprecated awful.tag.move
--- @param new_index Integer absolute position in the table to insert.
--- @param target_tag The tag that should be moved. If null, the currently
+-- @tparam integer new_index Integer absolute position in the table to insert.
+-- @tparam tag target_tag The tag that should be moved. If null, the currently
 -- selected tag is used.
 -- @see index
 function tag.move(new_index, target_tag)
@@ -243,8 +243,8 @@ end
 --- Swap 2 tags
 -- @deprecated awful.tag.swap
 -- @see tag.swap
--- @param tag1 The first tag
--- @param tag2 The second tag
+-- @tparam tag tag1 The first tag
+-- @tparam tag tag2 The second tag
 function tag.swap(tag1, tag2)
     gdebug.deprecate("Use t:swap(tag2) instead of awful.tag.swap", {deprecated_in=4})
 
@@ -263,7 +263,7 @@ end
 -- @constructorfct awful.tag.add
 -- @tparam string name The tag name, a string
 -- @tparam[opt=nil] table|nil props The tags initial properties, a table
--- @return The created tag
+-- @treturn tag The created tag.
 -- @see tag.delete
 function tag.add(name, props)
     local properties = props or {}
@@ -397,7 +397,7 @@ end
 --  stickied tags to.
 -- @tparam[opt=false] boolean force Move even non-sticky clients to the fallback
 -- tag.
--- @return Returns true if the tag is successfully deleted.
+-- @treturn boolean Returns true if the tag is successfully deleted.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
@@ -465,9 +465,9 @@ end
 --- Delete a tag.
 -- @deprecated awful.tag.delete
 -- @see tag.delete
--- @param target_tag Optional tag object to delete. [selected()]
--- @param fallback_tag Tag to assign stickied tags to. [~selected()]
--- @return Returns true if the tag is successfully deleted, nil otherwise.
+-- @tparam tag target_tag Optional tag object to delete. [selected()]
+-- @tparam tag|nil fallback_tag Tag to assign stickied tags to. [~selected()]
+-- @treturn boolean Returns true if the tag is successfully deleted, nil otherwise.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
@@ -558,7 +558,7 @@ end
 --- Get a list of all tags on a screen
 -- @deprecated awful.tag.gettags
 -- @tparam screen s Screen
--- @return A table with all available tags
+-- @treturn table A table with all available tags
 -- @see screen.tags
 function tag.gettags(s)
     gdebug.deprecate("Use s.tags instead of awful.tag.gettags", {deprecated_in=4})
@@ -571,7 +571,7 @@ end
 --- Find a tag by name.
 -- @tparam screen s The screen of the tag
 -- @tparam string name The name of the tag
--- @return The tag found, or `nil`
+-- @treturn tag|nil The tag found, or `nil`
 -- @staticfct awful.tag.find_by_name
 -- @usage -- For the current screen
 -- local t = awful.tag.find_by_name(awful.screen.focused(), "name")
@@ -637,8 +637,8 @@ end
 --- Set a tag's screen
 -- @deprecated awful.tag.setscreen
 -- @see screen
--- @param s Screen
--- @param t tag object
+-- @tparam screen s Screen
+-- @tparam tag t tag object
 function tag.setscreen(s, t)
     -- For API consistency, the arguments have been swapped for Awesome 3.6
     -- this method is already deprecated, so be silent and swap the args
@@ -654,8 +654,8 @@ end
 --- Get a tag's screen
 -- @deprecated awful.tag.getscreen
 -- @see screen
--- @param[opt] t tag object
--- @return Screen number
+-- @tparam[opt] tag|nil t tag object
+-- @treturn screen The tag screen.
 function tag.getscreen(t)
     gdebug.deprecate("Use t.screen instead of awful.tag.getscreen(t)", {deprecated_in=4})
 
@@ -668,8 +668,8 @@ end
 
 --- Return a table with all visible tags
 -- @deprecated awful.tag.selectedlist
--- @param s Screen.
--- @return A table with all selected tags.
+-- @tparam screen s Screen.
+-- @treturn table A table with all selected tags.
 -- @see screen.selected_tags
 function tag.selectedlist(s)
     gdebug.deprecate("Use s.selected_tags instead of awful.tag.selectedlist", {deprecated_in=4})
@@ -681,7 +681,7 @@ end
 
 --- Return only the first visible tag.
 -- @deprecated awful.tag.selected
--- @param s Screen.
+-- @tparam screen s Screen.
 -- @see screen.selected_tag
 function tag.selected(s)
     gdebug.deprecate("Use s.selected_tag instead of awful.tag.selected", {deprecated_in=4})
@@ -694,7 +694,7 @@ end
 --- The default master width factor
 --
 -- @beautiful beautiful.master_width_factor
--- @param number (default: 0.5)
+-- @tparam number master_width_factor (default: 0.5)
 -- @see master_width_factor
 -- @see gap
 
@@ -740,8 +740,8 @@ end
 -- @deprecated awful.tag.setmwfact
 -- @see master_fill_policy
 -- @see master_width_factor
--- @param mwfact Master width factor.
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam number mwfact Master width factor.
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.setmwfact(mwfact, t)
     gdebug.deprecate("Use t.master_width_factor = mwfact instead of awful.tag.setmwfact", {deprecated_in=4})
 
@@ -762,7 +762,7 @@ end
 -- @deprecated awful.tag.getmwfact
 -- @see master_width_factor
 -- @see master_fill_policy
--- @param[opt] t The tag.
+-- @tparam[opt] tag|nil t The tag.
 function tag.getmwfact(t)
     gdebug.deprecate("Use t.master_width_factor instead of awful.tag.getmwfact", {deprecated_in=4})
 
@@ -795,6 +795,8 @@ end
 --     }
 --
 -- @tfield table awful.tag.layouts
+-- @tparam[opt={}] table awful.tag.layouts
+-- @see request::layouts
 
 --- The tag client layout.
 --
@@ -1003,7 +1005,7 @@ end
 -- @deprecated awful.tag.setlayout
 -- @see layout
 -- @param layout a layout table or a constructor function
--- @param t The tag to modify
+-- @tparam tag t The tag to modify
 -- @return The layout
 function tag.setlayout(layout, t)
     gdebug.deprecate("Use t.layout = layout instead of awful.tag.setlayout", {deprecated_in=4})
@@ -1053,7 +1055,7 @@ end
 -- @deprecated awful.tag.setvolatile
 -- @see volatile
 -- @tparam boolean volatile If the tag must be deleted when the last client is untagged
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.setvolatile(volatile, t)
     gdebug.deprecate("Use t.volatile = volatile instead of awful.tag.setvolatile", {deprecated_in=4})
 
@@ -1063,7 +1065,7 @@ end
 --- Get if the tag must be deleted when the last client closes
 -- @deprecated awful.tag.getvolatile
 -- @see volatile
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
 -- @treturn boolean If the tag will be deleted when the last client is untagged
 function tag.getvolatile(t)
     gdebug.deprecate("Use t.volatile instead of awful.tag.getvolatile", {deprecated_in=4})
@@ -1074,7 +1076,7 @@ end
 --- The default gap.
 --
 -- @beautiful beautiful.useless_gap
--- @param number (default: 0)
+-- @tparam tag number (default: 0)
 -- @see gap
 -- @see gap_single_client
 
@@ -1112,8 +1114,8 @@ end
 --- Set the spacing between clients
 -- @deprecated awful.tag.setgap
 -- @see gap
--- @param useless_gap The spacing between clients
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam number|nil useless_gap The spacing between clients
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.setgap(useless_gap, t)
     gdebug.deprecate("Use t.gap = useless_gap instead of awful.tag.setgap", {deprecated_in=4})
 
@@ -1133,7 +1135,7 @@ end
 --- Enable gaps for a single client.
 --
 -- @beautiful beautiful.gap_single_client
--- @param boolean (default: true)
+-- @tparam boolean gap_single_client (default: true)
 -- @see gap
 -- @see gap_single_client
 
@@ -1199,7 +1201,7 @@ end
 --   `master_width_factor`
 --
 -- @beautiful beautiful.master_fill_policy
--- @param string (default: "expand")
+-- @tparam string master_fill_policy (default: "expand")
 -- @see master_fill_policy
 
 --- Set size fill policy for the master client(s).
@@ -1283,7 +1285,7 @@ end
 --- The default number of master windows.
 --
 -- @beautiful beautiful.master_count
--- @param integer (default: 1)
+-- @tparam integer master_count (default: 1)
 -- @see master_count
 
 --- Set the number of master windows.
@@ -1312,8 +1314,8 @@ end
 --- The number of master clients.
 -- @deprecated awful.tag.setnmaster
 -- @see master_count
--- @param nmaster The number of master windows.
--- @param[opt] t The tag.
+-- @tparam nmaster The number of master windows.
+-- @tparam[opt] tag t The tag.
 function tag.setnmaster(nmaster, t)
     gdebug.deprecate("Use t.master_count = nmaster instead of awful.tag.setnmaster", {deprecated_in=4})
 
@@ -1323,7 +1325,7 @@ end
 --- Get the number of master windows.
 -- @deprecated awful.tag.getnmaster
 -- @see master_count
--- @param[opt] t The tag.
+-- @tparam[opt] tag t The tag.
 function tag.getnmaster(t)
     gdebug.deprecate("Use t.master_count instead of awful.tag.setnmaster", {deprecated_in=4})
 
@@ -1375,7 +1377,7 @@ end
 --- Set the tag icon
 -- @deprecated awful.tag.seticon
 -- @see icon
--- @param icon the icon to set, either path or image object
+-- @tparam gears.surface|string icon the icon to set, either path or image object
 -- @tparam tag tag the tag
 function tag.seticon(icon, _tag)
     gdebug.deprecate("Use t.icon = icon instead of awful.tag.seticon", {deprecated_in=4})
@@ -1398,7 +1400,7 @@ end
 --- The default number of columns.
 --
 -- @beautiful beautiful.column_count
--- @param integer (default: 1)
+-- @tparam integer column_count (default: 1)
 -- @see column_count
 
 --- Set the number of columns.
@@ -1427,8 +1429,8 @@ end
 --- Set number of column windows.
 -- @deprecated awful.tag.setncol
 -- @see column_count
--- @param ncol The number of column.
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam integer ncol The number of column.
+-- @tparam tag t The tag to modify, if null tag.selected() is used.
 function tag.setncol(ncol, t)
     gdebug.deprecate("Use t.column_count = new_index instead of awful.tag.setncol", {deprecated_in=4})
 
@@ -1442,7 +1444,7 @@ end
 --- Get number of column windows.
 -- @deprecated awful.tag.getncol
 -- @see column_count
--- @param[opt] t The tag.
+-- @tparam[opt] tag t The tag.
 function tag.getncol(t)
     gdebug.deprecate("Use t.column_count instead of awful.tag.getncol", {deprecated_in=4})
 
@@ -1530,8 +1532,8 @@ end
 --- Get a tag's index in the gettags() table.
 -- @deprecated awful.tag.getidx
 -- @see index
--- @param query_tag The tag object to find. [selected()]
--- @return The index of the tag, nil if the tag is not found.
+-- @tparam tag query_tag The tag object to find. [selected()]
+-- @treturn integer|nil The index of the tag, nil if the tag is not found.
 function tag.getidx(query_tag)
     gdebug.deprecate("Use t.index instead of awful.tag.getidx", {deprecated_in=4})
 
@@ -1651,7 +1653,7 @@ end
 --
 -- @deprecated awful.tag.getdata
 -- @tparam tag t The tag.
--- @return The data table.
+-- @treturn table The data table.
 function tag.getdata(t)
     return t._private.awful_tag_properties
 end
@@ -1679,8 +1681,8 @@ end
 -- Use `t.prop = value`
 --
 -- @deprecated awful.tag.setproperty
--- @param t The tag.
--- @param prop The property name.
+-- @tparam tag t The tag.
+-- @tparam string prop The property name.
 -- @param value The value.
 function tag.setproperty(t, prop, value)
     if not t._private.awful_tag_properties then
@@ -1695,7 +1697,7 @@ end
 
 --- Tag a client with the set of current tags.
 -- @deprecated awful.tag.withcurrent
--- @param c The client to tag.
+-- @tparam client c The client to tag.
 function tag.withcurrent(c)
     gdebug.deprecate("Use c:to_selected_tags() instead of awful.tag.selectedlist", {deprecated_in=4})
 
@@ -1809,12 +1811,12 @@ capi.tag.connect_signal("request::select", tag.object.view_only)
 
 --- Emitted when the number of urgent clients on this tag changes.
 -- @signal property::urgent
--- @param boolean `true` if there is at least one urgent client on the tag.
+-- @tparam boolean urgent `true` if there is at least one urgent client on the tag.
 -- @see client.urgent
 
 --- Emitted when the number of urgent clients on this tag changes.
 -- @signal property::urgent_count
--- @param integer The number of urgent clients on the tag.
+-- @tparam integer count The number of urgent clients on the tag.
 -- @see client.urgent
 
 --- Emitted when a screen is removed.

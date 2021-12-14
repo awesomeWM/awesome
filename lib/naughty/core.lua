@@ -102,7 +102,7 @@ gtable.crush(naughty, require("naughty.constants"))
 -- useful when watching movies or doing presentations.
 --
 -- @property suspended
--- @param boolean
+-- @tparam boolean suspended
 -- @emits added
 -- @propemits true false
 
@@ -113,7 +113,7 @@ gtable.crush(naughty, require("naughty.constants"))
 -- just vanish.
 --
 -- @property expiration_paused
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean expiration_paused
 -- @propemits true false
 
 --- A table with all active notifications.
@@ -125,12 +125,12 @@ gtable.crush(naughty, require("naughty.constants"))
 -- * property::active
 --
 -- @property active
--- @param table
+-- @tparam table active
 -- @propemits false false
 
 --- True when there is a handler connected to `request::display`.
 -- @property has_display_handler
--- @param boolean
+-- @tparam boolean has_display_handler
 
 --- If the timeout needs to be reset when a property changes.
 --
@@ -148,7 +148,7 @@ gtable.crush(naughty, require("naughty.constants"))
 -- support for this and enabling it will cause bugs.
 --
 -- @property image_animations_enabled
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean image_animations_enabled
 -- @propemits true false
 
 --- Enable or disable the persistent notifications.
@@ -164,7 +164,7 @@ gtable.crush(naughty, require("naughty.constants"))
 -- that.
 --
 -- @property persistence_enabled
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean persistence_enabled
 -- @propemits true false
 
 local properties = {
@@ -339,9 +339,9 @@ end
 -- This function is deprecated in favor of
 -- `notification:destroy(reason, keep_visible)`.
 --
--- @param notification Notification object to be destroyed
--- @param reason One of the reasons from `notification_closed_reason`
--- @param[opt=false] keep_visible If true, keep the notification visible
+-- @tparam naughty.notification notification Notification object to be destroyed
+-- @tparam string reason One of the reasons from `notification_closed_reason`
+-- @tparam[opt=false] boolean keep_visible If true, keep the notification visible
 -- @return True if the popup was successfully destroyed, nil otherwise
 -- @deprecated naughty.destroy
 function naughty.destroy(notification, reason, keep_visible)
@@ -385,8 +385,8 @@ end
 
 --- Get notification by ID
 --
--- @param id ID of the notification
--- @return notification object if it was found, nil otherwise
+-- @tparam integer id ID of the notification
+-- @treturn naughty.notification|nil notification object if it was found, nil otherwise
 -- @deprecated naughty.getById
 function naughty.getById(id)
     gdebug.deprecate("Use naughty.get_by_id", {deprecated_in=5})
@@ -395,8 +395,8 @@ end
 
 --- Get notification by ID
 --
--- @param id ID of the notification
--- @return notification object if it was found, nil otherwise
+-- @tparam integer id ID of the notification
+-- @treturn naughty.notification|nil notification object if it was found, nil otherwise
 -- @staticfct naughty.get_by_id
 function naughty.get_by_id(id)
     -- iterate the notifications to get the notfications with the correct ID

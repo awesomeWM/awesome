@@ -901,49 +901,50 @@ end
 
 --- Create a notification.
 --
--- @tparam table args The argument table containing any of the arguments below.
--- @string[opt=""] args.text Text of the notification.
--- @string[opt] args.title Title of the notification.
--- @int[opt=5] args.timeout Time in seconds after which popup expires.
+-- @tparam[opt={}] table args The argument table containing any of the arguments below.
+-- @tparam[opt=""] string args.text Text of the notification.
+-- @tparam[opt] string args.title Title of the notification.
+-- @tparam[opt=5] integer args.timeout Time in seconds after which popup expires.
 --   Set 0 for no timeout.
--- @int[opt] args.hover_timeout Delay in seconds after which hovered popup disappears.
+-- @tparam[opt] number args.hover_timeout Delay in seconds after which hovered popup disappears.
 -- @tparam[opt=focused] integer|screen args.screen Target screen for the notification.
--- @string[opt="top_right"] args.position Corner of the workarea displaying the popups.
+-- @tparam[opt="top_right"] string args.position Corner of the workarea displaying the popups.
 --   Values: `"top_right"`, `"top_left"`, `"bottom_left"`,
 --   `"bottom_right"`, `"top_middle"`, `"bottom_middle"`, `"middle"`.
--- @bool[opt=true] args.ontop Boolean forcing popups to display on top.
--- @int[opt=`beautiful.notification_height` or auto] args.height Popup height.
--- @int[opt=`beautiful.notification_width` or auto] args.width Popup width.
--- @string[opt=`beautiful.notification_font` or `beautiful.font` or `awesome.font`] args.font Notification font.
--- @string[opt] args.icon Path to icon.
--- @int[opt] args.icon_size Desired icon size in px.
--- @string[opt=`beautiful.notification_fg` or `beautiful.fg_focus` or `'#ffffff'`] args.fg Foreground color.
--- @string[opt=`beautiful.notification_fg` or `beautiful.bg_focus` or `'#535d6c'`] args.bg Background color.
--- @int[opt=`beautiful.notification_border_width` or 1] args.border_width Border width.
--- @string[opt=`beautiful.notification_border_color` or
---   `beautiful.border_color_active` or `'#535d6c'`] args.border_color Border color.
+-- @tparam[opt=true] boolean args.ontop Boolean forcing popups to display on top.
+-- @tparam[opt=`beautiful.notification_height` or auto] integer args.height Popup height.
+-- @tparam[opt=`beautiful.notification_width` or auto] integer args.width Popup width.
+-- @tparam[opt=`beautiful.notification_font` or `beautiful.font` or `awesome.font`] string|lgi.Pango.FontDescription args.font Notification font.
+-- @tparam[opt] gears.surface args.icon Path to icon.
+-- @tparam[opt] integer args.icon_size Desired icon size in px.
+-- @tparam[opt=`beautiful.notification_fg` or `beautiful.fg_focus` or `'#ffffff'`] string args.fg Foreground color.
+-- @tparam[opt=`beautiful.notification_fg` or `beautiful.bg_focus` or `'#535d6c'`] string args.bg Background color.
+-- @tparam[opt=`beautiful.notification_border_width` or 1] integer args.border_width Border width.
+-- @tparam[opt=`beautiful.notification_border_color` or `beautiful.border_color_active` or `'#535d6c'`] gears.color args.border_color Border color.
 -- @tparam[opt=`beautiful.notification_shape`] gears.shape args.shape Widget shape.
 -- @tparam[opt=`beautiful.notification_opacity`] gears.opacity args.opacity Widget opacity.
 -- @tparam[opt=`beautiful.notification_margin`] gears.margin args.margin Widget margin.
--- @tparam[opt] func args.run Function to run on left click.  The notification
+-- @tparam[opt] function args.run Function to run on left click.  The notification
 --   object will be passed to it as an argument.
 --   You need to call e.g.
 --   `notification.die(naughty.notification_closed_reason.dismissedByUser)` from
 --   there to dismiss the notification yourself.
--- @tparam[opt] func args.destroy Function to run when notification is destroyed.
+-- @tparam[opt] function args.destroy Function to run when notification is destroyed.
 -- @tparam[opt] table args.preset Table with any of the above parameters.
 --   Note: Any parameters specified directly in args will override ones defined
 --   in the preset.
--- @tparam[opt] func args.callback Function that will be called with all arguments.
+-- @tparam[opt] function args.callback Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.
 -- @tparam[opt] table args.actions A list of `naughty.action`s.
--- @bool[opt=false] args.ignore_suspend If set to true this notification
+-- @tparam[opt=false] boolean args.ignore_suspend If set to true this notification
 --   will be shown even if notifications are suspended via `naughty.suspend`.
--- @usage naughty.notify({ title = "Achtung!", message = "You're idling", timeout = 0 })
--- @treturn ?table The notification object, or nil in case a notification was
---   not displayed.
+-- @treturn naughty.notification A new notification object.
 -- @constructorfct naughty.notification
+-- @usage naughty.notification {
+--     title   = "Achtung!",
+--     message = "You're idling", timeout = 0
+-- }
 local function create(args)
     if cst.config.notify_callback then
         args = cst.config.notify_callback(args)

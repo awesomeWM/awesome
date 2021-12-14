@@ -427,7 +427,7 @@ luaA_root_buttons(lua_State *L)
  *
  *@DOC_cursor_c_COMMON@
  *
- * @param cursor_name A X cursor name.
+ * @tparam string cursor_name A X cursor name.
  * @staticfct cursor
  */
 static int
@@ -453,7 +453,7 @@ luaA_root_cursor(lua_State *L)
 
 /** Get the drawins attached to a screen.
  *
- * @return A table with all drawins.
+ * @treturn table A table with all drawins.
  * @staticfct drawins
  */
 static int
@@ -474,7 +474,8 @@ luaA_root_drawins(lua_State *L)
  *
  * @param pattern A cairo pattern as light userdata
  * @return A cairo surface or nothing.
- * @staticfct wallpaper
+ * @deprecated wallpaper
+ * @see awful.wallpaper
  */
 static int
 luaA_root_wallpaper(lua_State *L)
@@ -515,7 +516,7 @@ luaA_root_get_content(lua_State *L)
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.screen->root,
                                        globalconf.default_visual,
-                                       globalconf.screen->width_in_pixels, 
+                                       globalconf.screen->width_in_pixels,
                                        globalconf.screen->height_in_pixels);
 
     lua_pushlightuserdata(L, surface);
@@ -525,8 +526,8 @@ luaA_root_get_content(lua_State *L)
 
 /** Get the size of the root window.
  *
- * @return Width of the root window.
- * @return height of the root window.
+ * @treturn integer Width of the root window.
+ * @treturn integer height of the root window.
  * @staticfct size
  */
 static int
@@ -539,8 +540,8 @@ luaA_root_size(lua_State *L)
 
 /** Get the physical size of the root window, in millimeter.
  *
- * @return Width of the root window, in millimeters.
- * @return height of the root window, in millimeters.
+ * @treturn integer Width of the root window, in millimeters.
+ * @treturn integer height of the root window, in millimeters.
  * @staticfct size_mm
  */
 static int
@@ -552,7 +553,7 @@ luaA_root_size_mm(lua_State *L)
 }
 
 /** Get the attached tags.
- * @return A table with all tags.
+ * @treturn table A table with all tags.
  * @staticfct tags
  */
 static int

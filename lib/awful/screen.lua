@@ -49,10 +49,10 @@ end
 
 --- Get the square distance between a `screen` and a point.
 -- @deprecated awful.screen.getdistance_sq
--- @param s Screen
--- @param x X coordinate of point
--- @param y Y coordinate of point
--- @return The squared distance of the screen to the provided point.
+-- @tparam screen s Screen
+-- @tparam integer x X coordinate of point
+-- @tparam integer y Y coordinate of point
+-- @treturn number The squared distance of the screen to the provided point.
 -- @see screen.get_square_distance
 function screen.getdistance_sq(s, x, y)
     gdebug.deprecate("Use s:get_square_distance(x, y) instead of awful.screen.getdistance_sq", {deprecated_in=4})
@@ -90,7 +90,7 @@ end
 -- This moves the mouse pointer to the last known position on the new screen,
 -- or keeps its position relative to the current focused screen.
 -- @staticfct awful.screen.focus
--- @tparam screen _screen Screen number (defaults / falls back to mouse.screen).
+-- @tparam screen screen Screen number (defaults / falls back to mouse.screen).
 -- @request client activate screen.focus granted The most recent focused client
 --  for this screen should be re-activated.
 function screen.focus(_screen)
@@ -134,8 +134,8 @@ end
 -- the specified direction.
 --
 -- @method get_next_in_direction
--- @param self Screen.
--- @param dir The direction, can be either "up", "down", "left" or "right".
+-- @tparam string dir The direction, can be either "up", "down", "left" or "right".
+-- @treturn screen The next screen.
 function screen.object.get_next_in_direction(self, dir)
     local sel = get_screen(self)
     if not sel then
@@ -156,7 +156,8 @@ end
 -- or keeps its position relative to the current focused screen.
 -- @staticfct awful.screen.focus_bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
--- @tparam screen s Screen.
+-- @tparam[opt=awful.screen.focused()] screen s Screen.
+-- @treturn screen The next screen.
 function screen.focus_bydirection(dir, s)
     local sel = get_screen(s or screen.focused())
     local target = sel:get_next_in_direction(dir)
@@ -228,8 +229,8 @@ end
 --- Get or set the screen padding.
 --
 -- @deprecated awful.screen.padding
--- @param s The screen object to change the padding on
--- @param[opt=nil] padding The padding, a table with 'top', 'left', 'right' and/or
+-- @tparam screen s The screen object to change the padding on.
+-- @tparam[opt=nil] table|integer|nil padding The padding, a table with 'top', 'left', 'right' and/or
 -- 'bottom' or a number value to apply set the same padding on all sides. Can be
 --  nil if you only want to retrieve padding
 -- @treturn table A table with left, right, top and bottom number values.
@@ -253,7 +254,7 @@ end
 -- @DOC_screen_padding_EXAMPLE@
 --
 -- @property padding
--- @param table
+-- @tparam table padding
 -- @tfield integer table.left The padding on the left.
 -- @tfield integer table.right The padding on the right.
 -- @tfield integer table.top The padding on the top.
@@ -304,7 +305,7 @@ end
 --  * *property::outputs*
 --
 -- @property outputs
--- @param table
+-- @tparam table outputs
 -- @tfield table table.name A table with the screen name as key (like `eDP1` on a laptop)
 -- @tfield integer table.mm_width The screen physical width.
 -- @tfield integer table.mm_height The screen physical height.
@@ -439,7 +440,7 @@ end
 -- default.
 --
 -- @property clients
--- @param table The clients list, ordered from top to bottom.
+-- @tparam table clients The clients list, ordered from top to bottom.
 -- @see all_clients
 -- @see hidden_clients
 -- @see client.get
@@ -467,7 +468,7 @@ end
 -- This includes minimized clients and clients on hidden tags.
 --
 -- @property hidden_clients
--- @param table The clients list, ordered from top to bottom.
+-- @tparam table hidden_clients The clients list, ordered from top to bottom.
 -- @see clients
 -- @see all_clients
 -- @see client.get
@@ -486,7 +487,7 @@ end
 --- All clients assigned to the screen.
 --
 -- @property all_clients
--- @param table The clients list, ordered from top to bottom.
+-- @tparam table all_clients The clients list, ordered from top to bottom.
 -- @see clients
 -- @see hidden_clients
 -- @see client.get
@@ -513,7 +514,7 @@ end
 -- @DOC_screen_tiled_clients_EXAMPLE@
 --
 -- @property tiled_clients
--- @param table The clients list, ordered from top to bottom.
+-- @tparam table tiled_clients The clients list, ordered from top to bottom.
 
 --- Get tiled clients for the screen.
 --
@@ -548,7 +549,7 @@ function screen.connect_for_each_screen(func)
     capi.screen.connect_signal("added", func)
 end
 
---- Undo the effect of connect_for_each_screen.
+--- Undo the effect of `awful.screen.connect_for_each_screen`.
 -- @staticfct awful.screen.disconnect_for_each_screen
 -- @tparam function func The function that should no longer be called.
 function screen.disconnect_for_each_screen(func)
@@ -561,7 +562,7 @@ end
 -- `awful.tag.new` or `t:delete()` to alter this list.
 --
 -- @property tags
--- @param table
+-- @tparam table tags
 -- @treturn table A table with all available tags.
 -- @readonly
 
@@ -585,7 +586,7 @@ end
 
 --- A list of all selected tags on the screen.
 -- @property selected_tags
--- @param table
+-- @tparam table selected_tags
 -- @treturn table A table with all selected tags.
 -- @readonly
 -- @see tag.selected
@@ -605,7 +606,7 @@ end
 
 --- The first selected tag.
 -- @property selected_tag
--- @param tag
+-- @tparam tag selected_tag
 -- @treturn ?tag The first selected tag or nil.
 -- @readonly
 -- @see tag.selected
@@ -753,16 +754,16 @@ end
 -- screen is duplicated on a projector).
 --
 -- @property dpi
--- @param number the DPI value.
+-- @tparam number dpi The DPI value.
 
 --- The lowest density DPI from all of the (physical) outputs.
 -- @property minimum_dpi
--- @param number the DPI value.
+-- @tparam number minimum_dpi The DPI value.
 -- @readonly
 
 --- The highest density DPI from all of the (physical) outputs.
 -- @property maximum_dpi
--- @param number the DPI value.
+-- @tparam number maximum_dpi The DPI value.
 -- @readonly
 
 --- The preferred DPI from all of the (physical) outputs.
@@ -771,28 +772,28 @@ end
 -- the lowest of the resulting virtual DPIs.
 --
 -- @property preferred_dpi
--- @param number the DPI value.
+-- @tparam number preferred_dpi the DPI value.
 -- @readonly
 
 --- The maximum diagonal size in millimeters.
 --
 -- @property mm_maximum_size
--- @param number
+-- @tparam number mm_maximum_size
 
 --- The minimum diagonal size in millimeters.
 --
 -- @property mm_minimum_size
--- @param number
+-- @tparam number mm_minimum_size
 
 --- The maximum diagonal size in inches.
 --
 -- @property inch_maximum_size
--- @param number
+-- @tparam number inch_maximum_size
 
 --- The minimum diagonal size in inches.
 --
 -- @property inch_minimum_size
--- @param number
+-- @tparam number inch_minimum_size
 
 --- Emitted when a new screen is added.
 --

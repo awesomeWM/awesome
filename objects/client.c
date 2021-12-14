@@ -4351,7 +4351,7 @@ luaA_client_get_icon_sizes(lua_State *L, client_t *c)
  * (by raising an error, the function will be stopped and nothing will be
  * returned to the caller).
  *
- * @tparam interger index The index in the list of icons to get.
+ * @tparam integer index The index in the list of icons to get.
  * @treturn surface A lightuserdata for a cairo surface. This reference must be
  * destroyed!
  * @method get_icon

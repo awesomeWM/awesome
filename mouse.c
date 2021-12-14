@@ -76,7 +76,7 @@ static int miss_newindex_handler = LUA_REFNIL;
 /**
  * The `screen` under the cursor
  * @property screen
- * @param screen
+ * @tparam screen screen
  */
 
 /** Get the pointer position.
@@ -273,7 +273,7 @@ luaA_mouse_coords(lua_State *L)
 
 /** Get the client or any object which is under the pointer.
  *
- * @treturn client.object|nil A client or nil.
+ * @treturn client|wibox|nil A client, wibox or nil.
  * @staticfct object_under_pointer
  */
 static int
