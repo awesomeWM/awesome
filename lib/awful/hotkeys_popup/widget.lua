@@ -74,6 +74,7 @@ local gtable = require("gears.table")
 local gstring = require("gears.string")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local rgba = require("gears.color").to_rgba_string
 local dpi = beautiful.xresources.apply_dpi
 
 local matcher = require("gears.matcher")()
@@ -86,11 +87,11 @@ function markup.font(font, text)
 end
 -- Set the foreground.
 function markup.fg(color, text)
-    return '<span foreground="' .. tostring(color) .. '">' .. tostring(text) .. '</span>'
+    return '<span foreground="' .. rgba(color, beautiful.fg_normal) .. '">' .. tostring(text) .. '</span>'
 end
 -- Set the background.
 function markup.bg(color, text)
-    return '<span background="' .. tostring(color) .. '">' .. tostring(text) .. '</span>'
+    return '<span background="' .. rgba(color, beautiful.bg_normal) .. '">' .. tostring(text) .. '</span>'
 end
 
 local function join_plus_sort(modifiers)

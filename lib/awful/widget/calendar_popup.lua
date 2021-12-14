@@ -141,8 +141,10 @@ local function parse_cell_options(cell, args)
         props[prop] = args[prop] or beautiful["calendar_" .. cell .. "_" .. prop] or bl_style[prop] or default
     end
     if cell == "focus" and props.markup == nil then
-        local fg = props.fg_color and string.format('foreground="%s"', props.fg_color) or ""
-        local bg = props.bg_color and string.format('background="%s"', props.bg_color) or ""
+        local fg = props.fg_color
+            and string.format('foreground="%s"', gears.color.to_rgba_string(props.fg_color)) or ""
+        local bg = props.bg_color
+            and string.format('background="%s"', gears.color.to_rgba_string(props.bg_color)) or ""
         props.markup = string.format(
             '<span %s %s><b>%s</b></span>',
             fg, bg, "%s"
