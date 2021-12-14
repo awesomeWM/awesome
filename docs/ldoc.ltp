@@ -35,6 +35,7 @@
 # local nowrap = ldoc.wrap and '' or 'nowrap'
 # local html_space = function(s) return s:gsub(" ", "%%20") end
 # local no_underscores = function(s) return s:gsub("_", " ") end
+# local get_item = function(mod, name) for item in iter(mod.items) do if item.name == name then return item end end; return name == "" and mod or nil end
 
 # --------- modules hierarchy -------------
 # local hierarchy = {}
@@ -247,7 +248,7 @@
     <h3>See also:</h3>
     <$(list_or_p)>
 #     for see in iter(module.see) do
-         $(li)<a href="$(ldoc.href(see))">$(see.label)</a>$(il)
+         $(li)<a href="$(ldoc.href(see))">$(see.label) BOB</a>$(il)
 #    end -- for
     </$(list_or_p)>
   </div>
@@ -438,11 +439,21 @@
 #   if item.see then
 #     local li,il = use_li(item.see)
     <h3>See also:</h3>
-    <ul>
-#     for see in iter(item.see) do
-         $(li)<a href="$(ldoc.href(see))">$(see.label)</a>$(il)
+    <table class="see_also">
+#    for see in iter(item.see) do
+#      local see_item = see.mod and get_item(see.mod, see.name)
+#      local see_mod = (see_item and see.mod and see.mod ~= item.module and see.mod.name ~= see_item.name) and "("..see.mod.name..")" or ""
+     <tr>
+         <td><a href="$(ldoc.href(see))" title="In the $(see.mod and see.mod.name) module.">$(see.label)</a></td>
+         <td>$(see_item and M(see_item.summary)) $(see_mod)</td>
+         <td>
+#       if see_item or see.name == "" then
+             <span class="chips">$(see.name == "" and "module" or (see_item and see_item.kind))</span>
+#       end
+         </td>
+     <tr>
 #    end -- for
-    </ul>
+    </table>
 #   end -- if see
 
 #   if item.usage then

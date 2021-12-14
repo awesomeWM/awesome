@@ -233,6 +233,20 @@ table th, table td {
     padding: 2px;
 }
 
+.see_also, .see_also td {
+    border-style: hidden !important;
+}
+
+.see_also tr td:nth-of-type(1) {
+    display: list-item;
+    list-style-type: disc;
+    list-style-position: inside;
+}
+
+.see_also tr:hover {
+    background-color: #f7fbff;
+}
+
 .widget_list td {
     padding-top: 10px;
     padding-bottom: 10px;
