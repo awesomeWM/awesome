@@ -69,14 +69,34 @@ dd > code {
 }
 
 #navigation {
-    float: left;
+    --sidebar-width: 14em;
+    --sidebar-toggle-width: 24px;
+
     background-color: white;
     border-right: 1px solid #d3dbec;
     border-bottom: 1px solid #d3dbec;
 
-    width: 14em;
-    vertical-align: top;
+    width: var(--sidebar-width);
     overflow: visible;
+
+    margin-left: calc(-1 * var(--sidebar-width) + var(--sidebar-toggle-width));
+    transition: margin-left 0.2s ease-out;
+}
+
+#navigation.open {
+    margin-left: 0;
+}
+
+@media (hover: hover) {
+    #navigation:hover {
+        margin-left: 0;
+    }
+}
+
+@media all and (min-width: 768px) {
+    #navigation {
+        margin-left: 0;
+    }
 }
 
 #navigation br {
@@ -101,6 +121,10 @@ dd > code {
     padding-bottom: 10px;
     margin-top: 30px;
     margin-bottom: 0px;
+}
+
+#content {
+    overflow: hidden;
 }
 
 #content h1 {
@@ -280,10 +304,15 @@ table th, table td {
 
 #about {
     padding: 15px;
-    padding-left: 16em;
     background-color: white;
     border-top: 1px solid #d3dbec;
     border-bottom: 1px solid #d3dbec;
+}
+
+@media all and (min-width: 768px) {
+    #about {
+        padding-left: calc(14em + 15px);
+    }
 }
 
 table.module_list, table.function_list {
