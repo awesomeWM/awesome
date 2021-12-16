@@ -445,7 +445,7 @@ end
 --- The scrollbar widget.
 -- This widget is rendered as the scrollbar element.
 --
--- The default is `awful.widget.separator{ shape = gears.shape.rectangle }`.
+-- The default is `wibox.widget.separator{ shape = gears.shape.rectangle }`.
 --
 --@DOC_wibox_layout_overflow_scrollbar_widget_EXAMPLE@
 --
