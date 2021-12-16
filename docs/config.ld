@@ -956,6 +956,25 @@ custom_display_name_handler = function(item, default_handler)
 
     init_custom_types(item)
 
+    -- Do not use the default handler. It encodes the parameters using
+    -- the optchain convention. Not everybody is confortable with this.
+    -- It is also unreadable.
+    item.args = ""
+
+    if item.params then
+        item.args = "("
+        for key, line in ipairs(item.params) do
+            local name, comment = item:split_param(line)
+            local def = item:default_of_param(line)
+            if def then
+                item.args = item.args .. '<span class="optional_param">' .. name .. "</span>" .. (key < #item.params and ", " or "")
+            else
+                item.args = item.args .. name .. (key < #item.params and ", " or "")
+            end
+        end
+        item.args = item.args .. ")"
+    end
+
     local ret = default_handler(item)
 
     -- Edit the input so the template is notified.
