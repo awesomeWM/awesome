@@ -122,7 +122,7 @@ function overflow:layout(context, orig_width, orig_height)
 
     local need_scrollbar = used_in_dir > avail_in_dir and scrollbar_enabled
 
-    local scroll_position = self._private.position
+    local scroll_position = self._private.scroll_factor
 
     if need_scrollbar then
         local scrollbar_widget = self._private.scrollbar_widget
@@ -134,7 +134,7 @@ function overflow:layout(context, orig_width, orig_height)
         -- Make scrollbar length reflect `visible_percent`
         -- TODO: Apply a default minimum length
         local bar_length = math.floor(visible_percent * avail_in_dir)
-        local bar_pos = (avail_in_dir - bar_length) * self._private.position
+        local bar_pos = (avail_in_dir - bar_length) * self._private.scroll_factor
 
         if is_y then
             bar_w, bar_h = base.fit_widget(self, context, scrollbar_widget, scrollbar_width, bar_length)
@@ -279,8 +279,9 @@ end
 --
 -- @method overflow:scroll
 -- @tparam number amount The amount to scroll by.
--- @emits property::overflow::position
--- @emitstparam property::overflow::position number position The new position.
+-- @emits property::overflow::scroll_factor
+-- @emitstparam property::overflow::scroll_factor number scroll_factor The new
+--   scroll factor.
 -- @emits widget::layout_changed
 -- @emits widget::redraw_needed
 function overflow:scroll(amount)
@@ -290,39 +291,42 @@ function overflow:scroll(amount)
     local interval = self._private.used_in_dir
     local delta = self._private.step / interval
 
-    local pos = self._private.position + (delta * amount)
-    self:set_position(pos)
+    local factor = self._private.scroll_factor + (delta * amount)
+    self:set_scroll_factor(factor)
 end
 
 
---- The scroll position.
--- The position is represented as a fraction from `0` to `1`.
+--- The scroll factor.
 --
--- @property position
--- @tparam number position The position.
+-- The scroll factor represents the how for the layout's content is currently
+-- scrolled. It is represented as a fraction from `0` to `1`, where `0` is the
+-- start of the content and `0` is the end.
+--
+-- @property scroll_factor
+-- @tparam number scroll_factor The scroll factor.
 -- @propemits true false
 
-function overflow:set_position(pos)
-    local current = self._private.position
+function overflow:set_scroll_factor(factor)
+    local current = self._private.scroll_factor
     local interval = self._private.used_in_dir - self._private.avail_in_dir
-    if current == pos
+    if current == factor
         -- the content takes less space than what is available, i.e. everything
         -- is already visible
         or interval <= 0
-        -- the position is out of range
-        or (current <= 0 and pos < 0)
-        or (current >= 1 and pos > 1) then
+        -- the scroll factor is out of range
+        or (current <= 0 and factor < 0)
+        or (current >= 1 and factor > 1) then
         return
     end
 
-    self._private.position = math.min(1, math.max(pos, 0))
+    self._private.scroll_factor = math.min(1, math.max(factor, 0))
 
     self:emit_signal("widget::layout_changed")
-    self:emit_signal("property::position", pos)
+    self:emit_signal("property::scroll_factor", factor)
 end
 
-function overflow:get_position()
-    return self._private.position
+function overflow:get_scroll_factor()
+    return self._private.scroll_factor
 end
 
 
@@ -403,11 +407,11 @@ function overflow:get_scrollbar_enabled()
 end
 
 -- Wraps a callback function for `mousegrabber` that is capable of
--- updating the scroll position.
+-- updating the scroll factor.
 local function build_grabber(container)
     local is_y = container._private.dir == "y"
     local bar_interval = container._private.avail_in_dir - container._private.bar_length
-    local start_pos = container._private.position * bar_interval
+    local start_pos = container._private.scroll_factor * bar_interval
     local coords = mouse.coords()
     local start = is_y and coords.y or coords.x
 
@@ -417,7 +421,7 @@ local function build_grabber(container)
         end
 
         local pos = is_y and mouse.y or mouse.x
-        container:set_position((start_pos + (pos - start)) / bar_interval)
+        container:set_scroll_factor((start_pos + (pos - start)) / bar_interval)
 
         return true
     end
@@ -466,8 +470,8 @@ local function new(dir, ...)
     gtable.crush(ret, overflow, true)
     ret.widget_name = gobject.modulename(2)
 
-    -- Manually set the position here. We don't know the bounding size yet.
-    ret._private.position = 0
+    -- Manually set the scroll factor here. We don't know the bounding size yet.
+    ret._private.scroll_factor = 0
 
     -- Apply defaults. Bypass setters to avoid signals.
     ret._private.step = 10

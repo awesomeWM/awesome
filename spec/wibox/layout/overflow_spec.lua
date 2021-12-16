@@ -104,7 +104,7 @@ describe("wibox.layout.overflow", function()
                 p(second, 0, 10, 95, 15),
             })
 
-            layout:set_position(1)
+            layout:set_scroll_factor(1)
 
             assert.widget_layout(layout, { 100, 20 }, {
                 p(scrollbar,   95,  9,  5, 10),
