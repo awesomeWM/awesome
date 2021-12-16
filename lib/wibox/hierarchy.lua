@@ -143,12 +143,14 @@ function hierarchy_update(self, context, widget, width, height, region, matrix_t
 
     -- Calculate the draw extents
     local x1, y1, x2, y2 = 0, 0, width, height
-    for _, h in ipairs(self._children) do
-        local px, py, pwidth, pheight = matrix.transform_rectangle(h._matrix, h:get_draw_extents())
-        x1 = math.min(x1, px)
-        y1 = math.min(y1, py)
-        x2 = math.max(x2, px + pwidth)
-        y2 = math.max(y2, py + pheight)
+    if not widget.clip_child_extends then
+        for _, h in ipairs(self._children) do
+            local px, py, pwidth, pheight = matrix.transform_rectangle(h._matrix, h:get_draw_extents())
+            x1 = math.min(x1, px)
+            y1 = math.min(y1, py)
+            x2 = math.max(x2, px + pwidth)
+            y2 = math.max(y2, py + pheight)
+        end
     end
     self._draw_extents = {
         x = x1, y = y1,

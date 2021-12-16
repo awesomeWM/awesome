@@ -473,6 +473,10 @@ local function new(dir, ...)
 
     gtable.crush(ret, overflow, true)
     ret.widget_name = gobject.modulename(2)
+    -- Tell the widget system to prevent clicks outside the layout's extends
+    -- to register with child widgets, even if they actually extend that far.
+    -- This prevents triggering button presses on hidden/clipped widgets.
+    ret.clip_child_extends = true
 
     -- Manually set the scroll factor here. We don't know the bounding size yet.
     ret._private.scroll_factor = 0
