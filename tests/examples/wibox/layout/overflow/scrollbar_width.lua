@@ -1,6 +1,7 @@
---DOC_GEN_IMAGE --DOC_HIDE
-local generic_widget = ... --DOC_HIDE
-local wibox     = require("wibox") --DOC_HIDE
+--DOC_GEN_IMAGE --DOC_HIDE_START
+local generic_widget = ...
+local wibox     = require("wibox")
+--DOC_HIDE_END
 
 local w1 = wibox.widget {
     generic_widget( "first"  , nil, 0), --DOC_HIDE
@@ -29,24 +30,25 @@ local w3 = wibox.widget {
     layout = wibox.layout.overflow.horizontal
 }
 
-local ret = wibox.widget{                    --DOC_HIDE
-    {                                        --DOC_HIDE
-        w1,                                  --DOC_HIDE
-        border_width = 1,                    --DOC_HIDE
-        widget = wibox.container.background, --DOC_HIDE
-    },                                       --DOC_HIDE
-    {                                        --DOC_HIDE
-        w2,                                  --DOC_HIDE
-        border_width = 1,                    --DOC_HIDE
-        widget = wibox.container.background, --DOC_HIDE
-    },                                       --DOC_HIDE
-    {                                        --DOC_HIDE
-        w3,                                  --DOC_HIDE
-        border_width = 1,                    --DOC_HIDE
-        widget = wibox.container.background, --DOC_HIDE
-    },                                       --DOC_HIDE
-    spacing = 5,                             --DOC_HIDE
-    layout = wibox.layout.flex.vertical,     --DOC_HIDE
-}                                            --DOC_HIDE
+--DOC_HIDE_START
+local ret = wibox.widget{
+    {
+        w1,
+        border_width = 1,
+        widget = wibox.container.background,
+    },
+    {
+        w2,
+        border_width = 1,
+        widget = wibox.container.background,
+    },
+    {
+        w3,
+        border_width = 1,
+        widget = wibox.container.background,
+    },
+    spacing = 5,
+    layout = wibox.layout.flex.vertical,
+}
 
-return ret, 100, 3*40 --DOC_HIDE
+return ret, 75, 3*40
