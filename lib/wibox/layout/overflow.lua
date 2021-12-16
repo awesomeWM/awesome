@@ -412,19 +412,30 @@ end
 
 -- Wraps a callback function for `mousegrabber` that is capable of
 -- updating the scroll factor.
-local function build_grabber(container)
+local function build_grabber(container, initial_x, initial_y, geo)
     local is_y = container._private.dir == "y"
     local bar_interval = container._private.avail_in_dir - container._private.bar_length
     local start_pos = container._private.scroll_factor * bar_interval
-    local coords = mouse.coords()
-    local start = is_y and coords.y or coords.x
+    local start = is_y and initial_y or initial_x
+
+    -- Set to initial click location
+    container:set_scroll_factor(start / container._private.avail_in_dir)
+
+    -- Calculate a matrix transforming from screen coordinates into widget
+    -- coordinates.
+    -- This is required for mouse movement to work when the widget has been
+    -- transformed by something like `wibox.container.rotate`.
+    local matrix_from_device = geo.hierarchy:get_matrix_from_device()
+    local wgeo = geo.drawable.drawable:geometry()
+    local matrix = matrix_from_device:translate(-wgeo.x, -wgeo.y)
 
     return function(mouse)
         if not mouse.buttons[1] then
             return false
         end
 
-        local pos = is_y and mouse.y or mouse.x
+        local x, y = matrix:transform_point(mouse.x, mouse.y)
+        local pos = is_y and x and y
         container:set_scroll_factor((start_pos + (pos - start)) / bar_interval)
 
         return true
@@ -433,11 +444,11 @@ end
 
 -- Applies a mouse button signal using `build_grabber` to a scrollbar widget.
 local function apply_scrollbar_mouse_signal(container, w)
-    w:connect_signal('button::press', function(_, _, _, button_id)
+    w:connect_signal('button::press', function(_, x, y, button_id, _, geo)
         if button_id ~= 1 then
             return
         end
-        mousegrabber.run(build_grabber(container), "fleur")
+        mousegrabber.run(build_grabber(container, x, y, geo), "fleur")
     end)
 end
 
