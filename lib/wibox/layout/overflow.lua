@@ -259,6 +259,7 @@ end
 
 
 --- The amount of units to advance per scroll event.
+--
 -- This affects calls to `scroll` and the default mouse wheel handler.
 --
 -- The default is `10`.
@@ -273,6 +274,7 @@ end
 
 
 --- Scroll the layout's content by `amount * step`.
+--
 -- A positive amount scroll down/right, a negative amount scrolls up/left.
 --
 -- The amount of units scrolled is affected by `step`.
@@ -331,6 +333,7 @@ end
 
 
 --- The scrollbar width.
+--
 -- For horizontal scrollbars, this is the scrollbar height
 --
 -- The default is `5`.
@@ -382,6 +385,7 @@ end
 
 
 --- The scrollbar visibility.
+--
 -- If this is set to `false`, no scrollbar will be rendered, even if the layout's
 -- content overflows. Mouse wheel scrolling will work regardless.
 --
