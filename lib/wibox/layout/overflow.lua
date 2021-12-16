@@ -7,6 +7,7 @@
 -- @author Lucas Schwiderski
 -- @copyright 2021 Lucas Schwiderski
 -- @layoutmod wibox.layout.overflow
+-- @supermodule wibox.layout.fixed
 ---------------------------------------------------------------------------
 
 local base = require('wibox.widget.base')
@@ -264,13 +265,6 @@ end
 --
 -- @property step
 -- @tparam number step The step size.
--- @see set_step
-
--- Set the step size.
---
--- @method overflow:set_step
--- @tparam number step The step size.
--- @see step
 function overflow:set_step(step)
     self._private.step = step
     -- We don't need to emit enything here, since changing step only really
@@ -281,13 +275,14 @@ end
 --- Scroll the layout's content by `amount * step`.
 -- A positive amount scroll down/right, a negative amount scrolls up/left.
 --
+-- The amount of units scrolled is affected by `step`.
+--
 -- @method overflow:scroll
 -- @tparam number amount The amount to scroll by.
 -- @emits property::overflow::position
 -- @emitstparam property::overflow::position number position The new position.
 -- @emits widget::layout_changed
 -- @emits widget::redraw_needed
--- @see step
 function overflow:scroll(amount)
     if amount == 0 then
         return
@@ -306,16 +301,7 @@ end
 -- @property position
 -- @tparam number position The position.
 -- @propemits true false
--- @see set_position
 
--- Set the current scroll position.
---
--- @method overflow:set_position
--- @tparam number position The new position.
--- @propemits true false
--- @emits widget::layout_changed
--- @emits widget::redraw_needed
--- @see position
 function overflow:set_position(pos)
     local current = self._private.position
     local interval = self._private.used_in_dir - self._private.avail_in_dir
@@ -335,12 +321,6 @@ function overflow:set_position(pos)
     self:emit_signal("property::position", pos)
 end
 
-
---- Get the current scroll position.
---
--- @method overflow:get_position
--- @treturn number position The current position.
--- @see position
 function overflow:get_position()
     return self._private.position
 end
@@ -356,16 +336,7 @@ end
 -- @property scrollbar_width
 -- @tparam number scrollbar_width The scrollbar width.
 -- @propemits true false
--- @see set_scrollbar_width
 
--- Set the scrollbar width.
---
--- @method overflow:set_scrollbar_width
--- @tparam number scrollbar_width The new scrollbar width.
--- @propemits true false
--- @emits widget::layout_changed
--- @emits widget::redraw_needed
--- @see scrollbar_width
 function overflow:set_scrollbar_width(width)
     if self._private.scrollbar_width == width then
         return
@@ -389,16 +360,7 @@ end
 -- @property scrollbar_position
 -- @tparam string scrollbar_position The scrollbar position.
 -- @propemits true false
--- @see set_scrollbar_position
 
--- Set the scrollbar position.
---
--- @method overflow:set_scrollbar_position
--- @tparam string scrollbar_position The new scrollbar position.
--- @propemits true false
--- @emits widget::layout_changed
--- @emits widget::redraw_needed
--- @see scrollbar_position
 function overflow:set_scrollbar_position(position)
     if self._private.scrollbar_position == position then
         return
@@ -408,6 +370,10 @@ function overflow:set_scrollbar_position(position)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::scrollbar_position", position)
+end
+
+function overflow:get_scrollbar_position()
+    return self._private.scrollbar_position
 end
 
 
@@ -420,16 +386,7 @@ end
 -- @property scrollbar_enabled
 -- @tparam boolean scrollbar_enabled The scrollbar visibility.
 -- @propemits true false
--- @see set_scrollbar_enabled
 
--- Enable or disable the scrollbar visibility.
---
--- @method overflow:set_scrollbar_enabled
--- @tparam boolean scrollbar_enabled The new scrollbar visibility.
--- @propemits true false
--- @emits widget::layout_changed
--- @emits widget::redraw_needed
--- @see scrollbar_enabled
 function overflow:set_scrollbar_enabled(enabled)
     if self._private.scrollbar_enabled == enabled then
         return
@@ -439,6 +396,10 @@ function overflow:set_scrollbar_enabled(enabled)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::scrollbar_enabled", enabled)
+end
+
+function overflow:get_scrollbar_enabled()
+    return self._private.scrollbar_enabled
 end
 
 -- Wraps a callback function for `mousegrabber` that is capable of
@@ -483,17 +444,7 @@ end
 -- @property scrollbar_widget
 -- @tparam widget scrollbar_widget The scrollbar widget.
 -- @propemits true false
--- @see set_scrollbar_widget
 
--- Set the scrollbar widget.
---
--- This will also apply the mouse button handler.
---
--- @method overflow:set_scrollbar_widget
--- @tparam widget scrollbar_widget The new scrollbar widget.
--- @propemits true false
--- @emits widget::layout_changed
--- @see scrollbar_widget
 function overflow:set_scrollbar_widget(widget)
     local w = base.make_widget_from_value(widget)
 
@@ -503,6 +454,10 @@ function overflow:set_scrollbar_widget(widget)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::scrollbar_widget", widget)
+end
+
+function overflow:get_scrollbar_widget()
+    return self._private.scrollbar_widget
 end
 
 local function new(dir, ...)
@@ -559,51 +514,6 @@ end
 function overflow.vertical(...)
     return new("vertical", ...)
 end
-
-
---- Add spacing between each layout widgets.
---
--- This behaves just like in `wibox.layout.fixed`:
---
---@DOC_wibox_layout_fixed_spacing_EXAMPLE@
---
--- @property spacing
--- @tparam number spacing Spacing between widgets.
--- @propemits true false
--- @baseclass wibox.layout.fixed
--- @see wibox.layout.fixed
-
-
---- The widget used to fill the spacing between the layout elements.
--- By default, no widget is used.
---
--- This behaves just like in `wibox.layout.fixed`:
---
---@DOC_wibox_layout_fixed_spacing_widget_EXAMPLE@
---
--- @property spacing_widget
--- @tparam widget spacing_widget
--- @propemits true false
--- @baseclass wibox.layout.fixed
--- @see wibox.layout.fixed
-
-
---- Set the layout's fill_space property.
---
--- If this property is `true`, widgets
--- take all space in the non-scrolling directing (e.g. `width` for vertical
--- scrolling). If `false`, they will only take as much as they need for their
--- content.
---
--- The default is `true`.
---
---@DOC_wibox_layout_overflow_fill_space_EXAMPLE@
---
--- @property fill_space
--- @tparam boolean fill_space
--- @baseclass wibox.layout.fixed
--- @propemits true false
-
 
 --@DOC_fixed_COMMON@
 
