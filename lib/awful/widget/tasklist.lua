@@ -248,7 +248,7 @@ local instances
 -- @DOC_wibox_awidget_tasklist_style_align_EXAMPLE@
 --
 -- @beautiful beautiful.tasklist_align
--- @tparam[opt=left] string align *left*, *right* or *center*
+-- @tparam[opt="left"] string align *left*, *right* or *center*
 
 --- The tasklist font.
 --
@@ -823,7 +823,7 @@ end
 -- @tparam[opt='⬍'] string args.style.maximized_vertical Extra icon when client is maximized_vertical
 -- @tparam[opt=false] boolean args.style.disable_task_name
 -- @tparam[opt=nil] string args.style.font
--- @tparam[opt=left] string args.style.align *left*, *right* or *center*
+-- @tparam[opt="left"] string args.style.align *left*, *right* or *center*
 -- @tparam[opt=nil] string args.style.font_focus
 -- @tparam[opt=nil] string args.style.font_minimized
 -- @tparam[opt=nil] string args.style.font_urgent

@@ -10,7 +10,7 @@
 --
 -- @tparam string name The name of the signal
 -- @tparam function func The function to attach
--- @function naughty.connect_signal
+-- @staticfct naughty.connect_signal
 -- @usage naughty.connect_signal("added", function(notif)
 --    -- do something
 -- end)
@@ -18,10 +18,10 @@
 --- Emit a module signal.
 -- @tparam string name The signal name.
 -- @param ... The signal callback arguments
--- @function naughty.emit_signal
+-- @staticfct naughty.emit_signal
 
 --- Disconnect a signal from a source.
 -- @tparam string name The name of the signal
 -- @tparam function func The attached function
--- @function naughty.disconnect_signal
+-- @staticfct naughty.disconnect_signal
 -- @treturn boolean If the disconnection was successful

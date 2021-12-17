@@ -1,6 +1,8 @@
 ---------------------------------------------------------------------------
 --- Titlebars for awful.
---**Create a titlebar:**
+--
+-- Create a titlebar
+-- =================
 --
 -- This example reproduces what the default `rc.lua` does. It shows how to
 -- handle the titlebars on a lower level.

@@ -174,7 +174,7 @@ end
 -- @DOC_sequences_client_jump_to1_EXAMPLE@
 --
 -- @method jump_to
--- @tparam bool|function merge If true then merge tags (select the client's
+-- @tparam[opt] bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
 --   tag as arguments.
@@ -212,7 +212,7 @@ end
 --
 -- @deprecated awful.client.visible
 -- @see screen.clients
--- @tparam[opt] integer|screen s The screen, or nil for all screens.
+-- @tparam[opt] nil|integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible clients.
 function client.visible(s, stacked)
@@ -230,7 +230,7 @@ end
 --
 -- @deprecated awful.client.tiled
 -- @see screen.tiled_clients
--- @tparam integer|screen s The screen, or nil for all screens.
+-- @tparam nil|integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible and tiled clients.
 function client.tiled(s, stacked)
@@ -253,8 +253,8 @@ end
 -- If no client is passed, the focused client will be used.
 --
 -- @staticfct awful.client.next
--- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
--- @tparam[opt] client sel The client.
+-- @tparam int i The index.  Use `1` to get the next, `-1` to get the previous.
+-- @tparam[opt=client.focus] client sel The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn[opt] client|nil A client, or nil if no client is available.
 -- @see client.get
@@ -296,7 +296,7 @@ end
 --
 -- @staticfct awful.client.swap.bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
--- @tparam[opt=focused] client c The client.
+-- @tparam[opt="focused"] client c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @see swap
 -- @see swapped
@@ -328,7 +328,7 @@ end
 --
 -- @staticfct awful.client.swap.global_bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
--- @tparam[opt] client sel The client.
+-- @tparam[opt=client.focus] client sel The client.
 -- @request client activate client.swap.global_bydirection granted When a client
 --  could be activated because `awful.client.swap.global_bydirection` was called.
 -- @see swap
@@ -370,13 +370,14 @@ end
 -- @DOC_sequences_client_swap_byidx1_EXAMPLE@
 --
 -- @staticfct awful.client.swap.byidx
--- @tparam integer i The index.
--- @tparam[opt] client c The client, otherwise focused one is used.
+-- @tparam integer i The index. Use `1` to get the next, `-1` to get the previous.
+-- @tparam[opt=client.focus] client c The client, otherwise focused one is used.
 -- @see swap
 -- @see swapped
 -- @see awful.client.swap.bydirection
 -- @see awful.client.swap.global_bydirection
 -- @see awful.client.cycle
+-- @see awful.client.next
 function client.swap.byidx(i, c)
     local sel = c or capi.client.focus
     local target = client.next(i, sel)
@@ -393,8 +394,8 @@ end
 -- @DOC_sequences_client_cycle1_EXAMPLE@
 --
 -- @staticfct awful.client.cycle
--- @tparam boolean clockwise True to cycle clients clockwise.
--- @tparam[opt] screen s The screen where to cycle clients.
+-- @tparam[opt=false] boolean clockwise True to cycle clients clockwise.
+-- @tparam[opt=awful.screen.focused()] screen s The screen where to cycle clients.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @see swap
 -- @see swapped
@@ -510,7 +511,7 @@ end
 -- @tparam integer y The relative y coordinate.
 -- @tparam integer w The relative width.
 -- @tparam integer h The relative height.
--- @tparam[opt] client c The client, otherwise focused one is used.
+-- @tparam[opt=client.focus] client c The client, otherwise focused one is used.
 -- @see client.relative_move
 function client.moveresize(x, y, w, h, c)
     gdebug.deprecate("Use c:relative_move(x, y, w, h) instead of awful.client.moveresize", {deprecated_in=4})
@@ -522,11 +523,16 @@ end
 -- @DOC_sequences_client_relative_move1_EXAMPLE@
 --
 -- @method relative_move
+-- @tparam[opt=0] integer x The relative x coordinate.
+-- @tparam[opt=0] integer y The relative y coordinate.
+-- @tparam[opt=0] integer w The relative width.
+-- @tparam[opt=0] integer h The relative height.
 -- @see geometry
--- @tparam[opt=0] number x The relative x coordinate.
--- @tparam[opt=0] number y The relative y coordinate.
--- @tparam[opt=0] number w The relative width.
--- @tparam[opt=0] number h The relative height.
+-- @see x
+-- @see y
+-- @see width
+-- @see height
+-- @see floating
 function client.object.relative_move(self, x, y, w, h)
     local geometry = self:geometry()
     geometry['x'] = geometry['x'] + (x or 0)
@@ -571,7 +577,7 @@ end
 --
 -- @deprecated awful.client.toggletag
 -- @tparam tag target The tag to toggle.
--- @tparam[opt] client c The client to toggle, otherwise the focused one is used.
+-- @tparam[opt=client.focus] client c The client to toggle, otherwise the focused one is used.
 -- @see client.toggle_tag
 -- @see tags
 function client.toggletag(target, c)
@@ -610,7 +616,7 @@ end
 
 --- Move a client to a screen. Default is next screen, cycling.
 -- @deprecated awful.client.movetoscreen
--- @tparam client c The client to move.
+-- @tparam[opt=client.focus] client c The client to move.
 -- @tparam screen s The screen, default to current + 1.
 -- @see screen
 -- @see client.move_to_screen
@@ -791,16 +797,27 @@ end
 -- Floating client are not handled by tiling layouts.
 -- @deprecated awful.client.floating.set
 -- @tparam client c A client.
--- @tparam boolean s True or false.
+-- @tparam boolean s `true` is the client is to become floating or `false`.
 function client.floating.set(c, s)
     gdebug.deprecate("Use c.floating = true instead of awful.client.floating.set", {deprecated_in=4})
     client.object.set_floating(c, s)
 end
 
 -- Set a client floating state, overriding auto-detection.
--- Floating client are not handled by tiling layouts.
+--
+-- Floating client are not handled by tiling layouts. They can be
+-- moved around and resized freely unless other restriction, such as `maximized`
+-- or the `size_hints` restrict their geometry.
+--
+-- An easy way to position floating clients is to use the `awful.placement`
+-- module.
+--
 -- @tparam client c A client.
--- @tparam boolan s True or false.
+-- @tparam boolean floating.
+-- @see is_immobilized_vertical
+-- @see is_immobilized_horizontal
+-- @see is_fixed
+-- @see size_hints
 function client.object.set_floating(c, s)
     c = c or capi.client.focus
     if c and client.property.get(c, "floating") ~= s then
@@ -838,7 +855,7 @@ capi.client.connect_signal("property::geometry", store_floating_geometry)
 
 --- Return if a client has a fixed size or not.
 -- This function is deprecated, use `c.is_fixed`
--- @tparam client c The client.
+-- @tparam[opt=client.focus] client c The client.
 -- @deprecated awful.client.isfixed
 -- @see is_fixed
 -- @see size_hints_honor
@@ -851,7 +868,7 @@ end
 --- Return if a client has a fixed size or not.
 --
 -- @property is_fixed
--- @tparam[opt=false] boolean is_fixed The fixed size state
+-- @tparam[opt=false] boolean is_fixed The fixed size state.
 -- @propemits false false
 -- @readonly
 -- @see size_hints
@@ -874,10 +891,10 @@ end
 --- Is the client immobilized horizontally?
 --
 -- Does the client have a fixed horizontal position and width, i.e. is it
--- fullscreen, maximized, or horizontally maximized?
+-- `fullscreen`, `maximized`, or `maximized_horizontal`?
 --
 -- @property immobilized_horizontal
--- @tparam[opt=false] boolean immobilized_horizontal The immobilized state
+-- @tparam[opt=false] boolean immobilized_horizontal The immobilized state.
 -- @readonly
 -- @see maximized
 -- @see maximized_horizontal
@@ -1274,7 +1291,7 @@ end
 -- @tparam number add Amount to increase/decrease the client's window factor by.
 --   Should be between `-current_window_factor` and something close to
 --   infinite. Normalisation then ensures that the sum of all factors is 1.
--- @tparam client c the client.
+-- @tparam[opt=client.focus] client c the client.
 -- @emits property::windowfact
 function client.incwfact(add, c)
     c = c or capi.client.focus
@@ -1448,7 +1465,7 @@ end
 -- @tparam function filter a function that returns true to indicate a positive match.
 -- @tparam integer start  what index to start iterating from.  Defaults to using the
 --   index of the currently focused client.
--- @tparam screen s which screen to use.  nil means all screens.
+-- @tparam[opt=nil] screen s which screen to use.  nil means all screens.
 --
 -- @staticfct awful.client.iterate
 -- @usage -- un-minimize all urxvt instances
@@ -1640,7 +1657,7 @@ end
 --
 -- @method activate
 -- @tparam table args
--- @tparam[opt=other] string args.context Why was this activate called?
+-- @tparam[opt="other"] string args.context Why was this activate called?
 -- @tparam[opt=true] boolean args.raise Raise the client to the top of its layer
 --  and unminimize it (if needed).
 -- @tparam[opt=false] boolean args.force Force the activation even for unfocusable
@@ -1649,6 +1666,8 @@ end
 -- @tparam[opt=false] boolean args.switch_to_tag
 -- @tparam[opt=false] boolean args.action Once activated, perform an action.
 -- @tparam[opt=false] boolean args.toggle_minimization
+-- @request client activate args.context granted Will use the context defined in
+--  `args.context`.
 -- @see awful.permissions.add_activate_filter
 -- @see awful.permissions.activate
 -- @see request::activate

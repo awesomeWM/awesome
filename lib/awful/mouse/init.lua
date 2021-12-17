@@ -77,11 +77,11 @@ mouse.wibox = {}
 
 --- The resize cursor name.
 -- @beautiful beautiful.cursor_mouse_resize
--- @tparam[opt=cross] string cursor
+-- @tparam[opt="cross"] string cursor
 
 --- The move cursor name.
 -- @beautiful beautiful.cursor_mouse_move
--- @tparam[opt=fleur] string cursor
+-- @tparam[opt="fleur"] string cursor
 
 --- Get the client object under the pointer.
 -- @deprecated awful.mouse.client_under_pointer

@@ -169,8 +169,8 @@ end
 -- @tparam number width The surface width
 -- @tparam number height The surface height
 -- @param shape A `gears.shape` compatible function
--- @param[opt=white] shape_color The shape color or pattern
--- @param[opt=transparent] bg_color The surface background color
+-- @param[opt="#000000"] shape_color The shape color or pattern
+-- @param[opt="#00000000"] bg_color The surface background color
 -- @treturn cairo.surface the new surface
 -- @staticfct load_from_shape
 function surface.load_from_shape(width, height, shape, shape_color, bg_color, ...)

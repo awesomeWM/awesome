@@ -238,7 +238,7 @@ local layoutlist = {}
 
 --- The selected layout alignment.
 -- @beautiful beautiful.layoutlist_align
--- @tparam[opt=left] string align *left*, *right* or *center*
+-- @tparam[opt="left"] string align *left*, *right* or *center*
 
 --- The selected layout title font.
 -- @beautiful beautiful.layoutlist_font_selected

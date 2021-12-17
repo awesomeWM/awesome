@@ -203,11 +203,10 @@ function tag.object.get_index(query_tag)
     end
 end
 
---- Move a tag to an absolute position in the screen[]:tags() table.
+--- Move a tag to an absolute position in the `screen[]:tags()` table.
 -- @deprecated awful.tag.move
 -- @tparam integer new_index Integer absolute position in the table to insert.
--- @tparam tag target_tag The tag that should be moved. If null, the currently
--- selected tag is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag target_tag The tag that should be moved.
 -- @see index
 function tag.move(new_index, target_tag)
     gdebug.deprecate("Use t.index = new_index instead of awful.tag.move", {deprecated_in=4})
@@ -308,7 +307,7 @@ end
 --
 -- @staticfct awful.tag.new
 -- @tparam table names The tag name, in a table
--- @tparam[opt=1] screen|number screen The tag screen (defaults to screen 1).
+-- @tparam[opt=1] screen|number screen The tag screen.
 -- @tparam table layout The layout or layout table to set for this tags by default.
 -- @treturn table A table with all created tags.
 function tag.new(names, screen, layout)
@@ -334,8 +333,8 @@ end
 
 --- Find a suitable fallback tag.
 -- @staticfct awful.tag.find_fallback
--- @tparam screen screen The screen to look for a tag on. [awful.screen.focused()]
--- @tparam[opt=nil] table|nil invalids A table of tags considered unacceptable. [selectedlist(scr)]
+-- @tparam[opt=awful.screen.focused()] screen screen The screen to look for a tag on.
+-- @tparam[opt=nil] table|nil invalids A table of tags considered unacceptable.
 function tag.find_fallback(screen, invalids)
     local scr = screen or ascreen.focused()
     local t = invalids or scr.selected_tags
@@ -465,8 +464,8 @@ end
 --- Delete a tag.
 -- @deprecated awful.tag.delete
 -- @see tag.delete
--- @tparam tag target_tag Optional tag object to delete. [selected()]
--- @tparam tag|nil fallback_tag Tag to assign stickied tags to. [~selected()]
+-- @tparam[opt=mouse.screen.selected_tag] tag target_tag Optional tag object to delete.
+-- @tparam[opt] tag|nil fallback_tag Tag to assign stickied tags to.
 -- @treturn boolean Returns true if the tag is successfully deleted, nil otherwise.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
@@ -694,7 +693,7 @@ end
 --- The default master width factor
 --
 -- @beautiful beautiful.master_width_factor
--- @tparam number master_width_factor (default: 0.5)
+-- @tparam[opt=0.5] number master_width_factor
 -- @see master_width_factor
 -- @see gap
 
@@ -741,7 +740,7 @@ end
 -- @see master_fill_policy
 -- @see master_width_factor
 -- @tparam number mwfact Master width factor.
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.setmwfact(mwfact, t)
     gdebug.deprecate("Use t.master_width_factor = mwfact instead of awful.tag.setmwfact", {deprecated_in=4})
 
@@ -752,7 +751,7 @@ end
 -- @staticfct awful.tag.incmwfact
 -- @see master_width_factor
 -- @tparam number add Value to add to master width factor.
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.incmwfact(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_master_width_factor(t, tag.object.get_master_width_factor(t) + add)
@@ -797,6 +796,9 @@ end
 -- @tfield table awful.tag.layouts
 -- @tparam[opt={}] table awful.tag.layouts
 -- @see request::layouts
+-- @see awful.layout.append_default_layouts
+-- @see awful.layout.append_default_layout
+-- @see awful.layout.remove_default_layout
 
 --- The tag client layout.
 --
@@ -1055,7 +1057,7 @@ end
 -- @deprecated awful.tag.setvolatile
 -- @see volatile
 -- @tparam boolean volatile If the tag must be deleted when the last client is untagged
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.setvolatile(volatile, t)
     gdebug.deprecate("Use t.volatile = volatile instead of awful.tag.setvolatile", {deprecated_in=4})
 
@@ -1065,7 +1067,7 @@ end
 --- Get if the tag must be deleted when the last client closes
 -- @deprecated awful.tag.getvolatile
 -- @see volatile
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 -- @treturn boolean If the tag will be deleted when the last client is untagged
 function tag.getvolatile(t)
     gdebug.deprecate("Use t.volatile instead of awful.tag.getvolatile", {deprecated_in=4})
@@ -1076,7 +1078,7 @@ end
 --- The default gap.
 --
 -- @beautiful beautiful.useless_gap
--- @tparam tag number (default: 0)
+-- @tparam[opt=0] number useless_gap
 -- @see gap
 -- @see gap_single_client
 
@@ -1115,7 +1117,7 @@ end
 -- @deprecated awful.tag.setgap
 -- @see gap
 -- @tparam number|nil useless_gap The spacing between clients
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.setgap(useless_gap, t)
     gdebug.deprecate("Use t.gap = useless_gap instead of awful.tag.setgap", {deprecated_in=4})
 
@@ -1124,9 +1126,10 @@ end
 
 --- Increase the spacing between clients
 -- @staticfct awful.tag.incgap
--- @see gap
 -- @tparam number add Value to add to the spacing between clients
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
+-- @see gap
+-- @see beautiful.useless_gap
 function tag.incgap(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_gap(t, tag.object.get_gap(t) + add)
@@ -1135,7 +1138,7 @@ end
 --- Enable gaps for a single client.
 --
 -- @beautiful beautiful.gap_single_client
--- @tparam boolean gap_single_client (default: true)
+-- @tparam[opt=true] boolean gap_single_client
 -- @see gap
 -- @see gap_single_client
 
@@ -1201,7 +1204,7 @@ end
 --   `master_width_factor`
 --
 -- @beautiful beautiful.master_fill_policy
--- @tparam string master_fill_policy (default: "expand")
+-- @tparam[opt="expand"] string master_fill_policy
 -- @see master_fill_policy
 
 --- Set size fill policy for the master client(s).
@@ -1227,7 +1230,7 @@ end
 -- redistributed on both side.
 --
 -- @property master_fill_policy
--- @tparam string master_fill_policy "expand" or "master_width_factor"
+-- @tparam string master_fill_policy "expand" or "master\_width\_factor"
 -- @propemits false false
 -- @see awful.tag.togglemfpol
 
@@ -1252,10 +1255,10 @@ function tag.setmfpol(policy, t)
 end
 
 --- Toggle size fill policy for the master client(s)
--- between "expand" and "master_width_factor".
+-- between "expand" and `master_width_factor`.
 -- @staticfct awful.tag.togglemfpol
 -- @see master_fill_policy
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.togglemfpol(t)
     t = t or ascreen.focused().selected_tag
 
@@ -1285,7 +1288,7 @@ end
 --- The default number of master windows.
 --
 -- @beautiful beautiful.master_count
--- @tparam integer master_count (default: 1)
+-- @tparam[opt=1] integer master_count
 -- @see master_count
 
 --- Set the number of master windows.
@@ -1337,7 +1340,7 @@ end
 -- @staticfct awful.tag.incnmaster
 -- @see master_count
 -- @tparam number add Value to add to number of master windows.
--- @tparam[opt] tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 -- @tparam[opt=false] boolean sensible Limit nmaster based on the number of
 --   visible tiled windows?
 function tag.incnmaster(add, t, sensible)
@@ -1400,7 +1403,7 @@ end
 --- The default number of columns.
 --
 -- @beautiful beautiful.column_count
--- @tparam integer column_count (default: 1)
+-- @tparam[opt=1] integer column_count
 -- @see column_count
 
 --- Set the number of columns.
@@ -1430,7 +1433,7 @@ end
 -- @deprecated awful.tag.setncol
 -- @see column_count
 -- @tparam integer ncol The number of column.
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.setncol(ncol, t)
     gdebug.deprecate("Use t.column_count = new_index instead of awful.tag.setncol", {deprecated_in=4})
 
@@ -1455,7 +1458,7 @@ end
 --- Increase number of column windows.
 -- @staticfct awful.tag.incncol
 -- @tparam number add Value to add to number of column windows.
--- @tparam[opt] tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 -- @tparam[opt=false] boolean sensible Limit column_count based on the number
 --   of visible tiled windows?
 function tag.incncol(add, t, sensible)
@@ -1734,9 +1737,9 @@ end
 -- future. When a tag is detached from the screen, its signal is removed.
 --
 -- @staticfct awful.tag.attached_connect_signal
--- @tparam screen screen The screen concerned, or all if nil.
--- @tparam[opt] string signal The signal name.
--- @tparam[opt] function Callback
+-- @tparam screen|nil screen The screen concerned, or all if `nil`.
+-- @tparam string signal The signal name.
+-- @tparam function Callback
 function tag.attached_connect_signal(screen, ...)
     if screen then
         attached_connect_signal_screen(screen, ...)

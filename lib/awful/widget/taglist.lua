@@ -65,22 +65,22 @@ taglist.filter, taglist.source = {}, {}
 
 --- The tag list main foreground (text) color.
 -- @beautiful beautiful.taglist_fg_focus
--- @param[opt=fg_focus] color
+-- @param[opt=beautiful.fg_focus] color
 -- @see gears.color
 
 --- The tag list main background color.
 -- @beautiful beautiful.taglist_bg_focus
--- @param[opt=bg_focus] color
+-- @param[opt=beautiful.bg_focus] color
 -- @see gears.color
 
 --- The tag list urgent elements foreground (text) color.
 -- @beautiful beautiful.taglist_fg_urgent
--- @param[opt=fg_urgent] color
+-- @param[opt=beautiful.fg_urgent] color
 -- @see gears.color
 
 --- The tag list urgent elements background color.
 -- @beautiful beautiful.taglist_bg_urgent
--- @param[opt=bg_urgent] color
+-- @param[opt=beautiful.bg_urgent] color
 -- @see gears.color
 
 --- The tag list occupied elements background color.

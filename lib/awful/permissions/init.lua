@@ -38,18 +38,18 @@ local permissions = {
 -- @beautiful beautiful.maximized_hide_border
 -- @tparam[opt=false] boolean maximized_hide_border
 
---- The list of all registered generic request::activate (focus stealing)
+--- The list of all registered generic `request::activate` (focus stealing)
 -- filters. If a filter is added to only one context, it will be in
 -- `permissions.contextual_activate_filters`["context_name"].
--- @table[opt={}] generic_activate_filters
+-- @table[opt={}] awful.permissions.generic_activate_filters
 -- @see permissions.activate
 -- @see permissions.add_activate_filter
 -- @see permissions.remove_activate_filter
 
---- The list of all registered contextual request::activate (focus stealing)
+--- The list of all registered contextual `request::activate` (focus stealing)
 -- filters. If a filter is added to only one context, it will be in
 -- `permissions.generic_activate_filters`.
--- @table[opt={}] contextual_activate_filters
+-- @table[opt={}] awful.permissions.contextual_activate_filters
 -- @see permissions.activate
 -- @see permissions.add_activate_filter
 -- @see permissions.remove_activate_filter
@@ -288,8 +288,9 @@ end
 --
 -- @signalhandler awful.permissions.tag
 -- @tparam client c A client to tag
--- @tparam[opt] tag|boolean t A tag to use. If true, then the client is made sticky.
--- @tparam[opt={}] table hints Extra information
+-- @tparam[opt] tag|boolean t A tag to use. If `true`, then the client is made `sticky`.
+-- @tparam[opt={}] table hints Extra information.
+-- @tparam[opt=nil] nil|string hints.reason Why the tag is being changed.
 function permissions.tag(c, t, hints) --luacheck: no unused
     -- There is nothing to do
     if not t and #get_valid_tags(c, c.screen) > 0 then return end
@@ -338,6 +339,10 @@ local context_mapper = {
 -- @tparam client c The client
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
+-- @tparam[opt=true] boolean hints.store_geometry Create a memento of the
+--  previous geometry in case it has to be restored.
+-- @tparam[opt=true] boolean hints.honor_workarea Avoid overlapping the `wibar`s
+--  or other desktop decoration when applying the geometry.
 function permissions.geometry(c, context, hints)
     if not pcommon.check(c, "client", "geometry", context) then return end
 
@@ -407,6 +412,10 @@ end
 -- @tparam wibox w The wibox.
 -- @tparam string context The context
 -- @tparam[opt={}] table hints The hints to pass to the handler
+-- @tparam[opt] integer hints.x The horizontal position.
+-- @tparam[opt] integer hints.y The vertical position.
+-- @tparam[opt] integer hints.width The wibox width.
+-- @tparam[opt] integer hints.height The wibox height.
 function permissions.wibox_geometry(w, context, hints)
     if not pcommon.check(w, "wibox", "geometry", context) then return end
 
@@ -416,14 +425,16 @@ end
 --- Merge the 2 requests sent by clients wanting to be maximized.
 --
 -- The X clients set 2 flags (atoms) when they want to be maximized. This caused
--- 2 request::geometry to be sent. This code gives some time for them to arrive
+-- 2 `request::geometry` to be sent. This code gives some time for them to arrive
 -- and send a new `request::geometry` (through the property change) with the
 -- combined state.
 --
 -- @signalhandler awful.permissions.merge_maximization
 -- @tparam client c The client
 -- @tparam string context The context
--- @tparam[opt={}] table hints The hints to pass to the handler
+-- @tparam[opt={}] table hints The hints to pass to the handler.
+-- @tparam[opt=false] boolean hints.toggle Toggle the maximization state rather
+--  than set it to `true`.
 function permissions.merge_maximization(c, context, hints)
     if not pcommon.check(c, "client", "geometry", context) then return end
 
@@ -506,7 +517,11 @@ end
 -- @signalhandler awful.permissions.client_geometry_requests
 -- @tparam client c The client
 -- @tparam string context The context
--- @tparam[opt={}] table hints The hints to pass to the handler
+-- @tparam[opt={}] table hints The hints to pass to the handler.
+-- @tparam[opt] integer hints.x The horizontal position.
+-- @tparam[opt] integer hints.y The vertical position.
+-- @tparam[opt] integer hints.width The client width.
+-- @tparam[opt] integer hints.height The client height.
 function permissions.client_geometry_requests(c, context, hints)
     if not pcommon.check(c, "client", "geometry", context) then return end
 
@@ -539,13 +554,15 @@ end, "mouse_enter")
 --
 -- To replace this handler with your own, use:
 --
---    client.disconnect_signal("request::border", awful.ewmh.update_border)
+--    client.disconnect_signal("request::border", awful.permisions.update_border)
 --
 -- The default implementation chooses from dozens beautiful theme variables
 -- depending if the client is tiled, floating, maximized and then from its state
 -- (urgent, new, active, normal)
 --
 -- @signalhandler awful.permissions.update_border
+-- @tparam client c The client.
+-- @tparam string context Why is the border changed.
 -- @usebeautiful beautiful.border_color_marked
 -- @usebeautiful beautiful.border_color_active
 -- @usebeautiful beautiful.border_color_normal
@@ -604,6 +621,8 @@ end, "mouse_enter")
 -- @usebeautiful beautiful.opacity_normal
 -- @usebeautiful beautiful.opacity_new
 -- @usebeautiful beautiful.opacity_urgent
+-- @see client.border_width
+-- @see client.border_color
 
 function permissions.update_border(c, context)
     if not pcommon.check(c, "client", "border", context) then return end
@@ -729,6 +748,11 @@ local activate_context_map = {
 -- * history    : *autofocus.check_focus*
 --
 -- @signalhandler awful.permissions.autoactivate
+-- @tparam client c The client.
+-- @tparam string context Why is the client auto-activated.
+-- @tparam[opt={}] table hints Extra arguments.
+-- @see activate
+-- @see client:activate
 function permissions.autoactivate(c, context, args)
     if not pcommon.check(c, "client", "autoactivate", context) then return end
 

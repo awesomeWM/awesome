@@ -43,7 +43,7 @@ module.display_tags() --DOC_HIDE
 module.add_event("Call `:clear()` on the first tag.", function() --DOC_HIDE
     -- Call :clear() on the first tag.
     screen[1].tags[1]:clear{}
-end)
+end) --DOC_HIDE
 
 module.display_tags() --DOC_HIDE
 

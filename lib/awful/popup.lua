@@ -338,9 +338,9 @@ end
 --
 -- @DOC_awful_popup_position3_EXAMPLE@
 -- @property offset
--- @tparam table|number offset An integer value or a `{x=, y=}` table.
--- @tparam[opt=offset] number offset.x The horizontal distance.
--- @tparam[opt=offset] number offset.y The vertical distance.
+-- @tparam table|integer offset An integer value or a `{x=, y=}` table.
+-- @tparam[opt=offset] integer offset.x The horizontal distance.
+-- @tparam[opt=offset] integer offset.y The vertical distance.
 -- @propemits true false
 
 function popup:set_offset(offset)
@@ -370,7 +370,7 @@ end
 -- (or false to disable placement)
 --
 -- @property placement
--- @tparam[opt=next_to] function|string|boolean placement The placement function or name
+-- @tparam[opt=awful.placement.next_to] function|string|boolean placement The placement function or name
 -- @propemits true false
 -- @see awful.placement
 
@@ -495,5 +495,7 @@ local function create_popup(_, args)
 end
 
 --@DOC_wibox_COMMON@
+
+--@DOC_object_COMMON@
 
 return setmetatable(module, {__call = create_popup})
