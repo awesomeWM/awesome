@@ -744,6 +744,7 @@ local function wrap_args(item)
 
     -- Display named args with `{}` and ordered args with `()`
     if named_args[item.args] then
+        item.is_named_call = true
         return "<span class='function_named_args'><b>{</b>[args]<b>}</b></span>"
     end
 
@@ -902,6 +903,8 @@ local add_mod = {
     staticfct       = true,
     deprecated      = true,
     field           = true,
+    signalhandler   = true,
+    table           = true,
 }
 
 -- Add the arguments.
@@ -909,6 +912,9 @@ local add_args = {
     constructorfct  = true,
     constructorfct2 = true,
     staticfct       = true,
+    signalhandler   = true,
+    callback        = true,
+    deprecated      = true,
 }
 
 -- Add a type column to the summary and type field in the description.
