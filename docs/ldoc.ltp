@@ -139,7 +139,7 @@
 # if ldoc.no_summary and module and not ldoc.one then -- bang out the functions on the side
 # for kind, items in module.kinds() do
 #  if not kind:match("^ldoc_skip") then
-<h2>$(kind)dasdasd</h2>
+<h2>$(kind)</h2>
 <ul class="nowrap">
 #  end
 # for item in items() do
@@ -373,35 +373,75 @@
 #    if subnames then
     <h3>$(subnames):</h3>
 #    end
-    <ul>
+#   local has_optional, has_named_call = false, false
+#   for parm in iter(item.params) do
+#     local param,sublist = item:subparam(parm)
+#     has_named_call = has_named_call or (sublist and item.is_named_call)
+#     for p in iter(param) do
+#       local def = item:default_of_param(p)
+#       has_optional = has_optional or (def and def ~= true)
+#     end
+#   end
+#   if has_named_call then
+        <div class="important_box">
+          <b>Note:</b> This $(item.kind) uses named parameters calling convention. It
+          means you call it with $(M('`{}`')) and omit the parantheses. For example,
+          calling this will all default argument would be <code>$(item.name){}</code>.
+          This is a Lua shortcut syntax equivalent to <code>$(item.name)({})</code>.
+          <code>args</code> is only a placeholder name for the "lone table argument"
+          used in named parameters calls.
+        </div>
+#   end
+    <table class="see_also">
+         <tr class="param_header">
+            <th>Name</th>
+            <th></th>
+            <th>Type(s)</th>
+            <th>Description</th>
+#   if has_optional then
+            <th>Default value</th>
+#   end
+         </tr>
 #   for parm in iter(item.params) do
 #     local param,sublist = item:subparam(parm)
 #     if sublist then
-        <li><span class="parameter">$(sublist)</span>$(M(item.params.map[sublist],item))
-        <ul>
+#       local def = item:default_of_param(sublist)
+        <tr>
+           <td><span class="parameter">$(sublist)</span></td>
+           <td>$(def and '<span class="chips">Optional</span>' or '')</td>
+           <td><span class="types"><span class="type">table</span></span></td>
+           <td class="see_also_description">$(M(item.params.map[sublist],item)) </td>
+#      if has_optional then
+#       if def and def ~= true then
+          <td><span class="default_value"><code>$(def)</code></span></td>
+#       elseif def then
+           <td><span class="not_applicable">Undefined</span></td>
+#       else
+           <td><span class="not_applicable" title="This parameter is mandatory">Not applicable</span></td>
+#       end
+#      end
+         </tr>
 #     end
 #     for p in iter(param) do
 #        local name,tp,def = item:display_name_of(p), ldoc.typename(item:type_of_param(p)), item:default_of_param(p)
-        <li><span class="parameter">$(name)</span>
-#       if tp ~= '' then
-            <span class="types">$(tp)</span>
+         <tr$(sublist and ' class="see_also_sublist"' or '')>
+           <td><span class="parameter">$(name)</span></td>
+           <td>$(def and '<span class="chips">Optional</span>' or '')</td>
+           <td><span class="types">$(tp)</span></td>
+           <td class="see_also_description">$(M(item.params.map[p],item))</td>
+#      if has_optional then
+#       if def and def ~= true then
+           <td><span class="default_value"><code>$(def)</code></span></td>
+#       elseif def then
+           <td><span class="not_applicable">Undefined</span></td>
+#       else
+           <td><span class="not_applicable" title="This parameter is mandatory">Not applicable</span></td>
 #       end
-        $(M(item.params.map[p],item))
-#       if def == true then
-         (<em>optional</em>)
-#      elseif def then
-         (<em>default</em> <code>$(def)</code>)
-#       end
-#       if item:readonly(p) then
-          <em>readonly</em>
-#       end
-        </li>
-#     end
-#     if sublist then
-        </li></ul>
+#      end
+         </tr>
 #     end
 #   end -- for
-    </ul>
+        </table>
 #   end -- if params
 
 #  if show_return and item.retgroups then local groups = item.retgroups

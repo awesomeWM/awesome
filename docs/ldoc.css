@@ -25,22 +25,37 @@ hr {
 tt {
     font-family: monospace;
 }
+
 span.parameter {
     font-family: monospace;
     font-weight: bold;
     color: rgb(99, 115, 131);
 }
-span.parameter:after {
-    content:":";
+
+span.optional_param {
+    font-style: italic;
+    color: rgb(143, 166, 230);
 }
-span.types:before {
-    content:"(";
+
+.types {
+    white-space: pre;
 }
-span.types:after {
-    content:")";
+
+td span.types {
+    flex-flow: nowrap;
+    display: inline-flex;
+    width: 100%;
 }
+
 .type {
-    font-weight: bold; font-style:italic
+    flex-basis: auto;
+    font-weight: bold;
+    font-style:italic;
+    pointer-events: none;
+    text-decoration: none;
+    color: #008fee;
+    text-align: center;
+    flex-grow: 1;
 }
 
 p.name {
@@ -51,7 +66,12 @@ kbd,
 p code,
 ol code,
 ul code,
-dd > code {
+dd > code,
+td code,
+span.default_value,
+.see_also_description code,
+.important_box code
+{
     background-color: #eaedf587;
     padding-left: 3px;
     padding-right: 3px;
@@ -161,6 +181,7 @@ dd > code {
     margin-left: 15px;
     margin-bottom: 5px;
     border-bottom: solid 1px #bcd;
+    font-weight: normal;
 }
 
 #content h4 {
@@ -233,8 +254,24 @@ table th, table td {
     padding: 2px;
 }
 
-.see_also, .see_also td {
+.important_box {
+    padding-left: 40px;
+    min-height: 32px;
+    max-width: 640px;
+    vertical-align: middle;
+    background-image: url("images/warning_icon.svg");
+    background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-position: left center;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+}
+
+.see_also, .see_also td, .see_also th {
     border-style: hidden !important;
+    padding-left: 5pt;
+    padding-right: 5pt;
 }
 
 .see_also tr td:nth-of-type(1) {
@@ -245,6 +282,26 @@ table th, table td {
 
 .see_also tr:hover {
     background-color: #f7fbff;
+}
+
+.see_also tr th {
+    color: rgb(168, 168, 168);
+    padding-top: 15px;
+    padding-bottom: 4px;
+    font-weight: normal;
+    text-decoration: none;
+    font-style:italic;
+    font-size: 85%;
+}
+
+.see_also_description {
+    max-width: 640px;
+}
+
+.see_also_sublist td:nth-of-type(1) {
+    margin-left: 10px;
+    padding-left: 15px;
+    border-left: 1px solid rgb(200, 200, 200) !important;
 }
 
 .widget_list td {
@@ -374,6 +431,14 @@ table.function_list td.inheritance {
 span.inheritance {
     color: #9db9f3;
     font-weight: normal;
+}
+
+span.not_applicable {
+    color: rgb(200, 200, 200);
+    font-style:italic;
+    font-size: 85%;
+    text-align: center;
+    display: block;
 }
 
 .summarytype {
