@@ -1,6 +1,7 @@
 --DOC_GEN_OUTPUT --DOC_GEN_IMAGE --DOC_HIDE
 local awful = {placement = require("awful.placement")} --DOC_HIDE
 
+require("awful.tag").add("1", {screen=screen[1], selected=true}) --DOC_HIDE
 local c = client.gen_fake {x = 20, y = 20, width= 280, height=200, screen =screen[1]} --DOC_HIDE
 local bw = c.border_width --DOC_HIDE
 

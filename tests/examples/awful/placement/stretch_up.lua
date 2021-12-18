@@ -5,6 +5,7 @@
 -- @treturn table The new geometry --DOC_HEADER
 -- @staticfct awful.placement.stretch_up --DOC_HEADER
 
+require("awful.tag").add("1", {screen=screen[1], selected=true}) --DOC_HIDE
 screen[1]._resize {width = 128, height = 96} --DOC_HIDE
 local placement = require("awful.placement") --DOC_HIDE
 

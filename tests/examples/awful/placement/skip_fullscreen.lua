@@ -1,5 +1,6 @@
 --DOC_GEN_OUTPUT --DOC_GEN_IMAGE --DOC_HIDE
 local awful = {placement = require("awful.placement")} --DOC_HIDE
+require("awful.tag").add("1", {screen=screen[1], selected=true}) --DOC_HIDE
 
 --DOC_HIDE no_offscreen is auto-called when startup is true, avoid this.
 awesome.startup = false -- luacheck: globals awesome.startup --DOC_HIDE
