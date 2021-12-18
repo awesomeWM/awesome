@@ -333,35 +333,23 @@ end
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function fixed:fit(context, orig_width, orig_height)
-    local width_left, height_left = orig_width, orig_height
-    local spacing = self._private.spacing or 0
-    local widgets_nr = #self._private.widgets
-    local is_y = self._private.dir == "y"
-    local used_max = 0
-
-    -- when no widgets exist the function can be called with orig_width or
-    -- orig_height equal to nil. Exit early in this case.
-    if widgets_nr == 0 then
+    local widgets = self._private.widgets
+    local num_widgets = #widgets
+    -- Return early if there are no widgets to draw
+    if num_widgets < 1 then
         return 0, 0
     end
 
-    for k, v in pairs(self._private.widgets) do
-        local w, h = base.fit_widget(self, context, v, width_left, height_left)
-        local max
+    local width_left, height_left = orig_width, orig_height
+    local used_in_dir, used_max = 0, 0
+    local is_y = self._private.dir == "y"
+    local spacing = self._private.spacing or 0
 
-        if is_y then
-            max = w
-            height_left = height_left - h
-        else
-            max = h
-            width_left = width_left - w
-        end
+    for k, v in ipairs(widgets) do
+        -- Keep in mind that `spacing` may be negative to create overlap
+        if k > 1 and spacing ~= 0 then
+            used_in_dir = used_in_dir + spacing
 
-        if max > used_max then
-            used_max = max
-        end
-
-        if k < widgets_nr then
             if is_y then
                 height_left = height_left - spacing
             else
@@ -369,25 +357,45 @@ function fixed:fit(context, orig_width, orig_height)
             end
         end
 
-        if width_left <= 0 or height_left <= 0 then
-            -- this complicated two lines determine whether we're out-of-space
-            -- because of spacing, or if the last widget doesn't fit in
-            if is_y then
-                 height_left = k < widgets_nr and height_left + spacing or height_left
-                 height_left = height_left < 0 and 0 or height_left
-            else
-                 width_left = k < widgets_nr and width_left + spacing or width_left
-                 width_left = width_left < 0 and 0 or width_left
+        local w, h = base.fit_widget(self, context, v, width_left, height_left)
+
+
+        -- Determine if the widget still fits
+        local is_enough
+
+        if is_y then
+            is_enough = h > 0 and height_left >= h
+
+            if is_enough then
+                used_max = math.max(used_max, w)
+                used_in_dir = used_in_dir + h
+                height_left = height_left - h
             end
+        else
+            is_enough = w > 0 and width_left >= w
+
+            if is_enough then
+                used_max = math.max(used_max, h)
+                used_in_dir = used_in_dir + w
+                width_left = width_left - w
+            end
+        end
+
+        if not is_enough then
+            -- Remove previous spacing if there was not enough space
+            -- to add the current widget
+            used_in_dir = used_in_dir - spacing
+            break
+        elseif width_left <= 0 or height_left <= 0 then
             break
         end
     end
 
     if is_y then
-        return used_max, orig_height - height_left
+        return used_max, used_in_dir
+    else
+        return used_in_dir, used_max
     end
-
-    return orig_width - width_left, used_max
 end
 
 function fixed:reset()

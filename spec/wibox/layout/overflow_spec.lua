@@ -198,6 +198,21 @@ describe("wibox.layout.overflow", function()
         layout:reset()
         assert.is.same({}, layout:get_children())
     end)
+
+    it("can draw `wibox.layout.fixed` as child", function()
+        local fixed = require("wibox.layout.fixed")
+        local w1 = utils.widget_stub(10, 10)
+        local w2 = utils.widget_stub(10, 10)
+        local lfixed = fixed.vertical()
+        lfixed:add(w1)
+        lfixed:add(w2)
+
+        layout:add(lfixed)
+
+        assert.widget_layout(layout, { 100, 100 }, {
+            p(lfixed, 0, 0, 100, 20),
+        })
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
