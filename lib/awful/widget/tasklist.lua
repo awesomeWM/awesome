@@ -206,6 +206,10 @@ local instances
 -- @beautiful beautiful.tasklist_maximized_vertical
 -- @tparam[opt=nil] string maximized_vertical
 
+--- Extra tasklist client property notification icon for clients with the minimized property set.
+-- @beautiful beautiful.tasklist_minimized
+-- @tparam[opt=nil] string minimized
+
 --- The tasklist font.
 -- @beautiful beautiful.tasklist_font
 -- @tparam[opt=nil] string font
@@ -354,6 +358,7 @@ local function tasklist_label(c, args, tb)
     local maximized = args.maximized or theme.tasklist_maximized or '<b>+</b>'
     local maximized_horizontal = args.maximized_horizontal or theme.tasklist_maximized_horizontal or '⬌'
     local maximized_vertical = args.maximized_vertical or theme.tasklist_maximized_vertical or '⬍'
+    local minimized = args.minimized or theme.tasklist_minimized or '<b>_</b>'
 
     if tb then
         tb:set_align(align)
@@ -373,6 +378,7 @@ local function tasklist_label(c, args, tb)
             if c.maximized_vertical then name = name .. maximized_vertical end
             if c.floating then name = name .. floating end
         end
+        if c.minimized then name = name .. minimized end
     end
 
     if not disable_task_name then
