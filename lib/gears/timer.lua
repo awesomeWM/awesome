@@ -163,7 +163,7 @@ local timer_instance_mt = {
 --- Create a new timer object.
 --
 -- `call_now` only takes effect when a `callback` is provided. `single_shot`,
--- on the other hand, also stops signals connectioned to the `timeout` signal.
+-- on the other hand, also stops signals connected to the `timeout` signal.
 --
 -- Specifying a function `func` as `args.callback` is equivalent to calling
 -- `:connect_signal(func)` on the timer object.
