@@ -470,6 +470,7 @@ end)
 --
 -- @property bg
 -- @tparam gears.color bg
+-- @usebeautiful beautiful.wallpaper_bg
 -- @see gears.color
 
 --- The foreground color.
@@ -485,6 +486,7 @@ end)
 --- The default wallpaper background color.
 -- @beautiful beautiful.wallpaper_bg
 -- @tparam gears.color wallpaper_bg
+-- @usebeautiful beautiful.wallpaper_fg
 -- @see bg
 
 --- The default wallpaper foreground color.

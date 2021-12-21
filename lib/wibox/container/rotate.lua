@@ -101,7 +101,7 @@ end
 --
 --@DOC_wibox_container_rotate_angle_EXAMPLE@
 -- @property direction
--- @tparam string dir The direction.
+-- @tparam[opt="north"] string direction The direction.
 -- @propemits true false
 
 function rotate:set_direction(dir)

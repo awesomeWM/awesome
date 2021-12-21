@@ -43,6 +43,7 @@ end
 
 --- Maximized layout.
 -- @clientlayout awful.layout.suit.max
+-- @usebeautiful beautiful.layout_max
 max.name = "max"
 function max.arrange(p)
     return fmax(p, false)
@@ -53,6 +54,7 @@ end
 
 --- Fullscreen layout.
 -- @clientlayout awful.layout.suit.max.fullscreen
+-- @usebeautiful beautiful.layout_fullscreen
 max.fullscreen = {}
 max.fullscreen.name = "fullscreen"
 max.fullscreen.skip_gap = max.skip_gap

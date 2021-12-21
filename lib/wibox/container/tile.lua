@@ -110,7 +110,7 @@ end
 --@DOC_wibox_container_tile_horizontal_crop_EXAMPLE@
 --
 -- @property horizontal_crop
--- @tparam[opt=false] boolean tiled
+-- @tparam[opt=false] boolean horizontal_crop
 -- @see vertical_crop
 
 --- Avoid painting incomplete vertical tiles.
@@ -118,7 +118,7 @@ end
 --@DOC_wibox_container_tile_vertical_crop_EXAMPLE@
 --
 -- @property vertical_crop
--- @tparam[opt=false] boolean tiled
+-- @tparam[opt=false] boolean vertical_crop
 -- @see horizontal_crop
 
 --- Enable or disable the tiling.
@@ -199,9 +199,19 @@ end
 
 --- Create a new tile container.
 -- @tparam table args
--- @tparam wibox.widget widget args.widget The widget to tile.
+-- @tparam wibox.widget args.widget args.widget The widget to tile.
 -- @tparam string args.halign Either `left`, `right` or `center`.
 -- @tparam string args.valign Either `top`, `bottom` or `center`.
+-- @tparam number args.horizontal_spacing The horizontal spacing between the tiled.
+-- @tparam number args.vertical_spacing The vertical spacing between the tiled.
+-- @tparam boolean args.horizontal_crop Avoid painting incomplete horizontal tiles.
+-- @tparam boolean args.vertical_crop Avoid painting incomplete vertical tiles.
+-- @tparam boolean args.tiled Enable or disable the tiling.
+-- @tparam wibox.widget args.widget The widget to be placed.
+-- @tparam boolean args.fill_vertical Fill the vertical space.
+-- @tparam boolean args.fill_horizontal Fill the horizontal space.
+-- @tparam boolean args.content_fill_vertical Stretch the contained widget so it takes all the vertical space.
+-- @tparam boolean args.content_fill_horizontal Stretch the contained widget so it takes all the horizontal space.
 -- @constructorfct wibox.container.tile
 function module.mt:__call(...)
     return new(...)

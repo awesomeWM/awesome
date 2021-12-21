@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Utilities to integrate and manipulate Cairo drawing surfaces.
+--
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
 -- @module gears.surface
@@ -195,10 +197,9 @@ end
 --
 --  If the wibox or client size change, this function need to be called
 --   again.
--- @param draw A wibox or a client
--- @param shape or gears.shape function or a custom function with a context,
---   width and height as parameter.
--- @param[opt] Any additional parameters will be passed to the shape function.
+-- @tparam client|wibox draw A wibox or a client.
+-- @tparam gears.shape|function shape The shape.
+-- @param[opt] ... Any additional parameters will be passed to the shape function.
 -- @staticfct apply_shape_bounding
 function surface.apply_shape_bounding(draw, shape, ...)
   local geo = draw:geometry()

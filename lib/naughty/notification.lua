@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- A notification object.
+--- Notification manipulation class.
 --
 -- This class creates individual notification objects that can be manipulated
 -- to extend the default behavior.
@@ -110,7 +110,7 @@ local notification = {}
 -- * critical
 --
 -- @property urgency
--- @param string
+-- @tparam string urgency
 -- @propemits true false
 
 --- The notification category.
@@ -167,17 +167,17 @@ local notification = {}
 -- be updated with a date further in the future.
 --
 -- @property resident
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean resident
 -- @propemits true false
 
 --- Delay in seconds after which hovered popup disappears.
 -- @property hover_timeout
--- @param number
+-- @tparam[opt=nil] number|nil hover_timeout
 -- @propemits true false
 
 --- Target screen for the notification.
 -- @property screen
--- @param screen
+-- @tparam screen screen
 -- @propemits true false
 
 --- Corner of the workarea displaying the popups.
@@ -195,34 +195,35 @@ local notification = {}
 --@DOC_awful_notification_box_corner_EXAMPLE@
 --
 -- @property position
--- @param string
+-- @tparam[opt=beautiful.notification_position] string position
 -- @propemits true false
 -- @see awful.placement.next_to
 
 --- Boolean forcing popups to display on top.
 -- @property ontop
--- @param boolean
+-- @tparam[opt=false] boolean ontop
 
 --- Popup height.
 --
 --@DOC_awful_notification_geometry_EXAMPLE@
 --
 -- @property height
--- @param number
+-- @tparam number height
 -- @propemits true false
 -- @see width
 
 --- Popup width.
 -- @property width
--- @param number
+-- @tparam number width
 -- @propemits true false
 -- @see height
 
 --- Notification font.
 --@DOC_naughty_colors_EXAMPLE@
 -- @property font
--- @param string
+-- @tparam string font
 -- @propemits true false
+-- @see wibox.widget.textbox.font
 
 --- "All in one" way to access the default image or icon.
 --
@@ -248,7 +249,7 @@ local notification = {}
 
 --- Desired icon size in px.
 -- @property icon_size
--- @param number
+-- @tparam[opt=beautiful.notification_icon_size] number icon_size
 -- @propemits true false
 
 --- The icon provided in the `app_icon` field of the DBus notification.
@@ -257,7 +258,7 @@ local notification = {}
 -- icon name to be fetched from the theme.
 --
 -- @property app_icon
--- @param string
+-- @tparam string app_icon
 -- @propemits true false
 
 --- The notification image.
@@ -287,7 +288,7 @@ local notification = {}
 --@DOC_awful_notification_fg_EXAMPLE@
 --
 -- @property fg
--- @tparam string|color|pattern fg
+-- @tparam[beautiful.notification_fg] string|color|pattern fg
 -- @propemits true false
 -- @see title
 -- @see gears.color
@@ -297,14 +298,14 @@ local notification = {}
 --@DOC_awful_notification_bg_EXAMPLE@
 --
 -- @property bg
--- @tparam string|color|pattern bg
+-- @tparam[opt=beautiful.notification_bg] string|color|pattern bg
 -- @propemits true false
 -- @see title
 -- @see gears.color
 
 --- Border width.
 -- @property border_width
--- @param number
+-- @tparam[opt=beautiful.notification_border_width or 0] number border_width
 -- @propemits true false
 
 --- Border color.
@@ -312,7 +313,7 @@ local notification = {}
 --@DOC_awful_notification_border_color_EXAMPLE@
 --
 -- @property border_color
--- @param string
+-- @tparam[opt=beautiful.notification_border_color] string border_color
 -- @propemits true false
 -- @see gears.color
 
@@ -368,14 +369,14 @@ local notification = {}
 -- args will override ones defined
 --   in the preset.
 -- @property preset
--- @param table
+-- @tparam table preset
 -- @propemits true false
 
 --- Function that will be called with all arguments.
 --   The notification will only be displayed if the function returns true.
 --   Note: this function is only relevant to notifications sent via dbus.
 -- @property callback
--- @param function
+-- @tparam function callback
 -- @propemits true false
 
 --- A table containing strings that represents actions to buttons.
@@ -383,7 +384,7 @@ local notification = {}
 -- The table key (a number) is used by DBus to set map the action.
 --
 -- @property actions
--- @param table
+-- @tparam table actions
 -- @propemits true false
 
 --- Ignore this notification, do not display.
@@ -392,19 +393,20 @@ local notification = {}
 -- handler.
 --
 -- @property ignore
--- @param boolean
+-- @tparam[opt=false] boolean ignore
 -- @propemits true false
 
 --- Tell if the notification is currently suspended (read only).
 --
 -- This is always equal to `naughty.suspended`
---@property suspended
---@param boolean
+-- @property suspended
+-- @tparam[opt=false] boolean suspended
 -- @propemits true false
+-- @see naughty.suspended
 
 --- If the notification is expired.
 -- @property is_expired
--- @param boolean
+-- @tparam boolean is_expired
 -- @propemits true false
 -- @see naughty.expiration_paused
 
@@ -436,7 +438,7 @@ local notification = {}
 -- client.
 --
 -- @property clients
--- @param table
+-- @tparam table clients
 
 --- The maximum popup width.
 --
@@ -444,8 +446,8 @@ local notification = {}
 -- this is ignored by `naughty.list.notifications` because it delegate this
 -- decision to the layout.
 --
--- @property[opt=500] max_width
--- @param number
+-- @property max_width
+-- @tparam[opt=500] number max_width
 -- @propemits true false
 
 --- The application name specified by the notification.
@@ -454,7 +456,7 @@ local notification = {}
 -- property, but can sometime be specified for remote or headless notifications.
 -- In these case, it helps to triage and detect the notification from the rules.
 -- @property app_name
--- @param string
+-- @tparam string app_name
 -- @propemits true false
 
 --- The widget template used to represent the notification.
@@ -463,7 +465,7 @@ local notification = {}
 -- off with a specialized notification widget.
 --
 -- @property widget_template
--- @param table
+-- @tparam table|nil widget_template
 -- @propemits true false
 
 --- Destroy notification by notification object.
@@ -921,9 +923,9 @@ end
 -- @tparam[opt=`beautiful.notification_fg` or `beautiful.bg_focus` or `'#535d6c'`] string args.bg Background color.
 -- @tparam[opt=`beautiful.notification_border_width` or 1] integer args.border_width Border width.
 -- @tparam[opt=`beautiful.notification_border_color` or `beautiful.border_color_active` or `'#535d6c'`] gears.color args.border_color Border color.
--- @tparam[opt=`beautiful.notification_shape`] gears.shape args.shape Widget shape.
--- @tparam[opt=`beautiful.notification_opacity`] gears.opacity args.opacity Widget opacity.
--- @tparam[opt=`beautiful.notification_margin`] gears.margin args.margin Widget margin.
+-- @tparam[opt=beautiful.notification_shape] gears.shape args.shape Widget shape.
+-- @tparam[opt=beautiful.notification_opacity] gears.opacity args.opacity Widget opacity.
+-- @tparam[opt=beautiful.notification_margin] gears.margin args.margin Widget margin.
 -- @tparam[opt] function args.run Function to run on left click.  The notification
 --   object will be passed to it as an argument.
 --   You need to call e.g.

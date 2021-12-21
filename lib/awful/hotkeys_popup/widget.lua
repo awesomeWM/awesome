@@ -249,6 +249,21 @@ widget.labels = {
 -- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
 -- @return Widget instance.
 -- @constructorfct awful.widget.hotkeys_popup.widget.new
+-- @usebeautiful beautiful.hotkeys_fg
+-- @usebeautiful beautiful.hotkeys_bg
+-- @usebeautiful beautiful.hotkeys_border_width
+-- @usebeautiful beautiful.hotkeys_border_color
+-- @usebeautiful beautiful.hotkeys_shape
+-- @usebeautiful beautiful.hotkeys_modifiers_fg
+-- @usebeautiful beautiful.hotkeys_label_bg
+-- @usebeautiful beautiful.hotkeys_label_fg
+-- @usebeautiful beautiful.hotkeys_font
+-- @usebeautiful beautiful.hotkeys_description_font
+-- @usebeautiful beautiful.hotkeys_group_margin
+-- @usebeautiful beautiful.bg_normal Fallback.
+-- @usebeautiful beautiful.fg_normal Fallback.
+-- @usebeautiful beautiful.fg_minimize Fallback.
+-- @usebeautiful beautiful.border_width Fallback.
 function widget.new(args)
     args = args or {}
     local widget_instance = {
@@ -755,8 +770,8 @@ function widget.new(args)
     end
 
     --- Add hotkey group rules for third-party applications.
-    -- @tparam string group hotkeys group name,
-    -- @tparam table data rule data for the group
+    -- @tparam string group Hotkeys group name,
+    -- @tparam table data Rule data for the group
     -- see `awful.hotkeys_popup.key.vim` as an example.
     -- @method add_group_rules
     function widget_instance:add_group_rules(group, data)
@@ -795,8 +810,8 @@ end
 
 --- Add hotkey group rules for third-party applications
 -- (default widget instance will be used).
--- @tparam string group rule group name,
--- @tparam table data rule data for the group
+-- @tparam string group Rule group name,
+-- @tparam table data Rule data for the group
 -- see `awful.hotkeys_popup.key.vim` as an example.
 -- @staticfct awful.hotkeys_popup.widget.add_group_rules
 function widget.add_group_rules(group, data)

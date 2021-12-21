@@ -107,7 +107,7 @@ local offset = {
 
 --- The tooltip opacity.
 -- @beautiful beautiful.tooltip_opacity
--- @param number opacity Between 0 and 1
+-- @tparam number opacity Between 0 and 1
 
 --- The tooltip margins.
 -- @beautiful beautiful.tooltip_gaps
@@ -206,7 +206,7 @@ end
 
 --- The wibox containing the tooltip widgets.
 -- @property wibox
--- @param wibox
+-- @tparam wibox wibox
 
 function tooltip:get_wibox()
     if self._private.wibox then
@@ -229,7 +229,7 @@ end
 
 --- Is the tooltip visible?
 -- @property visible
--- @param boolean
+-- @tparam[opt=true] boolean visible
 -- @propemits true false
 
 function tooltip:get_visible()
@@ -269,7 +269,7 @@ end
 -- * top
 --
 -- @property align
--- @param string
+-- @tparam string align
 -- @see mode
 -- @see preferred_positions
 -- @propemits true false
@@ -277,7 +277,7 @@ end
 
 --- The default tooltip alignment.
 -- @beautiful beautiful.tooltip_align
--- @param string
+-- @tparam string tooltip_align
 -- @see align
 
 function tooltip:get_align()
@@ -330,7 +330,7 @@ end
 -- * "outside": Outside of the widget
 --
 -- @property mode
--- @param string
+-- @tparam string mode
 -- @propemits true false
 
 function tooltip:set_mode(mode)
@@ -410,7 +410,7 @@ end
 --    {"front", "back", "middle"}
 --
 -- @property preferred_alignments
--- @param string
+-- @tparam string preferred_alignments
 -- @propemits true false
 -- @see preferred_positions
 
@@ -447,7 +447,7 @@ end
 --- Change displayed markup.
 --
 -- @property markup
--- @tparam string  text New tooltip markup, passed to
+-- @tparam string markup New tooltip markup, passed to
 --   `wibox.widget.textbox.set_markup`.
 -- @propemits true false
 -- @see wibox.widget.textbox
@@ -479,7 +479,7 @@ end
 -- @DOC_awful_tooltip_margins_EXAMPLE@
 --
 -- @property margins
--- @tparam number|table New margins value.
+-- @tparam number|table margins New margins value.
 -- @propemits true false
 
 function tooltip:set_margins(val)
@@ -492,7 +492,7 @@ end
 -- @DOC_awful_tooltip_border_width_EXAMPLE@
 --
 -- @property border_width
--- @param number
+-- @tparam[opt=0] number border_width
 -- @propemits true false
 -- @propbeautiful
 
@@ -506,8 +506,10 @@ end
 -- @DOC_awful_tooltip_border_color_EXAMPLE@
 --
 -- @property border_color
--- @param color
+-- @tparam[opt=beautiful.tooltip_border_color or beautiful.border_color_normal or beautiful.fg_normal]
+--  gears.color border_color
 -- @propemits true false
+-- @propbeautiful
 
 function tooltip:set_border_color(val)
     self.widget.border_color = val
@@ -519,7 +521,7 @@ end
 -- @DOC_awful_tooltip_margins_leftright_EXAMPLE@
 --
 -- @property margins_leftright
--- @tparam number New margins value.
+-- @tparam number margins_leftright New margins value.
 -- @propemits true false
 
 function tooltip:set_margin_leftright(val)
@@ -538,7 +540,7 @@ end
 -- @DOC_awful_tooltip_margins_topbottom_EXAMPLE@
 --
 -- @property margins_topbottom
--- @tparam number New margins value.
+-- @tparam number margins_topbottom New margins value.
 -- @propemits true false
 
 function tooltip:set_margin_topbottom(val)
@@ -557,7 +559,7 @@ end
 -- @DOC_awful_tooltip_gaps_EXAMPLE@
 --
 -- @property gaps
--- @tparam number|table New margins value.
+-- @tparam number|table gaps New margins value.
 -- @propemits true false
 
 function tooltip:set_gaps(val)
@@ -617,14 +619,14 @@ end
 -- @tparam[opt=apply_dpi(5)] integer args.margin_leftright The left/right margin for the text.
 -- @tparam[opt=apply_dpi(3)] integer args.margin_topbottom The top/bottom margin for the text.
 -- @tparam[opt=nil] gears.shape args.shape The shape.
--- @tparam[opt] string args.bg The background color.
--- @tparam[opt] string args.fg The foreground color.
--- @tparam[opt] string args.border_color The tooltip border color.
--- @tparam[opt] number args.border_width The tooltip border width.
+-- @tparam[opt=beautiful.tooltip_bg] string args.bg The background color.
+-- @tparam[opt=beautiful.tooltip_fg] string args.fg The foreground color.
+-- @tparam[opt=beautiful.tooltip_border_color] string args.border_color The tooltip border color.
+-- @tparam[opt=beautiful.tooltip_border_width] number args.border_width The tooltip border width.
 -- @tparam[opt] string args.align The horizontal alignment.
--- @tparam[opt] string args.font The tooltip font.
--- @tparam[opt] number args.opacity The tooltip opacity.
--- @tparam[opt] table|number args.gaps The tooltip margins.
+-- @tparam[opt=beautiful.tooltip_font] string args.font The tooltip font.
+-- @tparam[opt=beautiful.tooltip_opacity] number args.opacity The tooltip opacity.
+-- @tparam[opt=beautiful.tooltip_gaps] table|number args.gaps The tooltip margins.
 -- @treturn awful.tooltip The created tooltip.
 -- @see add_to_object
 -- @see timeout

@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Timer objects and functions.
+--- Class to execute code at specific intervals.
 --
 -- @usage
 --    -- Create a widget and update its content using the output of a shell
@@ -134,13 +134,18 @@ function timer:again()
 end
 
 --- The timer is started.
--- @property started
--- @param boolean
+--
+-- For this to be `true` by default, pass `autostart` to the constructor.
+--
+-- @property[opt=false] started
+-- @tparam boolean started
+-- @see start
+-- @see stop
 
 --- The timer timeout value.
--- **Signal:** property::timeout
+--
 -- @property timeout
--- @param number
+-- @tparam number timeout
 -- @propemits true false
 
 local timer_instance_mt = {
@@ -273,7 +278,7 @@ end
 
 --- Call the given function at the end of the current GLib event loop iteration.
 -- @tparam function callback The function that should be called
--- @param ... Arguments to the callback function
+--@param ... Arguments to the callback function
 -- @staticfct gears.timer.delayed_call
 function timer.delayed_call(callback, ...)
     assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))

@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Text clock widget.
+--- Display the time (and date) in a text box.
 --
 -- The `wibox.widget.textclock` widget is part of the Awesome WM's widget
 -- system (see @{03-declarative-layout.md}).

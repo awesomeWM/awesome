@@ -431,7 +431,7 @@ end
 --
 -- @property count
 -- @readonly
--- @tparam number The number of tags.
+-- @tparam number count The number of tags.
 -- @propemits true false
 
 function taglist:set_base_layout(layout)
@@ -482,7 +482,7 @@ end
 -- API is very low level.
 --
 -- @property update_function
--- @tparam function update_function.
+-- @tparam function update_function
 
 --- A function to restrict the content of the taglist.
 --
@@ -542,34 +542,45 @@ end
 --  function used to generate the list of tag.
 -- @tparam[opt] table args.widget_template A custom widget to be used for each tag
 -- @tparam[opt={}] table args.style The style overrides default theme.
--- @tparam[opt=nil] string|pattern args.style.fg_focus
--- @tparam[opt=nil] string|pattern args.style.bg_focus
--- @tparam[opt=nil] string|pattern args.style.fg_urgent
--- @tparam[opt=nil] string|pattern args.style.bg_urgent
--- @tparam[opt=nil] string|pattern args.style.bg_occupied
--- @tparam[opt=nil] string|pattern args.style.fg_occupied
--- @tparam[opt=nil] string|pattern args.style.bg_empty
--- @tparam[opt=nil] string|pattern args.style.fg_empty
--- @tparam[opt=nil] string|pattern args.style.bg_volatile
--- @tparam[opt=nil] string|pattern args.style.fg_volatile
--- @tparam[opt=nil] string args.style.squares_sel
--- @tparam[opt=nil] string args.style.squares_unsel
--- @tparam[opt=nil] string args.style.squares_sel_empty
--- @tparam[opt=nil] string args.style.squares_unsel_empty
--- @tparam[opt=nil] string args.style.squares_resize
--- @tparam[opt=nil] string args.style.disable_icon
--- @tparam[opt=nil] string args.style.font
--- @tparam[opt=nil] number args.style.spacing The spacing between tags.
--- @tparam[opt] string args.style.squares_sel A user provided image for selected squares.
--- @tparam[opt] string args.style.squares_unsel A user provided image for unselected squares.
--- @tparam[opt] string args.style.squares_sel_empty A user provided image for selected squares for empty tags.
--- @tparam[opt] string args.style.squares_unsel_empty A user provided image for unselected squares for empty tags.
--- @tparam[opt] boolean args.style.squares_resize True or false to resize squares.
--- @tparam string|pattern args.style.bg_focus The background color for focused client.
--- @tparam string|pattern args.style.fg_focus The foreground color for focused client.
--- @tparam string|pattern args.style.bg_urgent The background color for urgent clients.
--- @tparam string|pattern args.style.fg_urgent The foreground color for urgent clients.
--- @tparam string args.style.font The font.
+-- @tparam[opt=beautiful.taglist_fg_focus] string|pattern args.style.fg_focus
+-- @tparam[opt=beautiful.taglist_bg_focus] string|pattern args.style.bg_focus
+-- @tparam[opt=beautiful.taglist_fg_urgent] string|pattern args.style.fg_urgent
+-- @tparam[opt=beautiful.taglist_bg_urgent] string|pattern args.style.bg_urgent
+-- @tparam[opt=beautiful.taglist_bg_occupied] string|pattern args.style.bg_occupied
+-- @tparam[opt=beautiful.taglist_fg_occupied] string|pattern args.style.fg_occupied
+-- @tparam[opt=beautiful.taglist_bg_empty] string|pattern args.style.bg_empty
+-- @tparam[opt=beautiful.taglist_fg_empty] string|pattern args.style.fg_empty
+-- @tparam[opt=beautiful.taglist_bg_volatile] string|pattern args.style.bg_volatile
+-- @tparam[opt=beautiful.taglist_fg_volatile] string|pattern args.style.fg_volatile
+-- @tparam[opt=beautiful.taglist_squares_sel] string args.style.squares_sel
+-- @tparam[opt=beautiful.taglist_squares_unsel] string args.style.squares_unsel
+-- @tparam[opt=beautiful.taglist_squares_sel_empty] string args.style.squares_sel_empty
+-- @tparam[opt=beautiful.taglist_squares_unsel_empty] string args.style.squares_unsel_empty
+-- @tparam[opt=beautiful.taglist_squares_resize] string args.style.squares_resize
+-- @tparam[opt=beautiful.taglist_disable_icon] string args.style.disable_icon
+-- @tparam[opt=beautiful.taglist_font] string args.style.font
+-- @tparam[opt=beautiful.taglist_spacing] number args.style.spacing The spacing between tags.
+-- @tparam[opt=beautiful.taglist_squares_sel] string args.style.squares_sel A user provided image for selected squares.
+-- @tparam[opt=beautiful.taglist_squares_unsel] string args.style.squares_unsel A user provided image for unselected squares.
+-- @tparam[opt=beautiful.taglist_squares_sel_empty] string args.style.squares_sel_empty A user provided image for selected squares for empty tags.
+-- @tparam[opt=beautiful.taglist_squares_unsel_empty] string args.style.squares_unsel_empty A user provided image for unselected squares for empty tags.
+-- @tparam[opt=beautiful.taglist_squares_resize] boolean args.style.squares_resize True or false to resize squares.
+-- @tparam[opt=beautiful.taglist_font] string args.style.font The font.
+-- @tparam[opt=beautiful.taglist_shape] gears.shape|function args.style.shape
+-- @tparam[opt=beautiful.taglist_shape_border_width] number args.style.shape_border_width
+-- @tparam[opt=beautiful.taglist_shape_border_color] string args.style.shape_border_color
+-- @tparam[opt=beautiful.taglist_shape_empty] gears.shape|function args.style.shape_empty
+-- @tparam[opt=beautiful.taglist_shape_border_width_empty] number args.style.shape_border_width_empty
+-- @tparam[opt=beautiful.taglist_shape_border_color_empty] string args.style.border_color_empty
+-- @tparam[opt=beautiful.taglist_shape_focus] gears.shape|function args.style.shape_focus
+-- @tparam[opt=beautiful.taglist_shape_border_width_focus] number args.style.shape_border_width_focus
+-- @tparam[opt=beautiful.taglist_shape_border_color_focus] string args.style.shape_border_color_focus
+-- @tparam[opt=beautiful.taglist_shape_urgent] gears.shape|function args.style.shape_urgent
+-- @tparam[opt=beautiful.taglist_shape_border_width_urgent] number args.style.shape_border_width_urgent
+-- @tparam[opt=beautiful.taglist_shape_border_color_urgent] string args.style.shape_border_color_urgent
+-- @tparam[opt=beautiful.taglist_shape_volatile] gears.shape|function args.style.shape_volatile
+-- @tparam[opt=beautiful.taglist_shape_border_width_volatile] number args.style.shape_border_width_volatile
+-- @tparam[opt=beautiful.taglist_shape_border_color_volatile] string args.style.shape_border_color_volatile
 -- @param filter **DEPRECATED** use args.filter
 -- @param buttons **DEPRECATED** use args.buttons
 -- @param style **DEPRECATED** use args.style

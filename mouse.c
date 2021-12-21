@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome mouse API.
+/** Manipulate and inspect the mouse cursor.
  *
  * The mouse buttons are represented as index. The common ones are:
  *

@@ -107,10 +107,12 @@ end
 --- The fair layout.
 -- Try to give all clients the same size.
 -- @clientlayout awful.layout.suit.fair
+-- @usebeautiful beautiful.layout_fairv
 
 --- The horizontal fair layout.
 -- Try to give all clients the same size.
 -- @clientlayout awful.layout.suit.fair.horizontal
+-- @usebeautiful beautiful.layout_fairh
 
 return fair
 

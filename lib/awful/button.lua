@@ -70,38 +70,39 @@ button.names = {
 -- Please note that Awesome ignores the status of "Lock" and "Mod2" (Num Lock).
 --
 -- @property modifiers
+-- @tparam table modifiers
 
 --- The mouse button identifier.
 --
 -- ![Mouse buttons](../images/mouse.svg)
 --
 -- @property button
--- @param integer
+-- @tparam integer button
 
 --- The button description.
 --
 -- @property description
--- @param string
+-- @tparam string description
 
 --- The button name.
 --
 -- @property name
--- @param string
+-- @tparam string name
 
 --- The button group.
 --
 -- @property group
--- @param string
+-- @tparam string group
 
 --- The callback when this button is pressed.
 --
 -- @property on_press
--- @param function
+-- @tparam function on_press
 
 --- The callback when this button is released.
 --
 -- @property on_release
--- @param function
+-- @tparam function on_release
 
 --- Execute this mousebinding.
 -- @method :trigger

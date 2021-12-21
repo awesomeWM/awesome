@@ -73,7 +73,7 @@ end
 -- of `awful.spawn`. Depending on the amount of customization to your shell
 -- environment, this can increase startup time.
 -- @property with_shell
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean with_shell
 
 --- Create a prompt widget which will launch a command.
 -- For additional documentation about `args` parameter, please refer to
@@ -85,10 +85,10 @@ end
 --   Prompt background color.
 -- @tparam[opt=`beautiful.prompt_fg` or `beautiful.fg_normal`] color args.fg
 --   Prompt foreground color.
--- @tparam[opt] gears.color args.fg_cursor
--- @tparam[opt] gears.color args.bg_cursor
+-- @tparam[opt=beautiful.prompt_fg_cursor] gears.color args.fg_cursor
+-- @tparam[opt=beautiful.prompt_bg_cursor] gears.color args.bg_cursor
 -- @tparam[opt] gears.color args.ul_cursor
--- @tparam[opt] string args.font
+-- @tparam[opt=beautiful.prompt_font] string args.font
 -- @tparam[opt] boolean args.autoexec
 -- @tparam[opt] function args.highlighter A function to add syntax highlighting
 --   to the command.
@@ -116,6 +116,10 @@ end
 -- @return An instance of prompt widget, inherits from
 --   `wibox.container.background`.
 -- @constructorfct awful.widget.prompt
+-- @usebeautiful beautiful.prompt_fg
+-- @usebeautiful beautiful.prompt_bg
+-- @usebeautiful beautiful.fg_normal When `beautiful.prompt_fg` isn't set.
+-- @usebeautiful beautiful.bg_normal When `beautiful.prompt_bg` isn't set.
 function widgetprompt.new(args)
     args = args or {}
     local promptbox = background()

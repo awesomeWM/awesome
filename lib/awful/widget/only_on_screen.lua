@@ -80,7 +80,7 @@ function only_on_screen:get_screen()
     return self._private.screen
 end
 
---- Returns a new only_on_screen container.
+--- Returns a new `awful.widget.only_on_screen` container.
 -- This widget makes some other widget visible on just some screens. Use
 -- `:set_widget()` to set the widget and `:set_screen()` to set the screen.
 -- @param[opt] widget The widget to display.

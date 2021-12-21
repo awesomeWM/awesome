@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Utility functions to make development easier.
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @utillib gears.debug
@@ -141,7 +143,7 @@ end
 -- @tparam table fallback The new class.
 -- @tparam string old_name The old class name.
 -- @tparam string new_name The new class name.
--- @tparam[opt={}] args The name.
+-- @tparam[opt={}] table args The name.
 -- @tparam[opt] number args.deprecated_in The version which deprecated this
 --  class.
 -- @treturn table A proxy class.

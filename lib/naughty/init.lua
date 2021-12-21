@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Desktop notification handling library.
+--
 -- @author Uli Schlachter &lt;psychon@znc.in&gt;
 -- @copyright 2014 Uli Schlachter
 -- @module naughty

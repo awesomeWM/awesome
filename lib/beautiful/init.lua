@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---- Theme library.
+--- Key+value based theme library and associated utility modules.
 --
 -- @author Damien Leone &lt;damien.leone@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
@@ -89,62 +89,52 @@ local active_font
 
 --- The default font.
 -- @beautiful beautiful.font
--- @param string
+-- @param[opt="sans 8"] string
 
--- The default background color.
+--- The default background color.
+--
+-- The background color can be transparent. If there is a
+-- compositing manager such as compton, then it will be
+-- real transparency and may include blur (provided by the
+-- compositor). When there is no compositor, it will take
+-- a picture of the wallpaper and blend it.
+--
 -- @beautiful beautiful.bg_normal
 -- @param color
 
--- The default focused element background color.
+--- The default focused element background color.
 -- @beautiful beautiful.bg_focus
 -- @param color
 
--- The default urgent element background color.
+--- The default urgent element background color.
 -- @beautiful beautiful.bg_urgent
 -- @param color
 
--- The default minimized element background color.
+--- The default minimized element background color.
 -- @beautiful beautiful.bg_minimize
 -- @param color
 
--- The system tray background color.
--- Please note that only solid colors are currently supported.
--- @beautiful beautiful.bg_systray
--- @param color
-
--- The default focused element foreground (text) color.
+--- The default focused element foreground (text) color.
 -- @beautiful beautiful.fg_normal
 -- @param color
 
--- The default focused element foreground (text) color.
+--- The default focused element foreground (text) color.
 -- @beautiful beautiful.fg_focus
 -- @param color
 
--- The default urgent element foreground (text) color.
+--- The default urgent element foreground (text) color.
 -- @beautiful beautiful.fg_urgent
 -- @param color
 
--- The default minimized element foreground (text) color.
+--- The default minimized element foreground (text) color.
 -- @beautiful beautiful.fg_minimize
--- @param color
-
---- The gap between clients.
--- @beautiful beautiful.useless_gap
--- @param[opt=0] number
-
---- The fallback border width.
--- @beautiful beautiful.border_width
--- @param number
-
---- The fallback border color.
--- @beautiful beautiful.border_color
 -- @param color
 
 --- The wallpaper path.
 -- @beautiful beautiful.wallpaper
 -- @tparam string|gears.surface wallpaper
 
--- The icon theme name.
+--- The icon theme name.
 -- It has to be a directory in `/usr/share/icons` or an XDG icon folder.
 -- @beautiful beautiful.icon_theme
 -- @param string
@@ -234,7 +224,7 @@ end
 
 --- Get the height of a font.
 --
--- @param name Name of the font.
+-- @tparam string name Name of the font.
 -- @staticfct beautiful.get_font_height
 function beautiful.get_font_height(name)
     return load_font(name).height

@@ -349,7 +349,7 @@ end
 --
 -- See `wibox.container.background.shape` for an usage example.
 -- @property border_width
--- @tparam[opt=0] number width The border width.
+-- @tparam[opt=0] number border_width The border width.
 -- @propemits true false
 -- @introducedin 4.4
 -- @see border_color
@@ -386,7 +386,7 @@ end
 --
 -- @deprecatedproperty shape_border_color
 -- @usebeautiful beautiful.fg_normal Fallback when 'fg' and `border_color` aren't set.
--- @tparam[opt=self._private.foreground] color fg The border color, pattern or gradient
+-- @tparam color fg The border color, pattern or gradient
 -- @renamedin 4.4 border_color
 -- @see gears.color
 -- @see border_color
@@ -395,7 +395,7 @@ end
 --
 -- See `wibox.container.background.shape` for an usage example.
 -- @property border_color
--- @tparam[opt=self._private.foreground] color fg The border color, pattern or gradient
+-- @tparam[opt=fg] color border_color The border color, pattern or gradient
 -- @propemits true false
 -- @usebeautiful beautiful.fg_normal Fallback when 'fg' and `border_color` aren't set.
 -- @introducedin 4.4
@@ -462,7 +462,7 @@ end
 -- as arguments. Any other arguments passed to this method will be appended.
 --
 -- @property bgimage
--- @tparam string|surface|function image A background image or a function
+-- @tparam string|surface|function bgimage A background image or a function
 -- @see gears.surface
 
 function background:set_bgimage(image, ...)

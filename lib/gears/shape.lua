@@ -215,7 +215,7 @@ end
 -- @param cr A cairo content
 -- @tparam number width The rectangle width
 -- @tparam number height The rectangle height
--- @tparam number radius the corner radius
+-- @tparam number radius The corner radius
 -- @staticfct gears.shape.rounded_rect
 function module.rounded_rect(cr, width, height, radius)
 
@@ -627,8 +627,8 @@ end
 -- @tparam[opt=math.min(width height)/2] number thickness The arc thickness
 -- @tparam[opt=0] number start_angle The start angle (in radian)
 -- @tparam[opt=math.pi/2] number end_angle The end angle (in radian)
--- @tparam[opt=false] boolean start_rounded if the arc start rounded
--- @tparam[opt=false] boolean end_rounded if the arc end rounded
+-- @tparam[opt=false] boolean start_rounded If the arc start rounded
+-- @tparam[opt=false] boolean end_rounded If the arc end rounded
 -- @staticfct gears.shape.arc
 function module.arc(cr, width, height, thickness, start_angle, end_angle, start_rounded, end_rounded)
     start_angle = start_angle or 0

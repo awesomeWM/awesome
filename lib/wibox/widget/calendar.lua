@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- A calendar widget.
+-- Display a monthly or yearly calendar.
 --
 -- This module defines two widgets: a month calendar and a year calendar
 --
@@ -71,7 +71,7 @@ local properties = { "date"        , "font"         , "spacing" , "week_numbers"
 -- A table representing the date {day=[number|nil], month=[number|nil], year=[number]}.
 --
 -- E.g.. {day=21, month=2, year=2005}, {month=2, year=2005}, {year=2005}
--- @tparam date table Date table.
+-- @tparam table date Date table.
 -- @tparam number date.year Date year
 -- @tparam number|nil date.month Date month
 -- @tparam number|nil date.day Date day
@@ -80,34 +80,44 @@ local properties = { "date"        , "font"         , "spacing" , "week_numbers"
 --- The calendar font.
 --
 -- Choose a monospace font for a better rendering.
+--
 --@DOC_wibox_widget_calendar_font_EXAMPLE@
--- @param[opt="Monospace 10"] string Font of the calendar
+--
+-- @tparam[opt="Monospace 10"] string font Font of the calendar
 -- @property font
+-- @usebeautiful beautiful.calendar_font
 
 --- The calendar spacing.
 --
 -- The spacing between cells in the month.
 -- The spacing between months in a year calendar is twice this value.
--- @param[opt=5] number Spacing of the grid
+-- @tparam[opt=5] number spacing Spacing of the grid
 -- @property spacing
+-- @usebeautiful beautiful.calendar_spacing
 
 --- Display the calendar week numbers.
 --
 --@DOC_wibox_widget_calendar_week_numbers_EXAMPLE@
--- @param[opt=false] boolean Display week numbers
+--
+-- @tparam[opt=false] boolean week_numbers Display week numbers
 -- @property week_numbers
+-- @usebeautiful beautiful.calendar_week_numbers
 
 --- Start the week on Sunday.
 --
 --@DOC_wibox_widget_calendar_start_sunday_EXAMPLE@
--- @param[opt=false] boolean Start the week on Sunday
+--
+-- @tparam[opt=false] boolean start_sunday Start the week on Sunday
 -- @property start_sunday
+-- @usebeautiful beautiful.calendar_start_sunday
 
 --- Format the weekdays with three characters instead of two
 --
 --@DOC_wibox_widget_calendar_long_weekdays_EXAMPLE@
--- @param[opt=false] boolean Use three characters for the weekdays instead of two
+--
+-- @tparam[opt=false] boolean long_weekdays Use three characters for the weekdays instead of two
 -- @property long_weekdays
+-- @usebeautiful beautiful.calendar_long_weekdays
 
 --- The widget encapsulating function.
 --
@@ -119,15 +129,16 @@ local properties = { "date"        , "font"         , "spacing" , "week_numbers"
 -- It is used to add a container to the grid layout and to the cells:
 --
 --@DOC_wibox_widget_calendar_fn_embed_cell_EXAMPLE@
--- @param function Function to embed the widget depending on its flag
+-- @tparam function fn_embed Function to embed the widget depending on its flag
 -- @property fn_embed
 
 --- Allow cells to have flexible height
 --
 --@DOC_wibox_widget_calendar_flex_height_EXAMPLE@
 --
--- @param[opt=false] boolean Allow flex height.
+-- @tparam[opt=false] boolean flex_height Allow flex height.
 -- @property flex_height
+-- @usebeautiful beautiful.flex_height
 
 --- Make a textbox
 -- @tparam string text Text of the textbox
@@ -257,7 +268,7 @@ end
 
 --- Create a grid layout for the year calendar
 -- @tparam table props Table of year calendar properties
--- @param date Year to display (number or string)
+-- @tparam number|string date Year to display.
 -- @treturn widget Grid layout
 local function create_year(props, date)
     -- Create a grid widget with the 12 months

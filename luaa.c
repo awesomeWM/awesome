@@ -19,7 +19,7 @@
  *
  */
 
-/** AwesomeWM lifecycle API.
+/** AwesomeWM lifecycle and low-level APIs.
  *
  * This module contains the functions and signal to manage the lifecycle of the
  * AwesomeWM process. It allows to execute code at specific point from the early

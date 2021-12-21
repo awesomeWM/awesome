@@ -35,12 +35,12 @@ local action = {}
 -- implement keyboard navigation.
 --
 -- @property selected
--- @param boolean
+-- @tparam boolean selected
 -- @propemits true false
 
 --- The action position (index).
 -- @property position
--- @param number
+-- @tparam number position
 -- @propemits true false
 
 --- The action icon.
@@ -53,7 +53,7 @@ local action = {}
 -- @DOC_wibox_nwidget_actionlist_icon_only_EXAMPLE@
 --
 -- @property icon_only
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean icon_only
 -- @propemits true false
 
 --- When a notification is invoked.

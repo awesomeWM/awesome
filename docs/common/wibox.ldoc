@@ -2,7 +2,7 @@
 --
 -- @baseclass wibox
 -- @property border_width
--- @param integer
+-- @tparam[opt=0] integer border_width
 -- @propemits false false
 
 --- Border color.
@@ -25,21 +25,21 @@
 --
 -- @baseclass wibox
 -- @property border_color
--- @param string
+-- @tparam[opt=beautiful.fg_normal] string border_color
 -- @propemits false false
 
 --- On top of other windows.
 --
 -- @baseclass wibox
 -- @property ontop
--- @param boolean
+-- @tparam[opt=false] boolean ontop
 -- @propemits false false
 
 --- The mouse cursor.
 --
 -- @baseclass wibox
 -- @property cursor
--- @param string
+-- @tparam string cursor
 -- @see mouse
 -- @propemits false false
 
@@ -47,7 +47,7 @@
 --
 -- @baseclass wibox
 -- @property visible
--- @param boolean
+-- @tparam boolean visible
 -- @propemits false false
 
 --- The opacity of the wibox, between 0 and 1.
@@ -61,7 +61,7 @@
 --
 -- @baseclass wibox
 -- @property type
--- @param string
+-- @tparam string type
 -- @see client.type
 -- @propemits false false
 
@@ -69,35 +69,35 @@
 --
 -- @baseclass wibox
 -- @property x
--- @param integer
+-- @tparam integer x
 -- @propemits false false
 
 --- The y coordinates.
 --
 -- @baseclass wibox
 -- @property y
--- @param integer
+-- @tparam integer y
 -- @propemits false false
 
 --- The width of the wibox.
 --
 -- @baseclass wibox
 -- @property width
--- @param width
+-- @tparam integer width
 -- @propemits false false
 
 --- The height of the wibox.
 --
 -- @baseclass wibox
 -- @property height
--- @param height
+-- @tparam integer height
 -- @propemits false false
 
 --- The wibox screen.
 --
 -- @baseclass wibox
 -- @property screen
--- @param screen
+-- @tparam screen screen
 -- @propemits true false
 
 ---  The wibox's `drawable`.
@@ -110,14 +110,14 @@
 --- The widget that the `wibox` displays.
 -- @baseclass wibox
 -- @property widget
--- @param widget
+-- @tparam[opt=nil] wibox.widget widget
 -- @propemits true false
 
 --- The X window id.
 --
 -- @baseclass wibox
 -- @property window
--- @param string
+-- @tparam string window
 -- @see client.window
 -- @propemits false false
 
@@ -129,7 +129,7 @@
 --
 -- @baseclass wibox
 -- @property shape_bounding
--- @param surface._native
+-- @tparam surface._native shape_bounding
 -- @propemits false false
 -- @see shape
 
@@ -140,7 +140,7 @@
 --
 -- @baseclass wibox
 -- @property shape_clip
--- @param surface._native
+-- @tparam surface._native shape_clip
 -- @propemits false false
 -- @see shape
 
@@ -152,7 +152,7 @@
 --
 -- @baseclass wibox
 -- @property shape_input
--- @param surface._native
+-- @tparam surface._native shape_input
 -- @propemits false false
 -- @see input_passthrough
 
@@ -174,7 +174,7 @@
 --
 -- @baseclass wibox
 -- @property input_passthrough
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean input_passthrough
 -- @see shape_input
 -- @propemits true false
 
@@ -182,14 +182,15 @@
 --
 -- @baseclass wibox
 -- @property buttons
--- @param buttons_table A table of buttons objects, or nothing.
+-- @tparam table buttons A table of buttons objects, or nothing.
 -- @propemits false false
 
 --- Get or set wibox geometry. That's the same as accessing or setting the x,
 -- y, width or height properties of a wibox.
 --
 -- @baseclass wibox
--- @param A table with coordinates to modify.
+-- @tparam[opt=nil] table|nil geo A table with coordinates to modify. If
+--  nothing is specified, it only returns the current geometry.
 -- @return A table with wibox coordinates and geometry.
 -- @method geometry
 -- @emits property::geometry When the geometry change.
@@ -205,30 +206,11 @@
 -- the side of the screen).
 --
 -- @baseclass wibox
--- @param strut A table with new strut, or nothing
 -- @return The wibox strut in a table.
 -- @method struts
+-- @tparam table struts A table with new strut, or nothing.
 -- @see client.struts
 -- @emits property::struts
-
---- The default background color.
---
--- The background color can be transparent. If there is a
--- compositing manager such as compton, then it will be
--- real transparency and may include blur (provided by the
--- compositor). When there is no compositor, it will take
--- a picture of the wallpaper and blend it.
---
--- @baseclass wibox
--- @beautiful beautiful.bg_normal
--- @param color
--- @see bg
-
---- The default foreground (text) color.
--- @baseclass wibox
--- @beautiful beautiful.fg_normal
--- @param color
--- @see fg
 
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
@@ -246,8 +228,8 @@
 --
 -- @baseclass wibox
 -- @property bg
--- @tparam c The background to use. This must either be a cairo pattern object,
---   nil or a string that gears.color() understands.
+-- @tparam[opt=beautiful.bg_normal] color bg The background to use. This
+--  must either be a cairo pattern object, nil or a string that gears.color() understands.
 -- @see gears.color
 -- @propemits true false
 -- @usebeautiful beautiful.bg_normal The default (fallback) bg color.
@@ -257,18 +239,17 @@
 -- If `image` is a function, it will be called with `(context, cr, width, height)`
 -- as arguments. Any other arguments passed to this method will be appended.
 --
--- @tparam gears.suface|string|function image A background image or a function.
 -- @baseclass wibox
 -- @property bgimage
+-- @tparam gears.suface|string|function bgimage A background image or a function.
 -- @see gears.surface
 -- @propemits true false
 
 --- The foreground (text) of the wibox.
--- @tparam color c The foreground to use. This must either be a cairo pattern object,
---   nil or a string that gears.color() understands.
+--
 -- @baseclass wibox
 -- @property fg
--- @param color
+-- @tparam[opt=beautiful.fg_normal] gears.color fg
 -- @see gears.color
 -- @propemits true false
 -- @usebeautiful beautiful.fg_normal The default (fallback) fg color.

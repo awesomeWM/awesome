@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Place many widgets in a column or row, until the available space is used up.
+--
 -- A `fixed` layout may be initialized with any number of child widgets, and
 -- during runtime widgets may be added and removed dynamically.
 --

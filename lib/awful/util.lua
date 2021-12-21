@@ -1,5 +1,8 @@
 ---------------------------------------------------------------------------
---- Utility module for awful.
+--- Various small utility functions not worth putting into new modules.
+--
+-- Most functions in this module are eventually moved into new modules are
+-- deprecated.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
@@ -19,11 +22,7 @@ local gstring = require("gears.string")
 local grect = require("gears.geometry").rectangle
 local gcolor = require("gears.color")
 local gfs = require("gears.filesystem")
-local capi =
-{
-    awesome = awesome,
-    mouse = mouse
-}
+local capi = { awesome = awesome }
 local gdebug = require("gears.debug")
 local gmath = require("gears.math")
 
@@ -38,6 +37,7 @@ util.shell = os.getenv("SHELL") or "/bin/sh"
 -- This function implementation **has been removed** and no longer
 -- do anything. Use `awful.spawn.easy_async`.
 -- @deprecated awful.util.pread
+-- @see awful.spawn.easy_async
 
 --- Display a deprecation notice, but only once per traceback.
 -- @deprecated deprecate
@@ -99,6 +99,12 @@ function util.mkdir(dir)
 end
 
 --- Eval Lua code.
+--
+-- It can either be "real" code or expressions like `2 ~= 3`.
+-- If the expression cannot be interpreted or returns false, this
+-- function calls `error`.
+--
+-- @tparam string code The code to evaluate.
 -- @return The return value of Lua code.
 -- @staticfct awful.util.eval
 function util.eval(s)
@@ -128,7 +134,7 @@ end
 
 --- Check if a file is a Lua valid file.
 -- This is done by loading the content and compiling it with loadfile().
--- @param path The file path.
+-- @tparam string path The file path.
 -- @return A function if everything is alright, a string with the error
 -- otherwise.
 -- @staticfct awful.util.checkfile
@@ -222,13 +228,16 @@ function util.getdir(d)
 end
 
 --- Search for an icon and return the full path.
+--
 -- It searches for the icon path under the given directories with respect to the
 -- given extensions for the icon filename.
--- @param iconname The name of the icon to search for.
--- @param exts Table of image extensions allowed, otherwise { 'png', gif' }
--- @param dirs Table of dirs to search, otherwise { '/usr/share/pixmaps/' }
+-- @tparam string iconname The name of the icon to search for.
+-- @tparam[opt={'png','gif'}] table exts Table of image extensions allowed.
+-- @tparam[opt={'/usr/share/pixmaps/','/usr/share/icons/hicolor/'}] table dirs
+--  Table of dirs to search.
 -- @tparam[opt] string size The size. If this is specified, subdirectories `x`
 --   of the dirs are searched first.
+-- @treturn string|nil The icon path or `nil` if not found.
 -- @staticfct awful.util.geticonpath
 function util.geticonpath(iconname, exts, dirs, size)
     exts = exts or { 'png', 'gif' }
@@ -326,8 +335,8 @@ end
 --
 -- Note that this method doesn't copy entries found in `__index`.
 -- @deprecated util.table.crush
--- @tparam table t the table to be overridden
--- @tparam table set the table used to override members of `t`
+-- @tparam table t The table to be overridden
+-- @tparam table set The table used to override members of `t`
 -- @tparam[opt=false] boolean raw Use rawset (avoid the metatable)
 -- @treturn table t (for convenience)
 -- @see gears.table
@@ -387,7 +396,7 @@ end
 
 --- Get a sorted table with all keys from a table.
 -- @deprecated util.table.keys
--- @param t the table for which the keys to get
+-- @param t The table for which the keys to get
 -- @return A table with keys
 -- @see gears.table
 function util.table.keys(t)
@@ -398,7 +407,7 @@ end
 --- Filter a tables keys for certain content types
 -- @deprecated util.table.keys_filter
 -- @param t The table to retrieve the keys for
--- @param ... the types to look for
+-- @param ... The types to look for
 -- @return A filtered table with keys
 -- @see gears.table
 function util.table.keys_filter(t, ...)
@@ -408,7 +417,7 @@ end
 
 --- Reverse a table
 -- @deprecated util.table.reverse
--- @param t the table to reverse
+-- @param t The table to reverse
 -- @return the reversed table
 -- @see gears.table
 function util.table.reverse(t)
@@ -418,7 +427,7 @@ end
 
 --- Clone a table
 -- @deprecated util.table.clone
--- @param t the table to clone
+-- @param t The table to clone
 -- @param deep Create a deep clone? (default: true)
 -- @return a clone of t
 -- @see gears.table
@@ -432,9 +441,9 @@ end
 -- given index, all elements of a table that match a given criteria.
 --
 -- @deprecated util.table.iterate
--- @param t      the table to iterate
--- @param filter a function that returns true to indicate a positive match
--- @param start  what index to start iterating from.  Default is 1 (=> start of
+-- @tparam table t The table to iterate.
+-- @tparam function filter A function that returns true to indicate a positive match
+-- @param start What index to start iterating from. Default is 1 (=> start of
 -- the table)
 -- @see gears.table
 function util.table.iterate(t, filter, start)
@@ -445,8 +454,8 @@ end
 
 --- Merge items from the one table to another one
 -- @deprecated util.table.merge
--- @tparam table t the container table
--- @tparam table set the mixin table
+-- @tparam table t The container table
+-- @tparam table set The mixin table
 -- @treturn table Return `t` for convenience
 -- @see gears.table
 function util.table.merge(t, set)

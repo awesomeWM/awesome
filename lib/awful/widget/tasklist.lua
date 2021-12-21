@@ -377,6 +377,10 @@ local instances
 -- @tparam[opt=nil] string|color shape_border_color_urgent
 -- @see gears.color
 
+--- The icon size.
+-- @beautiful beautiful.tasklist_icon_size
+-- @tparam[opt=nil] integer tasklist_icon_size
+
 -- Public structures
 tasklist.filter, tasklist.source = {}, {}
 
@@ -605,7 +609,7 @@ end
 --
 -- @property count
 -- @readonly
--- @tparam number The number of client.
+-- @tparam number count The number of client.
 -- @propemits true false
 
 --- Set the tasklist layout.
@@ -799,53 +803,54 @@ end
 --  function used to generate the list of client.
 -- @tparam[opt] table args.widget_template A custom widget to be used for each client
 -- @tparam[opt={}] table args.style The style overrides default theme.
--- @tparam[opt=nil] string|pattern args.style.fg_normal
--- @tparam[opt=nil] string|pattern args.style.bg_normal
--- @tparam[opt=nil] string|pattern args.style.fg_focus
--- @tparam[opt=nil] string|pattern args.style.bg_focus
--- @tparam[opt=nil] string|pattern args.style.fg_urgent
--- @tparam[opt=nil] string|pattern args.style.bg_urgent
--- @tparam[opt=nil] string|pattern args.style.fg_minimize
--- @tparam[opt=nil] string|pattern args.style.bg_minimize
--- @tparam[opt=nil] string args.style.bg_image_normal
--- @tparam[opt=nil] string args.style.bg_image_focus
--- @tparam[opt=nil] string args.style.bg_image_urgent
--- @tparam[opt=nil] string args.style.bg_image_minimize
--- @tparam[opt=nil] boolean args.style.disable_icon
--- @tparam[opt=nil] number args.style.icon_size The size of the icon
--- @tparam[opt='▪'] string args.style.sticky Extra icon when client is sticky
--- @tparam[opt='⌃'] string args.style.ontop Extra icon when client is ontop
--- @tparam[opt='▴'] string args.style.above Extra icon when client is above
--- @tparam[opt='▾'] string args.style.below Extra icon when client is below
--- @tparam[opt='✈'] string args.style.floating Extra icon when client is floating
--- @tparam[opt='<b>+</b>'] string args.style.maximized Extra icon when client is maximized
--- @tparam[opt='⬌'] string args.style.maximized_horizontal Extra icon when client is maximized_horizontal
--- @tparam[opt='⬍'] string args.style.maximized_vertical Extra icon when client is maximized_vertical
--- @tparam[opt=false] boolean args.style.disable_task_name
--- @tparam[opt=nil] string args.style.font
--- @tparam[opt="left"] string args.style.align *left*, *right* or *center*
--- @tparam[opt=nil] string args.style.font_focus
--- @tparam[opt=nil] string args.style.font_minimized
--- @tparam[opt=nil] string args.style.font_urgent
--- @tparam[opt=nil] number args.style.spacing The spacing between tags.
--- @tparam[opt=nil] gears.shape args.style.shape
--- @tparam[opt=nil] number args.style.shape_border_width
--- @tparam[opt=nil] string|color args.style.shape_border_color
--- @tparam[opt=nil] gears.shape args.style.shape_focus
--- @tparam[opt=nil] number args.style.shape_border_width_focus
--- @tparam[opt=nil] string|color args.style.shape_border_color_focus
--- @tparam[opt=nil] gears.shape args.style.shape_minimized
--- @tparam[opt=nil] number args.style.shape_border_width_minimized
--- @tparam[opt=nil] string|color args.style.shape_border_color_minimized
--- @tparam[opt=nil] gears.shape args.style.shape_urgent
--- @tparam[opt=nil] number args.style.shape_border_width_urgent
--- @tparam[opt=nil] string|color args.style.shape_border_color_urgent
+-- @tparam[opt=beautiful.tasklist_fg_normal] string|pattern args.style.fg_normal
+-- @tparam[opt=beautiful.tasklist_bg_normal] string|pattern args.style.bg_normal
+-- @tparam[opt=beautiful.tasklist_fg_focus or beautiful.fg_focus] string|pattern args.style.fg_focus
+-- @tparam[opt=beautiful.tasklist_bg_focus or beautiful.bg_focus] string|pattern args.style.bg_focus
+-- @tparam[opt=beautiful.tasklist_fg_urgent or beautiful.fg_urgent] string|pattern args.style.fg_urgent
+-- @tparam[opt=beautiful.tasklist_bg_urgent or beautiful.bg_urgent] string|pattern args.style.bg_urgent
+-- @tparam[opt=beautiful.tasklist_fg_minimize or beautiful.fg_minimize] string|pattern args.style.fg_minimize
+-- @tparam[opt=beautiful.tasklist_bg_minimize or beautiful.bg_minimize] string|pattern args.style.bg_minimize
+-- @tparam[opt=beautiful.tasklist_bg_image_normal] string args.style.bg_image_normal
+-- @tparam[opt=beautiful.tasklist_bg_image_focus] string args.style.bg_image_focus
+-- @tparam[opt=beautiful.tasklist_bg_image_urgent] string args.style.bg_image_urgent
+-- @tparam[opt=beautiful.tasklist_bg_image_minimize] string args.style.bg_image_minimize
+-- @tparam[opt=beautiful.tasklist_disable_icon] boolean args.style.disable_icon
+-- @tparam[opt=beautiful.tasklist_icon_size] number args.style.icon_size The size of the icon
+-- @tparam[opt=beautiful.tasklist_sticky or '▪'] string args.style.sticky Extra icon when client is sticky
+-- @tparam[opt=beautiful.tasklist_ontop or '⌃'] string args.style.ontop Extra icon when client is ontop
+-- @tparam[opt=beautiful.tasklist_above or '▴'] string args.style.above Extra icon when client is above
+-- @tparam[opt=beautiful.tasklist_below or '▾'] string args.style.below Extra icon when client is below
+-- @tparam[opt=beautiful.tasklist_floating or '✈'] string args.style.floating Extra icon when client is floating
+-- @tparam[opt=beautiful.tasklist_maximized or '<b>+</b>'] string args.style.maximized Extra icon when client is maximized
+-- @tparam[opt=beautiful.tasklist_maximized_horizontal or '⬌'] string args.style.maximized_horizontal Extra icon when client is maximized_horizontal
+-- @tparam[opt=beautiful.tasklist_maximized_vertical or '⬍'] string args.style.maximized_vertical Extra icon when client is maximized_vertical
+-- @tparam[opt=beautiful.tasklist_disable_task_name or false] boolean args.style.disable_task_name
+-- @tparam[opt=beautiful.tasklist_font] string args.style.font
+-- @tparam[opt=beautiful.tasklist_align or "left"] string args.style.align *left*, *right* or *center*
+-- @tparam[opt=beautiful.tasklist_font_focus] string args.style.font_focus
+-- @tparam[opt=beautiful.tasklist_font_minimized] string args.style.font_minimized
+-- @tparam[opt=beautiful.tasklist_font_urgent] string args.style.font_urgent
+-- @tparam[opt=beautiful.tasklist_spacing] number args.style.spacing The spacing between tags.
+-- @tparam[opt=beautiful.tasklist_shape] gears.shape args.style.shape
+-- @tparam[opt=beautiful.tasklist_shape_border_width] number args.style.shape_border_width
+-- @tparam[opt=beautiful.tasklist_shape_border_color] string|color args.style.shape_border_color
+-- @tparam[opt=beautiful.tasklist_shape_focus] gears.shape args.style.shape_focus
+-- @tparam[opt=beautiful.tasklist_shape_border_width_focus] number args.style.shape_border_width_focus
+-- @tparam[opt=beautiful.tasklist_shape_border_color_focus] string|color args.style.shape_border_color_focus
+-- @tparam[opt=beautiful.tasklist_shape_minimized] gears.shape args.style.shape_minimized
+-- @tparam[opt=beautiful.tasklist_shape_border_width_minimized] number args.style.shape_border_width_minimized
+-- @tparam[opt=beautiful.tasklist_shape_border_color_minimized] string|color args.style.shape_border_color_minimized
+-- @tparam[opt=beautiful.tasklist_shape_urgent] gears.shape args.style.shape_urgent
+-- @tparam[opt=beautiful.tasklist_shape_border_width_urgent] number args.style.shape_border_width_urgent
+-- @tparam[opt=beautiful.tasklist_shape_border_color_urgent] string|color args.style.shape_border_color_urgent
 -- @param filter **DEPRECATED** use args.filter
 -- @param buttons **DEPRECATED** use args.buttons
 -- @param style **DEPRECATED** use args.style
 -- @param update_function **DEPRECATED** use args.update_function
 -- @param base_widget **DEPRECATED** use args.base_layout
 -- @constructorfct awful.widget.tasklist
+-- @usebeautiful beautiful.tasklist_plain_task_name
 function tasklist.new(args, filter, buttons, style, update_function, base_widget)
     local screen = nil
 

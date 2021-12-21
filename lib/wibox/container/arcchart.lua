@@ -1,6 +1,5 @@
 ---------------------------------------------------------------------------
---
--- A circular chart (arc chart).
+-- A circular chart (arc chart) container.
 --
 -- It can contain a central widget (or not) and display multiple values.
 --
@@ -43,7 +42,19 @@ local arcchart = { mt = {} }
 
 --- The arc thickness.
 -- @beautiful beautiful.arcchart_thickness
--- @param number
+-- @tparam number arcchart_thickness
+
+--- If the chart has rounded edges.
+-- @beautiful beautiful.arcchart_rounded_edge
+-- @tparam boolean arcchart_rounded_edge
+
+--- The radial background.
+-- @beautiful beautiful.arcchart_bg
+-- @tparam gears.color arcchart_bg
+
+--- The (radiant) angle where the first value start.
+-- @beautiful beautiful.arcchart_start_angle
+-- @tparam number arcchart_start_angle
 
 local function outline_workarea(width, height)
     local x, y = 0, 0
@@ -101,7 +112,6 @@ function arcchart:after_draw_children(_, cr, width, height)
 
     local wa = outline_workarea(width, height)
     cr:translate(wa.x+border_width/2, wa.y+border_width/2)
-
 
     -- Get the min and max value
     --local min_val = self:get_min_value() or 0 --TODO support min_values
@@ -245,9 +255,9 @@ end
 --- The arcchart values foreground colors.
 --@DOC_wibox_container_arcchart_color_EXAMPLE@
 -- @property colors
--- @tparam table values An ordered set of colors for each value in arcchart.
+-- @tparam table colors An ordered set of colors for each value in arcchart.
 -- @propemits true false
--- @propbeautiful
+-- @usebeautiful beautiful.arcchart_color
 
 --- The border width.
 --
@@ -279,7 +289,7 @@ end
 --- The value.
 --@DOC_wibox_container_arcchart_value_EXAMPLE@
 -- @property value
--- @tparam number value Between min_value and max_value
+-- @tparam number value Between `min_value` and `max_value`
 -- @see values
 -- @propemits true false
 
@@ -297,18 +307,21 @@ end
 -- @property rounded_edge
 -- @tparam[opt=false] boolean rounded_edge
 -- @propemits true false
+-- @propbeautiful
 
 --- The arc thickness.
 --@DOC_wibox_container_arcchart_thickness_EXAMPLE@
 -- @property thickness
 -- @propemits true false
 -- @tparam number thickness
+-- @propbeautiful
 
 --- The (radiant) angle where the first value start.
---@DOC_wibox_container_arcchart_start_angle_EXAMPLE@
+-- @DOC_wibox_container_arcchart_start_angle_EXAMPLE@
 -- @property start_angle
 -- @tparam[opt=math.pi] number start_angle A number between 0 and 2*math.pi
 -- @propemits true false
+-- @usebeautiful beautiful.arcchart_start_angle
 
 for _, prop in ipairs {"border_width", "border_color", "paddings", "colors",
     "rounded_edge", "bg", "thickness", "values", "min_value", "max_value",

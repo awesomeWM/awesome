@@ -30,7 +30,7 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_handle_shape_EXAMPLE@
 --
 -- @property handle_shape
--- @tparam[opt=gears shape rectangle] gears.shape shape
+-- @tparam[opt=gears shape rectangle] gears.shape handle_shape
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.shape
@@ -49,7 +49,7 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_handle_margins_EXAMPLE@
 --
 -- @property handle_margins
--- @tparam[opt={}] table margins
+-- @tparam[opt={}] table handle_margins
 -- @tparam[opt=0] number margins.left
 -- @tparam[opt=0] number margins.right
 -- @tparam[opt=0] number margins.top
@@ -86,7 +86,7 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_bar_shape_EXAMPLE@
 --
 -- @property bar_shape
--- @tparam[opt=gears shape rectangle] gears.shape shape
+-- @tparam[opt=gears shape rectangle] gears.shape bar_shape
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.shape
@@ -124,7 +124,7 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_bar_margins_EXAMPLE@
 --
 -- @property bar_margins
--- @tparam[opt={}] table margins
+-- @tparam[opt={}] table bar_margins
 -- @tparam[opt=0] number margins.left
 -- @tparam[opt=0] number margins.right
 -- @tparam[opt=0] number margins.top
@@ -136,6 +136,7 @@ local slider = {mt={}}
 -- @property bar_border_width
 -- @tparam[opt=0] number bar_border_width
 -- @propemits true false
+-- @propbeautiful
 
 --- The bar (background) border_color.
 --
@@ -147,8 +148,6 @@ local slider = {mt={}}
 -- @propemits true false
 
 --- The slider value.
---
--- **Signal:** *property::value* notify the value is changed.
 --
 --@DOC_wibox_widget_slider_value_EXAMPLE@
 --
@@ -521,8 +520,25 @@ local function mouse_press(self, x, y, button_id, _, geo)
 end
 
 --- Create a slider widget.
--- @tparam[opt={}] table args
+--
 -- @constructorfct wibox.widget.slider
+-- @tparam[opt={}] table args
+-- @tparam[opt] gears.shape args.handle_shape The slider handle shape.
+-- @tparam[opt] color args.handle_color The slider handle color.
+-- @tparam[opt] table args.handle_margins The slider handle margins.
+-- @tparam[opt] number args.handle_width The slider handle width.
+-- @tparam[opt] color args.handle_border_color The handle border_color.
+-- @tparam[opt] number args.handle_border_width The handle border width.
+-- @tparam[opt] gears.shape args.bar_shape The bar (background) shape.
+-- @tparam[opt] number args.bar_height The bar (background) height.
+-- @tparam[opt] color args.bar_color The bar (background) color.
+-- @tparam[opt] color args.bar_active_color The bar (active) color.
+-- @tparam[opt] table args.bar_margins The bar (background) margins.
+-- @tparam[opt] number args.bar_border_width The bar (background) border width.
+-- @tparam[opt] color args.bar_border_color The bar (background) border_color.
+-- @tparam[opt] number args.value The slider value.
+-- @tparam[opt] number args.minimum The slider minimum value.
+-- @tparam[opt] number args.maximum The slider maximum value.
 local function new(args)
     local ret = base.make_widget(nil, nil, {
         enable_properties = true,

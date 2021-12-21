@@ -137,7 +137,7 @@ local checkbox = {}
 -- If none is set, then the `shape` property will be used.
 --@DOC_wibox_widget_checkbox_check_shape_EXAMPLE@
 -- @property check_shape
--- @tparam gears.shape shape
+-- @tparam gears.shape check_shape
 -- @propbeautiful
 -- @propemits true false
 -- @see gears.shape
@@ -254,7 +254,7 @@ end
 
 --- If the checkbox is checked.
 -- @property checked
--- @param boolean
+-- @tparam[opt=false] boolean checked
 
 for _, prop in ipairs {"border_width", "bg", "border_color", "check_border_color",
     "check_border_width", "check_color", "shape", "check_shape", "paddings",

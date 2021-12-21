@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- A grid layout.
+--- Place multiple widgets in multiple rows and columns.
 --
 -- Widgets spanning several columns or rows cannot be included using the
 -- declarative system.
@@ -52,7 +52,7 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 --  row is filled, creating it if it does not exist.
 --
 --@DOC_wibox_layout_grid_orientation_EXAMPLE@
--- @param[opt="vertical"] string Preferred orientation: "horizontal" or "vertical".
+-- @tparam[opt="vertical"] string orientation Preferred orientation: "horizontal" or "vertical".
 -- @property orientation
 
 --- Allow to superpose widgets in the same cell.
@@ -60,39 +60,39 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 -- widget and prevent from adding it.
 --
 --@DOC_wibox_layout_grid_superpose_EXAMPLE@
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean superpose
 -- @property superpose
 
 --- Force the number of rows of the layout.
 -- @property forced_num_rows
--- @tparam[opt=nil] number|nil number Forced number of rows (`nil` for automatic).
+-- @tparam[opt=nil] number|nil forced_num_rows Forced number of rows (`nil` for automatic).
 
 --- Force the number of columns of the layout.
 -- @property forced_num_cols
--- @tparam[opt=nil] number|nil number Forced number of columns (`nil` for automatic).
+-- @tparam[opt=nil] number|nil forced_num_cols Forced number of columns (`nil` for automatic).
 
 --- Set the minimum size for the columns.
 --
 --@DOC_wibox_layout_grid_min_size_EXAMPLE@
--- @param[opt=0] number Minimum size of the columns.
+-- @tparam[opt=0] number min_cols_size Minimum size of the columns.
 -- @property min_cols_size
 
 --- Set the minimum size for the rows.
--- @param[opt=0] number Minimum size of the rows.
+-- @tparam[opt=0] number min_rows_size Minimum size of the rows.
 -- @property min_rows_size
 
 --- The spacing between columns.
 --
 -- see `spacing`
 --
--- @param[opt=0] number The spacing
+-- @tparam[opt=0] number horizontal_spacing The spacing
 -- @property horizontal_spacing
 
 --- The spacing between rows.
 --
 -- see `spacing`
 --
--- @param[opt=0] number The spacing
+-- @tparam[opt=0] number vertical_spacing The spacing
 -- @property vertical_spacing
 
 --- The spacing between rows and columns.
@@ -101,21 +101,21 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 -- preferred `orientation`.
 --
 --@DOC_wibox_layout_grid_spacing_EXAMPLE@
--- @param[opt=0] number The spacing
+-- @tparam[opt=0] number spacing The spacing
 -- @property spacing
 
 --- Controls if the columns are expanded to use all the available width.
 --
 -- see `expand`
 --
--- @param[opt=false] boolean Expand the grid into the available space
+-- @tparam[opt=false] boolean horizontal_expand Expand the grid into the available space
 -- @property horizontal_expand
 
 --- Controls if the rows are expanded to use all the available height.
 --
 -- see `expand`
 --
--- @param[opt=false] boolean Expand the grid into the available space
+-- @tparam[opt=false] boolean vertical_expand Expand the grid into the available space
 -- @property vertical_expand
 
 --- Controls if the columns/rows are expanded to use all the available space.
@@ -124,7 +124,7 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 -- preferred `orientation`.
 --
 --@DOC_wibox_layout_grid_expand_EXAMPLE@
--- @param[opt=false] boolean Expand the grid into the available space
+-- @tparam[opt=false] boolean expand Expand the grid into the available space
 -- @property expand
 
 --- Controls if the columns all have the same width or if the width of each
@@ -132,7 +132,7 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 --
 -- see `homogeneous`
 --
--- @param[opt=true] boolean All the columns have the same width.
+-- @tparam[opt=true] boolean horizontal_homogeneous All the columns have the same width.
 -- @property horizontal_homogeneous
 
 --- Controls if the rows all have the same height or if the height of each row
@@ -140,7 +140,7 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 --
 -- see `homogeneous`
 --
--- @param[opt=true] boolean All the rows have the same height.
+-- @tparam[opt=true] boolean vertical_homogeneous All the rows have the same height.
 -- @property vertical_homogeneous
 
 --- Controls if the columns/rows all have the same size or if the size depends
@@ -150,7 +150,7 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 -- by the preferred `orientation`.
 --
 --@DOC_wibox_layout_grid_expand_EXAMPLE@
--- @param[opt=true] boolean All the columns/rows have the same size.
+-- @tparam[opt=true] boolean homogeneous All the columns/rows have the same size.
 -- @property homogeneous
 
 --- Child widget position. Return of `get_widget_position`.
@@ -305,7 +305,7 @@ end
 --@DOC_wibox_layout_grid_add_EXAMPLE@
 --
 -- @method add_widget_at
--- @param child Widget that should be added
+-- @tparam wibox.widget child Widget that should be added
 -- @tparam number row Row number for the top left corner of the widget
 -- @tparam number col Column number for the top left corner of the widget
 -- @tparam[opt=1] number row_span The number of rows the widget spans.
@@ -400,7 +400,7 @@ end
 
 --- Return the coordinates of the widget.
 -- @method get_widget_position
--- @param widget The widget
+-- @tparam widget widget The widget
 -- @treturn table The `position` table of the coordinates in the grid, with
 -- fields `row`, `col`, `row_span` and `col_span`.
 function grid:get_widget_position(widget)
@@ -441,8 +441,8 @@ end
 
 --- Replace old widget by new widget, spanning the same columns and rows.
 -- @method replace_widget
--- @param old The widget to remove
--- @param new The widget to add
+-- @tparam widget old The widget to remove
+-- @tparam widget new The widget to add
 -- @treturn boolean If the operation is successful (widget found)
 function grid:replace_widget(old, new)
     -- check if the new object is a widget

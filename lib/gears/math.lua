@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Various math related functions.
+--
 --- Math module for gears.
 --
 -- @utillib gears.math

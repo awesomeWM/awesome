@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Base class of every widgets, containers and layouts,
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @classmod wibox.widget.base
@@ -31,17 +33,17 @@ local base = {}
 -- widgets hierarchy. A hierarchy loop is when a widget, or any of its
 -- children, contain (directly or indirectly) itself.
 -- @property all_children
--- @tparam table children The children.
+-- @tparam table all_children The children.
 -- @baseclass wibox.widget.base
 
 --- Force a widget height.
 -- @property forced_height
--- @tparam number|nil height The height (`nil` for automatic)
+-- @tparam number|nil forced_height The height (`nil` for automatic)
 -- @baseclass wibox.widget.base
 
 --- Force a widget width.
 -- @property forced_width
--- @tparam number|nil width The width (`nil` for automatic)
+-- @tparam number|nil forced_width The width (`nil` for automatic)
 -- @baseclass wibox.widget.base
 
 --- The widget opacity (transparency).
@@ -51,14 +53,14 @@ local base = {}
 
 --- The widget visibility.
 -- @property visible
--- @param boolean
+-- @tparam[opt=true] boolean visible
 -- @baseclass wibox.widget.base
 
 --- The widget buttons.
 --
 -- The table contains a list of `awful.button` objects.
 -- @property buttons
--- @param table
+-- @tparam table buttons
 -- @see awful.button
 -- @baseclass wibox.widget.base
 
@@ -92,7 +94,7 @@ local base = {}
 -- @tparam number button The button number.
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
 -- @tparam table find_widgets_result The entry from the result of
--- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @{wibox:find_widgets} for the position that the mouse hit.
 -- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
 -- the widget.
 -- @tparam widget find_widgets_result.widget The widget being displayed.
@@ -123,7 +125,7 @@ local base = {}
 -- @tparam number button The button number.
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
 -- @tparam table find_widgets_result The entry from the result of
--- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @{wibox:find_widgets} for the position that the mouse hit.
 -- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
 -- the widget.
 -- @tparam widget find_widgets_result.widget The widget being displayed.
@@ -148,7 +150,7 @@ local base = {}
 -- @signal mouse::enter
 -- @tparam table self The current object instance itself.
 -- @tparam table find_widgets_result The entry from the result of
--- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @{wibox:find_widgets} for the position that the mouse hit.
 -- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
 -- the widget.
 -- @tparam widget find_widgets_result.widget The widget being displayed.
@@ -173,7 +175,7 @@ local base = {}
 -- @signal mouse::leave
 -- @tparam table self The current object instance itself.
 -- @tparam table find_widgets_result The entry from the result of
--- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @{wibox:find_widgets} for the position that the mouse hit.
 -- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
 -- the widget.
 -- @tparam widget find_widgets_result.widget The widget being displayed.

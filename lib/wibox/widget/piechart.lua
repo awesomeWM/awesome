@@ -191,7 +191,7 @@ end
 --
 --@DOC_wibox_widget_piechart_label_EXAMPLE@
 -- @property display_labels
--- @param[opt=true] boolean
+-- @tparam[opt=true] boolean display_labels
 
 --- The pie elements border width.
 --

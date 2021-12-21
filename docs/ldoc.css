@@ -190,11 +190,11 @@ span.default_value,
     border-bottom: solid 1px #bcd;
 }
 
-#content pre {
+#content pre, .auto_genenerated_code {
     margin: 15px;
 }
 
-pre {
+pre, .auto_genenerated_code {
     background-color: rgb(50, 55, 68);
     color: white;
     border-radius: 3px;

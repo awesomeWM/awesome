@@ -19,7 +19,7 @@
  *
  */
 
-/** A process window.
+/** A process window managed by AwesomeWM.
  *
  * Clients are the name used by Awesome (and X11) to refer to a window.
  *
@@ -38,9 +38,6 @@
  * All clients also have a `shape_bounding` and `shape_clip` used to "crop" the
  * client's content.
  * Finally, each clients can have titlebars (see `awful.titlebar`).
- *
- * Additionally to the classes described here, one can also use signals as
- * described in @{signals} and X properties as described in @{xproperties}.
  *
  * Some signal names are starting with a dot. These dots are artefacts from
  * the documentation generation, you get the real signal name by
@@ -273,9 +270,10 @@ lua_class_t client_class;
  * To implement focus stealing filters see `awful.ewmh.add_activate_filter`.
  *
  * @signal request::activate
+ * @tparam client c The client.
  * @tparam string context The context where this signal was used.
  * @tparam[opt] table hints A table with additional hints:
- * @tparam[opt=false] boolean hints.raise should the client be raised?
+ * @tparam[opt=false] boolean hints.raise Should the client be raised?
  * @request client activate ewmh granted When the client asks to be activated.
  * @classsignal
  */
@@ -294,9 +292,10 @@ lua_class_t client_class;
  * moving the mouse.
  *
  * @signal request::autoactivate
+ * @tparam client c The client.
  * @tparam string context The context where this signal was used.
  * @tparam[opt] table hints A table with additional hints:
- * @tparam[opt=false] boolean hints.raise should the client be raised?
+ * @tparam[opt=false] boolean hints.raise Should the client be raised?
  * @classsignal
  *
  */
@@ -307,7 +306,7 @@ lua_class_t client_class;
  * @tparam client c The client
  * @tparam string context Why and what to resize. This is used for the
  *   handlers to know if they are capable of applying the new geometry.
- * @tparam[opt={}] table Additional arguments. Each context handler may
+ * @tparam[opt={}] table hints Additional arguments. Each context handler may
  *   interpret this differently.
  * @request client geometry client_maximize_horizontal granted When a client
  *  (programmatically) asks for the maximization to be changed.
@@ -320,6 +319,10 @@ lua_class_t client_class;
  *
  * @signal request::tag
  * @tparam client c The client requesting a new tag.
+ * @tparam[opt] tag tag A preferred tag.
+ * @tparam[opt] table hints
+ * @tparam[opt] string hints.reason
+ * @tparam[opt] screen hints.screen
  * @classsignal
  */
 
@@ -373,6 +376,8 @@ lua_class_t client_class;
 /** Emitted when a client gets tagged.
  * @signal tagged
  * @tparam tag t The tag object.
+ * @see tags
+ * @see untagged
  */
 
 /** Emitted when a client gets unfocused.
@@ -382,6 +387,8 @@ lua_class_t client_class;
 /** Emitted when a client gets untagged.
  * @signal untagged
  * @tparam tag t The tag object.
+ * @see tags
+ * @see tagged
  */
 
 /**
@@ -680,7 +687,7 @@ lua_class_t client_class;
  *    }
  *
  * @property icon_sizes
- * @tparam table sizes
+ * @tparam table icon_sizes
  * @propemits false false
  * @readonly
  * @see awful.widget.clienticon
@@ -1108,7 +1115,7 @@ lua_class_t client_class;
  * advised to set `size_hints_honor` to `false` in the `ruled.client` rules.
  *
  * @property size_hints
- * @tparam[opt] table|nil hints The hints.
+ * @tparam[opt] table|nil size_hints The hints.
  * @tparam[opt] table|nil hints.user_position A table with `x` and `y` keys. It
  *  contains the preferred position of the client. This is set when the
  *  position has been modified by the user. See `program_position`.
@@ -1159,7 +1166,7 @@ lua_class_t client_class;
  * should be enabled.
  *
  * @property motif_wm_hints
- * @tparam table hints The hints.
+ * @tparam table motif_wm_hints The hints.
  * @tparam[opt] boolean hints.functions.all
  * @tparam[opt] boolean hints.functions.resize
  * @tparam[opt] boolean hints.functions.move

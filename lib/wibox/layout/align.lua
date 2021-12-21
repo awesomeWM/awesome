@@ -273,7 +273,7 @@ end
 -- `"inside"`.
 --
 -- @property expand
--- @tparam[opt="inside"] string mode How to use unused space.
+-- @tparam[opt="inside"] string expand How to use unused space.
 
 function align:set_expand(mode)
     if mode == "none" or mode == "outside" then

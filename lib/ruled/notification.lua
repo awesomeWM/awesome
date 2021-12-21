@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Rules for notifications.
+--- Apply properties to a new `naughty.notification` based on pre-determined rules.
 --
 --@DOC_wibox_nwidget_rules_urgency_EXAMPLE@
 --

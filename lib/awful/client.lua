@@ -157,7 +157,7 @@ client.focus = require("awful.client.focus")
 --
 -- @deprecated awful.client.jumpto
 -- @see client.jump_to
--- @tparam client c the client to jump to
+-- @tparam client c The client to jump to
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
@@ -1153,7 +1153,7 @@ end
 -- @DOC_screen_wfact4_EXAMPLE@
 --
 -- @legacylayout awful.client.idx
--- @tparam client c the client
+-- @tparam client c The client
 -- @treturn table data A table with "col", "idx" and "num" keys.
 -- @treturn integer data.col The column number.
 -- @treturn integer data.idx Index of the client in the column.
@@ -1224,8 +1224,8 @@ end
 -- @DOC_screen_wfact3_EXAMPLE@
 --
 -- @legacylayout awful.client.setwfact
--- @tparam number wfact the window factor value
--- @tparam client c the client
+-- @tparam number wfact The window factor value
+-- @tparam client c The client
 -- @emits property::windowfact Emitted on the c.first_tag object.
 -- @see tag.master_width_factor
 function client.setwfact(wfact, c)
@@ -1291,7 +1291,7 @@ end
 -- @tparam number add Amount to increase/decrease the client's window factor by.
 --   Should be between `-current_window_factor` and something close to
 --   infinite. Normalisation then ensures that the sum of all factors is 1.
--- @tparam[opt=client.focus] client c the client.
+-- @tparam[opt=client.focus] client c The client.
 -- @emits property::windowfact
 function client.incwfact(add, c)
     c = c or capi.client.focus
@@ -1462,10 +1462,10 @@ end
 -- Starting from the client in focus or the given index, all clients that match
 -- a given criteria.
 --
--- @tparam function filter a function that returns true to indicate a positive match.
--- @tparam integer start  what index to start iterating from.  Defaults to using the
+-- @tparam function filter A function that returns true to indicate a positive match.
+-- @tparam integer start What index to start iterating from.  Defaults to using the
 --   index of the currently focused client.
--- @tparam[opt=nil] screen s which screen to use.  nil means all screens.
+-- @tparam[opt=nil] screen s Which screen to use.  nil means all screens.
 --
 -- @staticfct awful.client.iterate
 -- @usage -- un-minimize all urxvt instances
@@ -1487,8 +1487,8 @@ end
 -- If multiple clients match the given condition then the next one is
 -- focused.
 --
--- @tparam string cmd the command to execute
--- @tparam function matcher a function that returns true to indicate a matching client
+-- @tparam string cmd The command to execute
+-- @tparam function matcher A function that returns true to indicate a matching client
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client as argument.
@@ -1611,7 +1611,7 @@ end, true, true, "keybinding")
 -- @DOC_awful_client_shape1_EXAMPLE@
 --
 -- @property shape
--- @tparam gears.shape A gears.shape compatible function.
+-- @tparam gears.shape shape A gears.shape compatible function.
 -- @propemits true false
 -- @see gears.shape
 function client.object.set_shape(self, shape)
@@ -1811,6 +1811,7 @@ end)
 
 --- Emitted when a client need to get a titlebar.
 -- @signal request::titlebars
+-- @tparam client c The client.
 -- @tparam[opt=nil] string content The context (like "rules")
 -- @tparam[opt=nil] table hints Some hints.
 -- @classsignal
@@ -1834,6 +1835,7 @@ end)
 -- * **floating**: When the floating or maximization state changes.
 --
 -- @signal request::border
+-- @tparam client c The client.
 -- @tparam string context The context.
 -- @tparam table hints The hints.
 -- @classsignal

@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+--- Utility function for working with widgets.
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @module wibox.widget

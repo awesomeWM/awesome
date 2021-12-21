@@ -1,7 +1,7 @@
 --luacheck: no max line length
 
 ---------------------------------------------------------------------------
---- Spawning of programs.
+--- Spawn sub-processes and optionally get their output.
 --
 -- This module provides methods to start programs and supports startup
 -- notifications, which allows for callbacks and applying properties to the

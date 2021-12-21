@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Prompt module for awful.
+--- Convert a `wibox.widget.textbox` into an input prompt.
 --
 -- **Keyboard navigation**:
 --
@@ -444,21 +444,21 @@ end
 --         return command
 --       end}
 --     }
--- @param textbox The textbox to use for the prompt. [**DEPRECATED**]
--- @param exe_callback The callback function to call with command as argument
+-- @tparam wibox.widget.textbox textbox The textbox to use for the prompt. [**DEPRECATED**]
+-- @tparam[opt] function|nil exe_callback The callback function to call with command as argument
 -- when finished. [**DEPRECATED**]
--- @param completion_callback The callback function to call to get completion.
+-- @tparam[opt] function completion_callback The callback function to call to get completion.
 --   [**DEPRECATED**]
--- @param[opt] history_path File path where the history should be
+-- @tparam[opt] string history_path File path where the history should be
 -- saved, set nil to disable history [**DEPRECATED**]
--- @param[opt] history_max Set the maximum entries in history
+-- @tparam[opt] number history_max Set the maximum entries in history
 -- file, 50 by default [**DEPRECATED**]
--- @param[opt] done_callback The callback function to always call
+-- @tparam[opt] function done_callback The callback function to always call
 -- without arguments, regardless of whether the prompt was cancelled.
 --  [**DEPRECATED**]
--- @param[opt] changed_callback The callback function to call
+-- @tparam[opt] function changed_callback The callback function to call
 -- with command as argument when a command was changed. [**DEPRECATED**]
--- @param[opt] keypressed_callback The callback function to call
+-- @tparam[opt] function keypressed_callback The callback function to call
 --   with mod table, key and command as arguments when a key was pressed.
 --   [**DEPRECATED**]
 -- @see gears.color

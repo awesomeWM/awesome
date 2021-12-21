@@ -21,11 +21,6 @@ local setmetatable = setmetatable
 
 local textbox = { mt = {} }
 
---- The textbox font.
---
--- @beautiful beautiful.font
--- @param string
-
 --- Set the DPI of a Pango layout
 local function setup_dpi(box, dpi)
     assert(dpi, "No DPI provided")
@@ -258,7 +253,7 @@ end
 --@DOC_wibox_widget_textbox_ellipsize_EXAMPLE@
 --
 -- @property ellipsize
--- @tparam[opt="end"] string mode The ellipsize mode.
+-- @tparam[opt="end"] string ellipsize The ellipsize mode.
 -- @propemits true false
 
 function textbox:set_ellipsize(mode)
@@ -285,7 +280,7 @@ end
 -- @DOC_wibox_widget_textbox_wrap1_EXAMPLE@
 --
 -- @property wrap
--- @tparam[opt="word_char"] string mode Where to wrap? After "word", "char" or "word_char".
+-- @tparam[opt="word_char"] string wrap Where to wrap? After "word", "char" or "word_char".
 -- @propemits true false
 
 function textbox:set_wrap(mode)
@@ -315,7 +310,7 @@ end
 --@DOC_wibox_widget_textbox_valign1_EXAMPLE@
 --
 -- @property valign
--- @tparam[opt="center"] string mode The vertical alignment
+-- @tparam[opt="center"] string valign The vertical alignment
 -- @propemits true false
 
 function textbox:set_valign(mode)
@@ -345,7 +340,7 @@ end
 --@DOC_wibox_widget_textbox_align1_EXAMPLE@
 --
 -- @property align
--- @tparam[opt="left"] string mode The horizontal alignment
+-- @tparam[opt="left"] string align The horizontal alignment
 -- @propemits true false
 
 function textbox:set_align(mode)

@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Box where widget can be displayed.
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @popupmod wibox

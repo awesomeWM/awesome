@@ -19,7 +19,16 @@
  *
  */
 
-/** awesome root window API.
+/** APIs to interact with the root window.
+ *
+ * X11 windows (clients) are stored in a tree. Each window
+ * can have children. A common example of this are modal
+ * dialog windows.
+ *
+ * This tree goes beyond a process. The root window is where
+ * the wallpaper is drawn. It span the combined geometry of
+ * every screen. It also persist when AwesomeWM is restarted.
+ *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @coreclassmod root
@@ -339,7 +348,7 @@ luaA_root_fake_input(lua_State *L)
  * (the wallpaper).
  *
  * @property keys
- * @param table
+ * @tparam table keys
  * @see awful.key
  */
 static int
@@ -505,7 +514,7 @@ luaA_root_wallpaper(lua_State *L)
 /** Get the content of the root window as a cairo surface.
  *
  * @property content
- * @tparam surface A cairo surface with the root window content (aka the whole surface from every screens).
+ * @tparam surface content A cairo surface with the root window content (aka the whole surface from every screens).
  * @see gears.surface
  */
 static int

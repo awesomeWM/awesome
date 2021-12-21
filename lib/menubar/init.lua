@@ -454,6 +454,13 @@ end
 --- Show the menubar on the given screen.
 -- @param[opt] scr Screen.
 -- @staticfct menubar.show
+-- @usebeautiful beautiful.menubar_fg_normal
+-- @usebeautiful beautiful.menubar_bg_normal
+-- @usebeautiful beautiful.menubar_border_width
+-- @usebeautiful beautiful.menubar_border_color
+-- @usebeautiful beautiful.menubar_fg_focus
+-- @usebeautiful beautiful.menubar_bg_focus
+-- @usebeautiful beautiful.menubar_font
 function menubar.show(scr)
     scr = get_screen(scr or awful.screen.focused() or 1)
     local fg_color = theme.menubar_fg_normal or theme.menu_fg_normal or theme.fg_normal

@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------------
+-- Split the space equally between multiple widgets.
+--
+--
 -- A `flex` layout may be initialized with any number of child widgets, and
 -- during runtime widgets may be added and removed dynamically.
 --
@@ -49,7 +52,7 @@ local flex = {}
 
 --- Remove a widget from the layout.
 --
--- @tparam index The widget index to remove.
+-- @tparam number index The widget index to remove.
 -- @treturn boolean index If the operation is successful.
 -- @method remove
 -- @interface layout

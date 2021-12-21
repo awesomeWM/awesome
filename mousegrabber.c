@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome mousegrabber API.
+/** Set a callback to process all mouse events.
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @coreclassmod mousegrabber

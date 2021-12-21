@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- A calendar popup wibox.
+-- A popup wibox containing a `wibox.widget,calendar` widget.
 --
 -- Display a month or year calendar popup using `calendar_popup.month` or `calendar_popup.year`.
 -- The calendar style can be tweaked by providing tables of style properties at creation:
@@ -386,6 +386,7 @@ end
 -- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
 -- @constructorfct awful.widget.calendar_popup.month
+-- @usebeautiful beautiful.calendar_style
 function calendar_popup.month(args)
     return get_cal_wibox("month", args)
 end

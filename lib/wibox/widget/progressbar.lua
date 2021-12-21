@@ -54,7 +54,7 @@ local progressbar = { mt = {} }
 -- @DOC_wibox_widget_progressbar_border_color_EXAMPLE@
 --
 -- @property border_color
--- @tparam gears.color color The border color to set.
+-- @tparam gears.color border_color The border color to set.
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.color
@@ -75,7 +75,7 @@ local progressbar = { mt = {} }
 -- @DOC_wibox_widget_progressbar_bar_border_color_EXAMPLE@
 --
 -- @property bar_border_color
--- @tparam gears.color color The border color to set.
+-- @tparam gears.color bar_border_color The border color to set.
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.color
@@ -104,7 +104,7 @@ local progressbar = { mt = {} }
 -- @DOC_wibox_widget_progressbar_background_color_EXAMPLE@
 --
 -- @property background_color
--- @tparam gears.color color The progressbar background color.
+-- @tparam gears.color background_color The progressbar background color.
 -- @propemits true false
 -- @usebeautiful beautiful.progressbar_bg
 -- @see gears.color
@@ -114,7 +114,7 @@ local progressbar = { mt = {} }
 --@DOC_wibox_widget_progressbar_bar_shape_EXAMPLE@
 --
 -- @property bar_shape
--- @tparam[opt=gears.shape.rectangle] gears.shape shape
+-- @tparam[opt=gears.shape.rectangle] gears.shape bar_shape
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.shape
@@ -243,7 +243,7 @@ local progressbar = { mt = {} }
 -- @DOC_wibox_widget_progressbar_margins1_EXAMPLE@
 --
 -- @property margins
--- @tparam[opt=0] (table|number|nil) margins A table for each side or a number
+-- @tparam[opt=0] table|number|nil margins A table for each side or a number
 -- @tparam[opt=0] number margins.top
 -- @tparam[opt=0] number margins.bottom
 -- @tparam[opt=0] number margins.left
@@ -268,7 +268,7 @@ local progressbar = { mt = {} }
 -- @DOC_wibox_widget_progressbar_paddings1_EXAMPLE@
 --
 -- @property paddings
--- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
+-- @tparam[opt=0] (table|number|nil) paddings A table for each side or a number
 -- @tparam[opt=0] number paddings.top
 -- @tparam[opt=0] number paddings.bottom
 -- @tparam[opt=0] number paddings.left
@@ -591,8 +591,24 @@ end
 --
 -- @tparam table args Standard widget() arguments. You should add width and
 --  height constructor parameters to set progressbar geometry.
--- @tparam number args.width The width.
--- @tparam number args.height The height.
+-- @tparam[opt] number args.width The width.
+-- @tparam[opt] number args.height The height.
+-- @tparam[opt] gears.color args.border_color The progressbar border color.
+-- @tparam[opt] number args.border_width The progressbar border width.
+-- @tparam[opt] gears.color args.bar_border_color The progressbar inner border color.
+-- @tparam[opt] number args.bar_border_width The progressbar inner border width.
+-- @tparam[opt] gears.color args.color The progressbar foreground color.
+-- @tparam[opt] gears.color args.background_color The progressbar background color.
+-- @tparam[opt] gears.shape args.bar_shape The progressbar inner shape.
+-- @tparam[opt] gears.shape args.shape The progressbar shape.
+-- @tparam[opt] boolean args.clip Force the inner part (the bar) to fit in the background shape.
+-- @tparam[opt] boolean args.ticks The progressbar to draw ticks.
+-- @tparam[opt] number args.ticks_gap The progressbar ticks gap.
+-- @tparam[opt] number args.ticks_size The progressbar ticks size.
+-- @tparam[opt] number args.max_value The maximum value the progressbar should handle.
+-- @tparam[opt] table|number args.margins The progressbar margins.
+-- @tparam[opt] table|number args.paddings The progressbar padding.
+-- @tparam[opt] number args.value Set the progressbar value.
 -- @treturn wibox.widget.progressbar A progressbar widget.
 -- @constructorfct wibox.widget.progressbar
 function progressbar.new(args)

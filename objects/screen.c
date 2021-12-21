@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome screen API.
+/** A physical or virtual screen object.
  *
  * Screen objects can be added and removed over time. To get a callback for all
  * current and future screens, use `awful.screen.connect_for_each_screen`:
@@ -36,9 +36,6 @@
  *
  * Most basic Awesome objects also have a screen property, see `mouse.screen`
  * `client.screen`, `wibox.screen` and `tag.screen`.
- *
- * Furthermore to the classes described here, one can also use signals as
- * described in @{signals}.
  *
  * @DOC_uml_nav_tables_screen_EXAMPLE@
  *
@@ -1677,8 +1674,8 @@ luaA_screen_count(lua_State *L)
  *
  * @tparam integer x X-coordinate for screen.
  * @tparam integer y Y-coordinate for screen.
- * @tparam integer width width for screen.
- * @tparam integer height height for screen.
+ * @tparam integer width Width for screen.
+ * @tparam integer height Height for screen.
  * @treturn screen The new screen.
  * @constructorfct fake_add
  */
@@ -1766,6 +1763,8 @@ luaA_screen_fake_remove(lua_State *L)
  * @tparam integer width The new width for screen.
  * @tparam integer height The new height for screen.
  * @method fake_resize
+ * @see split
+ * @see geometry
  */
 static int
 luaA_screen_fake_resize(lua_State *L)

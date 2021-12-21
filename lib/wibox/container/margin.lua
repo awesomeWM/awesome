@@ -94,7 +94,7 @@ end
 --- Set all the margins to val.
 --
 -- @property margins
--- @tparam number|table val The margin value. It can be a number or a table with
+-- @tparam number|table margins The margin value. It can be a number or a table with
 --  the *left*/*right*/*top*/*bottom* keys.
 -- @propemits false false
 
@@ -126,7 +126,7 @@ end
 --- Set the margins color to create a border.
 --
 -- @property color
--- @param color A color used to fill the margin.
+-- @tparam gears.color color A color used to fill the margin.
 -- @propemits true false
 
 function margin:set_color(color)
@@ -206,13 +206,13 @@ end
 
 --- Returns a new margin container.
 --
--- @param[opt] widget A widget to use.
--- @param[opt] left A margin to use on the left side of the widget.
--- @param[opt] right A margin to use on the right side of the widget.
--- @param[opt] top A margin to use on the top side of the widget.
--- @param[opt] bottom A margin to use on the bottom side of the widget.
--- @param[opt] color A color for the margins.
--- @param[opt] draw_empty whether or not to draw the margin when the content is empty
+-- @tparam[opt] widget widget A widget to use.
+-- @tparam[opt] number left A margin to use on the left side of the widget.
+-- @tparam[opt] number right A margin to use on the right side of the widget.
+-- @tparam[opt] number top A margin to use on the top side of the widget.
+-- @tparam[opt] number bottom A margin to use on the bottom side of the widget.
+-- @tparam[opt] gears.color color A color for the margins.
+-- @tparam[opt] boolean draw_empty Whether or not to draw the margin when the content is empty
 -- @treturn table A new margin container
 -- @constructorfct wibox.container.margin
 local function new(widget, left, right, top, bottom, color, draw_empty)

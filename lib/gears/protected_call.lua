@@ -1,4 +1,9 @@
 ---------------------------------------------------------------------------
+-- Safely call a function and handle errors using `gears.debug`.
+--
+-- This is a `pcall`/`xpcall` wrapper. All it does is to integrate into the
+-- AwesomeWM-wide error handling and logging.
+--
 -- @author Uli Schlachter
 -- @copyright 2016 Uli Schlachter
 -- @utillib gears.protected_call

@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---- A notification square icon.
+--- A notification square icon widget.
 --
 -- This widget is a specialized `wibox.widget.imagebox` with the following extra
 -- features:
@@ -14,6 +14,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2017 Emmanuel Lepage Vallee
 -- @widgetmod naughty.widget.icon
+-- @supermodule wibox.widget.imagebox
 -- @see wibox.widget.imagebox
 ----------------------------------------------------------------------------
 local imagebox = require("wibox.widget.imagebox")
@@ -24,7 +25,7 @@ local dpi = require("beautiful.xresources").apply_dpi
 
 local icon = {}
 
--- The default way to resize the icon.
+--- The default way to resize the icon.
 -- @beautiful beautiful.notification_icon_resize_strategy
 -- @param number
 
@@ -129,6 +130,11 @@ local valid_strategies = {
 -- @usebeautiful beautiful.notification_icon_resize_strategy The fallback when
 --  there is no specified strategy.
 -- @usebeautiful beautiful.notification_icon_size  The size upper bound.
+
+
+--- The default notification icon size.
+-- @beautiful beautiful.notification_icon_size
+-- @tparam number notification_icon_size The size (in pixels).
 
 function icon:set_resize_strategy(strategy)
     assert(valid_strategies[strategy], "Invalid strategy")

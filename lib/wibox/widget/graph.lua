@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- A graph widget.
+--- Display multiple values as a stream of bars.
 --
 -- The graph goes from left to right. To change this to right to left, use
 -- a `wibox.container.mirror` widget. This can also be used to have data
@@ -84,7 +84,7 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_stacked_group_disable_EXAMPLE@
 --
 -- @property group_colors
--- @tparam table colors A table with colors for data groups.
+-- @tparam table group_colors A table with colors for data groups.
 -- @see gears.color
 
 --- The maximum value the graph should handle.

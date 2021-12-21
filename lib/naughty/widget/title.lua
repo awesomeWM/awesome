@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---- A notification title.
+--- A notification title widget.
 --
 -- This widget is a specialized `wibox.widget.textbox` with the following extra
 -- features:
@@ -12,6 +12,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2017 Emmanuel Lepage Vallee
 -- @widgetmod naughty.widget.title
+-- @supermodule wibox.widget.textbox
 -- @see wibox.widget.textbox
 ----------------------------------------------------------------------------
 local textbox = require("wibox.widget.textbox")

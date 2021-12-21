@@ -178,33 +178,38 @@ end
 local layoutlist = {}
 
 --- The layoutlist default widget layout.
+--
 -- If no layout is specified, a `wibox.layout.fixed.vertical` will be created
 -- automatically.
 -- @property base_layout
--- @param widget
+-- @tparam[opt=wibox.layout.fixed.vertical] wibox.layout base_layout
 -- @propemits true false
 -- @see wibox.layout.fixed.vertical
 -- @see base_layout
 
 --- The delegate widget template.
+--
 -- @property widget_template
--- @param table
+-- @tparam[opt=nil] table widget_template
 -- @propemits true false
 
 --- The layoutlist screen.
+--
 -- @property screen
--- @param screen
+-- @tparam screen screen
 
 --- A function that returns the list of layout to display.
 --
 -- @property source
--- @param[opt=awful.widget.layoutlist.source.for_screen] function
+-- @tparam[opt=awful.widget.layoutlist.source.for_screen] function source
 
 --- The layoutlist filter function.
+--
 -- @property filter
--- @param[opt=awful.widget.layoutlist.source.for_screen] function
+-- @tparam[opt=awful.widget.layoutlist.source.for_screen] function filter
 
 --- The default foreground (text) color.
+--
 -- @beautiful beautiful.layoutlist_fg_normal
 -- @tparam[opt=nil] string|pattern fg_normal
 -- @see gears.color
@@ -276,17 +281,17 @@ local layoutlist = {}
 
 --- The currenly displayed layouts.
 -- @property layouts
--- @param table
+-- @tparam table layouts
 
 --- The currently selected layout.
 -- @property current_layout
--- @param layout
+-- @tparam layout current_layout
 
 --- The current number of layouts.
 --
 -- @property count
 -- @readonly
--- @tparam number The number of layouts.
+-- @tparam number count The number of layouts.
 -- @propemits true false
 
 function layoutlist:get_layouts()
@@ -395,22 +400,22 @@ end
 -- @tparam[opt] table args.widget_template A custom widget to be used for each action.
 -- @tparam[opt=ascreen.focused()] screen args.screen A screen
 -- @tparam[opt={}] table args.style Extra look and feel parameters
--- @tparam boolean args.style.disable_icon
--- @tparam boolean args.style.disable_name
--- @tparam string|pattern args.style.fg_normal
--- @tparam string|pattern args.style.bg_normal
--- @tparam string|pattern args.style.fg_selected
--- @tparam string|pattern args.style.bg_selected
--- @tparam string args.style.font
--- @tparam string args.style.font_selected
--- @tparam string args.style.align *left*, *right* or *center*
--- @tparam number args.style.spacing
--- @tparam gears.shape args.style.shape
--- @tparam number args.style.shape_border_width
--- @tparam string|pattern args.style.shape_border_color
--- @tparam gears.shape args.style.shape_selected
--- @tparam string|pattern args.style.shape_border_width_selected
--- @tparam string|pattern args.style.shape_border_color_selected
+-- @tparam[opt=beautiful.layoutlist_disable_icon] boolean args.style.disable_icon
+-- @tparam[opt=beautiful.layoutlist_disable_name] boolean args.style.disable_name
+-- @tparam[opt=beautiful.layoutlist_fg_normal] string|pattern args.style.fg_normal
+-- @tparam[opt=beautiful.layoutlist_bg_normal] string|pattern args.style.bg_normal
+-- @tparam[opt=beautiful.layoutlist_fg_selected] string|pattern args.style.fg_selected
+-- @tparam[opt=beautiful.layoutlist_bg_selected] string|pattern args.style.bg_selected
+-- @tparam[opt=beautiful.layoutlist_font] string args.style.font
+-- @tparam[opt=beautiful.layoutlist_font_selected] string args.style.font_selected
+-- @tparam[opt=beautiful.layoutlist_align] string args.style.align *left*, *right* or *center*
+-- @tparam[opt=beautiful.layoutlist_spacing] number args.style.spacing
+-- @tparam[opt=beautiful.layoutlist_shape] gears.shape args.style.shape
+-- @tparam[opt=beautiful.layoutlist_shape_border_width] number args.style.shape_border_width
+-- @tparam[opt=beautiful.layoutlist_shape_border_color] string|pattern args.style.shape_border_color
+-- @tparam[opt=beautiful.layoutlist_shape_selected] gears.shape args.style.shape_selected
+-- @tparam[opt=beautiful.layoutlist_shape_border_width_selected] string|pattern args.style.shape_border_width_selected
+-- @tparam[opt=beautiful.layoutlist_shape_border_color_selected] string|pattern args.style.shape_border_color_selected
 -- @treturn widget The action widget.
 -- @constructorfct awful.widget.layoutlist
 

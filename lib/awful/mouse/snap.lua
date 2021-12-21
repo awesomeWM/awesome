@@ -200,6 +200,10 @@ end
 -- @tparam boolean fixed_x True if the client isn't allowed to move in the x direction.
 -- @tparam boolean fixed_y True if the client isn't allowed to move in the y direction.
 -- @treturn table The new geometry.
+-- @usebeautiful beautiful.snap_bg
+-- @usebeautiful beautiful.snap_border_width
+-- @usebeautiful beautiful.snap_shape
+-- @usebeautiful beautiful.snapper_gap
 function module.snap(c, snap, x, y, fixed_x, fixed_y)
     snap = snap or module.default_distance
     c = c or capi.client.focus

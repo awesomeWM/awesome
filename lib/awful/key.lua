@@ -43,7 +43,7 @@ local gobject = require("gears.object")
 -- keycode such as `#65`.
 --
 -- @property key
--- @param string
+-- @tparam string key
 
 --- The table of modifier keys.
 --
@@ -75,31 +75,31 @@ local gobject = require("gears.object")
 -- This is used, for example, by `awful.hotkeys_popup`.
 --
 -- @property description
--- @param string
+-- @tparam string description
 
 --- The key name.
 --
 -- This can be useful when searching for keybindings by keywords.
 --
 -- @property name
--- @param string
+-- @tparam string name
 
 --- The key group bound to a function in a key binding.
 --
 -- This is used, for example, by `awful.hotkeys_popup`.
 --
 -- @property group
--- @param string
+-- @tparam string group
 
 --- The callback when this key is pressed.
 --
 -- @property on_press
--- @param function
+-- @tparam function on_press
 
 --- The callback when this key is released.
 --
 -- @property on_release
--- @param function
+-- @tparam function on_release
 
 local key = { mt = {}, hotkeys = {} }
 

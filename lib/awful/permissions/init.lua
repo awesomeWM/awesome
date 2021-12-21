@@ -1,5 +1,19 @@
 ---------------------------------------------------------------------------
---- Implements EWMH requests handling.
+--- Default implementation of the various requests handers.
+--
+-- AwesomeWM has many `request::` signals across the core APIs. They help
+-- decouple the default behavior from the core API. The request handlers
+-- can be disconnected and replaced by module or `rc.lua` to alter
+-- AwesomeWM behavior.
+--
+-- This module provides the default implementation of those request handlers.
+-- Beside some legacy signals, most request handlers have a main object, a
+-- named context and a table containing any low-level hints the core code is
+-- aware of. Each default handler implement a context based filter mechanism.
+-- This filter is called the "permissions". It allows requests to be denied.
+-- For example, if a tiled client asks to be resized or moved, the permission
+-- and deny it. In the documentation, many objects and properties have a
+-- "permissions" section you can display by clicking "show more".
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
@@ -143,12 +157,13 @@ end
 -- @tparam client c A client to use
 -- @tparam string context The context where this signal was used.
 -- @tparam[opt] table hints A table with additional hints:
--- @tparam[opt=false] boolean hints.raise should the client be unminimized
+-- @tparam[opt=false] boolean hints.raise Should the client be unminimized
 --  and raised?
--- @tparam[opt=false] boolean hints.switch_to_tag should the client's first tag
+-- @tparam[opt=false] boolean hints.switch_to_tag Should the client's first tag
 --  be selected if none of the client's tags are selected?
 -- @tparam[opt=false] boolean hints.switch_to_tags Select all tags associated
 --  with the client.
+-- @sourcesignal client request::activate
 function permissions.activate(c, context, hints) -- luacheck: no unused args
     if not pcommon.check(c, "client", "activate", context) then return end
 
@@ -291,6 +306,7 @@ end
 -- @tparam[opt] tag|boolean t A tag to use. If `true`, then the client is made `sticky`.
 -- @tparam[opt={}] table hints Extra information.
 -- @tparam[opt=nil] nil|string hints.reason Why the tag is being changed.
+-- @sourcesignal client request::tag
 function permissions.tag(c, t, hints) --luacheck: no unused
     -- There is nothing to do
     if not t and #get_valid_tags(c, c.screen) > 0 then return end
@@ -317,6 +333,7 @@ end
 -- @signalhandler awful.permissions.urgent
 -- @tparam client c A client
 -- @tparam boolean urgent If the client should be urgent
+-- @sourcesignal client request::urgent
 function permissions.urgent(c, urgent)
     if c ~= client.focus and not aclient.property.get(c,"ignore_urgent") then
         c.urgent = urgent
@@ -343,6 +360,7 @@ local context_mapper = {
 --  previous geometry in case it has to be restored.
 -- @tparam[opt=true] boolean hints.honor_workarea Avoid overlapping the `wibar`s
 --  or other desktop decoration when applying the geometry.
+-- @sourcesignal client request::geometry
 function permissions.geometry(c, context, hints)
     if not pcommon.check(c, "client", "geometry", context) then return end
 
@@ -416,6 +434,7 @@ end
 -- @tparam[opt] integer hints.y The vertical position.
 -- @tparam[opt] integer hints.width The wibox width.
 -- @tparam[opt] integer hints.height The wibox height.
+-- @sourcesignal client request::geometry
 function permissions.wibox_geometry(w, context, hints)
     if not pcommon.check(w, "wibox", "geometry", context) then return end
 
@@ -435,6 +454,7 @@ end
 -- @tparam[opt={}] table hints The hints to pass to the handler.
 -- @tparam[opt=false] boolean hints.toggle Toggle the maximization state rather
 --  than set it to `true`.
+-- @sourcesignal client request::geometry
 function permissions.merge_maximization(c, context, hints)
     if not pcommon.check(c, "client", "geometry", context) then return end
 
@@ -522,6 +542,7 @@ end
 -- @tparam[opt] integer hints.y The vertical position.
 -- @tparam[opt] integer hints.width The client width.
 -- @tparam[opt] integer hints.height The client height.
+-- @sourcesignal client request::geometry
 function permissions.client_geometry_requests(c, context, hints)
     if not pcommon.check(c, "client", "geometry", context) then return end
 
@@ -563,6 +584,7 @@ end, "mouse_enter")
 -- @signalhandler awful.permissions.update_border
 -- @tparam client c The client.
 -- @tparam string context Why is the border changed.
+-- @sourcesignal client request::border
 -- @usebeautiful beautiful.border_color_marked
 -- @usebeautiful beautiful.border_color_active
 -- @usebeautiful beautiful.border_color_normal
@@ -751,6 +773,7 @@ local activate_context_map = {
 -- @tparam client c The client.
 -- @tparam string context Why is the client auto-activated.
 -- @tparam[opt={}] table hints Extra arguments.
+-- @sourcesignal client request::activated
 -- @see activate
 -- @see client:activate
 function permissions.autoactivate(c, context, args)

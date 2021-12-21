@@ -68,7 +68,7 @@ local separator = {}
 --- The relative percentage covered by the bar.
 --
 -- @property span_ratio
--- @tparam[opt=1] number A number between 0 and 1.
+-- @tparam[opt=1] number span_ratio A number between 0 and 1.
 -- @propbeautiful
 -- @propemits true false
 
@@ -112,7 +112,7 @@ local separator = {}
 
 --- The relative percentage covered by the bar.
 -- @beautiful beautiful.separator_span_ratio
--- @tparam[opt=1] number A number between 0 and 1.
+-- @tparam[opt=1] number separator_span_ratio A number between 0 and 1.
 
 --- The separator's color.
 -- @beautiful beautiful.separator_color
@@ -203,6 +203,13 @@ end
 --- Create a new separator.
 -- @constructorfct wibox.widget.separator
 -- @tparam table args The arguments (all properties are available).
+-- @tparam[opt] string args.orientation The separator's orientation.
+-- @tparam[opt] number args.thickness The separator's thickness.
+-- @tparam[opt] function args.shape The separator's shape.
+-- @tparam[opt] number args.span_ratio The relative percentage covered by the bar.
+-- @tparam[opt] color args.color The separator's color.
+-- @tparam[opt] color args.border_color The separator's border color.
+-- @tparam[opt] number args.border_width The separator's border width.
 
 local function new(args)
     local ret = base.make_widget(nil, nil, {

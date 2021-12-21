@@ -296,7 +296,7 @@ end
 -- @DOC_text_awful_keygrabber_timeout_EXAMPLE@
 --
 -- @property timeout
--- @param number
+-- @tparam number timeout
 -- @see gears.timer
 -- @see timeout_callback
 
@@ -321,7 +321,7 @@ end
 -- their corresponding key names such as `Control_L`.
 --
 -- @property stop_key
--- @param[opt=nil] string|table stop_key
+-- @tparam[opt=nil] string|table stop_key
 -- @see stop_event
 
 --- The event on which the keygrabbing will be terminated.
@@ -332,7 +332,7 @@ end
 -- * "release"
 --
 -- @property stop_event
--- @param string
+-- @tparam string stop_event
 -- @see stop_key
 
 --- Whether or not to execute the key press/release callbacks when keybindings are called.
@@ -344,14 +344,14 @@ end
 -- By default, keybindings block those callbacks from being executed.
 --
 -- @property mask_event_callback
--- @param[opt=true] boolean
+-- @tparam[opt=true] boolean mask_event_callback
 -- @see keybindings
 -- @see keyreleased_callback
 -- @see keypressed_callback
 
 --- Do not call the callbacks on modifier keys (like `Control` or `Mod4`) events.
 -- @property mask_modkeys
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean mask_modkeys
 -- @see mask_event_callback
 
 --- Export all keygrabber keybindings as root (global) keybindings.
@@ -365,7 +365,7 @@ end
 -- have a single instance.
 --
 -- @property export_keybindings
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean export_keybindings
 
 --- The root (global) keybinding to start this keygrabber.
 --
@@ -376,7 +376,7 @@ end
 -- @DOC_text_awful_keygrabber_root_keybindings_EXAMPLE@
 --
 -- @property root_keybindings
--- @param table
+-- @tparam table root_keybindings
 -- @see export_keybindings
 -- @see keybindings
 
@@ -385,7 +385,7 @@ end
 -- This property contains a table of `awful.key` objects.
 --
 -- @property keybindings
--- @param table
+-- @tparam table keybindings
 -- @see export_keybindings
 -- @see root_keybindings
 -- @see awful.key
@@ -415,7 +415,7 @@ end
 -- @DOC_text_awful_keygrabber_autostart_EXAMPLE@
 --
 -- @property sequence
--- @param string
+-- @tparam string sequence
 --
 
 --- The current (running) instance of this keygrabber.

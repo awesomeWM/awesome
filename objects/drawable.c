@@ -20,10 +20,7 @@
  *
  */
 
-/** awesome drawable API.
- *
- * Furthermore to the classes described here, one can also use signals as
- * described in @{signals}.
+/** Low-level API to allow Cairo to draw on clients and wiboxes.
  *
  * @author Uli Schlachter &lt;psychon@znc.in&gt;
  * @copyright 2012 Uli Schlachter
@@ -240,5 +237,7 @@ drawable_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawable_get_surface,
                             NULL);
 }
+
+/* @DOC_cobject_COMMON@ */
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

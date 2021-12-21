@@ -10,7 +10,7 @@ local hotkeys_popup = {
   widget = require("awful.hotkeys_popup.widget"),
 }
 
---- This is the same as awful.hotkeys_popup.widget.show_help.
+--- This is the same as `awful.hotkeys_popup.widget.show_help`.
 --
 -- example usage:
 --

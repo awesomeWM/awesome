@@ -637,7 +637,7 @@ end
 -- @deprecated awful.tag.setscreen
 -- @see screen
 -- @tparam screen s Screen
--- @tparam tag t tag object
+-- @tparam tag t The tag object
 function tag.setscreen(s, t)
     -- For API consistency, the arguments have been swapped for Awesome 3.6
     -- this method is already deprecated, so be silent and swap the args
@@ -653,7 +653,7 @@ end
 --- Get a tag's screen
 -- @deprecated awful.tag.getscreen
 -- @see screen
--- @tparam[opt] tag|nil t tag object
+-- @tparam[opt=awful.screen.focused().selected_taga] tag|nil t Tag object
 -- @treturn screen The tag screen.
 function tag.getscreen(t)
     gdebug.deprecate("Use t.screen instead of awful.tag.getscreen(t)", {deprecated_in=4})
@@ -713,7 +713,7 @@ end
 -- @DOC_screen_mwfact2_EXAMPLE@
 --
 -- @property master_width_factor
--- @tparam number master_width_factor Between 0 and 1
+-- @tparam[opt=beautiful.master_width_factor] number master_width_factor Between 0 and 1
 -- @emits property::mwfact When the value changes (deprecated).
 -- @emits property::master_width_factor When the value changes.
 -- @see master_count
@@ -1006,7 +1006,7 @@ end
 --- Set layout.
 -- @deprecated awful.tag.setlayout
 -- @see layout
--- @param layout a layout table or a constructor function
+-- @param layout A layout table or a constructor function
 -- @tparam tag t The tag to modify
 -- @return The layout
 function tag.setlayout(layout, t)
@@ -1096,7 +1096,7 @@ end
 -- @DOC_screen_gaps2_EXAMPLE@
 --
 -- @property gap
--- @tparam number gap The value has to be greater than zero.
+-- @tparam[opt=beautiful.useless_gap] number gap The value has to be greater than zero.
 -- @emits property::useless_gap When the gap changes.
 -- @see gap_single_client
 -- @see awful.tag.incgap
@@ -1158,7 +1158,7 @@ end
 -- @DOC_screen_gap_single_client_false_EXAMPLE@
 --
 -- @property gap_single_client
--- @tparam boolean gap_single_client Enable gaps for a single client
+-- @tparam[opt=beautiful.gap_single_client] boolean gap_single_client Enable gaps for a single client
 -- @propemits false false
 -- @see awful.tag.incgap
 
@@ -1230,7 +1230,7 @@ end
 -- redistributed on both side.
 --
 -- @property master_fill_policy
--- @tparam string master_fill_policy "expand" or "master\_width\_factor"
+-- @tparam[opt=beautiful.master_fill_policy] string master_fill_policy "expand" or "master\_width\_factor"
 -- @propemits false false
 -- @see awful.tag.togglemfpol
 
@@ -1245,7 +1245,7 @@ end
 -- @see master_fill_policy
 -- @tparam string policy Can be set to
 -- "expand" (fill all the available workarea) or
--- "master_width_factor" (fill only an area inside the master width factor)
+-- `master_width_factor` (fill only an area inside the master width factor)
 -- @tparam[opt=tag.selected()] tag t The tag to modify
 function tag.setmfpol(policy, t)
     gdebug.deprecate("Use t.master_fill_policy = policy instead of awful.tag.setmfpol", {deprecated_in=4})
@@ -1296,7 +1296,7 @@ end
 -- @DOC_sequences_tag_master_count_EXAMPLE@
 --
 -- @property master_count
--- @tparam integer master_count nmaster Only positive values are accepted
+-- @tparam[opt=beautiful.master_count] integer master_count Only positive values are accepted
 -- @emits property::nmaster Deprecated.
 -- @emits property::master_count When the value changes.
 -- @see awful.tag.incnmaster
@@ -1317,7 +1317,7 @@ end
 --- The number of master clients.
 -- @deprecated awful.tag.setnmaster
 -- @see master_count
--- @tparam nmaster The number of master windows.
+-- @tparam number nmaster The number of master windows.
 -- @tparam[opt] tag t The tag.
 function tag.setnmaster(nmaster, t)
     gdebug.deprecate("Use t.master_count = nmaster instead of awful.tag.setnmaster", {deprecated_in=4})
@@ -1379,9 +1379,9 @@ end
 
 --- Set the tag icon
 -- @deprecated awful.tag.seticon
+-- @tparam gears.surface|string icon The icon to set, either path or image object
+-- @tparam tag tag The tag
 -- @see icon
--- @tparam gears.surface|string icon the icon to set, either path or image object
--- @tparam tag tag the tag
 function tag.seticon(icon, _tag)
     gdebug.deprecate("Use t.icon = icon instead of awful.tag.seticon", {deprecated_in=4})
 
@@ -1392,7 +1392,7 @@ end
 --- Get the tag icon
 -- @deprecated awful.tag.geticon
 -- @see icon
--- @tparam tag tag the tag
+-- @tparam tag tag The tag
 function tag.geticon(_tag)
     gdebug.deprecate("Use t.icon instead of awful.tag.geticon", {deprecated_in=4})
 
@@ -1411,7 +1411,7 @@ end
 -- @DOC_sequences_tag_column_count_EXAMPLE@
 --
 -- @property column_count
--- @tparam integer ncol Has to be greater than 1
+-- @tparam[opt=beautiful.column_count or 1] integer column_count Has to be greater than 1
 -- @emits property::ncol Deprecated.
 -- @emits property::column_count When the value changes.
 -- @see awful.tag.incncol
@@ -1739,7 +1739,7 @@ end
 -- @staticfct awful.tag.attached_connect_signal
 -- @tparam screen|nil screen The screen concerned, or all if `nil`.
 -- @tparam string signal The signal name.
--- @tparam function Callback
+-- @tparam function callback
 function tag.attached_connect_signal(screen, ...)
     if screen then
         attached_connect_signal_screen(screen, ...)

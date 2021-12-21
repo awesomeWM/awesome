@@ -208,7 +208,7 @@ end)
 --    }
 --
 -- @property widget_template
--- @param widget
+-- @tparam[opt=nil] widget|nil|table widget_template
 -- @usebeautiful beautiful.notification_max_width The maximum width for the
 --  resulting widget.
 

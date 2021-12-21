@@ -37,6 +37,15 @@
 # local no_underscores = function(s) return s:gsub("_", " ") end
 # local get_item = function(mod, name) for item in iter(mod.items) do if item.name == name then return item end end; return name == "" and mod or nil end
 
+# -- Poke a hole to allow config.ld code to have a global initialization.
+# for m in iter(ldoc.modules) do
+#    if #m.items > 0 then
+#      display_name(m.items[1])
+#      m.items[1].global_init(ldoc)
+#      break
+#    end
+# end
+
 # --------- modules hierarchy -------------
 # local hierarchy = {}
 # local curr = module
@@ -67,7 +76,7 @@
 #     local myitems = {}
 #     for item in items() do
 #       myitems[#myitems + 1] = item
-#      end
+#     end
 #     all_module_kinds[#all_module_kinds + 1] = { kind = kind,  items = myitems }
 # end
 # local filtered_kinds = { "Constructors", "Static module functions",
@@ -532,7 +541,7 @@
 #       end -- if group_header then
 #       for value in iter(tag) do
           <$(row_type_begin)>$(custom.format and custom.format(value, item, M) or M(value))</$(row_type_end)>
-#         local sub_values, sub_custom = item.get_auto_params(custom[1], value)
+#         local sub_values, sub_custom, extra_data = item.get_auto_params(custom[1], value)
 #         if sub_values then
            <ul>
 #          for _, value in ldoc.ipairs(sub_values) do
@@ -540,6 +549,12 @@
 #          end -- for auto_params
            </ul>
 #         end -- if item.auto_params
+#          if extra_data.usage then
+           <br/>
+           <p>
+           <pre class="auto_genenerated_code">$(extra_data.usage)</pre>
+#          end -- extra_data.usage
+
 #       end -- for
      </$(group_end)>
 #      end -- if tag

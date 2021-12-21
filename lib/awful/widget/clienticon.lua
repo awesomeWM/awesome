@@ -86,7 +86,7 @@ end
 --- The widget's @{client}.
 --
 -- @property client
--- @param client
+-- @tparam client client
 -- @propemits true false
 
 function clienticon:get_client()

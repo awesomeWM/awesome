@@ -1,5 +1,29 @@
 ---------------------------------------------------------------------------
---- Layout module for awful.
+--- Deterministically lay the clients in a screen workarea.
+--
+-- The `awful.layout` module contains many sub-modules. Each of them contain
+-- one or more layout. `awful.layout` offers static layouts rather than
+-- tree based like other WMs. The layout have a small number of configuration
+-- variables:
+--
+-- * `master_width_factor`: The ratio between the main (master) section of the
+--  layout and a sub-section. For example, in the `tile.left` layout, the main
+--  (master) part contains `master_count` clients and the secondary part contains
+--  all other clients.
+-- * `master_count`: The number of clients which belong to the main (master) area.
+-- * `column_count`: The number of columns to store the clients in the secondary
+--   area.
+-- * `master_fill_policy`: When the number of clients is below `master_count`,
+--  how is the remaining space used.
+-- * `gaps`: The empty space between the clients.
+-- * `gap_single_client`: Same as gap, but when there is a single client. Gaps
+--  are often useful as a visual cue to know where a client starts and ends.
+--  This makes no sense when there is only one.
+--
+-- Not all layouts make use of all variables. Having such an overloaded meaning
+-- to a small set of variable is useful to attach those values to keybindings
+-- without having special logic for each layouts. AwesomeWM keybindings are not
+-- modal, so such "limitation" actually improves usability.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou

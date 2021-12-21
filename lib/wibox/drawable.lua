@@ -199,7 +199,7 @@ local function find_widgets(self, result, hierarchy, x, y)
     end
 end
 
---- Find a widget by a point.
+-- Find a widget by a point.
 -- The drawable must have drawn itself at least once for this to work.
 -- @param x X coordinate of the point
 -- @param y Y coordinate of the point

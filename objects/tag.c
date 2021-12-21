@@ -19,7 +19,7 @@
  *
  */
 
- /** awesome tag API.
+ /** Labelled container where `client` objects can be stored.
  *
  * What is a tag?
  * ==============

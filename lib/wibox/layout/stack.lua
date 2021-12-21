@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- A stacked layout.
+-- Place multiple widgets on top of each other.
 --
 -- This layout display widgets on top of each other. It can be used to overlay
 -- a `wibox.widget.textbox` on top of a `awful.widget.progressbar` or manage
@@ -31,7 +31,7 @@ local stack = {mt={}}
 
 --- Remove a widget from the layout.
 --
--- @tparam index The widget index to remove
+-- @tparam number index The widget index to remove
 -- @treturn boolean index If the operation is successful
 -- @method remove
 -- @interface layout
@@ -115,7 +115,7 @@ end
 --- Raise a widget at `index` to the top of the stack.
 --
 -- @method raise
--- @tparam number index the widget index to raise
+-- @tparam number index The widget index to raise
 function stack:raise(index)
     if (not index) or (not self._private.widgets[index]) then return end
 

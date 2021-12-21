@@ -116,7 +116,7 @@ end, "mouse.resize")
 
 --- Get the client currently under the mouse cursor.
 -- @property current_client
--- @tparam client|nil The client
+-- @tparam client|nil current_client The client
 
 function mouse.object.get_current_client()
     local obj = capi.mouse.object_under_pointer()
@@ -127,7 +127,7 @@ end
 
 --- Get the wibox currently under the mouse cursor.
 -- @property current_wibox
--- @tparam wibox|nil The wibox
+-- @tparam wibox|nil current_wibox The wibox
 
 function mouse.object.get_current_wibox()
     local obj = capi.mouse.object_under_pointer()
@@ -139,7 +139,7 @@ end
 --- Get the widgets currently under the mouse cursor.
 --
 -- @property current_widgets
--- @tparam nil|table list The widget list
+-- @tparam nil|table current_widgets The widget list
 -- @treturn table The list of widgets.The first element is the biggest
 -- container while the last is the topmost widget. The table contains *x*, *y*,
 -- *width*, *height* and *widget*.
@@ -164,7 +164,7 @@ end
 
 --- Get the topmost widget currently under the mouse cursor.
 -- @property current_widget
--- @tparam widget|nil widget The widget
+-- @tparam widget|nil current_widget The widget
 -- @treturn ?widget The widget
 -- @see current_widget_geometry
 
@@ -178,7 +178,7 @@ end
 
 --- Get the current widget geometry.
 -- @property current_widget_geometry
--- @tparam ?table The geometry.
+-- @tparam ?table current_widget_geometry The geometry.
 -- @see current_widget
 
 function mouse.object.get_current_widget_geometry()
@@ -189,7 +189,7 @@ end
 
 --- Get the current widget geometries.
 -- @property current_widget_geometries
--- @tparam ?table A list of geometry tables.
+-- @tparam ?table current_widget_geometries A list of geometry tables.
 -- @see current_widgets
 
 function mouse.object.get_current_widget_geometries()
@@ -238,7 +238,7 @@ end
 
 --- True if the middle mouse button is pressed.
 -- @property is_middle_mouse_button_pressed
--- @tparam boolean is_right_mouse_button_pressed
+-- @tparam boolean is_middle_mouse_button_pressed
 
 --- Add an `awful.button` based mousebinding to the global set.
 --

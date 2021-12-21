@@ -171,6 +171,7 @@ end
 -- Display master client in a corner of the screen, and slaves in one
 -- column and one row around the master.
 -- @clientlayout awful.layout.suit.corner.nw
+-- @usebeautiful beautiful.layout_cornernw
 corner.nw = {
         name = "cornernw",
         arrange = function (p) return do_corner(p, "NW") end,
@@ -181,6 +182,7 @@ corner.nw = {
 -- Display master client in a corner of the screen, and slaves in one
 -- column and one row around the master.
 -- @clientlayout awful.layout.suit.corner.ne
+-- @usebeautiful beautiful.layout_cornerne
 corner.ne = {
         name = "cornerne",
         arrange = function (p) return do_corner(p, "NE") end,
@@ -191,6 +193,7 @@ corner.ne = {
 -- Display master client in a corner of the screen, and slaves in one
 -- column and one row around the master.
 -- @clientlayout awful.layout.suit.corner.sw
+-- @usebeautiful beautiful.layout_cornersw
 corner.sw = {
         name = "cornersw",
         arrange = function (p) return do_corner(p, "SW") end,
@@ -201,6 +204,7 @@ corner.sw = {
 -- Display master client in a corner of the screen, and slaves in one
 -- column and one row around the master.
 -- @clientlayout awful.layout.suit.corner.se
+-- @usebeautiful beautiful.layout_cornerse
 corner.se = {
         name = "cornerse",
         arrange = function (p) return do_corner(p, "SE") end,

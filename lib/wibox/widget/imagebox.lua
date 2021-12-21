@@ -547,7 +547,7 @@ end
 -- @DOC_wibox_widget_imagebox_vertical_fit_policy_EXAMPLE@
 --
 -- @property vertical_fit_policy
--- @tparam[opt="auto"] string horizontal_fit_policy
+-- @tparam[opt="auto"] string vertical_fit_policy
 -- @propemits true false
 -- @see horizontal_fit_policy
 -- @see resize

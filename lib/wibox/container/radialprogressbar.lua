@@ -178,7 +178,7 @@ end
 --
 --@DOC_wibox_container_radialprogressbar_value_EXAMPLE@
 -- @property value
--- @tparam number value Between min_value and max_value.
+-- @tparam number value Between `min_value` and `max_value`.
 -- @propemits true false
 
 function radialprogressbar:set_value(val)

@@ -537,6 +537,19 @@ end
 --@DOC_wibox_constructor_COMMON@
 -- @return The new wibar
 -- @constructorfct awful.wibar
+-- @usebeautiful beautiful.wibar_favor_vertical
+-- @usebeautiful beautiful.wibar_border_width
+-- @usebeautiful beautiful.wibar_border_color
+-- @usebeautiful beautiful.wibar_ontop
+-- @usebeautiful beautiful.wibar_cursor
+-- @usebeautiful beautiful.wibar_opacity
+-- @usebeautiful beautiful.wibar_type
+-- @usebeautiful beautiful.wibar_width
+-- @usebeautiful beautiful.wibar_height
+-- @usebeautiful beautiful.wibar_bg
+-- @usebeautiful beautiful.wibar_bgimage
+-- @usebeautiful beautiful.wibar_fg
+-- @usebeautiful beautiful.wibar_shape
 function awfulwibar.new(args)
     args = args or {}
     local position = args.position or "top"

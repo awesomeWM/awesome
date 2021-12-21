@@ -380,7 +380,7 @@ end
 --
 -- This method computes the different variants of the "usable" screen geometry.
 --
--- @staticfct screen.get_bounding_geometry
+-- @method screen.get_bounding_geometry
 -- @tparam[opt={}] table args The arguments
 -- @tparam[opt=false] boolean args.honor_padding Whether to honor the screen's padding.
 -- @tparam[opt=false] boolean args.honor_workarea Whether to honor the screen's workarea.
@@ -772,7 +772,7 @@ end
 -- the lowest of the resulting virtual DPIs.
 --
 -- @property preferred_dpi
--- @tparam number preferred_dpi the DPI value.
+-- @tparam number preferred_dpi The DPI value.
 -- @readonly
 
 --- The maximum diagonal size in millimeters.
@@ -953,6 +953,8 @@ end
 -- `request::remove` and `request::resize`.
 --
 -- @signalhandler awful.screen.create_screen_handler
+-- @tparam table viewport
+-- @sourcesignal screen request::create
 -- @see request::create
 
 --- Default handler for `request::remove`.
@@ -972,6 +974,8 @@ end
 --    end
 --
 -- @signalhandler awful.screen.remove_screen_handler
+-- @tparam table viewport
+-- @sourcesignal screen request::remove
 -- @see request::remove
 
 --- Default handler for `request::resize`.
@@ -993,6 +997,8 @@ end
 --    end
 --
 -- @signalhandler awful.screen.resize_screen_handler
+-- @tparam table viewport
+-- @sourcesignal screen request::resize
 -- @see request::resize
 
 -- Add the DPI properties.

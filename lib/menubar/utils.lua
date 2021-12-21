@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Utility module for menubar
+--- Utility functions for the `menubar` module.
 --
 -- @author Antonio Terceiro
 -- @copyright 2009, 2011-2012 Antonio Terceiro, Alexander Yakushev
@@ -199,7 +199,7 @@ local function get_icon_lookup_path()
 end
 
 --- Remove CR newline from the end of the string.
--- @param s string to trim
+-- @tparam string s The string to trim
 -- @staticfct menubar.utils.rtrim
 function utils.rtrim(s)
     if not s then return end
