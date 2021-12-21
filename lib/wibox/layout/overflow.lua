@@ -300,9 +300,9 @@ end
 
 --- The scroll factor.
 --
--- The scroll factor represents the how for the layout's content is currently
+-- The scroll factor represents how far the layout's content is currently
 -- scrolled. It is represented as a fraction from `0` to `1`, where `0` is the
--- start of the content and `0` is the end.
+-- start of the content and `1` is the end.
 --
 -- @property scroll_factor
 -- @tparam number scroll_factor The scroll factor.
