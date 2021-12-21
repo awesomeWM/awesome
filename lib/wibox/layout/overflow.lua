@@ -538,12 +538,6 @@ function overflow.vertical(...)
     return new("vertical", ...)
 end
 
---@DOC_fixed_COMMON@
-
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
-
 return setmetatable(overflow, overflow.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
