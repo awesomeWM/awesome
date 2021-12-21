@@ -1,12 +1,12 @@
---DOC_GEN_IMAGE --DOC_HIDE
-local parent    = ... --DOC_HIDE
-local wibox     = require( "wibox"     ) --DOC_HIDE
-local beautiful = require( "beautiful" ) --DOC_HIDE
-local gears     = {shape=require("gears.shape") } --DOC_HIDE
+--DOC_GEN_IMAGE --DOC_HIDE_START
+local parent    = ...
+local wibox     = require( "wibox"     )
+local beautiful = require( "beautiful" )
+local gears     = {shape=require("gears.shape") }
+local naughty = { notify = function(_) end }
 
-parent:add( --DOC_HIDE
-
-wibox.widget {
+--DOC_HIDE_END
+local widget = wibox.widget {
     bar_shape           = gears.shape.rounded_rect,
     bar_height          = 3,
     bar_color           = beautiful.border_color,
@@ -19,6 +19,19 @@ wibox.widget {
     forced_height = 50, --DOC_HIDE
     forced_width  = 100, --DOC_HIDE
 }
+--DOC_NEWLINE
+-- Connect to `property::value` to use the value on change
+widget:connect_signal("property::value", function(_, new_value)
+    --DOC_HIDE_START
+    if new_value ~= 10 then
+        error(string.format("unexpected value %s", new_value))
+    end
+    --DOC_HIDE_END
+    naughty.notify { title = "Slider changed", message = new_value }
+end)
 
-) --DOC_HIDE
---DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
+--DOC_HIDE_START
+widget.value = 10
+parent:add(widget)
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
