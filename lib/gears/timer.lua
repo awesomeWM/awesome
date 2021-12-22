@@ -61,6 +61,7 @@ local glib = require("lgi").GLib
 local object = require("gears.object")
 local protected_call = require("gears.protected_call")
 local gdebug = require("gears.debug")
+local gmath = require("gears.math")
 
 --- Timer objects. This type of object is useful when triggering events repeatedly.
 --
@@ -96,7 +97,8 @@ function timer:start()
         gdebug.print_error(traceback("timer already started"))
         return
     end
-    self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, self.data.timeout * 1000, function()
+    local timeout_ms = gmath.round(self.data.timeout * 1000)
+    self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, timeout_ms, function()
         protected_call(self.emit_signal, self, "timeout")
         return true
     end)
