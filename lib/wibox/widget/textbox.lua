@@ -301,19 +301,21 @@ function textbox:set_wrap(mode)
     end
 end
 
---- The textbox' vertical alignment.
+--- The vertical text alignment.
+--
+-- This aligns the text within the widget's bounds. In some situations this may
+-- differ from aligning the widget with `wibox.container.place`.
 --
 -- Valid values are:
 --
--- * **top**
--- * **center**
--- * **bottom**
+-- * `"top"`
+-- * `"center"`
+-- * `"bottom"`
 --
 --@DOC_wibox_widget_textbox_valign1_EXAMPLE@
 --
 -- @property valign
--- @tparam[opt="center"] string mode Where should the textbox be drawn? "top", "center" or
---  "bottom".
+-- @tparam[opt="center"] string mode The vertical alignment
 -- @propemits true false
 
 function textbox:set_valign(mode)
@@ -329,19 +331,21 @@ function textbox:set_valign(mode)
     end
 end
 
---- Set a textbox horizontal alignment.
+--- The horizontal text alignment.
+--
+-- This aligns the text within the widget's bounds. In some situations this may
+-- differ from aligning the widget with `wibox.container.place`.
 --
 -- Valid values are:
 --
--- * **left**
--- * **center**
--- * **right**
+-- * `"left"`
+-- * `"center"`
+-- * `"right"`
 --
 --@DOC_wibox_widget_textbox_align1_EXAMPLE@
 --
 -- @property align
--- @tparam[opt="left"] string mode Where should the textbox be drawn? "left", "center" or
---  "right".
+-- @tparam[opt="left"] string mode The horizontal alignment
 -- @propemits true false
 
 function textbox:set_align(mode)

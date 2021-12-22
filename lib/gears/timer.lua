@@ -63,22 +63,27 @@ local protected_call = require("gears.protected_call")
 local gdebug = require("gears.debug")
 
 --- Timer objects. This type of object is useful when triggering events repeatedly.
+--
 -- The timer will emit the "timeout" signal every N seconds, N being the timeout
 -- value. Note that a started timer will not be garbage collected. Call `:stop`
--- to enable garbage collection.
+-- before dropping the last reference to prevent leaking the object.
+--
 -- @tfield number timeout Interval in seconds to emit the timeout signal.
---   Can be any value, including floating point ones (e.g. 1.5 seconds).
+--   Can be any value, including floating point ones (e.g. `1.5` seconds).
 -- @tfield boolean started Read-only boolean field indicating if the timer has been
 --   started.
 -- @table timer
 
---- When the timer is started.
+--- Emitted when the timer is started.
 -- @signal start
 
---- When the timer is stopped.
+--- Emitted when the timer is stopped.
 -- @signal stop
 
---- When the timer had a timeout event.
+--- Emitted when `timeout` seconds have elapsed.
+--
+-- This will be emitted repeatedly, unless `single_shot` has been set to `true`
+-- for the timer.
 -- @signal timeout
 
 local timer = { mt = {} }
@@ -156,11 +161,18 @@ local timer_instance_mt = {
 }
 
 --- Create a new timer object.
+--
+-- `call_now` only takes effect when a `callback` is provided. `single_shot`,
+-- on the other hand, also stops signals connected to the `timeout` signal.
+--
+-- Specifying a function `func` as `args.callback` is equivalent to calling
+-- `:connect_signal(func)` on the timer object.
+--
 -- @tparam table args Arguments.
--- @tparam number args.timeout Timeout in seconds (e.g. 1.5).
+-- @tparam number args.timeout Timeout in seconds (e.g. `1.5`).
 -- @tparam[opt=false] boolean args.autostart Automatically start the timer.
 -- @tparam[opt=false] boolean args.call_now Call the callback at timer creation.
--- @tparam[opt=nil] function args.callback Callback function to connect to the
+-- @tparam[opt] function args.callback Callback function to connect to the
 --  "timeout" signal.
 -- @tparam[opt=false] boolean args.single_shot Run only once then stop.
 -- @treturn timer

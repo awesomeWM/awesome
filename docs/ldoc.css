@@ -47,7 +47,11 @@ p.name {
     font-family: monospace;
 }
 
-kbd, p code, ol code {
+kbd,
+p code,
+ol code,
+ul code,
+dd > code {
     background-color: #eaedf587;
     padding-left: 3px;
     padding-right: 3px;

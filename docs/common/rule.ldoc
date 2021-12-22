@@ -4,15 +4,17 @@
 --
 -- @rulecomponent properties
 -- @param table
--- @see callbacks
+-- @see callback
 
 --TODO add ^
 -- @DOC_text_gears_matcher_properties_EXAMPLE@
 
---- A list of callback function to call *after* the properties have been apploed.
--- @rulecomponent callbacks
--- @param table
--- @see properties
+--- A callback function to call *after* the `properties` have been applied.
+--
+-- The callback is called with the current client as first argument.
+--
+-- @rulecomponent callback
+-- @param function
 
 --- A table whose content will be compared to the target object current properties.
 --
