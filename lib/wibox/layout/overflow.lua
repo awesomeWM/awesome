@@ -418,9 +418,6 @@ local function build_grabber(container, initial_x, initial_y, geo)
     local start_pos = container._private.scroll_factor * bar_interval
     local start = is_y and initial_y or initial_x
 
-    -- Set to initial click location
-    container:set_scroll_factor(start / container._private.avail_in_dir)
-
     -- Calculate a matrix transforming from screen coordinates into widget
     -- coordinates.
     -- This is required for mouse movement to work when the widget has been
