@@ -32,8 +32,14 @@ endif()
 
 include(awesomeConfig.cmake)
 
+# Always print as many warning as possible
+include(${CMAKE_CURRENT_SOURCE_DIR}/cmake/extra_warnings.cmake)
+
 include_directories(
     ${BUILD_DIR}
+)
+
+include_directories( SYSTEM
     ${AWESOME_COMMON_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_REQUIRED_INCLUDE_DIRS}
     ${AWESOME_OPTIONAL_INCLUDE_DIRS})

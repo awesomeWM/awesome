@@ -345,13 +345,13 @@ luaA_systray(lua_State *L)
     {
         size_t bg_len;
         drawin_t *w = luaA_checkudata(L, 1, &drawin_class);
-        int x = round(luaA_checknumber_range(L, 2, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
-        int y = round(luaA_checknumber_range(L, 3, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
-        int base_size = ceil(luaA_checknumber_range(L, 4, MIN_X11_SIZE, MAX_X11_SIZE));
+        int x = (int) round(luaA_checknumber_range(L, 2, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        int y = (int) round(luaA_checknumber_range(L, 3, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        int base_size = (int) ceil(luaA_checknumber_range(L, 4, MIN_X11_SIZE, MAX_X11_SIZE));
         bool horiz = lua_toboolean(L, 5);
         const char *bg = luaL_checklstring(L, 6, &bg_len);
         bool revers = lua_toboolean(L, 7);
-        int spacing = ceil(luaA_checknumber_range(L, 8, 0, MAX_X11_COORDINATE));
+        int spacing = (int) ceil(luaA_checknumber_range(L, 8, 0, MAX_X11_COORDINATE));
         color_t bg_color;
         bool force_redraw = false;
 

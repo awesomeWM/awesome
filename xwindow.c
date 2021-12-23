@@ -206,7 +206,7 @@ xwindow_set_opacity(xcb_window_t win, double opacity)
     {
         if(opacity >= 0 && opacity <= 1)
         {
-            uint32_t real_opacity = opacity * 0xffffffff;
+            uint32_t real_opacity = (uint32_t) (opacity * 0xffffffff);
             xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE, win,
                                 _NET_WM_WINDOW_OPACITY, XCB_ATOM_CARDINAL, 32, 1L, &real_opacity);
         }

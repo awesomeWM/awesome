@@ -318,8 +318,8 @@ luaA_root_fake_input(lua_State *L)
     {
         type = XCB_MOTION_NOTIFY;
         detail = luaA_checkboolean(L, 2); /* relative to the current position or not */
-        x = round(luaA_checknumber_range(L, 3, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
-        y = round(luaA_checknumber_range(L, 4, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        x = (int) round(luaA_checknumber_range(L, 3, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
+        y = (int) round(luaA_checknumber_range(L, 4, MIN_X11_COORDINATE, MAX_X11_COORDINATE));
     }
     else
         return 0;
