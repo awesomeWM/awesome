@@ -9,7 +9,7 @@
 --TODO add ^
 -- @DOC_text_gears_matcher_properties_EXAMPLE@
 
---- A callback function to call *after* the `properties` have been applied.
+--- A callback function to call *before* the `properties` have been applied.
 --
 -- The callback is called with the current client as first argument.
 --
