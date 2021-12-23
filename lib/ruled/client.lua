@@ -626,6 +626,13 @@ crules._execute = function(_, c, props, callbacks)
         end
     end
 
+    -- Apply all callbacks.
+    if callbacks then
+        for _, callback in pairs(callbacks) do
+            protected_call(callback, c)
+        end
+    end
+
     -- Apply the delayed properties
     for prop, handler in pairs(module.delayed_properties) do
         if not force_ignore[prop] then
@@ -636,13 +643,6 @@ crules._execute = function(_, c, props, callbacks)
                 end
                 handler(c, value, props)
             end
-        end
-    end
-
-    -- Apply all callbacks.
-    if callbacks then
-        for _, callback in pairs(callbacks) do
-            protected_call(callback, c)
         end
     end
 
