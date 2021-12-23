@@ -488,13 +488,6 @@ end
 --  sole argument. The callbacks are executed *before* applying the properties.
 -- @see gears.matcher.apply
 function matcher:_execute(o, props, callbacks)
-    -- Apply all callbacks.
-    if callbacks then
-        for _, callback in pairs(callbacks) do
-            protected_call(callback, o)
-        end
-    end
-
     for property, value in pairs(props) do
         if type(value) == "function" then
             value = value(o, props)
@@ -506,6 +499,13 @@ function matcher:_execute(o, props, callbacks)
             o[property](o, value)
         else
             o[property] = value
+        end
+    end
+
+    -- Apply all callbacks.
+    if callbacks then
+        for _, callback in pairs(callbacks) do
+            protected_call(callback, o)
         end
     end
 end
