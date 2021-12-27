@@ -37,6 +37,12 @@ local math = math
 
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
+local policies_to_extents = {
+    ["pad"]     = cairo.Extend.PAD,
+    ["repeat"]  = cairo.Extend.REPEAT,
+    ["reflect"] = cairo.Extend.REFLECT,
+}
+
 -- Safe load for optional Rsvg module
 local Rsvg = nil
 do
@@ -182,6 +188,11 @@ function imagebox:draw(ctx, cr, width, height)
 
     local w, h = self._private.default.width, self._private.default.height
 
+    local policy = {
+        w = self._private.horizontal_fit_policy or "auto",
+        h = self._private.vertical_fit_policy or "auto"
+    }
+
     if self._private.resize then
         -- That's for the "fit" policy.
         local aspects = {
@@ -189,17 +200,12 @@ function imagebox:draw(ctx, cr, width, height)
             h = height / h
         }
 
-        local policy = {
-            w = self._private.horizontal_fit_policy or "auto",
-            h = self._private.vertical_fit_policy or "auto"
-        }
-
         for _, aspect in ipairs {"w", "h"} do
             if self._private.upscale == false and (w < width and h < height) then
                 aspects[aspect] = 1
             elseif self._private.downscale == false and (w >= width and h >= height) then
                 aspects[aspect] = 1
-            elseif policy[aspect] == "none" then
+            elseif policy[aspect] == "none" or policies_to_extents[policy[aspect]] then
                 aspects[aspect] = 1
             elseif policy[aspect] == "auto" then
                 aspects[aspect] = math.min(width / w, height / h)
@@ -258,7 +264,18 @@ function imagebox:draw(ctx, cr, width, height)
     if self._private.handle then
         self._private.handle:render_cairo(cr)
     else
-        cr:set_source_surface(self._private.image, 0, 0)
+        -- Yes, it is possible that the vertical or horizontal policies both
+        -- have extends, but Cairo doesn't support this. So be it.
+        local pol = policies_to_extents[policy.w]
+        pol = pol or policies_to_extents[policy.h]
+
+        if pol then
+            local pat = cairo.Pattern.create_for_surface(self._private.image)
+            pat:set_extend(pol)
+            cr:set_source(pat)
+        else
+            cr:set_source_surface(self._private.image, 0, 0)
+        end
 
         local filter = self._private.scaling_quality
 
@@ -510,6 +527,9 @@ end
 
 --- Set the horizontal fit policy.
 --
+-- Note that `repeat`, `reflect` and `pad` cannot be mixed across
+-- the vertical and horizontal axis.
+--
 -- Here is the result for a 22x32 image:
 --
 -- @DOC_wibox_widget_imagebox_horizontal_fit_policy_EXAMPLE@
@@ -519,11 +539,19 @@ end
 -- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
 -- @propertyvalue "none" Do not resize at all.
 -- @propertyvalue "fit" Resize to the widget width.
+-- @propertyvalue "repeat"` Repeat the image side by side.
+-- @propertyvalue "reflect"` Like `repeat`, but alternate the reflection.
+-- @propertyvalue "pad"` Take the last column of pixels and repeat them.
 -- @propemits true false
 -- @see vertical_fit_policy
 -- @see resize
 
 --- Set the vertical fit policy.
+--
+-- Valid values are:
+--
+-- Note that `repeat`, `reflect` and `pad` cannot be mixed across
+-- the vertical and horizontal axis.
 --
 -- Here is the result for a 32x22 image:
 --
@@ -534,6 +562,10 @@ end
 -- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
 -- @propertyvalue "none" Do not resize at all.
 -- @propertyvalue "fit" Resize to the widget height.
+-- @propertyvalue "fit" Resize to the widget width.
+-- @propertyvalue "repeat"` Repeat the image side by side.
+-- @propertyvalue "reflect"` Like `repeat`, but alternate the reflection.
+-- @propertyvalue "pad"` Take the last column of pixels and repeat them.
 -- @propemits true false
 -- @see horizontal_fit_policy
 -- @see resize
