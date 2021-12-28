@@ -56,11 +56,11 @@ local imagebox = { mt = {} }
 
 local rsvg_handle_cache = setmetatable({}, { __mode = 'k' })
 
----Load rsvg handle form image file
+--Load rsvg handle form image file
 -- @tparam string file Path to svg file.
 -- @return Rsvg handle
 -- @treturn table A table where cached data can be stored.
-local function load_rsvg_handle(file)
+function imagebox._load_rsvg_handle(file)
     if not Rsvg then return end
 
     local cache = (rsvg_handle_cache[file] or {})["handle"]
@@ -343,7 +343,7 @@ function imagebox:set_image(image)
 
     if type(image) == "string" then
         -- try to load rsvg handle from file
-        setup_succeed = load_and_apply(self, image, load_rsvg_handle, set_handle)
+        setup_succeed = load_and_apply(self, image, imagebox._load_rsvg_handle, set_handle)
 
         if not setup_succeed then
             -- rsvg handle failed, try to load cairo surface with pixbuf
