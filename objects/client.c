@@ -2405,7 +2405,7 @@ client_resize_do(client_t *c, area_t geometry)
         luaA_object_emit_signal(L, -1, "property::position", 0);
         if (old_geometry.x != geometry.x)
             luaA_object_emit_signal(L, -1, "property::x", 0);
-        else
+        if (old_geometry.y != geometry.y)
             luaA_object_emit_signal(L, -1, "property::y", 0);
     }
     if (old_geometry.width != geometry.width || old_geometry.height != geometry.height)
@@ -2413,7 +2413,7 @@ client_resize_do(client_t *c, area_t geometry)
         luaA_object_emit_signal(L, -1, "property::size", 0);
         if (old_geometry.width != geometry.width)
             luaA_object_emit_signal(L, -1, "property::width", 0);
-        else
+        if (old_geometry.height != geometry.height)
             luaA_object_emit_signal(L, -1, "property::height", 0);
     }
     lua_pop(L, 1);
