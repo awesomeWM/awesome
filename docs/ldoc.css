@@ -649,3 +649,17 @@ pre .url { color: #272fc2; text-decoration: underline; }
     color: #00000044;
     margin-top: 15px;
 }
+
+.copy-link {
+    font-size: 9px;
+    padding: 2px;
+    border-radius: 9px;
+    vertical-align: middle;
+    text-decoration: none;
+}
+.copy-link--success {
+    background-color: green;
+}
+.copy-link--failure {
+    background-color: red;
+}

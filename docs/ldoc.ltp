@@ -339,7 +339,7 @@
 #  end
 #  for item in iter(k.items) do if not item.tags.hidden then
     <dt>
-    <a name = "$(item.name)"></a>
+    <a class="copy-link js-copy-link" name="$(item.name)" href="#$(item.name)">&#128279;</a>
     <strong>$(display_name(item))</strong>
 #   if item.display_inheritance then
     <span class="inheritance">
@@ -558,6 +558,49 @@
         if (target.classList.contains("open")) {
             target.classList.remove("open");
         }
+    });
+
+    const copyResultClasses = {
+        success : "copy-link--success",
+        failure: "copy-link--failure"
+    };
+
+    const removeCopyResultClasses = ($target) =>
+        Object.values(copyResultClasses).forEach(c => $target.classList.remove(c));
+
+    document.querySelectorAll(".js-copy-link").forEach(copyLink => {
+        copyLink.addEventListener("click", function(e) {
+            e.preventDefault();
+            const $target = e.target;
+
+            removeCopyResultClasses($target);
+
+            let link = $target.href;
+            if (!link) {
+                return;
+            }
+            if (link.startsWith("#")) {
+                const curr = window.location.pathname;
+                link = curr.substring(0, curr.indexOf("#")) + link;
+            }
+
+            // We need to create a fake element to copy the text from
+            const fakeElement = document.createElement("textarea");
+            fakeElement.value = link;
+            document.body.appendChild(fakeElement);
+            fakeElement.select();
+
+            let success = false;
+            try {
+                success = document.execCommand("copy");
+            } catch(err) {
+                success = false;
+            }
+
+            fakeElement.remove();
+            $target.classList.add(success ? copyResultClasses.success : copyResultClasses.failure);
+            setInterval(() => removeCopyResultClasses($target), 1500);
+        });
     });
 </script>
 
