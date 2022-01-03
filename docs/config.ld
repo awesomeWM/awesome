@@ -31,7 +31,9 @@ should be useful for you.
 
 ### Default configuration components name:
 
-<center><img src="images/AUTOGEN_awful_popup_defaultconfig.svg"></center>
+<center>
+    <object class="img-object" data="images/AUTOGEN_awful_popup_defaultconfig.svg" alt="" type="image/svg+xml"></object>
+</center>
 
 ### Guides
 

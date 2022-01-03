@@ -650,6 +650,11 @@ pre .url { color: #272fc2; text-decoration: underline; }
     margin-top: 15px;
 }
 
+.img-object {
+    max-width: 100%;
+    padding: 5px;
+}
+
 .copy-link {
     font-size: 9px;
     padding: 2px;
