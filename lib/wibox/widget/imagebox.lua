@@ -362,6 +362,28 @@ end
 -- @tparam[opt=nil] image|nil image
 -- @propemits false false
 
+--- Return the source image width.
+--
+-- For SVG images, this may be affected by the DPI and might not
+-- reflect the size the images will be rendered at. For PNG or
+-- JPG images, this will return the file resolution.
+--
+-- @property source_width
+-- @tparam number source_width
+-- @see image
+-- @see source_height
+
+--- Return the source image height.
+--
+-- For SVG images, this may be affected by the DPI and might not
+-- reflect the size the images will be rendered at. For PNG or
+-- JPG images, this will return the file resolution.
+--
+-- @property source_height
+-- @tparam number source_height
+-- @see image
+-- @see source_width
+
 --- Set the `imagebox` image.
 --
 -- The image can be a file, a cairo image surface, or an rsvg handle object
@@ -415,6 +437,14 @@ function imagebox:set_image(image)
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::image")
     return true
+end
+
+for _, dim in ipairs { "width", "height" } do
+    imagebox["get_source_"..dim] = function(self)
+        if not self._private.default then return nil end
+
+        return self._private.default[dim]
+    end
 end
 
 --- Set a clip shape for this imagebox.
