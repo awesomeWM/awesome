@@ -39,20 +39,34 @@ end
 say:set("assertion.widget_fit.positive", "Offering (%s, %s) to widget and expected (%s, %s), but got (%s, %s)")
 assert:register("assertion", "widget_fit", widget_fit, "assertion.widget_fit.positive", "assertion.widget_fit.positive")
 
+local function times(char, len)
+    local chars = {}
+    for _ = 1, len do
+        table.insert(chars, char)
+    end
+    return table.concat(chars, "")
+end
+
+--- Pad the `str` with `len` amount of characters `char`.
+-- When `is_after == true`, the padding will be appended.
+-- This allows exceeding the limit of 99 in `string.format`.
+local function pad_string(str, char, len, is_after)
+    len = len - #str
+    local pad = times(char, len)
+
+    if is_after == true then
+        return str .. pad
+    else
+        return pad .. str
+    end
+end
+
 local function draw_layout_comparison(actual, expected)
     local lines = {
         "Widget layout does not match:\n",
     }
 
     local left, right = {}, {}
-
-    local function times(char, len)
-        local chars = {}
-        for _ = 1, len do
-            table.insert(chars, char)
-        end
-        return table.concat(chars, "")
-    end
 
     local function wrap_line(width, x, line)
         -- Two columns occupied by the `|` characters
@@ -115,13 +129,16 @@ local function draw_layout_comparison(actual, expected)
         end
     end
 
-    table.insert(lines, string.format(
-        "%-"..max_len.."s   %-"..max_len.."s",
-        "Actual:", "Expected:"
-    ))
+    table.insert(
+        lines,
+        pad_string("Actual:", " ", max_len, true) .. "   Expected:"
+    )
 
     for i = 1, math.max(#left, #right) do
-        table.insert(lines, string.format("%-"..max_len.."s   %s", left[i] or "", right[i] or ""))
+        table.insert(
+            lines,
+            pad_string(left[i] or "", " ", max_len, true) .. "   " .. (right[i] or "")
+        )
     end
 
     -- Force one additional newline. Due to how the error message has to be set
