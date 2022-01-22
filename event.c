@@ -696,6 +696,11 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
 static void
 event_handle_focusin(xcb_focus_in_event_t *ev)
 {
+    if (ev->event == globalconf.screen->root) {
+        /* Received focus in for root window, refocusing the focused window */
+        globalconf.focus.need_update = true;
+    }
+
     if (ev->mode == XCB_NOTIFY_MODE_GRAB
             || ev->mode == XCB_NOTIFY_MODE_UNGRAB)
         /* Ignore focus changes due to keyboard grabs */
