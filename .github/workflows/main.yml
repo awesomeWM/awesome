@@ -28,6 +28,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - test_name: "lua5.4"
+            lua_version: "5.4"
+            lua_name: "lua5.4"
+            lua_include: "/usr/local/include"
+            manual_screens: true
+
           - test_name: "codecov-lua5.3"
             lua_version: "5.3"
             lua_name: "lua5.3"
