@@ -84,10 +84,16 @@ init_rng(void)
     lua_getfield(L, -1, "randomseed");
 
     /* Push a seed */
-    lua_pushnumber(L, g_random_int() + g_random_double());
+    lua_pushnumber(L, g_random_int());
 
     /* Call math.randomseed */
-    lua_call(L, 1, 0);
+    if(lua_pcall(L, 1, 0, 0))
+    {
+        warn("Random number generator initialization failed: %s", lua_tostring(L, -1));
+        /* Remove error function and error string */
+        lua_pop(L, 2);
+        return;
+    }
 
     /* Remove "math" global */
     lua_pop(L, 1);
