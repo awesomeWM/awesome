@@ -215,6 +215,7 @@ jobs:
           wget -O /tmp/lgi.zip https://github.com/pavouk/lgi/archive/refs/heads/master.zip
           unzip /tmp/lgi.zip -d /tmp
           cd /tmp/lgi-master
+          sed -i 's/5.1/5.4/' lgi/Makefile
           make all
           sudo make install
 
