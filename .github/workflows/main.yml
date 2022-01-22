@@ -31,6 +31,7 @@ jobs:
           - test_name: "lua5.4"
             lua_version: "5.4"
             lua_name: "lua5.4"
+            lua_library: "/usr/local/lib/liblua.a"
             lua_include: "/usr/local/include"
             manual_screens: true
 
