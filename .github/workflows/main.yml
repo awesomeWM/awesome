@@ -166,12 +166,12 @@ jobs:
         with:
           path: /tmp/luarocks
           # The build input for luarocks changes per test, so we need separate caches
-          key: ${{ github.workflow }}-${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.5.0
+          key: ${{ github.workflow }}-${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.8.0
 
       - name: Install fresh Luarocks
         if: steps.cache-luarocks.outputs.cache-hit != 'true'
         run: |
-          wget -O /tmp/luarocks.tar.gz https://github.com/luarocks/luarocks/archive/v3.5.0.tar.gz
+          wget -O /tmp/luarocks.tar.gz https://github.com/luarocks/luarocks/archive/v3.8.0.tar.gz
           mkdir /tmp/luarocks
           tar -xf /tmp/luarocks.tar.gz -C /tmp/luarocks --strip-components=1
           cd /tmp/luarocks
