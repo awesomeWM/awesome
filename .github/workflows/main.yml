@@ -142,11 +142,23 @@ jobs:
         run: sudo dpkg -i /var/cache/apt/archives/*.deb
 
       - name: Install Lua packages
+        if: matrix.lua_version != '5.4'
         run: |
           if [ "${{ matrix.lua_name }}" = "luajit" ]; then
             sudo apt-get install libluajit-5.1-dev luajit
           fi
           sudo apt-get install liblua${{ matrix.lua_version }}-dev lua${{ matrix.lua_version }}
+
+      # Ubuntu 20.04 hasn't a package for Lua 5.4, we need to build it from source.
+      - name: Build and Install Lua 5.4
+        if: matrix.lua_version == '5.4'
+        run: |
+          wget -O /tmp/lua-5.4.3.tar.gz http://www.lua.org/ftp/lua-5.4.3.tar.gz
+          tar -xf /tmp/lua-5.4.3.tar.gz -C /tmp
+          cd /tmp/lua-5.4.3
+          make all
+          make test
+          sudo make install
 
       - name: Cache luarocks
         id: cache-luarocks
