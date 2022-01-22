@@ -207,9 +207,21 @@ jobs:
           cd /tmp/xcb-errors
           sudo make install
 
+      # Only LGI git master supports Lua 5.4. We need to build it from source.
+      - name: Build and Install LGI
+        if: matrix.lua_version == '5.4'
+        run: |
+          wget -O /tmp/lgi.zip https://github.com/pavouk/lgi/archive/refs/heads/master.zip
+          unzip /tmp/lgi.zip -d /tmp
+          cd /tmp/lgi-master
+          make all
+          sudo make install
+
       - name: Install rocks
         run: |
-          sudo -H luarocks install lgi ${{ matrix.lgi_version }}
+          if [ "${{ matrix.lua_name }}" != "lua5.4" ]; then
+            sudo -H luarocks install lgi ${{ matrix.lgi_version }}
+          fi
           sudo -H luarocks install ldoc
           sudo -H luarocks install busted
 
