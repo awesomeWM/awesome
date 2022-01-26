@@ -189,19 +189,26 @@ function imagebox:draw(ctx, cr, width, height)
             h = height / h
         }
 
-        local policy = {
-            w = self._private.horizontal_fit_policy or "auto",
-            h = self._private.vertical_fit_policy or "auto"
-        }
+        local policy = self._private.fit_policy or "fit"
 
         for _, aspect in ipairs {"w", "h"} do
             if self._private.upscale == false and (w < width and h < height) then
                 aspects[aspect] = 1
             elseif self._private.downscale == false and (w >= width and h >= height) then
                 aspects[aspect] = 1
-            elseif policy[aspect] == "none" then
+            elseif policy == "none" then
                 aspects[aspect] = 1
-            elseif policy[aspect] == "auto" then
+            elseif policy == "vstretch" then
+                aspects.w = 1
+            elseif policy == "hstretch" then
+                aspects.h = 1
+            elseif policy == "fill" then
+                if ( width/w > height/h ) then
+                    aspects.h = aspects.w
+                else
+                    aspects.w = aspects.h
+                end
+            elseif policy == "fit" then
                 aspects[aspect] = math.min(width / w, height / h)
             end
         end
@@ -640,8 +647,7 @@ end
 local defaults = {
     halign                = "left",
     valign                = "top",
-    horizontal_fit_policy = "auto",
-    vertical_fit_policy   = "auto",
+    fit_policy            = "fit",
     max_scaling_factor    = 0,
     scaling_quality       = "good"
 }
