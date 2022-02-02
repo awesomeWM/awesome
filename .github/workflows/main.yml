@@ -28,6 +28,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
+          - test_name: "lua5.4"
+            lua_version: "5.4"
+            lua_name: "lua5.4"
+            lua_library: "/usr/local/lib/liblua.a"
+            lua_include: "/usr/local/include"
+            manual_screens: true
+
           - test_name: "codecov-lua5.3"
             lua_version: "5.3"
             lua_name: "lua5.3"
@@ -136,11 +143,23 @@ jobs:
         run: sudo dpkg -i /var/cache/apt/archives/*.deb
 
       - name: Install Lua packages
+        if: matrix.lua_version != '5.4'
         run: |
           if [ "${{ matrix.lua_name }}" = "luajit" ]; then
             sudo apt-get install libluajit-5.1-dev luajit
           fi
           sudo apt-get install liblua${{ matrix.lua_version }}-dev lua${{ matrix.lua_version }}
+
+      # Ubuntu 20.04 hasn't a package for Lua 5.4, we need to build it from source.
+      - name: Build and Install Lua 5.4
+        if: matrix.lua_version == '5.4'
+        run: |
+          wget -O /tmp/lua-5.4.3.tar.gz http://www.lua.org/ftp/lua-5.4.3.tar.gz
+          tar -xf /tmp/lua-5.4.3.tar.gz -C /tmp
+          cd /tmp/lua-5.4.3
+          make all
+          make test
+          sudo make install
 
       - name: Cache luarocks
         id: cache-luarocks
@@ -148,12 +167,12 @@ jobs:
         with:
           path: /tmp/luarocks
           # The build input for luarocks changes per test, so we need separate caches
-          key: ${{ github.workflow }}-${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.5.0
+          key: ${{ github.workflow }}-${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.8.0
 
       - name: Install fresh Luarocks
         if: steps.cache-luarocks.outputs.cache-hit != 'true'
         run: |
-          wget -O /tmp/luarocks.tar.gz https://github.com/luarocks/luarocks/archive/v3.5.0.tar.gz
+          wget -O /tmp/luarocks.tar.gz https://github.com/luarocks/luarocks/archive/v3.8.0.tar.gz
           mkdir /tmp/luarocks
           tar -xf /tmp/luarocks.tar.gz -C /tmp/luarocks --strip-components=1
           cd /tmp/luarocks
@@ -189,9 +208,22 @@ jobs:
           cd /tmp/xcb-errors
           sudo make install
 
+      # Only LGI git master supports Lua 5.4. We need to build it from source.
+      - name: Build and Install LGI
+        if: matrix.lua_version == '5.4'
+        run: |
+          wget -O /tmp/lgi.zip https://github.com/pavouk/lgi/archive/refs/heads/master.zip
+          unzip /tmp/lgi.zip -d /tmp
+          cd /tmp/lgi-master
+          sed -i 's/5.1/5.4/' lgi/Makefile
+          make all
+          sudo make install
+
       - name: Install rocks
         run: |
-          sudo -H luarocks install lgi ${{ matrix.lgi_version }}
+          if [ "${{ matrix.lua_name }}" != "lua5.4" ]; then
+            sudo -H luarocks install lgi ${{ matrix.lgi_version }}
+          fi
           sudo -H luarocks install ldoc
           sudo -H luarocks install busted
 
