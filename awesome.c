@@ -111,8 +111,9 @@ awesome_atexit(bool restart)
     /* Move clients where we want them to be and keep the stacking order intact */
     foreach(c, globalconf.stack)
     {
+        area_t geometry = client_get_undecorated_geometry(*c);
         xcb_reparent_window(globalconf.connection, (*c)->window, globalconf.screen->root,
-                (*c)->geometry.x, (*c)->geometry.y);
+                geometry.x, geometry.y);
     }
 
     /* Save the client order.  This is useful also for "hard" restarts. */

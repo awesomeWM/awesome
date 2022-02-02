@@ -2267,6 +2267,27 @@ client_add_titlebar_geometry(client_t *c, area_t *geometry)
     geometry->height += c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
 }
 
+area_t
+client_get_undecorated_geometry(client_t *c)
+{
+    area_t geometry = c->geometry;
+    if (!c->fullscreen) {
+        int diff_left = c->titlebar[CLIENT_TITLEBAR_LEFT].size;
+        int diff_right = c->titlebar[CLIENT_TITLEBAR_RIGHT].size;
+        int diff_top = c->titlebar[CLIENT_TITLEBAR_TOP].size;
+        int diff_bottom = c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
+        geometry.width -= diff_left + diff_right;
+        geometry.height -= diff_top + diff_bottom;
+        if (c->size_hints.flags & XCB_ICCCM_SIZE_HINT_P_WIN_GRAVITY) {
+            xwindow_translate_for_gravity(c->size_hints.win_gravity,
+                                          -diff_left - c->border_width, -diff_top - c->border_width,
+                                          -diff_right - c->border_width, -diff_bottom - c->border_width,
+                                          &geometry.x, &geometry.y);
+        }
+    }
+    return geometry;
+}
+
 /** Send a synthetic configure event to a window.
  */
 void
@@ -2941,9 +2962,10 @@ client_unmanage(client_t *c, client_unmanage_t reason)
 
     if(reason != CLIENT_UNMANAGE_DESTROYED)
     {
+        area_t geometry = client_get_undecorated_geometry(c);
         xcb_unmap_window(globalconf.connection, c->window);
         xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
-                c->geometry.x, c->geometry.y);
+                geometry.x, geometry.y);
     }
 
     if (c->nofocus_window != XCB_NONE)
