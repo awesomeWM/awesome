@@ -1,6 +1,7 @@
 -- This test suite tests the various screenshot related APIs.
 --
 -- Credit: https://www.reddit.com/r/awesomewm/comments/i6nf7z/need_help_writing_a_color_picker_widget_using_lgi/
+local awful = require("awful")
 local wibox = require("wibox")
 local spawn = require("awful.spawn")
 local gsurface = require("gears.surface")
@@ -165,6 +166,71 @@ table.insert(steps, function()
     awesome.kill(c.pid, 9)
 
     return true
+end)
+
+--Check root window with awful.screenshot module
+table.insert(steps, function()
+    --Make sure client from last test is gone
+    if #client.get() ~= 0 then return end
+    local ss = awful.screenshot.root()
+    local img = ss.surface
+
+    if get_pixel(img, 100, 100) ~= "#00ff00" then return end
+    if get_pixel(img, 2, 2) ~= "#ff0000" then return end
+
+    assert(get_pixel(img, 100, 100) == "#00ff00")
+    assert(get_pixel(img, 199, 199) == "#00ff00")
+    assert(get_pixel(img, 201, 201) ~= "#00ff00")
+
+    assert(get_pixel(img, 2, 2) == "#ff0000")
+    assert(get_pixel(img, root_width - 2, 2) == "#ff0000")
+    assert(get_pixel(img, 2, root_height - 2) == "#ff0000")
+    assert(get_pixel(img, root_width - 2, root_height - 2) == "#ff0000")
+
+    return true   
+end)
+
+-- Check the screen.content
+table.insert(steps, function()
+    for s in screen do
+
+      local ss = awful.screenshot.screen({screen = s})
+      local img = ss.surface
+
+      assert(get_pixel(img, geo.x + 4, geo.y + 4) == "#ff0000")
+      assert(get_pixel(img, geo.x + geo.width - 4, geo.y + 4) == "#ff0000")
+      assert(get_pixel(img, geo.x + 4, geo.y + geo.height - 4) == "#ff0000")
+      assert(get_pixel(img, geo.x + geo.width - 4, geo.y + geo.height - 4) == "#ff0000")
+
+    end
+
+    -- Spawn for the client.content test
+    assert(#client.get() == 0)
+    spawn(tiny_client)
+
+    return true
+end)
+
+-- Check the client.content
+table.insert(steps, function()
+
+    if #client.get() ~= 1 then return end
+
+    local c = client.get()[1]
+    local ss = awful.screenshot.client({client = c})
+    local img = ss.surface
+
+    if get_pixel(img, math.floor(geo.width / 2), math.floor(geo.height / 2)) ~= "#0000ff" then
+        return
+    end
+
+    -- Make sure the process finishes. Just `c:kill()` only
+    -- closes the window. Adding some handlers to the GTK "app"
+    -- created some unwanted side effects in the CI.
+    awesome.kill(c.pid, 9)
+
+    return true
+
 end)
 
 require("_runner").run_steps(steps)
