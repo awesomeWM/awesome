@@ -251,7 +251,7 @@ local progressbar = { mt = {} }
 -- @propemits false false
 -- @propbeautiful
 -- @see clip
--- @see padding
+-- @see paddings
 -- @see wibox.container.margin
 
 --- The progressbar padding.
@@ -269,10 +269,10 @@ local progressbar = { mt = {} }
 --
 -- @property paddings
 -- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
--- @tparam[opt=0] number padding.top
--- @tparam[opt=0] number padding.bottom
--- @tparam[opt=0] number padding.left
--- @tparam[opt=0] number padding.right
+-- @tparam[opt=0] number paddings.top
+-- @tparam[opt=0] number paddings.bottom
+-- @tparam[opt=0] number paddings.left
+-- @tparam[opt=0] number paddings.right
 -- @propemits false false
 -- @propbeautiful
 -- @see clip
@@ -282,25 +282,29 @@ local progressbar = { mt = {} }
 --
 -- Note that if the `clip` is disabled, this allows the background to be smaller
 -- than the bar.
+-- @beautiful beautiful.progressbar_margins
 -- @tparam[opt=0] (table|number|nil) margins A table for each side or a number
 -- @tparam[opt=0] number margins.top
 -- @tparam[opt=0] number margins.bottom
 -- @tparam[opt=0] number margins.left
 -- @tparam[opt=0] number margins.right
--- @beautiful beautiful.progressbar_margins
 -- @see clip
+-- @see beautiful.progressbar_paddings
+-- @see wibox.container.margin
 
 --- The progressbar padding.
 --
 -- Note that if the `clip` is disabled, this allows the bar to be taller
 -- than the background.
--- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
--- @tparam[opt=0] number padding.top
--- @tparam[opt=0] number padding.bottom
--- @tparam[opt=0] number padding.left
--- @tparam[opt=0] number padding.right
 -- @beautiful beautiful.progressbar_paddings
+-- @tparam[opt=0] (table|number|nil) padding A table for each side or a number
+-- @tparam[opt=0] number paddings.top
+-- @tparam[opt=0] number paddings.bottom
+-- @tparam[opt=0] number paddings.left
+-- @tparam[opt=0] number paddings.right
 -- @see clip
+-- @see beautiful.progressbar_margins
+
 
 local properties = { "border_color", "color"     , "background_color",
                      "value"       , "max_value" , "ticks",
