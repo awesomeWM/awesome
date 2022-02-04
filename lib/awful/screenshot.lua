@@ -26,9 +26,9 @@ local screenshot = {}
 local screenshot_methods = {}
 
 -- Configuration data
-local ss_dir = nil
-local ss_prfx = nil
-local frame_color = gears.color("#000000")
+local module_default_directory = nil
+local module_default_prefix = nil
+local module_default_frame_color = gears.color("#000000")
 local initialized = nil
 
 
@@ -37,13 +37,13 @@ local initialized = nil
 -- Can be expanded to read X environment variables or configuration files.
 local function get_default_dir()
   -- This can be expanded
-  local d = os.getenv("HOME")
+  local home_dir = os.getenv("HOME")
   
-  if d then
-    d = string.gsub(d, '/*$', '/') .. 'Images/'
-    if os.execute("bash -c \"if [ -d \\\"" .. d .. "\\\" -a -w \\\"" .. d ..
-                    "\\\" ] ; then exit 0 ; else exit 1 ; fi ;\"") then
-      return d
+  if home_dir then
+    home_dir = string.gsub(home_dir, '/*$', '/') .. 'Images/'
+    if os.execute("bash -c \"if [ -d \\\"" .. home_dir .. "\\\" -a -w \\\"" ..
+                  home_dir ..  "\\\" ] ; then exit 0 ; else exit 1 ; fi ;\"") then
+      return home_dir
     end
   end
 
@@ -79,10 +79,11 @@ local function check_directory(directory)
 
     -- If we use single quotes, we only need to deal with single quotes - (I
     -- promise that's meaningful if you think about it from a bash perspective)
-    local dir = string.gsub(directory, "'", "'\\'\\\\\\'\\''")
+    local bash_esc_dir = string.gsub(directory, "'", "'\\'\\\\\\'\\''")
 
-    if os.execute("bash -c 'if [ -d '\\''" .. dir .. "'\\'' -a -w '\\''" ..
-                  dir .. "'\\'' ] ; then exit 0 ; else exit 1 ; fi'") then
+    if os.execute("bash -c 'if [ -d '\\''" .. bash_esc_dir ..
+                          "'\\'' -a -w '\\''" ..  bash_esc_dir ..
+                  "'\\'' ] ; then exit 0 ; else exit 1 ; fi'") then
       return directory
     else
       -- Currently returns nil if the requested directory string cannot be used.
@@ -119,11 +120,11 @@ local function check_filepath(filepath)
   -- options, this function is basically unchanged, except for trying
   -- to match a regex for each supported format (e.g. (png|jpe?g|gif|bmp))
   -- NOTE: we should maybe make this case insensitive too?
-  local fname_start, fname_end = string.find(filepath,'/[^/]+%.png$')
+  local filename_start, filename_end = string.find(filepath,'/[^/]+%.png$')
 
-  if fname_start and fname_end then
-    local directory = string.sub(filepath, 1, fname_start)
-    local file_name = string.sub(filepath, fname_start + 1, fname_end)
+  if filename_start and filename_end then
+    local directory = string.sub(filepath, 1, filename_start)
+    local file_name = string.sub(filepath, filename_start + 1, filename_end)
     directory = check_directory(directory)
     if directory then
       return directory .. file_name
@@ -141,18 +142,19 @@ end
 local function parse_filepath(filepath)
 
   -- Same remark as above about adding more image formats in the future
-  local fname_start, fname_end = string.find(filepath,'/[^/]+%.png$')
+  local filename_start, filename_end = string.find(filepath,'/[^/]+%.png$')
 
-  if fname_start and fname_end then
+  if filename_start and filename_end then
 
-    local directory = string.sub(filepath, 1, fname_start)
-    local file_name = string.sub(filepath, fname_start + 1, fname_end)
+    if filename_end - filename_start > 14 + 4 then
 
-    if fname_end - fname_start > 14 + 4 then
+      local directory = string.sub(filepath, 1, filename_start)
+      local file_name = string.sub(filepath, filename_start + 1, filename_end)
 
       local base_name = string.sub(file_name, 1, #file_name - 4)
-      -- Is there a repeat count in Lua patterns, like {14} for most regexes?
-      local date_start, date_end = string.find(base_name, '%d%d%d%d%d%d%d%d%d%d%d%d%d%d$')
+      -- Is there a repeat count in Lua, like %d{14}, as for most regexes?
+      local date_start, date_end =
+                      string.find(base_name, '%d%d%d%d%d%d%d%d%d%d%d%d%d%d$')
 
       if date_start and date_end then
         return directory, string.sub(base_name, 1, date_start - 1)
@@ -178,45 +180,45 @@ end
 -- unitialized state and without passing any arguments.
 local function configure_path(directory, prefix)
 
-  local d, p
+  local _directory, _prefix
 
   if not initialized or directory then
-    d = check_directory(directory)
-    if not d then
+    _directory = check_directory(directory)
+    if not _directory then
       return
     end
   else
-    d = ss_dir
+    _directory = module_default_directory
   end
 
 
   if not initialized or prefix then
-    p = check_prefix(prefix)
-    if not p then 
+    _prefix = check_prefix(prefix)
+    if not _prefix then 
       return
     end
   else
-    p = ss_prfx
+    _prefix = module_default_prefix
   end
 
   -- In the case of taking a screenshot in an unitialized state, store the
   -- configuration parameters and toggle to initialized going forward.
   if not initialized then
-    ss_dir = d
-    ss_prfx = p
+    module_default_directory = _directory
+    module_default_prefix = _prefix
     initilialized = true
   end
   
-  return d, p
+  return _directory, _prefix
 
 end
 
 local function make_filepath(directory, prefix)
-  local dir, prfx
+  local _directory, _prefix
   local date_time = tostring(os.date("%Y%m%d%H%M%S"))
-  dir, prfx = configure_path(directory, prefix)
-  local filepath = dir .. prfx .. date_time .. ".png"
-  return dir, prfx, filepath
+  _directory, _prefix = configure_path(directory, prefix)
+  local filepath = _directory .. _prefix .. date_time .. ".png"
+  return _directory, _prefix, filepath
 end
 
 -- Internal function to do the actual work of taking a cropped screenshot
@@ -262,7 +264,7 @@ function show_frame(ss, geo)
 
   ss._private.frame = ss._private.frame or wibox {
       ontop = true,
-      bg    = frame_color
+      bg    = ss._private.frame_color
   }
 
   local frame = ss._private.frame
@@ -404,8 +406,6 @@ function screen_screenshot(ss)
   if ss.screen then
     if type(ss.screen) == "number" then
       ss._private.screen = capi.screen[ss.screen] or aw_screen.focused()
-    elseif ss.screen.index and type(ss.screen.index) == "number" then
-      ss._private.screen = capi.screen[ss.screen.index] or aw_screen.focused()
     end
   else
     ss._private.screen = aw_screen.focused()
@@ -421,12 +421,12 @@ end
 
 -- Internal function executed when a client window screenshot is taken.
 function client_screenshot(ss)
+	--
   -- note the use of _private becuase client has no setter
-  if ss.client and ss.client.content then
-    -- If the passed client arg has a content property we'll take it.
-  else
+  if not ss.client then
     ss._private.client = capi.client.focus 
   end
+
   ss._private.geometry = ss.client:geometry()
   ss:filepath_builder()
   ss._private.surface = gears.surface(ss.client.content) -- surface has no setter
@@ -504,12 +504,13 @@ local default_method_name = "root"
 -- @tparam[opt] table args Table passed with the configuration data.
 -- @treturn boolean true or false depending on success
 function module.set_defaults(args)
+
   local tmp
 
   tmp = check_directory(args.directory)
 
   if tmp then
-    ss_dir = tmp
+    module_default_directory = tmp
   else
     initialized = nil
     return false
@@ -518,7 +519,7 @@ function module.set_defaults(args)
   tmp = check_prefix(args.prefix)
 
   if tmp then
-    ss_prfx = tmp
+    module_default_prefix = tmp
   else
     -- Should be unreachable as the default will always be taken
     initialized = nil
@@ -536,6 +537,7 @@ function module.set_defaults(args)
   end
 
   return true
+
 end
 
 --- Take root window screenshots.
@@ -557,7 +559,7 @@ end
 -- This is a wrapper constructor for a physical screen screenshot. See the main
 -- constructor, new(), for details about the arguments.
 --
--- @staticfct awful.screenshot.screen
+-- @constructorfct awful.screenshot.screen
 -- @tparam[opt] table args Table of arguments to pass to the constructor
 -- @treturn screenshot The screenshot object
 function module.screen(args)
@@ -571,7 +573,7 @@ end
 -- This is a wrapper constructor for a client window screenshot. See the main
 -- constructor, new(), for details about the arguments.
 --
--- @staticfct awful.screenshot.client
+-- @constructorfct awful.screenshot.client
 -- @tparam[opt] table args Table of arguments to pass to the constructor
 -- @treturn screenshot The screenshot object
 function module.client(args)
@@ -588,7 +590,7 @@ end
 -- This is a wrapper constructor for a snipper tool screenshot. See the main
 -- constructor, new(), for details about the arguments.
 --
--- @staticfct awful.screenshot.snipper
+-- @constructorfct awful.screenshot.snipper
 -- @tparam[opt] table args Table of arguments to pass to the constructor
 -- @treturn screenshot The screenshot object
 function module.snipper(args)
@@ -602,7 +604,7 @@ end
 -- This is a wrapper constructor for a snip screenshot (defined geometry). See
 -- the main constructor, new(), for details about the arguments.
 --
--- @staticfct awful.screenshot.snip
+-- @constructorfct awful.screenshot.snip
 -- @tparam[opt] table args Table of arguments to pass to the constructor
 -- @treturn screenshot The screenshot object
 function module.snip(args)
@@ -627,9 +629,9 @@ end
 -- @tparam string directory The path to the screenshot directory
 function screenshot:set_directory(directory)
   if type(directory) == "string" then
-    local dir = check_directory(directory)
-    if dir then
-      self._private.directory = dir
+    local checked_dir = check_directory(directory)
+    if checked_dir then
+      self._private.directory = checked_dir
     end
   end
 end
@@ -647,9 +649,9 @@ end
 -- @tparam string prefix The prefix prepended to screenshot files names.
 function screenshot:set_prefix(prefix)
   if type(prefix) == "string" then
-    local prfx = check_prefix(prefix)
-    if prfx then
-      self._private.prefix = prfx
+    local checked_prefix = check_prefix(prefix)
+    if checked_prefix then
+      self._private.prefix = checked_prefix
     end
   end
 end
@@ -758,17 +760,13 @@ function screenshot:filepath_builder(args)
 
   else
 
-    if directory and type(directory) == "string" then
-      directory = check_directory(directory)
-    elseif self.directory then
+    if self.directory then
       directory = self._private.directory -- The setter ran check_directory()
     else
       directory = get_default_dir()
     end
 
-    if prefix and type(prefix) == "string" then
-      prefix = check_prefix(prefix)
-    elseif self.prefix then
+    if self.prefix then
       prefix = self._private.prefix -- The setter ran check_prefix()
     else
       prefix = get_default_prefix()
@@ -801,17 +799,17 @@ function screenshot:save(args)
 end
 
 --- Screenshot constructor - it is possible to call this directly, but it is
--- recommended to use the helper constructors, such as awful.screenshot.root
+--  recommended to use the helper constructors, such as awful.screenshot.root
 --
 -- Possible args include:
 --   directory [string]: the path to the screenshot directory
 --   prefix [string]: the prefix to prepend to screenshot file names
---   frame_color: the color of the frame for a snipper tool
---   method: the method of screenshot to take (i.e. root window, etc).
---   screen: the screen for a physical screen screenshot
---   on_success_cb: the callback to run on the screenshot taken with
+--   frame_color [gears color]: the color of the frame for a snipper tool
+--   method [string]: the method of screenshot to take (i.e. root window, etc).
+--   screen [index or screen]: the screen for a physical screen screenshot
+--   on_success_cb [function]: the callback to run on the screenshot taken with
 --                  a snipper tool
---   geometry: a geometry object for a snip screenshot
+--   geometry [gears geometry]: a geometry object for a snip screenshot
 --
 -- @constructorfct awful.screenshot.new
 -- @tparam[opt] table args Table with the constructor parameters
@@ -823,61 +821,60 @@ local function new(_, args)
     enable_properties = true
   })
 
-  dir, prfx = configure_path(args.directory, args.prefix)
+  local directory, prefix = configure_path(args.directory, args.prefix)
 
-  local fclr = nil
-  if args.frame_color then
-    fclr = gears.color(args.frame_color)
-    if not fclr then
-      fclr = frame_color
-    end
-  else
-    fclr = frame_color
-  end
-
-  local mthd = nil
-  local mthd_name = ""
+  local method = nil
+  local method_name = ""
   if screenshot_methods[args.method] then
-    mthd = screenshot_methods[args.method]
-    mthd_name = args.method
+    method = screenshot_methods[args.method]
+    method_name = args.method
   else
-    mthd = screenshot_methods.default
-    mthd_name = default_method_name
+    method = screenshot_methods.default
+    method_name = default_method_name
   end
 
-  local scrn, clnt, mg_cb, geom
-  if mthd_name == "screen" then
-    scrn = args.screen
-  elseif mthd_name == "client" then
-    clnt = args.client
-  elseif mthd_name == "snipper" then
-    mg_cb = args.on_success_cb 
-  elseif mthd_name == "snip" then
+  local screen, client, on_success_cb, frame_color, geometry
+  if method_name == "screen" then
+    screen = args.screen
+  elseif method_name == "client" then
+    client = args.client
+  elseif method_name == "snipper" then
+
+    if args.frame_color then
+      frame_color = gears.color(args.frame_color)
+      if not frame_color then
+        frame_color = module_default_frame_color
+      end
+    else
+      frame_color = module_default_frame_color
+    end
+
+    if type(args.on_success_cb) == "function" then
+      on_success_cb = args.on_success_cb
+    else
+      on_success_cb = default_on_success_cb
+    end
+
+  elseif method_name == "snip" then
     geom = args.geometry
   end
 
-  if type(args.on_success_cb) == "function" then
-    mg_cb = args.on_success_cb
-  else
-    mg_cb = default_on_success_cb
-  end
-
   ss._private = {
-    directory = dir,
-    prefix = prfx,
+    directory = directory,
+    prefix = prefix,
     filepath = nil,
-    method_name = mthd_name,
-    frame_color = fclr,
-    screen = scrn,
-    client = clnt,
-    on_success_cb = mg_cb,
-    geometry = geom,
+    method_name = method_name,
+    frame_color = frame_color,
+    screen = screen,
+    client = client,
+    on_success_cb = on_success_cb,
+    geometry = geometry,
     surface = nil
   }
 
   gears.table.crush(ss, screenshot, true)
 
-  return mthd(ss)
+  return method(ss)
 
 end
 

@@ -11,7 +11,6 @@ local gdk = lgi.require('Gdk', '3.0')
 local capi = {
     root = _G.root
 }
-
 -- Dummy blue client for the client.content test
 -- the lua_executable portion may need to get ironed out. I need to specify 5.3
 local lua_executable = os.getenv("LUA")
@@ -33,6 +32,10 @@ Gtk:main{...}
 ]]
 local tiny_client = { lua_executable, "-e", string.format(
                           tiny_client_code_template, client_dim, client_dim)}
+
+-- We need a directory to configure the screenshot library to use even through
+-- we never actually write a file.
+local fake_screenshot_dir = "/tmp"
 
 -- Split in the screen into 2 distict screens.
 screen[1]:split()
@@ -107,7 +110,7 @@ end
 
 local steps = {}
 
--- Check the whole root window.
+-- Check the whole root window with root.content()
 table.insert(steps, function()
     local root_width, root_height = root.size()
     local img = copy_to_image_surface(capi.root.content(), root_width,
@@ -128,17 +131,24 @@ table.insert(steps, function()
     return true
 end)
 
--- Check the screen.content
+-- Check screen.content
 table.insert(steps, function()
     for s in screen do
 
       local geo = s.geometry
       local img = copy_to_image_surface(s.content, geo.width, geo.height)
 
+      assert(get_pixel(img, 4, 4) == "#ff0000")
+      assert(get_pixel(img, geo.width - 4, 4) == "#ff0000")
+      assert(get_pixel(img, 4, geo.height - 4) == "#ff0000")
+      assert(get_pixel(img, geo.width - 4, geo.height - 4) == "#ff0000")
+
+--[[
       assert(get_pixel(img, geo.x + 4, geo.y + 4) == "#ff0000")
       assert(get_pixel(img, geo.x + geo.width - 4, geo.y + 4) == "#ff0000")
       assert(get_pixel(img, geo.x + 4, geo.y + geo.height - 4) == "#ff0000")
       assert(get_pixel(img, geo.x + geo.width - 4, geo.y + geo.height - 4) == "#ff0000")
+--]]
 
     end
 
@@ -149,7 +159,7 @@ table.insert(steps, function()
     return true
 end)
 
--- Check the client.content
+-- Check client.content
 table.insert(steps, function()
     if #client.get() ~= 1 then return end
     local c = client.get()[1]
@@ -168,11 +178,13 @@ table.insert(steps, function()
     return true
 end)
 
---Check root window with awful.screenshot module
+--Check the root window with awful.screenshot.root() method
 table.insert(steps, function()
     --Make sure client from last test is gone
     if #client.get() ~= 0 then return end
-    local ss = awful.screenshot.root()
+
+    local root_width, root_height = root.size()
+    local ss = awful.screenshot.root({directory = fake_screenshot_dir})
     local img = ss.surface
 
     if get_pixel(img, 100, 100) ~= "#00ff00" then return end
@@ -190,17 +202,18 @@ table.insert(steps, function()
     return true   
 end)
 
--- Check the screen.content
+-- Check the awful.screenshot.screen() method
 table.insert(steps, function()
     for s in screen do
 
-      local ss = awful.screenshot.screen({screen = s})
+      local geo = s.geometry
+      local ss = awful.screenshot.screen({screen = s, directory = fake_screenshot_dir})
       local img = ss.surface
 
-      assert(get_pixel(img, geo.x + 4, geo.y + 4) == "#ff0000")
-      assert(get_pixel(img, geo.x + geo.width - 4, geo.y + 4) == "#ff0000")
-      assert(get_pixel(img, geo.x + 4, geo.y + geo.height - 4) == "#ff0000")
-      assert(get_pixel(img, geo.x + geo.width - 4, geo.y + geo.height - 4) == "#ff0000")
+      assert(get_pixel(img, 4, 4) == "#ff0000")
+      assert(get_pixel(img, geo.width - 4, 4) == "#ff0000")
+      assert(get_pixel(img, 4, geo.height - 4) == "#ff0000")
+      assert(get_pixel(img, geo.width - 4, geo.height - 4) == "#ff0000")
 
     end
 
@@ -211,13 +224,14 @@ table.insert(steps, function()
     return true
 end)
 
--- Check the client.content
+-- Check the awful.screenshot.client() method
 table.insert(steps, function()
 
     if #client.get() ~= 1 then return end
 
     local c = client.get()[1]
-    local ss = awful.screenshot.client({client = c})
+    local geo = c:geometry()
+    local ss = awful.screenshot.client({client = c, directory = fake_screenshot_dir})
     local img = ss.surface
 
     if get_pixel(img, math.floor(geo.width / 2), math.floor(geo.height / 2)) ~= "#0000ff" then
