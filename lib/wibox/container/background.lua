@@ -450,10 +450,13 @@ end
 
 --- How the border width affects the contained widget.
 --
+--@DOC_wibox_container_background_border_strategy_EXAMPLE@
+--
 -- @property border_strategy
 -- @tparam[opt="none"] string border_strategy
 -- @propertyvalue "none" Just apply the border, do not affect the content size (default).
 -- @propertyvalue "inner" Squeeze the size of the content by the border width.
+-- @propemits true false
 
 function background:set_border_strategy(value)
     self._private.border_strategy = value
@@ -463,12 +466,24 @@ end
 
 --- The background image to use.
 --
+-- This property is deprecated. The `wibox.container.border` provides a much
+-- more fine-grained support for background images. It is now out of the
+-- `wibox.container.background` scope. `wibox.layout.stack` can also be used
+-- to overlay a widget on top of a `wibox.widget.imagebox`. This solution
+-- exposes all availible imagebox properties. Finally, if you wish to use the
+-- `function` callback support, implement the `before_draw_children` method
+-- on any widget. This gives you the same level of control without all the
+-- `bgimage` corner cases.
+--
 -- If `image` is a function, it will be called with `(context, cr, width, height)`
 -- as arguments. Any other arguments passed to this method will be appended.
 --
--- @property bgimage
--- @tparam[opt=nil] image|nil bgimage
+-- @deprecatedproperty bgimage
+-- @tparam string|surface|function bgimage A background image or a function.
 -- @see gears.surface
+-- @see wibox.container.border
+-- @see wibox.widget.imagebox
+-- @see wibox.layout.stack
 
 function background:set_bgimage(image, ...)
     self._private.bgimage = type(image) == "function" and image or surface.load(image)
