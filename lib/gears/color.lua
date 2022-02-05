@@ -59,7 +59,7 @@ local pattern_cache
 -- Max 4 chars per channel.
 --
 -- @param col The color to parse
--- @treturn table 4 values representing color in RGBA format (each of them in
+-- @return 4 values representing color in RGBA format (each of them in
 -- [0, 1] range) or nil if input is incorrect.
 -- @staticfct gears.color.parse_color
 -- @usage -- This will return 0, 1, 0, 1
