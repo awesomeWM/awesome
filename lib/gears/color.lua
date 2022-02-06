@@ -59,11 +59,17 @@ local pattern_cache
 -- Max 4 chars per channel.
 --
 -- @param col The color to parse
--- @treturn table 4 values representing color in RGBA format (each of them in
--- [0, 1] range) or nil if input is incorrect.
+-- @treturn number between 0 and 1 for the 'red' value (1st channel)
+-- @treturn number between 0 and 1 for the 'green' value (2nd channel)
+-- @treturn number between 0 and 1 for the 'blue' value (3rd channel)
+-- @treturn number between 0 and 1 for the 'opacity' value (4th channel)
+-- if the incoming color code only has 3 values (only rgb, not opacity) the 4th
+-- return value is 1.
+-- @treturn nil if input is incorrect
 -- @staticfct gears.color.parse_color
--- @usage -- This will return 0, 1, 0, 1
--- gears.color.parse_color("#00ff00ff")
+-- @usage -- Both of the following will return 0, 0.4, 0.8, 1
+-- gears.color.parse_color("#0066ccff")
+-- gears.color.parse_color("#0066cc")
 function color.parse_color(col)
     local rgb = {}
     if string.match(col, "^#%x+$") then
