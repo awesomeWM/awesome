@@ -99,8 +99,8 @@ end
 
 --- Set the maximum width to val. nil for no width limit.
 --
--- @property height
--- @tparam number height
+-- @property width
+-- @tparam number width
 -- @propemits true false
 
 function constraint:set_width(val)
@@ -115,8 +115,8 @@ end
 
 --- Set the maximum height to val. nil for no height limit.
 --
--- @property width
--- @tparam number width
+-- @property height
+-- @tparam number height
 -- @propemits true false
 
 function constraint:set_height(val)
