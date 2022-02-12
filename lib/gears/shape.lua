@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 --- Module dedicated to gather common shape painters.
 --
--- It add the concept of "shape" to Awesome. A shape can be applied to a
+-- It adds the concept of "shape" to Awesome. A shape can be applied to a
 -- background, a margin, a mask or a drawable shape bounding.
 --
 -- The functions exposed by this module always take a cairo context as first
