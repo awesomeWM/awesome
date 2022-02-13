@@ -143,7 +143,6 @@ end
 -- tasklist_[bg|fg|shape|shape_border_color|shape_border_width]_[focus|urgent|minimized]
 -- titlebar_[bg|fg]_[normal|focus]
 -- tooltip_[font|opacity|fg_color|bg_color|border_width|border_color]
--- mouse_finder_[color|timeout|animate_timeout|radius|factor]
 
 theme.tasklist_fg_normal = theme.wibar_fg
 theme.tasklist_bg_normal = theme.wibar_bg

@@ -59,11 +59,6 @@ theme.titlebar_bg_normal = "#3F3F3F"
 --theme.border_widget    = "#3F3F3F"
 -- }}}
 
--- {{{ Mouse finder
-theme.mouse_finder_color = "#CC9393"
--- mouse_finder_[timeout|animate_timeout|radius|factor]
--- }}}
-
 -- {{{ Menu
 -- Variables set for theming the menu:
 -- menu_[bg|fg]_[normal|focus]
