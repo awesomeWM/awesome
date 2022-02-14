@@ -527,7 +527,7 @@ function keygrabber:add_keybinding(key, _keycode, _callback, _description)
         _keycode = key.key
     end
 
-    self._private.keybindings[key] = self._private.keybindings[key] or {}
+    self._private.keybindings[key.key] = self._private.keybindings[key.key] or {}
     table.insert(self._private.keybindings[_keycode], key)
 
     if self.export_keybindings then
