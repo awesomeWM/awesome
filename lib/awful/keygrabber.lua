@@ -509,7 +509,7 @@ end
 -- @tparam string description.group The keybinding group
 
 function keygrabber:add_keybinding(key, _keycode, _callback, _description)
-    local mods = not akey._is_awful_key and akey or nil
+    local mods = not key._is_awful_key and key or nil
 
     if mods then
         gdebug.deprecate(":add_keybinding now takes `awful.key` objects instead"
