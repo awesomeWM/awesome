@@ -3,8 +3,8 @@ pull_request_rules:
     conditions:
       - label!=no-mergify
       - '#approved-reviews-by>=2'
-      - status-success=Build & Test
-      - status-success=Update API docs
+      - check-success=Build & Test
+      - check-success=Update API docs
       - status-success=codecov/patch
     actions:
       merge:
