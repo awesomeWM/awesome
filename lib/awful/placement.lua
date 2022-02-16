@@ -93,6 +93,7 @@ local floating = require("awful.layout.suit.floating")
 local a_screen = require("awful.screen")
 local grect = require("gears.geometry").rectangle
 local gdebug = require("gears.debug")
+local gmath = require("gears.math")
 local gtable = require("gears.table")
 local cairo = require( "lgi" ).cairo
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
@@ -797,19 +798,31 @@ local function get_relative_regions(geo, mode, is_absolute)
     return regions
 end
 
+local function round_geometry(geo)
+    local geo_keys = { "x", "y", "height", "width" }
+    local rounded_geo = {}
+    for _, key in pairs(geo_keys) do
+        if geo[key] ~= nil then
+            rounded_geo[key] = gmath.round(geo[key])
+        end
+    end
+    return rounded_geo
+end
+
 -- Check if the proposed geometry fits the screen
 local function fit_in_bounding(obj, geo, args)
-    local sgeo   = get_parent_geometry(obj, args)
-    local region = cairo.Region.create_rectangle(cairo.RectangleInt(sgeo))
+    local round_sgeo = round_geometry(get_parent_geometry(obj, args))
+    local region     = cairo.Region.create_rectangle(cairo.RectangleInt(round_sgeo))
 
+    local round_geo = round_geometry(geo)
     region:intersect(cairo.Region.create_rectangle(
-        cairo.RectangleInt(geo)
+        cairo.RectangleInt(round_geo)
     ))
 
     local geo2 = region:get_rectangle(0)
 
     -- If the geometry is the same then it fits, otherwise it will be cropped.
-    return geo2.width == geo.width and geo2.height == geo.height
+    return geo2.width == round_geo.width and geo2.height == round_geo.height
 end
 
 -- Remove border from drawable geometry
