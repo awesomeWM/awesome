@@ -305,7 +305,6 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-unit
 
       - name: Run examples tests
-        if: matrix.coverage
         run: cd "${{ github.workspace }}/build" && make check-examples
 
       - name: Run requires tests
