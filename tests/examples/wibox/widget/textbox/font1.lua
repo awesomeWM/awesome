@@ -28,7 +28,16 @@ local ret = wibox.layout.fixed.vertical()
        --DOC_NEWLINE
        -- Use the low level Pango API to validate the font was parsed properly.
        local desc = pango.FontDescription.from_string(w.font)
-       print(w.font, desc:get_size(), desc:get_family(), desc:get_variant(), desc:get_style())
+       print(
+           string.format(
+               "%s %d %s %s %s",
+               w.font,
+               desc:get_size(),
+               desc:get_family(),
+               desc:get_variant(),
+               desc:get_style()
+            )
+       )
 
     --DOC_HIDE_START
 
