@@ -37,6 +37,29 @@
 --
 --    hotkeys_popup.add_hotkeys(firefox_keys)
 --
+--
+-- Example of having different types of hotkey popups:
+--
+--    local globalkeys = awful.util.table.join(
+--        awful.key({modkey}, "/", function()
+--          hotkeys_popup.show_help()
+--        end, nil, {
+--          description = "show help (all)", group="HELP"
+--        }),
+--        awful.key({"Shift", modkey}, "/", function()
+--          hotkeys_popup.show_help(nil, nil, {show_awesome_keys=false})
+--        end, nil, {
+--          description = "show help for current app", group="HELP"
+--        }),
+--        awful.key({altkey, modkey}, "/", function()
+--          hotkeys_popup.show_help({}, nil, {show_awesome_keys=true})
+--        end, nil, {
+--          description = "show help for awesome only", group="HELP"
+--        })
+--        -- (more hotkeys goes here)
+--    )
+--
+--
 -- @author Yauheni Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2014-2015 Yauheni Kirylau
 -- @popupmod awful.hotkeys_popup.widget
