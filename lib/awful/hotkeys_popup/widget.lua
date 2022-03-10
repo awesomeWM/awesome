@@ -196,7 +196,6 @@ function widget.new(args)
             Mod4             = "Super",
             Insert           = "Ins",
             Delete           = "Del",
-            Backspace        = "BackSpc",
             Next             = "PgDn",
             Prior            = "PgUp",
             Left             = "←",
