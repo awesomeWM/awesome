@@ -35,19 +35,37 @@ local base = require("wibox.widget.base")
 
 local align = {}
 
+
+-- The names of the modes how the align layout spaces and sizes
+-- its child widgets.
+--
+-- It can be used instead of specifying the mode with strings
+--
+-- @table expand_modes
+align.expand_modes = {
+    INSIDE    = "inside",
+    OUTSIDE   = "outside",
+    NONE      = "none",
+    JUSTIFIED = "justified"
+}
+
+
 -- Calculate the layout of an align layout.
 -- @param context The context in which we are drawn.
 -- @param width The available width.
 -- @param height The available height.
 function align:layout(context, width, height)
     local result = {}
-    local size_remains = self._private.dir == "y" and height or width
     local is_vert = self._private.dir == "y"
+    local size_remains = is_vert and height or width
+    local first = self._private.first
+    local second = self._private.second
+    local third = self._private.third
 
-    -- Get the required size of a child widget
-    local function fit_child(child, max_size)
+    -- Get the required size of a widget
+    local function fit_widget(widget, max_size)
         -- Can't fit a widget if it does not exist
-        if not self._private[child] then
+        if not widget then
             return 0
         end
 
@@ -56,24 +74,24 @@ function align:layout(context, width, height)
         local height_remains = is_vert and max_size or height
 
         local w, h = base.fit_widget(
-            self, context, self._private[child],
+            self, context, widget,
             width_remains, height_remains
         )
         return is_vert and h or w
     end
-    -- Place a child widget inside the layout
-    local function place_child(child, offset, size, update_size_remains)
+    -- Place a widget inside the layout
+    local function place_widget(widget, offset, size)
         -- Can't place a widget if it does not exist or there is no more size
-        if not self._private[child] or size_remains <= 0 then
+        if not widget or size_remains <= 0 then
             return
         end
 
         offset = floor(offset)
         if not size then
-            size = size and floor(size) or size_remains
-            size = fit_child(child, size)
+            size = floor(fit_widget(widget, size_remains))
         else
-            fit_child(child, size)
+            size = floor(size)
+            fit_widget(widget, size)
         end
 
         local child_width = is_vert and width or size
@@ -85,124 +103,244 @@ function align:layout(context, width, height)
         table.insert(
             result,
             base.place_widget_at(
-                self._private[child],
+                widget,
                 x_offset, y_offset,
                 child_width, child_height
             )
         )
 
-        if update_size_remains == nil or update_size_remains == true then
-            size_remains = size_remains - size
-        end
+        size_remains = size_remains - size
     end
 
     -- Size of the layout before any placements
     local size_total = size_remains
 
-    if self._private.expand == "none" then
-        local size_second = fit_child("second")
+    if self._private.expand == align.expand_modes.NONE then
+        local size_second = fit_widget(second)
 
         if size_second >= size_total then
             -- Second widget takes all layout's space, no need to place another widgets
-            place_child("second", 0, size_total)
+            place_widget(second, 0, size_total)
         elseif size_second == 0 then
             -- There is no second widget
             local size_side = floor(size_total / 2)
 
-            local size_first = fit_child("first", size_side)
-            place_child(
-                "first",
+            local size_first = fit_widget(first, size_side)
+            place_widget(
+                first,
                 -- At the beginning
                 0,
                 -- Takes the space it needs until the second widget
                 size_first
             )
 
-            place_child(
-                "third",
+            place_widget(
+                third,
                 -- At the end
-                size_total - fit_child("third")
+                size_total - fit_widget(third)
             )
         else
             -- Second widget can leave some space to other widgets
             local size_side = floor((size_total - size_second) / 2)
 
-            place_child(
-                "first",
+            place_widget(
+                first,
                 -- At the beginning
                 0,
                 -- Takes the space it needs until the second widget
-                fit_child("first", size_side)
+                fit_widget(first, size_side)
             )
 
-            local size_third = fit_child("third", size_side)
-            place_child(
-                "third",
+            local size_third = fit_widget(third, size_side)
+            place_widget(
+                third,
                 -- At the end
                 size_total - size_third,
                 -- Takes the space it needs after the second widget
                 size_third
             )
 
-            place_child(
-                "second",
-                -- Right after first
+            place_widget(
+                second,
+                -- After first
                 size_side,
                 -- Takes the space it needs
                 size_second
             )
         end
-    elseif self._private.expand == "outside" then
-        local size_second = fit_child("second")
+    elseif self._private.expand == align.expand_modes.OUTSIDE then
+        local size_second = fit_widget(second)
 
         if size_second >= size_total then
             -- Second widget takes all layout's space, no need to place another widgets
-            place_child("second", 0, size_total)
+            place_widget(second, 0, size_total)
         else
             -- Second widget can leave some space to other widgets
             local size_side = floor((size_remains - size_second) / 2)
 
-            place_child(
-                "first",
+            place_widget(
+                first,
                 -- At the beginning
                 0,
                 -- Takes the space it needs until the second widget
                 size_side
             )
 
-            place_child(
-                "third",
+            place_widget(
+                third,
                 -- At the end
                 size_total - size_side,
                 -- Takes the space it needs after the second widget
                 size_side
             )
 
-            place_child(
-                "second",
-                -- Right after first
+            place_widget(
+                second,
+                -- After first
                 size_side
                 -- Takes all available space - expand
             )
         end
+    elseif self._private.expand == align.expand_modes.JUSTIFIED then
+        local size_first = fit_widget(first)
+        local size_second = fit_widget(second)
+        local size_third = fit_widget(third)
+        local max_size_side = math.max(size_first, size_third)
+        local min_size_side = math.min(size_first, size_third)
+        local first_larger = size_first >= size_third
+
+        if max_size_side + min_size_side >= size_total then
+            -- Could place at least one side widget
+            -- The other side widget will be ignored if no space left
+
+            if first_larger then
+                place_widget(
+                    first,
+                    -- At the beginning
+                    0
+                    -- Takes the space it needs
+                )
+                place_widget(
+                    third,
+                    -- After the first
+                    size_first,
+                    -- Whatever is left - shrink
+                    size_remains
+                )
+            else
+                place_widget(
+                    third,
+                    -- At the end
+                    size_total - size_third
+                    -- Takes the space it needs
+                )
+                place_widget(
+                    first,
+                    -- At the beginning
+                    0
+                    -- Whatever is left - shrink
+                )
+            end
+        elseif max_size_side * 2 + size_second >= size_total then
+            -- Could place a bit of the second widget
+            -- If do not fully expand the smaller widget
+
+            if first_larger then
+                place_widget(
+                    -- At the beginning
+                    first,
+                    -- Takes the space it needs
+                    0
+                )
+
+                -- Whatever second widget would leave it if the third would be placed
+                size_third = math.max(size_remains - size_second, size_third)
+                place_widget(
+                    third,
+                    -- At the end
+                    size_total - size_third,
+                    -- Size calculated above - expand
+                    size_third
+                )
+
+                place_widget(
+                    second,
+                    -- After the first
+                    size_first,
+                    -- Whatever is left - shrink
+                    size_remains
+                )
+            else
+                place_widget(
+                    third,
+                    -- At the end
+                    size_total - size_third
+                    -- Takes the space it needs
+                )
+
+                -- Whatever second widget would leave it if the first would be placed
+                size_first = math.max(size_remains - size_second, size_first)
+                place_widget(
+                    first,
+                    -- At the beginning
+                    0,
+                    -- Size calculated above - expand
+                    size_first
+                )
+
+                place_widget(
+                    second,
+                    -- After the first
+                    size_first,
+                    -- Whatever is left - shrink
+                    size_remains
+                )
+            end
+        else
+            -- Can place all widgets with the correct sizes
+
+            place_widget(
+                -- At the beginning
+                first,
+                0,
+                -- Same size as the largest widget - expand
+                max_size_side
+            )
+
+            place_widget(
+                third,
+                -- At the end
+                size_total - max_size_side,
+                -- Same size as the largest widget - expand
+                max_size_side
+            )
+
+            place_widget(
+                second,
+                -- After the first
+                max_size_side,
+                -- Whatever is left - expand
+                size_remains
+            )
+        end
     else
-        local size_first = fit_child("first")
-        place_child(
-            "first",
+        local size_first = fit_widget(first)
+        place_widget(
+            first,
             -- At the beginning
             0
             -- Takes the space it needs
         )
 
-        place_child(
-            "third",
+        place_widget(
+            third,
             -- At the end
-            size_total - fit_child("third")
+            size_total - fit_widget(third)
             -- Takes the space it needs
         )
 
-        place_child(
-            "second",
+        place_widget(
+            second,
             -- After first
             size_first,
             -- Takes all available space - expand
@@ -329,10 +467,10 @@ end
 -- @property expand
 -- @tparam[opt="inside"] string mode How to use unused space.
 function align:set_expand(mode)
-    if mode == "none" or mode == "outside" or mode == "justified" then
+    if gtable.hasitem(align.expand_modes, mode) then
         self._private.expand = mode
     else
-        self._private.expand = "inside"
+        self._private.expand = align.expand_modes.INSIDE
     end
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::expand", mode)

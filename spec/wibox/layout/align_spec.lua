@@ -223,6 +223,190 @@ describe("wibox.layout.align", function()
         end)
     end)
 
+    describe("expand=justified", function()
+        local layout
+        before_each(function()
+            layout = align.vertical()
+            layout:set_expand("justified")
+        end)
+
+        it("empty layout fit", function()
+            assert.widget_fit(layout, { 10, 10 }, { 0, 0 })
+        end)
+
+        it("empty layout layout", function()
+            assert.widget_layout(layout, { 0, 0 }, {})
+        end)
+
+        describe("with widgets", function()
+            describe("with equal sides", function()
+                local first, second, third
+
+                before_each(function()
+                    first = utils.widget_stub(10, 10)
+                    second = utils.widget_stub(15, 15)
+                    third = utils.widget_stub(10, 10)
+
+                    layout:set_first(first)
+                    layout:set_second(second)
+                    layout:set_third(third)
+                end)
+
+                describe("with enough space", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 100 }, { 15, 35 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 100 }, {
+                            p(first,  0,  0, 100, 10),
+                            p(third,  0, 90, 100, 10),
+                            p(second, 0, 10, 100, 80),
+                        })
+                    end)
+                end)
+
+                describe("without enough height", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 5, 100 }, { 5, 35 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 5, 100 }, {
+                            p(first,  0,  0, 5, 10),
+                            p(third,  0, 90, 5, 10),
+                            p(second, 0, 10, 5, 80),
+                        })
+                    end)
+                end)
+
+                describe("without enough width", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 20 }, {
+                            p(first,  0,  0, 100, 10),
+                            p(third,  0, 10, 100, 10),
+                        })
+                    end)
+                end)
+            end)
+
+            describe("with first larger", function()
+                local first, second, third
+
+                before_each(function()
+                    first = utils.widget_stub(10, 20)
+                    second = utils.widget_stub(15, 15)
+                    third = utils.widget_stub(10, 10)
+
+                    layout:set_first(first)
+                    layout:set_second(second)
+                    layout:set_third(third)
+                end)
+
+                describe("with enough space", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 100 }, { 15, 45 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 100 }, {
+                            p(first,  0,  0, 100, 20),
+                            p(third,  0, 80, 100, 20),
+                            p(second, 0, 20, 100, 60),
+                        })
+                    end)
+                end)
+
+                describe("without enough height", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 5, 100 }, { 5, 45 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 5, 100 }, {
+                            p(first,  0,  0, 5, 20),
+                            p(third,  0, 80, 5, 20),
+                            p(second, 0, 20, 5, 60),
+                        })
+                    end)
+                end)
+
+                describe("without enough width", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 30 }, { 15, 30 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 30 }, {
+                            p(first,  0,  0, 100, 20),
+                            p(third,  0, 20, 100, 10),
+                        })
+                    end)
+                end)
+            end)
+
+            describe("with third larger", function()
+                local first, second, third
+
+                before_each(function()
+                    first = utils.widget_stub(10, 10)
+                    second = utils.widget_stub(15, 15)
+                    third = utils.widget_stub(10, 20)
+
+                    layout:set_first(first)
+                    layout:set_second(second)
+                    layout:set_third(third)
+                end)
+
+                describe("with enough space", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 100 }, { 15, 45 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 100 }, {
+                            p(first,  0,  0, 100, 20),
+                            p(third,  0, 80, 100, 20),
+                            p(second, 0, 20, 100, 60),
+                        })
+                    end)
+                end)
+
+                describe("without enough height", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 5, 100 }, { 5, 45 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 5, 100 }, {
+                            p(first,  0,  0, 5, 20),
+                            p(third,  0, 80, 5, 20),
+                            p(second, 0, 20, 5, 60),
+                        })
+                    end)
+                end)
+
+                describe("without enough width", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 30 }, { 15, 30 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 30 }, {
+                            p(third,  0, 10, 100, 20),
+                            p(first,  0, 0, 100, 10),
+                        })
+                    end)
+                end)
+            end)
+        end)
+    end)
+
+
     describe("emitting signals", function()
         local layout, layout_changed
         before_each(function()
