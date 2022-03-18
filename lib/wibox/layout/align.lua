@@ -50,65 +50,82 @@ align.expand_modes = {
 }
 
 
+-- Get the required size of a widget
+local function layout_fit_widget(layout, context, width, height, widget, size)
+    local is_vert = layout._private.dir == "y"
+
+    local width_remains = is_vert and width or size
+    local height_remains = is_vert and size or height
+
+    local w, h = base.fit_widget(
+        layout, context, widget,
+        width_remains, height_remains
+    )
+    return is_vert and h or w
+end
+-- Place a widget inside the layout
+local function layout_place_widget(layout, width, height, widget, offset, size)
+    local is_vert = layout._private.dir == "y"
+
+    local child_width = is_vert and width or size
+    local child_height = is_vert and size or height
+
+    local x_offset = (not is_vert) and offset or 0
+    local y_offset = (not is_vert) and 0 or offset
+
+    return base.place_widget_at(
+        widget,
+        x_offset, y_offset,
+        child_width, child_height
+    )
+end
+
+
 -- Calculate the layout of an align layout.
 -- @param context The context in which we are drawn.
 -- @param width The available width.
 -- @param height The available height.
 function align:layout(context, width, height)
     local result = {}
-    local is_vert = self._private.dir == "y"
-    local size_remains = is_vert and height or width
+    local size_remains = (self._private.dir == "y") and height or width
+
     local first = self._private.first
     local second = self._private.second
     local third = self._private.third
 
-    -- Get the required size of a widget
+    -- Wrapper around layout_fit_widget function to pass less parameters
     local function fit_widget(widget, max_size)
-        -- Can't fit a widget if it does not exist
+        -- Can't place a widget if it does not exist
         if not widget then
             return 0
         end
-
+        -- Default values
         max_size = max_size and max_size or size_remains
-        local width_remains = is_vert and width or max_size
-        local height_remains = is_vert and max_size or height
 
-        local w, h = base.fit_widget(
-            self, context, widget,
-            width_remains, height_remains
+        return layout_fit_widget(
+            self, context, width, height,
+            widget, max_size
         )
-        return is_vert and h or w
     end
-    -- Place a widget inside the layout
+
+    -- Wrapper around layout_place_widget function to pass less parameters
     local function place_widget(widget, offset, size)
         -- Can't place a widget if it does not exist or there is no more size
         if not widget or size_remains <= 0 then
             return
         end
-
-        offset = floor(offset)
+        -- Default values
         if not size then
-            size = floor(fit_widget(widget, size_remains))
+            size = fit_widget(widget, size_remains)
         else
-            size = floor(size)
             fit_widget(widget, size)
         end
 
-        local child_width = is_vert and width or size
-        local child_height = is_vert and size or height
-
-        local x_offset = (not is_vert) and offset or 0
-        local y_offset = (not is_vert) and 0 or offset
-
-        table.insert(
-            result,
-            base.place_widget_at(
-                widget,
-                x_offset, y_offset,
-                child_width, child_height
-            )
+        local placed = layout_place_widget(
+            self, width, height,
+            widget, offset, size
         )
-
+        table.insert(result, placed)
         size_remains = size_remains - size
     end
 
