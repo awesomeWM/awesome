@@ -345,6 +345,9 @@ function utils.parse_desktop_file(file)
         if program.Terminal == true then
             cmdline = utils.terminal .. ' -e ' .. cmdline
         end
+        if program.Path then
+            cmdline = 'sh -c "cd ' .. program.Path .. ' && ' .. cmdline .. '"'
+        end
         program.cmdline = cmdline
     end
 
