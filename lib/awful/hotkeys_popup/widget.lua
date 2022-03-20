@@ -40,7 +40,7 @@
 --
 -- Example of having different types of hotkey popups:
 --
---    local globalkeys = awful.util.table.join(
+--    awful.keyboard.append_global_keybindings({
 --        awful.key({modkey}, "/", function()
 --          hotkeys_popup.show_help()
 --        end, nil, {
@@ -56,8 +56,8 @@
 --        end, nil, {
 --          description = "show help for awesome only", group="HELP"
 --        })
---        -- (more hotkeys goes here)
---    )
+--        -- (more hotkeys go here)
+--    })
 --
 --
 -- @author Yauheni Kirylau &lt;yawghen@gmail.com&gt;
