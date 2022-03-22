@@ -352,7 +352,7 @@ jobs:
       - name: Test previous commits
         if: matrix.test_prev_commits && github.event_name == 'pull_request'
         run: |
-          git remote add fork "${{ github.event.pull_request.head.repo.git_url }}"
+          git remote add fork "${{ github.event.pull_request.head.repo.clone_url }}"
           # `actions/checkout` creates a shallow repo (`--depth 1`) by default,
           # which is fine for everything up until now. But we need individual commits now.
           # And we only want to unshallow now, to not slow down the checkout for other jobs.

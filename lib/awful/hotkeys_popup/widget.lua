@@ -37,6 +37,29 @@
 --
 --    hotkeys_popup.add_hotkeys(firefox_keys)
 --
+--
+-- Example of having different types of hotkey popups:
+--
+--    awful.keyboard.append_global_keybindings({
+--        awful.key({modkey}, "/", function()
+--          hotkeys_popup.show_help()
+--        end, nil, {
+--          description = "show help (all)", group="HELP"
+--        }),
+--        awful.key({"Shift", modkey}, "/", function()
+--          hotkeys_popup.show_help(nil, nil, {show_awesome_keys=false})
+--        end, nil, {
+--          description = "show help for current app", group="HELP"
+--        }),
+--        awful.key({altkey, modkey}, "/", function()
+--          hotkeys_popup.show_help({}, nil, {show_awesome_keys=true})
+--        end, nil, {
+--          description = "show help for awesome only", group="HELP"
+--        })
+--        -- (more hotkeys go here)
+--    })
+--
+--
 -- @author Yauheni Kirylau &lt;yawghen@gmail.com&gt;
 -- @copyright 2014-2015 Yauheni Kirylau
 -- @popupmod awful.hotkeys_popup.widget
@@ -100,6 +123,59 @@ widget.hide_without_description = true
 -- @param boolean
 widget.merge_duplicates = true
 
+--- Labels used for displaying human-readable keynames.
+-- @tfield table widget.labels
+-- @param table
+widget.labels = {
+    Control          = "Ctrl",
+    Mod1             = "Alt",
+    ISO_Level3_Shift = "Alt Gr",
+    Mod4             = "Super",
+    Insert           = "Ins",
+    Delete           = "Del",
+    Next             = "PgDn",
+    Prior            = "PgUp",
+    Left             = "←",
+    Up               = "↑",
+    Right            = "→",
+    Down             = "↓",
+    KP_End           = "Num1",
+    KP_Down          = "Num2",
+    KP_Next          = "Num3",
+    KP_Left          = "Num4",
+    KP_Begin         = "Num5",
+    KP_Right         = "Num6",
+    KP_Home          = "Num7",
+    KP_Up            = "Num8",
+    KP_Prior         = "Num9",
+    KP_Insert        = "Num0",
+    KP_Delete        = "Num.",
+    KP_Divide        = "Num/",
+    KP_Multiply      = "Num*",
+    KP_Subtract      = "Num-",
+    KP_Add           = "Num+",
+    KP_Enter         = "NumEnter",
+    -- Some "obvious" entries are necessary for the Escape sequence
+    -- and whitespace characters:
+    Escape           = "Esc",
+    Tab              = "Tab",
+    space            = "Space",
+    Return           = "Enter",
+    -- Dead keys aren't distinct from non-dead keys because no sane
+    -- layout should have both of the same kind:
+    dead_acute       = "´",
+    dead_circumflex  = "^",
+    dead_grave       = "`",
+    -- Basic multimedia keys:
+    XF86MonBrightnessUp   = "🔆+",
+    XF86MonBrightnessDown = "🔅-",
+    XF86AudioRaiseVolume = "Vol+",
+    XF86AudioLowerVolume = "Vol-",
+    XF86AudioMute = "Mute",
+    XF86AudioPlay = "⏯",
+    XF86AudioPrev = "⏮",
+    XF86AudioNext = "⏭",
+}
 --- Hotkeys widget background color.
 -- @beautiful beautiful.hotkeys_bg
 -- @tparam color hotkeys_bg
@@ -189,57 +265,7 @@ function widget.new(args)
         -- If no match is found, the key name will not be translated, and will
         -- be presented to the user as-is. (This is useful for cheatsheets for
         -- external programs.)
-        labels = args.labels or {
-            Control          = "Ctrl",
-            Mod1             = "Alt",
-            ISO_Level3_Shift = "Alt Gr",
-            Mod4             = "Super",
-            Insert           = "Ins",
-            Delete           = "Del",
-            Backspace        = "BackSpc",
-            Next             = "PgDn",
-            Prior            = "PgUp",
-            Left             = "←",
-            Up               = "↑",
-            Right            = "→",
-            Down             = "↓",
-            KP_End           = "Num1",
-            KP_Down          = "Num2",
-            KP_Next          = "Num3",
-            KP_Left          = "Num4",
-            KP_Begin         = "Num5",
-            KP_Right         = "Num6",
-            KP_Home          = "Num7",
-            KP_Up            = "Num8",
-            KP_Prior         = "Num9",
-            KP_Insert        = "Num0",
-            KP_Delete        = "Num.",
-            KP_Divide        = "Num/",
-            KP_Multiply      = "Num*",
-            KP_Subtract      = "Num-",
-            KP_Add           = "Num+",
-            KP_Enter         = "NumEnter",
-            -- Some "obvious" entries are necessary for the Escape sequence
-            -- and whitespace characters:
-            Escape           = "Esc",
-            Tab              = "Tab",
-            space            = "Space",
-            Return           = "Enter",
-            -- Dead keys aren't distinct from non-dead keys because no sane
-            -- layout should have both of the same kind:
-            dead_acute       = "´",
-            dead_circumflex  = "^",
-            dead_grave       = "`",
-            -- Basic multimedia keys:
-            XF86MonBrightnessUp   = "🔆+",
-            XF86MonBrightnessDown = "🔅-",
-            XF86AudioRaiseVolume = "Vol+",
-            XF86AudioLowerVolume = "Vol-",
-            XF86AudioMute = "Mute",
-            XF86AudioPlay = "⏯",
-            XF86AudioPrev = "⏮",
-            XF86AudioNext = "⏭",
-        },
+        labels = args.labels or widget.labels,
         _additional_hotkeys = {},
         _cached_wiboxes = {},
         _cached_awful_keys = {},
