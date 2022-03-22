@@ -439,24 +439,40 @@ end
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function align:fit(context, orig_width, orig_height)
-    local used_in_dir = 0
-    local used_in_other = 0
-
-    for _, v in pairs{self._private.first, self._private.second, self._private.third} do
-        local w, h = base.fit_widget(self, context, v, orig_width, orig_height)
-
-        local max = self._private.dir == "y" and w or h
-        if max > used_in_other then
-            used_in_other = max
+    local is_vert = self._private.dir == "y"
+    local function get_widget_size(widget)
+        if widget then
+            return base.fit_widget(self, context, widget, orig_width, orig_height)
+        else
+            return 0, 0
         end
-
-        used_in_dir = used_in_dir + (self._private.dir == "y" and h or w)
     end
 
-    if self._private.dir == "y" then
-        return used_in_other, used_in_dir
+    local first_w, first_h = get_widget_size(self._private.first)
+    local second_w, second_h = get_widget_size(self._private.second)
+    local third_w, third_h = get_widget_size(self._private.third)
+
+    if self._private.expand == align.expand_modes.JUSTIFIED then
+        -- For justified mode, pay attention to the maximum size of the side widgets
+        if is_vert then
+            local w = math.max(first_w, second_w, third_w)
+            local h = 2 * math.max(first_h, third_h) + second_h
+            return w, h
+        end
+        local w = 2 * math.max(first_w, third_w) + second_w
+        local h = math.max(first_h, second_h, third_h)
+        return h, w
+    else
+        -- For any other expand mode, just sum up the sizes of the widgets
+        if is_vert then
+            local w = math.max(first_w, second_w, third_w)
+            local h = first_h + second_h + third_h
+            return w, h
+        end
+        local w = first_w + second_w + third_h
+        local h = math.max(first_h, second_h, third_h)
+        return h, w
     end
-    return used_in_dir, used_in_other
 end
 
 --- Set the expand mode, which determines how child widgets expand to take up

@@ -309,7 +309,7 @@ describe("wibox.layout.align", function()
 
                 describe("with enough space", function()
                     it("fit", function()
-                        assert.widget_fit(layout, { 100, 100 }, { 15, 45 })
+                        assert.widget_fit(layout, { 100, 100 }, { 15, 55 })
                     end)
 
                     it("layout", function()
@@ -323,7 +323,7 @@ describe("wibox.layout.align", function()
 
                 describe("without enough height", function()
                     it("fit", function()
-                        assert.widget_fit(layout, { 5, 100 }, { 5, 45 })
+                        assert.widget_fit(layout, { 5, 100 }, { 5, 55 })
                     end)
 
                     it("layout", function()
@@ -364,7 +364,7 @@ describe("wibox.layout.align", function()
 
                 describe("with enough space", function()
                     it("fit", function()
-                        assert.widget_fit(layout, { 100, 100 }, { 15, 45 })
+                        assert.widget_fit(layout, { 100, 100 }, { 15, 55 })
                     end)
 
                     it("layout", function()
@@ -378,7 +378,7 @@ describe("wibox.layout.align", function()
 
                 describe("without enough height", function()
                     it("fit", function()
-                        assert.widget_fit(layout, { 5, 100 }, { 5, 45 })
+                        assert.widget_fit(layout, { 5, 100 }, { 5, 55 })
                     end)
 
                     it("layout", function()
