@@ -280,7 +280,35 @@ describe("wibox.layout.align", function()
                     end)
                 end)
 
-                describe("without enough width", function()
+                describe("with just enough width for 3 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 35 }, { 15, 35 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 35 }, {
+                            p(first,  0,  0, 100, 10),
+                            p(third,  0, 25, 100, 10),
+                            p(second, 0, 10, 100, 15),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 3 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 30 }, { 15, 30 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 30 }, {
+                            p(first,  0,  0, 100, 10),
+                            p(third,  0, 20, 100, 10),
+                            p(second, 0, 10, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("with just enough width for 2 widgets", function()
                     it("fit", function()
                         assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
                     end)
@@ -289,6 +317,43 @@ describe("wibox.layout.align", function()
                         assert.widget_layout(layout, { 100, 20 }, {
                             p(first,  0,  0, 100, 10),
                             p(third,  0, 10, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 2 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 15 }, { 15, 15 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 15 }, {
+                            p(first,  0,  0, 100, 10),
+                            p(third,  0, 10, 100,  5),
+                        })
+                    end)
+                end)
+
+                describe("with just enough width for 1 widget", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 10 }, { 15, 10 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 10 }, {
+                            p(first,  0,  0, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 1 widget", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 5 }, { 15, 5 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 5 }, {
+                            p(first,  0,  0, 100, 5),
                         })
                     end)
                 end)
@@ -335,7 +400,35 @@ describe("wibox.layout.align", function()
                     end)
                 end)
 
-                describe("without enough width", function()
+                describe("with just enough width for 3 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 45 }, { 15, 45 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 45 }, {
+                            p(first,  0,  0, 100, 20),
+                            p(third,  0, 35, 100, 10),
+                            p(second, 0, 20, 100, 15),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 3 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 40 }, { 15, 40 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 40 }, {
+                            p(first,  0,  0, 100, 20),
+                            p(third,  0, 30, 100, 10),
+                            p(second, 0, 20, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("with just enough width for 2 widgets", function()
                     it("fit", function()
                         assert.widget_fit(layout, { 100, 30 }, { 15, 30 })
                     end)
@@ -344,6 +437,43 @@ describe("wibox.layout.align", function()
                         assert.widget_layout(layout, { 100, 30 }, {
                             p(first,  0,  0, 100, 20),
                             p(third,  0, 20, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 2 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 25 }, { 15, 25 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 25 }, {
+                            p(first,  0,  0, 100, 20),
+                            p(third,  0, 20, 100,  5),
+                        })
+                    end)
+                end)
+
+                describe("with just enough width for 1 widget", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 20 }, {
+                            p(first,  0,  0, 100, 20),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 1 widget", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 15 }, { 15, 15 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 15 }, {
+                            p(first,  0,  0, 100, 15),
                         })
                     end)
                 end)
@@ -390,7 +520,35 @@ describe("wibox.layout.align", function()
                     end)
                 end)
 
-                describe("without enough width", function()
+                describe("with just enough width for 3 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 45 }, { 15, 45 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 45 }, {
+                            p(third,  0, 25, 100, 20),
+                            p(first,  0,  0, 100, 10),
+                            p(second, 0, 10, 100, 15),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 3 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 40 }, { 15, 40 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 40 }, {
+                            p(third,  0, 20, 100, 20),
+                            p(first,  0,  0, 100, 10),
+                            p(second, 0, 10, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("with just enough width for 2 widgets", function()
                     it("fit", function()
                         assert.widget_fit(layout, { 100, 30 }, { 15, 30 })
                     end)
@@ -398,7 +556,44 @@ describe("wibox.layout.align", function()
                     it("layout", function()
                         assert.widget_layout(layout, { 100, 30 }, {
                             p(third,  0, 10, 100, 20),
-                            p(first,  0, 0, 100, 10),
+                            p(first,  0,  0, 100, 10),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 2 widgets", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 25 }, { 15, 25 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 25 }, {
+                            p(third,  0,  5, 100, 20),
+                            p(first,  0,  0, 100,  5),
+                        })
+                    end)
+                end)
+
+                describe("with just enough width for 1 widget", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 20 }, { 15, 20 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 20 }, {
+                            p(third,  0,  0, 100, 20),
+                        })
+                    end)
+                end)
+
+                describe("with barely enough width for 1 widget", function()
+                    it("fit", function()
+                        assert.widget_fit(layout, { 100, 15 }, { 15, 15 })
+                    end)
+
+                    it("layout", function()
+                        assert.widget_layout(layout, { 100, 15 }, {
+                            p(third,  0,  0, 100, 15),
                         })
                     end)
                 end)
