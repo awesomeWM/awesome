@@ -100,7 +100,9 @@ function align:layout(context, width, height)
             return 0
         end
         -- Default values
-        max_size = max_size and max_size or size_remains
+        if not max_size then
+            max_size = size_remains
+        end
 
         return layout_fit_widget(
             self, context, width, height,
@@ -117,14 +119,14 @@ function align:layout(context, width, height)
         -- Default values
         if not size then
             size = fit_widget(widget, size_remains)
-        else
-            fit_widget(widget, size)
         end
 
         local placed = layout_place_widget(
             self, width, height,
             widget, offset, size
         )
+
+        --return placed, size
         table.insert(result, placed)
         size_remains = size_remains - size
     end
@@ -137,12 +139,16 @@ function align:layout(context, width, height)
 
         if size_second >= size_total then
             -- Second widget takes all layout's space, no need to place another widgets
-            place_widget(second, 0, size_total)
+            place_widget(
+                second,
+                -- At the beginning
+                0,
+                -- Takes all the space - shrink
+                size_total
+            )
         elseif size_second == 0 then
             -- There is no second widget
-            local size_side = floor(size_total / 2)
-
-            local size_first = fit_widget(first, size_side)
+            local size_first = fit_widget(first, floor(size_total / 2))
             place_widget(
                 first,
                 -- At the beginning
@@ -190,7 +196,13 @@ function align:layout(context, width, height)
 
         if size_second >= size_total then
             -- Second widget takes all layout's space, no need to place another widgets
-            place_widget(second, 0, size_total)
+            place_widget(
+                second,
+                -- At the beginning
+                0,
+                -- Takes all the space - shrink
+                size_total
+            )
         else
             -- Second widget can leave some space to other widgets
             local size_side = floor((size_remains - size_second) / 2)
@@ -341,6 +353,8 @@ function align:layout(context, width, height)
             )
         end
     else
+        -- Default case for "inside" expand mode
+
         local size_first = fit_widget(first)
         place_widget(
             first,
@@ -439,7 +453,6 @@ end
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function align:fit(context, orig_width, orig_height)
-    local is_vert = self._private.dir == "y"
     local function get_widget_size(widget)
         if widget then
             return base.fit_widget(self, context, widget, orig_width, orig_height)
@@ -448,6 +461,7 @@ function align:fit(context, orig_width, orig_height)
         end
     end
 
+    local is_vert = self._private.dir == "y"
     local first_w, first_h = get_widget_size(self._private.first)
     local second_w, second_h = get_widget_size(self._private.second)
     local third_w, third_h = get_widget_size(self._private.third)
