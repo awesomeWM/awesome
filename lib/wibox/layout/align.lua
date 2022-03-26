@@ -26,7 +26,6 @@
 -- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
-local table = table
 local pairs = pairs
 local type = type
 local floor = math.floor
@@ -100,9 +99,11 @@ function align:layout(context, width, height)
     end
 
     -- Wrapper around layout_place_widget function to pass less parameters
-    local function prepare_place_widget(widget, offset, size)
+    local function prepare_place_widget(widget, offset, size, force)
+        -- Let widgets with size of 0 be placed if specified
+        local min_size = force and -1 or 0
         -- Can't place a widget if it does not exist or the size is invalid
-        if not widget or size <= 0 then
+        if not widget or size <= min_size then
             return nil
         end
 
@@ -110,6 +111,15 @@ function align:layout(context, width, height)
             self, width, height,
             widget, offset, size
         )
+    end
+
+    local function filter_nil(t)
+        local filtered = {}
+        for _, v in pairs(t) do
+            filtered[#filtered + 1] = v
+        end
+
+        return filtered
     end
 
     -- Size of the layout before any placements
@@ -126,6 +136,8 @@ function align:layout(context, width, height)
     local placed_first
     local placed_second
     local placed_third
+    -- Final result
+    local result = {}
 
 
     if self._private.expand == align.expand_modes.NONE then
@@ -141,7 +153,7 @@ function align:layout(context, width, height)
                 size_total
             )
 
-            return { placed_third }
+            result = { placed_third }
         elseif size_second == 0 then
             -- There is no second widget
             size_first = fit_widget(first, floor(size_total / 2))
@@ -161,7 +173,7 @@ function align:layout(context, width, height)
                 size_third
             )
 
-            return { placed_first, placed_third }
+            result = { placed_first, placed_third }
         else
             -- Second widget can leave some space to other widgets
             local size_side = floor((size_total - size_second) / 2)
@@ -191,7 +203,7 @@ function align:layout(context, width, height)
                 size_second
             )
 
-            return { placed_first, placed_third, placed_second }
+            result = { placed_first, placed_third, placed_second }
         end
     elseif self._private.expand == align.expand_modes.OUTSIDE then
         size_second = fit_widget(second, size_total)
@@ -206,7 +218,7 @@ function align:layout(context, width, height)
                 size_total
             )
 
-            return { placed_third }
+            result = { placed_third }
         else
             -- Second widget can leave some space to other widgets
             local size_side = floor((size_total - size_second) / 2)
@@ -235,7 +247,7 @@ function align:layout(context, width, height)
                 size_total - 2 * size_side - 1
             )
 
-            return { placed_first, placed_third, placed_second }
+            result = { placed_first, placed_third, placed_second }
         end
     elseif self._private.expand == align.expand_modes.JUSTIFIED then
         size_first = fit_widget(first, size_total)
@@ -265,7 +277,7 @@ function align:layout(context, width, height)
                     size_total - size_first
                 )
 
-                return { placed_first, placed_third }
+                result = { placed_first, placed_third }
             else
                 placed_third = prepare_place_widget(
                     third,
@@ -282,7 +294,7 @@ function align:layout(context, width, height)
                     size_total - size_third
                 )
 
-                return { placed_third, placed_first }
+                result = { placed_third, placed_first }
             end
         elseif max_size_side * 2 + size_second >= size_total then
             -- Could place a bit of the second widget
@@ -315,7 +327,7 @@ function align:layout(context, width, height)
                     size_total - size_first - size_third
                 )
 
-                return { placed_first, placed_third, placed_second }
+                result = { placed_first, placed_third, placed_second }
             else
                 placed_third = prepare_place_widget(
                     third,
@@ -343,7 +355,7 @@ function align:layout(context, width, height)
                     size_total - size_first - size_third
                 )
 
-                return { placed_third, placed_first, placed_second }
+                result = { placed_third, placed_first, placed_second }
             end
         else
             -- Can place all widgets with the correct sizes
@@ -372,7 +384,7 @@ function align:layout(context, width, height)
                 size_total - 2 * max_size_side
             )
 
-            return { placed_first, placed_third, placed_second }
+            result = { placed_first, placed_third, placed_second }
         end
     else
         -- Default case for "inside" expand mode
@@ -403,8 +415,10 @@ function align:layout(context, width, height)
             size_total - size_first - size_third
         )
 
-        return { placed_first, placed_third, placed_second }
+        result = { placed_first, placed_third, placed_second }
     end
+
+    return filter_nil(result)
 end
 
 --- The widget in slot one.
@@ -500,7 +514,7 @@ function align:fit(context, orig_width, orig_height)
         end
         local w = 2 * math.max(first_w, third_w) + second_w
         local h = math.max(first_h, second_h, third_h)
-        return h, w
+        return w, h
     else
         -- For any other expand mode, just sum up the sizes of the widgets
         if is_vert then
@@ -510,7 +524,7 @@ function align:fit(context, orig_width, orig_height)
         end
         local w = first_w + second_w + third_h
         local h = math.max(first_h, second_h, third_h)
-        return h, w
+        return w, h
     end
 end
 
