@@ -1,0 +1,7 @@
+[Desktop Entry]
+
+Type=Application
+Name=terminal test
+Path=/home/
+Exec=ls
+Terminal=true
