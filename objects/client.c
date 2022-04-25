@@ -1881,7 +1881,7 @@ client_focus_refresh(void)
      * new client gets the input focus.
      */
     xcb_set_input_focus(globalconf.connection, XCB_INPUT_FOCUS_PARENT,
-                        win, globalconf.timestamp);
+                        win, XCB_CURRENT_TIME);
 
     /* Do this last, because client_unban() might set it to true */
     globalconf.focus.need_update = false;
