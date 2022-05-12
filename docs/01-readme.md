@@ -53,7 +53,7 @@ git clone https://github.com/awesomewm/awesome
 cd awesome
 make package
 cd build
-sudo apt install *.deb
+sudo dpkg -i *.deb
 ```
 
 ## Running Awesome
