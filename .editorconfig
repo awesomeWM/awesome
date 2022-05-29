@@ -24,3 +24,6 @@ indent_size = 4
 # In a Makefile, the tab is significant and not "just" whitespace
 [Makefile]
 indent_style = tab
+
+[*.yml]
+indent_size = 2
