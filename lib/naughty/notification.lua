@@ -621,7 +621,7 @@ local properties = {
     "destroy" , "preset"  , "callback", "actions"       ,
     "run"     , "id"      , "ignore"  , "auto_reset_timeout",
     "urgency" , "image"   , "images"  , "widget_template",
-    "max_width",
+    "max_width", "app_icon",
 }
 
 for _, prop in ipairs(properties) do
