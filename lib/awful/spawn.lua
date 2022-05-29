@@ -433,7 +433,7 @@ end
 --   @tparam string callback.stderr Output on stderr.
 --   @tparam string callback.exitreason Exit reason ("exit" or "signal").
 --   @tparam integer callback.exitcode Exit code (exit code or signal number,
---     depending on "exitreason").
+--   depending on `exitreason`).
 -- @treturn[1] Integer the PID of the forked process.
 -- @treturn[2] string Error message.
 -- @see spawn.with_line_callback
@@ -484,7 +484,7 @@ end
 --   @tparam string callback.stderr Output on stderr.
 --   @tparam string callback.exitreason Exit reason ("exit" or "signal").
 --   @tparam integer callback.exitcode Exit code (exit code or signal number,
---     depending on "exitreason").
+--   depending on `exitreason`).
 -- @treturn[1] Integer the PID of the forked process.
 -- @treturn[2] string Error message.
 -- @see spawn.with_line_callback
