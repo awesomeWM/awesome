@@ -613,15 +613,15 @@ function notification:get_text()
 end
 
 local properties = {
-    "message" , "title"   , "timeout" , "hover_timeout" ,
-    "app_name", "position", "ontop"   , "border_width"  ,
-    "width"   , "font"    , "icon"    , "icon_size"     ,
-    "fg"      , "bg"      , "height"  , "border_color"  ,
-    "shape"   , "opacity" , "margin"  , "ignore_suspend",
-    "destroy" , "preset"  , "callback", "actions"       ,
-    "run"     , "id"      , "ignore"  , "auto_reset_timeout",
-    "urgency" , "image"   , "images"  , "widget_template",
-    "max_width",
+    "message"  , "title"   , "timeout" , "hover_timeout"     ,
+    "app_name" , "position", "ontop"   , "border_width"      ,
+    "width"    , "font"    , "icon"    , "icon_size"         ,
+    "fg"       , "bg"      , "height"  , "border_color"      ,
+    "shape"    , "opacity" , "margin"  , "ignore_suspend"    ,
+    "destroy"  , "preset"  , "callback", "actions"           ,
+    "run"      , "id"      , "ignore"  , "auto_reset_timeout",
+    "urgency"  , "image"   , "images"  , "widget_template"   ,
+    "max_width", "app_icon",
 }
 
 for _, prop in ipairs(properties) do
