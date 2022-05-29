@@ -6,7 +6,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2009 Julien Danjou
 -- @widgetmod awful.widget.layoutbox
--- @supermodule wibox.layout.fixed
+-- @supermodule wibox.widget.template
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -20,28 +20,62 @@ local gdebug = require("gears.debug")
 local gtable = require("gears.table")
 
 local function get_screen(s)
-    return s and capi.screen[s]
+    return s and capi.screen[s] or 1
+end
+
+local default_template = {
+    {
+        {
+            id = "icon_role",
+            widget = wibox.widget.imagebox,
+        },
+        {
+            id = "text_role",
+            widget = wibox.widget.imagebox,
+        },
+        fill_space = true,
+        layout = wibox.layout.fixed.horizontal,
+    },
+    id = "background_role",
+    widget = wibox.container.background,
+}
+
+local function default_update_callback(template_widget, args)
+    screen = get_screen(args.screen)
+    local w = template_widget.widget
+    local name = layout.getname(layout.get(screen))
+
+    template_widget._layoutbox_tooltip:set_text(name or "[no name]")
+
+    local img = surface.load_silently(beautiful["layout_" .. name], false)
+    w:get_children_by_id("icon_role")[1].image = img
+    w:get_children_by_id("text_role")[1].text = img and "" or name
+end
+
+local function build_default_widget()
+    local widget = wibox.widget.template {
+        template = default_template,
+        update_callback = default_update_callback,
+        update_now = true,
+    }
+
+    widget._layoutbox_tooltip = tooltip {
+        objects = { widget },
+        delay_show = 1,
+    }
+
+    return widget
 end
 
 local layoutbox = { mt = {} }
 
 local boxes = nil
 
-local function update(w, screen)
-    screen = get_screen(screen)
-    local name = layout.getname(layout.get(screen))
-    w._layoutbox_tooltip:set_text(name or "[no name]")
-
-    local img = surface.load_silently(beautiful["layout_" .. name], false)
-    w.imagebox.image = img
-    w.textbox.text   = img and "" or name
-end
-
 local function update_from_tag(t)
     local screen = get_screen(t.screen)
     local w = boxes[screen]
     if w then
-        update(w, screen)
+        w:update { screen = screen }
     end
 end
 
@@ -50,6 +84,11 @@ end
 -- @tparam table args The arguments.
 -- @tparam screen args.screen The screen number that the layout will be represented for.
 -- @tparam table args.buttons The `awful.button`s for this layoutbox.
+-- @tparam[opt] table args.widget_template Widget template arguments.
+-- @tparam[opt] widget args.widget_template.template Base widget for the
+--   template.
+-- @tparam[opt] function args.widget_template.update_callback Update function
+--   for the widget template.
 -- @return The layoutbox.
 function layoutbox.new(args)
     args = args or {}
@@ -76,7 +115,7 @@ function layoutbox.new(args)
         capi.tag.connect_signal("property::screen", function()
             for s, w in pairs(boxes) do
                 if s.valid then
-                    update(w, s)
+                    w:update { screen = s }
                 end
             end
         end)
@@ -86,24 +125,13 @@ function layoutbox.new(args)
     -- Do we already have a layoutbox for this screen?
     local w = boxes[screen]
     if not w then
-        w = wibox.widget {
-            {
-                id     = "imagebox",
-                widget = wibox.widget.imagebox
-            },
-            {
-                id     = "textbox",
-                widget = wibox.widget.textbox
-            },
-            layout = wibox.layout.fixed.horizontal
-        }
-
-        w._layoutbox_tooltip = tooltip {objects = {w}, delay_show = 1}
+        w = args.widget_template and wibox.widget.template(args.widget_template)
+            or build_default_widget()
 
         -- Apply the buttons, visible, forced_width and so on
         gtable.crush(w, args)
 
-        update(w, screen)
+        w:update { screen = screen }
         boxes[screen] = w
     end
 
