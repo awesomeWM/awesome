@@ -509,7 +509,7 @@ end
 -- @tparam string description.group The keybinding group
 
 function keygrabber:add_keybinding(key, _keycode, _callback, _description)
-    local mods = not akey._is_awful_key and akey or nil
+    local mods = not key._is_awful_key and key or nil
 
     if mods then
         gdebug.deprecate(":add_keybinding now takes `awful.key` objects instead"
@@ -523,12 +523,10 @@ function keygrabber:add_keybinding(key, _keycode, _callback, _description)
             description = _description,
             on_press    = _callback
         }
-    else
-        _keycode = key.key
     end
 
-    self._private.keybindings[key] = self._private.keybindings[key] or {}
-    table.insert(self._private.keybindings[_keycode], key)
+    self._private.keybindings[key.key] = self._private.keybindings[key.key] or {}
+    table.insert(self._private.keybindings[key.key], key)
 
     if self.export_keybindings then
         add_root_keybindings(self, {key})
