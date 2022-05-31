@@ -523,6 +523,19 @@ function notification:set_id(new_id)
     self:emit_signal("property::id", new_id)
 end
 
+
+function notification:die(reason)
+    if reason == cst.notification_closed_reason.expired then
+        self.is_expired = true
+        if naughty.expiration_paused then
+            table.insert(naughty.notifications._expired[1], self)
+            return
+        end
+    end
+
+    self:destroy(reason)
+end
+
 -- Return true if `self` is suspended.
 local function get_suspended(self)
     return naughty.suspended and (not self._private.ignore_suspend)
@@ -531,18 +544,6 @@ end
 function notification:set_timeout(timeout)
     timeout = timeout or 0
 
-    local die = function (reason)
-        if reason == cst.notification_closed_reason.expired then
-            self.is_expired = true
-            if naughty.expiration_paused then
-                table.insert(naughty.notifications._expired[1], self)
-                return
-            end
-        end
-
-        self:destroy(reason)
-    end
-
     if self.timer and self._private.timeout == timeout then return end
 
     -- 0 == never
@@ -550,7 +551,7 @@ function notification:set_timeout(timeout)
         local timer_die = timer { timeout = timeout }
 
         timer_die:connect_signal("timeout", function()
-            pcall(die, cst.notification_closed_reason.expired)
+            pcall(notification.die, self, cst.notification_closed_reason.expired)
 
             -- Prevent infinite timers events on errors.
             if timer_die.started then
@@ -574,7 +575,6 @@ function notification:set_timeout(timeout)
         self.timer = nil
     end
 
-    self.die = die
     self._private.timeout = timeout
     self:emit_signal("property::timeout", timeout)
 end
