@@ -544,7 +544,11 @@ end
 function notification:set_timeout(timeout)
     timeout = timeout or 0
 
-    if self.timer and self._private.timeout == timeout then return end
+    -- Even if the value is the same, the internal timer might be in an incorrect state.
+    -- We need to check that first, and continue with the stuff below, if necessary.
+    if self._private.timeout == timeout and ((not self.timer and timeout == 0) or self.timer) then
+        return
+    end
 
     -- 0 == never
     if timeout > 0 then
