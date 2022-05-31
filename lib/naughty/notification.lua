@@ -569,7 +569,11 @@ function notification:set_timeout(timeout)
         end
 
         self.timer = timer_die
+    elseif timeout == 0 and self.timer then
+        self.timer:stop()
+        self.timer = nil
     end
+
     self.die = die
     self._private.timeout = timeout
     self:emit_signal("property::timeout", timeout)
