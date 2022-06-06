@@ -432,7 +432,7 @@ local function build_grabber(container, initial_x, initial_y, geo)
         end
 
         local x, y = matrix:transform_point(mouse.x, mouse.y)
-        local pos = is_y and x and y
+        local pos = is_y and y or x
         container:set_scroll_factor((start_pos + (pos - start)) / bar_interval)
 
         return true
