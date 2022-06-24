@@ -707,8 +707,7 @@ lua_class_t client_class;
  */
 
 /**
- * Define if the client must be hidden, i.e. never mapped,
- *   invisible in taskbar.
+ * Define if the client must be hidden (Never mapped, invisible in taskbar).
  *
  * @property hidden
  * @tparam boolean hidden
@@ -719,8 +718,7 @@ lua_class_t client_class;
  */
 
 /**
- * Define it the client must be iconify, i.e. only visible in
- *   taskbar.
+ * Define if the client must be iconified (Only visible in taskbar).
  *
  * Minimized clients are still part of tags and screens, but
  * they are not displayed. You can unminimize using `c.minimized = false`,
@@ -1184,7 +1182,7 @@ lua_class_t client_class;
  */
 
 /**
- * Set the client sticky, i.e. available on all tags.
+ * Set the client sticky (Available on all tags).
  *
  * Please note that AwesomeWM implements `sticky` clients
  * per screens rather than globally like some other

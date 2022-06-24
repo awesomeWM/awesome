@@ -49,7 +49,6 @@ local common = require("awful.widget.common")
 local tag = require("awful.tag")
 local beautiful = require("beautiful")
 local fixed = require("wibox.layout.fixed")
-local surface = require("gears.surface")
 local timer = require("gears.timer")
 local gcolor = require("gears.color")
 local gstring = require("gears.string")
@@ -372,7 +371,7 @@ function taglist.taglist_label(t, args)
     end
     if not taglist_disable_icon then
         if t.icon then
-            icon = surface.load(t.icon)
+            icon = t.icon
         end
     end
 
