@@ -155,7 +155,10 @@ else
 end
 
 if not theme.wallpaper then
-    theme.wallpaper = themes_path.."xresources/wallpaper.svg"
+    gdebug.print_warning("Loading fallback wallpaper.")
+    theme.wallpaper = function(s)
+        return theme_assets.wallpaper(wallpaper_bg, wallpaper_fg, wallpaper_alt_fg, s)
+    end
 end
 
 theme.wallpaper_bg = wallpaper_bg
