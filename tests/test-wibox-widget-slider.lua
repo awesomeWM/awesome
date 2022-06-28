@@ -53,26 +53,23 @@ step("create slider widget", function()
     return true
 end)
 
-step("start dragging", function()
+step("start dragging", function(run_count)
     -- Coordinates to hit the slider's handle
-    mouse.coords({ x = 1, y = 24 })
-
+    mouse.coords({ x = 12, y = 24 })
     root.fake_input("button_press", 1)
-    awesome.sync()
-
-    return on_drag_start
+    print(string.format("on_drag_start = %s", on_drag_start))
+    return run_count < 10 or on_drag_start
 end)
 
 step("drag handle", function()
-    mouse.coords({ x = 50, y = 24 })
+    mouse.coords({ x = 100, y = 24 })
     return true
 end)
 
-step("stop dragging", function()
+step("stop dragging", function(run_count)
     root.fake_input("button_release", 1)
-    awesome.sync()
-
-    return on_drag_end
+    print(string.format("on_drag_end = %s", on_drag_end))
+    return run_count < 10 or on_drag_end
 end)
 
 step("check signals", function()
