@@ -524,7 +524,7 @@ function notification:set_id(new_id)
 end
 
 
-function notification:die(reason)
+local function die(self, reason)
     if reason == cst.notification_closed_reason.expired then
         self.is_expired = true
         if naughty.expiration_paused then
@@ -555,7 +555,7 @@ function notification:set_timeout(timeout)
         local timer_die = timer { timeout = timeout }
 
         timer_die:connect_signal("timeout", function()
-            pcall(notification.die, self, cst.notification_closed_reason.expired)
+            pcall(die, self, cst.notification_closed_reason.expired)
 
             -- Prevent infinite timers events on errors.
             if timer_die.started then
@@ -936,7 +936,7 @@ end
 -- @tparam[opt] func args.run Function to run on left click.  The notification
 --   object will be passed to it as an argument.
 --   You need to call e.g.
---   `notification.die(naughty.notification_closed_reason.dismissedByUser)` from
+--   `notification:destroy(naughty.notification_closed_reason.dismissedByUser)` from
 --   there to dismiss the notification yourself.
 -- @tparam[opt] func args.destroy Function to run when notification is destroyed.
 -- @tparam[opt] table args.preset Table with any of the above parameters.
