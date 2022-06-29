@@ -7,6 +7,7 @@ local theme_assets = require("beautiful.theme_assets")
 local dpi = require("beautiful.xresources").apply_dpi
 local rnotification = require("ruled.notification")
 local gfs = require("gears.filesystem")
+local colorful = require("beautiful.colorful")
 local themes_path = gfs.get_themes_dir()
 local gears_shape = require("gears.shape")
 local wibox = require("wibox")
@@ -17,21 +18,6 @@ local gtk = require("beautiful.gtk")
 -- Helper functions for modifying hex colors:
 --
 local hex_color_match = "[a-fA-F0-9][a-fA-F0-9]"
-local function darker(color_value, darker_n)
-    local result = "#"
-    local channel_counter = 1
-    for s in color_value:gmatch(hex_color_match) do
-        local bg_numeric_value = tonumber("0x"..s)
-        if channel_counter <= 3 then
-            bg_numeric_value = bg_numeric_value - darker_n
-        end
-        if bg_numeric_value < 0 then bg_numeric_value = 0 end
-        if bg_numeric_value > 255 then bg_numeric_value = 255 end
-        result = result .. string.format("%02x", bg_numeric_value)
-        channel_counter = channel_counter + 1
-    end
-    return result
-end
 local function is_dark(color_value)
     local bg_numeric_value = 0;
     local channel_counter = 1
@@ -45,25 +31,11 @@ local function is_dark(color_value)
     local is_dark_bg = (bg_numeric_value < 383)
     return is_dark_bg
 end
-local function mix(color1, color2, ratio)
-    ratio = ratio or 0.5
-    local result = "#"
-    local channels1 = color1:gmatch(hex_color_match)
-    local channels2 = color2:gmatch(hex_color_match)
-    for _ = 1,3 do
-        local bg_numeric_value = math.ceil(
-          tonumber("0x"..channels1())*ratio +
-          tonumber("0x"..channels2())*(1-ratio)
-        )
-        if bg_numeric_value < 0 then bg_numeric_value = 0 end
-        if bg_numeric_value > 255 then bg_numeric_value = 255 end
-        result = result .. string.format("%02x", bg_numeric_value)
-    end
-    return result
-end
 local function reduce_contrast(color, ratio)
-    ratio = ratio or 50
-    return darker(color, is_dark(color) and -ratio or ratio)
+    -- turn ratio to a percentage range [0,1]
+    ratio = (ratio or 50) / 100
+    -- Negative number here will lighten
+    return colorful.darken(color, is_dark(tostring(color)) and -ratio or ratio)
 end
 
 local function choose_contrast_color(reference, candidate1, candidate2)  -- luacheck: no unused
@@ -95,7 +67,7 @@ end
 theme.gtk.button_border_radius = dpi(theme.gtk.button_border_radius or 0)
 theme.gtk.button_border_width = dpi(theme.gtk.button_border_width or 1)
 theme.gtk.bold_font = theme.gtk.font_family .. ' Bold ' .. theme.gtk.font_size
-theme.gtk.menubar_border_color = mix(
+theme.gtk.menubar_border_color = colorful.mix(
     theme.gtk.menubar_bg_color,
     theme.gtk.menubar_fg_color,
     0.7
@@ -116,8 +88,8 @@ theme.fg_focus      = theme.gtk.selected_fg_color
 theme.bg_urgent     = theme.gtk.error_bg_color
 theme.fg_urgent     = theme.gtk.error_fg_color
 
-theme.bg_minimize   = mix(theme.wibar_fg, theme.wibar_bg, 0.3)
-theme.fg_minimize   = mix(theme.wibar_fg, theme.wibar_bg, 0.9)
+theme.bg_minimize   = colorful.mix(theme.wibar_fg, theme.wibar_bg, 0.3)
+theme.fg_minimize   = colorful.mix(theme.wibar_fg, theme.wibar_bg, 0.9)
 
 theme.bg_systray    = theme.wibar_bg
 
@@ -152,7 +124,7 @@ theme.tasklist_bg_focus = theme.tasklist_bg_normal
 theme.tasklist_font_focus = theme.gtk.bold_font
 
 theme.tasklist_shape_minimized = rounded_rect_shape
-theme.tasklist_shape_border_color_minimized = mix(
+theme.tasklist_shape_border_color_minimized = colorful.mix(
     theme.bg_minimize,
     theme.fg_minimize,
     0.85
@@ -233,12 +205,12 @@ theme.taglist_shape_border_color_container = theme.gtk.header_button_border_colo
 theme.taglist_bg_occupied = theme.gtk.header_button_bg_color
 theme.taglist_fg_occupied = theme.gtk.header_button_fg_color
 
-theme.taglist_bg_empty = mix(
+theme.taglist_bg_empty = colorful.mix(
     theme.gtk.menubar_bg_color,
     theme.gtk.header_button_bg_color,
     0.3
 )
-theme.taglist_fg_empty = mix(
+theme.taglist_fg_empty = colorful.mix(
     theme.gtk.menubar_bg_color,
     theme.gtk.header_button_fg_color
 )
@@ -315,7 +287,7 @@ theme.icon_theme = nil
 
 -- Generate Awesome icon:
 theme.awesome_icon = theme_assets.awesome_icon(
-    theme.menu_height, mix(theme.bg_focus, theme.fg_normal), theme.wibar_bg
+    theme.menu_height, colorful.mix(theme.bg_focus, theme.fg_normal), theme.wibar_bg
 )
 
 -- Generate taglist squares:
@@ -339,8 +311,8 @@ if not is_dark(theme.bg_normal) then
 end
 wallpaper_bg = reduce_contrast(wallpaper_bg, 50)
 wallpaper_fg = reduce_contrast(wallpaper_fg, 30)
-wallpaper_fg = mix(wallpaper_fg, wallpaper_bg, 0.4)
-wallpaper_alt_fg = mix(wallpaper_alt_fg, wallpaper_fg, 0.4)
+wallpaper_fg = colorful.mix(wallpaper_fg, wallpaper_bg, 0.4)
+wallpaper_alt_fg = colorful.mix(wallpaper_alt_fg, wallpaper_fg, 0.4)
 theme.wallpaper = function(s)
     return theme_assets.wallpaper(wallpaper_bg, wallpaper_fg, wallpaper_alt_fg, s)
 end
