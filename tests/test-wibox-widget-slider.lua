@@ -12,6 +12,12 @@ local function step(_, func)
     table.insert(steps, func)
 end
 
+-- Apparently in CI the wibox won't always be at the coordinates we specify.
+-- So we'll have to click around blindly until we find our widget,
+-- then use those coordinates as offset for the actual test.
+local offset_x = nil
+local offset_y = nil
+
 local w
 local slider
 
@@ -34,11 +40,22 @@ step("create slider widget", function()
         handle_border_width = 1,
     }
 
-    slider:connect_signal("button::press", function(...) on_mouse_press = true end)
-    slider:connect_signal("drag_start", function(...) on_drag_start = true end)
-    slider:connect_signal("drag", function(...) on_drag = true end)
-    slider:connect_signal("drag_end", function(...) on_drag_end = true end)
-    slider:connect_signal("property::value", function(...) on_property_value = true end)
+    slider:connect_signal("button::press", function()
+        on_mouse_press = true
+
+        if offset_x ~= nil then
+            return
+        end
+
+        local coords = mouse.coords()
+        offset_x = coords.x
+        offset_y = coords.y
+        print(coords.x, coords.y)
+    end)
+    slider:connect_signal("drag_start", function() on_drag_start = true end)
+    slider:connect_signal("drag", function() on_drag = true end)
+    slider:connect_signal("drag_end", function() on_drag_end = true end)
+    slider:connect_signal("property::value", function() on_property_value = true end)
 
     w = wibox {
         ontop = true,
@@ -50,29 +67,34 @@ step("create slider widget", function()
         widget = slider,
     }
 
+    -- Mute luacheck warning
+    assert(w.ontop)
+
     return true
 end)
 
-step("start dragging", function()
-    -- Coordinates to hit the slider's handle
-    mouse.coords({ x = 1, y = 24 })
+for x = 0, 2000, 5 do
+    for y = 0, 2000, 5 do
+        step("find widget", function()
+            if offset_x ~= nil then
+                return true
+            end
 
+            mouse.coords({ x = x, y = y })
+            root.fake_input("button_press", 1)
+            root.fake_input("button_release", 1)
+
+            return true
+        end)
+    end
+end
+
+step("test dragging", function()
+    mouse.coords({ x = offset_x, y = offset_y })
     root.fake_input("button_press", 1)
-    awesome.sync()
-
-    return on_drag_start
-end)
-
-step("drag handle", function()
-    mouse.coords({ x = 50, y = 24 })
-    return true
-end)
-
-step("stop dragging", function()
+    mouse.coords({ x = offset_x + 100, offset_y })
     root.fake_input("button_release", 1)
-    awesome.sync()
-
-    return on_drag_end
+    return true
 end)
 
 step("check signals", function()
