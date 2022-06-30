@@ -508,10 +508,10 @@ function widget.new(args)
         end
         current_column.layout:add(self:_group_label(group))
 
-        local function insert_keys(_keys, _add_new_column)
+        local function insert_keys(ik_keys, ik_add_new_column)
             local max_label_width = 0
             local joined_labels = ""
-            for i, key in ipairs(_keys) do
+            for i, key in ipairs(ik_keys) do
                 local modifiers = key.mod
                 if not modifiers or modifiers == "none" then
                     modifiers = ""
@@ -538,7 +538,7 @@ function widget.new(args)
                 if label_width > max_label_width then
                     max_label_width = label_width
                 end
-                joined_labels = joined_labels .. rendered_hotkey .. (i~=#_keys and "\n" or "")
+                joined_labels = joined_labels .. rendered_hotkey .. (i~=#ik_keys and "\n" or "")
                 end
             current_column.layout:add(wibox.widget.textbox(joined_labels))
             local max_width = max_label_width + self.group_margin
@@ -548,7 +548,7 @@ function widget.new(args)
             -- +1 for group label:
             current_column.height_px = (current_column.height_px or 0) +
                 gstring.linecount(joined_labels)*line_height + group_label_height
-            if _add_new_column then
+            if ik_add_new_column then
                 table.insert(column_layouts, current_column)
             end
         end
@@ -643,23 +643,23 @@ function widget.new(args)
             awful.button({ }, 3, function () widget_obj:hide() end)
         }
 
-        function widget_obj.page_next(_self)
-            if _self.current_page == #pages then return end
-            _self.current_page = _self.current_page + 1
-            _self.popup:set_widget(pages[_self.current_page])
+        function widget_obj.page_next(w_self)
+            if w_self.current_page == #pages then return end
+            w_self.current_page = w_self.current_page + 1
+            w_self.popup:set_widget(pages[w_self.current_page])
         end
-        function widget_obj.page_prev(_self)
-            if _self.current_page == 1 then return end
-            _self.current_page = _self.current_page - 1
-            _self.popup:set_widget(pages[_self.current_page])
+        function widget_obj.page_prev(w_self)
+            if w_self.current_page == 1 then return end
+            w_self.current_page = w_self.current_page - 1
+            w_self.popup:set_widget(pages[w_self.current_page])
         end
-        function widget_obj.show(_self)
-            _self.popup.visible = true
+        function widget_obj.show(w_self)
+            w_self.popup.visible = true
         end
-        function widget_obj.hide(_self)
-            _self.popup.visible = false
-            if _self.keygrabber then
-                awful.keygrabber.stop(_self.keygrabber)
+        function widget_obj.hide(w_self)
+            w_self.popup.visible = false
+            if w_self.keygrabber then
+                awful.keygrabber.stop(w_self.keygrabber)
             end
         end
 

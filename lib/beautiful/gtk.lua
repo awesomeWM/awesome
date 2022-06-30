@@ -29,35 +29,35 @@ local function convert_gtk_color_to_hex(gtk_color)
         convert_gtk_channel_to_hex(gtk_color.alpha)
 end
 
-local function lookup_gtk_color_to_hex(_style_context, color_name)
-    local gtk_color = _style_context:lookup_color(color_name)
+local function lookup_gtk_color_to_hex(style_context, color_name)
+    local gtk_color = style_context:lookup_color(color_name)
     if not gtk_color then
         return nil
     end
     return convert_gtk_color_to_hex(gtk_color)
 end
 
-local function get_gtk_property(_style_context, property_name)
-    local state = _style_context:get_state()
-    local property = _style_context:get_property(property_name, state)
+local function get_gtk_property(style_context, property_name)
+    local state = style_context:get_state()
+    local property = style_context:get_property(property_name, state)
     if not property then
         return nil
     end
     return property.value
 end
 
-local function get_gtk_color_property_to_hex(_style_context, property_name)
+local function get_gtk_color_property_to_hex(style_context, property_name)
     return convert_gtk_color_to_hex(
-        get_gtk_property(_style_context, property_name)
+        get_gtk_property(style_context, property_name)
     )
 end
 
 local function read_gtk_color_properties_from_widget(gtk_widget, properties)
-    local _style_context = gtk_widget:get_style_context()
+    local style_context = gtk_widget:get_style_context()
     local result = {}
     for result_key, style_context_property in pairs(properties) do
         result[result_key] = get_gtk_color_property_to_hex(
-            _style_context, style_context_property
+            style_context, style_context_property
         )
     end
     return result
