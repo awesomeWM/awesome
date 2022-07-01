@@ -631,7 +631,6 @@ lua_class_t client_class;
  * @property icon_name
  * @tparam string icon_name
  * @propemits false false
- * @readonly
  */
 
 /**
@@ -3849,6 +3848,14 @@ luaA_client_get_icon_name(lua_State *L, client_t *c)
 }
 
 static int
+luaA_client_set_icon_name(lua_State *L, client_t *c)
+{
+    const char *icon_name = luaL_checkstring(L, -1);
+    client_set_icon_name(L, 1, a_strdup(icon_name));
+    return 0;
+}
+
+static int
 luaA_client_set_startup_id(lua_State *L, client_t *c)
 {
     const char *startup_id = luaL_checkstring(L, -1);
@@ -4510,9 +4517,9 @@ client_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_client_get_machine,
                             NULL);
     luaA_class_add_property(&client_class, "icon_name",
-                            NULL,
+                            (lua_class_propfunc_t) luaA_client_set_icon_name,
                             (lua_class_propfunc_t) luaA_client_get_icon_name,
-                            NULL);
+                            (lua_class_propfunc_t) luaA_client_set_icon_name);
     luaA_class_add_property(&client_class, "screen",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_screen,
