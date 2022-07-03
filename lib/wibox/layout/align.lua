@@ -113,15 +113,6 @@ function align:layout(context, width, height)
         )
     end
 
-    local function filter_nil(t)
-        local filtered = {}
-        for _, v in pairs(t) do
-            filtered[#filtered + 1] = v
-        end
-
-        return filtered
-    end
-
     -- Size of the layout before any placements
     local size_total = (self._private.dir == "y") and height or width
     -- References to widgets
@@ -137,7 +128,7 @@ function align:layout(context, width, height)
     local placed_second
     local placed_third
     -- Final result
-    local result = {}
+    local result
 
 
     if self._private.expand == align.expand_modes.NONE then
@@ -206,48 +197,62 @@ function align:layout(context, width, height)
             result = { placed_first, placed_third, placed_second }
         end
     elseif self._private.expand == align.expand_modes.OUTSIDE then
-        size_second = fit_widget(second, size_total)
-
-        if size_second >= size_total then
-            -- Second widget takes all layout's space, no need to place another widgets
-            placed_third = prepare_place_widget(
-                second,
+        if not second then
+            -- Only 1 widget, place only the first one
+            placed_first = prepare_place_widget(
+                first,
                 -- At the beginning
                 0,
                 -- Takes all the space - shrink
                 size_total
             )
 
-            result = { placed_third }
+            result = { placed_first }
         else
-            -- Second widget can leave some space to other widgets
-            local size_side = floor((size_total - size_second) / 2)
+            -- More then 1 widget, measure and place
+            size_second = fit_widget(second, size_total)
 
-            placed_first = prepare_place_widget(
-                first,
-                -- At the beginning
-                0,
-                -- Takes the space it needs until the second widget
-                size_side
-            )
+            if size_second >= size_total then
+                -- Second widget takes all layout's space, no need to place another widgets
+                placed_second = prepare_place_widget(
+                    second,
+                    -- At the beginning
+                    0,
+                    -- Takes all the space - shrink
+                    size_total
+                )
 
-            placed_third = prepare_place_widget(
-                third,
-                -- At the end
-                size_total - size_side,
-                -- Takes the space it needs after the second widget
-                size_side
-            )
+                result = { placed_second }
+            else
+                -- Second widget can leave some space to other widgets
+                local size_side = floor((size_total - size_second) / 2)
 
-            placed_second = prepare_place_widget(
-                second,
-                -- After first
-                size_side,
-                -- Takes all available space - expand
-                size_total - 2 * size_side - 1
-            )
+                placed_first = prepare_place_widget(
+                    first,
+                    -- At the beginning
+                    0,
+                    -- Takes the space it needs until the second widget
+                    size_side
+                )
 
-            result = { placed_first, placed_third, placed_second }
+                placed_third = prepare_place_widget(
+                    third,
+                    -- At the end
+                    size_total - size_side,
+                    -- Takes the space it needs after the second widget
+                    size_side
+                )
+
+                placed_second = prepare_place_widget(
+                    second,
+                    -- After first
+                    size_side,
+                    -- Takes the space it needs in between side widgets
+                    size_second
+                )
+
+                result = { placed_first, placed_third, placed_second }
+            end
         end
     elseif self._private.expand == align.expand_modes.JUSTIFIED then
         size_first = fit_widget(first, size_total)
@@ -418,7 +423,7 @@ function align:layout(context, width, height)
         result = { placed_first, placed_third, placed_second }
     end
 
-    return filter_nil(result)
+    return gtable.from_sparse(result)
 end
 
 --- The widget in slot one.
@@ -507,24 +512,28 @@ function align:fit(context, orig_width, orig_height)
 
     if self._private.expand == align.expand_modes.JUSTIFIED then
         -- For justified mode, pay attention to the maximum size of the side widgets
+
         if is_vert then
             local w = math.max(first_w, second_w, third_w)
             local h = 2 * math.max(first_h, third_h) + second_h
             return w, h
+        else
+            local w = 2 * math.max(first_w, third_w) + second_w
+            local h = math.max(first_h, second_h, third_h)
+            return w, h
         end
-        local w = 2 * math.max(first_w, third_w) + second_w
-        local h = math.max(first_h, second_h, third_h)
-        return w, h
     else
         -- For any other expand mode, just sum up the sizes of the widgets
+
         if is_vert then
             local w = math.max(first_w, second_w, third_w)
             local h = first_h + second_h + third_h
             return w, h
+        else
+            local w = first_w + second_w + third_w
+            local h = math.max(first_h, second_h, third_h)
+            return w, h
         end
-        local w = first_w + second_w + third_h
-        local h = math.max(first_h, second_h, third_h)
-        return w, h
     end
 end
 
