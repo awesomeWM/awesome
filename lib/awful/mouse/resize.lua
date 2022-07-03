@@ -154,7 +154,7 @@ local function handler(_, client, context, args) --luacheck: no unused_args
         or "fleur"
 
     -- Execute the placement function and use request::geometry
-    capi.mousegrabber.run(function (_mouse)
+    capi.mousegrabber.run(function (coords)
         if not client.valid then return end
 
         -- Resize everytime the mouse moves (default behavior) in live mode,
@@ -194,7 +194,7 @@ local function handler(_, client, context, args) --luacheck: no unused_args
         end
 
         -- Quit when the button is released
-        for _,v in pairs(_mouse.buttons) do
+        for _,v in pairs(coords.buttons) do
             if v then return true end
         end
 

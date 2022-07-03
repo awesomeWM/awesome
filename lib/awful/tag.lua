@@ -1650,10 +1650,10 @@ end
 -- Do not use.
 --
 -- @deprecated awful.tag.getdata
--- @tparam tag _tag The tag.
+-- @tparam tag t The tag.
 -- @return The data table.
-function tag.getdata(_tag)
-    return _tag._private.awful_tag_properties
+function tag.getdata(t)
+    return t._private.awful_tag_properties
 end
 
 --- Get a tag property.
@@ -1661,14 +1661,14 @@ end
 -- Use `_tag.prop` directly.
 --
 -- @deprecated awful.tag.getproperty
--- @tparam tag _tag The tag.
+-- @tparam tag t The tag.
 -- @tparam string prop The property name.
 -- @return The property.
-function tag.getproperty(_tag, prop)
-    if not _tag then return end -- FIXME: Turn this into an error?
+function tag.getproperty(t, prop)
+    if not t then return end -- FIXME: Turn this into an error?
 
-    if _tag._private.awful_tag_properties then
-       return _tag._private.awful_tag_properties[prop]
+    if t._private.awful_tag_properties then
+       return t._private.awful_tag_properties[prop]
     end
 end
 
@@ -1676,20 +1676,20 @@ end
 -- This properties are internal to awful. Some are used to draw taglist, or to
 -- handle layout, etc.
 --
--- Use `_tag.prop = value`
+-- Use `t.prop = value`
 --
 -- @deprecated awful.tag.setproperty
--- @param _tag The tag.
+-- @param t The tag.
 -- @param prop The property name.
 -- @param value The value.
-function tag.setproperty(_tag, prop, value)
-    if not _tag._private.awful_tag_properties then
-        _tag._private.awful_tag_properties = {}
+function tag.setproperty(t, prop, value)
+    if not t._private.awful_tag_properties then
+        t._private.awful_tag_properties = {}
     end
 
-    if _tag._private.awful_tag_properties[prop] ~= value then
-        _tag._private.awful_tag_properties[prop] = value
-        _tag:emit_signal("property::" .. prop)
+    if t._private.awful_tag_properties[prop] ~= value then
+        t._private.awful_tag_properties[prop] = value
+        t:emit_signal("property::" .. prop)
     end
 end
 
@@ -1721,9 +1721,9 @@ end
 
 local function attached_connect_signal_screen(screen, sig, func)
     screen = get_screen(screen)
-    capi.tag.connect_signal(sig, function(_tag)
-        if get_screen(tag.getproperty(_tag, "screen")) == screen then
-            func(_tag)
+    capi.tag.connect_signal(sig, function(t)
+        if get_screen(tag.getproperty(t, "screen")) == screen then
+            func(t)
         end
     end)
 end

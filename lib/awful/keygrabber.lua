@@ -480,7 +480,7 @@ end
 -- @method stop
 -- @emits stopped
 -- @emits property::current_instance
-function keygrabber:stop(_stop_key, _stop_mods) -- (at)function disables ldoc params
+function keygrabber:stop(_stop_key, _stop_mods) --luacheck: ignore 214
     keygrab.stop(self.grabber)
 
     local timer = self._private.timer
@@ -508,7 +508,7 @@ end
 -- @tparam awful.key key The key.
 -- @tparam string description.group The keybinding group
 
-function keygrabber:add_keybinding(key, _keycode, _callback, _description)
+function keygrabber:add_keybinding(key, _keycode, _callback, _description) --luacheck: ignore 214
     local mods = not key._is_awful_key and key or nil
 
     if mods then

@@ -33,14 +33,14 @@ function magnifier.mouse_resize_handler(c, corner, x, y)
     local maxdist_pow = (wa.width^2 + wa.height^2) / 4
 
     local prev_coords = {}
-    capi.mousegrabber.run(function (_mouse)
+    capi.mousegrabber.run(function (position)
                               if not c.valid then return false end
 
-                              for _, v in ipairs(_mouse.buttons) do
+                              for _, v in ipairs(position.buttons) do
                                   if v then
-                                      prev_coords = { x =_mouse.x, y = _mouse.y }
-                                      local dx = center_x - _mouse.x
-                                      local dy = center_y - _mouse.y
+                                      prev_coords = { x =position.x, y = position.y }
+                                      local dx = center_x - position.x
+                                      local dy = center_y - position.y
                                       local dist = dx^2 + dy^2
 
                                       -- New master width factor
@@ -50,7 +50,7 @@ function magnifier.mouse_resize_handler(c, corner, x, y)
                                       return true
                                   end
                               end
-                              return prev_coords.x == _mouse.x and prev_coords.y == _mouse.y
+                              return prev_coords.x == position.x and prev_coords.y == position.y
                           end, corner .. "_corner")
 end
 

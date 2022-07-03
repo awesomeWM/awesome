@@ -155,10 +155,10 @@ end
 -- This moves the mouse pointer to the last known position on the new screen,
 -- or keeps its position relative to the current focused screen.
 -- @staticfct awful.screen.focus_bydirection
--- @param dir The direction, can be either "up", "down", "left" or "right".
--- @param _screen Screen.
-function screen.focus_bydirection(dir, _screen)
-    local sel = get_screen(_screen or screen.focused())
+-- @tparam string dir The direction, can be either "up", "down", "left" or "right".
+-- @tparam screen s Screen.
+function screen.focus_bydirection(dir, s)
+    local sel = get_screen(s or screen.focused())
     local target = sel:get_next_in_direction(dir)
 
     if target then
@@ -228,18 +228,18 @@ end
 --- Get or set the screen padding.
 --
 -- @deprecated awful.screen.padding
--- @param _screen The screen object to change the padding on
+-- @param s The screen object to change the padding on
 -- @param[opt=nil] padding The padding, a table with 'top', 'left', 'right' and/or
 -- 'bottom' or a number value to apply set the same padding on all sides. Can be
 --  nil if you only want to retrieve padding
 -- @treturn table A table with left, right, top and bottom number values.
 -- @see padding
-function screen.padding(_screen, padding)
+function screen.padding(s, padding)
     gdebug.deprecate("Use _screen.padding = value instead of awful.screen.padding", {deprecated_in=4})
     if padding then
-        screen.object.set_padding(_screen, padding)
+        screen.object.set_padding(s, padding)
     end
-    return screen.object.get_padding(_screen)
+    return screen.object.get_padding(s)
 end
 
 --- The screen padding.

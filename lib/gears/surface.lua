@@ -31,7 +31,7 @@ end
 
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name.
--- @param _surface The surface to load or nil
+-- @param surface The surface to load or nil
 -- @param default The default value to return on error; when nil, then a surface
 -- in an error state is returned.
 -- @return The loaded surface, or the replacement default
@@ -67,60 +67,60 @@ end
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name and uses a cache.
 -- In contrast to `load()`, errors are returned to the caller.
--- @param _surface The surface to load or nil
+-- @param surface The surface to load or nil
 -- @param default The default value to return on error; when nil, then a surface
 -- in an error state is returned.
 -- @return The loaded surface, or the replacement default, or nil if called with
 -- nil.
 -- @return An error message, or nil on success.
 -- @staticfct load_silently
-function surface.load_silently(_surface, default)
-    if type(_surface) == "string" then
-        local cache = surface_cache[_surface]
+function surface.load_silently(self, default)
+    if type(self) == "string" then
+        local cache = surface_cache[self]
         if cache then
             return cache
         end
-        local result, err = surface.load_uncached_silently(_surface, default)
+        local result, err = surface.load_uncached_silently(self, default)
         if not err then
             -- Cache the file
-            surface_cache[_surface] = result
+            surface_cache[self] = result
         end
         return result, err
     end
-    return surface.load_uncached_silently(_surface, default)
+    return surface.load_uncached_silently(self, default)
 end
 
-local function do_load_and_handle_errors(_surface, func)
-    if type(_surface) == 'nil' then
+local function do_load_and_handle_errors(self, func)
+    if type(self) == 'nil' then
         return get_default()
     end
-    local result, err = func(_surface, false)
+    local result, err = func(self, false)
     if result then
         return result
     end
     gdebug.print_error(debug.traceback(
-        "Failed to load '" .. tostring(_surface) .. "': " .. tostring(err)))
+        "Failed to load '" .. tostring(self) .. "': " .. tostring(err)))
     return get_default()
 end
 
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name. Errors are handled
 -- via `gears.debug.print_error`.
--- @param _surface The surface to load or nil
+-- @param surface The surface to load or nil
 -- @return The loaded surface, or nil
 -- @staticfct load_uncached
-function surface.load_uncached(_surface)
-    return do_load_and_handle_errors(_surface, surface.load_uncached_silently)
+function surface.load_uncached(self)
+    return do_load_and_handle_errors(self, surface.load_uncached_silently)
 end
 
 --- Try to convert the argument into an lgi cairo surface.
 -- This is usually needed for loading images by file name. Errors are handled
 -- via `gears.debug.print_error`.
--- @param _surface The surface to load or nil
+-- @param surface The surface to load or nil
 -- @return The loaded surface, or nil.
 -- @staticfct gears.surface
-function surface.load(_surface)
-    return do_load_and_handle_errors(_surface, surface.load_silently)
+function surface.load(self)
+    return do_load_and_handle_errors(self, surface.load_silently)
 end
 
 function surface.mt.__call(_, ...)

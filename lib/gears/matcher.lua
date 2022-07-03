@@ -358,8 +358,8 @@ end
 -- @treturn boolean Returns false if a dependency conflict was found.
 -- @method add_matching_rules
 function matcher:add_matching_rules(name, rules, depends_on, precede)
-    local function matching_fct(_self, c, props, callbacks)
-        default_rules_callback(_self, c, props, callbacks, rules)
+    local function matching_fct(_, c, props, callbacks)
+        default_rules_callback(self, c, props, callbacks, rules)
     end
 
     self._matching_rules[name] = rules

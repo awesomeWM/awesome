@@ -145,12 +145,12 @@ function layout.inc(i, s, layouts)
 end
 
 --- Set the layout function of the current tag.
--- @param _layout Layout name.
+-- @tparam layout|function l Layout object or function.
 -- @tparam[opt=mouse.screen.selected_tag] tag t The tag to modify.
 -- @staticfct awful.layout.set
-function layout.set(_layout, t)
+function layout.set(l, t)
     t = t or capi.mouse.screen.selected_tag
-    t.layout = _layout
+    t.layout = l
 end
 
 --- Get the layout parameters used for the screen

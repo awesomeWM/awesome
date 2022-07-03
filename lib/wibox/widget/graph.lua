@@ -343,9 +343,21 @@ prop_fallbacks.nan_color = build_fallback_nan_color()
 --
 
 local function graph_gather_drawn_values_num_stats(self, new_value)
-    if not (new_value >= 0) then
-        return -- is negative or NaN
-    end
+    -- Because the graphs are at risk of dividing by zero, the value can
+    -- be `inf`, `-inf` and `-nan`. For example:
+    --
+    -- nan = 0/0
+    -- print(not (nan >= 0), nan < 0)
+    -- > true, false
+    --
+    -- Because if this, we need to ignore the luacheck rule which promotes
+    -- the removal of double negative and DeMorgan's law style optimizations.
+    -- Those only works on real numbers, which `NaN` and `Inf` are not part of.
+    --
+    -- The `luacheck` project decided that adding this check by default and
+    -- adding annotations where it doesn't work is the way to go
+    -- https://github.com/lunarmodules/luacheck/issues/43#issuecomment-1014949507
+    if not (new_value >= 0) then return end --luacheck: ignore 581
 
     local last_value = self._private.last_drawn_values_num or 0
     -- Grow instantly and shrink slow

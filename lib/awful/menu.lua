@@ -147,16 +147,16 @@ local function load_theme(a, b)
 end
 
 
-local function item_position(_menu, child)
+local function item_position(self, child)
     local a, b = "height", "width"
-    local dir = _menu.layout.dir or "y"
+    local dir = self.layout.dir or "y"
     if dir == "x" then  a, b = b, a  end
 
-    local in_dir, other = 0, _menu[b]
-    local num = gtable.hasitem(_menu.child, child)
+    local in_dir, other = 0, self[b]
+    local num = gtable.hasitem(self.child, child)
     if num then
         for i = 0, num - 1 do
-            local item = _menu.items[i]
+            local item = self.items[i]
             if item then
                 other = math.max(other, item[b])
                 in_dir = in_dir + item[a]
@@ -169,97 +169,97 @@ local function item_position(_menu, child)
 end
 
 
-local function set_coords(_menu, s, m_coords)
+local function set_coords(self, s, m_coords)
     local s_geometry = s.workarea
     local screen_w = s_geometry.x + s_geometry.width
     local screen_h = s_geometry.y + s_geometry.height
 
-    _menu.width = _menu.wibox.width
-    _menu.height = _menu.wibox.height
+    self.width = self.wibox.width
+    self.height = self.wibox.height
 
-    _menu.x = _menu.wibox.x
-    _menu.y = _menu.wibox.y
+    self.x = self.wibox.x
+    self.y = self.wibox.y
 
-    if _menu.parent then
-        local w, h = item_position(_menu.parent, _menu)
-        w = w + _menu.parent.theme.border_width
+    if self.parent then
+        local w, h = item_position(self.parent, self)
+        w = w + self.parent.theme.border_width
 
-        _menu.y = _menu.parent.y + h + _menu.height > screen_h and
-                 screen_h - _menu.height or _menu.parent.y + h
-        _menu.x = _menu.parent.x + w + _menu.width > screen_w and
-                 _menu.parent.x - _menu.width or _menu.parent.x + w
+        self.y = self.parent.y + h + self.height > screen_h and
+                 screen_h - self.height or self.parent.y + h
+        self.x = self.parent.x + w + self.width > screen_w and
+                 self.parent.x - self.width or self.parent.x + w
     else
         if m_coords == nil then
             m_coords = capi.mouse.coords()
             m_coords.x = m_coords.x + 1
             m_coords.y = m_coords.y + 1
         end
-        _menu.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
-        _menu.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
+        self.y = m_coords.y < s_geometry.y and s_geometry.y or m_coords.y
+        self.x = m_coords.x < s_geometry.x and s_geometry.x or m_coords.x
 
-        _menu.y = _menu.y + _menu.height > screen_h and
-                 screen_h - _menu.height or _menu.y
-        _menu.x = _menu.x + _menu.width  > screen_w and
-                 screen_w - _menu.width  or _menu.x
+        self.y = self.y + self.height > screen_h and
+                 screen_h - self.height or self.y
+        self.x = self.x + self.width  > screen_w and
+                 screen_w - self.width  or self.x
     end
 
-    _menu.wibox.x = _menu.x
-    _menu.wibox.y = _menu.y
+    self.wibox.x = self.x
+    self.wibox.y = self.y
 end
 
 
-local function set_size(_menu)
+local function set_size(self)
     local in_dir, other, a, b = 0, 0, "height", "width"
-    local dir = _menu.layout.dir or "y"
+    local dir = self.layout.dir or "y"
     if dir == "x" then  a, b = b, a  end
-    for _, item in ipairs(_menu.items) do
+    for _, item in ipairs(self.items) do
         other = math.max(other, item[b])
         in_dir = in_dir + item[a]
     end
-    _menu[a], _menu[b] = in_dir, other
+    self[a], self[b] = in_dir, other
     if in_dir > 0 and other > 0 then
-        _menu.wibox[a] = in_dir
-        _menu.wibox[b] = other
+        self.wibox[a] = in_dir
+        self.wibox[b] = other
         return true
     end
     return false
 end
 
 
-local function check_access_key(_menu, key)
-   for i, item in ipairs(_menu.items) do
+local function check_access_key(self, key)
+   for i, item in ipairs(self.items) do
       if item.akey == key then
-            _menu:item_enter(i)
-            _menu:exec(i, { exec = true })
+            self:item_enter(i)
+            self:exec(i, { exec = true })
             return
       end
    end
-   if _menu.parent then
-      check_access_key(_menu.parent, key)
+   if self.parent then
+      check_access_key(self.parent, key)
    end
 end
 
 
-local function grabber(_menu, _, key, event)
+local function grabber(self, _, key, event)
     if event ~= "press" then return end
 
-    local sel = _menu.sel or 0
+    local sel = self.sel or 0
     if gtable.hasitem(menu.menu_keys.up, key) then
-        local sel_new = sel-1 < 1 and #_menu.items or sel-1
-        _menu:item_enter(sel_new)
+        local sel_new = sel-1 < 1 and #self.items or sel-1
+        self:item_enter(sel_new)
     elseif gtable.hasitem(menu.menu_keys.down, key) then
-        local sel_new = sel+1 > #_menu.items and 1 or sel+1
-        _menu:item_enter(sel_new)
+        local sel_new = sel+1 > #self.items and 1 or sel+1
+        self:item_enter(sel_new)
     elseif sel > 0 and gtable.hasitem(menu.menu_keys.enter, key) then
-        _menu:exec(sel)
+        self:exec(sel)
     elseif sel > 0 and gtable.hasitem(menu.menu_keys.exec, key) then
-        _menu:exec(sel, { exec = true })
+        self:exec(sel, { exec = true })
     elseif gtable.hasitem(menu.menu_keys.back, key) then
-        _menu:hide()
+        self:hide()
     elseif gtable.hasitem(menu.menu_keys.close, key) then
-        menu.get_root(_menu):hide()
+        menu.get_root(self):hide()
     else
-        check_access_key(_menu, key)
+        check_access_key(self, key)
     end
 end
 

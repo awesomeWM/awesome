@@ -152,22 +152,22 @@ end
 
 --- Get list of matching rules for a client.
 -- @tparam client c The client.
--- @tparam table _rules The rules to check. List with "rule", "rule_any", "except" and
+-- @tparam table rules The rules to check. List with "rule", "rule_any", "except" and
 --   "except_any" keys.
 -- @treturn table The list of matched rules.
 -- @staticfct ruled.client.matching_rules
-function module.matching_rules(c, _rules)
-    return crules:matching_rules(c, _rules)
+function module.matchingrules(c, rules)
+    return crules:matching_rules(c, rules)
 end
 
 --- Check if a client matches a given set of rules.
 -- @tparam client c The client.
--- @tparam table _rules The rules to check. List of tables with `rule`, `rule_any`,
+-- @tparam table rules The rules to check. List of tables with `rule`, `rule_any`,
 --   `except` and `except_any` keys.
 -- @treturn bool True if at least one rule is matched, false otherwise.
 -- @staticfct ruled.client.matches_list
-function module.matches_list(c, _rules)
-    return crules:matches_rules(c, _rules)
+function module.matches_list(c, rules)
+    return crules:matchesrules(c, rules)
 end
 
 --- Remove a source.
