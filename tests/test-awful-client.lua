@@ -23,6 +23,12 @@ local steps = {
             assert(c.foo == "bar")
             assert(c.foo == awful.client.property.get(c, "foo"))
 
+            -- Test writing to some uncommon properties
+            c.name = "some name"
+            assert(c.name == "some name")
+            c.icon_name = "some minimized name"
+            assert(c.icon_name == "some minimized name")
+
             -- Test jumpto
 
             --FIXME doesn't work
