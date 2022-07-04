@@ -235,20 +235,22 @@ function util.geticonpath(iconname, exts, dirs, size)
     dirs = dirs or { '/usr/share/pixmaps/', '/usr/share/icons/hicolor/' }
     local icontypes = { 'apps', 'actions',  'categories',  'emblems',
         'mimetypes',  'status', 'devices', 'extras', 'places', 'stock' }
-    for _, d in pairs(dirs) do
-        local icon
-        for _, e in pairs(exts) do
-            icon = d .. iconname .. '.' .. e
+    local dirlist = {}
+    if size then
+        for _, d in pairs(dirs) do
+            local path = string.format("%s%ux%u/", d, size, size)
+            table.insert(dirlist,path)
+            for _, t in pairs(icontypes) do
+                table.insert(dirlist, string.format("%s/%s/", path, t))
+            end
+        end
+    end
+    dirlist = gtable.join(dirlist, dirs)
+    for _,d in pairs(dirlist) do
+        for _,e in pairs(exts) do
+            local icon = string.format("%s%s.%s", d, iconname, e)
             if gfs.file_readable(icon) then
                 return icon
-            end
-            if size then
-                for _, t in pairs(icontypes) do
-                    icon = string.format("%s%ux%u/%s/%s.%s", d, size, size, t, iconname, e)
-                    if gfs.file_readable(icon) then
-                        return icon
-                    end
-                end
             end
         end
     end
