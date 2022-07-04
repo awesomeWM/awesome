@@ -227,7 +227,7 @@ end
 -- @param iconname The name of the icon to search for.
 -- @param exts Table of image extensions allowed, otherwise { 'png', gif' }
 -- @param dirs Table of dirs to search, otherwise { '/usr/share/pixmaps/' }
--- @tparam[opt] string size The size. If this is specified, subdirectories `x`
+-- @tparam[opt] string size The size. If this is specified, subdirectories `sizexsize`
 --   of the dirs are searched first.
 -- @staticfct awful.util.geticonpath
 function util.geticonpath(iconname, exts, dirs, size)
