@@ -238,7 +238,7 @@ function util.geticonpath(iconname, exts, dirs, size)
     local dirlist = {}
     if size then
         for _, d in ipairs(dirs) do
-            local path = string.format("%s%ux%u/", d, size, size)
+            local path = string.format("%s/%ux%u/", d, size, size)
             table.insert(dirlist,path)
             for _, t in ipairs(icontypes) do
                 table.insert(dirlist, string.format("%s/%s/", path, t))
@@ -248,7 +248,7 @@ function util.geticonpath(iconname, exts, dirs, size)
     dirlist = gtable.merge(dirlist, dirs)
     for _,d in ipairs(dirlist) do
         for _,e in ipairs(exts) do
-            local icon = string.format("%s%s.%s", d, iconname, e)
+            local icon = string.format("%s/%s.%s", d, iconname, e)
             if gfs.file_readable(icon) then
                 return icon
             end
