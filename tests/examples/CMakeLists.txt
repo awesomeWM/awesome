@@ -309,7 +309,6 @@ function(run_test test_path namespace escaped_content)
         DEPENDS ${TARGET_NAME}_RAW "${TOP_SOURCE_DIR}/tests/examples/_postprocess.lua"
     )
 
-
     if(NOT ${OUTPUT_RAW_IMAGE_PATH} STREQUAL "")
         file(RELATIVE_PATH rel_output "${TOP_SOURCE_DIR}" "${OUTPUT_RAW_IMAGE_PATH}")
         if(tmp_content MATCHES "--DOC_GEN_OUTPUT")
@@ -381,5 +380,12 @@ endforeach()
 
 add_custom_target(generate-examples DEPENDS ${EXAMPLE_DOC_GENERATED_FILES})
 add_custom_target(check-examples DEPENDS ${EXAMPLE_DOC_TEST_TARGETS})
+
+# Some tests produce multiple files, find them and post-process them.
+add_custom_target(DOC_EXAMPLES_PPOSTPROCESS_CLEANUP
+    COMMAND "${TOP_SOURCE_DIR}/tests/examples/_postprocess_cleanup.lua" ${RAW_IMAGE_DIR} ${IMAGE_DIR} "${TOP_SOURCE_DIR}/tests/examples/_postprocess.lua"
+    VERBATIM
+    DEPENDS ${BUILD_DIR}/doc/index.html
+)
 
 # vim: filetype=cmake:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80:foldmethod=marker

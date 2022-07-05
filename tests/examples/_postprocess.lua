@@ -23,9 +23,8 @@ local i, o = io.open(input, "r"), io.open(output, "w")
 
 if (not i) or (not o) then return end
 
-local line, count = i:read("*line"), 0
-
-local add_link = false
+local line = i:read("*line")
+local count
 
 while line do
     -- Deduplicate and concatenate the classes.
