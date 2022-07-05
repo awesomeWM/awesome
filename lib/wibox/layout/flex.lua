@@ -48,6 +48,7 @@ local flex = {}
 --
 -- @tparam widget ... Widgets that should be added (must at least be one).
 -- @method add
+-- @noreturn
 -- @interface layout
 
 --- Remove a widget from the layout.

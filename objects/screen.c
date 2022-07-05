@@ -1564,6 +1564,7 @@ luaA_screen_module_newindex(lua_State *L)
  * for s in screen do
  *     print("Oh, wow, we have screen " .. tostring(s))
  * end
+ * @treturn function A lua iterator function.
  * @staticfct screen
  */
 static int
@@ -1725,6 +1726,7 @@ luaA_screen_fake_add(lua_State *L)
  * @DOC_sequences_screen_fake_remove_EXAMPLE@
  *
  * @method fake_remove
+ * @noreturn
  */
 static int
 luaA_screen_fake_remove(lua_State *L)
@@ -1763,6 +1765,7 @@ luaA_screen_fake_remove(lua_State *L)
  * @tparam integer width The new width for screen.
  * @tparam integer height The new height for screen.
  * @method fake_resize
+ * @noreturn
  * @see split
  * @see geometry
  */
@@ -1800,6 +1803,7 @@ luaA_screen_fake_resize(lua_State *L)
  *
  * @tparam client s A screen to swap with.
  * @method swap
+ * @noreturn
  */
 static int
 luaA_screen_swap(lua_State *L)

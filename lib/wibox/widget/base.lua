@@ -225,6 +225,7 @@ end
 --- Add a new `awful.button` to this widget.
 -- @tparam awful.button button The button to add.
 -- @method wibox.widget.base:add_button
+-- @noreturn
 function base.widget:add_button(button)
     if not button then return end
 
@@ -412,6 +413,7 @@ end
 -- @tparam string signal_name
 -- @param ... Other arguments
 -- @method wibox.widget.base:emit_signal_recursive
+-- @noreturn
 function base.widget:emit_signal_recursive(signal_name, ...)
     -- This is a convenience wrapper, the real implementation is in the
     -- hierarchy.
@@ -500,6 +502,15 @@ end
 -- This gives only tight bounds if no rotations by non-multiples of 90° are
 -- used.
 -- @staticfct wibox.widget.base.rect_to_device_geometry
+-- @param cr The cairo context.
+-- @tparam number x The `x` value.
+-- @tparam number y The `y` value.
+-- @tparam number width The `width` value.
+-- @tparam number height The `height` value.
+-- @treturn number The new `x` value.
+-- @treturn number The new `y` value.
+-- @treturn number The new `width` value.
+-- @treturn number The new `height` value.
 function base.rect_to_device_geometry(cr, x, y, width, height)
     return matrix.transform_rectangle(cr.matrix, x, y, width, height)
 end
@@ -585,6 +596,7 @@ end
 --
 -- This is used internally and should not be called directly.
 -- @staticfct wibox.widget.base.handle_button
+-- @noreturn
 function base.handle_button(event, widget, x, y, button, modifiers, geometry)
     x = x or y -- luacheck: no unused
     local function is_any(mod)
@@ -997,6 +1009,7 @@ end
 --
 -- This function raises an error if the widget is not valid.
 -- @staticfct wibox.widget.base.check_widget
+-- @noreturn
 function base.check_widget(widget)
     assert(type(widget) == "table", "Type should be table, but is " .. tostring(type(widget)))
     assert(widget.is_widget, "Argument is not a widget!")

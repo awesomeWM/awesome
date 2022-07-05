@@ -136,6 +136,7 @@ end
 --
 -- @method add
 -- @tparam widget ... Widgets that should be added (must at least be one).
+-- @noreturn
 -- @interface layout
 function fixed:add(...)
     -- No table.pack in Lua 5.1 :-(

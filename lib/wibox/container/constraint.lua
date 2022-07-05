@@ -135,6 +135,7 @@ end
 -- and the constraints set to nil.
 --
 -- @method reset
+-- @noreturn
 -- @interface container
 function constraint:reset()
     self._private.width = nil

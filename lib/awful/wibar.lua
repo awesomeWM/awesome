@@ -442,6 +442,7 @@ end
 
 --- Remove a wibar.
 -- @method remove
+-- @noreturn
 
 function awfulwibar.remove(self)
     self.visible = false

@@ -500,6 +500,7 @@ end
 -- @method stop
 -- @tparam string|nil stop_key Override the key passed to `stop_callback` **DEPRECATED**
 -- @tparam tale|nil Override the modifiers passed to `stop_callback` **DEPRECATED**
+-- @noreturn
 -- @emits stopped
 -- @emits property::current_instance
 function keygrabber:stop(stop_key, stop_mods)
@@ -535,6 +536,7 @@ end
 -- @method add_keybinding
 -- @tparam awful.key key The key.
 -- @tparam string description.group The keybinding group
+-- @noreturn
 
 function keygrabber:add_keybinding(key, keycode, callback, description)
     local mods = not key._is_awful_key and key or nil
@@ -852,6 +854,7 @@ local signals = {}
 -- @staticfct awful.keygrabber.connect_signal
 -- @tparam string name The signal name.
 -- @tparam function callback The callback.
+-- @noreturn
 function keygrab.connect_signal(name, callback)
     signals[name] = signals[name] or {}
 
@@ -865,6 +868,7 @@ end
 -- @staticfct awful.keygrabber.disconnect_signal
 -- @tparam string name The signal name.
 -- @tparam function callback The callback.
+-- @noreturn
 function keygrab.disconnect_signal(name, callback)
     signals[name] = signals[name] or {}
 
@@ -885,6 +889,7 @@ end
 -- @staticfct awful.keygrabber.emit_signal
 -- @tparam string name The signal name.
 -- @param ... Other arguments for the callbacks.
+-- @noreturn
 function keygrab.emit_signal(name, ...)
     signals[name] = signals[name] or {}
 

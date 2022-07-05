@@ -713,6 +713,7 @@ end
 --
 -- @method add_screen
 -- @tparam screen screen The screen object.
+-- @noreturn
 -- @see remove_screen
 function module:add_screen(s)
     s = get_screen(s)
@@ -741,6 +742,7 @@ end
 -- wallpaper will have an overlap.
 --
 -- @method detach
+-- @noreturn
 -- @see remove_screen
 -- @see add_screen
 function module:detach()
@@ -764,6 +766,7 @@ end
 -- really need to repaint the wallpaper, call this method.
 --
 -- @method repaint
+-- @noreturn
 function module:repaint()
     for _, s in ipairs(self._private.screens) do
         pending_repaint[s] = true
@@ -791,21 +794,28 @@ end
 --
 -- @method remove_screen
 -- @tparam screen screen The screen to remove.
+-- @treturn boolean `true` if the screen was removed and `false` if the screen
+--  wasn't found.
 -- @see detach
 -- @see add_screen
 -- @see screens
 function module:remove_screen(s)
+    local ret =  false
+
     s = get_screen(s)
 
     for k, s2 in ipairs(self._private.screens) do
         if s == s2 then
             table.remove(self._private.screens, k)
+            ret = true
         end
     end
 
     backgrounds[s] = nil
 
     self:repaint()
+
+    return ret
 end
 
 --- Create a wallpaper.

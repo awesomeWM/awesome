@@ -70,6 +70,7 @@ end
 --- Reset this layout. The widget will be removed and the axes reset.
 --
 -- @method reset
+-- @noreturn
 -- @interface container
 function mirror:reset()
     self._private.horizontal = false

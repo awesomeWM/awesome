@@ -201,6 +201,7 @@ end
 --- Move the wibox under the cursor.
 -- @staticfct awful.mouse.wibox.move
 -- @tparam wibox w The wibox to move, or none to use that under the pointer
+-- @noreturn
 -- @request wibox geometry mouse.move granted Requests to move the wibox.
 function mouse.wibox.move(w)
     w = w or mouse.current_wibox
@@ -248,6 +249,7 @@ end
 --
 -- @staticfct awful.mouse.append_global_mousebinding
 -- @tparam awful.button button The button object.
+-- @noreturn
 -- @see awful.button
 
 function mouse.append_global_mousebinding(button)
@@ -264,6 +266,7 @@ end
 -- @tparam table buttons A table of `awful.button` objects. Optionally, it can have
 --  a `group` entry. If set, the `group` property will be set on all `awful.buttons`
 --  objects.
+-- @noreturn
 -- @see awful.button
 
 function mouse.append_global_mousebindings(buttons)
@@ -286,6 +289,7 @@ end
 --
 -- @staticfct awful.mouse.remove_global_mousebinding
 -- @tparam awful.button button The button object.
+-- @noreturn
 -- @see awful.button
 
 function mouse.remove_global_mousebinding(button)
@@ -298,6 +302,7 @@ local default_buttons = {}
 --
 -- @staticfct awful.mouse.append_client_mousebinding
 -- @tparam awful.button button The button.
+-- @noreturn
 -- @emits client_mousebinding::added
 -- @emitstparam client_mousebinding::added awful.button button The button.
 -- @see awful.button
@@ -317,6 +322,7 @@ end
 --
 -- @staticfct awful.mouse.append_client_mousebindings
 -- @tparam table buttons A table containing `awful.button` objects.
+-- @noreturn
 -- @see awful.button
 -- @see awful.keyboard.append_client_keybinding
 -- @see awful.mouse.append_client_mousebinding

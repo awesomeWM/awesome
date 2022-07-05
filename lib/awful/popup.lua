@@ -264,6 +264,7 @@ end
 -- @tparam widget widget The widget
 -- @tparam[opt=1] number button The button index
 -- @method bind_to_widget
+-- @noreturn
 function popup:bind_to_widget(widget, button)
     if not self._private.button_for_widget then
         self._private.button_for_widget = {}
@@ -276,6 +277,7 @@ end
 --- Unbind the popup from a widget button.
 -- @tparam widget widget The widget
 -- @method unbind_to_widget
+-- @noreturn
 function popup:unbind_to_widget(widget)
     widget:disconnect_signal("button::press", self._private.show_fct)
 end

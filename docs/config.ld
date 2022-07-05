@@ -824,6 +824,14 @@ add_custom_tag {
     auto_subtags = false
 }
 
+-- Forces every method and function to have either `@treturn` or `@noreturn`.
+-- This avoids the many case where the return value was forgotten.
+add_custom_tag {
+    name = "noreturn",
+    hidden = true,
+    auto_subtags = false
+}
+
 add_custom_tag {
     name   = "signalhandler",
     hidden = false,
@@ -1342,6 +1350,11 @@ local function sanitize_return_type(item)
         end
 
         item.display_type = item.display_type .. "</span>"
+    elseif not item.tags["noreturn"] then
+        print(
+            "WARNING:", item.name, "from", item.module.name,
+            "doesn't have a return value or @noreturn"
+        )
     end
 
     item.compact_signature = true

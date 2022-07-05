@@ -575,6 +575,7 @@ end
 -- @tparam tooltip self The tooltip.
 -- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
+-- @noreturn
 -- @method add_to_object
 function tooltip:add_to_object(obj)
     if not obj then return end
@@ -588,6 +589,7 @@ end
 -- @tparam tooltip self The tooltip.
 -- @tparam gears.object obj An object with `mouse::enter` and
 --   `mouse::leave` signals.
+-- @noreturn
 -- @method remove_from_object
 function tooltip:remove_from_object(obj)
     obj:disconnect_signal("mouse::enter", self.show)

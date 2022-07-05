@@ -360,6 +360,7 @@ end
 -- @tparam[opt={}] table args The arguments
 -- @tparam[opt=mouse.coords] table args.coords The menu position. A table with
 --  `x` and `y` as keys and position (in pixels) as values.
+-- @noreturn
 -- @method show
 function menu:show(args)
     args = args or {}
@@ -375,6 +376,7 @@ end
 
 --- Hide a menu popup.
 -- @method hide
+-- @noreturn
 function menu:hide()
     -- Remove items from screen
     for i = 1, #self.items do
@@ -394,6 +396,7 @@ end
 -- @tparam table args The arguments.
 -- @tparam[opt=mouse.coords] table args.coords The menu position. A table with
 --  `x` and `y` as keys and position (in pixels) as values.
+-- @noreturn
 -- @method toggle
 function menu:toggle(args)
     if self.wibox.visible then
@@ -405,6 +408,7 @@ end
 
 --- Update menu content.
 -- @method update
+-- @noreturn
 function menu:update()
     if self.wibox.visible then
         self:show({ coords = { x = self.x, y = self.y } })
@@ -415,6 +419,7 @@ end
 --- Get the elder parent so for example when you kill
 -- it, it will destroy the whole family.
 -- @method get_root
+-- @treturn awful.menu The root menu.
 function menu:get_root()
     return self.parent and menu.get_root(self.parent) or self
 end
@@ -425,6 +430,7 @@ end
 -- @tparam[opt=awful.menu.entry] function args.new The menu entry constructor.
 -- @tparam[opt] table args.theme The menu entry theme.
 -- @tparam[opt] number index The index where the new entry will inserted.
+-- @treturn table|nil The new item.
 -- @method add
 function menu:add(args, index)
     if not args then return end
@@ -482,6 +488,7 @@ end
 
 --- Delete menu entry at given position.
 -- @tparam table|number num The index in the table of the menu entry to be deleted; can be also the menu entry itself.
+-- @noreturn
 -- @method delete
 function menu:delete(num)
     if type(num) == "table" then

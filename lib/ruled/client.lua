@@ -180,9 +180,10 @@ end
 
 --- Apply ruled.client.rules to a client.
 -- @tparam client c The client.
+-- @noreturn
 -- @staticfct ruled.client.apply
 function module.apply(c)
-    return crules:apply(c)
+    crules:apply(c)
 end
 
 --- Add a new rule to the default set.
@@ -527,7 +528,8 @@ end
 --- Apply properties and callbacks to a client.
 -- @tparam client c The client.
 -- @tparam table props Properties to apply.
--- @tparam[opt] table callbacks Callbacks to apply.
+-- @tparam[opt={}] table callbacks Callbacks to apply.
+-- @noreturn
 -- @staticfct ruled.client.execute
 -- @request client titlebars rules granted The `titlebars_enabled` is set in the
 --  rules.

@@ -105,7 +105,8 @@ button.names = {
 -- @tparam function on_release
 
 --- Execute this mousebinding.
--- @method :trigger
+-- @method trigger
+-- @noreturn
 
 function button:set_button(b)
     for _, v in ipairs(self) do

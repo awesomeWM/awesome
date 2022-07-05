@@ -13,9 +13,9 @@ local module = {}
 
 --- Move a client.
 -- @staticfct awful.mouse.client.move
--- @param c The client to move, or the focused one if nil.
+-- @tparam client c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
--- @param finished_cb Deprecated, do not use.
+-- @noreturn
 -- @request client geometry mouse.move granted When `awful.mouse.client.move` is
 --  called.
 function module.move(c, snap, finished_cb) --luacheck: no unused args

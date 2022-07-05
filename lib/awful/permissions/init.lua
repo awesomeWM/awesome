@@ -241,6 +241,7 @@ end
 --
 -- @tparam function f The callback
 -- @tparam[opt] string context The `request::activate` context
+-- @noreturn
 -- @see generic_activate_filters
 -- @see contextual_activate_filters
 -- @see remove_activate_filter

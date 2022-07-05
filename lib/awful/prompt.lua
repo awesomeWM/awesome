@@ -461,6 +461,7 @@ end
 -- @tparam[opt] function keypressed_callback The callback function to call
 --   with mod table, key and command as arguments when a key was pressed.
 --   [**DEPRECATED**]
+-- @noreturn
 -- @see gears.color
 -- @staticfct awful.prompt.run
 function prompt.run(args, textbox, exe_callback, completion_callback,

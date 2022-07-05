@@ -288,7 +288,9 @@ end
 -- The widgets are assumed to span one cell.
 --
 -- @method add
--- @param ... Widgets that should be added (must at least be one)
+-- @tparam wibox.widget ... Widgets that should be added (must at least be one)
+-- @interface layout
+-- @noreturn
 function grid:add(...)
     local args = { n=select('#', ...), ... }
     assert(args.n > 0, "need at least one widget to add")
@@ -863,6 +865,7 @@ end
 --
 -- **Signal:** widget::reset
 -- @method reset
+-- @noreturn
 function grid:reset()
     self._private.widgets = {}
     -- reset the number of columns and rows to the forced value or to 0

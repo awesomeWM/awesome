@@ -3191,6 +3191,7 @@ out:
  * @DOC_sequences_client_kill1_EXAMPLE@
  *
  * @method kill
+ * @noreturn
  * @see awesome.kill
  */
 static int
@@ -3206,6 +3207,7 @@ luaA_client_kill(lua_State *L)
  * @DOC_sequences_client_swap1_EXAMPLE@
  *
  * @tparam client c A client to swap with.
+ * @noreturn
  * @method swap
  * @emits swapped
  * @emitstparam swapped client other The other client.
@@ -3338,6 +3340,7 @@ luaA_client_get_first_tag(lua_State *L, client_t *c)
 /** Raise a client on top of others which are on the same layer.
  *
  * @method raise
+ * @noreturn
  * @emits raised
  * @see above
  * @see below
@@ -3364,6 +3367,7 @@ luaA_client_raise(lua_State *L)
 /** Lower a client on bottom of others which are on the same layer.
  *
  * @method lower
+ * @noreturn
  * @emits lowered
  * @see above
  * @see below
@@ -3396,6 +3400,7 @@ luaA_client_lower(lua_State *L)
 /** Stop managing a client.
  *
  * @method unmanage
+ * @noreturn
  */
 static int
 luaA_client_unmanage(lua_State *L)

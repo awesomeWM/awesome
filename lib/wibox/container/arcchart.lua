@@ -217,6 +217,7 @@ end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
 -- @method reset
+-- @noreturn
 -- @interface container
 function arcchart:reset()
     self:set_widget(nil)

@@ -221,6 +221,7 @@ end
 --
 -- @method swap
 -- @tparam tag tag2 The second tag
+-- @noreturn
 -- @see client.swap
 function tag.object.swap(self, tag2)
     local idx1, idx2 = tag.object.get_index(self), tag.object.get_index(tag2)
@@ -335,6 +336,7 @@ end
 -- @staticfct awful.tag.find_fallback
 -- @tparam[opt=awful.screen.focused()] screen screen The screen to look for a tag on.
 -- @tparam[opt=nil] table|nil invalids A table of tags considered unacceptable.
+-- @treturn tag|nil Returns a fallback tag if one was found, otherwise `nil`.
 function tag.find_fallback(screen, invalids)
     local scr = screen or ascreen.focused()
     local t = invalids or scr.selected_tags
@@ -356,6 +358,7 @@ end
 -- @tparam table args The arguments.
 -- @tparam tag args.fallback_tag A fallback tag.
 -- @tparam[opt=false] boolean args.allow_untagged Allow the untagged clients to remain untagged.
+-- @noreturn
 -- @emits cleared After all clients have been untagged.
 -- @emits untagged For each currently tagged clients.
 -- @emitstparam untagged client c The untagged client.
@@ -480,6 +483,7 @@ end
 --- Update the tag history.
 -- @staticfct awful.tag.history.update
 -- @tparam screen obj Screen object.
+-- @noreturn
 function tag.history.update(obj)
     local s = get_screen(obj)
     local curtags = s.selected_tags
@@ -520,6 +524,7 @@ end
 
 --- Revert tag history.
 -- @staticfct awful.tag.history.restore
+-- @noreturn
 -- @tparam screen screen The screen.
 -- @tparam number idx Index in history. Defaults to "previous" which is a special index
 -- toggling between last two selected sets of tags. Number (eg 1) will go back
@@ -752,6 +757,7 @@ end
 -- @see master_width_factor
 -- @tparam number add Value to add to master width factor.
 -- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
+-- @noreturn
 function tag.incmwfact(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_master_width_factor(t, tag.object.get_master_width_factor(t) + add)
@@ -1128,6 +1134,7 @@ end
 -- @staticfct awful.tag.incgap
 -- @tparam number add Value to add to the spacing between clients
 -- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
+-- @noreturn
 -- @see gap
 -- @see beautiful.useless_gap
 function tag.incgap(add, t)
@@ -1247,6 +1254,7 @@ end
 -- "expand" (fill all the available workarea) or
 -- `master_width_factor` (fill only an area inside the master width factor)
 -- @tparam[opt=tag.selected()] tag t The tag to modify
+-- @noreturn
 function tag.setmfpol(policy, t)
     gdebug.deprecate("Use t.master_fill_policy = policy instead of awful.tag.setmfpol", {deprecated_in=4})
 
@@ -1257,6 +1265,7 @@ end
 --- Toggle size fill policy for the master client(s)
 -- between "expand" and `master_width_factor`.
 -- @staticfct awful.tag.togglemfpol
+-- @noreturn
 -- @see master_fill_policy
 -- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.togglemfpol(t)
@@ -1343,6 +1352,7 @@ end
 -- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 -- @tparam[opt=false] boolean sensible Limit nmaster based on the number of
 --   visible tiled windows?
+-- @noreturn
 function tag.incnmaster(add, t, sensible)
     t = t or ascreen.focused().selected_tag
 
@@ -1461,6 +1471,7 @@ end
 -- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 -- @tparam[opt=false] boolean sensible Limit column_count based on the number
 --   of visible tiled windows?
+-- @noreturn
 function tag.incncol(add, t, sensible)
     t = t or ascreen.focused().selected_tag
 
@@ -1492,6 +1503,7 @@ end
 --
 -- @staticfct awful.tag.viewnone
 -- @tparam[opt] int|screen screen The screen.
+-- @noreturn
 function tag.viewnone(screen)
     screen = screen or ascreen.focused()
     local tags = screen.tags
@@ -1511,6 +1523,7 @@ end
 -- @see screen.tags
 -- @tparam number i The **relative** index to see.
 -- @tparam[opt] screen screen The screen.
+-- @noreturn
 -- @see awful.tag.viewnext
 -- @see awful.tag.viewprev
 function tag.viewidx(i, screen)
@@ -1552,10 +1565,11 @@ end
 --
 -- @staticfct awful.tag.viewnext
 -- @tparam screen screen The screen.
+-- @noreturn
 -- @see awful.tag.viewidx
 -- @see awful.tag.viewprev
 function tag.viewnext(screen)
-    return tag.viewidx(1, screen)
+    tag.viewidx(1, screen)
 end
 
 --- View previous tag. This is the same a `tag.viewidx(-1)`.
@@ -1566,10 +1580,11 @@ end
 --
 -- @staticfct awful.tag.viewprev
 -- @tparam screen screen The screen.
+-- @noreturn
 -- @see awful.tag.viewidx
 -- @see awful.tag.viewnext
 function tag.viewprev(screen)
-    return tag.viewidx(-1, screen)
+    tag.viewidx(-1, screen)
 end
 
 --- View only a tag.
@@ -1577,6 +1592,7 @@ end
 -- @DOC_sequences_tag_view_only_EXAMPLE@
 --
 -- @method view_only
+-- @noreturn
 -- @see selected
 function tag.object.view_only(self)
     local tags = self.screen.tags
@@ -1595,6 +1611,7 @@ end
 
 --- View only a tag.
 -- @deprecated awful.tag.viewonly
+-- @noreturn
 -- @see tag.view_only
 -- @tparam tag t The tag object.
 function tag.viewonly(t)
@@ -1613,6 +1630,7 @@ end
 -- @tparam table tags A table with tags to view only.
 -- @tparam[opt] screen screen The screen of the tags.
 -- @tparam[opt=#tags] number maximum The maximum number of tags to select.
+-- @noreturn
 function tag.viewmore(tags, screen, maximum)
     maximum = maximum or #tags
     local selected = 0
@@ -1643,8 +1661,9 @@ end
 
 --- Toggle selection of a tag
 -- @staticfct awful.tag.viewtoggle
--- @see selected
 -- @tparam tag t Tag to be toggled
+-- @noreturn
+-- @see selected
 function tag.viewtoggle(t)
     t.selected = not t.selected
     capi.screen[tag.getproperty(t, "screen")]:emit_signal("tag::history::update")
@@ -1701,6 +1720,7 @@ end
 --- Tag a client with the set of current tags.
 -- @deprecated awful.tag.withcurrent
 -- @tparam client c The client to tag.
+-- @noreturn
 function tag.withcurrent(c)
     gdebug.deprecate("Use c:to_selected_tags() instead of awful.tag.selectedlist", {deprecated_in=4})
 
@@ -1740,6 +1760,7 @@ end
 -- @tparam screen|nil screen The screen concerned, or all if `nil`.
 -- @tparam string signal The signal name.
 -- @tparam function callback
+-- @noreturn
 function tag.attached_connect_signal(screen, ...)
     if screen then
         attached_connect_signal_screen(screen, ...)

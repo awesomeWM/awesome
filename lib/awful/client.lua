@@ -178,6 +178,7 @@ end
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
 --   tag as arguments.
+-- @noreturn
 -- @request client activate client.jumpto granted When a client is activated
 --  because `c:jump_to()` is called.
 -- @see activate
@@ -298,6 +299,7 @@ end
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
 -- @tparam[opt="focused"] client c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
+-- @noreturn
 -- @see swap
 -- @see swapped
 -- @see awful.client.swap.global_bydirection
@@ -329,6 +331,7 @@ end
 -- @staticfct awful.client.swap.global_bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
 -- @tparam[opt=client.focus] client sel The client.
+-- @noreturn
 -- @request client activate client.swap.global_bydirection granted When a client
 --  could be activated because `awful.client.swap.global_bydirection` was called.
 -- @see swap
@@ -372,6 +375,7 @@ end
 -- @staticfct awful.client.swap.byidx
 -- @tparam integer i The index. Use `1` to get the next, `-1` to get the previous.
 -- @tparam[opt=client.focus] client c The client, otherwise focused one is used.
+-- @noreturn
 -- @see swap
 -- @see swapped
 -- @see awful.client.swap.bydirection
@@ -397,6 +401,7 @@ end
 -- @tparam[opt=false] boolean clockwise True to cycle clients clockwise.
 -- @tparam[opt=awful.screen.focused()] screen s The screen where to cycle clients.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
+-- @noreturn
 -- @see swap
 -- @see swapped
 -- @see awful.client.swap.bydirection
@@ -424,6 +429,7 @@ end
 --
 -- @method append_keybinding
 -- @tparam awful.key key The key.
+-- @noreturn
 -- @see remove_keybinding
 -- @see append_mousebinding
 -- @see remove_mousebinding
@@ -431,17 +437,20 @@ end
 --- Remove a keybinding.
 --
 -- @method remove_keybinding
+-- @noreturn
 -- @tparam awful.key key The key.
 
 --- Append a mousebinding.
 --
 -- @method append_mousebinding
 -- @tparam awful.button button The button.
+-- @noreturn
 
 --- Remove a mousebinding.
 --
 -- @method remove_mousebinding
 -- @tparam awful.button button The button.
+-- @noreturn
 
 --- Get the master window.
 --
@@ -476,6 +485,7 @@ end
 -- @DOC_sequences_client_to_primary_EXAMPLE@
 --
 -- @method to_primary_section
+-- @noreturn
 -- @see swap
 -- @see to_secondary_section
 function client.object:to_primary_section()
@@ -494,6 +504,7 @@ end
 -- @DOC_sequences_client_to_secondary_EXAMPLE@
 --
 -- @method to_secondary_section
+-- @noreturn
 -- @see swap
 -- @see to_primary_section
 
@@ -527,6 +538,7 @@ end
 -- @tparam[opt=0] integer y The relative y coordinate.
 -- @tparam[opt=0] integer w The relative width.
 -- @tparam[opt=0] integer h The relative height.
+-- @noreturn
 -- @see geometry
 -- @see x
 -- @see y
@@ -558,6 +570,7 @@ end
 --
 -- @method move_to_tag
 -- @tparam tag target The tag to move the client to.
+-- @noreturn
 -- @request client activate client.movetotag granted When a client could be
 --  activated because `c:move_to_tag()` was called.
 -- @see tags
@@ -591,6 +604,7 @@ end
 --
 -- @method toggle_tag
 -- @tparam tag target The tag to move the client to.
+-- @noreturn
 -- @see tags
 function client.object.toggle_tag(self, target)
     -- Check that tag and client screen are identical
@@ -631,6 +645,7 @@ end
 --
 -- @method move_to_screen
 -- @tparam[opt=c.screen.index+1] screen s The screen, default to current + 1.
+-- @noreturn
 -- @see screen
 -- @see request::activate
 -- @request client activate client.movetoscreen granted When a client could be
@@ -682,6 +697,7 @@ end
 -- @DOC_sequences_client_to_selected_tags1_EXAMPLE@
 --
 -- @method to_selected_tags
+-- @noreturn
 -- @see screen.selected_tags
 function client.object.to_selected_tags(self)
     local tags = {}
@@ -1444,6 +1460,7 @@ end
 -- @tparam string prop The property name.
 -- @tparam string kind The type (used for register_xproperty).
 --   One of "string", "number" or "boolean".
+-- @noreturn
 function client.property.persist(prop, kind)
     local xprop = "awful.client.property." .. prop
     capi.awesome.register_xproperty(xprop, kind)
@@ -1466,7 +1483,7 @@ end
 -- @tparam integer start What index to start iterating from.  Defaults to using the
 --   index of the currently focused client.
 -- @tparam[opt=nil] screen s Which screen to use.  nil means all screens.
---
+-- @treturn function A Lua iterator (to use in a `for` loop).
 -- @staticfct awful.client.iterate
 -- @usage -- un-minimize all urxvt instances
 -- local urxvt = function (c)
@@ -1666,6 +1683,7 @@ end
 -- @tparam[opt=false] boolean args.switch_to_tag
 -- @tparam[opt=false] boolean args.action Once activated, perform an action.
 -- @tparam[opt=false] boolean args.toggle_minimization
+-- @noreturn
 -- @request client activate args.context granted Will use the context defined in
 --  `args.context`.
 -- @see awful.permissions.add_activate_filter
@@ -1712,6 +1730,7 @@ end
 -- @method grant
 -- @tparam string permission The permission name (just the name, no `request::`).
 -- @tparam string context The reason why this permission is requested.
+-- @noreturn
 -- @see awful.permissions
 
 --- Deny a permission for a client.
@@ -1719,6 +1738,7 @@ end
 -- @method deny
 -- @tparam string permission The permission name (just the name, no `request::`).
 -- @tparam string context The reason why this permission is requested.
+-- @noreturn
 -- @see awful.permissions
 
 pcommon.setup_grant(client.object, "client")
@@ -1849,6 +1869,7 @@ end)
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client as argument.
+-- @noreturn
 
 -- Add clients during startup to focus history.
 -- This used to happen through permissions.activate, but that only handles visible

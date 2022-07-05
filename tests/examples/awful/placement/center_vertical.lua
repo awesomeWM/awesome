@@ -2,6 +2,7 @@
 -- Align a client to the vertical center of the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments") --DOC_HEADER
+-- @treturn table The new geometry --DOC_HEADER
 -- @staticfct awful.placement.center_vertical --DOC_HEADER
 
 require("awful.tag").add("1", {screen=screen[1], selected=true}) --DOC_HIDE

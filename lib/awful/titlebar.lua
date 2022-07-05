@@ -535,6 +535,7 @@ local titlebar = {
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @tparam table args An array containing the widgets disposition
 -- @method setup
+-- @noreturn
 
 
 local all_titlebars = setmetatable({}, { __mode = 'k' })
@@ -713,6 +714,7 @@ end
 -- @tparam client c The client whose titlebar is modified
 -- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
 --   `"right"`, `"top"`, `"bottom"`.
+-- @noreturn
 -- @staticfct awful.titlebar.show
 -- @request client titlebars show granted Called when `awful.titlebar.show` is
 --  called.
@@ -729,6 +731,7 @@ end
 -- @tparam client c The client whose titlebar is modified
 -- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
 --   `"right"`, `"top"`, `"bottom"`.
+-- @noreturn
 -- @staticfct awful.titlebar.hide
 function titlebar.hide(c, position)
     position = position or "top"
@@ -739,6 +742,7 @@ end
 -- @tparam client c The client whose titlebar is modified
 -- @tparam[opt="top"] string position The position of the titlebar. Must be one of `"left"`,
 --   `"right"`, `"top"`, `"bottom"`.
+-- @noreturn
 -- @staticfct awful.titlebar.toggle
 -- @request client titlebars toggle granted Called when `awful.titlebar.toggle` is
 --  called.

@@ -201,6 +201,7 @@ end
 -- @tparam gears.shape|function shape The shape.
 -- @param[opt] ... Any additional parameters will be passed to the shape function.
 -- @staticfct apply_shape_bounding
+-- @noreturn
 function surface.apply_shape_bounding(draw, shape, ...)
   local geo = draw:geometry()
 

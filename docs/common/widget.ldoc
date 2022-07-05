@@ -26,6 +26,7 @@
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
 -- @tparam table args An array containing the widgets disposition
 -- @method setup
+-- @noreturn
 -- @baseclass wibox.widget
 
 --- Force a widget height.
@@ -60,6 +61,7 @@
 --- Add a new `awful.button` to this widget.
 -- @tparam awful.button button The button to add.
 -- @method add_button
+-- @noreturn
 -- @baseclass wibox.widget
 
 --- Emit a signal and ensure all parent widgets in the hierarchies also
@@ -69,6 +71,7 @@
 -- @param ... Other arguments
 -- @baseclass wibox.widget
 -- @method emit_signal_recursive
+-- @noreturn
 
 --- When the layout (size) change.
 -- This signal is emitted when the previous results of `:layout()` and `:fit()`

@@ -52,6 +52,7 @@ end
 -- @tparam string name The name of the signal.
 -- @tparam function func The callback to call when the signal is emitted.
 -- @method connect_signal
+-- @noreturn
 function object:connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
     local sig = find_signal(self, name)
@@ -105,6 +106,7 @@ end
 -- @tparam string name The name of the signal.
 -- @tparam function func The callback to call when the signal is emitted.
 -- @method weak_connect_signal
+-- @noreturn
 function object:weak_connect_signal(name, func)
     assert(type(func) == "function", "callback must be a function, got: " .. type(func))
     local sig = find_signal(self, name)
@@ -116,6 +118,7 @@ end
 -- @tparam string name The name of the signal.
 -- @tparam function func The callback that should be disconnected.
 -- @method disconnect_signal
+-- @noreturn
 function object:disconnect_signal(name, func)
     local sig = find_signal(self, name)
     sig.weak[func] = nil
@@ -129,6 +132,7 @@ end
 --   function receives the object as first argument and then any extra
 --   arguments that are given to emit_signal()
 -- @method emit_signal
+-- @noreturn
 function object:emit_signal(name, ...)
     local sig = find_signal(self, name)
     for func in pairs(sig.strong) do

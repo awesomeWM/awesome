@@ -86,6 +86,7 @@ end
 -- @tparam color bg Background color.
 -- @tparam color fg Main foreground color.
 -- @tparam color alt_fg Accent foreground color.
+-- @noreturn
 -- @staticfct beautiful.theme_assets.gen_awesome_name
 function theme_assets.gen_awesome_name(cr, height, bg, fg, alt_fg)
     local ls = height/10 -- letter_size
@@ -155,6 +156,7 @@ end
 -- @tparam number height Height.
 -- @tparam color bg Background color.
 -- @tparam color fg Foreground color.
+-- @noreturn
 -- @staticfct beautiful.theme_assets.gen_logo
 function theme_assets.gen_logo(cr, width, height, bg, fg)
     local ls = math.min(width, height)

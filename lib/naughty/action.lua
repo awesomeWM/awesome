@@ -120,6 +120,7 @@ end
 --  the action was invoked. If a notification is shared by many object (like
 --  a "mute" or "snooze" action added to all notification), calling `:invoke()`
 --  without adding the `notif` context will cause unexpected results.
+-- @noreturn
 function action:invoke(notif)
     self:emit_signal("invoked", notif)
 end

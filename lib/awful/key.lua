@@ -159,7 +159,8 @@ end
 
 --- Execute this keybinding.
 --
--- @method :trigger
+-- @method trigger
+-- @noreturn
 
 function key:trigger()
     local data = reverse_map[self]
@@ -432,10 +433,10 @@ function key.new(args, keycode, press, release, data)
 end
 
 --- Compare a key object with modifiers and key.
--- @param _key The key object.
--- @param pressed_mod The modifiers to compare with.
--- @param pressed_key The key to compare with.
--- @staticfct awful.key.match
+-- @tparam table pressed_mod The modifiers to compare with.
+-- @tparam string pressed_key The key to compare with.
+-- @treturn boolean If the key and modifier match.
+-- @method match
 function key.match(self, pressed_mod, pressed_key)
     -- First, compare key.
     if pressed_key ~= self.key then return false end

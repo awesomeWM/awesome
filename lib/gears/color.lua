@@ -282,6 +282,7 @@ end
 
 --- Create a pattern from a given string, same as @{gears.color}.
 -- @see gears.color
+-- @treturn gears.color A cairo pattern object.
 -- @staticfct gears.color.create_pattern
 function color.create_pattern(col)
     if cairo.Pattern:is_type_of(col) then

@@ -498,6 +498,7 @@ end
 --- Set new notification timeout.
 -- @method reset_timeout
 -- @tparam number new_timeout Time in seconds after which notification disappears.
+-- @noreturn
 function notification:reset_timeout(new_timeout)
     if self.timer then self.timer:stop() end
 
@@ -793,6 +794,7 @@ end
 --- Add more actions to the notification.
 -- @method append_actions
 -- @tparam table new_actions
+-- @noreturn
 
 function notification:append_actions(new_actions)
     self._private.actions = self._private.actions or {}
@@ -1062,6 +1064,7 @@ end
 -- @method grant
 -- @tparam string permission The permission name (just the name, no `request::`).
 -- @tparam string context The reason why this permission is requested.
+-- @noreturn
 -- @see awful.permissions
 
 --- Deny a permission for a notification
@@ -1069,6 +1072,7 @@ end
 -- @method deny
 -- @tparam string permission The permission name (just the name, no `request::`).
 -- @tparam string context The reason why this permission is requested.
+-- @noreturn
 -- @see awful.permissions
 
 pcommon.setup_grant(notification, "notification")

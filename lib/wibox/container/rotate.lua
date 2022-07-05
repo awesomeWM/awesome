@@ -84,6 +84,7 @@ end
 -- The widget will be removed and the rotation reset.
 --
 -- @method reset
+-- @noreturn
 -- @interface container
 function rotate:reset()
     self._private.direction = nil

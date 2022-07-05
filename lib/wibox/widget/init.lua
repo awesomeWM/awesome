@@ -41,6 +41,7 @@ setmetatable(widget, {
 -- @tparam number width The width of the widget
 -- @tparam number height The height of the widget
 -- @tparam[opt={dpi=96}] table context The context information to give to the widget.
+-- @noreturn
 -- @staticfct wibox.widget.draw_to_cairo_context
 function widget.draw_to_cairo_context(wdg, cr, width, height, context)
     local function no_op() end
@@ -55,6 +56,7 @@ end
 -- @tparam number width The surface width
 -- @tparam number height The surface height
 -- @tparam[opt={dpi=96}] table context The context information to give to the widget.
+-- @noreturn
 -- @staticfct wibox.widget.draw_to_svg_file
 function widget.draw_to_svg_file(wdg, path, width, height, context)
     local img = cairo.SvgSurface.create(path, width, height)

@@ -87,8 +87,9 @@ mousegrabber_handleevent(lua_State *L, int x, int y, uint16_t mask)
  *@DOC_cursor_c_COMMON@
  *
  *
- * @param func A callback function as described above.
- * @param cursor The name of a X cursor to use while grabbing.
+ * @tparam function func A callback function as described above.
+ * @tparam string cursor The name of a X cursor to use while grabbing.
+ * @noreturn
  * @staticfct run
  */
 static int
@@ -120,6 +121,7 @@ luaA_mousegrabber_run(lua_State *L)
 /** Stop grabbing the mouse pointer.
  *
  * @staticfct stop
+ * @noreturn
  */
 int
 luaA_mousegrabber_stop(lua_State *L)

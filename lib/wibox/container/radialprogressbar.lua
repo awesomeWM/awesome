@@ -148,6 +148,7 @@ end
 --- Reset this container.
 --
 -- @method reset
+-- @noreturn
 -- @interface container
 function radialprogressbar:reset()
     self:set_widget(nil)

@@ -91,6 +91,7 @@ end
 -- or keeps its position relative to the current focused screen.
 -- @staticfct awful.screen.focus
 -- @tparam screen screen Screen number (defaults / falls back to mouse.screen).
+-- @treturn screen The newly focused screen.
 -- @request client activate screen.focus granted The most recent focused client
 --  for this screen should be re-activated.
 function screen.focus(_screen)
@@ -126,6 +127,8 @@ function screen.focus(_screen)
     if c then
         c:emit_signal("request::activate", "screen.focus", {raise=false})
     end
+
+    return _screen
 end
 
 --- Get the next screen in a specific direction.
@@ -175,6 +178,7 @@ end
 -- @staticfct awful.screen.focus_relative
 -- @tparam int offset Value to add to the current focused screen index. 1 to
 --   focus the next one, -1 to focus the previous one.
+-- @treturn screen The newly focusd screen.
 function screen.focus_relative(offset)
     return screen.focus(gmath.cycle(capi.screen.count(),
                                    screen.focused().index + offset))
@@ -542,6 +546,7 @@ end
 -- @staticfct awful.screen.connect_for_each_screen
 -- @tparam function func The function to call.
 -- @tparam screen func.screen The screen.
+-- @noreturn
 function screen.connect_for_each_screen(func)
     for s in capi.screen do
         func(s)
@@ -552,6 +557,7 @@ end
 --- Undo the effect of `awful.screen.connect_for_each_screen`.
 -- @staticfct awful.screen.disconnect_for_each_screen
 -- @tparam function func The function that should no longer be called.
+-- @noreturn
 function screen.disconnect_for_each_screen(func)
     capi.screen.disconnect_signal("added", func)
 end
@@ -652,10 +658,14 @@ end
 --
 -- @DOC_awful_screen_split2_EXAMPLE@
 --
--- @tparam[opt] table ratios The different ratios to split into. If none is
---  provided, it is split in half.
+-- @tparam[opt={50﹐50}] table ratios The different ratios to split into. If none
+--  is provided, it is split in half.
 -- @tparam[opt] string mode Either "vertical" or "horizontal". If none is
 --  specified, it will split along the longest axis.
+-- @treturn table A table with the screen objects. The first value is the
+--  original screen object (`s`) and the following one(s) are the new screen
+--  objects. The values are ordered from left to right or top to bottom depending
+--  on the value of `mode`.
 -- @method split
 function screen.object.split(s, ratios, mode, _geo)
     s = get_screen(s)
@@ -737,6 +747,7 @@ end
 -- defaulting to 96.
 --
 -- @tparam boolean enabled Enable or disable automatic DPI support.
+-- @noreturn
 -- @staticfct awful.screen.set_auto_dpi_enabled
 function screen.set_auto_dpi_enabled(enabled)
     for s in capi.screen do

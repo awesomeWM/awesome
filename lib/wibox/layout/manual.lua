@@ -20,6 +20,8 @@ local manual_layout = {}
 --
 -- @method add
 -- @tparam widget ... Widgets that should be added
+-- @interface layout
+-- @noreturn
 
 --- Remove a widget from the layout.
 --
@@ -166,6 +168,7 @@ end
 -- @tparam widget widget The widget.
 -- @tparam table|function point Either an `{x=x,y=y}` table or a function
 --  returning the new geometry.
+-- @noreturn
 function manual_layout:add_at(widget, point)
     assert(not widget.point, "2 points are specified, only one is supported")
 
@@ -189,6 +192,7 @@ end
 -- @method move
 -- @tparam number index The widget index.
 -- @tparam table|function point A new point value.
+-- @noreturn
 -- @see add_at
 function manual_layout:move(index, point)
     assert(self._private.pos[index])
@@ -203,6 +207,7 @@ end
 -- @method move_widget
 -- @tparam widget widget The widget.
 -- @tparam table|function point A new point value.
+-- @noreturn
 -- @see add_at
 function manual_layout:move_widget(widget, point)
     local idx, l = self:index(widget, false)

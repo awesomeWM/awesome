@@ -1,9 +1,11 @@
 */
 
 /** Disconnect from a signal.
+ *
  * @tparam string name The name of the signal.
  * @tparam function func The callback that should be disconnected.
  * @staticfct disconnect_signal
+ * @noreturn
  */
 
 /** Emit a signal.
@@ -13,12 +15,14 @@
  *   function receives the object as first argument and then any extra
  *   arguments that are given to emit_signal().
  * @staticfct emit_signal
+ * @noreturn
  */
 
 /** Connect to a signal.
  * @tparam string name The name of the signal.
  * @tparam function func The callback to call when the signal is emitted.
  * @staticfct connect_signal
+ * @noreturn
  */
 
 /*

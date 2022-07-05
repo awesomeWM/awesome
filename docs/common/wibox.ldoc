@@ -191,7 +191,7 @@
 -- @baseclass wibox
 -- @tparam[opt=nil] table|nil geo A table with coordinates to modify. If
 --  nothing is specified, it only returns the current geometry.
--- @return A table with wibox coordinates and geometry.
+-- @treturn table A table with wibox coordinates and geometry.
 -- @method geometry
 -- @emits property::geometry When the geometry change.
 -- @emitstparam property::geometry table geo The geometry table.
@@ -217,6 +217,7 @@
 -- @param args An array containing the widgets disposition
 -- @baseclass wibox
 -- @method setup
+-- @noreturn
 
 --- The background of the wibox.
 --

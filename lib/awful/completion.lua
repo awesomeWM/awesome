@@ -32,6 +32,7 @@ local bashcomp_src = "@SYSCONFDIR@/bash_completion"
 --- Enable programmable bash completion in awful.completion.bash at the price of
 -- a slight overhead.
 -- @tparam string src The bash completion source file, `/etc/bash_completion` by default.
+-- @noreturn
 -- @staticfct awful.completion.bashcomp_load
 function completion.bashcomp_load(src)
     if src then bashcomp_src = src end

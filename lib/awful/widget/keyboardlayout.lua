@@ -256,6 +256,7 @@ local function update_layout(self)
 end
 
 --- Select the next layout.
+-- @noreturn
 -- @method next_layout
 
 --- Create a keyboard layout widget.

@@ -57,8 +57,7 @@ menu_gen.all_categories = {
                 icon_name = "applications-accessories", use = true }
 }
 
---- Find icons for category entries.
--- @staticfct menubar.menu_gen.lookup_category_icons
+-- Find icons for category entries.
 function menu_gen.lookup_category_icons()
     for _, v in pairs(menu_gen.all_categories) do
         v.icon = utils.lookup_icon(v.icon_name)
@@ -81,6 +80,7 @@ end
 -- with the resulting list of menu entries as argument.
 -- @tparam table callback.entries All menu entries.
 -- @staticfct menubar.menu_gen.generate
+-- @noreturn
 function menu_gen.generate(callback)
     -- Update icons for category entries
     menu_gen.lookup_category_icons()

@@ -36,6 +36,7 @@
  *
  * @tparam string name The name of the X11 property.
  * @tparam string type One of "string", "number" or "boolean".
+ * @noreturn
  * @staticfct register_xproperty
  */
 
@@ -229,6 +230,7 @@ composite_manager_running(void)
 /** Quit awesome.
  * @tparam[opt=0] integer code The exit code to use when exiting.
  * @staticfct quit
+ * @noreturn
  */
 static int
 luaA_quit(lua_State *L)
@@ -246,6 +248,7 @@ luaA_quit(lua_State *L)
  *
  * @tparam string cmd The command line to execute.
  * @staticfct exec
+ * @noreturn
  */
 static int
 luaA_exec(lua_State *L)
@@ -260,6 +263,7 @@ luaA_exec(lua_State *L)
 
 /** Restart awesome.
  * @staticfct restart
+ * @noreturn
  */
 static int
 luaA_restart(lua_State *L)
@@ -290,6 +294,7 @@ luaA_kill(lua_State *L)
 /** Synchronize with the X11 server. This is needed in the test suite to avoid
  * some race conditions. You should never need to use this function.
  * @staticfct sync
+ * @noreturn
  */
 static int
 luaA_sync(lua_State *L)
@@ -352,6 +357,7 @@ luaA_load_image(lua_State *L)
  *
  * @tparam integer size The size of the icons in pixels.
  * @staticfct set_preferred_icon_size
+ * @noreturn
  */
 static int
 luaA_set_preferred_icon_size(lua_State *L)
@@ -808,6 +814,7 @@ luaA_awesome_index(lua_State *L)
  * @tparam string name A string with the event name.
  * @tparam function func The function to call.
  * @staticfct connect_signal
+ * @noreturn
  */
 static int
 luaA_awesome_connect_signal(lua_State *L)
@@ -823,6 +830,7 @@ luaA_awesome_connect_signal(lua_State *L)
  * @tparam string name A string with the event name.
  * @tparam function func The function to call.
  * @staticfct disconnect_signal
+ * @noreturn
  */
 static int
 luaA_awesome_disconnect_signal(lua_State *L)
@@ -840,6 +848,7 @@ luaA_awesome_disconnect_signal(lua_State *L)
  * @tparam function name A string with the event name.
  * @param ... The signal arguments.
  * @staticfct emit_signal
+ * @noreturn
  */
 static int
 luaA_awesome_emit_signal(lua_State *L)

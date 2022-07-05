@@ -114,6 +114,7 @@ end
 
 --- Force a textclock to update now.
 --
+-- @noreturn
 -- @method force_update
 function textclock:force_update()
     self._timer:emit_signal("timeout")

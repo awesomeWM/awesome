@@ -2,6 +2,7 @@
 -- Vetically maximize the drawable in the parent area. --DOC_HEADER
 -- @tparam drawable d A drawable (like `client` or `wibox`) --DOC_HEADER
 -- @tparam[opt={}] table args Other arguments") --DOC_HEADER
+-- @treturn table The new geometry --DOC_HEADER
 -- @staticfct awful.placement.maximize_vertically --DOC_HEADER
 
 require("awful.tag").add("1", {screen=screen[1], selected=true}) --DOC_HIDE

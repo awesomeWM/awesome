@@ -159,6 +159,7 @@ end
 --- Reset this layout. The widget will be unreferenced, the margins set to 0
 -- and the color erased
 -- @method reset
+-- @noreturn
 -- @interface container
 function margin:reset()
     self:set_widget(nil)

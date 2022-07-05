@@ -240,10 +240,12 @@ function calendar_popup:call_calendar(offset, position, screen)
 end
 
 --- Toggle calendar visibility.
+-- @treturn boolean The new value of `visible`.
 -- @method toggle
 function calendar_popup:toggle()
     self:call_calendar(0)
     self.visible = not self.visible
+    return self.visible
 end
 
 --- Attach the calendar to a widget to display at a specific position.

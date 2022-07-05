@@ -74,6 +74,7 @@ end
 
 --- Generate a pattern matching expression that ignores case.
 -- @tparam string q Original pattern matching expression.
+-- @treturn string The pattern.
 -- @staticfct gears.string.query_to_pattern
 function gstring.query_to_pattern(q)
     local s = gstring.quote_pattern(q)

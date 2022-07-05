@@ -316,6 +316,7 @@ end
 --
 -- @method set_shape
 -- @tparam gears.shape|function shape A function taking a context, width and height as arguments
+-- @noreturn
 -- @propemits true false
 -- @see gears.shape
 -- @see shape

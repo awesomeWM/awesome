@@ -91,6 +91,7 @@ local timer = { mt = {} }
 
 --- Start the timer.
 -- @method start
+-- @noreturn
 -- @emits start
 function timer:start()
     if self.data.source_id ~= nil then
@@ -110,6 +111,7 @@ end
 -- Does nothing if the timer isn't running.
 --
 -- @method stop
+-- @noreturn
 -- @emits stop
 function timer:stop()
     if self.data.source_id == nil then
@@ -124,6 +126,7 @@ end
 -- This is equivalent to stopping the timer if it is running and then starting
 -- it.
 -- @method again
+-- @noreturn
 -- @emits start
 -- @emits stop
 function timer:again()
@@ -269,6 +272,7 @@ local delayed_calls = {}
 -- all, because it means that less batching happens and the delayed calls run
 -- prematurely.
 -- @staticfct gears.timer.run_delayed_calls_now
+-- @noreturn
 function timer.run_delayed_calls_now()
     for _, callback in ipairs(delayed_calls) do
         protected_call(unpack(callback))
@@ -278,7 +282,8 @@ end
 
 --- Call the given function at the end of the current GLib event loop iteration.
 -- @tparam function callback The function that should be called
---@param ... Arguments to the callback function
+-- @param ... Arguments to the callback function
+-- @noreturn
 -- @staticfct gears.timer.delayed_call
 function timer.delayed_call(callback, ...)
     assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))

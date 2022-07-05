@@ -395,7 +395,8 @@ local function menulist_update(scr)
 end
 
 --- Refresh menubar's cache by reloading .desktop files.
--- @tparam[opt] screen scr Screen.
+-- @tparam[opt=awful.screen.focused()] screen scr Screen.
+-- @noreturn
 -- @staticfct menubar.refresh
 function menubar.refresh(scr)
     scr = get_screen(scr or awful.screen.focused() or 1)
@@ -452,7 +453,8 @@ local function prompt_keypressed_callback(mod, key, comm)
 end
 
 --- Show the menubar on the given screen.
--- @param[opt] scr Screen.
+-- @tparam[opt=awful.screen.focused()] screen scr Screen.
+-- @noreturn
 -- @staticfct menubar.show
 -- @usebeautiful beautiful.menubar_fg_normal
 -- @usebeautiful beautiful.menubar_bg_normal

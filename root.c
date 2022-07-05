@@ -280,6 +280,7 @@ _string_to_key_code(const char *s)
  *  coordinates relatives.
  * @param x In case of a motion event, this is the X coordinate.
  * @param y In case of a motion event, this is the Y coordinate.
+ * @noreturn
  * @staticfct fake_input
  */
 static int
@@ -437,6 +438,7 @@ luaA_root_buttons(lua_State *L)
  *@DOC_cursor_c_COMMON@
  *
  * @tparam string cursor_name A X cursor name.
+ * @noreturn
  * @staticfct cursor
  */
 static int

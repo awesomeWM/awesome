@@ -35,8 +35,8 @@
 
 /** Drawable object.
  *
- * @field surface The drawable's cairo surface.
- * @staticfct drawable
+ * @property surface The drawable's cairo surface.
+ * @tparam gears.surface surface
  */
 
 /**
@@ -89,12 +89,12 @@
  * @staticfct instances
  */
 
-/** Set a __index metamethod for all drawable instances.
+/* Set a __index metamethod for all drawable instances.
  * @tparam function cb The meta-method
  * @staticfct set_index_miss_handler
  */
 
-/** Set a __newindex metamethod for all drawable instances.
+/* Set a __newindex metamethod for all drawable instances.
  * @tparam function cb The meta-method
  * @staticfct set_newindex_miss_handler
  */
@@ -186,6 +186,7 @@ luaA_drawable_get_surface(lua_State *L, drawable_t *drawable)
  * the drawable's surface has been done and should become visible.
  *
  * @method refresh
+ * @noreturn
  */
 static int
 luaA_drawable_refresh(lua_State *L)

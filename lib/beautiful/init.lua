@@ -225,6 +225,7 @@ end
 --- Get the height of a font.
 --
 -- @tparam string name Name of the font.
+-- @treturn number The font height.
 -- @staticfct beautiful.get_font_height
 function beautiful.get_font_height(name)
     return load_font(name).height

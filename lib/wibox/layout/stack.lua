@@ -26,6 +26,7 @@ local stack = {mt={}}
 --- Add some widgets to the given stack layout.
 --
 -- @tparam widget ... Widgets that should be added (must at least be one)
+-- @noreturn
 -- @method add
 -- @interface layout
 
@@ -116,6 +117,7 @@ end
 --
 -- @method raise
 -- @tparam number index The widget index to raise
+-- @noreturn
 function stack:raise(index)
     if (not index) or (not self._private.widgets[index]) then return end
 
@@ -132,6 +134,7 @@ end
 -- @tparam widget widget The widget to raise
 -- @tparam[opt=false] boolean recursive Also look deeper in the hierarchy to
 --   find the widget
+-- @noreturn
 function stack:raise_widget(widget, recursive)
     local idx, layout = self:index(widget, recursive)
 

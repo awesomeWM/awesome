@@ -672,6 +672,7 @@ end
 --
 -- @method compute_drawn_values_num
 -- @tparam number usable_width
+-- @treturn number The number of values.
 function graph:compute_drawn_values_num(usable_width)
     if usable_width <= 0 then
         return 0
@@ -718,6 +719,7 @@ end
 -- @method add_value
 -- @tparam[opt=NaN] number value The value to be added to a graph's data group.
 -- @tparam[opt=1] integer group The index of the data group.
+-- @noreturn Note that it actually returns something, but that's better undocumented.
 function graph:add_value(value, group)
     value = value or 0/0 -- default to NaN
     group = group or 1
@@ -762,6 +764,7 @@ end
 -- Removes all values from all data groups.
 --
 -- @method clear
+-- @noreturn Note that it actually returns something, but that's better undocumented.
 function graph:clear()
     self._private.values = {}
     self:emit_signal("widget::redraw_needed")
