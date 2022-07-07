@@ -250,7 +250,7 @@ function util.geticonpath(iconname, exts, dirs, size)
         for _,e in ipairs(exts) do
             local icon = string.format("%s/%s.%s", d, iconname, e)
             if gfs.file_readable(icon) then
-                return icon
+                return icon:gsub("//+", "/")
             end
         end
     end
