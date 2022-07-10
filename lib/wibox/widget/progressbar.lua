@@ -519,7 +519,7 @@ end
 -- @DOC_wibox_widget_progressbar_value_EXAMPLE@
 --
 -- @property value
--- @tparam number value The progress bar value.
+-- @tparam[opt=0] number value The progress bar value.
 -- @propemits true false
 -- @see max_value
 

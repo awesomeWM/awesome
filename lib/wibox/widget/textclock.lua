@@ -70,7 +70,7 @@ end
 -- For information about the format specifiers, see
 -- [the GLib docs](https://developer.gnome.org/glib/stable/glib-GDateTime.html#g-date-time-format).
 -- @property format
--- @tparam string format The new time format. This can contain pango markup.
+-- @tparam[opt=" %a %b %d %H:%M"] string format The new time format. This can contain pango markup.
 
 function textclock:set_format(format)
     self._private.format = format
@@ -86,7 +86,7 @@ end
 -- e.g. "Z" for UTC, "±hh:mm" or "Europe/Amsterdam". See
 -- [GTimeZone](https://developer.gnome.org/glib/stable/glib-GTimeZone.html#g-time-zone-new).
 -- @property timezone
--- @tparam string timezone
+-- @tparam[opt=TimeZone.new()] string timezone
 
 function textclock:set_timezone(tzid)
     self._private.tzid = tzid
@@ -101,7 +101,7 @@ end
 --- Set the clock's refresh rate.
 --
 -- @property refresh
--- @tparam number refresh How often the clock is updated, in seconds
+-- @tparam[opt=60] number refresh How often the clock is updated, in seconds
 
 function textclock:set_refresh(refresh)
     self._private.refresh = refresh or self._private.refresh

@@ -304,7 +304,7 @@ end
 -- * `nil`: Unset the image.
 --
 -- @property image
--- @tparam image image The image to render.
+-- @tparam[opt=nil] image image The image to render.
 -- @propemits false false
 
 --- Set the `imagebox` image.
@@ -370,7 +370,7 @@ end
 -- @DOC_wibox_widget_imagebox_clip_shape_EXAMPLE@
 --
 -- @property clip_shape
--- @tparam function|gears.shape clip_shape A `gears.shape` compatible shape function.
+-- @tparam[opt=nil] function|gears.shape clip_shape A `gears.shape` compatible shape function.
 -- @propemits true false
 -- @see gears.shape
 
@@ -402,7 +402,7 @@ end
 -- @DOC_wibox_widget_imagebox_resize_EXAMPLE@
 -- @property resize
 -- @propemits true false
--- @tparam boolean resize
+-- @tparam[opt=true] boolean resize
 
 --- Allow the image to be upscaled (made bigger).
 --
@@ -412,7 +412,7 @@ end
 --
 -- @DOC_wibox_widget_imagebox_upscale_EXAMPLE@
 -- @property upscale
--- @tparam boolean upscale
+-- @tparam[opt=self.resize] boolean upscale
 -- @see downscale
 -- @see resize
 
@@ -424,7 +424,7 @@ end
 --
 -- @DOC_wibox_widget_imagebox_downscale_EXAMPLE@
 -- @property downscale
--- @tparam boolean downscale
+-- @tparam[opt=self.resize] boolean downscale
 -- @see upscale
 -- @see resize
 
@@ -439,7 +439,7 @@ end
 --@DOC_wibox_widget_imagebox_stylesheet_EXAMPLE@
 --
 -- @property stylesheet
--- @tparam string stylesheet
+-- @tparam[opt=""] string stylesheet
 -- @propemits true false
 
 --- Set the SVG DPI (dot per inch).
@@ -455,7 +455,7 @@ end
 --@DOC_wibox_widget_imagebox_dpi_EXAMPLE@
 --
 -- @property dpi
--- @tparam number|table dpi
+-- @tparam[opt=96] number|table dpi
 -- @propemits true false
 -- @see auto_dpi
 
@@ -597,7 +597,7 @@ end
 -- @DOC_wibox_widget_imagebox_max_scaling_factor_EXAMPLE@
 --
 -- @property max_scaling_factor
--- @tparam number max_scaling_factor
+-- @tparam[opt=0] number max_scaling_factor Use `0` for "no limit".
 -- @propemits true false
 -- @see valign
 -- @see halign
@@ -629,7 +629,7 @@ end
 -- @DOC_wibox_widget_imagebox_scaling_quality_EXAMPLE@
 --
 -- @property scaling_quality
--- @tparam string scaling_quality Either `"fast"`, `"good"`, `"best"`,
+-- @tparam[op="fast"] string scaling_quality Either `"fast"`, `"good"`, `"best"`,
 --   `"nearest"` or `"bilinear"`.
 -- @propemits true false
 -- @see resize

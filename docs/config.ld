@@ -234,6 +234,37 @@ create_type {
                 " doesn't match the property name. For linting purpose, please fix this."
             )
         end
+
+        -- Properties should have a default value. If they don't or if the
+        -- default depends on the context, then `opt=nil` should be used to
+        -- mute this warning.
+        if not item:default_of_param(item.params[1]) then
+            local auto_opt = nil
+
+            -- Extract the default value from other metadata.
+            if item.tags["propbeautiful"] and item.tags["propbeautiful"][1] then
+                auto_opt = "beautiful."..(item.module.name.."_"..item.name):gsub("[.]", "_")
+            elseif item.tags["usebeautiful"] and item.tags["usebeautiful"][1] then
+                auto_opt = item.tags["usebeautiful"][1]:match("[^ ]+")
+            end
+
+            -- This adds a default value. It works for LDoc 1.4.5, but is a
+            -- private API and might break in the future.
+            if auto_opt then
+                local mods = item.modifiers[item.parameter]
+
+                if mods then
+                    mods[item.params[1]].opt = auto_opt
+                end
+            else
+                -- The default could not be determined automatically, it requires
+                -- an explicit `opt=<value>`.
+                print(
+                    "WARNING: Property", item.name .." from "..item.module.name --,
+                    --"doesn't have a default value. Add `[opt=value]` to the @tparam"
+                )
+            end
+        end
     end
 }
 

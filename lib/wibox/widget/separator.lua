@@ -43,7 +43,7 @@ local separator = {}
 --@DOC_wibox_widget_separator_orientation_EXAMPLE@
 --
 -- @property orientation
--- @tparam string orientation
+-- @tparam[opt="auto"] string orientation
 -- @propemits true false
 
 --- The separator's thickness.

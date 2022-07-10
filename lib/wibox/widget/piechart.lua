@@ -140,7 +140,7 @@ end
 --- The pie chart data list.
 --
 -- @property data_list
--- @tparam table data_list Sorted table where each entry has a label as its
+-- @tparam[opt={}] table data_list Sorted table where each entry has a label as its
 -- first value and a number as its second value.
 -- @propemits false false
 

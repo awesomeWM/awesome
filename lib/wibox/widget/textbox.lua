@@ -189,7 +189,7 @@ end
 -- @DOC_wibox_widget_textbox_markup2_EXAMPLE@
 --
 -- @property markup
--- @tparam string markup The text to set. This can contain pango markup (e.g.
+-- @tparam[opt=self.text] string markup The text to set. This can contain pango markup (e.g.
 --   `<b>bold</b>`). You can use `gears.string.escape` to escape
 --   parts of it.
 -- @propemits true false
@@ -217,7 +217,7 @@ end
 -- @DOC_wibox_widget_textbox_text2_EXAMPLE@
 --
 -- @property text
--- @tparam string text The text to display. Pango markup is ignored and shown
+-- @tparam[opt=""] string text The text to display. Pango markup is ignored and shown
 --  as-is.
 -- @propemits true false
 -- @see markup

@@ -148,7 +148,7 @@ end
 -- available space. Otherwise, any single icon has a size of `size`x`size`.
 --
 -- @property base_size
--- @tparam integer|nil base_size The base size
+-- @tparam[opt=nil] integer|nil base_size The base size
 -- @propemits true false
 
 function systray:set_base_size(size)
@@ -162,7 +162,7 @@ end
 --- Decide between horizontal or vertical display.
 --
 -- @property horizontal
--- @tparam boolean horizontal Use horizontal mode?
+-- @tparam[opt=true] boolean horizontal Use horizontal mode?
 -- @propemits true false
 
 function systray:set_horizontal(horiz)
@@ -176,7 +176,7 @@ end
 --- Should the systray icons be displayed in reverse order?
 --
 -- @property reverse
--- @tparam boolean reverse Display in reverse order.
+-- @tparam[opt=false] boolean reverse Display in reverse order.
 -- @propemits true false
 
 function systray:set_reverse(rev)
@@ -194,7 +194,7 @@ end
 -- visible on the primary screen. The default value is "primary".
 --
 -- @property screen
--- @tparam screen|"primary" screen The screen to display on.
+-- @tparam[opt=nil] screen|"primary" screen The screen to display on.
 -- @propemits true false
 
 function systray:set_screen(s)
