@@ -70,7 +70,8 @@ dd > code,
 td code,
 span.default_value,
 .see_also_description code,
-.important_box code
+.important_box code,
+.property_type code
 {
     background-color: #eaedf587;
     padding-left: 3px;
@@ -523,7 +524,7 @@ dl.function dd {
     margin-bottom: 15px;
 }
 
-#content dl.function dd h3 {
+#content dl.function dd h3, .property_type i {
     margin-top: 0px;
     margin-left: 0px;
     padding-left: 0px;
@@ -746,4 +747,9 @@ pre .url { color: #272fc2; text-decoration: underline; }
 }
 .copy-link--failure {
     background-color: red;
+}
+
+.property_type {
+    display: inline-block;
+    margin-left: 15px;
 }

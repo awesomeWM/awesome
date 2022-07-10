@@ -377,7 +377,19 @@
     <dd>
     $(M(ldoc.descript(item),item))
 
-#  if show_parms and item.params and #item.params > 0 and not item.hide_params then
+#  if kind == "Object properties" and item.params[1] then
+    </dd>
+    <span class="property_type">
+     <br/>
+#   if item:default_of_param(item.params[1]) then
+      <i>Default value: </b> <code>$(item:default_of_param(item.params[1]))</code><br/>
+#   end
+#   if item.params[1] then
+      <i>Type constraint: </b> $(M(item.params.map[item.params[1]],item))<br/>
+#   end
+    </span>
+    <dd>
+#  elseif show_parms and item.params and #item.params > 0 and not item.hide_params then
 #    local subnames = module.kinds:type_of(item).subnames
 #    if subnames then
     <h3>$(subnames):</h3>
