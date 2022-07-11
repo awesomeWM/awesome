@@ -863,6 +863,34 @@ add_custom_tag {
     auto_subtags = false
 }
 
+-- When properties are integers, the value usually has a meaning, like the PID,
+-- apoint or a pixel.
+add_custom_tag {
+    name = "propertyunit",
+    hidden = true,
+    auto_subtags = false
+}
+
+-- Some string properties are de-facto enums. Only a small set of value is valid.
+-- This tag provides a consistent rendering for such properties.
+add_custom_tag {
+    name = "propertyvalue",
+    hidden = true,
+    auto_subtags = false
+}
+
+-- Some values, mostly bytes, have a minimum and maximum value.
+add_custom_tag {
+    name = "rangestart",
+    hidden = true,
+    auto_subtags = false
+}
+add_custom_tag {
+    name = "rangestop",
+    hidden = true,
+    auto_subtags = false
+}
+
 add_custom_tag {
     name   = "signalhandler",
     hidden = false,
@@ -934,14 +962,6 @@ add_custom_tag {
         end
     end
 }
-
--- @rangestart
--- @rangeend
--- @minimumvalue
--- @maximumvalue
--- @tenumvalue
--- @increments
--- @tablekey or not?
 
 -- More fitting section names
 kind_names={topic='Documentation', module='Libraries', script='Sample files'}
