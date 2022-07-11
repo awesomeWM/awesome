@@ -135,6 +135,7 @@ function widgetprompt.new(args)
     promptbox.exe_callback = args.exe_callback or function (...)
         promptbox:spawn_and_handle_error(...)
     end
+    promptbox.with_shell = args.with_shell or false
     promptbox.completion_callback = args.completion_callback or completion.shell
     promptbox.history_path = args.history_path or
         gfs.get_cache_dir() .. 'history'
