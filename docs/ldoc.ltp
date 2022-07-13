@@ -378,17 +378,23 @@
     $(M(ldoc.descript(item),item))
 
 #  if kind == "Object properties" and item.params[1] then
-    </dd>
+    <h3>Constraints:</h3>
     <span class="property_type">
-     <br/>
+      <table class="see_also">
 #   if item:default_of_param(item.params[1]) then
-      <i>Default value: </b> <code>$(item:default_of_param(item.params[1]))</code><br/>
+       <tr><td><i>Default value: </i></td><td> <code>$(item:default_of_param(item.params[1]))</code></td><tr/>
 #   end
-#   if item.params[1] then
-      <i>Type constraint: </b> $(M(item.params.map[item.params[1]],item))<br/>
+#   for _, metadata in ldoc.ipairs(item.metadata or {}) do
+       <tr><td><i>$(metadata.title): </i></td><td> $(metadata.value)</td><tr/>
+#    for _, child in ldoc.ipairs(metadata.children) do
+        <tr class="see_also_sublist"><td><i>$(child.title): </i></td><td> $(child.value)</td><tr/>
+#    end
 #   end
+#   if item.params.map[item.params[1]] and item.params.map[item.params[1]] ~= "" then
+       <tr><td><i>Valid values: </i></td><td> $(M(item.params.map[item.params[1]],item))</td><tr/>
+#   end
+     </table>
     </span>
-    <dd>
 #  elseif show_parms and item.params and #item.params > 0 and not item.hide_params then
 #    local subnames = module.kinds:type_of(item).subnames
 #    if subnames then

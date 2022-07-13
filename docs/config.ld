@@ -299,6 +299,16 @@ create_type {
                 )
             end
         end
+
+        -- Allow the template to be shorter by using a for-loop.
+        for _, mt in ipairs {"propertyunit", "rangestart", "rangestop" } do
+            local tag_desc = named_tags[mt]
+
+            if item.tags[mt] and item.tags[mt][1] then
+                local title = tag_desc.title or mt
+                item:add_metadata(title, item.tags[mt][1])
+            end
+        end
     end
 }
 
@@ -901,6 +911,7 @@ add_custom_tag {
 -- apoint or a pixel.
 add_custom_tag {
     name = "propertyunit",
+    title = "Unit",
     hidden = true,
     auto_subtags = false
 }
@@ -916,11 +927,13 @@ add_custom_tag {
 -- Some values, mostly bytes, have a minimum and maximum value.
 add_custom_tag {
     name = "rangestart",
+    title = "Range starts",
     hidden = true,
     auto_subtags = false
 }
 add_custom_tag {
     name = "rangestop",
+    title = "Range stops",
     hidden = true,
     auto_subtags = false
 }
@@ -1204,7 +1217,7 @@ local function init_custom_types(item)
     -- Give each item an unique identifier so the JavaScript can locate them.
     item.uid, item_id = item_id, item_id + 1
 
-    item.delims, item.auto_usage, item.auto_params = {}, {}, {}
+    item.delims, item.auto_usage, item.auto_params, item.metadata = {}, {}, {}, {}
 
     local to_rm = {}
 
@@ -1277,6 +1290,18 @@ local function init_custom_types(item)
 
         return nil, nil, extra
     end
+
+    -- Recursive way to annotate property-like objects.
+    local amt
+    amt = function(self, title, value, children)
+        self.metadata[#self.metadata+1] = {
+            title        = title,
+            value        = value,
+            children     = children or {},
+            add_metadata = amt
+        }
+    end
+    item.add_metadata = amt
 
     item.is_init = true
 end
