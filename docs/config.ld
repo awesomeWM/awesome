@@ -224,6 +224,13 @@ create_type {
             )
         end
 
+        if type == "bool" then
+            print(
+                "WARNING: Property ".. item.name .." from "..item.module.name..
+                " type is `bool`, please use `boolean`."
+            )
+        end
+
         -- One of the repeated problem we have is the first word of the
         -- description being removed because it is used as the property name.
         -- This "rule" might be stupid, but it prevents it from accidentally
@@ -235,10 +242,37 @@ create_type {
             )
         end
 
-        -- Properties should have a default value. If they don't or if the
-        -- default depends on the context, then `opt=nil` should be used to
-        -- mute this warning.
-        if not item:default_of_param(item.params[1]) then
+        local def = item:default_of_param(item.params[1])
+
+        -- Check the default value for obvious mistakes.
+        if def then
+            -- Detect the blatant missing quote marks for string. This is important
+            -- to differentiate variables from string literals.
+            if type == "string" and def:sub(1,1) ~= '"' and not def:find(".") then
+                print(
+                    "WARNING: Property ".. item.name .." from "..item.module.name..
+                    " is a string, but the default value is not quoted."
+                )
+            end
+
+            -- If the default value is `nil`, then the property must be nullable.
+            if def == "nil" and not type:find("nil") then
+                print(
+                    "WARNING: Property ".. item.name .." from "..item.module.name..
+                    " default value is `nil`, but the type doesn't allow it"
+                )
+            end
+
+            if type == "boolean" and (not (def == "true" or def == "false")) and (not def:find(".")) then
+                print(
+                    "WARNING: Property ".. item.name .." from "..item.module.name..
+                    " is a boolean, but is neither `true`, `false` or an alias"
+                )
+            end
+        else
+            -- Properties should have a default value. If they don't or if the
+            -- default depends on the context, then `opt=nil` should be used to
+            -- mute this warning.
             local auto_opt = nil
 
             -- Extract the default value from other metadata.
