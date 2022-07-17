@@ -47,6 +47,12 @@ td span.types {
     width: 100%;
 }
 
+td span.inline_types {
+    color: #a4c7ff;
+    flex-flow: nowrap;
+    width: 100%;
+}
+
 .type {
     flex-basis: auto;
     font-weight: bold;

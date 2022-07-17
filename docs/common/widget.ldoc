@@ -13,6 +13,7 @@
 -- @property children
 -- @tparam table children The children.
 -- @baseclass wibox.widget
+-- @see all_children
 
 --- Get all direct and indirect children widgets.
 -- This will scan all containers recursively to find widgets
@@ -21,6 +22,7 @@
 -- @property all_children
 -- @tparam table all_children The children.
 -- @baseclass wibox.widget
+-- @see children
 
 --- Set a declarative widget hierarchy description.
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
@@ -32,16 +34,30 @@
 --- Force a widget height.
 -- @property forced_height
 -- @tparam number|nil forced_height The height (`nil` for automatic)
+-- @propertytype nil Let the layout decide the height. Usually using the widget
+--  native height.
+-- @propertytype number Enforce a number of pixels.
+-- @rangestart 0
+-- @rangestop 65534
 -- @baseclass wibox.widget
+-- @see forced_width
 
 --- Force a widget width.
 -- @property forced_width
 -- @tparam number|nil forced_width The width (`nil` for automatic)
+-- @propertytype nil Let the layout decide the width. Usually using the widget
+--  native width.
+-- @propertytype number Enforce a number of pixels.
+-- @rangestart 0
+-- @rangestop 65534
 -- @baseclass wibox.widget
+-- @see forced_height
 
 --- The widget opacity (transparency).
 -- @property opacity
--- @tparam[opt=1] number opacity The opacity (between 0 and 1)
+-- @tparam[opt=1] number opacity.
+-- @rangestart 0.0
+-- @rangestop 1.0
 -- @baseclass wibox.widget
 
 --- The widget visibility.

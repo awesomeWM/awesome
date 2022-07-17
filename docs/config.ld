@@ -95,6 +95,82 @@ topics={
     '89-NEWS.md',
 }
 
+-- Rather han copy paste this hundreds of time, unify these special type
+-- descriptions.
+local type_fallback_description = {
+    image = {
+        "string Interpreted as a path to an image file." ,
+        "string A valid SVG content." ,
+        "cairo A cairo image surface: Directly used as-is." ,
+        "librsvg A librsvg handle object: Directly used as-is." ,
+        "nil Unset the image." ,
+    },
+    color = {
+        "string An hexadecimal color code, such as `\"#ff0000\"` for red." ,
+        "string A color name, such as `\"red\"`." ,
+        "table A [gradient table](../theme_related_libraries/gears.color.html)." ,
+        "cairo.pattern Any valid [Cairo pattern](https://cairographics.org/manual/cairo-cairo-pattern-t.html)." ,
+        "cairo.pattern A texture build from an image by [gears.color.create\\_png\\_pattern](../theme_related_libraries/gears.color.html#create_png_pattern)" ,
+    },
+    shape = {
+        "gears.shape Like `gears.shape.circle`",
+        "function This can be used for custom shapes or to set parameters of existing shapes.",
+    },
+    screen = {
+        "screen A valid screen object such as retured by `awful.screen.focused()` or `mouse.screen`.",
+        "integer A screen global id. Avoid using this since they are unsorted.",
+        "string The `\"primary\"` value is also valid.",
+    },
+    font = {
+        "string A Pango [font description](../widgets/wibox.widget.textbox.html#font).",
+        "string An [XFT string](https://wiki.archlinux.org/title/X_Logical_Font_Description), such as `\"-*-dejavu sans mono-medium-r-normal--*-80-*-*-*-*-iso10646-1\"`.",
+
+    },
+    template = {
+        "table A table containing a widget tree definition. WARNING: This is really a table"..
+        " and **NOT** a widget object. Use the `widget = come.class.here` to define the "..
+        " topmost class rather than construct an instance."
+    },
+    placement = {
+        "function A custom callback to generate *and set* the geometry.",
+        "placement Any of the `awful.placement` function or constructs."
+    }
+}
+
+-- Document the "common" function prototypes. Some common types, such as
+-- the client layouts, the shapes and placements are just glorified functions.
+local callback_fallback_description = {
+    shape = {
+        {"functionparam", "cairo.context", "cr", "A [Cairo context](https://cairographics.org/manual/cairo-cairo-t.html)"},
+        {"functionparam", "number", "width", "The area width."},
+        {"functionparam", "number", "height", "The area height."},
+    },
+    placement = {
+        {"functionreturn", "table", "A table with an `x`, `y`, `width` and `height` keys."},
+        {"functionparam", "object", "obj", "Any object with a `geometry` property or method."},
+        {"functionparam", "table", "args", "The `placement` arguments. See `awful.placement` for a complete list."},
+    },
+}
+
+-- Try to use a single name for common types. For example, mixing `color` and
+-- `gears.color` (which is *not* a type) is confusing. It also allows the
+-- type description to be auto-generated from `type_fallback_description`.
+local type_name_linting = {
+    ["gears.color"]     = "color",
+    ["gears.shape"]     = "shape",
+    ["wibox.widget"]    = "widget",
+    ["gears.surface"]   = "image",
+    ["surface"]         = "image",
+    ["awful.placement"] = "placement",
+    ["double"]          = "number",
+    ["float"]           = "number",
+    ["bool"]            = "boolean",
+}
+
+local metadata_tags = {
+    "propertyunit", "rangestart", "rangestop", "negativeallowed",
+}
+
 local databases, named_tags, item_id, is_init = {}, {}, 1, false
 local all_theme_vars, delayed_collect = nil, {}
 
@@ -135,28 +211,75 @@ end
 
 -- Add the @usebeautiful from the optional/default value.
 local function auto_add_usebeautiful(item)
-        local vars, var_names = {}, {}
+    local vars, var_names = {}, {}
 
-        -- Datamine the default values to autogenerate the @usebeautiful.
-        for parm in ldoc.modules.iter(item.params) do
-            for p in ldoc.modules.iter(item:subparam(parm)) do
-                local def = item:default_of_param(p)
+    -- Datamine the default values to autogenerate the @usebeautiful.
+    for parm in ldoc.modules.iter(item.params) do
+        for p in ldoc.modules.iter(item:subparam(parm)) do
+            local def = item:default_of_param(p)
 
-                if def and def ~= true then
-                    for var in def:gmatch("beautiful[.][a-z_]+") do
-                        if not var_names[var] then
-                            vars[#vars+1] = var
-                        end
-                        var_names[var] = true
+            if def and def ~= true then
+                for var in def:gmatch("beautiful[.][a-z_]+") do
+                    if not var_names[var] then
+                        vars[#vars+1] = var
                     end
+                    var_names[var] = true
                 end
             end
         end
+    end
 
-        for _, var in ipairs(vars) do
-            named_tags.usebeautiful:add_to_item(item, var)
+    for _, var in ipairs(vars) do
+        named_tags.usebeautiful:add_to_item(item, var)
+    end
+end
+
+-- Handle both manually specified callback prototypes and common ones.
+local function parse_properties_function_metadata(item, types)
+    local raw_input  = item.tags["functionnoparam"] and {} or item.tags["functionparam"]
+    local raw_output = item.tags["functionnoreturn"] and {} or item.tags["functionreturn"]
+    local fallback, input, output = true, {}, {}
+
+    for _, arg in ipairs(raw_input or {}) do
+        input[#input+1] = item.parsed_tags["functionparam"][arg]
+        fallback = false
+    end
+
+    for _, ret in ipairs(raw_output or {}) do
+        output[#output+1] = item.parsed_tags["functionreturn"][ret]
+        fallback = false
+    end
+
+    local has_in  = #input > 0 or item.tags["functionnoparam"] ~= nil
+    local has_out = #output > 0 or item.tags["functionnoreturn"] ~= nil
+
+    if fallback then
+        for type in pairs(types) do
+            if callback_fallback_description[type] then
+                for _, row in ipairs(callback_fallback_description[type]) do
+                    local dest = row[1] == "functionparam" and input or output
+
+                    dest[#dest+1] = {
+                        description = row[#row],
+                        type = row[2] and {value = row[2]},
+                        name = row[3] and {value = row[3]},
+                    }
+                end
+
+                -- Assume the fallback is correct.
+                has_out, has_in = true, true
+                break
+            end
         end
     end
+
+    return {
+        input      = input,
+        output     = output,
+        has_input  = has_in,
+        has_output = has_out,
+    }
+end
 
 -- The first stereotype are the constructors.
 create_type  {
@@ -211,8 +334,8 @@ create_type {
             return
         end
 
-        local param = item:subparam(item.params[1])
-        local type  = item:type_of_param(param[1])
+        local param, sublist = item:subparam(item.params[1])
+        local type = item:type_of_param(item.params[1])
 
         -- Force people to use @tparam because it is easier to lint and allows
         -- multiple types.
@@ -269,6 +392,8 @@ create_type {
                     " is a boolean, but is neither `true`, `false` or an alias"
                 )
             end
+
+            item:add_metadata("Default value", ("<code>%s</code>"):format(def))
         else
             -- Properties should have a default value. If they don't or if the
             -- default depends on the context, then `opt=nil` should be used to
@@ -284,30 +409,360 @@ create_type {
 
             -- This adds a default value. It works for LDoc 1.4.5, but is a
             -- private API and might break in the future.
-            if auto_opt then
+            if item.tags["propertydefault"] and item.tags["propertydefault"][1] then
+                item:add_metadata(
+                    "Default value",
+                    ldoc.markup(item.tags["propertydefault"][1])
+                )
+            elseif auto_opt then
                 local mods = item.modifiers[item.parameter]
 
                 if mods then
                     mods[item.params[1]].opt = auto_opt
                 end
-            else
+
+                item:add_metadata("Default value", ("<code>%s</code>"):format(auto_opt))
+            elseif not sublist then
                 -- The default could not be determined automatically, it requires
                 -- an explicit `opt=<value>`.
                 print(
-                    "WARNING: Property", item.name .." from "..item.module.name --,
-                    --"doesn't have a default value. Add `[opt=value]` to the @tparam"
+                    "WARNING: Property", item.name .." from "..item.module.name,
+                    "doesn't have a default value. Add `[opt=value]` to the @tparam"
                 )
             end
         end
 
+        local prop_types, prop_type_names, fallback_callback = {}, {}, false
+
+        -- Type validation.
+        do
+            -- Handle the case where a property has multiple types.
+            local metatypes, table_args = {}, {}
+            local prop_has_nil, prop_has_obj = false, false
+
+            -- Make a copy of the table to avoid recursion.
+            for _, t in ipairs(item.tags["propertytype"] or {}) do
+                metatypes[#metatypes+1] = t
+            end
+
+            for t in item:type_of_param(item.params[1]):gmatch('[^|]+') do
+                if type_name_linting[t] then
+                    print(
+                        "WARNING: Property", item.name .." from "..item.module.name..
+                        " type is '"..t.."'. Please use `"..type_name_linting[t].."'"
+                    )
+                end
+
+                if not prop_type_names[t] then
+                    prop_types[#prop_types+1] = t
+                end
+                prop_type_names[t] = true
+                fallback_callback = fallback_callback or callback_fallback_description[t]
+                prop_has_nil = prop_has_nil or t == "nil"
+                prop_has_obj = prop_has_obj or (t:find('.') and not t:sub(1,5) == "gears")
+            end
+
+            if item.tags["propbeautiful"]
+              and item.tags["propbeautiful"][1]
+              and not prop_type_names["nil"] then
+                print(
+                    "WARNING: Property", item.name .." from "..item.module.name..
+                    " uses `@propbeautiful`, yet, doesn't have `nil` as a type."
+                )
+            end
+
+            if #item.params == 0 then
+                print(
+                    "WARNING: Property", item.name .." from "..item.module.name..
+                    " is missing it's `@tparam` section. Please add it."
+                )
+            elseif #item.params > 1 then
+                for i=2, #item.params do
+                    local splitted = {}
+
+                    for part in item.params[i]:gmatch("[^.]+") do
+                        splitted[#splitted+1] = part
+                    end
+
+                    if #splitted == 1 then
+                        print(
+                            "WARNING: Property", item.name .." from "..item.module.name..
+                            " has a `@tparam` named \""..item.params[i].."\". The only"..
+                            " valid name is \"..item.name\""
+                        )
+                    else
+                        print(
+                            "WARNING: Property", item.name .." from "..item.module.name..
+                            " has a `@tparam` named \""..item.params[i].."\". This is"..
+                            " not valid. It should be `@tparam[opt=...] <type> "..item.name..
+                            ".<something> <description>"
+                        )
+                    end
+                end
+            end
+
+            -- Some properties are table with fixed keys.
+            local param,sublist = item:subparam(item.params[1])
+            if sublist then
+                for _, sub_param in pairs(param) do
+                    local splitted = {}
+
+                    for part in sub_param:gmatch("[^.]+") do
+                        splitted[#splitted+1] = part
+                    end
+
+                    -- The first part should match the property name. If it doesn't,
+                    -- then it's unclear what it is.
+                    if splitted[1] ~= item.name then
+                        print(
+                            "WARNING: Property", item.name .." from "..item.module.name..
+                            " has additional @tparams with unclear meaning. Please"..
+                            " use `@tparam[opt=...] type property_name.subparam Desc...`"
+                        )
+                    else
+                        local rebuilt_name = ""
+
+                        for i=2, #splitted do
+                            rebuilt_name = rebuilt_name .. ((#rebuilt_name > 0) and "." or "") .. splitted[i]
+                        end
+
+                        table_args[#table_args+1] = {
+                            name        = rebuilt_name,
+                            default     = item:default_of_param(sub_param),
+                            type        = item:type_of_param(sub_param),
+                            description = item.params.map[sub_param],
+                        }
+                    end
+                end
+            end
+
+            if prop_has_obj and not prop_has_nil then
+                print(
+                    "WARNING: Property", item.name .." from "..item.module.name..
+                    " has an object type, however it doesn't define the behavior"..
+                    " or `nil` (or lack `@nonnullable`)"
+                )
+            end
+
+            local type_map = {}
+
+            for _, typeinfo in ipairs(metatypes) do
+                local parsed = item.parsed_tags["propertytype"][typeinfo]
+                type_map[parsed.typename.value] = type_map[parsed.typename.value] or {}
+                type_map[parsed.typename.value][#type_map[parsed.typename.value]+1] = parsed
+            end
+
+            local warnings = {}
+
+            -- Check if every possible type is described.
+            for _, t in ipairs(prop_types) do
+                if not type_map[t] then
+                    -- Auto add description for common types.
+                    if type_fallback_description[t] then
+                        for _, entry in ipairs(type_fallback_description[t]) do
+                            metatypes[#metatypes+1] = entry
+                            named_tags.propertytype:add_to_item(item, entry)
+                            type_map[t] = type_map[t] or {}
+                            type_map[t][#type_map[t]+1] = entry
+                        end
+                    elseif #prop_types > 1 then
+                        local warn = "WARNING: Property", item.name .." from "..item.module.name..
+                            " has the undescribed object type \""..t.."\", please add"..
+                            " one (or more) `@propertytype "..t.." <description>` tag."
+                        warnings[t] = warnings[t] or {}
+                        warnings[t][#warnings[t]+1] = warn
+                    end
+                end
+            end
+
+            -- Autofill the meaning of `nil` when there is a fallback `beautiful`
+            -- variable.
+            if prop_type_names["nil"]
+              and (not type_map["nil"])
+              and item.tags["propbeautiful"]
+              and item.tags["propbeautiful"][1] then
+                local modname = item.module.name:gmatch("[^.]+$")()
+                local fallback = "beautiful."..(modname.."_"..item.name):gsub("[.]", "_")
+                local entry = "nil Fallback to the current value of `"..fallback.."`."
+                named_tags.propertytype:add_to_item(item, entry)
+                metatypes[#metatypes+1] = entry
+
+                warnings["nil"] = nil
+            end
+
+            for _, warn in ipairs(warnings) do
+                print(warn)
+            end
+
+            local mt_by_type = {}
+
+            -- Add the metatype section
+            if #metatypes > 0 then
+                local mt = item:add_metadata("Type description")
+
+                for _, typeinfo in ipairs(metatypes) do
+                    local parsed = item.parsed_tags["propertytype"][typeinfo]
+                    local tmt = mt:add_metadata(
+                        "<span class='summary_type'>"..parsed.typename.value.."</span>",
+                        ldoc.markup(parsed.description)
+                    )
+                    mt_by_type[parsed.typename.value] = mt_by_type[parsed.typename.value] or {}
+                    mt_by_type[parsed.typename.value][#mt_by_type[parsed.typename.value]+1] = tmt
+                end
+            end
+
+            if #table_args > 0 then
+                local mt = mt_by_type["table"] and mt_by_type["table"][1] or item:add_metadata("Table keys")
+                for _, key in ipairs(table_args) do
+                    mt:add_metadata(
+                        key.name,
+                        ldoc.markup(key.description),
+                        key.type
+                    )
+                end
+            end
+
+            -- Add the function callback parameters section.
+            if prop_type_names["function"] or fallback_callback then
+                local fp = (mt_by_type["function"] and mt_by_type["function"][1] or item):add_metadata("Function prototype")
+
+                local prototype = parse_properties_function_metadata(item, prop_type_names)
+
+                if not prototype.has_input then
+                    print(
+                        "WARNING: Property ".. item.name .." from "..item.module.name..
+                        " needs either `@functionparam` or  `@functionnoparam` if there"..
+                        " is none."
+                    )
+                elseif #prototype.input == 0 then
+                    fp:add_metadata("Parameters:", "The function has no parameters")
+                else
+                    local fparams = fp:add_metadata("Parameters")
+                    for _, parsed in ipairs(prototype.input) do
+                        if (not parsed.name) or (not parsed.type) then
+                            print(
+                                "WARNING: Property ".. item.name .." from "..item.module.name..
+                                " has a `@functionparam` improperly formatted. The format is "..
+                                 "`<type> <name> [description]`."
+                            )
+                        else
+                            fparams:add_metadata(
+                                parsed.name.value,
+                                ldoc.markup(parsed.description),
+                                parsed.type.value
+                            )
+                        end
+                    end
+                end
+
+                args = item.tags["functionnoreturn"] and {} or item.tags["functionreturn"]
+
+                if not prototype.has_output then
+                    print(
+                        "WARNING: Property ".. item.name .." from "..item.module.name..
+                        " needs either `@functionreturn` or  `@functionnoreturn` if there"..
+                        " is none."
+                    )
+                elseif #prototype.output == 0 then
+                    fp:add_metadata("Return", "The function returns nothing.")
+                elseif #prototype.output == 1 then
+                    fp:add_metadata("Return", ldoc.markup(prototype.output[1].description), prototype.output[1].type.value)
+                else
+                    local md = fp:add_metadata("Return")
+                    for _, parsed in ipairs(prototype.output) do
+                        md:add_metadata(
+                            "",
+                            ldoc.markup(parsed.description),
+                            parsed.type.value
+                        )
+                    end
+                end
+            end
+
+            -- Handle the case where the table is a list.
+            if #prop_types == 1 and prop_types[1] == "table"
+              and #(item.tags["tablerowtype"] or {}) == 0
+              and #table_args == 0 then
+                print(
+                    "WARNING: Property ".. item.name .." from "..item.module.name..
+                    " needs either `@tablerowtype` or additional `@tparam`."
+                )
+            elseif #(item.tags["tablerowtype"] or {}) > 0 then
+                local mt = item:add_metadata("Table content", ldoc.markup(item.tags["tablerowtype"][1]))
+
+                for _, key in ipairs(item.tags["tablerowkey"] or {}) do
+                    local parsed = item.parsed_tags["tablerowkey"][key]
+                    local type, val, desc = parsed.type.value, parsed.name.value, parsed.description
+                    mt:add_metadata("<code>"..val.."</code>", ldoc.markup(desc), type)
+                end
+            end
+        end
+
         -- Allow the template to be shorter by using a for-loop.
-        for _, mt in ipairs {"propertyunit", "rangestart", "rangestop" } do
+        local has_start, has_allow_negative = false, false
+        for _, mt in ipairs(metadata_tags) do
             local tag_desc = named_tags[mt]
 
             if item.tags[mt] and item.tags[mt][1] then
+                has_start = has_start or mt == "rangestart"
+                has_allow_negative = has_allow_negative or mt == "negativeallowed"
                 local title = tag_desc.title or mt
-                item:add_metadata(title, item.tags[mt][1])
+                item:add_metadata(title, ldoc.markup(item.tags[mt][1]))
             end
+        end
+
+        if (prop_type_names["number"] or prop_type_names["integer"]) and not (has_start or has_allow_negative) then
+            print(
+                "WARNING: Property", item.name .." from "..item.module.name..
+                " has numeric type, please add either `@rangestart` or `@negativeallowed false`."
+            )
+        end
+
+        local tdesc = item.params.map[item.params[1]] and item.params.map[item.params[1]] or ""
+
+        -- Auto add the description for "simple" boolean.
+        if #prop_types == 1 and prop_types[1] == "boolean" and tdesc == "" then
+            tdesc = "`true` or `false`."
+        end
+
+        -- Handle custom type description and string "enum".
+        if #(item.tags["propertyvalue"] or {}) > 0 or tdesc ~= "" then
+
+            local mt = item:add_metadata("Valid values", ldoc.markup(tdesc))
+
+            local values, found_default = item.tags["propertyvalue"] or {}, false
+
+            for _, enum_val in ipairs(values) do
+                local parsed = item.parsed_tags["propertyvalue"][enum_val]
+                local val, desc = parsed.value.value, parsed.description
+
+                if val:sub(1,1) ~= '"' or val:sub(#val,#val) ~= '"' then
+                    print(
+                        "WARNING: Value `"..val.."` from property ".. item.name
+                        .." from module "..item.module.name.. "should be a quoted string."
+                    )
+                end
+
+                found_default = found_default or val == def
+
+                mt:add_metadata("<code>"..val.."</code>", ldoc.markup(desc))
+            end
+
+            if def and #values > 0 and def:sub(1,9) ~= "beautiful" and not found_default then
+                print(
+                    "WARNING: Property ".. item.name .." from "..item.module.name..
+                    " has some `@propertyvalue`, but the default value is not among them."
+                )
+            end
+        end
+
+        -- @return is not displayed for properties, something important
+        -- might have been written there, so it's better to block it
+        if item.tags["return"] or item.tags["treturn"] then
+            print(
+                "WARNING: Property ".. item.name .." from "..item.module.name..
+                " has a `@return`, it is not rendered. Remove it."
+            )
         end
     end
 }
@@ -405,12 +860,58 @@ all_theme_vars = create_type {
         end
     end,
     finish_callback = function(item)
-        if item.tags["beautiful_used_by"] then return end
+        if not item.tags["beautiful_used_by"] then
+            -- Every variable should be consumed by something. Better "park" some
+            -- variable in the constructors than leave them disconnected from the
+            -- global model.
+            print("WARNING: ", item.name, "is not used by anything, add @usebeautiful or @propbeautiful")
+        else
+            local prop, mn = nil, item.module.name:match("[.]?([^.]+)$")
+            -- If there is a property with the corresponding name and it doesn't
+            -- mention the `beautiful` variable, that's nearly always a bug.
+            for kind, items in item.module.kinds() do
+                if kind == "Object properties" then
+                    for k in items do
+                        for k2,v2 in k do
+                            if item.name:match("[.]"..mn.."_"..k2.name.."$") then
+                                prop = k2
+                                break
+                            end
+                            if prop then break end
+                        end
+                        break
+                    end
+                end
+            end
 
-        -- Every variable should be consumed by something. Better "park" some
-        -- variable in the constructors than leave them disconnected from the
-        -- global model.
-        print("WARNING: ", item.name, "is not used by anything, add @usebeautiful or @propbeautiful")
+            if prop then
+                local mention = false
+
+                if prop.tags.propbeautiful then mention = true end
+
+                if (not mention) and prop:default_of_param(prop.params[1]) == item.name then
+                    mention = true
+                end
+
+                for _, v in ipairs((not mention) and prop.tags.usebeautiful or {}) do
+                    local parsed = prop.parsed_tags.usebeautiful[v]
+                    if parsed.name.value == item.name then
+                        mention = true
+                        break
+                    end
+                end
+
+                if not mention then
+                    print(
+                        "WARNING: `"..item.name.. "` from `"..item.module.name.."` "..
+                        "seems to match a property called `"..prop.name.."`. However, "..
+                        "there is no mention of this `beautiful` "..
+                        "variable in its documentation. Please add `@propbeautiful` or "..
+                        "`[opt="..item.module.name.."]"
+                    )
+                end
+            end
+        end
     end
 }
 
@@ -624,6 +1125,8 @@ add_custom_tag = function(args)
         end
 
         item.has_show_more = item.has_show_more or (not args.hidden)
+
+        return parsed
     end
 
     custom_tags[#custom_tags+1] = args
@@ -907,6 +1410,13 @@ add_custom_tag {
     auto_subtags = false
 }
 
+-- When a property cannot be `nil` or a function/method cannot return `nil`.
+add_custom_tag {
+    name = "nonnullable",
+    hidden = true,
+    auto_subtags = false
+}
+
 -- When properties are integers, the value usually has a meaning, like the PID,
 -- apoint or a pixel.
 add_custom_tag {
@@ -921,21 +1431,108 @@ add_custom_tag {
 add_custom_tag {
     name = "propertyvalue",
     hidden = true,
-    auto_subtags = false
+    auto_subtags = false,
+    params = {
+        { name = "value" },
+    },
+}
+
+-- Some defaults are not values. They are either algorithms, chains od fallbacks
+-- or somehow inherited. `ldoc` `opt` can only parse single "words", thus a new
+-- tag is needed for textual description of the default value.
+add_custom_tag {
+    name = "propertydefault",
+    hidden = true,
+    auto_subtags = false,
+}
+
+-- Some properties have multiple possible types. Some also might support multiple
+-- "logical type" for the same datatype. For example `string` can be a path or
+-- some CSS/SVG or an integer have different meaning for positive vs.
+-- negative/zeroed.
+--
+-- This tag helps document those nuances.
+add_custom_tag {
+    name = "propertytype",
+    hidden = true,
+    auto_subtags = false,
+    params = {
+        { name = "typename" },
+    },
 }
 
 -- Some values, mostly bytes, have a minimum and maximum value.
 add_custom_tag {
     name = "rangestart",
-    title = "Range starts",
+    title = "Minimum value",
     hidden = true,
     auto_subtags = false
 }
 add_custom_tag {
     name = "rangestop",
-    title = "Range stops",
+    title = "Maximum value",
     hidden = true,
     auto_subtags = false
+}
+add_custom_tag {
+    name = "negativeallowed",
+    title = "Negative allowed",
+    hidden = true,
+    auto_subtags = false,
+    params = {
+        { name = "allowed" },
+    },
+}
+
+-- A lot of properties have the `table` value. Lua tables can be anything from
+-- "struct" to list to objects. For lists, then the type of the row needs to
+-- be specified.
+add_custom_tag {
+    name = "tablerowtype",
+    title = "Table content",
+    hidden = true,
+    auto_subtags = false,
+}
+add_custom_tag {
+    name = "tablerowkey",
+    title = "Row keys",
+    hidden = true,
+    auto_subtags = false,
+    params = {
+        { name = "type" },
+        { name = "name" },
+    },
+}
+
+-- When a `@property` takes a `function` value, then the function arguments
+-- much be provided. If there is none, then `@functionnoparam` must be explicitly
+-- specified. Same for the return value(s).
+add_custom_tag {
+    name = "functionnoparam",
+    hidden = true,
+    auto_subtags = false,
+}
+add_custom_tag {
+    name = "functionparam",
+    hidden = true,
+    auto_subtags = false,
+    params = {
+        { name = "type" },
+        { name = "name" },
+    },
+}
+add_custom_tag {
+    name = "functionnoreturn",
+    hidden = true,
+    auto_subtags = false,
+}
+add_custom_tag {
+    name = "functionreturn",
+    hidden = true,
+    auto_subtags = false,
+    params = {
+        { name = "type" },
+    },
 }
 
 add_custom_tag {
@@ -1115,9 +1712,19 @@ local named_args = {
     [ '(<span class="optional_param">args</span>)' ] = true,
 }
 
+-- Some values come from external sources, we can't enforce the naming conventions
+-- on them. So far, they are all keyboard related.
 local param_name_whitelist = {
-    Mod2 = true,
-    Lock = true,
+    Mod2 = true, Lock = true, Control = true, Mod1 = true, ISO_Level3_Shift = true,
+    Mod4 = true, Insert = true, Delete = true, Next = true, Prior = true, Left = true,
+    Up = true, Right = true, Down = true, KP_End = true, KP_Down = true,
+    KP_Next = true, KP_Left = true, KP_Begin = true, KP_Right = true,
+    KP_Home = true, KP_Up = true, KP_Prior = true, KP_Insert = true, KP_Delete = true,
+    KP_Divide = true, KP_Multiply = true, KP_Subtract = true, KP_Add = true,
+    KP_Enter = true, Escape = true, Tab = true, space = true, Return = true,
+    XF86MonBrightnessUp = true, XF86MonBrightnessDown = true,
+    XF86AudioRaiseVolume = true, XF86AudioLowerVolume = true, XF86AudioMute = true,
+    XF86AudioPlay = true, XF86AudioPrev = true, XF86AudioNext = true, XF86AudioStop = true,
 }
 
 -- Sections which are hidden by default, but visible when clicked.
@@ -1293,13 +1900,15 @@ local function init_custom_types(item)
 
     -- Recursive way to annotate property-like objects.
     local amt
-    amt = function(self, title, value, children)
+    amt = function(self, title, description, datatype)
         self.metadata[#self.metadata+1] = {
             title        = title,
-            value        = value,
-            children     = children or {},
+            datatype     = datatype,
+            description  = description,
+            metadata     = {},
             add_metadata = amt
         }
+        return self.metadata[#self.metadata]
     end
     item.add_metadata = amt
 
