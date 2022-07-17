@@ -650,6 +650,8 @@ pre .url { color: #272fc2; text-decoration: underline; }
 /* Inheritance diagram */
 .inheritance .inheritance__level {
     list-style: none;
+    padding-top: 0px;
+    padding-left: 30px;
 }
 
 .inheritance .inheritance__level--root {
