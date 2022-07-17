@@ -83,6 +83,18 @@ function filesystem.dir_readable(path)
         gfileinfo:get_attribute_boolean("access::can-read")
 end
 
+--- Check if a path exists, is writable and a directory.
+-- @tparam string path The directory path.
+-- @treturn boolean True if path exists and is writable.
+-- @staticfct gears.filesystem.dir_writable
+function filesystem.dir_writable(path)
+    local gfile = Gio.File.new_for_path(path)
+    local gfileinfo = gfile:query_info("standard::type,access::can-write",
+                                       Gio.FileQueryInfoFlags.NONE)
+    return gfileinfo and gfileinfo:get_file_type() == "DIRECTORY" and
+        gfileinfo:get_attribute_boolean("access::can-write")
+end
+
 --- Check if a path is a directory.
 -- @tparam string path The directory path
 -- @treturn boolean True if path exists and is a directory.

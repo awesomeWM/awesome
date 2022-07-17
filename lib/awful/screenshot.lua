@@ -41,8 +41,9 @@ local function get_default_dir()
   
   if home_dir then
     home_dir = string.gsub(home_dir, '/*$', '/') .. 'Images/'
-    if os.execute("bash -c \"if [ -d \\\"" .. home_dir .. "\\\" -a -w \\\"" ..
-                  home_dir ..  "\\\" ] ; then exit 0 ; else exit 1 ; fi ;\"") then
+    if gears.filesystem.dir_writable(home_dir) then
+--    if os.execute("bash -c \"if [ -d \\\"" .. home_dir .. "\\\" -a -w \\\"" ..
+--                  home_dir ..  "\\\" ] ; then exit 0 ; else exit 1 ; fi ;\"") then
       return home_dir
     end
   end
@@ -81,9 +82,7 @@ local function check_directory(directory)
     -- promise that's meaningful if you think about it from a bash perspective)
     local bash_esc_dir = string.gsub(directory, "'", "'\\'\\\\\\'\\''")
 
-    if os.execute("bash -c 'if [ -d '\\''" .. bash_esc_dir ..
-                          "'\\'' -a -w '\\''" ..  bash_esc_dir ..
-                  "'\\'' ] ; then exit 0 ; else exit 1 ; fi'") then
+    if gears.filesystem.dir_writable(directory) then
       return directory
     else
       -- Currently returns nil if the requested directory string cannot be used.
@@ -160,9 +159,9 @@ local function parse_filepath(filepath)
         return directory, string.sub(base_name, 1, date_start - 1)
       end
 
-    end
+      return directory
 
-    return directory
+    end
 
   end
 
@@ -391,7 +390,7 @@ function default_on_success_cb(ss)
 end
 
 -- Internal function exected when a root window screenshot is taken.
-function root_screenshot(ss)
+function screenshot_methods.root_screenshot(ss)
   local w, h = root.size()
   ss._private.geometry = {x = 0, y = 0, width = w, height = h}
   ss:filepath_builder()
@@ -400,7 +399,7 @@ function root_screenshot(ss)
 end
 
 -- Internal function executed when a physical screen screenshot is taken.
-function screen_screenshot(ss)
+function screenshot_methods.screen_screenshot(ss)
 
   -- note the use of _private because screen has no setter
   if ss.screen then
@@ -420,7 +419,7 @@ function screen_screenshot(ss)
 end
 
 -- Internal function executed when a client window screenshot is taken.
-function client_screenshot(ss)
+function screenshot_methods.client_screenshot(ss)
 	--
   -- note the use of _private becuase client has no setter
   if not ss.client then
@@ -434,7 +433,7 @@ function client_screenshot(ss)
 end
 
 -- Internal function executed when a snipper screenshot tool is launched.
-function snipper_screenshot(ss)
+function screenshot_methods.snipper_screenshot(ss)
 
   if type(ss._private.on_success_cb) ~= "function" then
     ss._private.on_success_cb = default_on_success_cb -- the cb has no setter
@@ -449,7 +448,7 @@ end
 
 -- Internal function executed when a snip screenshow (a defined geometry) is
 -- taken.
-function snip_screenshot(ss)
+function screenshot_methods.snip_screenshot(ss)
 
   local root_w, root_h
   local root_intrsct
@@ -483,19 +482,13 @@ function snip_screenshot(ss)
 
 end
 
--- Screenshot methods
-screenshot_methods.root = root_screenshot
-screenshot_methods.screen = screen_screenshot
-screenshot_methods.client = client_screenshot
-screenshot_methods.snipper = snipper_screenshot
-screenshot_methods.snip = snip_screenshot
 -- Default method is root
 screenshot_methods.default = root_screenshot
 local default_method_name = "root"
 
 -- Module routines
 
---- Function to initialize the screenshot library
+--- Function to initialize the screenshot library.
 --
 -- Currently only sets the screenshot directory, the filename, prefix and the
 -- snipper tool outline color. More initialization can be added as the API
@@ -554,7 +547,7 @@ function module.root(args)
   return module(args)
 end
 
---- Take physical screen screenshots
+--- Take physical screen screenshots.
 --
 -- This is a wrapper constructor for a physical screen screenshot. See the main
 -- constructor, new(), for details about the arguments.
@@ -568,7 +561,7 @@ function module.screen(args)
   return module(args)
 end
 
---- Take client window screenshots
+--- Take client window screenshots.
 --
 -- This is a wrapper constructor for a client window screenshot. See the main
 -- constructor, new(), for details about the arguments.
@@ -585,7 +578,7 @@ function module.client(args)
   return module(args)
 end
 
---- Launch an interactive snipper tool to take cropped shots
+--- Launch an interactive snipper tool to take cropped shots.
 --
 -- This is a wrapper constructor for a snipper tool screenshot. See the main
 -- constructor, new(), for details about the arguments.
@@ -599,7 +592,7 @@ function module.snipper(args)
   return module(args)
 end
 
---- Take a cropped screenshot of a defined geometry
+--- Take a cropped screenshot of a defined geometry.
 --
 -- This is a wrapper constructor for a snip screenshot (defined geometry). See
 -- the main constructor, new(), for details about the arguments.
@@ -616,16 +609,15 @@ end
 -- Various accessors for the screenshot object returned by any public
 -- module method.
 
---- Get screenshot directory property
+--- Get screenshot directory property.
 --
 -- @property directory
 function screenshot:get_directory()
   return self._private.directory
 end
 
---- Set screenshot directory property
+--- Set screenshot directory property.
 --
--- @property directory
 -- @tparam string directory The path to the screenshot directory
 function screenshot:set_directory(directory)
   if type(directory) == "string" then
@@ -636,16 +628,15 @@ function screenshot:set_directory(directory)
   end
 end
 
---- Get screenshot prefix property
+--- Get screenshot prefix property.
 --
 -- @property prefix
 function screenshot:get_prefix()
   return self._private.prefix
 end
 
---- Set screenshot prefix property
+--- Set screenshot prefix property.
 --
--- @property prefix
 -- @tparam string prefix The prefix prepended to screenshot files names.
 function screenshot:set_prefix(prefix)
   if type(prefix) == "string" then
@@ -656,16 +647,15 @@ function screenshot:set_prefix(prefix)
   end
 end
 
---- Get screenshot filepath
+--- Get screenshot filepath.
 --
 -- @property filepath
 function screenshot:get_filepath()
   return self._private.filepath
 end
 
---- Set screenshot filepath
+--- Set screenshot filepath.
 --
--- @property filepath
 -- @tparam[opt] string fp The full path to the filepath
 function screenshot:set_filepath(fp)
   self:filepath_builder({filepath = fp})
@@ -678,7 +668,7 @@ function screenshot:get_method_name()
   return self._private.method_name
 end
 
---- Get screenshot screen
+--- Get screenshot screen.
 --
 -- @property screen
 function screenshot:get_screen()
@@ -689,7 +679,7 @@ function screenshot:get_screen()
   end
 end
 
---- Get screenshot client
+--- Get screenshot client.
 --
 -- @property client
 function screenshot:get_client()
@@ -700,14 +690,14 @@ function screenshot:get_client()
   end
 end
 
---- Get screenshot geometry
+--- Get screenshot geometry.
 --
 -- @property geometry
 function screenshot:get_geometry()
   return self._private.geometry
 end
 
---- Get screenshot surface
+--- Get screenshot surface.
 --
 -- @property surface
 function screenshot:get_surface()
@@ -716,9 +706,9 @@ end
 
 -- Methods for the screenshot object returned from taking a screenshot.
 
---- Set the filepath to save a screenshot
+--- Set the filepath to save a screenshot.
 --
--- @function awful.screenshot:filepath_builder
+-- @method awful.screenshot:filepath_builder
 -- @tparam[opt] table args Table with the filepath parameters
 function screenshot:filepath_builder(args)
 
@@ -784,9 +774,9 @@ function screenshot:filepath_builder(args)
 
 end
 
---- Save screenshot
+--- Save screenshot.
 --
--- @function awful.screenshot:save
+-- @method awful.screenshot:save
 -- @tparam[opt] table args Table with the filepath parameters
 function screenshot:save(args)
 
@@ -798,21 +788,20 @@ function screenshot:save(args)
 
 end
 
---- Screenshot constructor - it is possible to call this directly, but it is
+--- Screenshot constructor - it is possible to call this directly, but it is.
 --  recommended to use the helper constructors, such as awful.screenshot.root
 --
--- Possible args include:
---   directory [string]: the path to the screenshot directory
---   prefix [string]: the prefix to prepend to screenshot file names
---   frame_color [gears color]: the color of the frame for a snipper tool
---   method [string]: the method of screenshot to take (i.e. root window, etc).
---   screen [index or screen]: the screen for a physical screen screenshot
---   on_success_cb [function]: the callback to run on the screenshot taken with
---                  a snipper tool
---   geometry [gears geometry]: a geometry object for a snip screenshot
---
--- @constructorfct awful.screenshot.new
--- @tparam[opt] table args Table with the constructor parameters
+-- @constructorfct awful.screenshot
+-- @tparam[opt] string args.directory The path to the screenshot directory.
+-- @tparam[opt] string args.prefix The prefix to prepend to screenshot file names.
+-- @tparam[opt] color args.frame_color The color of the frame for a snipper tool as
+--              a gears color.
+-- @tparam[opt] string args.method The method of screenshot to take (i.e. root window, etc).
+-- @tparam[opt] screen args.screen The screen for a physical screen screenshot. Can be a
+--              screen object of number.
+-- @tparam[opt] function args.on_success_cb: the callback to run on the screenshot taken
+--              with a snipper tool.
+-- @tparam[opt] geometry args.geometry A gears geometry object for a snip screenshot.
 local function new(_, args)
 
   local args = (type(args) == "table" and args) or {}
