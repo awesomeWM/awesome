@@ -1026,6 +1026,10 @@ event_handle_selectionclear(xcb_selection_clear_event_t *ev)
 
 static void
 event_handle_damage_notify(xcb_damage_notify_event_t *ev) {
+    if (ev->drawable == globalconf.systray.window) {
+        luaA_systray_invalidate();
+        xcb_damage_subtract(globalconf.connection, ev->damage, None, None);
+    }
 }
 
 /** \brief awesome xerror function.

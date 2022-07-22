@@ -45,6 +45,7 @@
 
 #include <cairo-xcb.h>
 #include <xcb/shape.h>
+#include <xcb/composite.h>
 
 lua_class_t drawin_class;
 
@@ -451,6 +452,8 @@ drawin_allocator(lua_State *L)
                           globalconf.default_cmap,
                           xcursor_new(globalconf.cursor_ctx, xcursor_font_fromstr(w->cursor))
                       });
+    if (globalconf.is_compositing)
+        xcb_composite_redirect_subwindows(globalconf.connection, w->window, XCB_COMPOSITE_REDIRECT_MANUAL);
     xwindow_set_class_instance(w->window);
     xwindow_set_name_static(w->window, "Awesome drawin");
 

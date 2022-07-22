@@ -809,6 +809,8 @@ main(int argc, char **argv)
         xcb_discard_reply(globalconf.connection,
                 xcb_damage_query_version(globalconf.connection, 1, 0).sequence);
 
+    globalconf.is_compositing = globalconf.have_composite && globalconf.have_damage;
+
     event_init();
 
     /* Allocate the key symbols */

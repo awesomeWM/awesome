@@ -130,6 +130,8 @@ typedef struct
     bool have_composite;
     /** Check for Damage extenion */
     bool have_damage;
+    /** Enable compositing features? */
+    bool is_compositing;
     /** Custom searchpaths are present, the runtime is tinted */
     bool have_searchpaths;
     /** When --no-argb is used in the modeline or command line */

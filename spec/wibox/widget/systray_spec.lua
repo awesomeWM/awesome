@@ -27,7 +27,10 @@ _G.awesome = {
             systray_arguments = { first_arg, ... }
         end
         return num_systray_icons
-    end
+    end,
+    systray_surface = function()
+        return nil
+    end,
 }
 _G.screen = {
     connect_signal = function() end

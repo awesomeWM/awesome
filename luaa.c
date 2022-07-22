@@ -1090,6 +1090,7 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
         { "disconnect_signal", luaA_awesome_disconnect_signal },
         { "emit_signal", luaA_awesome_emit_signal },
         { "systray", luaA_systray },
+        { "systray_surface", luaA_systray_surface },
         { "load_image", luaA_load_image },
         { "pixbuf_to_surface", luaA_pixbuf_to_surface },
         { "set_preferred_icon_size", luaA_set_preferred_icon_size },
