@@ -116,6 +116,8 @@ jobs:
             libxcb-shape0-dev \
             libxcb-util0-dev \
             libxcb-xfixes0-dev \
+            libxcb-composite0-dev \
+            libxcb-damage0-dev \
             libxcb-xinerama0-dev \
             libxcb-xkb-dev \
             libxcb-xrm-dev \

@@ -55,6 +55,8 @@
 #include <xcb/xtest.h>
 #include <xcb/shape.h>
 #include <xcb/xfixes.h>
+#include <xcb/composite.h>
+#include <xcb/damage.h>
 
 #include <glib-unix.h>
 
@@ -725,6 +727,8 @@ main(int argc, char **argv)
     xcb_prefetch_extension_data(globalconf.connection, &xcb_xinerama_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_shape_id);
     xcb_prefetch_extension_data(globalconf.connection, &xcb_xfixes_id);
+    xcb_prefetch_extension_data(globalconf.connection, &xcb_composite_id);
+    xcb_prefetch_extension_data(globalconf.connection, &xcb_damage_id);
 
     if (xcb_cursor_context_new(globalconf.connection, globalconf.screen, &globalconf.cursor_ctx) < 0)
         fatal("Failed to initialize xcb-cursor");
@@ -792,6 +796,18 @@ main(int argc, char **argv)
     if (globalconf.have_xfixes)
         xcb_discard_reply(globalconf.connection,
                 xcb_xfixes_query_version(globalconf.connection, 1, 0).sequence);
+
+    query = xcb_get_extension_data(globalconf.connection, &xcb_composite_id);
+    globalconf.have_composite = query && query->present;
+    if (globalconf.have_composite)
+        xcb_discard_reply(globalconf.connection,
+                xcb_composite_query_version(globalconf.connection, 0, 3).sequence);
+
+    query = xcb_get_extension_data(globalconf.connection, &xcb_damage_id);
+    globalconf.have_damage = query && query->present;
+    if (globalconf.have_damage)
+        xcb_discard_reply(globalconf.connection,
+                xcb_damage_query_version(globalconf.connection, 1, 0).sequence);
 
     event_init();
 

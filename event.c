@@ -47,6 +47,7 @@
 #include <xcb/xcb_event.h>
 #include <xcb/xkb.h>
 #include <xcb/xfixes.h>
+#include <xcb/damage.h>
 
 #define DO_EVENT_HOOK_CALLBACK(type, xcbtype, xcbeventprefix, arraytype, match) \
     static void \
@@ -1023,6 +1024,10 @@ event_handle_selectionclear(xcb_selection_clear_event_t *ev)
         selection_handle_selectionclear(ev);
 }
 
+static void
+event_handle_damage_notify(xcb_damage_notify_event_t *ev) {
+}
+
 /** \brief awesome xerror function.
  * There's no way to check accesses to destroyed windows, thus those cases are
  * ignored (especially on UnmapNotify's).
@@ -1143,6 +1148,7 @@ void event_handle(xcb_generic_event_t *event)
     EXTENSION_EVENT(shape, XCB_SHAPE_NOTIFY, event_handle_shape_notify);
     EXTENSION_EVENT(xkb, 0, event_handle_xkb_notify);
     EXTENSION_EVENT(xfixes, XCB_XFIXES_SELECTION_NOTIFY, event_handle_xfixes_selection_notify);
+    EXTENSION_EVENT(damage, XCB_DAMAGE_NOTIFY, event_handle_damage_notify);
 #undef EXTENSION_EVENT
 }
 
@@ -1165,6 +1171,10 @@ void event_init(void)
     reply = xcb_get_extension_data(globalconf.connection, &xcb_xfixes_id);
     if (reply && reply->present)
         globalconf.event_base_xfixes = reply->first_event;
+
+    reply = xcb_get_extension_data(globalconf.connection, &xcb_damage_id);
+    if (reply && reply->present)
+        globalconf.event_base_damage = reply->first_event;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

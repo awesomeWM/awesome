@@ -126,6 +126,10 @@ typedef struct
     bool have_xkb;
     /** Check for XFixes extension */
     bool have_xfixes;
+    /** Check for Composite extension */
+    bool have_composite;
+    /** Check for Damage extenion */
+    bool have_damage;
     /** Custom searchpaths are present, the runtime is tinted */
     bool have_searchpaths;
     /** When --no-argb is used in the modeline or command line */
@@ -134,6 +138,7 @@ typedef struct
     uint8_t event_base_xkb;
     uint8_t event_base_randr;
     uint8_t event_base_xfixes;
+    uint8_t event_base_damage;
     /** Clients list */
     client_array_t clients;
     /** Embedded windows */
