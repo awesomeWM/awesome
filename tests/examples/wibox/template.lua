@@ -52,7 +52,7 @@ for _ = 1, 10 do
 end
 
 -- Get the example fallback size (the tests can return a size if the want)
-local f_w, f_h = container:fit({dpi=96}, 9999, 9999)
+local f_w, f_h = container:fit({dpi=96}, w or 9999, h or 9999)
 
 -- There is an overhead that cause testbox "...", add 10 until someone
 -- figures out the real equation
