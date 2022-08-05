@@ -169,9 +169,9 @@ widget.labels = {
     -- Basic multimedia keys:
     XF86MonBrightnessUp   = "🔆+",
     XF86MonBrightnessDown = "🔅-",
-    XF86AudioRaiseVolume = "Vol+",
-    XF86AudioLowerVolume = "Vol-",
-    XF86AudioMute = "Mute",
+    XF86AudioRaiseVolume = "🕩+",
+    XF86AudioLowerVolume = "🕩-",
+    XF86AudioMute = "⏹",
     XF86AudioPlay = "⏯",
     XF86AudioPrev = "⏮",
     XF86AudioNext = "⏭",
