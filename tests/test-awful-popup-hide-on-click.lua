@@ -20,6 +20,7 @@ end
 runner.run_steps {
     function()
         assert(p.visible)
+        assert(not p.hide_on_click)
         return true
     end,
     click(p.x, p.y),
@@ -31,6 +32,7 @@ runner.run_steps {
     click(p.x, p.y),
     function()
         assert(not p.visible)
+        assert(p.hide_on_click)
         return true
     end,
 }

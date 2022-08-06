@@ -318,6 +318,9 @@ function popup:set_hide_on_right_click(value)
     )
     self:set_hide_on_click(value)
 end
+function popup:get_hide_on_click()
+    return self:is_signal_connected("button::press", self._private.hide_fct)
+end
 
 --- The popup minimum width.
 --
