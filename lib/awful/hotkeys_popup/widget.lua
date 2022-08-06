@@ -171,10 +171,11 @@ widget.labels = {
     XF86MonBrightnessDown = "🔅-",
     XF86AudioRaiseVolume = "🕩+",
     XF86AudioLowerVolume = "🕩-",
-    XF86AudioMute = "⏹",
+    XF86AudioMute = "Mute",
     XF86AudioPlay = "⏯",
     XF86AudioPrev = "⏮",
     XF86AudioNext = "⏭",
+    XF86AudioStop = "⏹",
 }
 --- Hotkeys widget background color.
 -- @beautiful beautiful.hotkeys_bg
