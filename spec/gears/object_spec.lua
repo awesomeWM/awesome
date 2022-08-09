@@ -185,6 +185,20 @@ describe("gears.object", function()
             object{enable_auto_signals=true, enable_properties=false}
         end)
     end)
+
+    it("is_signal_connected", function()
+        local cb = function()end
+        assert.is_false(obj:is_signal_connected("signal", cb))
+        obj:connect_signal("signal", cb)
+        assert.is_true(obj:is_signal_connected("signal", cb))
+    end)
+
+    it("is_weak_signal_connected", function()
+        local cb = function()end
+        assert.is_false(obj:is_weak_signal_connected("signal", cb))
+        obj:weak_connect_signal("signal", cb)
+        assert.is_true(obj:is_weak_signal_connected("signal", cb))
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

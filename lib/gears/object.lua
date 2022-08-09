@@ -60,6 +60,21 @@ function object:connect_signal(name, func)
     sig.strong[func] = true
 end
 
+--- Check if the callback is connected to the signal.
+--
+-- @tparam string name The name of the signal.
+-- @tparam function func The callback to check if connected.
+-- @treturn boolean Whether the signal is connected.
+-- @method is_signal_connected
+function object:is_signal_connected(name, func)
+    assert(
+        type(func) == "function",
+        "callback must be a function, got: " .. type(func)
+    )
+    local sig = find_signal(self, name)
+    return not not (sig and sig.strong[func])
+end
+
 -- Register a global signal receiver.
 function object:_connect_everything(callback)
     table.insert(self._global_receivers, callback)
@@ -112,6 +127,21 @@ function object:weak_connect_signal(name, func)
     local sig = find_signal(self, name)
     assert(sig.strong[func] == nil, "Trying to connect a weak callback which is already connected strongly")
     sig.weak[func] = make_the_gc_obey(func)
+end
+
+--- Check if the callback is weakly connected to the signal.
+--
+-- @tparam string name The name of the signal.
+-- @tparam function func The callback to check if connected.
+-- @treturn boolean Whether the signal is connected.
+-- @method is_weak_signal_connected
+function object:is_weak_signal_connected(name, func)
+    assert(
+        type(func) == "function",
+        "callback must be a function, got: " .. type(func)
+    )
+    local sig = find_signal(self, name)
+    return not not (sig and sig.weak[func])
 end
 
 --- Disonnect from a signal.
