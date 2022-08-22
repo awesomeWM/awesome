@@ -170,10 +170,12 @@
  *
  * @property geometry
  * @tparam table geometry
- * @tfield integer table.x The horizontal position.
- * @tfield integer table.y The vertical position.
- * @tfield integer table.width The width.
- * @tfield integer table.height The height.
+ * @tparam integer geometry.x The horizontal position.
+ * @tparam integer geometry.y The vertical position.
+ * @tparam integer geometry.width The width.
+ * @tparam integer geometry.height The height.
+ * @propertydefault Either from `xrandr` or from `fake_resize`.
+ * @propertyunit pixel
  * @propemits false false
  * @readonly
  */
@@ -205,6 +207,9 @@
  *
  * @property index
  * @tparam integer index
+ * @propertydefault The index is not derived from the geometry. It may or may
+ *  not be from `xrandr`. It isn't a good idea to rely on indices.
+ * @negativeallowed false
  * @see screen
  * @readonly
  */
@@ -222,10 +227,13 @@
  *
  * @property workarea
  * @tparam table workarea
- * @tfield integer table.x The horizontal position
- * @tfield integer table.y The vertical position
- * @tfield integer table.width The width
- * @tfield integer table.height The height
+ * @tparam integer workarea.x The horizontal position
+ * @tparam integer workarea.y The vertical position
+ * @tparam integer workarea.width The width
+ * @tparam integer workarea.height The height
+ * @propertyunit pixel
+ * @propertydefault Based on `geometry` with the `awful.wibar` and docks area
+ *  substracted.
  * @propemits false false
  * @see client.struts
  * @readonly
