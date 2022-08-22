@@ -140,15 +140,17 @@ end
 --
 -- For this to be `true` by default, pass `autostart` to the constructor.
 --
--- @property[opt=false] started
--- @tparam boolean started
+-- @property started
+-- @tparam[opt=false] boolean started
 -- @see start
 -- @see stop
 
 --- The timer timeout value.
 --
 -- @property timeout
--- @tparam number timeout
+-- @tparam[opt=0] number timeout
+-- @propertyunit second
+-- @negativeallowed false
 -- @propemits true false
 
 local timer_instance_mt = {
