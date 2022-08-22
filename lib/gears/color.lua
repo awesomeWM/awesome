@@ -361,7 +361,7 @@ end
 -- @staticfct gears.color.change_opacity
 -- @tparam string|pattern input The input color.
 -- @tparam number opacity A floating point number between 0 and 1.
--- @treturn The new color if successful or `input` if invalid.
+-- @treturn color The new color if successful or `input` if invalid.
 function color.change_opacity(input, opacity)
     input = color.create_pattern(input)
 
