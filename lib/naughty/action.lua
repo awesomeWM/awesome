@@ -27,6 +27,7 @@ local action = {}
 -- The action name.
 -- @property name
 -- @tparam string name The name.
+-- @propertydefault This is provided by DBus.
 -- @propemits true false
 
 -- If the action is selected.
@@ -35,17 +36,19 @@ local action = {}
 -- implement keyboard navigation.
 --
 -- @property selected
--- @tparam boolean selected
+-- @tparam[opt=false] boolean selected
 -- @propemits true false
 
 --- The action position (index).
 -- @property position
--- @tparam number position
+-- @tparam integer position
+-- @propertydefault This is provided by DBus.
 -- @propemits true false
+-- @negativeallowed false
 
 --- The action icon.
 -- @property icon
--- @tparam gears.surface|string icon
+-- @tparam[opt=nil] image|string|nil icon
 -- @propemits true false
 
 --- If the action should hide the label and only display the icon.
