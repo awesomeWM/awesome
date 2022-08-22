@@ -190,23 +190,22 @@ local layoutlist = {}
 --- The delegate widget template.
 --
 -- @property widget_template
--- @tparam[opt=nil] table widget_template
+-- @tparam[opt=nil] template|nil widget_template
 -- @propemits true false
 
 --- The layoutlist screen.
 --
 -- @property screen
 -- @tparam screen screen
+-- @propertydefault Obtained from the constructor.
 
 --- A function that returns the list of layout to display.
 --
 -- @property source
 -- @tparam[opt=awful.widget.layoutlist.source.for_screen] function source
-
---- The layoutlist filter function.
---
--- @property filter
--- @tparam[opt=awful.widget.layoutlist.source.for_screen] function filter
+-- @functionparam screen s The layoutlist screen.
+-- @functionparam table metadata Various metadata.
+-- @functionreturn table The list of layouts.
 
 --- The default foreground (text) color.
 --
@@ -281,17 +280,21 @@ local layoutlist = {}
 
 --- The currenly displayed layouts.
 -- @property layouts
--- @tparam table layouts
+-- @tparam[opt={}] table layouts
+-- @tablerowtype A list of `awful.layout.suit`.
 
 --- The currently selected layout.
 -- @property current_layout
--- @tparam layout current_layout
+-- @tparam[opt=nil] layout|nil current_layout
+-- @readonly
 
 --- The current number of layouts.
 --
 -- @property count
 -- @readonly
 -- @tparam number count The number of layouts.
+-- @propertydefault This current number of layouts.
+-- @negativeallowed false
 -- @propemits true false
 
 function layoutlist:get_layouts()
