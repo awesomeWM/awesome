@@ -35,6 +35,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @widgetmod awful.widget.taglist
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -419,6 +420,7 @@ end
 --- The taglist screen.
 --
 -- @property screen
+-- @propertydefault Obtained from the constructor.
 -- @tparam screen screen
 
 --- Set the taglist layout.
@@ -429,9 +431,15 @@ end
 
 --- The current number of tags.
 --
+-- Note that the `tasklist` is usually lazy-loaded. Reading this property
+-- may cause the widgets to be created. Depending on where the property is called
+-- from, it might, in theory, cause an infinite loop.
+--
 -- @property count
 -- @readonly
 -- @tparam number count The number of tags.
+-- @propertydefault This current number of tags.
+-- @negativeallowed false
 -- @propemits true false
 
 function taglist:set_base_layout(layout)
@@ -483,11 +491,21 @@ end
 --
 -- @property update_function
 -- @tparam function update_function
+-- @propertydefault The default function delegate everything to the `widget_template`.
+-- @functionparam widget layout The base layout object.
+-- @functionparam table buttons The buttons for this tag entry (see below).
+-- @functionparam string label The tag name.
+-- @functionparam table data Arbitrary metadate.
+-- @functionparam table tags The list of tags (ordered).
+-- @functionparam table metadata Other values.
+-- @functionnoreturn
 
 --- A function to restrict the content of the taglist.
 --
 -- @property filter
--- @tparam function filter
+-- @tparam[opt=nil] function|nil filter
+-- @functionparam tag t The tag to accept or reject.
+-- @functionreturn boolean `true` if the tag is accepter or `false` if it is rejected.
 -- @see source
 -- @see awful.widget.taglist.filter.noempty
 -- @see awful.widget.taglist.filter.selected
@@ -497,14 +515,17 @@ end
 --- The function used to gather the group of tags.
 --
 -- @property source
--- @tparam function source
+-- @tparam[opt=awful.widget.taglist.source.for_screen] function source
+-- @functionparam screen s The taglist screen.
+-- @functionparam table metadata Various metadata.
+-- @functionreturn table The list of tags
 -- @see filter
 -- @see awful.widget.taglist.source.for_screen
 
 --- A templete used to genetate the individual tag widgets.
 --
 -- @property widget_template
--- @tparam table widget_template
+-- @tparam[opt=nil] template|nil widget_template
 
 for _, prop in ipairs { "filter", "update_function", "widget_template", "source", "screen" } do
     taglist["set_"..prop] = function(self, value)
@@ -560,11 +581,16 @@ end
 -- @tparam[opt=beautiful.taglist_disable_icon] string args.style.disable_icon
 -- @tparam[opt=beautiful.taglist_font] string args.style.font
 -- @tparam[opt=beautiful.taglist_spacing] number args.style.spacing The spacing between tags.
--- @tparam[opt=beautiful.taglist_squares_sel] string args.style.squares_sel A user provided image for selected squares.
--- @tparam[opt=beautiful.taglist_squares_unsel] string args.style.squares_unsel A user provided image for unselected squares.
--- @tparam[opt=beautiful.taglist_squares_sel_empty] string args.style.squares_sel_empty A user provided image for selected squares for empty tags.
--- @tparam[opt=beautiful.taglist_squares_unsel_empty] string args.style.squares_unsel_empty A user provided image for unselected squares for empty tags.
--- @tparam[opt=beautiful.taglist_squares_resize] boolean args.style.squares_resize True or false to resize squares.
+-- @tparam[opt=beautiful.taglist_squares_sel] string args.style.squares_sel A user
+--  provided image for selected squares.
+-- @tparam[opt=beautiful.taglist_squares_unsel] string args.style.squares_unsel A
+--  user provided image for unselected squares.
+-- @tparam[opt=beautiful.taglist_squares_sel_empty] string args.style.squares_sel_empty A
+-- user provided image for selected squares for empty tags.
+-- @tparam[opt=beautiful.taglist_squares_unsel_empty] string args.style.squares_unsel_empty A
+--  user provided image for unselected squares for empty tags.
+-- @tparam[opt=beautiful.taglist_squares_resize] boolean args.style.squares_resize `true`
+--  or `false` to resize squares.
 -- @tparam[opt=beautiful.taglist_font] string args.style.font The font.
 -- @tparam[opt=beautiful.taglist_shape] gears.shape|function args.style.shape
 -- @tparam[opt=beautiful.taglist_shape_border_width] number args.style.shape_border_width
@@ -745,8 +771,6 @@ end
 function taglist.mt:__call(...)
     return taglist.new(...)
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 
