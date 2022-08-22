@@ -38,7 +38,7 @@ local flex = {}
 
 --- From `wibox.layout.fixed`.
 -- @property fill_space
--- @tparam boolean fill_space
+-- @tparam[opt=true] boolean fill_space
 -- @propemits true false
 -- @hidden
 
@@ -91,7 +91,7 @@ local flex = {}
 --@DOC_wibox_layout_flex_spacing_widget_EXAMPLE@
 --
 -- @property spacing_widget
--- @tparam widget spacing_widget
+-- @tparam[opt=nil] widget|nil spacing_widget
 -- @propemits true false
 -- @interface layout
 
@@ -102,7 +102,9 @@ local flex = {}
 --@DOC_wibox_layout_flex_spacing_EXAMPLE@
 --
 -- @property spacing
--- @tparam number spacing Spacing between widgets.
+-- @tparam[opt=0] number spacing Spacing between widgets.
+-- @propertyunit pixel
+-- @negativeallowed true
 -- @propemits true false
 -- @interface layout
 
@@ -200,7 +202,9 @@ end
 --That is, maximum width for horizontal and maximum height for vertical.
 --
 -- @property max_widget_size
--- @tparam number max_widget_size
+-- @tparam[opt=nil] number|nil max_widget_size
+-- @propertytype nil No size limit.
+-- @negativeallowed false
 -- @propemits true false
 
 function flex:set_max_widget_size(val)
