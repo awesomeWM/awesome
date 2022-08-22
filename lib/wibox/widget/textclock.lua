@@ -102,6 +102,8 @@ end
 --
 -- @property refresh
 -- @tparam[opt=60] number refresh How often the clock is updated, in seconds
+-- @propertyunit second
+-- @negativeallowed false
 
 function textclock:set_refresh(refresh)
     self._private.refresh = refresh or self._private.refresh
