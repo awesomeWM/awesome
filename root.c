@@ -349,7 +349,8 @@ luaA_root_fake_input(lua_State *L)
  * (the wallpaper).
  *
  * @property keys
- * @tparam table keys
+ * @tparam[opt={}] table keys
+ * @tablerowtype A list of `awful.key` objects.
  * @see awful.key
  */
 static int
@@ -390,7 +391,8 @@ luaA_root_keys(lua_State *L)
  * known as root window).
  *
  * @property buttons
- * @tparam[opt={}] table buttons The list of buttons.
+ * @tparam[opt={}] table buttons
+ * @tablerowtype A list of `awful.button` objects.
  * @see awful.button
  *
  * @usage
@@ -516,7 +518,9 @@ luaA_root_wallpaper(lua_State *L)
 /** Get the content of the root window as a cairo surface.
  *
  * @property content
- * @tparam surface content A cairo surface with the root window content (aka the whole surface from every screens).
+ * @tparam raw_surface content A cairo surface with the root window content (aka the whole surface from every screens).
+ * @propertydefault This is the live content. Use `gears.surface(root.content)` to
+ *  take a screenshot.
  * @see gears.surface
  */
 static int
