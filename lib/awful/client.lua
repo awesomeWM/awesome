@@ -731,7 +731,7 @@ end
 --- If a client is marked or not.
 --
 -- @property marked
--- @tparam boolean marked
+-- @tparam[opt=false] boolean marked
 -- @emits marked (for legacy reasons, use `property::marked`)
 -- @emits unmarker (for legacy reasons, use `property::marked`)
 -- @emits property::marked
@@ -883,8 +883,10 @@ end
 
 --- Return if a client has a fixed size or not.
 --
+-- Fixed size means it cannot be resized.
+--
 -- @property is_fixed
--- @tparam[opt=false] boolean is_fixed The fixed size state.
+-- @tparam[opt=false] boolean is_fixed
 -- @propemits false false
 -- @readonly
 -- @see size_hints
@@ -910,7 +912,7 @@ end
 -- `fullscreen`, `maximized`, or `maximized_horizontal`?
 --
 -- @property immobilized_horizontal
--- @tparam[opt=false] boolean immobilized_horizontal The immobilized state.
+-- @tparam[opt=false] boolean immobilized_horizontal
 -- @readonly
 -- @see maximized
 -- @see maximized_horizontal
@@ -926,7 +928,7 @@ end
 -- fullscreen, maximized, or vertically maximized?
 --
 -- @property immobilized_vertical
--- @tparam[opt=false] boolean immobilized_vertical The immobilized state
+-- @tparam[opt=false] boolean immobilized_vertical
 -- @readonly
 -- @see maximized
 -- @see maximized_vertical
@@ -959,7 +961,7 @@ end
 -- @DOC_sequences_client_floating1_EXAMPLE@
 --
 -- @property floating
--- @tparam boolean floating The floating state.
+-- @tparam[opt=false] boolean floating
 -- @request client border floating granted When a border update is required
 --  because the client focus status changed.
 -- @request client border active granted When a client becomes active and is not
@@ -1047,7 +1049,8 @@ end
 -- @DOC_sequences_client_x1_EXAMPLE@
 --
 -- @property x
--- @tparam integer x
+-- @tparam[opt=c:geometry().x] integer x
+-- @negativeallowed true
 -- @emits property::geometry
 -- @emitstparam property::geometry table geo The
 --  geometry (with `x`, `y`, `width`, `height`).
@@ -1065,7 +1068,8 @@ end
 -- @DOC_sequences_client_y1_EXAMPLE@
 --
 -- @property y
--- @tparam integer y
+-- @tparam[opt=c:geometry().y] integer y
+-- @negativeallowed true
 -- @emits property::geometry
 -- @emitstparam property::geometry table geo The
 --  geometry (with `x`, `y`, `width`, `height`).
@@ -1079,7 +1083,8 @@ end
 -- @DOC_sequences_client_width1_EXAMPLE@
 --
 -- @property width
--- @tparam integer width
+-- @tparam[opt=c:geometry().width] integer width
+-- @rangestart 1
 -- @emits property::geometry
 -- @emitstparam property::geometry table geo The
 --  geometry (with `x`, `y`, `width`, `height`).
@@ -1093,7 +1098,8 @@ end
 -- @DOC_sequences_client_height1_EXAMPLE@
 --
 -- @property height
--- @tparam integer height
+-- @tparam[opt=c:geometry().height] integer height
+-- @rangestart 1
 -- @emits property::geometry
 -- @emitstparam property::geometry table geo The
 --  geometry (with `x`, `y`, `width`, `height`).
@@ -1347,7 +1353,7 @@ end
 -- default.
 --
 -- @property dockable
--- @tparam boolean dockable The dockable state
+-- @tparam[opt=false] boolean dockable
 -- @propemits false false
 -- @see struts
 
@@ -1386,7 +1392,7 @@ end
 -- interprets it as the client (not) wanting a titlebar.
 --
 -- @property requests_no_titlebar
--- @tparam boolean requests_no_titlebar Whether the client
+-- @tparam[opt=false] boolean requests_no_titlebar Whether the client
 --  requests not to get a titlebar.
 -- @propemits false false
 
@@ -1628,7 +1634,7 @@ end, true, true, "keybinding")
 -- @DOC_awful_client_shape1_EXAMPLE@
 --
 -- @property shape
--- @tparam gears.shape shape A gears.shape compatible function.
+-- @tparam[opt=gears.shape.rectangle] shape shape A gears.shape compatible function.
 -- @propemits true false
 -- @see gears.shape
 function client.object.set_shape(self, shape)
@@ -1794,7 +1800,7 @@ pcommon.setup_grant(client.object, "client")
 --    end)
 --
 -- @property active
--- @tparam boolean active
+-- @tparam[opt=true] boolean active
 -- @request client border active granted When a client becomes active.
 -- @request client border inactive granted When a client stop being active.
 -- @readonly
