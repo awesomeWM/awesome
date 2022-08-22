@@ -140,15 +140,22 @@ end
 --- The pie chart data list.
 --
 -- @property data_list
--- @tparam[opt={}] table data_list Sorted table where each entry has a label as its
+-- @tparam[opt={}] table data_list
+-- @tablerowtype Sorted list where each entry has a label as its
 -- first value and a number as its second value.
+-- @tablerowkey string 1 The label.
+-- @tablerowkey number 2 The value.
 -- @propemits false false
 
 --- The pie chart data.
 --
 -- @property data
--- @tparam table data Labels as keys and number as value.
+-- @tparam[opt={}] table data
+-- @tablerowtype Key/value pair.
+-- @tablerowkey string key The label.
+-- @tablerowkey number value The value.
 -- @propemits false false
+-- @see data_list
 
 --- The border color.
 --
@@ -156,7 +163,7 @@ end
 --
 --@DOC_wibox_widget_piechart_border_color_EXAMPLE@
 -- @property border_color
--- @tparam color border_color
+-- @tparam color|nil border_color
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.color
@@ -165,7 +172,9 @@ end
 --
 --@DOC_wibox_widget_piechart_border_width_EXAMPLE@
 -- @property border_width
--- @tparam[opt=1] number border_width
+-- @tparam[opt=1] number|nil border_width
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 -- @propbeautiful
 
@@ -175,7 +184,8 @@ end
 -- required are set, colors will be re-used in order.
 --
 -- @property colors
--- @tparam table colors A table of colors, one for each elements.
+-- @tparam table|nil colors A table of colors, one for each elements.
+-- @propertytype table List of colors (numerical keys).
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.color
@@ -192,6 +202,7 @@ end
 --@DOC_wibox_widget_piechart_label_EXAMPLE@
 -- @property display_labels
 -- @tparam[opt=true] boolean display_labels
+-- @propemits true false
 
 --- The pie elements border width.
 --
