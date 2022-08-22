@@ -120,7 +120,7 @@ gtable.crush(naughty, require("naughty.constants"))
 -- useful when watching movies or doing presentations.
 --
 -- @property suspended
--- @tparam boolean suspended
+-- @tparam[opt=false] boolean suspended
 -- @emits added
 -- @propemits true false
 
@@ -138,17 +138,19 @@ gtable.crush(naughty, require("naughty.constants"))
 --
 -- Please note that this list is kept up-to-date even in suspended mode.
 --
--- **Signal:**
---
--- * property::active
---
 -- @property active
--- @tparam table active
+-- @tparam[opt={}] table active
+-- @tablerowtype A list of `naughty.notification` objects.
 -- @propemits false false
 
 --- True when there is a handler connected to `request::display`.
+--
+-- Note that using the legacy notifications is deprecated.
+--
 -- @property has_display_handler
 -- @tparam boolean has_display_handler
+-- @propertydefault If `rc.lua` has a `request::display` section, this will
+--  be `true`. Otherwise it is `false` and the legacy notification will be used.
 
 --- If the timeout needs to be reset when a property changes.
 --
