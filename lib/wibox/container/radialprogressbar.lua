@@ -131,7 +131,7 @@ end
 --- The widget to wrap in a radial proggressbar.
 --
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam[opt=nil] widget|nil widget
 -- @interface container
 
 radialprogressbar.set_widget = base.set_widget_common
@@ -167,11 +167,15 @@ end
 --
 --@DOC_wibox_container_radialprogressbar_padding_EXAMPLE@
 -- @property paddings
--- @tparam[opt=0] table|number paddings A number or a table
+-- @tparam[opt=0] table|number|nil paddings A number or a table
 -- @tparam[opt=0] number paddings.top
 -- @tparam[opt=0] number paddings.bottom
 -- @tparam[opt=0] number paddings.left
 -- @tparam[opt=0] number paddings.right
+-- @propertytype number A single value for each sides.
+-- @propertytype table A different value for each side.
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propbeautiful
 -- @propemits false false
 
@@ -179,7 +183,10 @@ end
 --
 --@DOC_wibox_container_radialprogressbar_value_EXAMPLE@
 -- @property value
--- @tparam number value Between `min_value` and `max_value`.
+-- @tparam[opt=0] number value
+-- @rangestart `min_value`
+-- @rangestop `max_value`
+-- @negativeallowed true
 -- @propemits true false
 
 function radialprogressbar:set_value(val)
@@ -202,7 +209,7 @@ end
 --
 --@DOC_wibox_container_radialprogressbar_border_color_EXAMPLE@
 -- @property border_color
--- @tparam color border_color
+-- @tparam color|nil border_color
 -- @propbeautiful
 -- @propemits true false
 
@@ -210,7 +217,7 @@ end
 --
 --@DOC_wibox_container_radialprogressbar_color_EXAMPLE@
 -- @property color
--- @tparam color color
+-- @tparam color|nil color
 -- @propbeautiful
 -- @propemits true false
 
@@ -218,20 +225,24 @@ end
 --
 --@DOC_wibox_container_radialprogressbar_border_width_EXAMPLE@
 -- @property border_width
--- @tparam[opt=3] number border_width
+-- @tparam[opt=2] number|nil border_width
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propbeautiful
 -- @propemits true false
 
 --- The minimum value.
 --
 -- @property min_value
--- @tparam number min_value
+-- @tparam[opt=0] number min_value
+-- @negativeallowed true
 -- @propemits true false
 
 --- The maximum value.
 --
 -- @property max_value
--- @tparam number max_value
+-- @tparam[opt=1] number max_value
+-- @negativeallowed true
 -- @propemits true false
 
 for _, prop in ipairs {"max_value", "min_value", "border_color", "color",
