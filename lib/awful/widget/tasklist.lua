@@ -71,6 +71,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @widgetmod awful.widget.tasklist
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -435,7 +436,8 @@ local function tasklist_label(c, args, tb)
     local bg_image_focus = args.bg_image_focus or theme.tasklist_bg_image_focus or theme.bg_image_focus
     local bg_image_urgent = args.bg_image_urgent or theme.tasklist_bg_image_urgent or theme.bg_image_urgent
     local bg_image_minimize = args.bg_image_minimize or theme.tasklist_bg_image_minimize or theme.bg_image_minimize
-    local tasklist_disable_icon = args.disable_icon or args.tasklist_disable_icon or theme.tasklist_disable_icon or false
+    local tasklist_disable_icon = args.disable_icon or args.tasklist_disable_icon
+        or theme.tasklist_disable_icon or false
     local disable_task_name = args.disable_task_name or theme.tasklist_disable_task_name or false
     local font = args.font or theme.tasklist_font or theme.font
     local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font
@@ -607,9 +609,15 @@ end
 
 --- The current number of clients.
 --
+-- Note that the `tasklist` is usually lazy-loaded. Reading this property
+-- may cause the widgets to be created. Depending on where the property is called
+-- from, it might, in theory, cause an infinite loop.
+--
 -- @property count
 -- @readonly
--- @tparam number count The number of client.
+-- @tparam number count
+-- @propertydefault The current number of client.
+-- @negativeallowed false
 -- @propemits true false
 
 --- Set the tasklist layout.
@@ -629,6 +637,7 @@ end
 --
 -- @property screen
 -- @tparam screen screen
+-- @propertydefault Obtained from the constructor.
 -- @propemits true false
 
 --- A function to narrow down the list of clients.
@@ -636,7 +645,10 @@ end
 -- @DOC_sequences_client_tasklist_custom_filter1_EXAMPLE@
 --
 -- @property filter
--- @tparam function filter
+-- @tparam[opt=awful.widget.tasklist.filter.alltags] function filter
+-- @functionparam client c The client to accept or reject.
+-- @functionparam screen s The value of the tasklist `screen` property.
+-- @functionreturn boolean `true` if the client is accepter or `false` if it is rejected.
 -- @propemits true false
 -- @see awful.widget.tasklist.filter.allscreen
 -- @see awful.widget.tasklist.filter.alltags
@@ -650,7 +662,15 @@ end
 -- you can.
 --
 -- @property update_function
--- @tparam function update_function
+-- @tparam function|nil update_function
+-- @propertydefault The default function delegate everything to the `widget_template`.
+-- @functionparam widget layout The base layout object.
+-- @functionparam table buttons The buttons for this client entry (see below).
+-- @functionparam string label The client name.
+-- @functionparam table data Arbitrary metadate.
+-- @functionparam table clients The list of clients (ordered).
+-- @functionparam table metadata Other values.
+-- @functionnoreturn
 -- @propemits true false
 
 --- A template for creating the client widgets.
@@ -658,7 +678,7 @@ end
 -- @DOC_sequences_client_tasklist_widget_template1_EXAMPLE@
 --
 -- @property widget_template
--- @tparam table widget_template
+-- @tparam[opt=nil] template|nil widget_template
 -- @propemits true false
 
 --- A function to gather the clients to display.
@@ -666,7 +686,10 @@ end
 -- @DOC_sequences_client_tasklist_custom_source1_EXAMPLE@
 --
 -- @property source
--- @tparam function source
+-- @tparam[opt=awful.widget.tasklist.source.all_clients] function source
+-- @functionparam screen s The tasklist screen.
+-- @functionparam table metadata Various metadata.
+-- @functionreturn table The list of clients.
 -- @propemits true false
 -- @see awful.widget.tasklist.source.all_clients
 
@@ -822,9 +845,12 @@ end
 -- @tparam[opt=beautiful.tasklist_above or '▴'] string args.style.above Extra icon when client is above
 -- @tparam[opt=beautiful.tasklist_below or '▾'] string args.style.below Extra icon when client is below
 -- @tparam[opt=beautiful.tasklist_floating or '✈'] string args.style.floating Extra icon when client is floating
--- @tparam[opt=beautiful.tasklist_maximized or '<b>+</b>'] string args.style.maximized Extra icon when client is maximized
--- @tparam[opt=beautiful.tasklist_maximized_horizontal or '⬌'] string args.style.maximized_horizontal Extra icon when client is maximized_horizontal
--- @tparam[opt=beautiful.tasklist_maximized_vertical or '⬍'] string args.style.maximized_vertical Extra icon when client is maximized_vertical
+-- @tparam[opt=beautiful.tasklist_maximized or '<b>+</b>'] string args.style.maximized Extra
+--   icon when client is maximized
+-- @tparam[opt=beautiful.tasklist_maximized_horizontal or '⬌'] string args.style.maximized_horizontal Extra
+--   icon when client is maximized_horizontal
+-- @tparam[opt=beautiful.tasklist_maximized_vertical or '⬍'] string args.style.maximized_vertical Extra
+--   icon when client is maximized_vertical
 -- @tparam[opt=beautiful.tasklist_disable_task_name or false] boolean args.style.disable_task_name
 -- @tparam[opt=beautiful.tasklist_font] string args.style.font
 -- @tparam[opt=beautiful.tasklist_align or "left"] string args.style.align *left*, *right* or *center*
@@ -844,6 +870,7 @@ end
 -- @tparam[opt=beautiful.tasklist_shape_urgent] gears.shape args.style.shape_urgent
 -- @tparam[opt=beautiful.tasklist_shape_border_width_urgent] number args.style.shape_border_width_urgent
 -- @tparam[opt=beautiful.tasklist_shape_border_color_urgent] string|color args.style.shape_border_color_urgent
+-- @tparam[opt=beautiful.tasklist_minimized ] string|color args.style.minimized
 -- @param filter **DEPRECATED** use args.filter
 -- @param buttons **DEPRECATED** use args.buttons
 -- @param style **DEPRECATED** use args.style
@@ -1100,8 +1127,6 @@ end
 function tasklist.mt:__call(...)
     return tasklist.new(...)
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 
