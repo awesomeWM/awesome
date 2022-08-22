@@ -92,8 +92,10 @@ end
 --@DOC_wibox_container_tile_horizontal_spacing_EXAMPLE@
 --
 -- @property horizontal_spacing
--- @tparam number horizontal_spacing
+-- @tparam[opt=0] number horizontal_spacing
 -- @propemits true false
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @see vertical_spacing
 
 --- The vertical spacing between the tiled.
@@ -101,7 +103,9 @@ end
 --@DOC_wibox_container_tile_vertical_spacing_EXAMPLE@
 --
 -- @property vertical_spacing
--- @tparam number vertical_spacing
+-- @tparam[opt=0] number vertical_spacing
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 -- @see horizontal_spacing
 
