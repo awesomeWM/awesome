@@ -62,25 +62,22 @@ local align_map = {
 -- @DOC_awful_wibar_stretch_EXAMPLE@
 --
 -- @property stretch
--- @tparam boolean stretch
+-- @tparam[opt=true] boolean|nil stretch
 -- @propbeautiful
 -- @propemits true false
 -- @see align
 
 --- How to align non-stretched wibars.
 --
--- Values are:
---
---  * `"top"`
---  * `"bottom"`
---  * `"left"`
---  * `"right"`
---  * `"centered"`
---
 --  @DOC_awful_wibar_align_EXAMPLE@
 --
 -- @property align
--- @tparam string align
+-- @tparam[opt="centered"] string|nil align
+-- @propertyvalue "top"
+-- @propertyvalue "bottom"
+-- @propertyvalue "left"
+-- @propertyvalue "right"
+-- @propertyvalue "centered"
 -- @propbeautiful
 -- @propemits true false
 -- @see stretch
@@ -93,7 +90,16 @@ local align_map = {
 -- @DOC_awful_wibar_margins_EXAMPLE@
 --
 -- @property margins
--- @tparam number|table margins
+-- @tparam[opt=0] number|table|nil margins
+-- @tparam[opt=0] number margins.left
+-- @tparam[opt=0] number margins.right
+-- @tparam[opt=0] number margins.top
+-- @tparam[opt=0] number margins.bottom
+-- @negativeallowed true
+-- @propertytype number A single value for each side.
+-- @propertytype table A different value for each side.
+-- @propertytype nil Fallback to `beautiful.wibar_margins`.
+-- @propertyunit pixel
 -- @propbeautiful
 -- @propemits true false
 
@@ -281,17 +287,14 @@ end
 
 --- The wibox position.
 --
--- The valid values are:
---
--- * left
--- * right
--- * top
--- * bottom
---
 -- @DOC_awful_wibar_position_EXAMPLE@
 --
 -- @property position
--- @tparam string position Either "left", right", "top" or "bottom"
+-- @tparam[opt="top"] string position
+-- @propertyvalue "left"
+-- @propertyvalue "right"
+-- @propertyvalue "top"
+-- @propertyvalue "bottom"
 -- @propemits true false
 
 function awfulwibar.get_position(wb)
@@ -671,10 +674,6 @@ function awfulwibar.mt:__index(_, k)
         return legacy_attach
     end
 end
-
---@DOC_wibox_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(awfulwibar, awfulwibar.mt)
 
