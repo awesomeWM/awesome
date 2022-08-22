@@ -262,7 +262,7 @@ lua_class_t tag_class;
  * @DOC_sequences_tag_name_EXAMPLE@
  *
  * @property name
- * @tparam string name
+ * @tparam[opt=""] string name
  * @propemits false false
  */
 
@@ -272,7 +272,7 @@ lua_class_t tag_class;
  * @DOC_sequences_tag_selected_EXAMPLE@
  *
  * @property selected
- * @tparam boolean selected
+ * @tparam[opt=false] boolean selected
  * @propemits false false
  */
 
@@ -280,7 +280,7 @@ lua_class_t tag_class;
  * True if the tag is active and can be used.
  *
  * @property activated
- * @tparam boolean activated
+ * @tparam[opt=true] boolean activated
  * @propemits false false
  */
 
