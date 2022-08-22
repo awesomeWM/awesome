@@ -5,6 +5,7 @@
 -- @author Aleksey Fedotov &lt;lexa@cfotr.com&gt;
 -- @copyright 2015 Aleksey Fedotov
 -- @widgetmod awful.widget.keyboardlayout
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local capi = {awesome = awesome}
@@ -317,9 +318,6 @@ function keyboardlayout.mt:__call(...)
     return _instance
 end
 
---@DOC_widget_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(keyboardlayout, keyboardlayout.mt)
 
