@@ -29,7 +29,7 @@ local ratio = {}
 --@DOC_wibox_layout_ratio_spacing_widget_EXAMPLE@
 --
 -- @property spacing_widget
--- @tparam widget spacing_widget
+-- @tparam[opt=nil] widget|nil spacing_widget
 -- @propemits true false
 -- @interface layout
 
@@ -38,7 +38,8 @@ local ratio = {}
 --@DOC_wibox_layout_ratio_spacing_EXAMPLE@
 --
 -- @property spacing
--- @tparam number spacing Spacing between widgets.
+-- @tparam[opt=0] number spacing
+-- @negativeallowed true
 -- @propemits true false
 -- @interface layout
 
@@ -463,20 +464,17 @@ end
 
 --- Set how the space of invisible or `0x0` sized widget is redistributed.
 --
--- Possible values:
---
--- * "default": Honor the ratio and do not redistribute the space.
--- * "justify": Distribute the space among remaining widgets.
--- * "center": Squash remaining widgets and leave equal space on both side.
--- * "inner_spacing": Add equal spacing between all widgets.
--- * "spacing": Add equal spacing between all widgets and on the outside.
--- * "left": Squash remaining widgets and leave empty space on the left.
--- * "right": Squash remaining widgets and leave empty space on the right.
---
 --@DOC_wibox_layout_ratio_strategy_EXAMPLE@
 --
 -- @property inner_fill_strategy
--- @tparam string inner_fill_strategy One of the value listed above.
+-- @tparam[opt="default"] string inner_fill_strategy One of the value listed above.
+-- @propertyvalue "default" Honor the ratio and do not redistribute the space.
+-- @propertyvalue "justify" Distribute the space among remaining widgets.
+-- @propertyvalue "center" Squash remaining widgets and leave equal space on both side.
+-- @propertyvalue "inner_spacing" Add equal spacing between all widgets.
+-- @propertyvalue "spacing" Add equal spacing between all widgets and on the outside.
+-- @propertyvalue "left" Squash remaining widgets and leave empty space on the left.
+-- @propertyvalue "right" Squash remaining widgets and leave empty space on the right.
 -- @propemits true false
 
 function ratio:get_inner_fill_strategy()
