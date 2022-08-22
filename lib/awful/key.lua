@@ -44,6 +44,7 @@ local gobject = require("gears.object")
 --
 -- @property key
 -- @tparam string key
+-- @propertydefault Set in the constructor.
 
 --- The table of modifier keys.
 --
@@ -68,38 +69,43 @@ local gobject = require("gears.object")
 -- Please note that Awesome ignores the status of "Lock" and "Mod2" (Num Lock).
 --
 -- @property modifiers
--- @tparam table modifiers
+-- @tparam[opt={}] table modifiers
+-- @tablerowtype A list of modifier names in no specific order.
 
 --- The description of the function run from a key binding.
 --
 -- This is used, for example, by `awful.hotkeys_popup`.
 --
 -- @property description
--- @tparam string description
+-- @tparam[opt=""] string description
 
 --- The key name.
 --
 -- This can be useful when searching for keybindings by keywords.
 --
 -- @property name
--- @tparam string name
+-- @tparam[opt=""] string name
 
 --- The key group bound to a function in a key binding.
 --
 -- This is used, for example, by `awful.hotkeys_popup`.
 --
 -- @property group
--- @tparam string group
+-- @tparam[opt=""] string group
 
 --- The callback when this key is pressed.
 --
 -- @property on_press
--- @tparam function on_press
+-- @tparam[opt=nil] function|nil on_press
+-- @functionnoparam
+-- @functionnoreturn
 
 --- The callback when this key is released.
 --
 -- @property on_release
--- @tparam function on_release
+-- @tparam[opt=nil] function|nil on_release
+-- @functionnoparam
+-- @functionnoreturn
 
 local key = { mt = {}, hotkeys = {} }
 
