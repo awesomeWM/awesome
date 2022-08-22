@@ -125,8 +125,51 @@ widget.hide_without_description = true
 widget.merge_duplicates = true
 
 --- Labels used for displaying human-readable keynames.
--- @tfield table widget.labels
--- @param table
+-- @tfield table awful.hotkeys_popup.widget.labels
+-- @tfield[opt="Ctrl"] string Control
+-- @tfield[opt="Alt"] string Mod1
+-- @tfield[opt="Alt Gr"] string ISO_Level3_Shift
+-- @tfield[opt="Super"] string Mod4
+-- @tfield[opt="Ins"] string Insert
+-- @tfield[opt="Del"] string Delete
+-- @tfield[opt="PgDn"] string Next
+-- @tfield[opt="PgUp"] string Prior
+-- @tfield[opt="←"] string Left
+-- @tfield[opt="↑"] string Up
+-- @tfield[opt="→"] string Right
+-- @tfield[opt="↓"] string Down
+-- @tfield[opt="Num1"] string KP_End
+-- @tfield[opt="Num2"] string KP_Down
+-- @tfield[opt="Num3"] string KP_Next
+-- @tfield[opt="Num4"] string KP_Left
+-- @tfield[opt="Num5"] string KP_Begin
+-- @tfield[opt="Num6"] string KP_Right
+-- @tfield[opt="Num7"] string KP_Home
+-- @tfield[opt="Num8"] string KP_Up
+-- @tfield[opt="Num9"] string KP_Prior
+-- @tfield[opt="Num0"] string KP_Insert
+-- @tfield[opt="Num."] string KP_Delete
+-- @tfield[opt="Num/"] string KP_Divide
+-- @tfield[opt="Num*"] string KP_Multiply
+-- @tfield[opt="Num-"] string KP_Subtract
+-- @tfield[opt="Num+"] string KP_Add
+-- @tfield[opt="NumEnter"] string KP_Enter
+-- @tfield[opt="Esc"] string Escape
+-- @tfield[opt="Tab"] string Tab
+-- @tfield[opt="Space"] string space
+-- @tfield[opt="Enter"] string Return
+-- @tfield[opt="´"] string dead_acute
+-- @tfield[opt="^"] string dead_circumflex
+-- @tfield[opt="`"] string dead_grave
+-- @tfield[opt="🔆+"] string XF86MonBrightnessUp
+-- @tfield[opt="🔅-"] string XF86MonBrightnessDown
+-- @tfield[opt="🕩+"] string XF86AudioRaiseVolume
+-- @tfield[opt="🕩-"] string XF86AudioLowerVolume
+-- @tfield[opt="🔇"] string XF86AudioMute
+-- @tfield[opt="⏯"] string XF86AudioPlay
+-- @tfield[opt="⏮"] string XF86AudioPrev
+-- @tfield[opt="⏭"] string XF86AudioNext
+-- @tfield[opt="⏹"] string XF86AudioStop
 widget.labels = {
     Control          = "Ctrl",
     Mod1             = "Alt",
