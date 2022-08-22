@@ -164,7 +164,10 @@ end
 -- This is the widget that is at the left/top.
 --
 -- @property first
--- @tparam widget first
+-- @tparam[opt=nil] widget|nil first
+-- @propertytype nil This spot will be empty. Depending on how large the second
+--  widget is an and the value of `expand`, it might mean it will leave an empty
+--  area.
 -- @propemits true false
 
 function align:set_first(widget)
@@ -181,7 +184,9 @@ end
 -- This is the centered one.
 --
 -- @property second
--- @tparam widget second
+-- @tparam[opt=nil] widget|nil second
+-- @propertytype nil When this property is `nil`, then there will be an empty
+--  area.
 -- @propemits true false
 
 function align:set_second(widget)
@@ -198,7 +203,10 @@ end
 -- This is the widget that is at the right/bottom.
 --
 -- @property third
--- @tparam widget third
+-- @tparam[opt=nil] widget|nil third
+-- @propertytype nil This spot will be empty. Depending on how large the second
+--  widget is an and the value of `expand`, it might mean it will leave an empty
+--  area.
 -- @propemits true false
 
 function align:set_third(widget)
@@ -256,24 +264,21 @@ end
 --- Set the expand mode, which determines how child widgets expand to take up
 -- unused space.
 --
--- The following values are valid:
---
--- * `"inside"`: The widgets in slot one and three are set to their minimal
---   required size. The widget in slot two is then given the remaining space.
---   This is the default behaviour.
--- * `"outside"`: The widget in slot two is set to its minimal required size and
---   placed in the center of the space available to the layout. The other
---   widgets are then given the remaining space on either side.
---   If the center widget requires all available space, the outer widgets are
---   not drawn at all.
--- * `"none"`: All widgets are given their minimal required size or the
---   remaining space, whichever is smaller. The center widget gets priority.
---
 -- Attempting to set any other value than one of those three will fall back to
 -- `"inside"`.
 --
 -- @property expand
 -- @tparam[opt="inside"] string expand How to use unused space.
+-- @propertyvalue "inside" The widgets in slot one and three are set to their minimal
+--   required size. The widget in slot two is then given the remaining space.
+--   This is the default behaviour.
+-- @propertyvalue "outside" The widget in slot two is set to its minimal required size and
+--   placed in the center of the space available to the layout. The other
+--   widgets are then given the remaining space on either side.
+--   If the center widget requires all available space, the outer widgets are
+--   not drawn at all.
+-- @propertyvalue "none" All widgets are given their minimal required size or the
+--   remaining space, whichever is smaller. The center widget gets priority.
 
 function align:set_expand(mode)
     if mode == "none" or mode == "outside" then
