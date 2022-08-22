@@ -240,20 +240,17 @@ end
 
 --- Set the text ellipsize mode.
 --
--- Valid values are:
---
--- * `"start"`
--- * `"middle"`
--- * `"end"`
--- * `"none"`
---
 -- See Pango for additional details:
 -- [Layout.set_ellipsize](https://docs.gtk.org/Pango/method.Layout.set_ellipsize.html)
 --
 --@DOC_wibox_widget_textbox_ellipsize_EXAMPLE@
 --
 -- @property ellipsize
--- @tparam[opt="end"] string ellipsize The ellipsize mode.
+-- @tparam[opt="end"] string ellipsize
+-- @propertyvalue "start"
+-- @propertyvalue "middle"
+-- @propertyvalue "end"
+-- @propertyvalue "none"
 -- @propemits true false
 
 function textbox:set_ellipsize(mode)
@@ -271,16 +268,13 @@ end
 
 --- Set a textbox wrap mode.
 --
--- Valid values are:
---
--- * **word**
--- * **char**
--- * **word_char**
---
 -- @DOC_wibox_widget_textbox_wrap1_EXAMPLE@
 --
 -- @property wrap
 -- @tparam[opt="word_char"] string wrap Where to wrap? After "word", "char" or "word_char".
+-- @propertyvalue "word"
+-- @propertyvalue "char"
+-- @propertyvalue "word_char"
 -- @propemits true false
 
 function textbox:set_wrap(mode)
@@ -301,16 +295,13 @@ end
 -- This aligns the text within the widget's bounds. In some situations this may
 -- differ from aligning the widget with `wibox.container.place`.
 --
--- Valid values are:
---
--- * `"top"`
--- * `"center"`
--- * `"bottom"`
---
 --@DOC_wibox_widget_textbox_valign1_EXAMPLE@
 --
 -- @property valign
--- @tparam[opt="center"] string valign The vertical alignment
+-- @tparam[opt="center"] string valign
+-- @propertyvalue "top"
+-- @propertyvalue "center"
+-- @propertyvalue "bottom"
 -- @propemits true false
 
 function textbox:set_valign(mode)
@@ -331,16 +322,13 @@ end
 -- This aligns the text within the widget's bounds. In some situations this may
 -- differ from aligning the widget with `wibox.container.place`.
 --
--- Valid values are:
---
--- * `"left"`
--- * `"center"`
--- * `"right"`
---
 --@DOC_wibox_widget_textbox_align1_EXAMPLE@
 --
 -- @property align
--- @tparam[opt="left"] string align The horizontal alignment
+-- @tparam[opt="left"] string align
+-- @propertyvalue "left"
+-- @propertyvalue "center"
+-- @propertyvalue "right"
 -- @propemits true false
 
 function textbox:set_align(mode)
@@ -398,7 +386,7 @@ end
 --@DOC_wibox_widget_textbox_font2_EXAMPLE@
 --
 -- @property font
--- @tparam[opt=beautiful.font] string font The font description as string.
+-- @tparam[opt=beautiful.font] font font
 -- @propemits true false
 -- @usebeautiful beautiful.font The default font.
 
