@@ -63,7 +63,9 @@ local stack = {mt={}}
 --
 --@DOC_wibox_layout_stack_spacing_EXAMPLE@
 -- @property spacing
--- @tparam number spacing Spacing between widgets.
+-- @tparam[opt=0] number spacing Spacing between widgets.
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propemits true false
 -- @interface layout
 
@@ -100,7 +102,7 @@ end
 --- If only the first stack widget is drawn.
 --
 -- @property top_only
--- @tparam boolean top_only
+-- @tparam[opt=false] boolean top_only
 -- @propemits true false
 
 function stack:get_top_only()
@@ -158,17 +160,21 @@ end
 --@DOC_wibox_layout_stack_offset_EXAMPLE@
 --
 -- @property horizontal_offset
--- @tparam number horizontal_offset
+-- @tparam[opt=0] number horizontal_offset
+-- @propertyunit pixel
+-- @negativeallowed true
 -- @propemits true false
--- @see vertial_offset
+-- @see vertical_offset
 
 --- Add an vertical offset to each layers.
 --
 -- Note that this reduces the overall size of each widgets by the sum of all
 -- layers offsets.
 --
--- @property vertial_offset
--- @tparam number vertial_offset
+-- @property vertical_offset
+-- @tparam[opt=0] number vertical_offset
+-- @propertyunit pixel
+-- @negativeallowed true
 -- @propemits true false
 -- @see horizontal_offset
 
