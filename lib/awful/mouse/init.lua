@@ -116,7 +116,8 @@ end, "mouse.resize")
 
 --- Get the client currently under the mouse cursor.
 -- @property current_client
--- @tparam client|nil current_client The client
+-- @tparam[opt=nil] client|nil current_client
+-- @propertytype nil When the mouse cursor is not over a client.
 
 function mouse.object.get_current_client()
     local obj = capi.mouse.object_under_pointer()
@@ -127,7 +128,8 @@ end
 
 --- Get the wibox currently under the mouse cursor.
 -- @property current_wibox
--- @tparam wibox|nil current_wibox The wibox
+-- @tparam[opt=nil] wibox|nil current_wibox
+-- @propertytype nil When the mouse cursor is not over a wibox.
 
 function mouse.object.get_current_wibox()
     local obj = capi.mouse.object_under_pointer()
@@ -139,10 +141,10 @@ end
 --- Get the widgets currently under the mouse cursor.
 --
 -- @property current_widgets
--- @tparam nil|table current_widgets The widget list
--- @treturn table The list of widgets.The first element is the biggest
--- container while the last is the topmost widget. The table contains *x*, *y*,
--- *width*, *height* and *widget*.
+-- @tparam[opt=nil] nil|table current_widgets
+-- @tablerowtype table The list of `wibox.widget`s. The first element is the biggest
+-- container while the last is the topmost widget.
+-- @propertytype nil When the mouse cursor is not over any widget.
 
 function mouse.object.get_current_widgets()
     local w = mouse.object.get_current_wibox()
@@ -164,8 +166,8 @@ end
 
 --- Get the topmost widget currently under the mouse cursor.
 -- @property current_widget
--- @tparam widget|nil current_widget The widget
--- @treturn ?widget The widget
+-- @tparam[opt=nil] widget|nil current_widget
+-- @propertytype nil When the mouse cursor is not over a widget.
 -- @see current_widget_geometry
 
 function mouse.object.get_current_widget()
@@ -178,7 +180,13 @@ end
 
 --- Get the current widget geometry.
 -- @property current_widget_geometry
--- @tparam ?table current_widget_geometry The geometry.
+-- @tparam[opt=nil] table|nil current_widget_geometry
+-- @tparam number current_widget_geometry.x
+-- @tparam number current_widget_geometry.y
+-- @tparam number current_widget_geometry.width
+-- @tparam number current_widget_geometry.height
+-- @propertytype nil When there is no current widgets.
+-- @propertytype table
 -- @see current_widget
 
 function mouse.object.get_current_widget_geometry()
@@ -189,7 +197,13 @@ end
 
 --- Get the current widget geometries.
 -- @property current_widget_geometries
--- @tparam ?table current_widget_geometries A list of geometry tables.
+-- @tparam[opt=nil] table|nil current_widget_geometries A list of geometry tables.
+-- @propertytype nil When there is no widgets.
+-- @propertytype table A list of geometry tables.
+-- @tablerowkey x integer
+-- @tablerowkey y integer
+-- @tablerowkey width integer
+-- @tablerowkey height integer
 -- @see current_widgets
 
 function mouse.object.get_current_widget_geometries()
@@ -231,15 +245,15 @@ end
 
 --- True if the left mouse button is pressed.
 -- @property is_left_mouse_button_pressed
--- @tparam boolean is_left_mouse_button_pressed
+-- @tparam[opt=false] boolean is_left_mouse_button_pressed
 
 --- True if the right mouse button is pressed.
 -- @property is_right_mouse_button_pressed
--- @tparam boolean is_right_mouse_button_pressed
+-- @tparam[opt=false] boolean is_right_mouse_button_pressed
 
 --- True if the middle mouse button is pressed.
 -- @property is_middle_mouse_button_pressed
--- @tparam boolean is_middle_mouse_button_pressed
+-- @tparam[opt=false] boolean is_middle_mouse_button_pressed
 
 --- Add an `awful.button` based mousebinding to the global set.
 --
