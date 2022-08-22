@@ -6,6 +6,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2017 Emmanuel Lepage Vallee
 -- @widgetmod naughty.list.notifications
+-- @supermodule wibox.widget.base
 -- @see awful.widget.common
 ----------------------------------------------------------------------------
 
@@ -160,16 +161,17 @@ local notificationlist = {}
 --- The notificationlist parent notification.
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propertydefault This is usually set in the construtor.
 -- @propemits true false
 -- @see naughty.notification
 
 --- A `wibox.layout` to be used to place the entries.
 --
--- If no layout is specified, a `wibox.layout.fixed.vertical` will be created
+-- If no layout is specified, a `wibox.layout.flex.horizontal` will be created
 -- automatically.
 --
 -- @property base_layout
--- @tparam widget base_layout
+-- @tparam[opt=wibox.layout.flex.horizontal] widget base_layout
 -- @propemits true false
 -- @usebeautiful beautiful.notification_spacing
 -- @see wibox.layout.fixed.horizontal
@@ -180,12 +182,15 @@ local notificationlist = {}
 
 --- The notificationlist parent notification.
 -- @property widget_template
--- @tparam table widget_template
+-- @tparam[opt=nil] template|nil widget_template
+-- @propertydefault The default template displays the icon, title, message and
+--  actions.
 -- @propemits true false
 
 --- A table with values to override each `beautiful.notification_action` values.
 -- @property style
--- @tparam table style
+-- @tparam[opt=nil] table|nil style
+-- @propertytype nil Use the values from `beautiful` rather than hardcoded ones.
 -- @propemits true false
 -- @usebeautiful beautiful.notification_shape_normal Fallback.
 -- @usebeautiful beautiful.notification_shape_selected Fallback.
@@ -242,7 +247,11 @@ end
 
 --- A function to prevent some notifications from being added to the list.
 -- @property filter
--- @tparam function filter
+-- @tparam[opt=nil] function|nil filter
+-- @functionparam naughty.notification n The notification object.
+-- @functionparam number count The number of notifications in the list.
+-- @functionreturn boolean `true` if the notification is allowed and `false` if
+--  it is rejected.
 -- @propemits true false
 
 for _, prop in ipairs { "filter", "base_layout" } do
@@ -366,8 +375,6 @@ function module.filter.most_recent(n, count)
 
     return false
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 
