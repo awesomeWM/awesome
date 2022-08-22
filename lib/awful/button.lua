@@ -70,7 +70,8 @@ button.names = {
 -- Please note that Awesome ignores the status of "Lock" and "Mod2" (Num Lock).
 --
 -- @property modifiers
--- @tparam table modifiers
+-- @tparam[opt={}] table modifiers
+-- @tablerowtype A list of modifier names in no specific order.
 
 --- The mouse button identifier.
 --
@@ -78,31 +79,38 @@ button.names = {
 --
 -- @property button
 -- @tparam integer button
+-- @propertydefault Set in the constructor.
+-- @propertyunit X11 mouse button codes.
+-- @negativeallowed false
 
 --- The button description.
 --
 -- @property description
--- @tparam string description
+-- @tparam[opt=""] string description
 
 --- The button name.
 --
 -- @property name
--- @tparam string name
+-- @tparam[opt=""] string name
 
 --- The button group.
 --
 -- @property group
--- @tparam string group
+-- @tparam[opt=""] string group
 
 --- The callback when this button is pressed.
 --
 -- @property on_press
--- @tparam function on_press
+-- @tparam[opt=nil] function|nil on_press
+-- @functionnoparam
+-- @functionnoreturn
 
 --- The callback when this button is released.
 --
 -- @property on_release
--- @tparam function on_release
+-- @tparam[opt=nil] function|nil on_release
+-- @functionnoparam
+-- @functionnoreturn
 
 --- Execute this mousebinding.
 -- @method trigger
@@ -239,7 +247,7 @@ local obj_mt = {
 --
 -- @constructorfct awful.button
 -- @tparam table mod A list of modifier keys.  Valid modifiers are:
---  `Any`, `Mod1`, Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
+--  `Any`, `Mod1`, `Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
 --  This argument is (**mandatory**).
 -- @tparam number button The mouse button (it is recommended to use the
 --  `awful.button.names` constants.
@@ -252,7 +260,7 @@ local obj_mt = {
 -- @constructorfct2 awful.button
 -- @tparam table args
 -- @tparam table args.modifiers A list of modifier keys.  Valid modifiers are:
---  `Any`, `Mod1`, Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
+--  `Any`, `Mod1`, `Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
 --  This argument is (**mandatory**).
 -- @tparam number args.button The mouse button (it is recommended to use the
 --  `awful.button.names` constants.
