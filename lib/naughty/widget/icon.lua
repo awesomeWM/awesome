@@ -81,6 +81,7 @@ end
 --- The attached notification.
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propertydefault This is usually set in the construtor.
 -- @propemits true false
 
 function icon:set_notification(notif)
@@ -113,12 +114,6 @@ local valid_strategies = {
 
 --- How small icons are handled.
 --
--- Valid values are:
---
--- * **scale**: Scale the icon up to the optimal size.
--- * **center**: Keep the icon size and draw it in the center
--- * **resize**: Change the size of the widget itself (*default*).
---
 -- Note that the size upper bound is defined by
 -- `beautiful.notification_icon_size`.
 --
@@ -127,6 +122,9 @@ local valid_strategies = {
 -- @property resize_strategy
 -- @tparam string resize_strategy
 -- @propemits true false
+-- @propertyvalue "scale" Scale the icon up to the optimal size.
+-- @propertyvalue "center" Keep the icon size and draw it in the center
+-- @propertyvalue "resize" Change the size of the widget itself (*default*).
 -- @usebeautiful beautiful.notification_icon_resize_strategy The fallback when
 --  there is no specified strategy.
 -- @usebeautiful beautiful.notification_icon_size  The size upper bound.
@@ -182,8 +180,6 @@ local function new(args)
 
     return tb
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 
