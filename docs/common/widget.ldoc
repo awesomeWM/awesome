@@ -11,7 +11,8 @@
 
 --- Get or set the children elements.
 -- @property children
--- @tparam table children The children.
+-- @tparam table children
+-- @tablerowtype A list of `widget`s.
 -- @baseclass wibox.widget
 -- @see all_children
 
@@ -20,7 +21,8 @@
 -- Warning: This method it prone to stack overflow id the widget, or any of its
 -- children, contain (directly or indirectly) itself.
 -- @property all_children
--- @tparam table all_children The children.
+-- @tparam table all_children
+-- @tablerowtype A list of `widget`s.
 -- @baseclass wibox.widget
 -- @see children
 
@@ -33,7 +35,7 @@
 
 --- Force a widget height.
 -- @property forced_height
--- @tparam number|nil forced_height The height (`nil` for automatic)
+-- @tparam number|nil forced_height
 -- @propertytype nil Let the layout decide the height. Usually using the widget
 --  native height.
 -- @propertytype number Enforce a number of pixels.
@@ -44,7 +46,7 @@
 
 --- Force a widget width.
 -- @property forced_width
--- @tparam number|nil forced_width The width (`nil` for automatic)
+-- @tparam number|nil forced_width
 -- @propertytype nil Let the layout decide the width. Usually using the widget
 --  native width.
 -- @propertytype number Enforce a number of pixels.
