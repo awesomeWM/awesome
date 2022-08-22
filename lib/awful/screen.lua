@@ -198,6 +198,8 @@ end
 -- @tparam number tiling_area.y
 -- @tparam number tiling_area.width
 -- @tparam number tiling_area.height
+-- @propertydefault This is the `workarea` substracted with the `padding` area.
+-- @propertyunit pixel
 -- @readonly
 -- @see padding
 -- @see get_bounding_geometry
@@ -214,8 +216,13 @@ end
 -- Reading this property returns a screenshot of the physical
 -- (Xinerama) screen as a cairo surface.
 --
+-- Use `gears.surface(c.content)` to convert the raw content into a static image.
+--
 -- @property content
--- @tparam gears.surface content
+-- @tparam raw_surface content
+-- @propertydefault The client raw pixels at the time the property is called.
+--  If there is no compositing manager running, it might be black.
+-- @see gears.surface
 -- @readonly
 
 function screen.object.get_content(s)
@@ -251,18 +258,19 @@ end
 --
 -- This adds a "buffer" section on each side of the screen.
 --
--- **Signal:**
---
--- * *property::padding*
---
 -- @DOC_screen_padding_EXAMPLE@
 --
 -- @property padding
--- @tparam table padding
--- @tfield integer table.left The padding on the left.
--- @tfield integer table.right The padding on the right.
--- @tfield integer table.top The padding on the top.
--- @tfield integer table.bottom The padding on the bottom.
+-- @tparam[opt=0] table|number padding
+-- @tparam[opt=0] integer padding.left The padding on the left.
+-- @tparam[opt=0] integer padding.right The padding on the right.
+-- @tparam[opt=0] integer padding.top The padding on the top.
+-- @tparam[opt=0] integer padding.bottom The padding on the bottom.
+-- @negativeallowed false
+-- @propertyunit pixel
+-- @propertytype number A single value for each sides.
+-- @propertytype table A different value for each sides.
+-- @propemits true false
 -- @usebeautiful beautiful.maximized_honor_padding Honor the screen padding when maximizing.
 
 function screen.object.get_padding(self)
@@ -304,18 +312,18 @@ end
 --        -- do something
 --    end
 --
--- **Signal:**
---
---  * *property::outputs*
---
 -- @property outputs
 -- @tparam table outputs
--- @tfield table table.name A table with the screen name as key (like `eDP1` on a laptop)
--- @tfield integer table.mm_width The screen physical width.
--- @tfield integer table.mm_height The screen physical height.
--- @tfield integer table.name The output name.
--- @tfield integer table.viewport_id The identifier of the viewport this output
+-- @tablerowtype A key-value table with the output name as key and a table of
+--  metadata as value.
+-- @tablerowkey integer mm_width The screen physical width.
+-- @tablerowkey integer mm_height The screen physical height.
+-- @tablerowkey string name The output name.
+-- @tablerowkey string viewport_id The identifier of the viewport this output
 --  corresponds to.
+-- @propertydefault This may or may not be populated if the screen are based on
+--  an actual physical screen. For fake screen, this property content is undefined.
+-- @propemits true false
 -- @readonly
 
 function screen.object.get_outputs(s)
@@ -444,7 +452,8 @@ end
 -- default.
 --
 -- @property clients
--- @tparam table clients The clients list, ordered from top to bottom.
+-- @tparam[opt={}] table clients The clients list, ordered from top to bottom.
+-- @tablerowtype A list of `client` objects.
 -- @see all_clients
 -- @see hidden_clients
 -- @see client.get
@@ -472,7 +481,8 @@ end
 -- This includes minimized clients and clients on hidden tags.
 --
 -- @property hidden_clients
--- @tparam table hidden_clients The clients list, ordered from top to bottom.
+-- @tparam[opt={}] table hidden_clients The clients list, ordered from top to bottom.
+-- @tablerowtype A list of `client` objects.
 -- @see clients
 -- @see all_clients
 -- @see client.get
@@ -491,7 +501,8 @@ end
 --- All clients assigned to the screen.
 --
 -- @property all_clients
--- @tparam table all_clients The clients list, ordered from top to bottom.
+-- @tparam[opt={}] table all_clients The clients list, ordered from top to bottom.
+-- @tablerowtype A list of `client` objects.
 -- @see clients
 -- @see hidden_clients
 -- @see client.get
@@ -518,7 +529,8 @@ end
 -- @DOC_screen_tiled_clients_EXAMPLE@
 --
 -- @property tiled_clients
--- @tparam table tiled_clients The clients list, ordered from top to bottom.
+-- @tparam[opt={}] table tiled_clients The clients list, ordered from top to bottom.
+-- @tablerowtype A list of `client` objects.
 
 --- Get tiled clients for the screen.
 --
@@ -568,8 +580,8 @@ end
 -- `awful.tag.new` or `t:delete()` to alter this list.
 --
 -- @property tags
--- @tparam table tags
--- @treturn table A table with all available tags.
+-- @tparam[opt={}] table tags
+-- @tablerowtype A table with all available tags.
 -- @readonly
 
 function screen.object.get_tags(s, unordered)
@@ -592,8 +604,8 @@ end
 
 --- A list of all selected tags on the screen.
 -- @property selected_tags
--- @tparam table selected_tags
--- @treturn table A table with all selected tags.
+-- @tparam[opt={}] table selected_tags
+-- @tablerowtype A table with all selected tags.
 -- @readonly
 -- @see tag.selected
 -- @see client.to_selected_tags
@@ -612,8 +624,7 @@ end
 
 --- The first selected tag.
 -- @property selected_tag
--- @tparam tag selected_tag
--- @treturn ?tag The first selected tag or nil.
+-- @tparam[opt=nil] tag|nil selected_tag
 -- @readonly
 -- @see tag.selected
 -- @see selected_tags
@@ -765,16 +776,24 @@ end
 -- screen is duplicated on a projector).
 --
 -- @property dpi
--- @tparam number dpi The DPI value.
+-- @tparam[opt=96] number dpi
+-- @propertyunit pixel\_per\_inch
+-- @negativeallowed false
 
 --- The lowest density DPI from all of the (physical) outputs.
 -- @property minimum_dpi
--- @tparam number minimum_dpi The DPI value.
+-- @tparam number minimum_dpi
+-- @propertyunit pixel\_per\_inch
+-- @propertydefault This is extracted from `outputs`.
+-- @negativeallowed false
 -- @readonly
 
 --- The highest density DPI from all of the (physical) outputs.
 -- @property maximum_dpi
--- @tparam number maximum_dpi The DPI value.
+-- @tparam number maximum_dpi
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit pixel\_per\_inch
+-- @negativeallowed false
 -- @readonly
 
 --- The preferred DPI from all of the (physical) outputs.
@@ -783,28 +802,42 @@ end
 -- the lowest of the resulting virtual DPIs.
 --
 -- @property preferred_dpi
--- @tparam number preferred_dpi The DPI value.
+-- @tparam number preferred_dpi
+-- @propertydefault This is extracted from `outputs`.
+-- @negativeallowed false
 -- @readonly
 
 --- The maximum diagonal size in millimeters.
 --
 -- @property mm_maximum_size
 -- @tparam number mm_maximum_size
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit millimeter
+-- @negativeallowed false
 
 --- The minimum diagonal size in millimeters.
 --
 -- @property mm_minimum_size
 -- @tparam number mm_minimum_size
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit millimeter
+-- @negativeallowed false
 
 --- The maximum diagonal size in inches.
 --
 -- @property inch_maximum_size
 -- @tparam number inch_maximum_size
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit inch
+-- @negativeallowed false
 
 --- The minimum diagonal size in inches.
 --
 -- @property inch_minimum_size
 -- @tparam number inch_minimum_size
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit inch
+-- @negativeallowed false
 
 --- Emitted when a new screen is added.
 --
