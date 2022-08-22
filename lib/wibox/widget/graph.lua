@@ -36,7 +36,9 @@ local graph = { mt = {} }
 --@DOC_wibox_widget_graph_border_width_EXAMPLE@
 --
 -- @property border_width
--- @tparam number border_width
+-- @tparam[opt=0] number border_width
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 -- @see border_color
 
@@ -45,7 +47,7 @@ local graph = { mt = {} }
 --@DOC_wibox_widget_graph_border_color_EXAMPLE@
 --
 -- @property border_color
--- @tparam gears.color border_color The border color to set.
+-- @tparam color|nil border_color The border color to set.
 -- @propbeautiful
 -- @propemits true false
 -- @see gears.color
@@ -67,7 +69,7 @@ local graph = { mt = {} }
 --@DOC_wibox_widget_graph_background_color_EXAMPLE@
 --
 -- @property background_color
--- @tparam gears.color background_color The graph background color.
+-- @tparam color background_color The graph background color.
 -- @usebeautiful beautiful.graph_bg
 -- @propemits true false
 -- @see gears.color
@@ -84,7 +86,8 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_stacked_group_disable_EXAMPLE@
 --
 -- @property group_colors
--- @tparam table group_colors A table with colors for data groups.
+-- @tparam[opt=self.color] table group_colors A table with colors for data groups.
+-- @tablerowtype List of color values.
 -- @see gears.color
 
 --- The maximum value the graph should handle.
@@ -97,7 +100,8 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_max_value_EXAMPLE@
 --
 -- @property max_value
--- @tparam number max_value
+-- @tparam[opt=1] number max_value
+-- @negativeallowed true
 -- @propemits true false
 
 --- The minimum value the graph should handle.
@@ -110,10 +114,11 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_min_value_EXAMPLE@
 --
 -- @property min_value
--- @tparam number min_value
+-- @tparam[opt=0] number min_value
+-- @negativeallowed true
 -- @propemits true false
 
---- Set the graph to automatically scale its values. Default is false.
+--- Set the graph to automatically scale its values.
 --
 -- If this property is set to true, the graph calculates
 -- effective `min_value` and `max_value` based on the displayed data,
@@ -126,7 +131,7 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_scale1_EXAMPLE@
 --
 -- @property scale
--- @tparam boolean scale
+-- @tparam[opt=false] boolean scale
 -- @propemits true false
 
 --- Clamp graph bars to keep them inside the widget for out-of-range values.
@@ -144,15 +149,16 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_clamp_bars_EXAMPLE@
 --
 -- @property clamp_bars
--- @tparam boolean clamp_bars
+-- @tparam[opt=false] boolean clamp_bars
 -- @propemits true false
 
---- The value corresponding to the starting point of graph bars. Default is 0.
+--- The value corresponding to the starting point of graph bars.
 --
 -- @DOC_wibox_widget_graph_baseline_value_EXAMPLE@
 --
 -- @property baseline_value
--- @tparam number baseline_value
+-- @tparam[opt=0] number baseline_value
+-- @negativeallowed true
 -- @propemits true false
 
 --- Set the width or the individual steps.
@@ -161,6 +167,8 @@ local graph = { mt = {} }
 --
 -- @property step_width
 -- @tparam[opt=1] number step_width
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 
 --- Set the spacing between the steps.
@@ -169,6 +177,8 @@ local graph = { mt = {} }
 --
 -- @property step_spacing
 -- @tparam[opt=0] number step_spacing
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 
 --- The step shape.
@@ -176,7 +186,7 @@ local graph = { mt = {} }
 --@DOC_wibox_widget_graph_step_shape_EXAMPLE@
 --
 -- @property step_shape
--- @tparam[opt=rectangle] gears.shape|function step_shape
+-- @tparam[opt=gears.rect.rectangle] shape step_shape
 -- @propemits true false
 -- @see gears.shape
 
@@ -190,7 +200,7 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_normal_vs_stacked_EXAMPLE@
 --
 -- @property stack
--- @tparam boolean stack
+-- @tparam[opt=false] boolean stack
 -- @propemits true false
 
 --- Display NaN indication. Default is true.
@@ -205,7 +215,7 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_nan_color_EXAMPLE@
 --
 -- @property nan_indication
--- @tparam boolean nan_indication
+-- @tparam[opt=true] boolean nan_indication
 -- @propemits true false
 
 --- The color of NaN indication.
@@ -216,7 +226,7 @@ local graph = { mt = {} }
 -- @DOC_wibox_widget_graph_stacked_nan_EXAMPLE@
 --
 -- @property nan_color
--- @tparam gears.color nan_color The color of NaN indication.
+-- @tparam[opt="#ffff00"] color nan_color The color of NaN indication.
 -- @propemits true false
 -- @see gears.color
 
@@ -377,7 +387,7 @@ end
 --
 -- @method pick_data_group_color
 -- @tparam number group_idx The index of the data group.
--- @treturn gears.color The color to paint the data group's values with.
+-- @treturn color The color to paint the data group's values with.
 function graph:pick_data_group_color(group_idx)
     -- Use an individual group color, if there's one
     local data_group_colors = self._private.group_colors
@@ -787,6 +797,8 @@ end
 -- @property capacity
 -- @tparam[opt=nil] integer|nil capacity The maximum number of values to keep
 -- per data group (`nil` for automatic guess).
+-- @negativeallowed false
+-- @propertyunit Number of value.
 -- @propemits true false
 function graph:set_capacity(capacity)
     -- Property override to avoid emitting the "redraw_needed" signal,
