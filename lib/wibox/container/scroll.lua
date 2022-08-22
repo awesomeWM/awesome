@@ -276,7 +276,7 @@ end
 
 --- The widget to be scrolled.
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam[opt=nil] widget|nil widget
 
 function scroll:set_widget(widget)
     if widget == self._private.widget then
