@@ -35,24 +35,24 @@ should be useful for you.
 ### Default configuration components name:
 
 <center>
-    <object class="img-object" data="images/AUTOGEN_awful_popup_defaultconfig.svg" alt="" type="image/svg+xml"></object>
+  <object class="img-object" data="images/AUTOGEN_awful_popup_defaultconfig.svg" alt="" type="image/svg+xml"></object>
 </center>
 
 ### Guides
 
 <div class="index_guides">
-    <div>
-        @{07-my-first-awesome.md|Getting started}
-        @{90-FAQ.md|FAQ}
-        @{01-readme.md|Read Me}
-        @{89-NEWS.md|NEWS}
-    </div>
-    <div>
-        @{03-declarative-layout.md|The widget system}
-        @{09-options.md|Startup options}
-        @{05-awesomerc.md|The default rc.lua}
-        @{08-client-layout-system.md|Window management}
-    </div>
+ <div>
+   @{07-my-first-awesome.md|Getting started}
+   @{90-FAQ.md|FAQ}
+   @{01-readme.md|Read Me}
+   @{89-NEWS.md|NEWS}
+ </div>
+ <div>
+   @{03-declarative-layout.md|The widget system}
+   @{09-options.md|Startup options}
+   @{05-awesomerc.md|The default rc.lua}
+   @{08-client-layout-system.md|Window management}
+ </div>
 </div>
 
 ## Major libraries
