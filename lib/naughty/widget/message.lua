@@ -25,6 +25,7 @@ local message = {}
 --- The attached notification.
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propertydefault This is usually set in the construtor.
 -- @propemits true false
 
 function message:set_notification(notif)
@@ -85,8 +86,6 @@ local function new(args)
 
     return tb
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 
