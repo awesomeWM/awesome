@@ -24,8 +24,10 @@ local base = {}
 
 --- Get or set the children elements.
 -- @property children
--- @tparam table children The children.
+-- @tparam[opt={}] table children
+-- @tablerowtype A list of `wibox.widget`.
 -- @baseclass wibox.widget.base
+-- @see all_children
 
 --- Get all direct and indirect children widgets.
 -- This will scan all containers recursively to find widgets
@@ -33,34 +35,56 @@ local base = {}
 -- widgets hierarchy. A hierarchy loop is when a widget, or any of its
 -- children, contain (directly or indirectly) itself.
 -- @property all_children
--- @tparam table all_children The children.
+-- @tparam[opt={}] table all_children
+-- @tablerowtype A list of `wibox.widget`.
 -- @baseclass wibox.widget.base
+-- @see children
 
 --- Force a widget height.
 -- @property forced_height
--- @tparam number|nil forced_height The height (`nil` for automatic)
+-- @tparam[opt=nil] number|nil forced_height
+-- @propertyunit pixel
+-- @propertytype nil Let the layout decide the height. Usually using the widget
+--  native height.
+-- @propertytype number Enforce a number of pixels.
+-- @rangestart 0
+-- @rangestop 65534
 -- @baseclass wibox.widget.base
+-- @see forced_width
 
 --- Force a widget width.
 -- @property forced_width
--- @tparam number|nil forced_width The width (`nil` for automatic)
+-- @tparam[opt=nil] number|nil forced_width
+-- @propertyunit pixel
+-- @propertytype nil Let the layout decide the width. Usually using the widget
+--  native width.
+-- @propertytype number Enforce a number of pixels.
+-- @rangestart 0
+-- @rangestop 65534
 -- @baseclass wibox.widget.base
+-- @see forced_height
 
 --- The widget opacity (transparency).
 -- @property opacity
--- @tparam[opt=1] number opacity The opacity (between 0 and 1)
+-- @tparam[opt=1.0] number opacity
+-- @rangestart 0.0
+-- @rangestop 1.0
+-- @propertyunit A gradient between transparent (`0.0`) and opaque (`1.0`).
 -- @baseclass wibox.widget.base
+-- @see visible
 
 --- The widget visibility.
 -- @property visible
 -- @tparam[opt=true] boolean visible
 -- @baseclass wibox.widget.base
+-- @see opacity
 
 --- The widget buttons.
 --
 -- The table contains a list of `awful.button` objects.
 -- @property buttons
--- @tparam table buttons
+-- @tparam[opt={}] table buttons
+-- @tablerowtype A list of `awful.button`.
 -- @see awful.button
 -- @baseclass wibox.widget.base
 
