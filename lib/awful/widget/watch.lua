@@ -31,6 +31,7 @@
 -- @author Yauheni Kirylau
 -- @copyright 2015, 2016 Benjamin Petrenko, Yauheni Kirylau
 -- @widgetmod awful.widget.watch
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -90,8 +91,6 @@ end
 function watch.mt.__call(_, ...)
     return watch.new(...)
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 
