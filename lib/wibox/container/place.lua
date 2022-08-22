@@ -75,7 +75,7 @@ end
 --- The widget to be placed.
 --
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam[opt=nil] widget|nil widget
 -- @interface container
 
 place.set_widget = base.set_widget_common
@@ -102,30 +102,24 @@ end
 
 --- The vertical alignment.
 --
--- Possible values are:
---
--- * *top*
--- * *center* (default)
--- * *bottom*
---
 --@DOC_wibox_container_place_valign_EXAMPLE@
 --
 -- @property valign
 -- @tparam[opt="center"] string valign
+-- @propertyvalue "top"
+-- @propertyvalue "center"
+-- @propertyvalue "bottom"
 -- @propemits true false
 
 --- The horizontal alignment.
---
--- Possible values are:
---
--- * *left*
--- * *center* (default)
--- * *right*
 --
 --@DOC_wibox_container_place_halign_EXAMPLE@
 --
 -- @property halign
 -- @tparam[opt="center"] string halign
+-- @propertyvalue "left"
+-- @propertyvalue "center"
+-- @propertyvalue "right"
 -- @propemits true false
 
 function place:set_valign(value)
