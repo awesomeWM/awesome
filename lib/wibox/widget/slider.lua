@@ -30,7 +30,7 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_handle_shape_EXAMPLE@
 --
 -- @property handle_shape
--- @tparam[opt=gears shape rectangle] gears.shape handle_shape
+-- @tparam shape|nil handle_shape
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.shape
@@ -41,7 +41,7 @@ local slider = {mt={}}
 --
 -- @property handle_color
 -- @propbeautiful
--- @tparam color handle_color
+-- @tparam color|nil handle_color
 -- @propemits true false
 
 --- The slider handle margins.
@@ -49,11 +49,15 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_handle_margins_EXAMPLE@
 --
 -- @property handle_margins
--- @tparam[opt={}] table handle_margins
--- @tparam[opt=0] number margins.left
--- @tparam[opt=0] number margins.right
--- @tparam[opt=0] number margins.top
--- @tparam[opt=0] number margins.bottom
+-- @tparam[opt={}] table|number|nil handle_margins
+-- @tparam[opt=0] number handle_margins.left
+-- @tparam[opt=0] number handle_margins.right
+-- @tparam[opt=0] number handle_margins.top
+-- @tparam[opt=0] number handle_margins.bottom
+-- @propertyunit pixel
+-- @propertytype number A single value used for all sides.
+-- @propertytype table A different value for each side. The side names are:
+-- @negativeallowed true
 -- @propemits true false
 -- @propbeautiful
 
@@ -62,7 +66,9 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_handle_width_EXAMPLE@
 --
 -- @property handle_width
--- @tparam number handle_width
+-- @tparam number|nil handle_width
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propemits true false
 -- @propbeautiful
 
@@ -71,13 +77,15 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_handle_border_EXAMPLE@
 --
 -- @property handle_border_color
--- @tparam color handle_border_color
+-- @tparam color|nil handle_border_color
 -- @propemits true false
 -- @propbeautiful
 
 --- The handle border width.
 -- @property handle_border_width
--- @tparam[opt=0] number handle_border_width
+-- @tparam[opt=0] number|nil handle_border_width
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 -- @propbeautiful
 
@@ -86,7 +94,7 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_bar_shape_EXAMPLE@
 --
 -- @property bar_shape
--- @tparam[opt=gears shape rectangle] gears.shape bar_shape
+-- @tparam shape|nil bar_shape
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.shape
@@ -96,7 +104,9 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_bar_height_EXAMPLE@
 --
 -- @property bar_height
--- @tparam number bar_height
+-- @tparam number|nil bar_height
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propbeautiful
 -- @propemits true false
 
@@ -105,7 +115,7 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_bar_color_EXAMPLE@
 --
 -- @property bar_color
--- @tparam color bar_color
+-- @tparam color|nil bar_color
 -- @propbeautiful
 -- @propemits true false
 
@@ -115,7 +125,7 @@ local slider = {mt={}}
 --
 -- Only works when both `bar_active_color` and `bar_color` are passed as hex color string
 -- @property bar_active_color
--- @tparam color bar_active_color
+-- @tparam color|nil bar_active_color
 -- @propbeautiful
 -- @propemits true false
 
@@ -124,17 +134,23 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_bar_margins_EXAMPLE@
 --
 -- @property bar_margins
--- @tparam[opt={}] table bar_margins
--- @tparam[opt=0] number margins.left
--- @tparam[opt=0] number margins.right
--- @tparam[opt=0] number margins.top
--- @tparam[opt=0] number margins.bottom
+-- @tparam[opt={}] table|number|nil bar_margins
+-- @tparam[opt=0] number bar_margins.left
+-- @tparam[opt=0] number bar_margins.right
+-- @tparam[opt=0] number bar_margins.top
+-- @tparam[opt=0] number bar_margins.bottom
+-- @propertyunit pixel
+-- @propertytype number A single value used for all sides.
+-- @propertytype table A different value for each side. The side names are:
+-- @negativeallowed true
 -- @propbeautiful
 -- @propemits true false
 
 --- The bar (background) border width.
 -- @property bar_border_width
--- @tparam[opt=0] number bar_border_width
+-- @tparam[opt=0] number|nil bar_border_width
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 -- @propbeautiful
 
@@ -143,7 +159,7 @@ local slider = {mt={}}
 --@DOC_wibox_widget_slider_bar_border_EXAMPLE@
 --
 -- @property bar_border_color
--- @tparam color bar_border_color
+-- @tparam color|nil bar_border_color
 -- @propbeautiful
 -- @propemits true false
 
@@ -153,18 +169,21 @@ local slider = {mt={}}
 --
 -- @property value
 -- @tparam[opt=0] number value
+-- @negativeallowed true
 -- @propemits true false
 
 --- The slider minimum value.
 --
 -- @property minimum
 -- @tparam[opt=0] number minimum
+-- @negativeallowed true
 -- @propemits true false
 
 --- The slider maximum value.
 --
 -- @property maximum
 -- @tparam[opt=100] number maximum
+-- @negativeallowed true
 -- @propemits true false
 
 --- The bar (background) border width.
@@ -200,13 +219,13 @@ local slider = {mt={}}
 --- The handle shape.
 --
 -- @beautiful beautiful.slider_handle_shape
--- @tparam[opt=gears shape rectangle] gears.shape shape
+-- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The bar (background) shape.
 --
 -- @beautiful beautiful.slider_bar_shape
--- @tparam[opt=gears shape rectangle] gears.shape shape
+-- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
 --- The bar (background) height.
