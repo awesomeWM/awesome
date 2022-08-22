@@ -149,6 +149,8 @@ end
 --
 -- @property index
 -- @tparam integer index
+-- @propertydefault This is based on the current list of `t.screen:tags()`.
+-- @negativeallowed false
 -- @propemits false false
 
 function tag.object.set_index(self, idx)
@@ -598,7 +600,7 @@ end
 --- The tag screen.
 --
 -- @property screen
--- @tparam screen screen
+-- @tparam[opt=awful.screen.focused()] screen screen
 -- @propemits false false
 -- @see screen
 
@@ -718,7 +720,9 @@ end
 -- @DOC_screen_mwfact2_EXAMPLE@
 --
 -- @property master_width_factor
--- @tparam[opt=beautiful.master_width_factor] number master_width_factor Between 0 and 1
+-- @tparam[opt=beautiful.master_width_factor] number master_width_factor
+-- @rangestart 0.0
+-- @rangestop 1.0
 -- @emits property::mwfact When the value changes (deprecated).
 -- @emits property::master_width_factor When the value changes.
 -- @see master_count
@@ -827,6 +831,34 @@ end
 --     placed. The only parameter is a table or arguments returned by
 --     `awful.layout.parameters`
 --
+-- The parameter table contains:
+--
+-- <table class='widget_list' border=1>
+--  <tr style='font-weight: bold;'>
+--   <th align='center'>Parameter </th>
+--   <th align='center'>Type</th>
+--   <th align='center'>Description</th>
+--  </tr>
+--  <tr><td>`workarea`</td><td> table </td><td>
+--   A table with `x`,`y`, `width` and `height` keys.<br/>
+--   All clients must be placed within this area.
+--  </td></tr>
+--  <tr><td align='center'>`geometry`</td><td> table </td><td>A table with the screen geometry.</td></tr>
+--  <tr><td align='center'>`clients`</td><td> table </td><td>A list of the clients to place.</td></tr>
+--  <tr><td align='center'>`screen`</td><td> screen </td><td>The screen.</td></tr>
+--  <tr><td align='center'>`padding`</td><td> table </td><td>
+--   A table with `left`, `right`, `top` and `bottom` keys.
+--  </td></tr>
+--  <tr>
+--   <td align='center'>`useless_gap`</td><td> integer </td>
+--   <td>The space that will be removed from the clients.</td>
+--  </tr>
+--  <tr><td align='center'>`geometries`</td><td> table </td><td>
+--   Empty. Place the client as key and preferred geometry<br/>
+--   as value. Do not call `:geometry()` directly.
+--  </td></tr>
+-- </table>
+--
 -- **Stateful layouts:**
 --
 -- The stateful layouts API is the same as stateless, but they are a function
@@ -843,9 +875,13 @@ end
 --
 -- @property layout
 -- @tparam layout|function layout A layout table or a constructor function
+-- @propertydefault The first non-nil value of either `self.layouts[1]` or
+-- `awful.layout.layouts[1]` or `awful.layout.suit.floating`.
+-- @functionparam table params A table containing the state of the layout (see the table above).
+-- @functionnoreturn
 -- @propemits false false
 -- @see awful.tag.layouts
--- @return The layout
+-- @see awful.layout.parameters
 
 --- The (proposed) list of available layouts for this tag.
 --
@@ -859,10 +895,13 @@ end
 -- front of the list.
 --
 -- @property layouts
--- @tparam table layouts
+-- @tparam[opt=nil] table|nil layouts
+-- @propertytype nil Use the current value of `awful.layout.layouts`.
 -- @request tag layouts awful granted When the `layouts` property is first called
 --  and there is no layouts, then that signal is called.
 -- @see awful.layout.layouts
+-- @see screen.workarea
+-- @see screen.padding
 -- @see layout
 
 function tag.object.set_layout(t, layout)
@@ -1053,7 +1092,7 @@ end
 -- the "Non-volatile" tag is still there (but with zero clients).
 --
 -- @property volatile
--- @tparam boolean volatile
+-- @tparam[opt=false] boolean volatile
 -- @propemits false false
 -- @see delete
 
@@ -1102,7 +1141,9 @@ end
 -- @DOC_screen_gaps2_EXAMPLE@
 --
 -- @property gap
--- @tparam[opt=beautiful.useless_gap] number gap The value has to be greater than zero.
+-- @tparam[opt=beautiful.useless_gap] integer gap The value has to be greater than zero.
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @emits property::useless_gap When the gap changes.
 -- @see gap_single_client
 -- @see awful.tag.incgap
@@ -1219,12 +1260,6 @@ end
 -- Some multi-column layouts can be configured so that the space is
 -- redistributed when there is not enough clients to fill all columns.
 --
--- ** Possible values**:
---
--- * *expand*: Take all the space
--- * *master\_width\_factor*: Only take the ratio defined by the
---   `master_width_factor`
---
 -- This is the default behavior of the `tile.left` layout (*expand*):
 --
 -- @DOC_screen_mfpol2_EXAMPLE@
@@ -1237,7 +1272,10 @@ end
 -- redistributed on both side.
 --
 -- @property master_fill_policy
--- @tparam[opt=beautiful.master_fill_policy] string master_fill_policy "expand" or "master\_width\_factor"
+-- @tparam[opt=beautiful.master_fill_policy] string master_fill_policy
+-- @propertyvalue "expand" Take all the space
+-- @propertyvalue "master_width_factor" Only take the ratio defined by the
+--   `master_width_factor`
 -- @propemits false false
 -- @see awful.tag.togglemfpol
 
@@ -1306,6 +1344,7 @@ end
 --
 -- @property master_count
 -- @tparam[opt=beautiful.master_count] integer master_count Only positive values are accepted
+-- @rangestart 1
 -- @emits property::nmaster Deprecated.
 -- @emits property::master_count When the value changes.
 -- @see awful.tag.incnmaster
@@ -1380,7 +1419,7 @@ end
 -- @DOC_wibox_awidget_taglist_icon_EXAMPLE@
 --
 -- @property icon
--- @tparam path|surface icon The icon
+-- @tparam[opt=nil] image|nil icon
 -- @propemits false false
 -- @see awful.widget.taglist
 -- @see gears.surface
@@ -1422,6 +1461,7 @@ end
 --
 -- @property column_count
 -- @tparam[opt=beautiful.column_count or 1] integer column_count Has to be greater than 1
+-- @rangestart 1
 -- @emits property::ncol Deprecated.
 -- @emits property::column_count When the value changes.
 -- @see awful.tag.incncol
