@@ -145,13 +145,6 @@ local popup = {}
 -- parent menu. If there is no space on the right, it tries on the left and so
 -- on.
 --
--- Valid directions are:
---
--- * left
--- * right
--- * top
--- * bottom
---
 -- The basic use case for this method is to give it a parent wibox:
 --
 -- @DOC_awful_popup_position1_EXAMPLE@
@@ -162,8 +155,16 @@ local popup = {}
 -- @DOC_awful_popup_position2_EXAMPLE@
 --
 -- @property preferred_positions
--- @tparam table|string preferred_positions A position name or an ordered
---  table of positions
+-- @tparam table|string preferred_positions
+-- @propertydefault `{ "right", "left", "top", "bottom" }`
+-- @propertytype string A single position with no fallback. It will be used
+--  even if it doesn't fit.
+-- @propertytype table A list of possible positions. The first one to fit will be
+--  used.
+-- @propertyvalue "left"
+-- @propertyvalue "right"
+-- @propertyvalue "top"
+-- @propertyvalue "bottom"
 -- @see awful.placement.next_to
 -- @see awful.popup.preferred_anchors
 -- @propemits true false
@@ -176,12 +177,6 @@ end
 
 --- Set the preferred popup anchors relative to the parent.
 --
--- The possible values are:
---
--- * front
--- * middle
--- * back
---
 -- For details information, see the `awful.placement.next_to` documentation.
 --
 -- In this example, it is possible to see the effect of having a fallback
@@ -190,8 +185,14 @@ end
 -- @DOC_awful_popup_anchors_EXAMPLE@
 --
 -- @property preferred_anchors
--- @tparam table|string preferred_anchors Either a single anchor name or a table
+-- @tparam[opt="back"] table|string preferred_anchors
 --  ordered by priority.
+-- @propertytype string A single anchor value with no fallback.
+-- @propertytype table A list of possible anchor, the first one has the higher
+--  priority, but will fallback if it doesn't fit.
+-- @propertyvalue "front"
+-- @propertyvalue "middle"
+-- @propertyvalue "back"
 -- @propemits true false
 -- @see awful.placement.next_to
 -- @see awful.popup.preferred_positions
@@ -210,7 +211,14 @@ end
 -- isn't enough space, it can also be one of the fallback.
 --
 -- @property current_position
--- @tparam string current_position Either "left", "right", "top" or "bottom"
+-- @tparam string current_position
+-- @propertydefault This depends on where the popup was displayed.
+-- @propertyvalue "left"
+-- @propertyvalue "right"
+-- @propertyvalue "top"
+-- @propertyvalue "bottom"
+-- @readonly
+-- @see awful.popup.preferred_positions
 
 function popup:get_current_position()
     return self._private.current_position
@@ -224,7 +232,13 @@ end
 -- opposite direction from the anchor.
 --
 -- @property current_anchor
--- @tparam string current_anchor Either "front", "middle", "back"
+-- @tparam string current_anchor
+-- @propertydefault This depends on where the popup was displayed.
+-- @propertyvalue "front"
+-- @propertyvalue "middle"
+-- @propertyvalue "back"
+-- @readonly
+-- @see awful.popup.preferred_anchors
 
 function popup:get_current_anchor()
     return self._private.current_anchor
@@ -275,7 +289,8 @@ function popup:bind_to_widget(widget, button)
 end
 
 --- Unbind the popup from a widget button.
--- @tparam widget widget The widget
+-- @tparam widget widget
+-- @propertytype widget A widget or declarative widget construct.
 -- @method unbind_to_widget
 -- @noreturn
 function popup:unbind_to_widget(widget)
@@ -298,25 +313,33 @@ end
 --- The popup minimum width.
 --
 -- @property minimum_width
--- @tparam[opt=1] number minimum_width The minimum width.
+-- @tparam[opt=1] integer minimum_width
+-- @propertyunit pixel
+-- @rangestart 1
 -- @propemits true false
 
 --- The popup minimum height.
 --
 -- @property minimum_height
--- @tparam[opt=1] number minimum_height The minimum height.
+-- @tparam[opt=1] integer minimum_height
+-- @propertyunit pixel
+-- @rangestart 1
 -- @propemits true false
 
 --- The popup maximum width.
 --
 -- @property maximum_width
--- @tparam[opt=1] number maximum_width The maximum width.
+-- @tparam[opt=1] integer maximum_width
+-- @propertyunit pixel
+-- @rangestart 1
 -- @propemits true false
 
 --- The popup maximum height.
 --
 -- @property maximum_height
--- @tparam[opt=1] number maximum_height The maximum height.
+-- @tparam[opt=1] integer maximum_height
+-- @propertyunit pixel
+-- @rangestart 1
 -- @propemits true false
 
 for _, orientation in ipairs {"_width", "_height"} do
@@ -340,9 +363,13 @@ end
 --
 -- @DOC_awful_popup_position3_EXAMPLE@
 -- @property offset
--- @tparam table|integer offset An integer value or a `{x=, y=}` table.
--- @tparam[opt=offset] integer offset.x The horizontal distance.
--- @tparam[opt=offset] integer offset.y The vertical distance.
+-- @tparam[opt=0] table|integer offset
+-- @tparam[opt=0] integer offset.x The horizontal offset.
+-- @tparam[opt=0] integer offset.y The vertical offset.
+-- @propertytype integer A value for both `x` and `y` simultaneously.
+-- @propertytype table Specify values for `x` and `y` individually.
+-- @negativeallowed true
+-- @propertyunit pixel
 -- @propemits true false
 
 function popup:set_offset(offset)
@@ -369,10 +396,10 @@ end
 
 --- Set the placement function.
 --
--- (or false to disable placement)
---
 -- @property placement
--- @tparam[opt=awful.placement.next_to] function|string|boolean placement The placement function or name
+-- @tparam[opt=awful.placement.next_to] placement|string|boolean placement
+-- @propertytype boolean Use `false` to disable automatic placement.
+-- @propertytype string The name of an `awful.placement` function, like `"next_to"`.
 -- @propemits true false
 -- @see awful.placement
 
@@ -495,9 +522,5 @@ local function create_popup(_, args)
 
     return w
 end
-
---@DOC_wibox_COMMON@
-
---@DOC_object_COMMON@
 
 return setmetatable(module, {__call = create_popup})
