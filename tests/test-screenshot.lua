@@ -108,6 +108,17 @@ local function get_pixel(img, x, y)
     return "#" .. bytes:gsub('.', function(c) return ('%02x'):format(c:byte()) end)
 end
 
+local snipper_success = nil
+local function snipper_cb(ss)
+    local img = ss.surface
+    if img and get_pixel(img, 10, 10) == "#00ff00" then
+        snipper_success = "true"
+        return
+    else
+        snipper_success = "false"
+    end
+end
+
 local steps = {}
 
 -- Check the whole root window with root.content()
@@ -245,6 +256,105 @@ table.insert(steps, function()
 
     return true
 
+end)
+
+--Check the snipper toop with awful.screenshot.snipper() method
+table.insert(steps, function()
+    --Make sure client from last test is gone
+    if #client.get() ~= 0 then return end
+    --Ensure mousegrabber is satisfied
+    root.fake_input("button_press",1)
+    return true   
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_release",1)
+    return true
+end)
+
+table.insert(steps, function()
+    --Ensure prior mouse presses go through
+    local t0 = os.time()
+    while os.time() - t0 < 1 do end
+    return true
+end)
+
+table.insert(steps, function()
+    awful.screenshot.snipper({directory = fake_screenshot_dir, on_success_cb = snipper_cb})
+    return true
+end)
+
+table.insert(steps, function()
+    mouse.coords {x = 110, y = 110}
+    return true
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_press",1)
+    return true
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_release",1)
+    return true
+end)
+
+table.insert(steps, function()
+    mouse.coords {x = 190, y = 190}
+    return true
+end)
+
+table.insert(steps, function()
+    --Ensure prior mouse presses and movements go through
+    local t0 = os.time()
+    while os.time() - t0 < 1 do end
+    return true
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_press",1)
+    return true
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_release",1)
+    return true
+end)
+
+table.insert(steps, function()
+    --Ensure prior mouse presses go through and callback runs
+    local t0 = os.time()
+    while os.time() - t0 < 1 do end
+    return true
+end)
+
+table.insert(steps, function()
+
+    --Check for success
+    if snipper_success then
+        if snipper_success == "true" then
+            return true
+        else
+            return false
+        end
+    else
+        return
+    end
+
+    return true
+
+end)
+
+table.insert(steps, function()
+
+    local ss = awful.screenshot.snip({geometry = {x = 100, y = 100, width = 100, height = 100},
+                                     directory = fake_screenshot_dir})
+    local img = ss.surface
+    if get_pixel(img, 10, 10) == "#00ff00" then
+        return true
+    else
+        return false
+    end
 end)
 
 require("_runner").run_steps(steps)

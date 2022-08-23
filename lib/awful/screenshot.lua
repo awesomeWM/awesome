@@ -390,7 +390,7 @@ function default_on_success_cb(ss)
 end
 
 -- Internal function exected when a root window screenshot is taken.
-function screenshot_methods.root_screenshot(ss)
+function screenshot_methods.root(ss)
   local w, h = root.size()
   ss._private.geometry = {x = 0, y = 0, width = w, height = h}
   ss:filepath_builder()
@@ -399,7 +399,7 @@ function screenshot_methods.root_screenshot(ss)
 end
 
 -- Internal function executed when a physical screen screenshot is taken.
-function screenshot_methods.screen_screenshot(ss)
+function screenshot_methods.screen(ss)
 
   -- note the use of _private because screen has no setter
   if ss.screen then
@@ -419,7 +419,7 @@ function screenshot_methods.screen_screenshot(ss)
 end
 
 -- Internal function executed when a client window screenshot is taken.
-function screenshot_methods.client_screenshot(ss)
+function screenshot_methods.client(ss)
 	--
   -- note the use of _private becuase client has no setter
   if not ss.client then
@@ -433,7 +433,7 @@ function screenshot_methods.client_screenshot(ss)
 end
 
 -- Internal function executed when a snipper screenshot tool is launched.
-function screenshot_methods.snipper_screenshot(ss)
+function screenshot_methods.snipper(ss)
 
   if type(ss._private.on_success_cb) ~= "function" then
     ss._private.on_success_cb = default_on_success_cb -- the cb has no setter
@@ -448,7 +448,7 @@ end
 
 -- Internal function executed when a snip screenshow (a defined geometry) is
 -- taken.
-function screenshot_methods.snip_screenshot(ss)
+function screenshot_methods.snip(ss)
 
   local root_w, root_h
   local root_intrsct
@@ -483,7 +483,7 @@ function screenshot_methods.snip_screenshot(ss)
 end
 
 -- Default method is root
-screenshot_methods.default = root_screenshot
+screenshot_methods.default = screenshot_methods.root
 local default_method_name = "root"
 
 -- Module routines
@@ -845,7 +845,7 @@ local function new(_, args)
     end
 
   elseif method_name == "snip" then
-    geom = args.geometry
+    geometry = args.geometry
   end
 
   ss._private = {
