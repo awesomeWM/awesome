@@ -194,23 +194,31 @@ table.insert(steps, function()
     --Make sure client from last test is gone
     if #client.get() ~= 0 then return end
 
+    print("Set blank defaults")
     awful.screenshot.set_defaults({})
+    print("Set explicit defaults")
     awful.screenshot.set_defaults({directory = "/dev/null", prefix = "Screenshot-", frame_color = "#000000"})
+    print("Set tilde default")
     awful.screenshot.set_defaults({directory = "~/"})
+    print("Set directory default")
     awful.screenshot.set_defaults({directory = fake_screenshot_dir})
 
+    print("Taking root shot")
     local ss = awful.screenshot.root()
     local name_prfx = string.gsub(fake_screenshot_dir, "/*$", "/") .. "Screenshot-"
 
+    print("Checking assigned filepath")
     local f, l = string.find(ss.filepath, name_prfx)
     if f ~= 1 then
         print("Failed first if: " .. ss.filepath .. " : " .. name_prfx)
         return false
     end
 
+    print("Assigning new filepath")
     name_prfx = string.gsub(fake_screenshot_dir, "/*$", "/") .. "MyShot.png"
     ss.filepath = name_prfx
 
+    print("Checking assigned filepath")
     if ss.filepath ~= name_prfx then
         print("Failed second if: " .. ss.filepath .. " : " .. name_prfx)
         return false
