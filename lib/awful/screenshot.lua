@@ -40,7 +40,7 @@ local function get_default_dir()
   local home_dir = os.getenv("HOME")
   
   if home_dir then
-    home_dir = string.gsub(home_dir, '/*$', '/') .. 'Images/'
+    home_dir = string.gsub(home_dir, '/*$', '/', 1) .. 'Images/'
     if gears.filesystem.dir_writable(home_dir) then
       return home_dir
     end
@@ -70,15 +70,15 @@ local function check_directory(directory)
     -- is arguably unexpected behavior.
     if string.find(directory, "^~/") then
       directory = string.gsub(directory, "^~/",
-                              string.gsub(os.getenv("HOME"), "/*$", "/"))
+                              string.gsub(os.getenv("HOME"), "/*$", "/", 1))
     elseif string.find(directory, "^[^/]") then
-      directory = string.gsub(os.getenv("HOME"), "/*$", "/") .. directory
+      directory = string.gsub(os.getenv("HOME"), "/*$", "/", 1) .. directory
     end
 
     print("After first sanitation -- " .. directory)
 
     -- Assure that we return exactly one trailing slash
-    directory = string.gsub(directory, '/*$', '/')
+    directory = string.gsub(directory, '/*$', '/', 1)
     print("After second sanitation -- " .. directory)
 
     if gears.filesystem.dir_writable(directory) then
