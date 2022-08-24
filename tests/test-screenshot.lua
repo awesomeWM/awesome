@@ -204,7 +204,7 @@ table.insert(steps, function()
 
     local f, l = string.find(ss.filepath, name_prfx)
     if f ~= 1 then
-        print("First if: " .. ss.filepath .. " : " .. name_prfx)
+        print("Failed first if: " .. ss.filepath .. " : " .. name_prfx)
         return false
     end
 
@@ -212,6 +212,7 @@ table.insert(steps, function()
     ss.filepath = name_prfx
 
     if ss.filepath ~= name_prfx then
+        print("Failed second if: " .. ss.filepath .. " : " .. name_prfx)
         return false
     end
 
