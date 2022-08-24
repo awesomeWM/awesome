@@ -60,6 +60,8 @@ end
 -- Adding 'mkdir -p' functionality can be considered in the future.
 local function check_directory(directory)
 
+  print("Enter check_directory()")
+  print(directory)
   if directory and type(directory) == "string"  then
 
     -- Fully qualify a "~/" path or a relative path to $HOME. One might argue
@@ -73,15 +75,20 @@ local function check_directory(directory)
       directory = string.gsub(os.getenv("HOME"), "/*$", "/") .. directory
     end
 
+    print("After first sanitation -- " .. directory)
+
     -- Assure that we return exactly one trailing slash
     directory = string.gsub(directory, '/*$', '/')
+    print("After second sanitation -- " .. directory)
 
     if gears.filesystem.dir_writable(directory) then
+      print("Returning directory")
       return directory
     else
       -- Currently returns nil if the requested directory string cannot be used.
       -- This can be swapped to a silent fallback to the default directory if
       -- desired. It is debatable which way is better.
+      print("Returning nil")
       return nil
     end
 
@@ -89,6 +96,7 @@ local function check_directory(directory)
     -- No directory argument means use the default. Technically an outrageously
     -- invalid argument (i.e. not even a string) currently falls back to the
     -- default as well.
+    print("Returning default directory")
     return get_default_dir()
   end
 
