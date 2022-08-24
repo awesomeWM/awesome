@@ -42,8 +42,6 @@ local function get_default_dir()
   if home_dir then
     home_dir = string.gsub(home_dir, '/*$', '/') .. 'Images/'
     if gears.filesystem.dir_writable(home_dir) then
---    if os.execute("bash -c \"if [ -d \\\"" .. home_dir .. "\\\" -a -w \\\"" ..
---                  home_dir ..  "\\\" ] ; then exit 0 ; else exit 1 ; fi ;\"") then
       return home_dir
     end
   end
@@ -77,10 +75,6 @@ local function check_directory(directory)
 
     -- Assure that we return exactly one trailing slash
     directory = string.gsub(directory, '/*$', '/')
-
-    -- If we use single quotes, we only need to deal with single quotes - (I
-    -- promise that's meaningful if you think about it from a bash perspective)
-    local bash_esc_dir = string.gsub(directory, "'", "'\\'\\\\\\'\\''")
 
     if gears.filesystem.dir_writable(directory) then
       return directory
@@ -252,7 +246,7 @@ end
 -- cases. It did not seem appropriate to make that change as a part of the pull
 -- request that was creating the screenshot API, as it would clutter and
 -- confuse the change.
-function show_frame(ss, geo)
+local function show_frame(ss, geo)
 
   if not geo then
       if ss._private.frame then
@@ -385,7 +379,7 @@ end
 
 -- Internal function to be passed as the default callback upon completion of
 -- the mousgrabber for the snipper if the user does not pass one.
-function default_on_success_cb(ss)
+local function default_on_success_cb(ss)
   ss:save()
 end
 
@@ -498,9 +492,8 @@ local default_method_name = "root"
 -- @treturn boolean true or false depending on success
 function module.set_defaults(args)
 
-  local tmp
-
-  tmp = check_directory(args.directory)
+  local args = (type(args) == "table" and args) or {}
+  local tmp = check_directory(args.directory)
 
   if tmp then
     module_default_directory = tmp

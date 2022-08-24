@@ -189,13 +189,40 @@ table.insert(steps, function()
     return true
 end)
 
---Check the root window with awful.screenshot.root() method
 table.insert(steps, function()
+
     --Make sure client from last test is gone
     if #client.get() ~= 0 then return end
 
+    awful.screenshot.set_defaults({})
+    awful.screenshot.set_defaults({directory = "/dev/null", prefix = "Screenshot-", frame_color = "#000000"})
+    awful.screenshot.set_defaults({directory = "~/"})
+    awful.screenshot.set_defaults({directory = fake_screenshot_dir})
+
+    local ss = awful.screenshot.root()
+    local name_prfx = string.gsub(fake_screenshot_dir, "/*$", "/") .. "Screenshot-"
+
+    local f, l = string.find(ss.filepath, name_prfx)
+    if f ~= 1 then
+        print("First if: " .. ss.filepath .. " : " .. name_prfx)
+        return false
+    end
+
+    name_prfx = string.gsub(fake_screenshot_dir, "/*$", "/") .. "MyShot.png"
+    ss.filepath = name_prfx
+
+    if ss.filepath ~= name_prfx then
+        return false
+    end
+
+    return true
+
+end)
+
+--Check the root window with awful.screenshot.root() method
+table.insert(steps, function()
     local root_width, root_height = root.size()
-    local ss = awful.screenshot.root({directory = fake_screenshot_dir})
+    local ss = awful.screenshot.root()
     local img = ss.surface
 
     if get_pixel(img, 100, 100) ~= "#00ff00" then return end
@@ -218,7 +245,7 @@ table.insert(steps, function()
     for s in screen do
 
       local geo = s.geometry
-      local ss = awful.screenshot.screen({screen = s, directory = fake_screenshot_dir})
+      local ss = awful.screenshot.screen({screen = s})
       local img = ss.surface
 
       assert(get_pixel(img, 4, 4) == "#ff0000")
@@ -242,7 +269,7 @@ table.insert(steps, function()
 
     local c = client.get()[1]
     local geo = c:geometry()
-    local ss = awful.screenshot.client({client = c, directory = fake_screenshot_dir})
+    local ss = awful.screenshot.client({client = c})
     local img = ss.surface
 
     if get_pixel(img, math.floor(geo.width / 2), math.floor(geo.height / 2)) ~= "#0000ff" then
@@ -280,7 +307,7 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    awful.screenshot.snipper({directory = fake_screenshot_dir, on_success_cb = snipper_cb})
+    awful.screenshot.snipper({on_success_cb = snipper_cb})
     return true
 end)
 
@@ -345,10 +372,93 @@ table.insert(steps, function()
 
 end)
 
-table.insert(steps, function()
 
-    local ss = awful.screenshot.snip({geometry = {x = 100, y = 100, width = 100, height = 100},
-                                     directory = fake_screenshot_dir})
+--Check the snipper collapse and cancel
+table.insert(steps, function()
+    --Make sure client from last test is gone
+    if #client.get() ~= 0 then return end
+    --Ensure mousegrabber is satisfied
+    root.fake_input("button_press",1)
+    return true   
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_release",1)
+    return true
+end)
+
+table.insert(steps, function()
+    --Ensure prior mouse presses go through
+    local t0 = os.time()
+    while os.time() - t0 < 1 do end
+    return true
+end)
+
+table.insert(steps, function()
+    awful.screenshot.snipper({on_success_cb = snipper_cb})
+    return true
+end)
+
+table.insert(steps, function()
+    mouse.coords {x = 110, y = 110}
+    return true
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_press",1)
+    return true
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_release",1)
+    return true
+end)
+
+table.insert(steps, function()
+    mouse.coords {x = 150, y = 150}
+    return true
+end)
+
+table.insert(steps, function()
+    --Ensure prior mouse presses and movements go through
+    local t0 = os.time()
+    while os.time() - t0 < 1 do end
+    return true
+end)
+
+table.insert(steps, function()
+    --Cause a rectangle collapse
+    mouse.coords {x = 150, y = 110}
+    return true
+end)
+
+table.insert(steps, function()
+    --Ensure prior mouse presses and movements go through
+    local t0 = os.time()
+    while os.time() - t0 < 1 do end
+    return true
+end)
+
+table.insert(steps, function()
+    --Cancel snipper tool
+    root.fake_input("button_press",3)
+    return true
+end)
+
+table.insert(steps, function()
+    root.fake_input("button_release",3)
+    return true
+end)
+
+table.insert(steps, function()
+    --Ensure prior mouse presses go through and callback runs
+    local t0 = os.time()
+    while os.time() - t0 < 1 do end
+    return true
+end)
+
+table.insert(steps, function()
+    local ss = awful.screenshot.snip({geometry = {x = 100, y = 100, width = 100, height = 100}})
     local img = ss.surface
     if get_pixel(img, 10, 10) == "#00ff00" then
         return true
