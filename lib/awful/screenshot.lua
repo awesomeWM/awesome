@@ -711,13 +711,17 @@ function screenshot:filepath_builder(args)
   local directory = args.directory
   local prefix = args.prefix
 
+  print("Entering filepath_builder(args)")
+  print(args)
 
   if filepath and check_filepath(filepath) then
 
+    print("First if in filepath_builder")
     directory, prefix = parse_filepath(filepath)
 
   elseif directory or prefix then
 
+    print("Second if in filepath_builder")
     if directory and type(directory) == "string" then
       directory = check_directory(directory)
     elseif self.directory then
@@ -738,11 +742,13 @@ function screenshot:filepath_builder(args)
 
   elseif self.filepath and check_filepath(self.filepath) then
 
+    print("Third if in filepath_builder")
     filepath = self.filepath
     directory, prefix = parse_filepath(filepath)
 
   else
 
+    print("Else in filepath_builder")
     if self.directory then
       directory = self._private.directory -- The setter ran check_directory()
     else
