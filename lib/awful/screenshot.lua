@@ -764,6 +764,10 @@ function screenshot:filepath_builder(args)
     end
 
     directory, prefix, filepath = make_filepath(directory, prefix) 
+    print("Finished building filepath:")
+    print(directory)
+    print(prefix)
+    print(filepath)
 
   end
 
