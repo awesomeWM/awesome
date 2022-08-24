@@ -712,7 +712,9 @@ function screenshot:filepath_builder(args)
   local prefix = args.prefix
 
   print("Entering filepath_builder(args)")
-  print(args)
+  print(args.filepath)
+  print(args.directory)
+  print(args.prefix)
 
   if filepath and check_filepath(filepath) then
 
