@@ -194,33 +194,33 @@ table.insert(steps, function()
     --Make sure client from last test is gone
     if #client.get() ~= 0 then return end
 
-    print("Set blank defaults")
+    local fake_screenshot_dir = string.gsub(fake_screenshot_dir, "/*$", "/", 1)
+
     awful.screenshot.set_defaults({})
-    print("Set explicit defaults")
     awful.screenshot.set_defaults({directory = "/dev/null", prefix = "Screenshot-", frame_color = "#000000"})
-    print("Set tilde default")
     awful.screenshot.set_defaults({directory = "~/"})
-    print("Set directory default")
     awful.screenshot.set_defaults({directory = fake_screenshot_dir})
 
-    print("Taking root shot")
     local ss = awful.screenshot.root()
-    local name_prfx = string.gsub(fake_screenshot_dir, "/*$", "/") .. "Screenshot-"
+    local name_prfx = fake_screenshot_dir .. "Screenshot-"
 
-    print("Checking assigned filepath")
     local f, l = string.find(ss.filepath, name_prfx)
     if f ~= 1 then
-        print("Failed first if: " .. ss.filepath .. " : " .. name_prfx)
+        print("Failed autogenerate filename: " .. ss.filepath .. " : " .. name_prfx)
         return false
     end
 
-    print("Assigning new filepath")
-    name_prfx = string.gsub(fake_screenshot_dir, "/*$", "/") .. "MyShot.png"
+    name_prfx = fake_screenshot_dir .. "MyShot.png"
     ss.filepath = name_prfx
 
-    print("Checking assigned filepath")
     if ss.filepath ~= name_prfx then
-        print("Failed second if: " .. ss.filepath .. " : " .. name_prfx)
+        print("Failed assign filename: " .. ss.filepath .. " : " .. name_prfx)
+        return false
+    end
+
+    ss:filepath_builder({directory = fake_screenshot_dir, prefix = "Screenshot-"})
+    if ss.directory ~= fake_screenshot_dir or ss.prefix ~= "Screenshot-" then
+        print("Failed assign directory/prefix: " .. ss.directory .. " : " .. ss.prefix)
         return false
     end
 
@@ -230,12 +230,10 @@ end)
 
 --Check the root window with awful.screenshot.root() method
 table.insert(steps, function()
+
     local root_width, root_height = root.size()
     local ss = awful.screenshot.root()
     local img = ss.surface
-
-    if get_pixel(img, 100, 100) ~= "#00ff00" then return end
-    if get_pixel(img, 2, 2) ~= "#ff0000" then return end
 
     assert(get_pixel(img, 100, 100) == "#00ff00")
     assert(get_pixel(img, 199, 199) == "#00ff00")
@@ -246,11 +244,20 @@ table.insert(steps, function()
     assert(get_pixel(img, 2, root_height - 2) == "#ff0000")
     assert(get_pixel(img, root_width - 2, root_height - 2) == "#ff0000")
 
+    if ss.screen ~= nil or ss.client ~= nil then
+        print("Returned non nil screen or client for root screenshot")
+        print(ss.screen)
+        print(ss.client)
+        return false
+    end
+
     return true   
+
 end)
 
 -- Check the awful.screenshot.screen() method
 table.insert(steps, function()
+
     for s in screen do
 
       local geo = s.geometry
@@ -269,6 +276,7 @@ table.insert(steps, function()
     spawn(tiny_client)
 
     return true
+
 end)
 
 -- Check the awful.screenshot.client() method

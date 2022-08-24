@@ -60,8 +60,6 @@ end
 -- Adding 'mkdir -p' functionality can be considered in the future.
 local function check_directory(directory)
 
-  print("Enter check_directory()")
-  print(directory)
   if directory and type(directory) == "string"  then
 
     -- Fully qualify a "~/" path or a relative path to $HOME. One might argue
@@ -75,20 +73,15 @@ local function check_directory(directory)
       directory = string.gsub(os.getenv("HOME"), "/*$", "/", 1) .. directory
     end
 
-    print("After first sanitation -- " .. directory)
-
     -- Assure that we return exactly one trailing slash
     directory = string.gsub(directory, '/*$', '/', 1)
-    print("After second sanitation -- " .. directory)
 
     if gears.filesystem.dir_writable(directory) then
-      print("Returning directory")
       return directory
     else
       -- Currently returns nil if the requested directory string cannot be used.
       -- This can be swapped to a silent fallback to the default directory if
       -- desired. It is debatable which way is better.
-      print("Returning nil")
       return nil
     end
 
@@ -96,7 +89,6 @@ local function check_directory(directory)
     -- No directory argument means use the default. Technically an outrageously
     -- invalid argument (i.e. not even a string) currently falls back to the
     -- default as well.
-    print("Returning default directory")
     return get_default_dir()
   end
 
@@ -719,19 +711,12 @@ function screenshot:filepath_builder(args)
   local directory = args.directory
   local prefix = args.prefix
 
-  print("Entering filepath_builder(args)")
-  print(args.filepath)
-  print(args.directory)
-  print(args.prefix)
-
   if filepath and check_filepath(filepath) then
 
-    print("First if in filepath_builder")
     directory, prefix = parse_filepath(filepath)
 
   elseif directory or prefix then
 
-    print("Second if in filepath_builder")
     if directory and type(directory) == "string" then
       directory = check_directory(directory)
     elseif self.directory then
@@ -752,13 +737,11 @@ function screenshot:filepath_builder(args)
 
   elseif self.filepath and check_filepath(self.filepath) then
 
-    print("Third if in filepath_builder")
     filepath = self.filepath
     directory, prefix = parse_filepath(filepath)
 
   else
 
-    print("Else in filepath_builder")
     if self.directory then
       directory = self._private.directory -- The setter ran check_directory()
     else
@@ -772,10 +755,6 @@ function screenshot:filepath_builder(args)
     end
 
     directory, prefix, filepath = make_filepath(directory, prefix) 
-    print("Finished building filepath:")
-    print(directory)
-    print(prefix)
-    print(filepath)
 
   end
 
