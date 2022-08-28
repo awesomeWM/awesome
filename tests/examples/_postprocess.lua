@@ -7,6 +7,13 @@
 
 local input, output = ...
 
+if (not input) or (not output) then
+    io.stderr:write("_postprocess.lua require <input> and <output>\n")
+    io.stderr:write("Got input: "..tostring(input).."\n")
+    io.stderr:write("Got output: "..tostring(output).."\n")
+    os.exit(0)
+end
+
 -- The second 24bit is just the 32 bit converted to #010001 and back.
 local FOREGROUNDS = {
     "rgb[(]0[.]5%%,0%%,0[.]5%%[)];",
