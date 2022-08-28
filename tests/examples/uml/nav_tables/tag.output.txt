@@ -14,4 +14,4 @@ Core components relationship
 <tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_tag5.svg"></td><td>s.selected_tag</td></tr>
 <tr><td>screen</td><td><img src="../images/AUTOGEN_uml_nav_tables_tag6.svg"></td><td>s.selected_tags</td></tr>
 </table></div>
-</div><div class="components-relationship--legend"><b>Legend:</b> <i>c</i>: a client object, <i>t</i>: a tag object, <i>s</i>: a screen object, <i>k</i>: an awful.key object, <i>b</i>: a awful.button object, <i>n</i>: a naughty.notification object</div></div> <!-- .components-relationship -->
+</div><div class="components-relationship--legend"><b>Legend:</b> <i>c</i>: a client object, <i>t</i>: a tag object, <i>s</i>: a screen object, <i>k</i>: an awful.key object, <i>b</i>: a awful.button object,<i>n</i>: a naughty.notification object</div></div> <!-- .components-relationship -->
