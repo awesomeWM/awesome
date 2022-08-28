@@ -72,8 +72,9 @@
 -- The table contains a list of `awful.button` objects.
 --
 -- @property buttons
--- @tparam table buttons
+-- @tparam[opt={}] table buttons
 -- @see awful.button
+-- @tablerowtype A list of `awful.button`.
 -- @baseclass wibox.widget
 
 --- Add a new `awful.button` to this widget.

@@ -334,7 +334,7 @@ create_type {
             return
         end
 
-        local param, sublist = item:subparam(item.params[1])
+        local _, sublist = item:subparam(item.params[1])
         local type = item:type_of_param(item.params[1])
 
         -- Force people to use @tparam because it is easier to lint and allows
@@ -347,10 +347,10 @@ create_type {
             )
         end
 
-        if type == "bool" then
+        if type_name_linting[type] then
             print(
                 "WARNING: Property ".. item.name .." from "..item.module.name..
-                " type is `bool`, please use `boolean`."
+                " type is `"..type.."`, please use `"..type_name_linting[type].."`."
             )
         end
 
@@ -371,7 +371,7 @@ create_type {
         if def then
             -- Detect the blatant missing quote marks for string. This is important
             -- to differentiate variables from string literals.
-            if type == "string" and def:sub(1,1) ~= '"' and not def:find(".") then
+            if type == "string" and def:sub(1,1) ~= '"' and def:sub(-1) ~= '"' and not def:find(".") then
                 print(
                     "WARNING: Property ".. item.name .." from "..item.module.name..
                     " is a string, but the default value is not quoted."
