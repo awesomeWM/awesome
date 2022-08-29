@@ -21,7 +21,7 @@ local surface = require("gears.surface")
 local timer = require("gears.timer")
 local grect =  require("gears.geometry").rectangle
 local matrix = require("gears.matrix")
-local hierarchy = require("wibox.hierarchy")
+local whierarchy = require("wibox.hierarchy")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local visible_drawables = {}
@@ -92,7 +92,7 @@ local function do_redraw(self)
             self._need_complete_repaint = true
             if self._widget then
                 self._widget_hierarchy_callback_arg = {}
-                self._widget_hierarchy = hierarchy.new(context, self._widget, width, height,
+                self._widget_hierarchy = whierarchy.new(context, self._widget, width, height,
                         self._redraw_callback, self._layout_callback, self._widget_hierarchy_callback_arg)
             else
                 self._widget_hierarchy = nil
@@ -166,12 +166,12 @@ local function do_redraw(self)
     assert(cr.status == "SUCCESS", "Cairo context entered error state: " .. cr.status)
 end
 
-local function find_widgets(_drawable, result, _hierarchy, x, y)
-    local m = _hierarchy:get_matrix_from_device()
+local function find_widgets(self, result, hierarchy, x, y)
+    local m = hierarchy:get_matrix_from_device()
 
     -- Is (x,y) inside of this hierarchy or any child (aka the draw extents)
     local x1, y1 = m:transform_point(x, y)
-    local x2, y2, w2, h2 = _hierarchy:get_draw_extents()
+    local x2, y2, w2, h2 = hierarchy:get_draw_extents()
     if x1 < x2 or x1 >= x2 + w2 then
         return
     end
@@ -180,22 +180,22 @@ local function find_widgets(_drawable, result, _hierarchy, x, y)
     end
 
     -- Is (x,y) inside of this widget?
-    local width, height = _hierarchy:get_size()
+    local width, height = hierarchy:get_size()
     if x1 >= 0 and y1 >= 0 and x1 <= width and y1 <= height then
         -- Get the extents of this widget in the device space
-        local x3, y3, w3, h3 = matrix.transform_rectangle(_hierarchy:get_matrix_to_device(),
+        local x3, y3, w3, h3 = matrix.transform_rectangle(hierarchy:get_matrix_to_device(),
             0, 0, width, height)
         table.insert(result, {
             x = x3, y = y3, width = w3, height = h3,
             widget_width = width,
             widget_height = height,
-            drawable = _drawable,
-            widget = _hierarchy:get_widget(),
-            hierarchy = _hierarchy
+            drawable = self,
+            widget = hierarchy:get_widget(),
+            hierarchy = hierarchy
         })
     end
-    for _, child in ipairs(_hierarchy:get_children()) do
-        find_widgets(_drawable, result, child, x, y)
+    for _, child in ipairs(hierarchy:get_children()) do
+        find_widgets(self, result, child, x, y)
     end
 end
 
@@ -221,7 +221,7 @@ end
 
 -- Private API. Not documented on purpose.
 function drawable._set_systray_widget(widget)
-    hierarchy.count_widget(widget)
+    whierarchy.count_widget(widget)
     systray_widget = widget
 end
 
@@ -331,34 +331,36 @@ local function emit_difference(name, list, skip)
     end
 end
 
-local function handle_leave(_drawable)
-    emit_difference("mouse::leave", _drawable._widgets_under_mouse, {})
-    _drawable._widgets_under_mouse = {}
+local function handle_leave(self)
+    emit_difference("mouse::leave", self._widgets_under_mouse, {})
+    self._widgets_under_mouse = {}
 end
 
-local function handle_motion(_drawable, x, y)
-    if x < 0 or y < 0 or x > _drawable.drawable:geometry().width or y > _drawable.drawable:geometry().height then
-        return handle_leave(_drawable)
+local function handle_motion(self, x, y)
+    local dgeo = self.drawable:geometry()
+
+    if x < 0 or y < 0 or x > dgeo.width or y > dgeo.height then
+        return handle_leave(self)
     end
 
     -- Build a plain list of all widgets on that point
-    local widgets_list = _drawable:find_widgets(x, y)
+    local widgets_list = self:find_widgets(x, y)
 
     -- First, "leave" all widgets that were left
-    emit_difference("mouse::leave", _drawable._widgets_under_mouse, widgets_list)
+    emit_difference("mouse::leave", self._widgets_under_mouse, widgets_list)
     -- Then enter some widgets
-    emit_difference("mouse::enter", widgets_list, _drawable._widgets_under_mouse)
+    emit_difference("mouse::enter", widgets_list, self._widgets_under_mouse)
 
-    _drawable._widgets_under_mouse = widgets_list
+    self._widgets_under_mouse = widgets_list
 end
 
-local function setup_signals(_drawable)
-    local d = _drawable.drawable
+local function setup_signals(self)
+    local d = self.drawable
 
     local function clone_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
         d:connect_signal(name, function(_, ...)
-            _drawable:emit_signal(name, ...)
+            self:emit_signal(name, ...)
         end)
     end
     clone_signal("button::press")

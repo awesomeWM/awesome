@@ -149,19 +149,39 @@ local function grabber(mod, key, event)
     end
 end
 
+local function stop(self, stop_key, stop_mods)
+    keygrab.stop(self.grabber)
+
+    local timer = self._private.timer
+    if timer and timer.started then
+        timer:stop()
+    end
+
+    if self.stop_callback then
+        self.stop_callback(
+            self.current_instance, stop_key, stop_mods, self.sequence
+        )
+    end
+
+    keygrab.emit_signal("property::current_instance", nil)
+
+    self.grabber = nil
+    self:emit_signal("stopped")
+end
+
 local function runner(self, modifiers, key, event)
     local converted = generate_conversion_map()[key]
 
     -- Stop the keygrabber with the `stop_key`
     if (key == self.stop_key or (converted and converted == self.stop_key))
       and event == self.stop_event and self.stop_key then
-        self:stop(key, modifiers)
+        stop(self, key, modifiers)
         return false
     end
 
     -- Stop when only a subset of keys are allowed and it isn't one of them.
     if self._private.allowed_keys and not self._private.allowed_keys[key] then
-        self:stop(key, modifiers)
+        stop(self, key, modifiers)
         return false
     end
 
@@ -169,7 +189,7 @@ local function runner(self, modifiers, key, event)
     if type(self.stop_key) == "table" and event == self.stop_event then
         for _, k in ipairs(self.stop_key) do
             if k == key then
-                self:stop(k, modifiers)
+                stop(self, k, modifiers)
                 return false
             end
         end
@@ -478,37 +498,45 @@ end
 -- Also stops any `timeout`.
 --
 -- @method stop
+-- @tparam string|nil stop_key Override the key passed to `stop_callback` **DEPRECATED**
+-- @tparam tale|nil Override the modifiers passed to `stop_callback` **DEPRECATED**
 -- @emits stopped
 -- @emits property::current_instance
-function keygrabber:stop(_stop_key, _stop_mods) -- (at)function disables ldoc params
-    keygrab.stop(self.grabber)
-
-    local timer = self._private.timer
-    if timer and timer.started then
-        timer:stop()
-    end
-
-    if self.stop_callback then
-        self.stop_callback(
-            self.current_instance, _stop_key, _stop_mods, self.sequence
+function keygrabber:stop(stop_key, stop_mods)
+    if stop_key then
+        gdebug.deprecate(
+            "The `stop_key` is deprecated. Overriding callback parameters "..
+            "is an anti-pattern and might confuse third party modules.",
+            {deprecated_in=5}
         )
     end
 
-    keygrab.emit_signal("property::current_instance", nil)
+    if stop_mods then
+        gdebug.deprecate(
+            "The `stop_mods` is deprecated. Overriding callback parameters "..
+            "is an anti-pattern and might confuse third party modules.",
+            {deprecated_in=5}
+        )
+    end
 
-    self.grabber = nil
-    self:emit_signal("stopped")
+    stop(self, stop_key, stop_mods)
 end
 
 --- Add a keybinding to this keygrabber.
 --
 -- Those keybindings will automatically start the keygrabbing when hit.
 --
+-- Please note that this method previously accepted a
+-- `mods, keycode, callback, description` signature. This is deprecated. Store
+-- those values in an `awful.key` prior to passing it to this function. The
+-- previous method signature made it impossible to alter the description and/or
+-- enable/disable the keybinding.
+--
 -- @method add_keybinding
 -- @tparam awful.key key The key.
 -- @tparam string description.group The keybinding group
 
-function keygrabber:add_keybinding(key, _keycode, _callback, _description)
+function keygrabber:add_keybinding(key, keycode, callback, description)
     local mods = not key._is_awful_key and key or nil
 
     if mods then
@@ -519,10 +547,16 @@ function keygrabber:add_keybinding(key, _keycode, _callback, _description)
 
         key = akey {
             modifiers   = mods,
-            key         = _keycode,
-            description = _description,
-            on_press    = _callback
+            key         = keycode,
+            description = description,
+            on_press    = callback
         }
+    elseif keycode or callback or description then
+        gdebug.deprecate(
+            ":add_keybinding only accept a single parameter. All "..
+            "other were ignored.",
+            {deprecated_in=4}
+        )
     end
 
     self._private.keybindings[key.key] = self._private.keybindings[key.key] or {}

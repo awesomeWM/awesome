@@ -117,23 +117,23 @@ end
 -- * right
 --
 -- @tparam string dir The direction.
--- @tparam table _gA The first rectangle.
--- @tparam table _gB The second rectangle.
+-- @tparam table gA The first rectangle.
+-- @tparam table gB The second rectangle.
 -- @return The distance between the screens.
-local function calculate_distance(dir, _gA, _gB)
-    local gAx = _gA.x
-    local gAy = _gA.y
-    local gBx = _gB.x
-    local gBy = _gB.y
+local function calculate_distance(dir, gA, gB)
+    local gAx = gA.x
+    local gAy = gA.y
+    local gBx = gB.x
+    local gBy = gB.y
 
     if dir == "up" then
-        gBy = _gB.y + _gB.height
+        gBy = gB.y + gB.height
     elseif dir == "down" then
-        gAy = _gA.y + _gA.height
+        gAy = gA.y + gA.height
     elseif dir == "left" then
-        gBx = _gB.x + _gB.width
+        gBx = gB.x + gB.width
     elseif dir == "right" then
-        gAx = _gA.x + _gA.width
+        gAx = gA.x + gA.width
     end
 
     return math.sqrt((gBx - gAx) ^ 2 + (gBy - gAy) ^ 2)

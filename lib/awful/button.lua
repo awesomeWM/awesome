@@ -258,14 +258,14 @@ local obj_mt = {
 -- @tparam function args.on_release Callback for when the button is released.
 -- @treturn table An `awful.button` object.
 
-local function new_common(mod, _button, press, release)
+local function new_common(mod, btn, press, release)
     local ret = {}
     local subsets = gmath.subsets(ignore_modifiers)
 
     for _, set in ipairs(subsets) do
         local sub_button = capi.button {
             modifiers = gtable.join(mod, set),
-            button    = _button
+            button    = btn
         }
 
         sub_button._private._legacy_convert_to = ret
@@ -294,9 +294,9 @@ local function new_common(mod, _button, press, release)
     return setmetatable(ret, obj_mt)
 end
 
-function button.new(args, _button, press, release)
+function button.new(args, btn, press, release)
     -- Assume this is the new constructor.
-    if not _button then
+    if not btn then
         assert(not (press or release), "Calling awful.button() requires a button name")
         return new_common(
             args.modifiers,
@@ -305,7 +305,7 @@ function button.new(args, _button, press, release)
             args.on_release
         )
     else
-        return new_common(args, _button, press, release)
+        return new_common(args, btn, press, release)
     end
 end
 

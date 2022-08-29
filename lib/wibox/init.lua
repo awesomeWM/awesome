@@ -246,16 +246,16 @@ object.properties._legacy_accessors(wibox.object, "buttons", "_buttons", true, f
     ) or false
 end, true)
 
-local function setup_signals(_wibox)
+local function setup_signals(w)
     local obj
     local function clone_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
         obj:connect_signal(name, function(_, ...)
-            _wibox:emit_signal(name, ...)
+            w:emit_signal(name, ...)
         end)
     end
 
-    obj = _wibox.drawin
+    obj = w.drawin
     clone_signal("property::border_color")
     clone_signal("property::border_width")
     clone_signal("property::buttons")
@@ -273,7 +273,7 @@ local function setup_signals(_wibox)
     clone_signal("property::shape_clip")
     clone_signal("property::shape_input")
 
-    obj = _wibox._drawable
+    obj = w._drawable
     clone_signal("button::press")
     clone_signal("button::release")
     clone_signal("mouse::enter")

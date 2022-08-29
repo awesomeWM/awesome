@@ -24,7 +24,7 @@ local math = math
 
 local spiral = {}
 
-local function do_spiral(p, _spiral)
+local function do_spiral(p, is_spiral)
     local wa = p.workarea
     local cls = p.clients
     local n = #cls
@@ -43,19 +43,19 @@ local function do_spiral(p, _spiral)
             end
         end
 
-        if k % 4 == 0 and _spiral then
+        if k % 4 == 0 and is_spiral then
             wa.x = wa.x - wa.width
         elseif k % 2 == 0 then
             wa.x = wa.x + old_width
-        elseif k % 4 == 3 and k < n and _spiral then
+        elseif k % 4 == 3 and k < n and is_spiral then
             wa.x = wa.x + math.ceil(old_width / 2)
         end
 
-        if k % 4 == 1 and k ~= 1 and _spiral then
+        if k % 4 == 1 and k ~= 1 and is_spiral then
             wa.y = wa.y - wa.height
         elseif k % 2 == 1 and k ~= 1 then
             wa.y = wa.y + old_height
-        elseif k % 4 == 0 and k < n and _spiral then
+        elseif k % 4 == 0 and k < n and is_spiral then
             wa.y = wa.y + math.ceil(old_height / 2)
         end
 
