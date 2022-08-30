@@ -47,8 +47,7 @@ local base = {}
 -- @propertytype nil Let the layout decide the height. Usually using the widget
 --  native height.
 -- @propertytype number Enforce a number of pixels.
--- @rangestart 0
--- @rangestop 65534
+-- @negativeallowed false
 -- @baseclass wibox.widget.base
 -- @see forced_width
 
@@ -59,8 +58,7 @@ local base = {}
 -- @propertytype nil Let the layout decide the width. Usually using the widget
 --  native width.
 -- @propertytype number Enforce a number of pixels.
--- @rangestart 0
--- @rangestop 65534
+-- @negativeallowed false
 -- @baseclass wibox.widget.base
 -- @see forced_height
 
