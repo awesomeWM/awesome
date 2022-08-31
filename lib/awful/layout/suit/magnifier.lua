@@ -143,6 +143,7 @@ end
 
 --- The magnifier layout.
 -- @clientlayout awful.layout.suit.magnifier
+-- @usebeautiful beautiful.layout_magnifier
 
 magnifier.name = "magnifier"
 

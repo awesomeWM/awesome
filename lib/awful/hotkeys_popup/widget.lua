@@ -74,6 +74,7 @@ local gtable = require("gears.table")
 local gstring = require("gears.string")
 local wibox = require("wibox")
 local beautiful = require("beautiful")
+local rgba = require("gears.color").to_rgba_string
 local dpi = beautiful.xresources.apply_dpi
 
 local matcher = require("gears.matcher")()
@@ -86,11 +87,11 @@ function markup.font(font, text)
 end
 -- Set the foreground.
 function markup.fg(color, text)
-    return '<span foreground="' .. tostring(color) .. '">' .. tostring(text) .. '</span>'
+    return '<span foreground="' .. rgba(color, beautiful.fg_normal) .. '">' .. tostring(text) .. '</span>'
 end
 -- Set the background.
 function markup.bg(color, text)
-    return '<span background="' .. tostring(color) .. '">' .. tostring(text) .. '</span>'
+    return '<span background="' .. rgba(color, beautiful.bg_normal) .. '">' .. tostring(text) .. '</span>'
 end
 
 local function join_plus_sort(modifiers)
@@ -124,8 +125,51 @@ widget.hide_without_description = true
 widget.merge_duplicates = true
 
 --- Labels used for displaying human-readable keynames.
--- @tfield table widget.labels
--- @param table
+-- @tfield table awful.hotkeys_popup.widget.labels
+-- @tfield[opt="Ctrl"] string Control
+-- @tfield[opt="Alt"] string Mod1
+-- @tfield[opt="Alt Gr"] string ISO_Level3_Shift
+-- @tfield[opt="Super"] string Mod4
+-- @tfield[opt="Ins"] string Insert
+-- @tfield[opt="Del"] string Delete
+-- @tfield[opt="PgDn"] string Next
+-- @tfield[opt="PgUp"] string Prior
+-- @tfield[opt="←"] string Left
+-- @tfield[opt="↑"] string Up
+-- @tfield[opt="→"] string Right
+-- @tfield[opt="↓"] string Down
+-- @tfield[opt="Num1"] string KP_End
+-- @tfield[opt="Num2"] string KP_Down
+-- @tfield[opt="Num3"] string KP_Next
+-- @tfield[opt="Num4"] string KP_Left
+-- @tfield[opt="Num5"] string KP_Begin
+-- @tfield[opt="Num6"] string KP_Right
+-- @tfield[opt="Num7"] string KP_Home
+-- @tfield[opt="Num8"] string KP_Up
+-- @tfield[opt="Num9"] string KP_Prior
+-- @tfield[opt="Num0"] string KP_Insert
+-- @tfield[opt="Num."] string KP_Delete
+-- @tfield[opt="Num/"] string KP_Divide
+-- @tfield[opt="Num*"] string KP_Multiply
+-- @tfield[opt="Num-"] string KP_Subtract
+-- @tfield[opt="Num+"] string KP_Add
+-- @tfield[opt="NumEnter"] string KP_Enter
+-- @tfield[opt="Esc"] string Escape
+-- @tfield[opt="Tab"] string Tab
+-- @tfield[opt="Space"] string space
+-- @tfield[opt="Enter"] string Return
+-- @tfield[opt="´"] string dead_acute
+-- @tfield[opt="^"] string dead_circumflex
+-- @tfield[opt="`"] string dead_grave
+-- @tfield[opt="🔆+"] string XF86MonBrightnessUp
+-- @tfield[opt="🔅-"] string XF86MonBrightnessDown
+-- @tfield[opt="🕩+"] string XF86AudioRaiseVolume
+-- @tfield[opt="🕩-"] string XF86AudioLowerVolume
+-- @tfield[opt="🔇"] string XF86AudioMute
+-- @tfield[opt="⏯"] string XF86AudioPlay
+-- @tfield[opt="⏮"] string XF86AudioPrev
+-- @tfield[opt="⏭"] string XF86AudioNext
+-- @tfield[opt="⏹"] string XF86AudioStop
 widget.labels = {
     Control          = "Ctrl",
     Mod1             = "Alt",
@@ -248,6 +292,21 @@ widget.labels = {
 -- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
 -- @return Widget instance.
 -- @constructorfct awful.widget.hotkeys_popup.widget.new
+-- @usebeautiful beautiful.hotkeys_fg
+-- @usebeautiful beautiful.hotkeys_bg
+-- @usebeautiful beautiful.hotkeys_border_width
+-- @usebeautiful beautiful.hotkeys_border_color
+-- @usebeautiful beautiful.hotkeys_shape
+-- @usebeautiful beautiful.hotkeys_modifiers_fg
+-- @usebeautiful beautiful.hotkeys_label_bg
+-- @usebeautiful beautiful.hotkeys_label_fg
+-- @usebeautiful beautiful.hotkeys_font
+-- @usebeautiful beautiful.hotkeys_description_font
+-- @usebeautiful beautiful.hotkeys_group_margin
+-- @usebeautiful beautiful.bg_normal Fallback.
+-- @usebeautiful beautiful.fg_normal Fallback.
+-- @usebeautiful beautiful.fg_minimize Fallback.
+-- @usebeautiful beautiful.border_width Fallback.
 function widget.new(args)
     args = args or {}
     local widget_instance = {
@@ -669,11 +728,13 @@ function widget.new(args)
 
 
     --- Show popup with hotkeys help.
-    -- @tparam[opt] client c Client.
-    -- @tparam[opt] screen s Screen.
-    -- @tparam[opt] table show_args Additional arguments.
+    -- @tparam[opt=client.focus] client c Client.
+    -- @tparam[opt=c.screen] screen s Screen.
+    -- @tparam[opt={}] table show_args Additional arguments.
     -- @tparam[opt=true] boolean show_args.show_awesome_keys Show AwesomeWM hotkeys.
     -- When set to `false` only app-specific hotkeys will be shown.
+    -- @treturn awful.keygrabber The keybrabber used to detect when the key is
+    --  released.
     -- @method show_help
     function widget_instance:show_help(c, s, show_args)
         show_args = show_args or {}
@@ -734,6 +795,7 @@ function widget.new(args)
     --- Add hotkey descriptions for third-party applications.
     -- @tparam table hotkeys Table with bindings,
     -- see `awful.hotkeys_popup.key.vim` as an example.
+    -- @noreturn
     -- @method add_hotkeys
     function widget_instance:add_hotkeys(hotkeys)
         for group, bindings in pairs(hotkeys) do
@@ -754,9 +816,10 @@ function widget.new(args)
     end
 
     --- Add hotkey group rules for third-party applications.
-    -- @tparam string group hotkeys group name,
-    -- @tparam table data rule data for the group
+    -- @tparam string group Hotkeys group name,
+    -- @tparam table data Rule data for the group
     -- see `awful.hotkeys_popup.key.vim` as an example.
+    -- @noreturn
     -- @method add_group_rules
     function widget_instance:add_group_rules(group, data)
         self.group_rules[group] = data
@@ -778,6 +841,8 @@ end
 -- @tparam[opt] table args Additional arguments.
 -- @tparam[opt=true] boolean args.show_awesome_keys Show AwesomeWM hotkeys.
 -- When set to `false` only app-specific hotkeys will be shown.
+-- @treturn awful.keygrabber The keybrabber used to detect when the key is
+--  released.
 -- @staticfct awful.hotkeys_popup.widget.show_help
 function widget.show_help(...)
     return get_default_widget():show_help(...)
@@ -787,19 +852,21 @@ end
 -- (default widget instance will be used).
 -- @tparam table hotkeys Table with bindings,
 -- see `awful.hotkeys_popup.key.vim` as an example.
+-- @noreturn
 -- @staticfct awful.hotkeys_popup.widget.add_hotkeys
 function widget.add_hotkeys(...)
-    return get_default_widget():add_hotkeys(...)
+    get_default_widget():add_hotkeys(...)
 end
 
 --- Add hotkey group rules for third-party applications
 -- (default widget instance will be used).
--- @tparam string group rule group name,
--- @tparam table data rule data for the group
+-- @tparam string group Rule group name,
+-- @tparam table data Rule data for the group
 -- see `awful.hotkeys_popup.key.vim` as an example.
+-- @noreturn
 -- @staticfct awful.hotkeys_popup.widget.add_group_rules
 function widget.add_group_rules(group, data)
-    return get_default_widget():add_group_rules(group, data)
+    get_default_widget():add_group_rules(group, data)
 end
 
 return widget

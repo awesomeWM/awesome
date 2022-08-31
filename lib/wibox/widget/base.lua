@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Base class of every widgets, containers and layouts,
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @classmod wibox.widget.base
@@ -22,8 +24,10 @@ local base = {}
 
 --- Get or set the children elements.
 -- @property children
--- @tparam table children The children.
+-- @tparam[opt={}] table children
+-- @tablerowtype A list of `wibox.widget`.
 -- @baseclass wibox.widget.base
+-- @see all_children
 
 --- Get all direct and indirect children widgets.
 -- This will scan all containers recursively to find widgets
@@ -31,34 +35,54 @@ local base = {}
 -- widgets hierarchy. A hierarchy loop is when a widget, or any of its
 -- children, contain (directly or indirectly) itself.
 -- @property all_children
--- @tparam table children The children.
+-- @tparam[opt={}] table all_children
+-- @tablerowtype A list of `wibox.widget`.
 -- @baseclass wibox.widget.base
+-- @see children
 
 --- Force a widget height.
 -- @property forced_height
--- @tparam number|nil height The height (`nil` for automatic)
+-- @tparam[opt=nil] number|nil forced_height
+-- @propertyunit pixel
+-- @propertytype nil Let the layout decide the height. Usually using the widget
+--  native height.
+-- @propertytype number Enforce a number of pixels.
+-- @negativeallowed false
 -- @baseclass wibox.widget.base
+-- @see forced_width
 
 --- Force a widget width.
 -- @property forced_width
--- @tparam number|nil width The width (`nil` for automatic)
+-- @tparam[opt=nil] number|nil forced_width
+-- @propertyunit pixel
+-- @propertytype nil Let the layout decide the width. Usually using the widget
+--  native width.
+-- @propertytype number Enforce a number of pixels.
+-- @negativeallowed false
 -- @baseclass wibox.widget.base
+-- @see forced_height
 
 --- The widget opacity (transparency).
 -- @property opacity
--- @tparam[opt=1] number opacity The opacity (between 0 and 1)
+-- @tparam[opt=1.0] number opacity
+-- @rangestart 0.0
+-- @rangestop 1.0
+-- @propertyunit A gradient between transparent (`0.0`) and opaque (`1.0`).
 -- @baseclass wibox.widget.base
+-- @see visible
 
 --- The widget visibility.
 -- @property visible
--- @param boolean
+-- @tparam[opt=true] boolean visible
 -- @baseclass wibox.widget.base
+-- @see opacity
 
 --- The widget buttons.
 --
 -- The table contains a list of `awful.button` objects.
 -- @property buttons
--- @param table
+-- @tparam[opt={}] table buttons
+-- @tablerowtype A list of `awful.button`.
 -- @see awful.button
 -- @baseclass wibox.widget.base
 
@@ -92,7 +116,7 @@ local base = {}
 -- @tparam number button The button number.
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
 -- @tparam table find_widgets_result The entry from the result of
--- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @{wibox:find_widgets} for the position that the mouse hit.
 -- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
 -- the widget.
 -- @tparam widget find_widgets_result.widget The widget being displayed.
@@ -123,7 +147,7 @@ local base = {}
 -- @tparam number button The button number.
 -- @tparam table mods The modifiers (mod4, mod1 (alt), Control, Shift)
 -- @tparam table find_widgets_result The entry from the result of
--- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @{wibox:find_widgets} for the position that the mouse hit.
 -- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
 -- the widget.
 -- @tparam widget find_widgets_result.widget The widget being displayed.
@@ -148,7 +172,7 @@ local base = {}
 -- @signal mouse::enter
 -- @tparam table self The current object instance itself.
 -- @tparam table find_widgets_result The entry from the result of
--- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @{wibox:find_widgets} for the position that the mouse hit.
 -- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
 -- the widget.
 -- @tparam widget find_widgets_result.widget The widget being displayed.
@@ -173,7 +197,7 @@ local base = {}
 -- @signal mouse::leave
 -- @tparam table self The current object instance itself.
 -- @tparam table find_widgets_result The entry from the result of
--- @{wibox.drawable:find_widgets} for the position that the mouse hit.
+-- @{wibox:find_widgets} for the position that the mouse hit.
 -- @tparam wibox.drawable find_widgets_result.drawable The drawable containing
 -- the widget.
 -- @tparam widget find_widgets_result.widget The widget being displayed.
@@ -223,6 +247,7 @@ end
 --- Add a new `awful.button` to this widget.
 -- @tparam awful.button button The button to add.
 -- @method wibox.widget.base:add_button
+-- @noreturn
 function base.widget:add_button(button)
     if not button then return end
 
@@ -410,6 +435,7 @@ end
 -- @tparam string signal_name
 -- @param ... Other arguments
 -- @method wibox.widget.base:emit_signal_recursive
+-- @noreturn
 function base.widget:emit_signal_recursive(signal_name, ...)
     -- This is a convenience wrapper, the real implementation is in the
     -- hierarchy.
@@ -498,6 +524,15 @@ end
 -- This gives only tight bounds if no rotations by non-multiples of 90° are
 -- used.
 -- @staticfct wibox.widget.base.rect_to_device_geometry
+-- @param cr The cairo context.
+-- @tparam number x The `x` value.
+-- @tparam number y The `y` value.
+-- @tparam number width The `width` value.
+-- @tparam number height The `height` value.
+-- @treturn number The new `x` value.
+-- @treturn number The new `y` value.
+-- @treturn number The new `width` value.
+-- @treturn number The new `height` value.
 function base.rect_to_device_geometry(cr, x, y, width, height)
     return matrix.transform_rectangle(cr.matrix, x, y, width, height)
 end
@@ -583,6 +618,7 @@ end
 --
 -- This is used internally and should not be called directly.
 -- @staticfct wibox.widget.base.handle_button
+-- @noreturn
 function base.handle_button(event, widget, x, y, button, modifiers, geometry)
     x = x or y -- luacheck: no unused
     local function is_any(mod)
@@ -995,6 +1031,7 @@ end
 --
 -- This function raises an error if the widget is not valid.
 -- @staticfct wibox.widget.base.check_widget
+-- @noreturn
 function base.check_widget(widget)
     assert(type(widget) == "table", "Type should be table, but is " .. tostring(type(widget)))
     assert(widget.is_widget, "Argument is not a widget!")

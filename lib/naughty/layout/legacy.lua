@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---- A notification popup widget.
+--- A notification popup widget (deprecated implementation).
 --
 -- This is the legacy notification widget. It was the default until Awesome
 -- v4.3 but is now being deprecated in favor of a more flexible widget.

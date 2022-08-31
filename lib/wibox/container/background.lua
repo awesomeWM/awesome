@@ -235,8 +235,8 @@ end
 
 --- The widget displayed in the background widget.
 -- @property widget
--- @tparam widget widget The widget to be disaplayed inside of the background
---  area.
+-- @tparam[opt=nil] widget|nil widget The widget to be disaplayed inside of
+--  the background area.
 -- @interface container
 
 background.set_widget = base.set_widget_common
@@ -258,7 +258,9 @@ end
 --@DOC_wibox_container_background_bg_EXAMPLE@
 --
 -- @property bg
--- @tparam color bg A color string, pattern or gradient
+-- @tparam color bg
+-- @propertydefault When unspecified, it will inherit the value from an higher
+--  level `wibox.container.background` or directly from the `wibox.bg` property.
 -- @see gears.color
 -- @propemits true false
 
@@ -282,6 +284,8 @@ end
 --
 -- @property fg
 -- @tparam color fg A color string, pattern or gradient
+-- @propertydefault When unspecified, it will inherit the value from an higher
+--  level `wibox.container.background` or directly from the `wibox.fg` property.
 -- @propemits true false
 -- @see gears.color
 
@@ -306,7 +310,7 @@ end
 --@DOC_wibox_container_background_shape_EXAMPLE@
 --
 -- @property shape
--- @tparam gears.shape|function shape A function taking a context, width and height as arguments
+-- @tparam[opt=gears.shape.rectangle] shape shape
 -- @see gears.shape
 -- @see set_shape
 
@@ -316,6 +320,7 @@ end
 --
 -- @method set_shape
 -- @tparam gears.shape|function shape A function taking a context, width and height as arguments
+-- @noreturn
 -- @propemits true false
 -- @see gears.shape
 -- @see shape
@@ -349,7 +354,9 @@ end
 --
 -- See `wibox.container.background.shape` for an usage example.
 -- @property border_width
--- @tparam[opt=0] number width The border width.
+-- @tparam[opt=0] number border_width
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 -- @introducedin 4.4
 -- @see border_color
@@ -386,7 +393,7 @@ end
 --
 -- @deprecatedproperty shape_border_color
 -- @usebeautiful beautiful.fg_normal Fallback when 'fg' and `border_color` aren't set.
--- @tparam[opt=self._private.foreground] color fg The border color, pattern or gradient
+-- @tparam color fg The border color, pattern or gradient
 -- @renamedin 4.4 border_color
 -- @see gears.color
 -- @see border_color
@@ -395,7 +402,8 @@ end
 --
 -- See `wibox.container.background.shape` for an usage example.
 -- @property border_color
--- @tparam[opt=self._private.foreground] color fg The border color, pattern or gradient
+-- @tparam color border_color
+-- @propertydefault `wibox.container.background.fg` if set, otherwise `beautiful.fg_normal`.
 -- @propemits true false
 -- @usebeautiful beautiful.fg_normal Fallback when 'fg' and `border_color` aren't set.
 -- @introducedin 4.4
@@ -442,13 +450,10 @@ end
 
 --- How the border width affects the contained widget.
 --
--- The valid values are:
---
--- * *none*: Just apply the border, do not affect the content size (default).
--- * *inner*: Squeeze the size of the content by the border width.
---
 -- @property border_strategy
 -- @tparam[opt="none"] string border_strategy
+-- @propertyvalue "none" Just apply the border, do not affect the content size (default).
+-- @propertyvalue "inner" Squeeze the size of the content by the border width.
 
 function background:set_border_strategy(value)
     self._private.border_strategy = value
@@ -462,7 +467,7 @@ end
 -- as arguments. Any other arguments passed to this method will be appended.
 --
 -- @property bgimage
--- @tparam string|surface|function image A background image or a function
+-- @tparam[opt=nil] image|nil bgimage
 -- @see gears.surface
 
 function background:set_bgimage(image, ...)

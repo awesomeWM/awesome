@@ -35,6 +35,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @widgetmod awful.widget.taglist
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -54,6 +55,7 @@ local gcolor = require("gears.color")
 local gstring = require("gears.string")
 local gdebug = require("gears.debug")
 local base = require("wibox.widget.base")
+local gtable = require("gears.table")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -64,22 +66,22 @@ taglist.filter, taglist.source = {}, {}
 
 --- The tag list main foreground (text) color.
 -- @beautiful beautiful.taglist_fg_focus
--- @param[opt=fg_focus] color
+-- @param[opt=beautiful.fg_focus] color
 -- @see gears.color
 
 --- The tag list main background color.
 -- @beautiful beautiful.taglist_bg_focus
--- @param[opt=bg_focus] color
+-- @param[opt=beautiful.bg_focus] color
 -- @see gears.color
 
 --- The tag list urgent elements foreground (text) color.
 -- @beautiful beautiful.taglist_fg_urgent
--- @param[opt=fg_urgent] color
+-- @param[opt=beautiful.fg_urgent] color
 -- @see gears.color
 
 --- The tag list urgent elements background color.
 -- @beautiful beautiful.taglist_bg_urgent
--- @param[opt=bg_urgent] color
+-- @param[opt=beautiful.bg_urgent] color
 -- @see gears.color
 
 --- The tag list occupied elements background color.
@@ -250,7 +252,7 @@ function taglist.taglist_label(t, args)
     local taglist_squares_unsel_empty = args.squares_unsel_empty or theme.taglist_squares_unsel_empty
     local taglist_squares_resize = theme.taglist_squares_resize or args.squares_resize or "true"
     local taglist_disable_icon = args.taglist_disable_icon or theme.taglist_disable_icon or false
-    local font = args.font or theme.taglist_font or theme.font or ""
+    local font = args.font or theme.taglist_font or theme.font
     local text = nil
     local sel = capi.client.focus
     local bg_color = nil
@@ -360,7 +362,7 @@ function taglist.taglist_label(t, args)
     end
 
     if not tag.getproperty(t, "icon_only") then
-        text = "<span font_desc='"..font.."'>"
+        text = "<span font_desc='"..(font or "").."'>"
         if fg_color then
             text = text .. "<span color='" .. gcolor.ensure_pango_color(fg_color) ..
                 "'>" .. (gstring.xml_escape(t.name) or "") .. "</span>"
@@ -390,10 +392,10 @@ local function create_callback(w, t)
     common._set_common_property(w, "tag", t)
 end
 
-local function taglist_update(s, w, buttons, filter, data, style, update_function, args)
+local function taglist_update(s, self, buttons, filter, data, style, update_function, args)
     local tags = {}
 
-    local source = args and args.source or taglist.source.for_screen or nil
+    local source = self._private.source or taglist.source.for_screen or nil
     local list   = source and source(s, args) or s.tags
 
     for _, t in ipairs(list) do
@@ -402,12 +404,145 @@ local function taglist_update(s, w, buttons, filter, data, style, update_functio
         end
     end
 
+    if self._private.last_count ~= #tags then
+        self:emit_signal("property::count", #tags, self._private.last_count)
+        self._private.last_count = #tags
+    end
+
     local function label(c) return taglist.taglist_label(c, style) end
 
-    update_function(w, buttons, label, data, tags, {
-        widget_template = args.widget_template,
+    update_function(self._private.base_layout, buttons, label, data, tags, {
+        widget_template = self._private.widget_template,
         create_callback = create_callback,
     })
+end
+
+--- The taglist screen.
+--
+-- @property screen
+-- @propertydefault Obtained from the constructor.
+-- @tparam screen screen
+
+--- Set the taglist layout.
+--
+-- @property base_layout
+-- @tparam[opt=wibox.layout.fixed.horizontal] wibox.layout base_layout
+-- @see wibox.layout.fixed.horizontal
+
+--- The current number of tags.
+--
+-- Note that the `tasklist` is usually lazy-loaded. Reading this property
+-- may cause the widgets to be created. Depending on where the property is called
+-- from, it might, in theory, cause an infinite loop.
+--
+-- @property count
+-- @readonly
+-- @tparam number count The number of tags.
+-- @propertydefault This current number of tags.
+-- @negativeallowed false
+-- @propemits true false
+
+function taglist:set_base_layout(layout)
+    self._private.base_layout = base.make_widget_from_value(
+        layout or fixed.horizontal
+    )
+
+    local spacing = self._private.style.spacing or beautiful.taglist_spacing
+
+    if self._private.base_layout.set_spacing and spacing then
+        self._private.base_layout:set_spacing(spacing)
+    end
+
+    assert(self._private.base_layout.is_widget)
+
+    self._do_taglist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::base_layout", layout)
+end
+
+function taglist:get_count()
+    if not self._private.last_count then
+        self._do_taglist_update_now()
+    end
+
+    return self._private.last_count
+end
+
+function taglist:layout(_, width, height)
+    if self._private.base_layout then
+        return { base.place_widget_at(self._private.base_layout, 0, 0, width, height) }
+    end
+end
+
+function taglist:fit(context, width, height)
+    if not self._private.base_layout then
+        return 0, 0
+    end
+
+    return base.fit_widget(self, context, self._private.base_layout, width, height)
+end
+
+--- An alternative function to configure the content.
+--
+-- You should use `widget_template` if it fits your use case first. This
+-- API is very low level.
+--
+-- @property update_function
+-- @tparam function update_function
+-- @propertydefault The default function delegate everything to the `widget_template`.
+-- @functionparam widget layout The base layout object.
+-- @functionparam table buttons The buttons for this tag entry (see below).
+-- @functionparam string label The tag name.
+-- @functionparam table data Arbitrary metadate.
+-- @functionparam table tags The list of tags (ordered).
+-- @functionparam table metadata Other values.
+-- @functionnoreturn
+
+--- A function to restrict the content of the taglist.
+--
+-- @property filter
+-- @tparam[opt=nil] function|nil filter
+-- @functionparam tag t The tag to accept or reject.
+-- @functionreturn boolean `true` if the tag is accepter or `false` if it is rejected.
+-- @see source
+-- @see awful.widget.taglist.filter.noempty
+-- @see awful.widget.taglist.filter.selected
+-- @see awful.widget.taglist.filter.all
+-- @see awful.widget.taglist.source.for_screen
+
+--- The function used to gather the group of tags.
+--
+-- @property source
+-- @tparam[opt=awful.widget.taglist.source.for_screen] function source
+-- @functionparam screen s The taglist screen.
+-- @functionparam table metadata Various metadata.
+-- @functionreturn table The list of tags
+-- @see filter
+-- @see awful.widget.taglist.source.for_screen
+
+--- A templete used to genetate the individual tag widgets.
+--
+-- @property widget_template
+-- @tparam[opt=nil] template|nil widget_template
+
+for _, prop in ipairs { "filter", "update_function", "widget_template", "source", "screen" } do
+    taglist["set_"..prop] = function(self, value)
+        if value == self._private[prop] then return end
+
+        self._private[prop] = value
+
+        self._do_taglist_update()
+
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("property::"..prop, value)
+    end
+
+    taglist["get_"..prop] = function(self)
+        return self._private[prop]
+    end
 end
 
 --- Create a new taglist widget. The last two arguments (update_function
@@ -428,39 +563,55 @@ end
 --  function used to generate the list of tag.
 -- @tparam[opt] table args.widget_template A custom widget to be used for each tag
 -- @tparam[opt={}] table args.style The style overrides default theme.
--- @tparam[opt=nil] string|pattern args.style.fg_focus
--- @tparam[opt=nil] string|pattern args.style.bg_focus
--- @tparam[opt=nil] string|pattern args.style.fg_urgent
--- @tparam[opt=nil] string|pattern args.style.bg_urgent
--- @tparam[opt=nil] string|pattern args.style.bg_occupied
--- @tparam[opt=nil] string|pattern args.style.fg_occupied
--- @tparam[opt=nil] string|pattern args.style.bg_empty
--- @tparam[opt=nil] string|pattern args.style.fg_empty
--- @tparam[opt=nil] string|pattern args.style.bg_volatile
--- @tparam[opt=nil] string|pattern args.style.fg_volatile
--- @tparam[opt=nil] string args.style.squares_sel
--- @tparam[opt=nil] string args.style.squares_unsel
--- @tparam[opt=nil] string args.style.squares_sel_empty
--- @tparam[opt=nil] string args.style.squares_unsel_empty
--- @tparam[opt=nil] string args.style.squares_resize
--- @tparam[opt=nil] string args.style.disable_icon
--- @tparam[opt=nil] string args.style.font
--- @tparam[opt=nil] number args.style.spacing The spacing between tags.
--- @tparam[opt] string args.style.squares_sel A user provided image for selected squares.
--- @tparam[opt] string args.style.squares_unsel A user provided image for unselected squares.
--- @tparam[opt] string args.style.squares_sel_empty A user provided image for selected squares for empty tags.
--- @tparam[opt] string args.style.squares_unsel_empty A user provided image for unselected squares for empty tags.
--- @tparam[opt] boolean args.style.squares_resize True or false to resize squares.
--- @tparam string|pattern args.style.bg_focus The background color for focused client.
--- @tparam string|pattern args.style.fg_focus The foreground color for focused client.
--- @tparam string|pattern args.style.bg_urgent The background color for urgent clients.
--- @tparam string|pattern args.style.fg_urgent The foreground color for urgent clients.
--- @tparam string args.style.font The font.
+-- @tparam[opt=beautiful.taglist_fg_focus] string|pattern args.style.fg_focus
+-- @tparam[opt=beautiful.taglist_bg_focus] string|pattern args.style.bg_focus
+-- @tparam[opt=beautiful.taglist_fg_urgent] string|pattern args.style.fg_urgent
+-- @tparam[opt=beautiful.taglist_bg_urgent] string|pattern args.style.bg_urgent
+-- @tparam[opt=beautiful.taglist_bg_occupied] string|pattern args.style.bg_occupied
+-- @tparam[opt=beautiful.taglist_fg_occupied] string|pattern args.style.fg_occupied
+-- @tparam[opt=beautiful.taglist_bg_empty] string|pattern args.style.bg_empty
+-- @tparam[opt=beautiful.taglist_fg_empty] string|pattern args.style.fg_empty
+-- @tparam[opt=beautiful.taglist_bg_volatile] string|pattern args.style.bg_volatile
+-- @tparam[opt=beautiful.taglist_fg_volatile] string|pattern args.style.fg_volatile
+-- @tparam[opt=beautiful.taglist_squares_sel] string args.style.squares_sel
+-- @tparam[opt=beautiful.taglist_squares_unsel] string args.style.squares_unsel
+-- @tparam[opt=beautiful.taglist_squares_sel_empty] string args.style.squares_sel_empty
+-- @tparam[opt=beautiful.taglist_squares_unsel_empty] string args.style.squares_unsel_empty
+-- @tparam[opt=beautiful.taglist_squares_resize] string args.style.squares_resize
+-- @tparam[opt=beautiful.taglist_disable_icon] string args.style.disable_icon
+-- @tparam[opt=beautiful.taglist_font] string args.style.font
+-- @tparam[opt=beautiful.taglist_spacing] number args.style.spacing The spacing between tags.
+-- @tparam[opt=beautiful.taglist_squares_sel] string args.style.squares_sel A user
+--  provided image for selected squares.
+-- @tparam[opt=beautiful.taglist_squares_unsel] string args.style.squares_unsel A
+--  user provided image for unselected squares.
+-- @tparam[opt=beautiful.taglist_squares_sel_empty] string args.style.squares_sel_empty A
+-- user provided image for selected squares for empty tags.
+-- @tparam[opt=beautiful.taglist_squares_unsel_empty] string args.style.squares_unsel_empty A
+--  user provided image for unselected squares for empty tags.
+-- @tparam[opt=beautiful.taglist_squares_resize] boolean args.style.squares_resize `true`
+--  or `false` to resize squares.
+-- @tparam[opt=beautiful.taglist_font] string args.style.font The font.
+-- @tparam[opt=beautiful.taglist_shape] gears.shape|function args.style.shape
+-- @tparam[opt=beautiful.taglist_shape_border_width] number args.style.shape_border_width
+-- @tparam[opt=beautiful.taglist_shape_border_color] string args.style.shape_border_color
+-- @tparam[opt=beautiful.taglist_shape_empty] gears.shape|function args.style.shape_empty
+-- @tparam[opt=beautiful.taglist_shape_border_width_empty] number args.style.shape_border_width_empty
+-- @tparam[opt=beautiful.taglist_shape_border_color_empty] string args.style.border_color_empty
+-- @tparam[opt=beautiful.taglist_shape_focus] gears.shape|function args.style.shape_focus
+-- @tparam[opt=beautiful.taglist_shape_border_width_focus] number args.style.shape_border_width_focus
+-- @tparam[opt=beautiful.taglist_shape_border_color_focus] string args.style.shape_border_color_focus
+-- @tparam[opt=beautiful.taglist_shape_urgent] gears.shape|function args.style.shape_urgent
+-- @tparam[opt=beautiful.taglist_shape_border_width_urgent] number args.style.shape_border_width_urgent
+-- @tparam[opt=beautiful.taglist_shape_border_color_urgent] string args.style.shape_border_color_urgent
+-- @tparam[opt=beautiful.taglist_shape_volatile] gears.shape|function args.style.shape_volatile
+-- @tparam[opt=beautiful.taglist_shape_border_width_volatile] number args.style.shape_border_width_volatile
+-- @tparam[opt=beautiful.taglist_shape_border_color_volatile] string args.style.shape_border_color_volatile
 -- @param filter **DEPRECATED** use args.filter
 -- @param buttons **DEPRECATED** use args.buttons
 -- @param style **DEPRECATED** use args.style
 -- @param update_function **DEPRECATED** use args.update_function
--- @param base_widget **DEPRECATED** use args.base_widget
+-- @param base_widget **DEPRECATED** use args.base_layout
 -- @constructorfct awful.widget.taglist
 function taglist.new(args, filter, buttons, style, update_function, base_widget)
 
@@ -495,28 +646,41 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
     screen = screen or get_screen(args.screen)
 
     local uf = args.update_function or common.list_update
-    local w = base.make_widget_from_value(args.layout or fixed.horizontal)
 
-    if w.set_spacing and (args.style and args.style.spacing or beautiful.taglist_spacing) then
-        w:set_spacing(args.style and args.style.spacing or beautiful.taglist_spacing)
-    end
+    local w = base.make_widget(nil, nil, {
+        enable_properties = true,
+    })
+
+    gtable.crush(w, taglist, true)
+
+    gtable.crush(w._private, {
+        style           = args.style or {},
+        buttons         = args.buttons,
+        filter          = args.filter,
+        update_function = args.update_function,
+        widget_template = args.widget_template,
+        source          = args.source,
+        screen          = screen
+    })
 
     local data = setmetatable({}, { __mode = 'k' })
 
     local queued_update = {}
 
     function w._do_taglist_update_now()
-        if screen.valid then
-            taglist_update(screen, w, args.buttons, args.filter, data, args.style, uf, args)
+        if w._private.screen.valid then
+            taglist_update(
+                w._private.screen, w, w._private.buttons, w._private.filter, data, args.style, uf, args
+            )
         end
-        queued_update[screen] = false
+        queued_update[w._private.screen] = false
     end
 
     function w._do_taglist_update()
         -- Add a delayed callback for the first update.
-        if not queued_update[screen] then
+        if not queued_update[w._private.screen] then
             timer.delayed_call(w._do_taglist_update_now)
-            queued_update[screen] = true
+            queued_update[w._private.screen] = true
         end
     end
     if instances == nil then
@@ -558,6 +722,9 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
             instances[get_screen(s)] = nil
         end)
     end
+
+    w:set_base_layout(args.base_layout or args.layout)
+
     w._do_taglist_update()
     local list = instances[screen]
     if not list then
@@ -604,8 +771,6 @@ end
 function taglist.mt:__call(...)
     return taglist.new(...)
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 

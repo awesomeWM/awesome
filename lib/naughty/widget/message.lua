@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---- A notification content message.
+--- A notification content message widget.
 --
 -- This widget is a specialized `wibox.widget.textbox` with the following extra
 -- features:
@@ -12,6 +12,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2017 Emmanuel Lepage Vallee
 -- @widgetmod naughty.widget.message
+-- @supermodule wibox.widget.textbox
 -- @see wibox.widget.textbox
 ----------------------------------------------------------------------------
 local textbox = require("wibox.widget.textbox")
@@ -24,6 +25,7 @@ local message = {}
 --- The attached notification.
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propertydefault This is usually set in the construtor.
 -- @propemits true false
 
 function message:set_notification(notif)
@@ -84,8 +86,6 @@ local function new(args)
 
     return tb
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 

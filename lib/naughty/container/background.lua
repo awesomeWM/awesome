@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------
---- A notification background.
+--- A notification background widget.
 --
 -- This widget holds the boilerplate code associated with the notification
 -- background. This includes the color and potentially some other styling
@@ -16,6 +16,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2019 Emmanuel Lepage Vallee
 -- @containermod naughty.widget.background
+-- @supermodule wibox.container.background
 -- @see wibox.container.background
 ----------------------------------------------------------------------------
 local wbg       = require("wibox.container.background")
@@ -43,6 +44,7 @@ end
 --- The attached notification.
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propertydefault This is usually set in the construtor.
 -- @propemits true false
 
 function background:set_notification(notif)
@@ -99,8 +101,6 @@ local function new(args)
 
     return bg
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 

@@ -157,7 +157,7 @@ client.focus = require("awful.client.focus")
 --
 -- @deprecated awful.client.jumpto
 -- @see client.jump_to
--- @tparam client c the client to jump to
+-- @tparam client c The client to jump to
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
@@ -174,10 +174,11 @@ end
 -- @DOC_sequences_client_jump_to1_EXAMPLE@
 --
 -- @method jump_to
--- @tparam bool|function merge If true then merge tags (select the client's
+-- @tparam[opt] bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client and its first
 --   tag as arguments.
+-- @noreturn
 -- @request client activate client.jumpto granted When a client is activated
 --  because `c:jump_to()` is called.
 -- @see activate
@@ -212,7 +213,7 @@ end
 --
 -- @deprecated awful.client.visible
 -- @see screen.clients
--- @tparam[opt] integer|screen s The screen, or nil for all screens.
+-- @tparam[opt] nil|integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible clients.
 function client.visible(s, stacked)
@@ -230,7 +231,7 @@ end
 --
 -- @deprecated awful.client.tiled
 -- @see screen.tiled_clients
--- @tparam integer|screen s The screen, or nil for all screens.
+-- @tparam nil|integer|screen s The screen, or nil for all screens.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn table A table with all visible and tiled clients.
 function client.tiled(s, stacked)
@@ -253,8 +254,8 @@ end
 -- If no client is passed, the focused client will be used.
 --
 -- @staticfct awful.client.next
--- @tparam int i The index.  Use 1 to get the next, -1 to get the previous.
--- @tparam[opt] client sel The client.
+-- @tparam int i The index.  Use `1` to get the next, `-1` to get the previous.
+-- @tparam[opt=client.focus] client sel The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
 -- @treturn[opt] client|nil A client, or nil if no client is available.
 -- @see client.get
@@ -296,8 +297,9 @@ end
 --
 -- @staticfct awful.client.swap.bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
--- @tparam[opt=focused] client c The client.
+-- @tparam[opt="focused"] client c The client.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
+-- @noreturn
 -- @see swap
 -- @see swapped
 -- @see awful.client.swap.global_bydirection
@@ -328,7 +330,8 @@ end
 --
 -- @staticfct awful.client.swap.global_bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
--- @tparam[opt] client sel The client.
+-- @tparam[opt=client.focus] client sel The client.
+-- @noreturn
 -- @request client activate client.swap.global_bydirection granted When a client
 --  could be activated because `awful.client.swap.global_bydirection` was called.
 -- @see swap
@@ -370,13 +373,15 @@ end
 -- @DOC_sequences_client_swap_byidx1_EXAMPLE@
 --
 -- @staticfct awful.client.swap.byidx
--- @tparam integer i The index.
--- @tparam[opt] client c The client, otherwise focused one is used.
+-- @tparam integer i The index. Use `1` to get the next, `-1` to get the previous.
+-- @tparam[opt=client.focus] client c The client, otherwise focused one is used.
+-- @noreturn
 -- @see swap
 -- @see swapped
 -- @see awful.client.swap.bydirection
 -- @see awful.client.swap.global_bydirection
 -- @see awful.client.cycle
+-- @see awful.client.next
 function client.swap.byidx(i, c)
     local sel = c or capi.client.focus
     local target = client.next(i, sel)
@@ -393,9 +398,10 @@ end
 -- @DOC_sequences_client_cycle1_EXAMPLE@
 --
 -- @staticfct awful.client.cycle
--- @tparam boolean clockwise True to cycle clients clockwise.
--- @tparam[opt] screen s The screen where to cycle clients.
+-- @tparam[opt=false] boolean clockwise True to cycle clients clockwise.
+-- @tparam[opt=awful.screen.focused()] screen s The screen where to cycle clients.
 -- @tparam[opt=false] boolean stacked Use stacking order? (top to bottom)
+-- @noreturn
 -- @see swap
 -- @see swapped
 -- @see awful.client.swap.bydirection
@@ -423,6 +429,7 @@ end
 --
 -- @method append_keybinding
 -- @tparam awful.key key The key.
+-- @noreturn
 -- @see remove_keybinding
 -- @see append_mousebinding
 -- @see remove_mousebinding
@@ -430,17 +437,20 @@ end
 --- Remove a keybinding.
 --
 -- @method remove_keybinding
+-- @noreturn
 -- @tparam awful.key key The key.
 
 --- Append a mousebinding.
 --
 -- @method append_mousebinding
 -- @tparam awful.button button The button.
+-- @noreturn
 
 --- Remove a mousebinding.
 --
 -- @method remove_mousebinding
 -- @tparam awful.button button The button.
+-- @noreturn
 
 --- Get the master window.
 --
@@ -475,6 +485,7 @@ end
 -- @DOC_sequences_client_to_primary_EXAMPLE@
 --
 -- @method to_primary_section
+-- @noreturn
 -- @see swap
 -- @see to_secondary_section
 function client.object:to_primary_section()
@@ -493,6 +504,7 @@ end
 -- @DOC_sequences_client_to_secondary_EXAMPLE@
 --
 -- @method to_secondary_section
+-- @noreturn
 -- @see swap
 -- @see to_primary_section
 
@@ -510,7 +522,7 @@ end
 -- @tparam integer y The relative y coordinate.
 -- @tparam integer w The relative width.
 -- @tparam integer h The relative height.
--- @tparam[opt] client c The client, otherwise focused one is used.
+-- @tparam[opt=client.focus] client c The client, otherwise focused one is used.
 -- @see client.relative_move
 function client.moveresize(x, y, w, h, c)
     gdebug.deprecate("Use c:relative_move(x, y, w, h) instead of awful.client.moveresize", {deprecated_in=4})
@@ -522,11 +534,17 @@ end
 -- @DOC_sequences_client_relative_move1_EXAMPLE@
 --
 -- @method relative_move
+-- @tparam[opt=0] integer x The relative x coordinate.
+-- @tparam[opt=0] integer y The relative y coordinate.
+-- @tparam[opt=0] integer w The relative width.
+-- @tparam[opt=0] integer h The relative height.
+-- @noreturn
 -- @see geometry
--- @tparam[opt=0] number x The relative x coordinate.
--- @tparam[opt=0] number y The relative y coordinate.
--- @tparam[opt=0] number w The relative width.
--- @tparam[opt=0] number h The relative height.
+-- @see x
+-- @see y
+-- @see width
+-- @see height
+-- @see floating
 function client.object.relative_move(self, x, y, w, h)
     local geometry = self:geometry()
     geometry['x'] = geometry['x'] + (x or 0)
@@ -552,6 +570,7 @@ end
 --
 -- @method move_to_tag
 -- @tparam tag target The tag to move the client to.
+-- @noreturn
 -- @request client activate client.movetotag granted When a client could be
 --  activated because `c:move_to_tag()` was called.
 -- @see tags
@@ -571,7 +590,7 @@ end
 --
 -- @deprecated awful.client.toggletag
 -- @tparam tag target The tag to toggle.
--- @tparam[opt] client c The client to toggle, otherwise the focused one is used.
+-- @tparam[opt=client.focus] client c The client to toggle, otherwise the focused one is used.
 -- @see client.toggle_tag
 -- @see tags
 function client.toggletag(target, c)
@@ -585,6 +604,7 @@ end
 --
 -- @method toggle_tag
 -- @tparam tag target The tag to move the client to.
+-- @noreturn
 -- @see tags
 function client.object.toggle_tag(self, target)
     -- Check that tag and client screen are identical
@@ -610,7 +630,7 @@ end
 
 --- Move a client to a screen. Default is next screen, cycling.
 -- @deprecated awful.client.movetoscreen
--- @tparam client c The client to move.
+-- @tparam[opt=client.focus] client c The client to move.
 -- @tparam screen s The screen, default to current + 1.
 -- @see screen
 -- @see client.move_to_screen
@@ -625,6 +645,7 @@ end
 --
 -- @method move_to_screen
 -- @tparam[opt=c.screen.index+1] screen s The screen, default to current + 1.
+-- @noreturn
 -- @see screen
 -- @see request::activate
 -- @request client activate client.movetoscreen granted When a client could be
@@ -676,6 +697,7 @@ end
 -- @DOC_sequences_client_to_selected_tags1_EXAMPLE@
 --
 -- @method to_selected_tags
+-- @noreturn
 -- @see screen.selected_tags
 function client.object.to_selected_tags(self)
     local tags = {}
@@ -709,7 +731,7 @@ end
 --- If a client is marked or not.
 --
 -- @property marked
--- @tparam boolean marked
+-- @tparam[opt=false] boolean marked
 -- @emits marked (for legacy reasons, use `property::marked`)
 -- @emits unmarker (for legacy reasons, use `property::marked`)
 -- @emits property::marked
@@ -791,16 +813,27 @@ end
 -- Floating client are not handled by tiling layouts.
 -- @deprecated awful.client.floating.set
 -- @tparam client c A client.
--- @tparam boolean s True or false.
+-- @tparam boolean s `true` is the client is to become floating or `false`.
 function client.floating.set(c, s)
     gdebug.deprecate("Use c.floating = true instead of awful.client.floating.set", {deprecated_in=4})
     client.object.set_floating(c, s)
 end
 
 -- Set a client floating state, overriding auto-detection.
--- Floating client are not handled by tiling layouts.
+--
+-- Floating client are not handled by tiling layouts. They can be
+-- moved around and resized freely unless other restriction, such as `maximized`
+-- or the `size_hints` restrict their geometry.
+--
+-- An easy way to position floating clients is to use the `awful.placement`
+-- module.
+--
 -- @tparam client c A client.
--- @tparam boolan s True or false.
+-- @tparam boolean floating.
+-- @see is_immobilized_vertical
+-- @see is_immobilized_horizontal
+-- @see is_fixed
+-- @see size_hints
 function client.object.set_floating(c, s)
     c = c or capi.client.focus
     if c and client.property.get(c, "floating") ~= s then
@@ -838,7 +871,7 @@ capi.client.connect_signal("property::geometry", store_floating_geometry)
 
 --- Return if a client has a fixed size or not.
 -- This function is deprecated, use `c.is_fixed`
--- @tparam client c The client.
+-- @tparam[opt=client.focus] client c The client.
 -- @deprecated awful.client.isfixed
 -- @see is_fixed
 -- @see size_hints_honor
@@ -850,8 +883,10 @@ end
 
 --- Return if a client has a fixed size or not.
 --
+-- Fixed size means it cannot be resized.
+--
 -- @property is_fixed
--- @tparam[opt=false] boolean is_fixed The fixed size state
+-- @tparam[opt=false] boolean is_fixed
 -- @propemits false false
 -- @readonly
 -- @see size_hints
@@ -874,10 +909,10 @@ end
 --- Is the client immobilized horizontally?
 --
 -- Does the client have a fixed horizontal position and width, i.e. is it
--- fullscreen, maximized, or horizontally maximized?
+-- `fullscreen`, `maximized`, or `maximized_horizontal`?
 --
 -- @property immobilized_horizontal
--- @tparam[opt=false] boolean immobilized_horizontal The immobilized state
+-- @tparam[opt=false] boolean immobilized_horizontal
 -- @readonly
 -- @see maximized
 -- @see maximized_horizontal
@@ -893,7 +928,7 @@ end
 -- fullscreen, maximized, or vertically maximized?
 --
 -- @property immobilized_vertical
--- @tparam[opt=false] boolean immobilized_vertical The immobilized state
+-- @tparam[opt=false] boolean immobilized_vertical
 -- @readonly
 -- @see maximized
 -- @see maximized_vertical
@@ -926,7 +961,7 @@ end
 -- @DOC_sequences_client_floating1_EXAMPLE@
 --
 -- @property floating
--- @tparam boolean floating The floating state.
+-- @tparam[opt=false] boolean floating
 -- @request client border floating granted When a border update is required
 --  because the client focus status changed.
 -- @request client border active granted When a client becomes active and is not
@@ -1014,7 +1049,8 @@ end
 -- @DOC_sequences_client_x1_EXAMPLE@
 --
 -- @property x
--- @tparam integer x
+-- @tparam[opt=c:geometry().x] integer x
+-- @negativeallowed true
 -- @emits property::geometry
 -- @emitstparam property::geometry table geo The
 --  geometry (with `x`, `y`, `width`, `height`).
@@ -1032,7 +1068,8 @@ end
 -- @DOC_sequences_client_y1_EXAMPLE@
 --
 -- @property y
--- @tparam integer y
+-- @tparam[opt=c:geometry().y] integer y
+-- @negativeallowed true
 -- @emits property::geometry
 -- @emitstparam property::geometry table geo The
 --  geometry (with `x`, `y`, `width`, `height`).
@@ -1046,7 +1083,8 @@ end
 -- @DOC_sequences_client_width1_EXAMPLE@
 --
 -- @property width
--- @tparam integer width
+-- @tparam[opt=c:geometry().width] integer width
+-- @rangestart 1
 -- @emits property::geometry
 -- @emitstparam property::geometry table geo The
 --  geometry (with `x`, `y`, `width`, `height`).
@@ -1060,7 +1098,8 @@ end
 -- @DOC_sequences_client_height1_EXAMPLE@
 --
 -- @property height
--- @tparam integer height
+-- @tparam[opt=c:geometry().height] integer height
+-- @rangestart 1
 -- @emits property::geometry
 -- @emitstparam property::geometry table geo The
 --  geometry (with `x`, `y`, `width`, `height`).
@@ -1136,7 +1175,7 @@ end
 -- @DOC_screen_wfact4_EXAMPLE@
 --
 -- @legacylayout awful.client.idx
--- @tparam client c the client
+-- @tparam client c The client
 -- @treturn table data A table with "col", "idx" and "num" keys.
 -- @treturn integer data.col The column number.
 -- @treturn integer data.idx Index of the client in the column.
@@ -1207,8 +1246,8 @@ end
 -- @DOC_screen_wfact3_EXAMPLE@
 --
 -- @legacylayout awful.client.setwfact
--- @tparam number wfact the window factor value
--- @tparam client c the client
+-- @tparam number wfact The window factor value
+-- @tparam client c The client
 -- @emits property::windowfact Emitted on the c.first_tag object.
 -- @see tag.master_width_factor
 function client.setwfact(wfact, c)
@@ -1274,7 +1313,7 @@ end
 -- @tparam number add Amount to increase/decrease the client's window factor by.
 --   Should be between `-current_window_factor` and something close to
 --   infinite. Normalisation then ensures that the sum of all factors is 1.
--- @tparam client c the client.
+-- @tparam[opt=client.focus] client c The client.
 -- @emits property::windowfact
 function client.incwfact(add, c)
     c = c or capi.client.focus
@@ -1314,7 +1353,7 @@ end
 -- default.
 --
 -- @property dockable
--- @tparam boolean dockable The dockable state
+-- @tparam[opt=false] boolean dockable
 -- @propemits false false
 -- @see struts
 
@@ -1353,7 +1392,7 @@ end
 -- interprets it as the client (not) wanting a titlebar.
 --
 -- @property requests_no_titlebar
--- @tparam boolean requests_no_titlebar Whether the client
+-- @tparam[opt=false] boolean requests_no_titlebar Whether the client
 --  requests not to get a titlebar.
 -- @propemits false false
 
@@ -1427,6 +1466,7 @@ end
 -- @tparam string prop The property name.
 -- @tparam string kind The type (used for register_xproperty).
 --   One of "string", "number" or "boolean".
+-- @noreturn
 function client.property.persist(prop, kind)
     local xprop = "awful.client.property." .. prop
     capi.awesome.register_xproperty(xprop, kind)
@@ -1445,11 +1485,11 @@ end
 -- Starting from the client in focus or the given index, all clients that match
 -- a given criteria.
 --
--- @tparam function filter a function that returns true to indicate a positive match.
--- @tparam integer start  what index to start iterating from.  Defaults to using the
+-- @tparam function filter A function that returns true to indicate a positive match.
+-- @tparam integer start What index to start iterating from.  Defaults to using the
 --   index of the currently focused client.
--- @tparam screen s which screen to use.  nil means all screens.
---
+-- @tparam[opt=nil] screen s Which screen to use.  nil means all screens.
+-- @treturn function A Lua iterator (to use in a `for` loop).
 -- @staticfct awful.client.iterate
 -- @usage -- un-minimize all urxvt instances
 -- local urxvt = function (c)
@@ -1470,8 +1510,8 @@ end
 -- If multiple clients match the given condition then the next one is
 -- focused.
 --
--- @tparam string cmd the command to execute
--- @tparam function matcher a function that returns true to indicate a matching client
+-- @tparam string cmd The command to execute
+-- @tparam function matcher A function that returns true to indicate a matching client
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client as argument.
@@ -1594,7 +1634,7 @@ end, true, true, "keybinding")
 -- @DOC_awful_client_shape1_EXAMPLE@
 --
 -- @property shape
--- @tparam gears.shape A gears.shape compatible function.
+-- @tparam[opt=gears.shape.rectangle] shape shape A gears.shape compatible function.
 -- @propemits true false
 -- @see gears.shape
 function client.object.set_shape(self, shape)
@@ -1640,7 +1680,7 @@ end
 --
 -- @method activate
 -- @tparam table args
--- @tparam[opt=other] string args.context Why was this activate called?
+-- @tparam[opt="other"] string args.context Why was this activate called?
 -- @tparam[opt=true] boolean args.raise Raise the client to the top of its layer
 --  and unminimize it (if needed).
 -- @tparam[opt=false] boolean args.force Force the activation even for unfocusable
@@ -1649,6 +1689,9 @@ end
 -- @tparam[opt=false] boolean args.switch_to_tag
 -- @tparam[opt=false] boolean args.action Once activated, perform an action.
 -- @tparam[opt=false] boolean args.toggle_minimization
+-- @noreturn
+-- @request client activate args.context granted Will use the context defined in
+--  `args.context`.
 -- @see awful.permissions.add_activate_filter
 -- @see awful.permissions.activate
 -- @see request::activate
@@ -1693,6 +1736,7 @@ end
 -- @method grant
 -- @tparam string permission The permission name (just the name, no `request::`).
 -- @tparam string context The reason why this permission is requested.
+-- @noreturn
 -- @see awful.permissions
 
 --- Deny a permission for a client.
@@ -1700,6 +1744,7 @@ end
 -- @method deny
 -- @tparam string permission The permission name (just the name, no `request::`).
 -- @tparam string context The reason why this permission is requested.
+-- @noreturn
 -- @see awful.permissions
 
 pcommon.setup_grant(client.object, "client")
@@ -1755,7 +1800,7 @@ pcommon.setup_grant(client.object, "client")
 --    end)
 --
 -- @property active
--- @tparam boolean active
+-- @tparam[opt=true] boolean active
 -- @request client border active granted When a client becomes active.
 -- @request client border inactive granted When a client stop being active.
 -- @readonly
@@ -1792,6 +1837,7 @@ end)
 
 --- Emitted when a client need to get a titlebar.
 -- @signal request::titlebars
+-- @tparam client c The client.
 -- @tparam[opt=nil] string content The context (like "rules")
 -- @tparam[opt=nil] table hints Some hints.
 -- @classsignal
@@ -1815,6 +1861,7 @@ end)
 -- * **floating**: When the floating or maximization state changes.
 --
 -- @signal request::border
+-- @tparam client c The client.
 -- @tparam string context The context.
 -- @tparam table hints The hints.
 -- @classsignal
@@ -1828,6 +1875,7 @@ end)
 -- @tparam bool|function merge If true then merge tags (select the client's
 --   first tag additionally) when the client is not visible.
 --   If it is a function, it will be called with the client as argument.
+-- @noreturn
 
 -- Add clients during startup to focus history.
 -- This used to happen through permissions.activate, but that only handles visible

@@ -37,7 +37,8 @@
  * Switch keyboard layout.
  *
  * @staticfct xkb_set_layout_group
- * @tparam integer num keyboard layout number, integer from 0 to 3
+ * @tparam integer num Keyboard layout number, integer from 0 to 3
+ * @noreturn
  */
 int
 luaA_xkb_set_layout_group(lua_State *L)

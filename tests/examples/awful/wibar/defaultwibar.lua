@@ -7,6 +7,7 @@ local gears     = require("gears")
 local wibox     = require("wibox")
 local beautiful = require("beautiful") --DOC_HIDE
 local look      = require("_default_look")
+local color     = require("gears.color")
 
 local offset = 60
 
@@ -99,7 +100,7 @@ local function create_line(x1, y1, x2, y2)
             return x2-x1+6, y2-y1+6
         end,
         draw = function(_, _, cr)
-            cr:set_source_rgb(0,0,0)
+            cr:set_source(color(beautiful.fg_normal))
             cr:set_line_width(1)
             cr:arc(1.5, 1.5, 1.5, 0, math.pi*2)
             cr:arc(x2-x1+1.5, y2-y1+1.5, 1.5, 0, math.pi*2)

@@ -1,6 +1,5 @@
 ---------------------------------------------------------------------------
---
--- A circular chart (arc chart).
+-- A circular chart (arc chart) container.
 --
 -- It can contain a central widget (or not) and display multiple values.
 --
@@ -43,7 +42,19 @@ local arcchart = { mt = {} }
 
 --- The arc thickness.
 -- @beautiful beautiful.arcchart_thickness
--- @param number
+-- @tparam number arcchart_thickness
+
+--- If the chart has rounded edges.
+-- @beautiful beautiful.arcchart_rounded_edge
+-- @tparam boolean arcchart_rounded_edge
+
+--- The radial background.
+-- @beautiful beautiful.arcchart_bg
+-- @tparam gears.color arcchart_bg
+
+--- The (radiant) angle where the first value start.
+-- @beautiful beautiful.arcchart_start_angle
+-- @tparam number arcchart_start_angle
 
 local function outline_workarea(width, height)
     local x, y = 0, 0
@@ -101,7 +112,6 @@ function arcchart:after_draw_children(_, cr, width, height)
 
     local wa = outline_workarea(width, height)
     cr:translate(wa.x+border_width/2, wa.y+border_width/2)
-
 
     -- Get the min and max value
     --local min_val = self:get_min_value() or 0 --TODO support min_values
@@ -191,7 +201,7 @@ end
 
 --- The widget to wrap in a radial proggressbar.
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam[opt=nil] widget|nil widget
 -- @interface container
 
 arcchart.set_widget = base.set_widget_common
@@ -207,6 +217,7 @@ end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
 -- @method reset
+-- @noreturn
 -- @interface container
 function arcchart:reset()
     self:set_widget(nil)
@@ -229,6 +240,10 @@ end
 -- @tparam[opt=0] number paddings.bottom
 -- @tparam[opt=0] number paddings.left
 -- @tparam[opt=0] number paddings.right
+-- @propertytype number A single padding value for each side.
+-- @propertytype table A different padding value for each side.
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @emits [opt=bob] property::paddings When the `paddings` changes.
 -- @emitstparam property::paddings widget self The object being modified.
 -- @emitstparam property::paddings table paddings The new paddings.
@@ -238,40 +253,46 @@ end
 --- The border background color.
 --@DOC_wibox_container_arcchart_border_color_EXAMPLE@
 -- @property border_color
--- @tparam color border_color
+-- @tparam color|nil border_color
 -- @propemits true false
 -- @propbeautiful
 
 --- The arcchart values foreground colors.
 --@DOC_wibox_container_arcchart_color_EXAMPLE@
 -- @property colors
--- @tparam table values An ordered set of colors for each value in arcchart.
+-- @tparam table colors
+-- @tablerowtype An ordered list of colors for each value in arcchart.
 -- @propemits true false
--- @propbeautiful
+-- @usebeautiful beautiful.arcchart_color
 
 --- The border width.
 --
 --@DOC_wibox_container_arcchart_border_width_EXAMPLE@
 --
 -- @property border_width
--- @tparam[opt=3] number border_width
+-- @tparam[opt=0] number|nil border_width
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propemits true false
 -- @propbeautiful
 
 --- The minimum value.
 -- @property min_value
--- @tparam number min_value
+-- @tparam[opt=0] number min_value
+-- @negativeallowed true
 -- @propemits true false
 
 --- The maximum value.
 -- @property max_value
 -- @tparam number max_value
+-- @propertydefault The sum of all `values`.
+-- @negativeallowed true
 -- @propemits true false
 
 --- The radial background.
 --@DOC_wibox_container_arcchart_bg_EXAMPLE@
 -- @property bg
--- @tparam color bg
+-- @tparam color|nil bg
 -- @see gears.color
 -- @propemits true false
 -- @propbeautiful
@@ -279,7 +300,10 @@ end
 --- The value.
 --@DOC_wibox_container_arcchart_value_EXAMPLE@
 -- @property value
--- @tparam number value Between min_value and max_value
+-- @tparam[opt=0] number value
+-- @rangestart `min_value`
+-- @rangestop `max_value`
+-- @negativeallowed true
 -- @see values
 -- @propemits true false
 
@@ -288,27 +312,35 @@ end
 -- shown in table order.
 --@DOC_wibox_container_arcchart_values_EXAMPLE@
 -- @property values
--- @tparam table values An ordered set of values.
+-- @tparam[opt={}] table values An ordered set of values.
+-- @tablerowtype A list of numbers.
 -- @propemits true false
 -- @see value
 
 --- If the chart has rounded edges.
 --@DOC_wibox_container_arcchart_rounded_edge_EXAMPLE@
 -- @property rounded_edge
--- @tparam[opt=false] boolean rounded_edge
+-- @tparam[opt=false] boolean|nil rounded_edge
 -- @propemits true false
+-- @propbeautiful
 
 --- The arc thickness.
 --@DOC_wibox_container_arcchart_thickness_EXAMPLE@
 -- @property thickness
 -- @propemits true false
--- @tparam number thickness
+-- @tparam number|nil thickness
+-- @propertyunit pixel
+-- @negativeallowed false
+-- @propbeautiful
 
 --- The (radiant) angle where the first value start.
---@DOC_wibox_container_arcchart_start_angle_EXAMPLE@
+-- @DOC_wibox_container_arcchart_start_angle_EXAMPLE@
 -- @property start_angle
--- @tparam[opt=math.pi] number start_angle A number between 0 and 2*math.pi
+-- @tparam[opt=math.pi] number start_angle
+-- @rangestart 0
+-- @rangestop 2*math.pi
 -- @propemits true false
+-- @usebeautiful beautiful.arcchart_start_angle
 
 for _, prop in ipairs {"border_width", "border_color", "paddings", "colors",
     "rounded_edge", "bg", "thickness", "values", "min_value", "max_value",

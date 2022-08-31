@@ -2,8 +2,11 @@
 --DOC_GEN_IMAGE
 local awful = {placement = require("awful.placement")}
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
-
 screen._setup_grid(64, 48, {4, 4, 4, 4}, {workarea_sides=0})
+
+for s in screen do
+    require("awful.tag").add("1", {screen=s, selected=true}) --DOC_HIDE
+end
 
 local function test_touch_mouse(c)
     local coords = mouse.coords()

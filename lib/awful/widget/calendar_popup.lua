@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- A calendar popup wibox.
+-- A popup wibox containing a `wibox.widget.calendar` widget.
 --
 -- Display a month or year calendar popup using `calendar_popup.month` or `calendar_popup.year`.
 -- The calendar style can be tweaked by providing tables of style properties at creation:
@@ -141,8 +141,10 @@ local function parse_cell_options(cell, args)
         props[prop] = args[prop] or beautiful["calendar_" .. cell .. "_" .. prop] or bl_style[prop] or default
     end
     if cell == "focus" and props.markup == nil then
-        local fg = props.fg_color and string.format('foreground="%s"', props.fg_color) or ""
-        local bg = props.bg_color and string.format('background="%s"', props.bg_color) or ""
+        local fg = props.fg_color
+            and string.format('foreground="%s"', gears.color.to_rgba_string(props.fg_color)) or ""
+        local bg = props.bg_color
+            and string.format('background="%s"', gears.color.to_rgba_string(props.bg_color)) or ""
         props.markup = string.format(
             '<span %s %s><b>%s</b></span>',
             fg, bg, "%s"
@@ -238,10 +240,12 @@ function calendar_popup:call_calendar(offset, position, screen)
 end
 
 --- Toggle calendar visibility.
+-- @treturn boolean The new value of `visible`.
 -- @method toggle
 function calendar_popup:toggle()
     self:call_calendar(0)
     self.visible = not self.visible
+    return self.visible
 end
 
 --- Attach the calendar to a widget to display at a specific position.
@@ -384,6 +388,7 @@ end
 -- @tparam table args.style_focus Cell style for the current day cell (see `cell_properties`)
 -- @treturn wibox A wibox containing the calendar
 -- @constructorfct awful.widget.calendar_popup.month
+-- @usebeautiful beautiful.calendar_style
 function calendar_popup.month(args)
     return get_cal_wibox("month", args)
 end

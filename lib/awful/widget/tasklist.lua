@@ -14,14 +14,14 @@
 --  <th align='center'>Icon</th>
 --  <th align='center'>Client property</th>
 -- </tr>
--- <tr><td>▪</td><td><a href="./client.html#client.sticky">sticky</a></td></tr>
--- <tr><td>⌃</td><td><a href="./client.html#client.ontop">ontop</a></td></tr>
--- <tr><td>▴</td><td><a href="./client.html#client.above">above</a></td></tr>
--- <tr><td>▾</td><td><a href="./client.html#client.below">below</a></td></tr>
--- <tr><td>✈</td><td><a href="./client.html#client.floating">floating</a></td></tr>
--- <tr><td>+</td><td><a href="./client.html#client.maximized">maximized</a></td></tr>
--- <tr><td>⬌</td><td><a href="./client.html#client.maximized_horizontal">maximized_horizontal</a></td></tr>
--- <tr><td>⬍</td><td><a href="./client.html#client.maximized_vertical">maximized_vertical</a></td></tr>
+-- <tr><td>▪</td><td><a href="../core_components/client.html#sticky">sticky</a></td></tr>
+-- <tr><td>⌃</td><td><a href="../core_components/client.html#ontop">ontop</a></td></tr>
+-- <tr><td>▴</td><td><a href="../core_components/client.html#above">above</a></td></tr>
+-- <tr><td>▾</td><td><a href="../core_components/client.html#below">below</a></td></tr>
+-- <tr><td>✈</td><td><a href="../core_components/client.html#floating">floating</a></td></tr>
+-- <tr><td>+</td><td><a href="../core_components/client.html#maximized">maximized</a></td></tr>
+-- <tr><td>⬌</td><td><a href="../core_components/client.html#maximized_horizontal">maximized_horizontal</a></td></tr>
+-- <tr><td>⬍</td><td><a href="../core_components/client.html#maximized_vertical">maximized_vertical</a></td></tr>
 -- </table>
 --
 -- **Customizing the tasklist:**
@@ -71,6 +71,7 @@
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @widgetmod awful.widget.tasklist
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -94,6 +95,7 @@ local wmargin = require("wibox.container.margin")
 local wtextbox = require("wibox.widget.textbox")
 local clienticon = require("awful.widget.clienticon")
 local wbackground = require("wibox.container.background")
+local gtable = require("gears.table")
 
 local function get_screen(s)
     return s and screen[s]
@@ -104,41 +106,65 @@ local tasklist = { mt = {} }
 local instances
 
 --- The default foreground (text) color.
+--
+-- @DOC_wibox_awidget_tasklist_style_fg_normal_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_fg_normal
 -- @tparam[opt=nil] string|pattern fg_normal
 -- @see gears.color
 
 --- The default background color.
+--
+-- @DOC_wibox_awidget_tasklist_style_bg_normal_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_bg_normal
 -- @tparam[opt=nil] string|pattern bg_normal
 -- @see gears.color
 
 --- The focused client foreground (text) color.
+--
+-- @DOC_wibox_awidget_tasklist_style_fg_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_fg_focus
 -- @tparam[opt=nil] string|pattern fg_focus
 -- @see gears.color
 
 --- The focused client background color.
+--
+-- @DOC_wibox_awidget_tasklist_style_bg_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_bg_focus
 -- @tparam[opt=nil] string|pattern bg_focus
 -- @see gears.color
 
 --- The urgent clients foreground (text) color.
+--
+-- @DOC_wibox_awidget_tasklist_style_fg_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_fg_urgent
 -- @tparam[opt=nil] string|pattern fg_urgent
 -- @see gears.color
 
 --- The urgent clients background color.
+--
+-- @DOC_wibox_awidget_tasklist_style_bg_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_bg_urgent
 -- @tparam[opt=nil] string|pattern bg_urgent
 -- @see gears.color
 
 --- The minimized clients foreground (text) color.
+--
+-- @DOC_wibox_awidget_tasklist_style_fg_minimize_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_fg_minimize
 -- @tparam[opt=nil] string|pattern fg_minimize
 -- @see gears.color
 
 --- The minimized clients background color.
+--
+-- @DOC_wibox_awidget_tasklist_style_bg_minimize_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_bg_minimize
 -- @tparam[opt=nil] string|pattern bg_minimize
 -- @see gears.color
@@ -160,16 +186,24 @@ local instances
 -- @tparam[opt=nil] string bg_image_minimize
 
 --- Disable the tasklist client icons.
+--
+-- @DOC_wibox_awidget_tasklist_style_disable_icon_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_disable_icon
 -- @tparam[opt=false] boolean tasklist_disable_icon
 
 --- Disable the tasklist client titles.
+--
+-- @DOC_wibox_awidget_tasklist_style_disable_task_name_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_disable_task_name
 -- @tparam[opt=false] boolean tasklist_disable_task_name
 
 --- Disable the extra tasklist client property notification icons.
 --
 -- See the <a href="#status_icons">Status icons</a> section for more details.
+--
+-- @DOC_wibox_awidget_tasklist_style_plain_task_name_EXAMPLE@
 --
 -- @beautiful beautiful.tasklist_plain_task_name
 -- @tparam[opt=false] boolean tasklist_plain_task_name
@@ -210,110 +244,178 @@ local instances
 -- @beautiful beautiful.tasklist_minimized
 -- @tparam[opt=nil] string minimized
 
+--- The focused client alignment.
+--
+-- @DOC_wibox_awidget_tasklist_style_align_EXAMPLE@
+--
+-- @beautiful beautiful.tasklist_align
+-- @tparam[opt="left"] string align *left*, *right* or *center*
+
 --- The tasklist font.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_font
 -- @tparam[opt=nil] string font
-
---- The focused client alignment.
--- @beautiful beautiful.tasklist_align
--- @tparam[opt=left] string align *left*, *right* or *center*
+-- @see wibox.widget.textbox.font
 
 --- The focused client title alignment.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_font_focus
 -- @tparam[opt=nil] string font_focus
+-- @see wibox.widget.textbox.font
 
 --- The minimized clients font.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_minimized_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_font_minimized
 -- @tparam[opt=nil] string font_minimized
+-- @see wibox.widget.textbox.font
 
 --- The urgent clients font.
+--
+-- @DOC_wibox_awidget_tasklist_style_font_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_font_urgent
 -- @tparam[opt=nil] string font_urgent
+-- @see wibox.widget.textbox.font
 
 --- The space between the tasklist elements.
+--
+-- @DOC_wibox_awidget_tasklist_style_spacing_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_spacing
 -- @tparam[opt=0] number spacing The spacing between tasks.
 
 --- The default tasklist elements shape.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape
 -- @tparam[opt=nil] gears.shape shape
 
 --- The default tasklist elements border width.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_width_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_width
 -- @tparam[opt=0] number shape_border_width
 
 --- The default tasklist elements border color.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_color_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_color
 -- @tparam[opt=nil] string|color shape_border_color
 -- @see gears.color
 
 --- The focused client shape.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_focus
 -- @tparam[opt=nil] gears.shape shape_focus
 
 --- The focused client border width.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_focus_border_width_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_width_focus
 -- @tparam[opt=0] number shape_border_width_focus
 
 --- The focused client border color.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_focus_border_width_focus_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_color_focus
 -- @tparam[opt=nil] string|color shape_border_color_focus
 -- @see gears.color
 
 --- The minimized clients shape.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_minimized_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_minimized
 -- @tparam[opt=nil] gears.shape shape_minimized
 
 --- The minimized clients border width.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_width_minimized_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_width_minimized
 -- @tparam[opt=0] number shape_border_width_minimized
 
 --- The minimized clients border color.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_color_minimized_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_color_minimized
 -- @tparam[opt=nil] string|color shape_border_color_minimized
 -- @see gears.color
 
 --- The urgent clients shape.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_urgent
 -- @tparam[opt=nil] gears.shape shape_urgent
 
 --- The urgent clients border width.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_width_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_width_urgent
 -- @tparam[opt=0] number shape_border_width_urgent
 
 --- The urgent clients border color.
+--
+-- @DOC_wibox_awidget_tasklist_style_shape_border_color_urgent_EXAMPLE@
+--
 -- @beautiful beautiful.tasklist_shape_border_color_urgent
 -- @tparam[opt=nil] string|color shape_border_color_urgent
 -- @see gears.color
+
+--- The icon size.
+-- @beautiful beautiful.tasklist_icon_size
+-- @tparam[opt=nil] integer tasklist_icon_size
 
 -- Public structures
 tasklist.filter, tasklist.source = {}, {}
 
 -- This is the same template as awful.widget.common, but with an clienticon widget
-local default_template = {
-    {
+local function default_template(self)
+    local has_no_icon = self._private.style.disable_icon
+        or self._private.style.tasklist_disable_icon
+        or beautiful.tasklist_disable_icon
+
+    return {
         {
-            clienticon,
-            id     = "icon_margin_role",
-            left   = dpi(4),
-            widget = wmargin
-        },
-        {
+            (not has_no_icon) and {
+                clienticon,
+                id     = "icon_margin_role",
+                left   = dpi(4),
+                widget = wmargin
+            } or nil,
             {
-                id     = "text_role",
-                widget = wtextbox,
+                {
+                    id     = "text_role",
+                    widget = wtextbox,
+                },
+                id     = "text_margin_role",
+                left   = dpi(4),
+                right  = dpi(4),
+                widget = wmargin
             },
-            id     = "text_margin_role",
-            left   = dpi(4),
-            right  = dpi(4),
-            widget = wmargin
+            fill_space = true,
+            layout     = wfixed.horizontal
         },
-        fill_space = true,
-        layout     = wfixed.horizontal
-    },
-    id     = "background_role",
-    widget = wbackground
-}
+        id     = "background_role",
+        widget = wbackground
+    }
+end
 
 local function tasklist_label(c, args, tb)
     if not args then args = {} end
@@ -334,12 +436,13 @@ local function tasklist_label(c, args, tb)
     local bg_image_focus = args.bg_image_focus or theme.tasklist_bg_image_focus or theme.bg_image_focus
     local bg_image_urgent = args.bg_image_urgent or theme.tasklist_bg_image_urgent or theme.bg_image_urgent
     local bg_image_minimize = args.bg_image_minimize or theme.tasklist_bg_image_minimize or theme.bg_image_minimize
-    local tasklist_disable_icon = args.tasklist_disable_icon or theme.tasklist_disable_icon or false
+    local tasklist_disable_icon = args.disable_icon or args.tasklist_disable_icon
+        or theme.tasklist_disable_icon or false
     local disable_task_name = args.disable_task_name or theme.tasklist_disable_task_name or false
-    local font = args.font or theme.tasklist_font or theme.font or ""
-    local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font or ""
-    local font_minimized = args.font_minimized or theme.tasklist_font_minimized or theme.font_minimized or font or ""
-    local font_urgent = args.font_urgent or theme.tasklist_font_urgent or theme.font_urgent or font or ""
+    local font = args.font or theme.tasklist_font or theme.font
+    local font_focus = args.font_focus or theme.tasklist_font_focus or theme.font_focus or font
+    local font_minimized = args.font_minimized or theme.tasklist_font_minimized or theme.font_minimized or font
+    local font_urgent = args.font_urgent or theme.tasklist_font_urgent or theme.font_urgent or font
     local text = ""
     local name = ""
     local bg
@@ -476,10 +579,10 @@ local function create_callback(w, t)
     common._set_common_property(w, "client", t)
 end
 
-local function tasklist_update(s, w, buttons, filter, data, style, update_function, args)
+local function tasklist_update(s, self, buttons, filter, data, style, update_function, args)
     local clients = {}
 
-    local source = args and args.source or tasklist.source.all_clients or nil
+    local source = self.source or tasklist.source.all_clients or nil
     local list   = source and source(s, args) or capi.client.get()
 
     for _, c in ipairs(list) do
@@ -490,12 +593,217 @@ local function tasklist_update(s, w, buttons, filter, data, style, update_functi
         end
     end
 
+    if self._private.last_count ~= #clients then
+        local old = self._private.last_count
+        self._private.last_count = #clients
+        self:emit_signal("property::count", #clients, old)
+    end
+
     local function label(c, tb) return tasklist_label(c, style, tb) end
 
-    update_function(w, buttons, label, data, clients, {
-        widget_template = args.widget_template or default_template,
+    update_function(self._private.base_layout, buttons, label, data, clients, {
+        widget_template = self._private.widget_template or default_template(self),
         create_callback = create_callback,
     })
+end
+
+--- The current number of clients.
+--
+-- Note that the `tasklist` is usually lazy-loaded. Reading this property
+-- may cause the widgets to be created. Depending on where the property is called
+-- from, it might, in theory, cause an infinite loop.
+--
+-- @property count
+-- @readonly
+-- @tparam number count
+-- @propertydefault The current number of client.
+-- @negativeallowed false
+-- @propemits true false
+
+--- Set the tasklist layout.
+--
+-- This can be used to change the layout based on the number of clients:
+--
+-- @DOC_sequences_client_tasklist_layout1_EXAMPLE@
+--
+-- @property base_layout
+-- @tparam[opt=wibox.layout.flex.horizontal] wibox.layout base_layout
+-- @propemits true false
+-- @see wibox.layout.flex.horizontal
+
+--- The tasklist screen.
+--
+-- @DOC_sequences_client_tasklist_screen1_EXAMPLE@
+--
+-- @property screen
+-- @tparam screen screen
+-- @propertydefault Obtained from the constructor.
+-- @propemits true false
+
+--- A function to narrow down the list of clients.
+--
+-- @DOC_sequences_client_tasklist_custom_filter1_EXAMPLE@
+--
+-- @property filter
+-- @tparam[opt=awful.widget.tasklist.filter.alltags] function filter
+-- @functionparam client c The client to accept or reject.
+-- @functionparam screen s The value of the tasklist `screen` property.
+-- @functionreturn boolean `true` if the client is accepter or `false` if it is rejected.
+-- @propemits true false
+-- @see awful.widget.tasklist.filter.allscreen
+-- @see awful.widget.tasklist.filter.alltags
+-- @see awful.widget.tasklist.filter.currenttags
+-- @see awful.widget.tasklist.filter.minimizedcurrenttags
+-- @see awful.widget.tasklist.filter.focused
+
+--- A function called when the tasklist is refreshed.
+--
+-- This is a very low level API, prefer `widget_template` whenever
+-- you can.
+--
+-- @property update_function
+-- @tparam function|nil update_function
+-- @propertydefault The default function delegate everything to the `widget_template`.
+-- @functionparam widget layout The base layout object.
+-- @functionparam table buttons The buttons for this client entry (see below).
+-- @functionparam string label The client name.
+-- @functionparam table data Arbitrary metadate.
+-- @functionparam table clients The list of clients (ordered).
+-- @functionparam table metadata Other values.
+-- @functionnoreturn
+-- @propemits true false
+
+--- A template for creating the client widgets.
+--
+-- @DOC_sequences_client_tasklist_widget_template1_EXAMPLE@
+--
+-- @property widget_template
+-- @tparam[opt=nil] template|nil widget_template
+-- @propemits true false
+
+--- A function to gather the clients to display.
+--
+-- @DOC_sequences_client_tasklist_custom_source1_EXAMPLE@
+--
+-- @property source
+-- @tparam[opt=awful.widget.tasklist.source.all_clients] function source
+-- @functionparam screen s The tasklist screen.
+-- @functionparam table metadata Various metadata.
+-- @functionreturn table The list of clients.
+-- @propemits true false
+-- @see awful.widget.tasklist.source.all_clients
+
+function tasklist:set_base_layout(layout)
+    self._private.base_layout = base.make_widget_from_value(
+        layout or flex.horizontal
+    )
+
+    local spacing = self._private.style.spacing or beautiful.tasklist_spacing
+
+    if self._private.base_layout.set_spacing and spacing then
+        self._private.base_layout:set_spacing(spacing)
+    end
+
+    assert(self._private.base_layout.is_widget)
+
+    self._do_tasklist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::base_layout", layout)
+end
+
+function tasklist:get_count()
+    if not self._private.last_count then
+        self._do_tasklist_update_now()
+    end
+
+    return self._private.last_count
+end
+
+function tasklist:layout(_, width, height)
+    if self._private.base_layout then
+        return { base.place_widget_at(self._private.base_layout, 0, 0, width, height) }
+    end
+end
+
+function tasklist:fit(context, width, height)
+    if not self._private.base_layout then
+        return 0, 0
+    end
+
+    return base.fit_widget(self, context, self._private.base_layout, width, height)
+end
+
+for _, prop in ipairs { "screen", "filter", "update_function", "widget_template", "source"} do
+    tasklist["set_"..prop] = function(self, value)
+        if value == self._private[prop] then return end
+
+        self._private[prop] = value
+
+        self._do_tasklist_update()
+
+        self:emit_signal("widget::layout_changed")
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("property::"..prop, value)
+    end
+
+    tasklist["get_"..prop] = function(self)
+        return self._private[prop]
+    end
+end
+
+local function update_screen(self, screen, old)
+    if not instances then return end
+
+    if old and instances[old] then
+        for k, w in ipairs(instances[old]) do
+            if w == self then
+                table.remove(instances[old], k)
+                break
+            end
+        end
+    end
+
+    local list = instances[screen]
+
+    if not list then
+        list = setmetatable({}, { __mode = "v" })
+        instances[screen] = list
+    end
+
+    table.insert(list, self)
+end
+
+function tasklist:set_screen(value)
+    value = get_screen(value)
+
+    if value == self._private.screen then return end
+
+    local old = self._private.screen
+
+    self._private.screen = value
+
+    update_screen(self, screen, old)
+
+    self._do_tasklist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::screen", value)
+end
+
+function tasklist:set_widget_template(widget_template)
+    self._private.widget_template = widget_template
+
+    -- Remove the existing instances
+    self._private.data = setmetatable({}, { __mode = 'k' })
+
+    self._do_tasklist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::widget_template", widget_template)
 end
 
 --- Create a new tasklist widget.
@@ -518,53 +826,58 @@ end
 --  function used to generate the list of client.
 -- @tparam[opt] table args.widget_template A custom widget to be used for each client
 -- @tparam[opt={}] table args.style The style overrides default theme.
--- @tparam[opt=nil] string|pattern args.style.fg_normal
--- @tparam[opt=nil] string|pattern args.style.bg_normal
--- @tparam[opt=nil] string|pattern args.style.fg_focus
--- @tparam[opt=nil] string|pattern args.style.bg_focus
--- @tparam[opt=nil] string|pattern args.style.fg_urgent
--- @tparam[opt=nil] string|pattern args.style.bg_urgent
--- @tparam[opt=nil] string|pattern args.style.fg_minimize
--- @tparam[opt=nil] string|pattern args.style.bg_minimize
--- @tparam[opt=nil] string args.style.bg_image_normal
--- @tparam[opt=nil] string args.style.bg_image_focus
--- @tparam[opt=nil] string args.style.bg_image_urgent
--- @tparam[opt=nil] string args.style.bg_image_minimize
--- @tparam[opt=nil] boolean args.style.tasklist_disable_icon
--- @tparam[opt=nil] number args.style.icon_size The size of the icon
--- @tparam[opt='▪'] string args.style.sticky Extra icon when client is sticky
--- @tparam[opt='⌃'] string args.style.ontop Extra icon when client is ontop
--- @tparam[opt='▴'] string args.style.above Extra icon when client is above
--- @tparam[opt='▾'] string args.style.below Extra icon when client is below
--- @tparam[opt='✈'] string args.style.floating Extra icon when client is floating
--- @tparam[opt='<b>+</b>'] string args.style.maximized Extra icon when client is maximized
--- @tparam[opt='⬌'] string args.style.maximized_horizontal Extra icon when client is maximized_horizontal
--- @tparam[opt='⬍'] string args.style.maximized_vertical Extra icon when client is maximized_vertical
--- @tparam[opt=false] boolean args.style.disable_task_name
--- @tparam[opt=nil] string args.style.font
--- @tparam[opt=left] string args.style.align *left*, *right* or *center*
--- @tparam[opt=nil] string args.style.font_focus
--- @tparam[opt=nil] string args.style.font_minimized
--- @tparam[opt=nil] string args.style.font_urgent
--- @tparam[opt=nil] number args.style.spacing The spacing between tags.
--- @tparam[opt=nil] gears.shape args.style.shape
--- @tparam[opt=nil] number args.style.shape_border_width
--- @tparam[opt=nil] string|color args.style.shape_border_color
--- @tparam[opt=nil] gears.shape args.style.shape_focus
--- @tparam[opt=nil] number args.style.shape_border_width_focus
--- @tparam[opt=nil] string|color args.style.shape_border_color_focus
--- @tparam[opt=nil] gears.shape args.style.shape_minimized
--- @tparam[opt=nil] number args.style.shape_border_width_minimized
--- @tparam[opt=nil] string|color args.style.shape_border_color_minimized
--- @tparam[opt=nil] gears.shape args.style.shape_urgent
--- @tparam[opt=nil] number args.style.shape_border_width_urgent
--- @tparam[opt=nil] string|color args.style.shape_border_color_urgent
+-- @tparam[opt=beautiful.tasklist_fg_normal] string|pattern args.style.fg_normal
+-- @tparam[opt=beautiful.tasklist_bg_normal] string|pattern args.style.bg_normal
+-- @tparam[opt=beautiful.tasklist_fg_focus or beautiful.fg_focus] string|pattern args.style.fg_focus
+-- @tparam[opt=beautiful.tasklist_bg_focus or beautiful.bg_focus] string|pattern args.style.bg_focus
+-- @tparam[opt=beautiful.tasklist_fg_urgent or beautiful.fg_urgent] string|pattern args.style.fg_urgent
+-- @tparam[opt=beautiful.tasklist_bg_urgent or beautiful.bg_urgent] string|pattern args.style.bg_urgent
+-- @tparam[opt=beautiful.tasklist_fg_minimize or beautiful.fg_minimize] string|pattern args.style.fg_minimize
+-- @tparam[opt=beautiful.tasklist_bg_minimize or beautiful.bg_minimize] string|pattern args.style.bg_minimize
+-- @tparam[opt=beautiful.tasklist_bg_image_normal] string args.style.bg_image_normal
+-- @tparam[opt=beautiful.tasklist_bg_image_focus] string args.style.bg_image_focus
+-- @tparam[opt=beautiful.tasklist_bg_image_urgent] string args.style.bg_image_urgent
+-- @tparam[opt=beautiful.tasklist_bg_image_minimize] string args.style.bg_image_minimize
+-- @tparam[opt=beautiful.tasklist_disable_icon] boolean args.style.disable_icon
+-- @tparam[opt=beautiful.tasklist_icon_size] number args.style.icon_size The size of the icon
+-- @tparam[opt=beautiful.tasklist_sticky or '▪'] string args.style.sticky Extra icon when client is sticky
+-- @tparam[opt=beautiful.tasklist_ontop or '⌃'] string args.style.ontop Extra icon when client is ontop
+-- @tparam[opt=beautiful.tasklist_above or '▴'] string args.style.above Extra icon when client is above
+-- @tparam[opt=beautiful.tasklist_below or '▾'] string args.style.below Extra icon when client is below
+-- @tparam[opt=beautiful.tasklist_floating or '✈'] string args.style.floating Extra icon when client is floating
+-- @tparam[opt=beautiful.tasklist_maximized or '<b>+</b>'] string args.style.maximized Extra
+--   icon when client is maximized
+-- @tparam[opt=beautiful.tasklist_maximized_horizontal or '⬌'] string args.style.maximized_horizontal Extra
+--   icon when client is maximized_horizontal
+-- @tparam[opt=beautiful.tasklist_maximized_vertical or '⬍'] string args.style.maximized_vertical Extra
+--   icon when client is maximized_vertical
+-- @tparam[opt=beautiful.tasklist_disable_task_name or false] boolean args.style.disable_task_name
+-- @tparam[opt=beautiful.tasklist_font] string args.style.font
+-- @tparam[opt=beautiful.tasklist_align or "left"] string args.style.align *left*, *right* or *center*
+-- @tparam[opt=beautiful.tasklist_font_focus] string args.style.font_focus
+-- @tparam[opt=beautiful.tasklist_font_minimized] string args.style.font_minimized
+-- @tparam[opt=beautiful.tasklist_font_urgent] string args.style.font_urgent
+-- @tparam[opt=beautiful.tasklist_spacing] number args.style.spacing The spacing between tags.
+-- @tparam[opt=beautiful.tasklist_shape] gears.shape args.style.shape
+-- @tparam[opt=beautiful.tasklist_shape_border_width] number args.style.shape_border_width
+-- @tparam[opt=beautiful.tasklist_shape_border_color] string|color args.style.shape_border_color
+-- @tparam[opt=beautiful.tasklist_shape_focus] gears.shape args.style.shape_focus
+-- @tparam[opt=beautiful.tasklist_shape_border_width_focus] number args.style.shape_border_width_focus
+-- @tparam[opt=beautiful.tasklist_shape_border_color_focus] string|color args.style.shape_border_color_focus
+-- @tparam[opt=beautiful.tasklist_shape_minimized] gears.shape args.style.shape_minimized
+-- @tparam[opt=beautiful.tasklist_shape_border_width_minimized] number args.style.shape_border_width_minimized
+-- @tparam[opt=beautiful.tasklist_shape_border_color_minimized] string|color args.style.shape_border_color_minimized
+-- @tparam[opt=beautiful.tasklist_shape_urgent] gears.shape args.style.shape_urgent
+-- @tparam[opt=beautiful.tasklist_shape_border_width_urgent] number args.style.shape_border_width_urgent
+-- @tparam[opt=beautiful.tasklist_shape_border_color_urgent] string|color args.style.shape_border_color_urgent
+-- @tparam[opt=beautiful.tasklist_minimized ] string|color args.style.minimized
 -- @param filter **DEPRECATED** use args.filter
 -- @param buttons **DEPRECATED** use args.buttons
 -- @param style **DEPRECATED** use args.style
 -- @param update_function **DEPRECATED** use args.update_function
--- @param base_widget **DEPRECATED** use args.base_widget
+-- @param base_widget **DEPRECATED** use args.base_layout
 -- @constructorfct awful.widget.tasklist
+-- @usebeautiful beautiful.tasklist_plain_task_name
 function tasklist.new(args, filter, buttons, style, update_function, base_widget)
     local screen = nil
 
@@ -596,23 +909,37 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
 
     screen = screen or get_screen(args.screen)
     local uf = args.update_function or common.list_update
-    local w = base.make_widget_from_value(args.layout or flex.horizontal)
 
-    local data = setmetatable({}, { __mode = 'k' })
+    local w = base.make_widget(nil, nil, {
+        enable_properties = true,
+    })
 
-    local spacing = args.style and args.style.spacing or args.layout and args.layout.spacing
-                    or beautiful.tasklist_spacing
-    if w.set_spacing and spacing then
-        w:set_spacing(spacing)
-    end
+    gtable.crush(w._private, {
+        disable_task_name = args.disable_task_name,
+        disable_icon      = args.disable_icon,
+        update_function   = args.update_function,
+        filter            = args.filter,
+        buttons           = args.buttons,
+        style             = args.style or {},
+        screen            = screen,
+        widget_template   = args.widget_template,
+        source            = args.source,
+        data              = setmetatable({}, { __mode = 'k' })
+    })
+
+    gtable.crush(w, tasklist, true)
+    rawset(w, "filter", nil)
+    rawset(w, "source", nil)
 
     local queued_update = false
 
     -- For the tests
     function w._do_tasklist_update_now()
         queued_update = false
-        if screen.valid then
-            tasklist_update(screen, w, args.buttons, args.filter, data, args.style, uf, args)
+        if w._private.screen.valid then
+            tasklist_update(
+                w._private.screen, w, w._private.buttons, w._private.filter, w._private.data, args.style, uf, args
+            )
         end
     end
 
@@ -624,7 +951,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
         end
     end
     function w._unmanage(c)
-        data[c] = nil
+        w._private.data[c] = nil
     end
     if instances == nil then
         instances = setmetatable({}, { __mode = "k" })
@@ -681,17 +1008,20 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
             instances[get_screen(s)] = nil
         end)
     end
+
+    tasklist.set_base_layout(w, args.layout or args.base_layout)
+
     w._do_tasklist_update()
-    local list = instances[screen]
-    if not list then
-        list = setmetatable({}, { __mode = "v" })
-        instances[screen] = list
-    end
-    table.insert(list, w)
+
+    update_screen(w, screen)
+
     return w
 end
 
 --- Filtering function to include all clients.
+--
+--@DOC_sequences_client_tasklist_filter_allscreen1_EXAMPLE@
+--
 -- @return true
 -- @filterfunction awful.widget.tasklist.filter.allscreen
 function tasklist.filter.allscreen()
@@ -699,8 +1029,11 @@ function tasklist.filter.allscreen()
 end
 
 --- Filtering function to include the clients from all tags on the screen.
--- @param c The client.
--- @param screen The screen we are drawing on.
+--
+--@DOC_sequences_client_tasklist_filter_alltags1_EXAMPLE@
+--
+-- @tparam client c The client.
+-- @tparam screen screen The screen we are drawing on.
 -- @return true if c is on screen, false otherwise
 -- @filterfunction awful.widget.tasklist.filter.alltags
 function tasklist.filter.alltags(c, screen)
@@ -709,8 +1042,13 @@ function tasklist.filter.alltags(c, screen)
 end
 
 --- Filtering function to include only the clients from currently selected tags.
--- @param c The client.
--- @param screen The screen we are drawing on.
+--
+-- This is the filter used in the default `rc.lua`.
+--
+--@DOC_sequences_client_tasklist_filter_currenttags1_EXAMPLE@
+--
+-- @tparam client c The client.
+-- @tparam screen screen The screen we are drawing on.
 -- @return true if c is in a selected tag on screen, false otherwise
 -- @filterfunction awful.widget.tasklist.filter.currenttags
 function tasklist.filter.currenttags(c, screen)
@@ -734,8 +1072,11 @@ function tasklist.filter.currenttags(c, screen)
 end
 
 --- Filtering function to include only the minimized clients from currently selected tags.
--- @param c The client.
--- @param screen The screen we are drawing on.
+--
+--@DOC_sequences_client_tasklist_filter_minimizedcurrenttags1_EXAMPLE@
+--
+-- @tparam client c The client.
+-- @tparam screen screen The screen we are drawing on.
 -- @return true if c is in a selected tag on screen and is minimized, false otherwise
 -- @filterfunction awful.widget.tasklist.filter.minimizedcurrenttags
 function tasklist.filter.minimizedcurrenttags(c, screen)
@@ -762,8 +1103,11 @@ function tasklist.filter.minimizedcurrenttags(c, screen)
 end
 
 --- Filtering function to include only the currently focused client.
--- @param c The client.
--- @param screen The screen we are drawing on.
+--
+--@DOC_sequences_client_tasklist_filter_focused1_EXAMPLE@
+--
+-- @tparam client c The client.
+-- @tparam screen screen The screen we are drawing on.
 -- @return true if c is focused on screen, false otherwise
 -- @filterfunction awful.widget.tasklist.filter.focused
 function tasklist.filter.focused(c, screen)
@@ -783,8 +1127,6 @@ end
 function tasklist.mt:__call(...)
     return tasklist.new(...)
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 

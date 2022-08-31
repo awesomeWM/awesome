@@ -1,12 +1,13 @@
---DOC_GEN_IMAGE --DOC_HEADER --DOC_HIDE
-local parent = ... --DOC_NO_USAGE --DOC_HIDE
-local awful = {--DOC_HIDE
-    button = require("awful.button"), --DOC_HIDE
-    widget = {button = require("awful.widget.button")} --DOC_HIDE
-}--DOC_HIDE
-local beautiful = require("beautiful") --DOC_HIDE
+--DOC_HIDE_START --DOC_GEN_IMAGE --DOC_NO_USAGE
+local parent = ...
+local awful = {
+    button = require("awful.button"),
+    widget = {button = require("awful.widget.button")}
+}
+local beautiful = require("beautiful")
 
-    local button = --DOC_HIDE
+    local button =
+    --DOC_HIDE_END
     awful.widget.button {
         image   = beautiful.awesome_icon,
         buttons = {
@@ -16,7 +17,8 @@ local beautiful = require("beautiful") --DOC_HIDE
         }
     }
 
-button.forced_height = 24 --DOC_HIDE
-button.forced_width = 24 --DOC_HIDE
+--DOC_HIDE_START
+button.forced_height = 24
+button.forced_width = 24
 
-parent:add(button) --DOC_HIDE
+parent:add(button)

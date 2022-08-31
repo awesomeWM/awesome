@@ -1,6 +1,7 @@
 --DOC_HIDE_ALL
 --DOC_GEN_IMAGE
 local placement = require("awful.placement")
+require("awful.tag").add("1", {screen=screen[1], selected=true}) --DOC_HIDE
 screen[1]._resize {x= 50}
 for _, pos in ipairs{
     "top_left", "top_right", "bottom_left", "bottom_right",
@@ -14,6 +15,8 @@ end
 
 screen._add_screen {x = 70, y = 260  , width = 128, height = 96}
 screen._add_screen {x = 210, y = 260  , width = 128, height = 96}
+require("awful.tag").add("1", {screen=screen[2], selected=true}) --DOC_HIDE
+require("awful.tag").add("1", {screen=screen[3], selected=true}) --DOC_HIDE
 
 local c
 

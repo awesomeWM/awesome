@@ -27,6 +27,7 @@ local action = {}
 -- The action name.
 -- @property name
 -- @tparam string name The name.
+-- @propertydefault This is provided by DBus.
 -- @propemits true false
 
 -- If the action is selected.
@@ -35,17 +36,19 @@ local action = {}
 -- implement keyboard navigation.
 --
 -- @property selected
--- @param boolean
+-- @tparam[opt=false] boolean selected
 -- @propemits true false
 
 --- The action position (index).
 -- @property position
--- @param number
+-- @tparam integer position
+-- @propertydefault This is provided by DBus.
 -- @propemits true false
+-- @negativeallowed false
 
 --- The action icon.
 -- @property icon
--- @tparam gears.surface|string icon
+-- @tparam[opt=nil] image|string|nil icon
 -- @propemits true false
 
 --- If the action should hide the label and only display the icon.
@@ -53,7 +56,7 @@ local action = {}
 -- @DOC_wibox_nwidget_actionlist_icon_only_EXAMPLE@
 --
 -- @property icon_only
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean icon_only
 -- @propemits true false
 
 --- When a notification is invoked.
@@ -120,6 +123,7 @@ end
 --  the action was invoked. If a notification is shared by many object (like
 --  a "mute" or "snooze" action added to all notification), calling `:invoke()`
 --  without adding the `notif` context will cause unexpected results.
+-- @noreturn
 function action:invoke(notif)
     self:emit_signal("invoked", notif)
 end

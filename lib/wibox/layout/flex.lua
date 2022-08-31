@@ -1,4 +1,7 @@
 ---------------------------------------------------------------------------
+-- Split the space equally between multiple widgets.
+--
+--
 -- A `flex` layout may be initialized with any number of child widgets, and
 -- during runtime widgets may be added and removed dynamically.
 --
@@ -35,7 +38,7 @@ local flex = {}
 
 --- From `wibox.layout.fixed`.
 -- @property fill_space
--- @tparam boolean fill_space
+-- @tparam[opt=true] boolean fill_space
 -- @propemits true false
 -- @hidden
 
@@ -45,11 +48,12 @@ local flex = {}
 --
 -- @tparam widget ... Widgets that should be added (must at least be one).
 -- @method add
+-- @noreturn
 -- @interface layout
 
 --- Remove a widget from the layout.
 --
--- @tparam index The widget index to remove.
+-- @tparam number index The widget index to remove.
 -- @treturn boolean index If the operation is successful.
 -- @method remove
 -- @interface layout
@@ -87,7 +91,7 @@ local flex = {}
 --@DOC_wibox_layout_flex_spacing_widget_EXAMPLE@
 --
 -- @property spacing_widget
--- @tparam widget spacing_widget
+-- @tparam[opt=nil] widget|nil spacing_widget
 -- @propemits true false
 -- @interface layout
 
@@ -98,7 +102,9 @@ local flex = {}
 --@DOC_wibox_layout_flex_spacing_EXAMPLE@
 --
 -- @property spacing
--- @tparam number spacing Spacing between widgets.
+-- @tparam[opt=0] number spacing Spacing between widgets.
+-- @propertyunit pixel
+-- @negativeallowed true
 -- @propemits true false
 -- @interface layout
 
@@ -196,7 +202,9 @@ end
 --That is, maximum width for horizontal and maximum height for vertical.
 --
 -- @property max_widget_size
--- @tparam number max_widget_size
+-- @tparam[opt=nil] number|nil max_widget_size
+-- @propertytype nil No size limit.
+-- @negativeallowed false
 -- @propemits true false
 
 function flex:set_max_widget_size(val)

@@ -2,6 +2,11 @@
 screen[1]._resize {width = 128, height = 96} --DOC_HIDE
 screen._add_screen {x = 140, y = 0, width = 128, height = 96} --DOC_HIDE
 screen._add_screen {x = 280, y = 0, width = 128, height = 96} --DOC_HIDE
+
+for s in screen do --DOC_HIDE
+    require("awful.tag").add("1", {screen=s, selected=true}) --DOC_HIDE
+end --DOC_HIDE
+
 local placement = require("awful.placement") --DOC_HIDE
 
 for k, pos in ipairs{ --DOC_HIDE

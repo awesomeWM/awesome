@@ -5,6 +5,8 @@ local awful = { titlebar = require("awful.titlebar"),
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 
+require("awful.tag").add("1", {screen=screen[1], selected = true})
+
 screen[1]._resize { width = 646, height = 182 }
 
 local c
@@ -38,27 +40,31 @@ c = clients[1]
 setup(
 --DOC_HIDE_END
 
-    -- Create default titlebar
+    -- Create default titlebar.
     awful.titlebar(c)
 
+--DOC_NEWLINE
 --DOC_HIDE_START
 )
+
 
 c = clients[2]
 setup(
 --DOC_HIDE_END
 
-    -- Create titlebar on the client's bottom edge
+    -- Create titlebar on the client's bottom edge.
     awful.titlebar(c, { position = "bottom" })
 
 --DOC_HIDE_START
 )
 
+
 c = clients[3]
 setup(
 --DOC_HIDE_END
+--DOC_NEWLINE
 
-    -- Create titlebar with inverted colors
+    -- Create titlebar with inverted colors.
     awful.titlebar(c, { bg_normal = beautiful.fg_normal, fg_normal = beautiful.bg_normal })
 
 --DOC_HIDE_START

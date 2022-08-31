@@ -1,5 +1,29 @@
 ---------------------------------------------------------------------------
---- Layout module for awful.
+--- Deterministically lay the clients in a screen workarea.
+--
+-- The `awful.layout` module contains many sub-modules. Each of them contain
+-- one or more layout. `awful.layout` offers static layouts rather than
+-- tree based like other WMs. The layout have a small number of configuration
+-- variables:
+--
+-- * `master_width_factor`: The ratio between the main (master) section of the
+--  layout and a sub-section. For example, in the `tile.left` layout, the main
+--  (master) part contains `master_count` clients and the secondary part contains
+--  all other clients.
+-- * `master_count`: The number of clients which belong to the main (master) area.
+-- * `column_count`: The number of columns to store the clients in the secondary
+--   area.
+-- * `master_fill_policy`: When the number of clients is below `master_count`,
+--  how is the remaining space used.
+-- * `gaps`: The empty space between the clients.
+-- * `gap_single_client`: Same as gap, but when there is a single client. Gaps
+--  are often useful as a visual cue to know where a client starts and ends.
+--  This makes no sense when there is only one.
+--
+-- Not all layouts make use of all variables. Having such an overloaded meaning
+-- to a small set of variable is useful to attach those values to keybindings
+-- without having special logic for each layouts. AwesomeWM keybindings are not
+-- modal, so such "limitation" actually improves usability.
 --
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008 Julien Danjou
@@ -85,7 +109,7 @@ local arrange_lock = false
 local delayed_arrange = {}
 
 --- Get the current layout.
--- @param screen The screen.
+-- @tparam screen screen The screen.
 -- @return The layout function.
 -- @staticfct awful.layout.get
 function layout.get(screen)
@@ -98,9 +122,10 @@ function layout.get(screen)
 end
 
 --- Change the layout of the current tag.
--- @param i Relative index.
--- @param s The screen.
--- @param[opt] layouts A table of layouts.
+-- @tparam integer i Relative index.
+-- @tparam screen s The screen.
+-- @tparam[opt=s.selected_tag.layouts] table layouts A table of layouts.
+-- @noreturn
 -- @staticfct awful.layout.inc
 function layout.inc(i, s, layouts)
     if type(i) == "table" then
@@ -147,6 +172,7 @@ end
 --- Set the layout function of the current tag.
 -- @tparam layout|function l Layout object or function.
 -- @tparam[opt=mouse.screen.selected_tag] tag t The tag to modify.
+-- @noreturn
 -- @staticfct awful.layout.set
 function layout.set(l, t)
     t = t or capi.mouse.screen.selected_tag
@@ -208,7 +234,8 @@ function layout.parameters(t, screen)
 end
 
 --- Arrange a screen using its current layout.
--- @param screen The screen to arrange.
+-- @tparam screen screen The screen to arrange.
+-- @noreturn
 -- @staticfct awful.layout.arrange
 function layout.arrange(screen)
     screen = get_screen(screen)
@@ -251,6 +278,7 @@ end
 --
 -- @staticfct awful.layout.append_default_layout
 -- @tparam layout to_add A valid tag layout.
+-- @noreturn
 -- @see awful.layout.layouts
 function layout.append_default_layout(to_add)
     rawset(default_layouts, #default_layouts+1, to_add)
@@ -287,6 +315,7 @@ end
 --
 -- @staticfct awful.layout.append_default_layouts
 -- @tparam table layouts A table of valid tag layout.
+-- @noreturn
 -- @see awful.layout.layouts
 function layout.append_default_layouts(layouts)
     for _, l in ipairs(layouts) do

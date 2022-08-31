@@ -329,7 +329,6 @@ local function paint()
                     cr:rectangle(area.x, area.y, area.width, area.height)
                     cr:fill()
                 end
-
             end
 
             if not wall._private.container then
@@ -413,7 +412,7 @@ end)
 -- wallpaper will be defined as a normal `wibox` widget tree.
 --
 -- @property widget
--- @tparam wibox.widget widget
+-- @tparam[opt=nil] widget|nil widget
 -- @see wibox.widget.imagebox
 -- @see wibox.container.tile
 
@@ -434,7 +433,9 @@ end)
 -- @DOC_awful_wallpaper_dpi1_EXAMPLE@
 --
 -- @property dpi
--- @tparam[opt=screen.dpi] number dpi
+-- @tparam[opt=self.screen.dpi] number dpi
+-- @propertyunit pixel\_per\_inch
+-- @negativeallowed false
 -- @see screen
 -- @see screen.dpi
 
@@ -445,6 +446,7 @@ end)
 --
 -- @property screen
 -- @tparam screen screen
+-- @propertydefault Obtained from the constructor.
 -- @see screens
 -- @see add_screen
 -- @see remove_screen
@@ -455,7 +457,8 @@ end)
 --
 -- Some large wallpaper are made to span multiple screens.
 -- @property screens
--- @tparam table screens
+-- @tparam[opt={self.screen}] table screens
+-- @tablerowtype A list of `screen` objects.
 -- @see screen
 -- @see add_screen
 -- @see remove_screen
@@ -464,12 +467,13 @@ end)
 --- The background color.
 --
 -- It will be used as the "fill" color if the `image` doesn't take all the
--- screen space. It will also be the default background for the `widget.
+-- screen space. It will also be the default background for the `widget`.
 --
 -- As usual with colors in `AwesomeWM`, it can also be a gradient or a pattern.
 --
 -- @property bg
--- @tparam gears.color bg
+-- @tparam[opt=beautiful.wallpaper_bg] color bg
+-- @usebeautiful beautiful.wallpaper_bg
 -- @see gears.color
 
 --- The foreground color.
@@ -479,12 +483,13 @@ end)
 -- As usual with colors in `AwesomeWM`, it can also be a gradient or a pattern.
 --
 -- @property fg
--- @tparam gears.color fg
+-- @tparam[opt=beautiful.wallpaper_fg] color fg
 -- @see gears.color
 
 --- The default wallpaper background color.
 -- @beautiful beautiful.wallpaper_bg
--- @tparam gears.color wallpaper_bg
+-- @tparam color wallpaper_bg
+-- @usebeautiful beautiful.wallpaper_fg
 -- @see bg
 
 --- The default wallpaper foreground color.
@@ -519,18 +524,23 @@ end)
 -- @DOC_awful_wallpaper_padding1_EXAMPLE@
 --
 -- @property honor_padding
--- @tparam boolean honor_padding
+-- @tparam[opt=false] boolean honor_padding
 -- @see honor_workarea
 -- @see uncovered_areas
 
 --- Returns the list of screen(s) area which won't be covered by the wallpaper.
 --
 -- When `honor_workarea`, `honor_padding` or panning are used, some section of
--- the screen won't have a wallpaper. This returns a list of areas tables. Each
--- table has a `x`, `y`, `width` and `height` key.
+-- the screen won't have a wallpaper.
 --
 -- @property uncovered_areas
 -- @tparam table uncovered_areas
+-- @propertydefault This depends on the `honor_workarea` and `honor_padding` values.
+-- @tablerowtype A list of area tables with the following keys:
+-- @tablerowkey number x
+-- @tablerowkey number y
+-- @tablerowkey number width
+-- @tablerowkey number height
 -- @see honor_workarea
 -- @see honor_padding
 -- @see uncovered_areas_color
@@ -545,7 +555,7 @@ end)
 -- color or a gradient.
 --
 -- @property uncovered_areas_color
--- @tparam gears.color uncovered_areas_color
+-- @tparam[opt="transparent"] color uncovered_areas_color
 -- @see uncovered_areas
 
 --- Defines where the wallpaper is placed when there is multiple screens.
@@ -590,7 +600,15 @@ end)
 -- @DOC_awful_wallpaper_panning_custom_EXAMPLE@
 --
 -- @property panning_area
--- @tparam function|string panning_area
+-- @tparam[opt="outer"] function|string panning_area
+-- @propertytype string A panning algorithm
+-- @propertyvalue "outer"
+-- @propertyvalue "inner"
+-- @propertyvalue "inner_horizontal"
+-- @propertyvalue "inner_vertical"
+-- @propertytype function Custom panning function.
+-- @functionparam awful.wallpaper wallpaper The wallpaper object.
+-- @functionreturn A table with `x`, `y`, `width` and `height` keys,
 -- @see uncovered_areas
 
 function module:set_panning_area(value)
@@ -711,6 +729,7 @@ end
 --
 -- @method add_screen
 -- @tparam screen screen The screen object.
+-- @noreturn
 -- @see remove_screen
 function module:add_screen(s)
     s = get_screen(s)
@@ -739,6 +758,7 @@ end
 -- wallpaper will have an overlap.
 --
 -- @method detach
+-- @noreturn
 -- @see remove_screen
 -- @see add_screen
 function module:detach()
@@ -762,6 +782,7 @@ end
 -- really need to repaint the wallpaper, call this method.
 --
 -- @method repaint
+-- @noreturn
 function module:repaint()
     for _, s in ipairs(self._private.screens) do
         pending_repaint[s] = true
@@ -789,21 +810,28 @@ end
 --
 -- @method remove_screen
 -- @tparam screen screen The screen to remove.
+-- @treturn boolean `true` if the screen was removed and `false` if the screen
+--  wasn't found.
 -- @see detach
 -- @see add_screen
 -- @see screens
 function module:remove_screen(s)
+    local ret =  false
+
     s = get_screen(s)
 
     for k, s2 in ipairs(self._private.screens) do
         if s == s2 then
             table.remove(self._private.screens, k)
+            ret = true
         end
     end
 
     backgrounds[s] = nil
 
     self:repaint()
+
+    return ret
 end
 
 --- Create a wallpaper.

@@ -149,6 +149,8 @@ end
 --
 -- @property index
 -- @tparam integer index
+-- @propertydefault This is based on the current list of `t.screen:tags()`.
+-- @negativeallowed false
 -- @propemits false false
 
 function tag.object.set_index(self, idx)
@@ -203,11 +205,10 @@ function tag.object.get_index(query_tag)
     end
 end
 
---- Move a tag to an absolute position in the screen[]:tags() table.
+--- Move a tag to an absolute position in the `screen[]:tags()` table.
 -- @deprecated awful.tag.move
--- @param new_index Integer absolute position in the table to insert.
--- @param target_tag The tag that should be moved. If null, the currently
--- selected tag is used.
+-- @tparam integer new_index Integer absolute position in the table to insert.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag target_tag The tag that should be moved.
 -- @see index
 function tag.move(new_index, target_tag)
     gdebug.deprecate("Use t.index = new_index instead of awful.tag.move", {deprecated_in=4})
@@ -222,6 +223,7 @@ end
 --
 -- @method swap
 -- @tparam tag tag2 The second tag
+-- @noreturn
 -- @see client.swap
 function tag.object.swap(self, tag2)
     local idx1, idx2 = tag.object.get_index(self), tag.object.get_index(tag2)
@@ -243,8 +245,8 @@ end
 --- Swap 2 tags
 -- @deprecated awful.tag.swap
 -- @see tag.swap
--- @param tag1 The first tag
--- @param tag2 The second tag
+-- @tparam tag tag1 The first tag
+-- @tparam tag tag2 The second tag
 function tag.swap(tag1, tag2)
     gdebug.deprecate("Use t:swap(tag2) instead of awful.tag.swap", {deprecated_in=4})
 
@@ -263,7 +265,7 @@ end
 -- @constructorfct awful.tag.add
 -- @tparam string name The tag name, a string
 -- @tparam[opt=nil] table|nil props The tags initial properties, a table
--- @return The created tag
+-- @treturn tag The created tag.
 -- @see tag.delete
 function tag.add(name, props)
     local properties = props or {}
@@ -308,7 +310,7 @@ end
 --
 -- @staticfct awful.tag.new
 -- @tparam table names The tag name, in a table
--- @tparam[opt=1] screen|number screen The tag screen (defaults to screen 1).
+-- @tparam[opt=1] screen|number screen The tag screen.
 -- @tparam table layout The layout or layout table to set for this tags by default.
 -- @treturn table A table with all created tags.
 function tag.new(names, screen, layout)
@@ -334,8 +336,9 @@ end
 
 --- Find a suitable fallback tag.
 -- @staticfct awful.tag.find_fallback
--- @tparam screen screen The screen to look for a tag on. [awful.screen.focused()]
--- @tparam[opt=nil] table|nil invalids A table of tags considered unacceptable. [selectedlist(scr)]
+-- @tparam[opt=awful.screen.focused()] screen screen The screen to look for a tag on.
+-- @tparam[opt=nil] table|nil invalids A table of tags considered unacceptable.
+-- @treturn tag|nil Returns a fallback tag if one was found, otherwise `nil`.
 function tag.find_fallback(screen, invalids)
     local scr = screen or ascreen.focused()
     local t = invalids or scr.selected_tags
@@ -357,6 +360,7 @@ end
 -- @tparam table args The arguments.
 -- @tparam tag args.fallback_tag A fallback tag.
 -- @tparam[opt=false] boolean args.allow_untagged Allow the untagged clients to remain untagged.
+-- @noreturn
 -- @emits cleared After all clients have been untagged.
 -- @emits untagged For each currently tagged clients.
 -- @emitstparam untagged client c The untagged client.
@@ -397,7 +401,7 @@ end
 --  stickied tags to.
 -- @tparam[opt=false] boolean force Move even non-sticky clients to the fallback
 -- tag.
--- @return Returns true if the tag is successfully deleted.
+-- @treturn boolean Returns true if the tag is successfully deleted.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
@@ -465,9 +469,9 @@ end
 --- Delete a tag.
 -- @deprecated awful.tag.delete
 -- @see tag.delete
--- @param target_tag Optional tag object to delete. [selected()]
--- @param fallback_tag Tag to assign stickied tags to. [~selected()]
--- @return Returns true if the tag is successfully deleted, nil otherwise.
+-- @tparam[opt=mouse.screen.selected_tag] tag target_tag Optional tag object to delete.
+-- @tparam[opt] tag|nil fallback_tag Tag to assign stickied tags to.
+-- @treturn boolean Returns true if the tag is successfully deleted, nil otherwise.
 -- If there are no clients exclusively on this tag then delete it. Any
 -- stickied clients are assigned to the optional 'fallback_tag'.
 -- If after deleting the tag there is no selected tag, try and restore from
@@ -481,6 +485,7 @@ end
 --- Update the tag history.
 -- @staticfct awful.tag.history.update
 -- @tparam screen obj Screen object.
+-- @noreturn
 function tag.history.update(obj)
     local s = get_screen(obj)
     local curtags = s.selected_tags
@@ -521,6 +526,7 @@ end
 
 --- Revert tag history.
 -- @staticfct awful.tag.history.restore
+-- @noreturn
 -- @tparam screen screen The screen.
 -- @tparam number idx Index in history. Defaults to "previous" which is a special index
 -- toggling between last two selected sets of tags. Number (eg 1) will go back
@@ -558,7 +564,7 @@ end
 --- Get a list of all tags on a screen
 -- @deprecated awful.tag.gettags
 -- @tparam screen s Screen
--- @return A table with all available tags
+-- @treturn table A table with all available tags
 -- @see screen.tags
 function tag.gettags(s)
     gdebug.deprecate("Use s.tags instead of awful.tag.gettags", {deprecated_in=4})
@@ -571,7 +577,7 @@ end
 --- Find a tag by name.
 -- @tparam screen s The screen of the tag
 -- @tparam string name The name of the tag
--- @return The tag found, or `nil`
+-- @treturn tag|nil The tag found, or `nil`
 -- @staticfct awful.tag.find_by_name
 -- @usage -- For the current screen
 -- local t = awful.tag.find_by_name(awful.screen.focused(), "name")
@@ -594,7 +600,7 @@ end
 --- The tag screen.
 --
 -- @property screen
--- @tparam screen screen
+-- @tparam[opt=awful.screen.focused()] screen screen
 -- @propemits false false
 -- @see screen
 
@@ -637,8 +643,8 @@ end
 --- Set a tag's screen
 -- @deprecated awful.tag.setscreen
 -- @see screen
--- @param s Screen
--- @param t tag object
+-- @tparam screen s Screen
+-- @tparam tag t The tag object
 function tag.setscreen(s, t)
     -- For API consistency, the arguments have been swapped for Awesome 3.6
     -- this method is already deprecated, so be silent and swap the args
@@ -654,8 +660,8 @@ end
 --- Get a tag's screen
 -- @deprecated awful.tag.getscreen
 -- @see screen
--- @param[opt] t tag object
--- @return Screen number
+-- @tparam[opt=awful.screen.focused().selected_taga] tag|nil t Tag object
+-- @treturn screen The tag screen.
 function tag.getscreen(t)
     gdebug.deprecate("Use t.screen instead of awful.tag.getscreen(t)", {deprecated_in=4})
 
@@ -668,8 +674,8 @@ end
 
 --- Return a table with all visible tags
 -- @deprecated awful.tag.selectedlist
--- @param s Screen.
--- @return A table with all selected tags.
+-- @tparam screen s Screen.
+-- @treturn table A table with all selected tags.
 -- @see screen.selected_tags
 function tag.selectedlist(s)
     gdebug.deprecate("Use s.selected_tags instead of awful.tag.selectedlist", {deprecated_in=4})
@@ -681,7 +687,7 @@ end
 
 --- Return only the first visible tag.
 -- @deprecated awful.tag.selected
--- @param s Screen.
+-- @tparam screen s Screen.
 -- @see screen.selected_tag
 function tag.selected(s)
     gdebug.deprecate("Use s.selected_tag instead of awful.tag.selected", {deprecated_in=4})
@@ -694,7 +700,7 @@ end
 --- The default master width factor
 --
 -- @beautiful beautiful.master_width_factor
--- @param number (default: 0.5)
+-- @tparam[opt=0.5] number master_width_factor
 -- @see master_width_factor
 -- @see gap
 
@@ -714,7 +720,9 @@ end
 -- @DOC_screen_mwfact2_EXAMPLE@
 --
 -- @property master_width_factor
--- @tparam number master_width_factor Between 0 and 1
+-- @tparam[opt=beautiful.master_width_factor] number master_width_factor
+-- @rangestart 0.0
+-- @rangestop 1.0
 -- @emits property::mwfact When the value changes (deprecated).
 -- @emits property::master_width_factor When the value changes.
 -- @see master_count
@@ -740,8 +748,8 @@ end
 -- @deprecated awful.tag.setmwfact
 -- @see master_fill_policy
 -- @see master_width_factor
--- @param mwfact Master width factor.
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam number mwfact Master width factor.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.setmwfact(mwfact, t)
     gdebug.deprecate("Use t.master_width_factor = mwfact instead of awful.tag.setmwfact", {deprecated_in=4})
 
@@ -752,7 +760,8 @@ end
 -- @staticfct awful.tag.incmwfact
 -- @see master_width_factor
 -- @tparam number add Value to add to master width factor.
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
+-- @noreturn
 function tag.incmwfact(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_master_width_factor(t, tag.object.get_master_width_factor(t) + add)
@@ -762,7 +771,7 @@ end
 -- @deprecated awful.tag.getmwfact
 -- @see master_width_factor
 -- @see master_fill_policy
--- @param[opt] t The tag.
+-- @tparam[opt] tag|nil t The tag.
 function tag.getmwfact(t)
     gdebug.deprecate("Use t.master_width_factor instead of awful.tag.getmwfact", {deprecated_in=4})
 
@@ -795,6 +804,11 @@ end
 --     }
 --
 -- @tfield table awful.tag.layouts
+-- @tparam[opt={}] table awful.tag.layouts
+-- @see request::layouts
+-- @see awful.layout.append_default_layouts
+-- @see awful.layout.append_default_layout
+-- @see awful.layout.remove_default_layout
 
 --- The tag client layout.
 --
@@ -817,6 +831,34 @@ end
 --     placed. The only parameter is a table or arguments returned by
 --     `awful.layout.parameters`
 --
+-- The parameter table contains:
+--
+-- <table class='widget_list' border=1>
+--  <tr style='font-weight: bold;'>
+--   <th align='center'>Parameter </th>
+--   <th align='center'>Type</th>
+--   <th align='center'>Description</th>
+--  </tr>
+--  <tr><td>`workarea`</td><td> table </td><td>
+--   A table with `x`,`y`, `width` and `height` keys.<br/>
+--   All clients must be placed within this area.
+--  </td></tr>
+--  <tr><td align='center'>`geometry`</td><td> table </td><td>A table with the screen geometry.</td></tr>
+--  <tr><td align='center'>`clients`</td><td> table </td><td>A list of the clients to place.</td></tr>
+--  <tr><td align='center'>`screen`</td><td> screen </td><td>The screen.</td></tr>
+--  <tr><td align='center'>`padding`</td><td> table </td><td>
+--   A table with `left`, `right`, `top` and `bottom` keys.
+--  </td></tr>
+--  <tr>
+--   <td align='center'>`useless_gap`</td><td> integer </td>
+--   <td>The space that will be removed from the clients.</td>
+--  </tr>
+--  <tr><td align='center'>`geometries`</td><td> table </td><td>
+--   Empty. Place the client as key and preferred geometry<br/>
+--   as value. Do not call `:geometry()` directly.
+--  </td></tr>
+-- </table>
+--
 -- **Stateful layouts:**
 --
 -- The stateful layouts API is the same as stateless, but they are a function
@@ -833,9 +875,13 @@ end
 --
 -- @property layout
 -- @tparam layout|function layout A layout table or a constructor function
+-- @propertydefault The first non-nil value of either `self.layouts[1]` or
+-- `awful.layout.layouts[1]` or `awful.layout.suit.floating`.
+-- @functionparam table params A table containing the state of the layout (see the table above).
+-- @functionnoreturn
 -- @propemits false false
 -- @see awful.tag.layouts
--- @return The layout
+-- @see awful.layout.parameters
 
 --- The (proposed) list of available layouts for this tag.
 --
@@ -849,10 +895,13 @@ end
 -- front of the list.
 --
 -- @property layouts
--- @tparam table layouts
+-- @tparam[opt=nil] table|nil layouts
+-- @propertytype nil Use the current value of `awful.layout.layouts`.
 -- @request tag layouts awful granted When the `layouts` property is first called
 --  and there is no layouts, then that signal is called.
 -- @see awful.layout.layouts
+-- @see screen.workarea
+-- @see screen.padding
 -- @see layout
 
 function tag.object.set_layout(t, layout)
@@ -1002,8 +1051,8 @@ end
 --- Set layout.
 -- @deprecated awful.tag.setlayout
 -- @see layout
--- @param layout a layout table or a constructor function
--- @param t The tag to modify
+-- @param layout A layout table or a constructor function
+-- @tparam tag t The tag to modify
 -- @return The layout
 function tag.setlayout(layout, t)
     gdebug.deprecate("Use t.layout = layout instead of awful.tag.setlayout", {deprecated_in=4})
@@ -1043,7 +1092,7 @@ end
 -- the "Non-volatile" tag is still there (but with zero clients).
 --
 -- @property volatile
--- @tparam boolean volatile
+-- @tparam[opt=false] boolean volatile
 -- @propemits false false
 -- @see delete
 
@@ -1053,7 +1102,7 @@ end
 -- @deprecated awful.tag.setvolatile
 -- @see volatile
 -- @tparam boolean volatile If the tag must be deleted when the last client is untagged
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.setvolatile(volatile, t)
     gdebug.deprecate("Use t.volatile = volatile instead of awful.tag.setvolatile", {deprecated_in=4})
 
@@ -1063,7 +1112,7 @@ end
 --- Get if the tag must be deleted when the last client closes
 -- @deprecated awful.tag.getvolatile
 -- @see volatile
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 -- @treturn boolean If the tag will be deleted when the last client is untagged
 function tag.getvolatile(t)
     gdebug.deprecate("Use t.volatile instead of awful.tag.getvolatile", {deprecated_in=4})
@@ -1074,7 +1123,7 @@ end
 --- The default gap.
 --
 -- @beautiful beautiful.useless_gap
--- @param number (default: 0)
+-- @tparam[opt=0] number useless_gap
 -- @see gap
 -- @see gap_single_client
 
@@ -1092,7 +1141,9 @@ end
 -- @DOC_screen_gaps2_EXAMPLE@
 --
 -- @property gap
--- @tparam number gap The value has to be greater than zero.
+-- @tparam[opt=beautiful.useless_gap] integer gap The value has to be greater than zero.
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @emits property::useless_gap When the gap changes.
 -- @see gap_single_client
 -- @see awful.tag.incgap
@@ -1112,8 +1163,8 @@ end
 --- Set the spacing between clients
 -- @deprecated awful.tag.setgap
 -- @see gap
--- @param useless_gap The spacing between clients
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam number|nil useless_gap The spacing between clients
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.setgap(useless_gap, t)
     gdebug.deprecate("Use t.gap = useless_gap instead of awful.tag.setgap", {deprecated_in=4})
 
@@ -1122,9 +1173,11 @@ end
 
 --- Increase the spacing between clients
 -- @staticfct awful.tag.incgap
--- @see gap
 -- @tparam number add Value to add to the spacing between clients
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
+-- @noreturn
+-- @see gap
+-- @see beautiful.useless_gap
 function tag.incgap(add, t)
     t = t or t or ascreen.focused().selected_tag
     tag.object.set_gap(t, tag.object.get_gap(t) + add)
@@ -1133,7 +1186,7 @@ end
 --- Enable gaps for a single client.
 --
 -- @beautiful beautiful.gap_single_client
--- @param boolean (default: true)
+-- @tparam[opt=true] boolean gap_single_client
 -- @see gap
 -- @see gap_single_client
 
@@ -1153,7 +1206,7 @@ end
 -- @DOC_screen_gap_single_client_false_EXAMPLE@
 --
 -- @property gap_single_client
--- @tparam boolean gap_single_client Enable gaps for a single client
+-- @tparam[opt=beautiful.gap_single_client] boolean gap_single_client Enable gaps for a single client
 -- @propemits false false
 -- @see awful.tag.incgap
 
@@ -1199,19 +1252,13 @@ end
 --   `master_width_factor`
 --
 -- @beautiful beautiful.master_fill_policy
--- @param string (default: "expand")
+-- @tparam[opt="expand"] string master_fill_policy
 -- @see master_fill_policy
 
 --- Set size fill policy for the master client(s).
 --
 -- Some multi-column layouts can be configured so that the space is
 -- redistributed when there is not enough clients to fill all columns.
---
--- ** Possible values**:
---
--- * *expand*: Take all the space
--- * *master\_width\_factor*: Only take the ratio defined by the
---   `master_width_factor`
 --
 -- This is the default behavior of the `tile.left` layout (*expand*):
 --
@@ -1225,7 +1272,10 @@ end
 -- redistributed on both side.
 --
 -- @property master_fill_policy
--- @tparam string master_fill_policy "expand" or "master_width_factor"
+-- @tparam[opt=beautiful.master_fill_policy] string master_fill_policy
+-- @propertyvalue "expand" Take all the space
+-- @propertyvalue "master_width_factor" Only take the ratio defined by the
+--   `master_width_factor`
 -- @propemits false false
 -- @see awful.tag.togglemfpol
 
@@ -1240,8 +1290,9 @@ end
 -- @see master_fill_policy
 -- @tparam string policy Can be set to
 -- "expand" (fill all the available workarea) or
--- "master_width_factor" (fill only an area inside the master width factor)
+-- `master_width_factor` (fill only an area inside the master width factor)
 -- @tparam[opt=tag.selected()] tag t The tag to modify
+-- @noreturn
 function tag.setmfpol(policy, t)
     gdebug.deprecate("Use t.master_fill_policy = policy instead of awful.tag.setmfpol", {deprecated_in=4})
 
@@ -1250,10 +1301,11 @@ function tag.setmfpol(policy, t)
 end
 
 --- Toggle size fill policy for the master client(s)
--- between "expand" and "master_width_factor".
+-- between "expand" and `master_width_factor`.
 -- @staticfct awful.tag.togglemfpol
+-- @noreturn
 -- @see master_fill_policy
--- @tparam tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.togglemfpol(t)
     t = t or ascreen.focused().selected_tag
 
@@ -1283,7 +1335,7 @@ end
 --- The default number of master windows.
 --
 -- @beautiful beautiful.master_count
--- @param integer (default: 1)
+-- @tparam[opt=1] integer master_count
 -- @see master_count
 
 --- Set the number of master windows.
@@ -1291,7 +1343,8 @@ end
 -- @DOC_sequences_tag_master_count_EXAMPLE@
 --
 -- @property master_count
--- @tparam integer master_count nmaster Only positive values are accepted
+-- @tparam[opt=beautiful.master_count] integer master_count Only positive values are accepted
+-- @rangestart 1
 -- @emits property::nmaster Deprecated.
 -- @emits property::master_count When the value changes.
 -- @see awful.tag.incnmaster
@@ -1312,8 +1365,8 @@ end
 --- The number of master clients.
 -- @deprecated awful.tag.setnmaster
 -- @see master_count
--- @param nmaster The number of master windows.
--- @param[opt] t The tag.
+-- @tparam number nmaster The number of master windows.
+-- @tparam[opt] tag t The tag.
 function tag.setnmaster(nmaster, t)
     gdebug.deprecate("Use t.master_count = nmaster instead of awful.tag.setnmaster", {deprecated_in=4})
 
@@ -1323,7 +1376,7 @@ end
 --- Get the number of master windows.
 -- @deprecated awful.tag.getnmaster
 -- @see master_count
--- @param[opt] t The tag.
+-- @tparam[opt] tag t The tag.
 function tag.getnmaster(t)
     gdebug.deprecate("Use t.master_count instead of awful.tag.setnmaster", {deprecated_in=4})
 
@@ -1335,9 +1388,10 @@ end
 -- @staticfct awful.tag.incnmaster
 -- @see master_count
 -- @tparam number add Value to add to number of master windows.
--- @tparam[opt] tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 -- @tparam[opt=false] boolean sensible Limit nmaster based on the number of
 --   visible tiled windows?
+-- @noreturn
 function tag.incnmaster(add, t, sensible)
     t = t or ascreen.focused().selected_tag
 
@@ -1365,7 +1419,7 @@ end
 -- @DOC_wibox_awidget_taglist_icon_EXAMPLE@
 --
 -- @property icon
--- @tparam path|surface icon The icon
+-- @tparam[opt=nil] image|nil icon
 -- @propemits false false
 -- @see awful.widget.taglist
 -- @see gears.surface
@@ -1374,9 +1428,9 @@ end
 
 --- Set the tag icon
 -- @deprecated awful.tag.seticon
+-- @tparam gears.surface|string icon The icon to set, either path or image object
+-- @tparam tag tag The tag
 -- @see icon
--- @param icon the icon to set, either path or image object
--- @tparam tag tag the tag
 function tag.seticon(icon, _tag)
     gdebug.deprecate("Use t.icon = icon instead of awful.tag.seticon", {deprecated_in=4})
 
@@ -1387,7 +1441,7 @@ end
 --- Get the tag icon
 -- @deprecated awful.tag.geticon
 -- @see icon
--- @tparam tag tag the tag
+-- @tparam tag tag The tag
 function tag.geticon(_tag)
     gdebug.deprecate("Use t.icon instead of awful.tag.geticon", {deprecated_in=4})
 
@@ -1398,7 +1452,7 @@ end
 --- The default number of columns.
 --
 -- @beautiful beautiful.column_count
--- @param integer (default: 1)
+-- @tparam[opt=1] integer column_count
 -- @see column_count
 
 --- Set the number of columns.
@@ -1406,7 +1460,8 @@ end
 -- @DOC_sequences_tag_column_count_EXAMPLE@
 --
 -- @property column_count
--- @tparam integer ncol Has to be greater than 1
+-- @tparam[opt=beautiful.column_count or 1] integer column_count Has to be greater than 1
+-- @rangestart 1
 -- @emits property::ncol Deprecated.
 -- @emits property::column_count When the value changes.
 -- @see awful.tag.incncol
@@ -1427,8 +1482,8 @@ end
 --- Set number of column windows.
 -- @deprecated awful.tag.setncol
 -- @see column_count
--- @param ncol The number of column.
--- @param t The tag to modify, if null tag.selected() is used.
+-- @tparam integer ncol The number of column.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 function tag.setncol(ncol, t)
     gdebug.deprecate("Use t.column_count = new_index instead of awful.tag.setncol", {deprecated_in=4})
 
@@ -1442,7 +1497,7 @@ end
 --- Get number of column windows.
 -- @deprecated awful.tag.getncol
 -- @see column_count
--- @param[opt] t The tag.
+-- @tparam[opt] tag t The tag.
 function tag.getncol(t)
     gdebug.deprecate("Use t.column_count instead of awful.tag.getncol", {deprecated_in=4})
 
@@ -1453,9 +1508,10 @@ end
 --- Increase number of column windows.
 -- @staticfct awful.tag.incncol
 -- @tparam number add Value to add to number of column windows.
--- @tparam[opt] tag t The tag to modify, if null tag.selected() is used.
+-- @tparam[opt=awful.screen.focused().selected_tag] tag t The tag to modify.
 -- @tparam[opt=false] boolean sensible Limit column_count based on the number
 --   of visible tiled windows?
+-- @noreturn
 function tag.incncol(add, t, sensible)
     t = t or ascreen.focused().selected_tag
 
@@ -1487,6 +1543,7 @@ end
 --
 -- @staticfct awful.tag.viewnone
 -- @tparam[opt] int|screen screen The screen.
+-- @noreturn
 function tag.viewnone(screen)
     screen = screen or ascreen.focused()
     local tags = screen.tags
@@ -1506,6 +1563,7 @@ end
 -- @see screen.tags
 -- @tparam number i The **relative** index to see.
 -- @tparam[opt] screen screen The screen.
+-- @noreturn
 -- @see awful.tag.viewnext
 -- @see awful.tag.viewprev
 function tag.viewidx(i, screen)
@@ -1530,8 +1588,8 @@ end
 --- Get a tag's index in the gettags() table.
 -- @deprecated awful.tag.getidx
 -- @see index
--- @param query_tag The tag object to find. [selected()]
--- @return The index of the tag, nil if the tag is not found.
+-- @tparam tag query_tag The tag object to find. [selected()]
+-- @treturn integer|nil The index of the tag, nil if the tag is not found.
 function tag.getidx(query_tag)
     gdebug.deprecate("Use t.index instead of awful.tag.getidx", {deprecated_in=4})
 
@@ -1547,10 +1605,11 @@ end
 --
 -- @staticfct awful.tag.viewnext
 -- @tparam screen screen The screen.
+-- @noreturn
 -- @see awful.tag.viewidx
 -- @see awful.tag.viewprev
 function tag.viewnext(screen)
-    return tag.viewidx(1, screen)
+    tag.viewidx(1, screen)
 end
 
 --- View previous tag. This is the same a `tag.viewidx(-1)`.
@@ -1561,10 +1620,11 @@ end
 --
 -- @staticfct awful.tag.viewprev
 -- @tparam screen screen The screen.
+-- @noreturn
 -- @see awful.tag.viewidx
 -- @see awful.tag.viewnext
 function tag.viewprev(screen)
-    return tag.viewidx(-1, screen)
+    tag.viewidx(-1, screen)
 end
 
 --- View only a tag.
@@ -1572,6 +1632,7 @@ end
 -- @DOC_sequences_tag_view_only_EXAMPLE@
 --
 -- @method view_only
+-- @noreturn
 -- @see selected
 function tag.object.view_only(self)
     local tags = self.screen.tags
@@ -1590,6 +1651,7 @@ end
 
 --- View only a tag.
 -- @deprecated awful.tag.viewonly
+-- @noreturn
 -- @see tag.view_only
 -- @tparam tag t The tag object.
 function tag.viewonly(t)
@@ -1608,6 +1670,7 @@ end
 -- @tparam table tags A table with tags to view only.
 -- @tparam[opt] screen screen The screen of the tags.
 -- @tparam[opt=#tags] number maximum The maximum number of tags to select.
+-- @noreturn
 function tag.viewmore(tags, screen, maximum)
     maximum = maximum or #tags
     local selected = 0
@@ -1638,8 +1701,9 @@ end
 
 --- Toggle selection of a tag
 -- @staticfct awful.tag.viewtoggle
--- @see selected
 -- @tparam tag t Tag to be toggled
+-- @noreturn
+-- @see selected
 function tag.viewtoggle(t)
     t.selected = not t.selected
     capi.screen[tag.getproperty(t, "screen")]:emit_signal("tag::history::update")
@@ -1651,7 +1715,7 @@ end
 --
 -- @deprecated awful.tag.getdata
 -- @tparam tag t The tag.
--- @return The data table.
+-- @treturn table The data table.
 function tag.getdata(t)
     return t._private.awful_tag_properties
 end
@@ -1679,8 +1743,8 @@ end
 -- Use `t.prop = value`
 --
 -- @deprecated awful.tag.setproperty
--- @param t The tag.
--- @param prop The property name.
+-- @tparam tag t The tag.
+-- @tparam string prop The property name.
 -- @param value The value.
 function tag.setproperty(t, prop, value)
     if not t._private.awful_tag_properties then
@@ -1695,7 +1759,8 @@ end
 
 --- Tag a client with the set of current tags.
 -- @deprecated awful.tag.withcurrent
--- @param c The client to tag.
+-- @tparam client c The client to tag.
+-- @noreturn
 function tag.withcurrent(c)
     gdebug.deprecate("Use c:to_selected_tags() instead of awful.tag.selectedlist", {deprecated_in=4})
 
@@ -1732,9 +1797,10 @@ end
 -- future. When a tag is detached from the screen, its signal is removed.
 --
 -- @staticfct awful.tag.attached_connect_signal
--- @tparam screen screen The screen concerned, or all if nil.
--- @tparam[opt] string signal The signal name.
--- @tparam[opt] function Callback
+-- @tparam screen|nil screen The screen concerned, or all if `nil`.
+-- @tparam string signal The signal name.
+-- @tparam function callback
+-- @noreturn
 function tag.attached_connect_signal(screen, ...)
     if screen then
         attached_connect_signal_screen(screen, ...)
@@ -1809,12 +1875,12 @@ capi.tag.connect_signal("request::select", tag.object.view_only)
 
 --- Emitted when the number of urgent clients on this tag changes.
 -- @signal property::urgent
--- @param boolean `true` if there is at least one urgent client on the tag.
+-- @tparam boolean urgent `true` if there is at least one urgent client on the tag.
 -- @see client.urgent
 
 --- Emitted when the number of urgent clients on this tag changes.
 -- @signal property::urgent_count
--- @param integer The number of urgent clients on the tag.
+-- @tparam integer count The number of urgent clients on the tag.
 -- @see client.urgent
 
 --- Emitted when a screen is removed.

@@ -114,6 +114,7 @@ end
 
 --- The floating layout.
 -- @clientlayout awful.layout.suit.floating
+-- @usebeautiful beautiful.layout_floating
 
 floating.name = "floating"
 

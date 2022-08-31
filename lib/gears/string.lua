@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- String module for gears.
+--- Various string manipulation and introspection fuctions.
 --
 -- @utillib gears.string
 ---------------------------------------------------------------------------
@@ -10,7 +10,7 @@ local xml_entity_names = { ["'"] = "&apos;", ["\""] = "&quot;", ["<"] = "&lt;", 
 
 --- Escape a string from XML char.
 -- Useful to set raw text in textbox.
--- @param text Text to escape.
+-- @tparam string text Text to escape.
 -- @treturn string Escaped text.
 -- @staticfct gears.string.xml_escape
 function gstring.xml_escape(text)
@@ -21,7 +21,7 @@ local xml_entity_chars = { lt = "<", gt = ">", nbsp = " ", quot = "\"", apos = "
                            amp = "&" };
 
 --- Unescape a string from entities.
--- @param text Text to unescape.
+-- @tparam string text Text to unescape.
 -- @treturn string Unescaped text.
 -- @staticfct gears.string.xml_unescape
 function gstring.xml_unescape(text)
@@ -74,6 +74,7 @@ end
 
 --- Generate a pattern matching expression that ignores case.
 -- @tparam string q Original pattern matching expression.
+-- @treturn string The pattern.
 -- @staticfct gears.string.query_to_pattern
 function gstring.query_to_pattern(q)
     local s = gstring.quote_pattern(q)

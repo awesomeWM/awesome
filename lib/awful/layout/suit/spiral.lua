@@ -71,6 +71,7 @@ end
 
 --- Dwindle layout.
 -- @clientlayout awful.layout.suit.spiral.dwindle
+-- @usebeautiful beautiful.layout_dwindle
 spiral.dwindle = {}
 spiral.dwindle.name = "dwindle"
 function spiral.dwindle.arrange(p)
@@ -79,6 +80,7 @@ end
 
 --- Spiral layout.
 -- @clientlayout awful.layout.suit.spiral.name
+-- @usebeautiful beautiful.layout_spiral
 spiral.name = "spiral"
 function spiral.arrange(p)
     return do_spiral(p, true)

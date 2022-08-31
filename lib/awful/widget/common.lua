@@ -1,4 +1,10 @@
 ---------------------------------------------------------------------------
+-- This module contains helper functions to manage a layout widgets.
+--
+-- This is the boilerplate code to manage a "list" of objects and display
+-- them in a `wibox.layout`. It uses signals to detect when an object change
+-- and its widget be updated.
+--
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
 -- @copyright 2008-2009 Julien Danjou
 -- @classmod awful.widget.common

@@ -62,7 +62,7 @@ end
 --- The widget to be rotated.
 --
 -- @property widget
--- @tparam widget widget The widget.
+-- @tparam[opt=nil] widget|nil widget
 -- @interface container
 
 rotate.set_widget = base.set_widget_common
@@ -84,6 +84,7 @@ end
 -- The widget will be removed and the rotation reset.
 --
 -- @method reset
+-- @noreturn
 -- @interface container
 function rotate:reset()
     self._private.direction = nil
@@ -92,16 +93,13 @@ end
 
 --- The direction of this rotating container.
 --
--- Valid values are:
---
--- * *north*
--- * *east*
--- * *south*
--- * *north*
---
 --@DOC_wibox_container_rotate_angle_EXAMPLE@
 -- @property direction
--- @tparam string dir The direction.
+-- @tparam[opt="north"] string direction
+-- @propertyvalue "north"
+-- @propertyvalue "east"
+-- @propertyvalue "south"
+-- @propertyvalue "north"
 -- @propemits true false
 
 function rotate:set_direction(dir)

@@ -31,19 +31,16 @@ local separator = {}
 
 --- The separator's orientation.
 --
--- Valid values are:
---
--- * *vertical*: From top to bottom
--- * *horizontal*: From left to right
--- * *auto*: Decide depending on the widget geometry (default)
---
 -- The default value is selected automatically. If the widget is taller than
 -- large, it will use vertical and vice versa.
 --
 --@DOC_wibox_widget_separator_orientation_EXAMPLE@
 --
 -- @property orientation
--- @tparam string orientation
+-- @tparam[opt="auto"] string orientation
+-- @propertyvalue "vertical" From top to bottom.
+-- @propertyvalue "horizontal" From left to right.
+-- @propertyvalue "auto" Decide depending on the widget geometry.
 -- @propemits true false
 
 --- The separator's thickness.
@@ -51,7 +48,9 @@ local separator = {}
 -- This is used by the default line separator, but ignored when a shape is used.
 --
 -- @property thickness
--- @tparam number thickness
+-- @tparam number|nil thickness
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propbeautiful
 -- @propemits true false
 
@@ -60,7 +59,7 @@ local separator = {}
 --@DOC_wibox_widget_separator_shape_EXAMPLE@
 --
 -- @property shape
--- @tparam function shape A valid shape function
+-- @tparam shape|nil shape A valid shape function
 -- @propbeautiful
 -- @propemits true false
 -- @see gears.shape
@@ -68,13 +67,16 @@ local separator = {}
 --- The relative percentage covered by the bar.
 --
 -- @property span_ratio
--- @tparam[opt=1] number A number between 0 and 1.
+-- @tparam[opt=1] number|nil span_ratio
+-- @rangestart 0.0
+-- @rangestop 1.0
+-- @propertyunit A gradient between "small" (0.0) and "full width/height" (1.0).
 -- @propbeautiful
 -- @propemits true false
 
 --- The separator's color.
 -- @property color
--- @tparam color color
+-- @tparam color|nil color
 -- @propbeautiful
 -- @propemits true false
 -- @see gears.color
@@ -84,20 +86,22 @@ local separator = {}
 --@DOC_wibox_widget_separator_border_color_EXAMPLE@
 --
 -- @property border_color
--- @tparam color border_color
+-- @tparam color|nil border_color
 -- @propbeautiful
 -- @propemits true false
 -- @see gears.color
 
 --- The separator's border width.
 -- @property border_width
--- @tparam number border_width
+-- @tparam number|nil border_width
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propbeautiful
 -- @propemits true false
 
 --- The separator thickness.
 -- @beautiful beautiful.separator_thickness
--- @param number
+-- @tparam[opt=1] number separator_thickness
 -- @see thickness
 
 --- The separator border color.
@@ -107,22 +111,22 @@ local separator = {}
 
 --- The separator border width.
 -- @beautiful beautiful.separator_border_width
--- @param number
+-- @tparam[opt=0] number separator_border_width
 -- @see border_width
 
 --- The relative percentage covered by the bar.
 -- @beautiful beautiful.separator_span_ratio
--- @tparam[opt=1] number A number between 0 and 1.
+-- @tparam[opt=1] number separator_span_ratio A number between 0 and 1.
 
 --- The separator's color.
 -- @beautiful beautiful.separator_color
--- @param string
+-- @param color
 -- @see gears.color
 
 --- The separator's shape.
 --
 -- @beautiful beautiful.separator_shape
--- @tparam function shape A valid shape function
+-- @tparam[opt=gears.shape.rectangle] shape shape A valid shape function
 -- @see gears.shape
 
 local function draw_shape(self, _, cr, width, height, shape)
@@ -203,6 +207,13 @@ end
 --- Create a new separator.
 -- @constructorfct wibox.widget.separator
 -- @tparam table args The arguments (all properties are available).
+-- @tparam[opt] string args.orientation The separator's orientation.
+-- @tparam[opt] number args.thickness The separator's thickness.
+-- @tparam[opt] function args.shape The separator's shape.
+-- @tparam[opt] number args.span_ratio The relative percentage covered by the bar.
+-- @tparam[opt] color args.color The separator's color.
+-- @tparam[opt] color args.border_color The separator's border color.
+-- @tparam[opt] number args.border_width The separator's border width.
 
 local function new(args)
     local ret = base.make_widget(nil, nil, {

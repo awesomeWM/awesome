@@ -25,22 +25,43 @@ hr {
 tt {
     font-family: monospace;
 }
+
 span.parameter {
     font-family: monospace;
     font-weight: bold;
     color: rgb(99, 115, 131);
 }
-span.parameter:after {
-    content:":";
+
+span.optional_param {
+    font-style: italic;
+    color: rgb(143, 166, 230);
 }
-span.types:before {
-    content:"(";
+
+.types {
+    white-space: pre;
 }
-span.types:after {
-    content:")";
+
+td span.types {
+    flex-flow: nowrap;
+    display: inline-flex;
+    width: 100%;
 }
+
+td span.inline_types {
+    color: #a4c7ff;
+    flex-flow: nowrap;
+    width: 100%;
+}
+
 .type {
-    font-weight: bold; font-style:italic
+    flex-basis: auto;
+    font-weight: bold;
+    font-style:italic;
+    pointer-events: none;
+    text-decoration: none;
+    color: #008fee;
+    text-align: center;
+    flex-grow: 1;
 }
 
 p.name {
@@ -51,7 +72,12 @@ kbd,
 p code,
 ol code,
 ul code,
-dd > code {
+dd > code,
+td code,
+span.default_value,
+.see_also_description code,
+.important_box code
+{
     background-color: #eaedf587;
     padding-left: 3px;
     padding-right: 3px;
@@ -64,15 +90,39 @@ dd > code {
     margin-right: 5px;
 }
 
+#main {
+    display: flex;
+}
+
 #navigation {
-    float: left;
+    --sidebar-width: 14em;
+    --sidebar-toggle-width: 24px;
+
     background-color: white;
     border-right: 1px solid #d3dbec;
     border-bottom: 1px solid #d3dbec;
 
-    width: 14em;
-    vertical-align: top;
+    width: var(--sidebar-width);
     overflow: visible;
+
+    margin-left: calc(-1 * var(--sidebar-width) + var(--sidebar-toggle-width));
+    transition: margin-left 0.2s ease-out;
+}
+
+#navigation.open {
+    margin-left: 0;
+}
+
+@media (hover: hover) {
+    #navigation:hover {
+        margin-left: 0;
+    }
+}
+
+@media all and (min-width: 768px) {
+    #navigation {
+        margin-left: 0;
+    }
 }
 
 #navigation br {
@@ -97,6 +147,10 @@ dd > code {
     padding-bottom: 10px;
     margin-top: 30px;
     margin-bottom: 0px;
+}
+
+#content {
+    overflow: hidden;
 }
 
 #content h1 {
@@ -133,6 +187,7 @@ dd > code {
     margin-left: 15px;
     margin-bottom: 5px;
     border-bottom: solid 1px #bcd;
+    font-weight: normal;
 }
 
 #content h4 {
@@ -141,11 +196,11 @@ dd > code {
     border-bottom: solid 1px #bcd;
 }
 
-#content pre {
+#content pre, .auto_genenerated_code {
     margin: 15px;
 }
 
-pre {
+pre, .auto_genenerated_code {
     background-color: rgb(50, 55, 68);
     color: white;
     border-radius: 3px;
@@ -185,10 +240,6 @@ table.index td {
     margin: 0px 3px 0px -1em;
 }
 
-#content {
-    margin-left: 14em;
-}
-
 #content p {
     padding-left: 15px;
     padding-right: 15px;
@@ -207,6 +258,56 @@ table {
 
 table th, table td {
     padding: 2px;
+}
+
+.important_box {
+    padding-left: 40px;
+    min-height: 32px;
+    max-width: 640px;
+    vertical-align: middle;
+    background-image: url("images/warning_icon.svg");
+    background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-position: left center;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    margin-left: 10px;
+}
+
+.see_also, .see_also td, .see_also th {
+    border-style: hidden !important;
+    padding-left: 5pt;
+    padding-right: 5pt;
+}
+
+.see_also tr td:nth-of-type(1) {
+    display: list-item;
+    list-style-type: disc;
+    list-style-position: inside;
+}
+
+.see_also tr:hover {
+    background-color: #f7fbff;
+}
+
+.see_also tr th {
+    color: rgb(168, 168, 168);
+    padding-top: 15px;
+    padding-bottom: 4px;
+    font-weight: normal;
+    text-decoration: none;
+    font-style:italic;
+    font-size: 85%;
+}
+
+.see_also_description {
+    max-width: 640px;
+}
+
+.see_also_sublist td:nth-of-type(1) {
+    margin-left: 10px;
+    padding-left: 15px;
+    border-left: 1px solid rgb(200, 200, 200) !important;
 }
 
 .widget_list td {
@@ -280,10 +381,15 @@ table th, table td {
 
 #about {
     padding: 15px;
-    padding-left: 16em;
     background-color: white;
     border-top: 1px solid #d3dbec;
     border-bottom: 1px solid #d3dbec;
+}
+
+@media all and (min-width: 768px) {
+    #about {
+        padding-left: calc(14em + 15px);
+    }
 }
 
 table.module_list, table.function_list {
@@ -301,26 +407,22 @@ table.module_list td, table.function_list td {
     padding-bottom: 5px;
 }
 table.module_list td.name, table.function_list td.name {
-    background-color: white;
     min-width: 200px;
     border-left-width: 0px;
     border-right-width: 0px;
 }
 table.module_list td.summary, table.function_list td.summary {
-    background-color: white;
     width: 100%;
     border-left-width: 0px;
     border-right: none;
 }
 
 table.function_list td.shortname {
-    background-color: white;
     border-left-width: 0px;
     border-right-width: 0px;
 }
 
 table.function_list td.inheritance {
-    background-color: white;
     border-right-width: 0px;
     border-left-width: 0px;
     color: #a4c7ff;
@@ -337,8 +439,15 @@ span.inheritance {
     font-weight: normal;
 }
 
+span.not_applicable {
+    color: rgb(200, 200, 200);
+    font-style:italic;
+    font-size: 85%;
+    text-align: center;
+    display: block;
+}
+
 .summarytype {
-    background-color: white;
     color: #a4c7ff;
     font-size: 85%;
     border-left: none;
@@ -346,14 +455,18 @@ span.inheritance {
     text-align: right;
 }
 
-span.chips--readonly {
+span.chips {
   border: 1px solid #9db9f3;
   border-radius: 25px;
-  padding: 1px 3px;
-  font-size: 70%;
+  padding-left: 5pt;
+  padding-right: 5pt;
+  padding-top: 1pt;
+  padding-bottom: 1pt;
+  font-size: 85%;
   color: #9db9f3;
   background-color: #FFF;
   margin-left: 10px;
+  vertical-align: middle;
 }
 
 table.function_list .function_args /*.function_modname*/ {
@@ -382,7 +495,6 @@ table.function_list .function_named_args {
 }
 
 table.function_list td.baseclass {
-    background-color: white;
     color: #a4c7ff;
     min-width: 200px;
     border-left: none;
@@ -417,7 +529,7 @@ dl.function dd {
     margin-bottom: 15px;
 }
 
-#content dl.function dd h3 {
+#content dl.function dd h3, .see_also i {
     margin-top: 0px;
     margin-left: 0px;
     padding-left: 0px;
@@ -538,6 +650,8 @@ pre .url { color: #272fc2; text-decoration: underline; }
 /* Inheritance diagram */
 .inheritance .inheritance__level {
     list-style: none;
+    padding-top: 0px;
+    padding-left: 30px;
 }
 
 .inheritance .inheritance__level--root {
@@ -562,4 +676,82 @@ pre .url { color: #272fc2; text-decoration: underline; }
 
 .extra-header__section {
     flex-grow: 1;
+}
+
+.summary_row {
+    background-color: white;
+}
+
+.summary_row:hover {
+    background-color: #f7fbff;
+}
+
+/* CSS for beautiful.fg_normal */
+.svg_stroke, .svg_fill {
+    color: black;
+}
+
+#content > .components-relationship {
+    margin-left: 15px;
+    margin-right: 15px;
+}
+
+.components-relationship--diagrams {
+    display: flex;
+    flex-direction: column;
+}
+
+.components-relationship--diagram {
+    flex-grow: 1;
+    flex-basis: 100%;
+}
+
+.components-relationship--diagram > table {
+    margin: 0;
+    width: 100%;
+}
+
+.components-relationship--diagram + .components-relationship--diagram {
+    margin-top: 15px;
+}
+
+/* on wide displays, put both diagrams next to each other */
+@media all and (min-width: 1100px) {
+    .components-relationship--diagrams {
+        flex-direction: row;
+    }
+
+    .components-relationship--diagram {
+        flex-grow: 1;
+        flex-basis: 50%;
+    }
+
+    .components-relationship--diagram + .components-relationship--diagram {
+        margin-top: 0;
+        margin-left: 15px;
+    }
+}
+
+.components-relationship--legend {
+    color: #00000044;
+    margin-top: 15px;
+}
+
+.img-object {
+    max-width: 100%;
+    padding: 5px;
+}
+
+.copy-link {
+    font-size: 9px;
+    padding: 2px;
+    border-radius: 9px;
+    vertical-align: middle;
+    text-decoration: none;
+}
+.copy-link--success {
+    background-color: green;
+}
+.copy-link--failure {
+    background-color: red;
 }

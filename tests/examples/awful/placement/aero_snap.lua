@@ -5,6 +5,10 @@ screen[1]._resize {width = 180, height = 120} --DOC_HIDE
 screen._add_screen {x = 190, y = 0, width = 180, height = 120} --DOC_HIDE
 screen._add_screen {x = 380, y = 0, width = 180, height = 120} --DOC_HIDE
 
+for s in screen do
+    require("awful.tag").add("1", {screen=s, selected=true}) --DOC_HIDE
+end
+
 for _, pos in ipairs{"left", "right"} do
     local c1 = client.gen_fake {x = 80, y = 55, width=78, height=50}
     placement.align(client.focus, {position = pos, honor_workarea=true})

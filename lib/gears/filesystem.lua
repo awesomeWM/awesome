@@ -1,5 +1,8 @@
 ---------------------------------------------------------------------------
---- Filesystem module for gears.
+--- Various filesystem utility functions.
+--
+-- Note that these functions are blocking. If you need to do a large number of
+-- I/O operations, it is better to use `lgi.Gio` async functions.
 --
 -- @utillib gears.filesystem
 ---------------------------------------------------------------------------

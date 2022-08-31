@@ -50,7 +50,7 @@ end
 
 --- The widget to be displayed
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam[opt=nil] widget|nil widget
 
 only_on_screen.set_widget = base.set_widget_common
 
@@ -66,10 +66,11 @@ function only_on_screen:set_children(children)
     self:set_widget(children[1])
 end
 
---- The screen to display on. Can be a screen object, a screen index, a screen
+--- The screen to display on.
+-- Can be a screen object, a screen index, a screen
 -- name ("VGA1") or the string "primary" for the primary screen.
 -- @property screen
--- @tparam screen|string|integer screen The screen.
+-- @tparam[opt="primary"] screen screen
 
 function only_on_screen:set_screen(s)
     self._private.screen = s
@@ -80,11 +81,11 @@ function only_on_screen:get_screen()
     return self._private.screen
 end
 
---- Returns a new only_on_screen container.
+--- Returns a new `awful.widget.only_on_screen` container.
 -- This widget makes some other widget visible on just some screens. Use
 -- `:set_widget()` to set the widget and `:set_screen()` to set the screen.
--- @param[opt] widget The widget to display.
--- @param[opt] s The screen to display on.
+-- @tparam[opt=nil] widget widget The widget to display.
+-- @tparam[opt="primary"] screen s The screen to display on.
 -- @treturn table A new only_on_screen container
 -- @constructorfct awful.widget.only_on_screen
 local function new(widget, s)

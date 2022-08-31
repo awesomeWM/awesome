@@ -33,6 +33,7 @@ local gtable   = require("gears.table")
 local beautiful= require("beautiful")
 local alayout  = require("awful.layout")
 local surface  = require("gears.surface")
+local gcolor   = require("gears.color")
 
 local module = {}
 
@@ -84,7 +85,7 @@ local function wb_label(item, _, textbox)
     local text = ""
 
     if item.name then
-        text = "<span color='"..fg.."'>"..item.name..'</span>'
+        text = "<span color='"..gcolor.ensure_pango_color(fg, "#000000").."'>"..item.name..'</span>'
     end
 
     return text, bg, nil, item.icon, {
@@ -177,33 +178,37 @@ end
 local layoutlist = {}
 
 --- The layoutlist default widget layout.
+--
 -- If no layout is specified, a `wibox.layout.fixed.vertical` will be created
 -- automatically.
 -- @property base_layout
--- @param widget
+-- @tparam[opt=wibox.layout.fixed.vertical] wibox.layout base_layout
 -- @propemits true false
 -- @see wibox.layout.fixed.vertical
 -- @see base_layout
 
 --- The delegate widget template.
+--
 -- @property widget_template
--- @param table
+-- @tparam[opt=nil] template|nil widget_template
 -- @propemits true false
 
 --- The layoutlist screen.
+--
 -- @property screen
--- @param screen
+-- @tparam screen screen
+-- @propertydefault Obtained from the constructor.
 
 --- A function that returns the list of layout to display.
 --
 -- @property source
--- @param[opt=awful.widget.layoutlist.source.for_screen] function
-
---- The layoutlist filter function.
--- @property filter
--- @param[opt=awful.widget.layoutlist.source.for_screen] function
+-- @tparam[opt=awful.widget.layoutlist.source.for_screen] function source
+-- @functionparam screen s The layoutlist screen.
+-- @functionparam table metadata Various metadata.
+-- @functionreturn table The list of layouts.
 
 --- The default foreground (text) color.
+--
 -- @beautiful beautiful.layoutlist_fg_normal
 -- @tparam[opt=nil] string|pattern fg_normal
 -- @see gears.color
@@ -237,7 +242,7 @@ local layoutlist = {}
 
 --- The selected layout alignment.
 -- @beautiful beautiful.layoutlist_align
--- @tparam[opt=left] string align *left*, *right* or *center*
+-- @tparam[opt="left"] string align *left*, *right* or *center*
 
 --- The selected layout title font.
 -- @beautiful beautiful.layoutlist_font_selected
@@ -275,16 +280,35 @@ local layoutlist = {}
 
 --- The currenly displayed layouts.
 -- @property layouts
--- @param table
+-- @tparam[opt={}] table layouts
+-- @tablerowtype A list of `awful.layout.suit`.
 
 --- The currently selected layout.
 -- @property current_layout
--- @param layout
+-- @tparam[opt=nil] layout|nil current_layout
+-- @readonly
+
+--- The current number of layouts.
+--
+-- @property count
+-- @readonly
+-- @tparam number count The number of layouts.
+-- @propertydefault This current number of layouts.
+-- @negativeallowed false
+-- @propemits true false
 
 function layoutlist:get_layouts()
     local f = self.source or self._private.source or module.source.for_screen
 
-    return f(self.screen)
+    local ret = f(self.screen)
+
+    if self._private.last_count ~= #ret then
+        self:emit_signal("property::count", ret, self._private.last_count)
+
+        self._private.last_count = ret
+    end
+
+    return ret
 end
 
 function layoutlist:get_current_layout()
@@ -329,6 +353,14 @@ function layoutlist:set_base_layout(layout)
     self:emit_signal("property::base_layout", layout)
 end
 
+function layoutlist:get_count()
+    if not self._private.last_count then
+        self._do_()
+    end
+
+    return self._private.last_count
+end
+
 function layoutlist:set_widget_template(widget_template)
     self._private.widget_template = widget_template
 
@@ -371,22 +403,22 @@ end
 -- @tparam[opt] table args.widget_template A custom widget to be used for each action.
 -- @tparam[opt=ascreen.focused()] screen args.screen A screen
 -- @tparam[opt={}] table args.style Extra look and feel parameters
--- @tparam boolean args.style.disable_icon
--- @tparam boolean args.style.disable_name
--- @tparam string|pattern args.style.fg_normal
--- @tparam string|pattern args.style.bg_normal
--- @tparam string|pattern args.style.fg_selected
--- @tparam string|pattern args.style.bg_selected
--- @tparam string args.style.font
--- @tparam string args.style.font_selected
--- @tparam string args.style.align *left*, *right* or *center*
--- @tparam number args.style.spacing
--- @tparam gears.shape args.style.shape
--- @tparam number args.style.shape_border_width
--- @tparam string|pattern args.style.shape_border_color
--- @tparam gears.shape args.style.shape_selected
--- @tparam string|pattern args.style.shape_border_width_selected
--- @tparam string|pattern args.style.shape_border_color_selected
+-- @tparam[opt=beautiful.layoutlist_disable_icon] boolean args.style.disable_icon
+-- @tparam[opt=beautiful.layoutlist_disable_name] boolean args.style.disable_name
+-- @tparam[opt=beautiful.layoutlist_fg_normal] string|pattern args.style.fg_normal
+-- @tparam[opt=beautiful.layoutlist_bg_normal] string|pattern args.style.bg_normal
+-- @tparam[opt=beautiful.layoutlist_fg_selected] string|pattern args.style.fg_selected
+-- @tparam[opt=beautiful.layoutlist_bg_selected] string|pattern args.style.bg_selected
+-- @tparam[opt=beautiful.layoutlist_font] string args.style.font
+-- @tparam[opt=beautiful.layoutlist_font_selected] string args.style.font_selected
+-- @tparam[opt=beautiful.layoutlist_align] string args.style.align *left*, *right* or *center*
+-- @tparam[opt=beautiful.layoutlist_spacing] number args.style.spacing
+-- @tparam[opt=beautiful.layoutlist_shape] gears.shape args.style.shape
+-- @tparam[opt=beautiful.layoutlist_shape_border_width] number args.style.shape_border_width
+-- @tparam[opt=beautiful.layoutlist_shape_border_color] string|pattern args.style.shape_border_color
+-- @tparam[opt=beautiful.layoutlist_shape_selected] gears.shape args.style.shape_selected
+-- @tparam[opt=beautiful.layoutlist_shape_border_width_selected] string|pattern args.style.shape_border_width_selected
+-- @tparam[opt=beautiful.layoutlist_shape_border_color_selected] string|pattern args.style.shape_border_color_selected
 -- @treturn widget The action widget.
 -- @constructorfct awful.widget.layoutlist
 

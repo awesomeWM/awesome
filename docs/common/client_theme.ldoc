@@ -345,6 +345,21 @@
  */
 
 /**
+ * The client border width for the fullscreen clients.
+ *
+ * This is the fallback if the more stateful version, like
+ * `beautiful.border_width_fullscreen_urgent` isn't set.
+ *
+ * @beautiful beautiful.border_width_fullscreen
+ * @param integer
+ * @see request::border
+ * @see beautiful.border_width_fullscreen_active
+ * @see beautiful.border_width_fullscreen_normal
+ * @see beautiful.border_width_fullscreen_urgent
+ * @see beautiful.border_width_fullscreen_new
+ */
+
+/**
  * The client opacity for the normal clients.
  *
  * A number between 0 and 1.
@@ -391,7 +406,6 @@
  *
  * @beautiful beautiful.opacity_floating_normal
  * @param[opt=1] number
- * @see request::border
  */
 
 /**
@@ -425,13 +439,27 @@
  */
 
 /**
+ * The client opacity for the floating clients.
+ *
+ * A number between 0 and 1. This is the fallback if the more stateful
+ * variables, like `beautiful.opacity_floating_new` are not set.
+ *
+ * @beautiful beautiful.opacity_floating
+ * @param[opt=1] number
+ * @see request::border
+ * @see beautiful.opacity_floating_normal
+ * @see beautiful.opacity_floating_active
+ * @see beautiful.opacity_floating_urgent
+ * @see beautiful.opacity_floating_new
+ */
+
+/**
  * The client opacity for the normal maximized clients.
  *
  * A number between 0 and 1.
  *
  * @beautiful beautiful.opacity_maximized_normal
  * @param[opt=1] number
- * @see request::border
  */
 
 /**
@@ -463,6 +491,22 @@
  * @param[opt=1] number
  * @see request::border
  */
+
+/**
+ * The client opacity for the maximized clients.
+ *
+ * A number between 0 and 1. This is the fallback if a more stateful
+ * variable, like `beautiful.opacity_maximized_urgent`, isn't set.
+ *
+ * @beautiful beautiful.opacity_maximized
+ * @param[opt=1] number
+ * @see request::border
+ * @see beautiful.opacity_maximized_normal
+ * @see beautiful.opacity_maximized_active
+ * @see beautiful.opacity_maximized_urgent
+ * @see beautiful.opacity_maximized_new
+ */
+
 /**
  * The client opacity for the normal fullscreen clients.
  *
@@ -470,7 +514,6 @@
  *
  * @beautiful beautiful.opacity_fullscreen_normal
  * @param[opt=1] number
- * @see request::border
  */
 
 /**
@@ -502,5 +545,22 @@
  * @param[opt=1] number
  * @see request::border
  */
+
+/**
+ * The client opacity for the fullscreen clients.
+ *
+ * A number between 0 and 1. This is the fallback if the variables
+ * for more stateful versions, like `beautiful.opacity_fullscreen_urgent`,
+ * are not set.
+ *
+ * @beautiful beautiful.opacity_fullscreen
+ * @param[opt=1] number
+ * @see request::border
+ * @see beautiful.opacity_fullscreen_new
+ * @see beautiful.opacity_fullscreen_urgent
+ * @see beautiful.opacity_fullscreen_active
+ * @see beautiful.opacity_fullscreen_normal
+ */
+
 
 /*

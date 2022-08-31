@@ -1,8 +1,8 @@
 ---------------------------------------------------------------------------
---- Table module for gears.
+--- Various functions to worj with tables.
 --
 -- Examples
--- =======
+-- ========
 --
 -- Using `cycle_value`, you can cycle through values in a table.
 -- When the end of the table is reached, `cycle_value` loops around to the beginning.

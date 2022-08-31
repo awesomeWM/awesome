@@ -312,6 +312,7 @@ end
 --- The main tile algo, on the right.
 -- @param screen The screen number to tile.
 -- @clientlayout awful.layout.suit.tile.right
+-- @usebeautiful beautiful.layout_tile
 tile.right = {}
 tile.right.name = "tile"
 tile.right.arrange = do_tile
@@ -323,6 +324,7 @@ end
 --- The main tile algo, on the left.
 -- @param screen The screen number to tile.
 -- @clientlayout awful.layout.suit.tile.left
+-- @usebeautiful beautiful.layout_tileleft
 tile.left = {}
 tile.left.name = "tileleft"
 tile.left.skip_gap = tile.skip_gap
@@ -336,6 +338,7 @@ end
 --- The main tile algo, on the bottom.
 -- @param screen The screen number to tile.
 -- @clientlayout awful.layout.suit.tile.bottom
+-- @usebeautiful beautiful.layout_tilebottom
 tile.bottom = {}
 tile.bottom.name = "tilebottom"
 tile.bottom.skip_gap = tile.skip_gap
@@ -349,6 +352,7 @@ end
 --- The main tile algo, on the top.
 -- @param screen The screen number to tile.
 -- @clientlayout awful.layout.suit.tile.top
+-- @usebeautiful beautiful.layout_tiletop
 tile.top = {}
 tile.top.name = "tiletop"
 tile.top.skip_gap = tile.skip_gap

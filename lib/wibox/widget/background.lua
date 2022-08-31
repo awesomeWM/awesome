@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- This class has been moved to `wibox.container.background`
+-- This class has been moved to `wibox.container.background`.
 --
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter

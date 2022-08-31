@@ -33,14 +33,6 @@ local cursors = {
     ["mouse.resize_bottom_right"] = "bottom_right_corner",
 }
 
---- The resize cursor name.
--- @beautiful beautiful.cursor_mouse_resize
--- @tparam[opt=cross] string cursor
-
---- The move cursor name.
--- @beautiful beautiful.cursor_mouse_move
--- @tparam[opt=fleur] string cursor
-
 --- Set the resize mode.
 -- The available modes are:
 --
@@ -60,7 +52,7 @@ end
 -- This callback will be executed before the mouse grabbing starts.
 -- @function awful.mouse.resize.add_enter_callback
 -- @tparam function cb The callback (or nil)
--- @tparam[default=other] string context The callback context
+-- @tparam[opt="other"] string context The callback context
 function module.add_enter_callback(cb, context)
     context = context or "other"
     callbacks.enter[context] = callbacks.enter[context] or {}
@@ -72,7 +64,7 @@ end
 -- applying the operation.
 -- @function awful.mouse.resize.add_move_callback
 -- @tparam function cb The callback (or nil)
--- @tparam[default=other] string context The callback context
+-- @tparam[opt="other"] string context The callback context
 function module.add_move_callback(cb, context)
     context = context or  "other"
     callbacks.move[context] = callbacks.move[context]  or {}
@@ -83,7 +75,7 @@ end
 -- This callback is executed just before the `mousegrabber` stop
 -- @function awful.mouse.resize.add_leave_callback
 -- @tparam function cb The callback (or nil)
--- @tparam[default=other] string context The callback context
+-- @tparam[opt="other"] string context The callback context
 function module.add_leave_callback(cb, context)
     context = context or  "other"
     callbacks.leave[context] = callbacks.leave[context]  or {}
@@ -101,9 +93,11 @@ end
 --
 -- @function awful.mouse.resize
 -- @tparam client client A client.
--- @tparam[default=mouse.resize] string context The resizing context.
+-- @tparam[opt=mouse.resize] string context The resizing context.
 -- @tparam[opt={}] table args A set of `awful.placement` arguments.
 -- @request wibox geometry mouse.resize granted Requests to resize the wibox.
+-- @usebeautiful beautiful.cursor_mouse_move
+-- @usebeautiful beautiful.cursor_mouse_resize
 local function handler(_, client, context, args) --luacheck: no unused_args
     args = args or {}
     context = context or "mouse.resize"

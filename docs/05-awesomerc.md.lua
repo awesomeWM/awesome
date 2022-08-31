@@ -324,6 +324,8 @@ rc_lua:close()
 
 
 table.insert(output_script, "-- @script rc.lua")
+table.insert(output_script, "-- @usebeautiful beautiful.awesome_icon")
+table.insert(output_script, "-- @usebeautiful beautiful.wallpaper")
 
 rc_script = assert(io.open(rc_script, "w"))
 rc_script:write(table.concat(output_script, "\n"))

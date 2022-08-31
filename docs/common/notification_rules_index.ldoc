@@ -37,6 +37,7 @@
 --   <tr><td><a href='../core_components/notification.html#auto_reset_timeout'>auto\_reset\_timeout</a></td><td>If the timeout needs to be reset when a property changes</td></tr>
 --   <tr><td><a href='../core_components/notification.html#ignore_suspend'>ignore\_suspend</a></td><td></td></tr>
 --   <tr><td><a href='../core_components/notification.html#clients'>clients</a></td><td>A list of clients associated with this notification</td></tr>
+--   <tr><td><a href='../core_components/notification.html#max_width'>max\_width</a></td><td>The maximum popup width</td></tr>
 --   <tr><td><a href='../core_components/notification.html#app_name'>app\_name</a></td><td>The application name specified by the notification</td></tr>
 --   <tr><td><a href='../core_components/notification.html#widget_template'>widget\_template</a></td><td>The widget template used to represent the notification</td></tr>
 -- </table>

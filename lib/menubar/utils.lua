@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Utility module for menubar
+--- Utility functions for the `menubar` module.
 --
 -- @author Antonio Terceiro
 -- @copyright 2009, 2011-2012 Antonio Terceiro, Alexander Yakushev
@@ -199,8 +199,9 @@ local function get_icon_lookup_path()
 end
 
 --- Remove CR newline from the end of the string.
--- @param s string to trim
+-- @tparam string s The string to trim
 -- @staticfct menubar.utils.rtrim
+-- @treturn string The trimmed string.
 function utils.rtrim(s)
     if not s then return end
     if string.byte(s, #s) == 13 then
@@ -357,6 +358,7 @@ end
 -- with the resulting list of menu entries as argument.
 -- @tparam table callback.programs Paths of found .desktop files.
 -- @staticfct menubar.utils.parse_dir
+-- @noreturn
 function utils.parse_dir(dir_path, callback)
 
     local function get_readable_path(file)

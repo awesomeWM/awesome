@@ -35,12 +35,12 @@ mouse.wibox = {}
 --
 -- @DOC_screen_client_snap_EXAMPLE@
 --
--- @tfield integer snap.default_distance
+-- @tfield integer awful.mouse.snap.default_distance
 -- @tparam[opt=8] integer default_distance
 -- @see awful.mouse.snap
 
 --- The default distance before activating screen edge snap.
--- @tfield integer snap.aerosnap_distance
+-- @tfield integer awful.mouse.snap.aerosnap_distance
 -- @tparam[opt=16] integer aerosnap_distance
 -- @see awful.mouse.snap
 
@@ -48,15 +48,15 @@ mouse.wibox = {}
 --
 --@DOC_awful_placement_aero_snap_EXAMPLE@
 --
--- @tfield[opt=true] boolean snap.edge_enabled
+-- @tfield[opt=true] boolean awful.mouse.snap.edge_enabled
 -- @tparam boolean edge_enabled
 
 --- Enable client to client snapping.
--- @tfield[opt=true] boolean snap.client_enabled
+-- @tfield[opt=true] boolean awful.mouse.snap.client_enabled
 -- @tparam boolean client_enabled
 
 --- Enable changing tag when a client is dragged to the edge of the screen.
--- @tfield[opt=false] boolean drag_to_tag.enabled
+-- @tfield[opt=false] boolean awful.mouse.drag_to_tag.enabled
 -- @tparam boolean enabled
 
 --- The snap outline background color.
@@ -65,7 +65,7 @@ mouse.wibox = {}
 
 --- The snap outline width.
 -- @beautiful beautiful.snap_border_width
--- @param integer
+-- @tparam integer snap_border_width
 
 --- The snap outline shape.
 -- @beautiful beautiful.snap_shape
@@ -75,9 +75,17 @@ mouse.wibox = {}
 -- @beautiful beautiful.snapper_gap
 -- @tparam[opt=0] number snapper_gap
 
+--- The resize cursor name.
+-- @beautiful beautiful.cursor_mouse_resize
+-- @tparam[opt="cross"] string cursor
+
+--- The move cursor name.
+-- @beautiful beautiful.cursor_mouse_move
+-- @tparam[opt="fleur"] string cursor
+
 --- Get the client object under the pointer.
 -- @deprecated awful.mouse.client_under_pointer
--- @return The client object under the pointer, if one can be found.
+-- @treturn client|nil The client object under the pointer, if one can be found.
 -- @see current_client
 function mouse.client_under_pointer()
     gdebug.deprecate("Use mouse.current_client instead of awful.mouse.client_under_pointer()", {deprecated_in=4})
@@ -108,7 +116,8 @@ end, "mouse.resize")
 
 --- Get the client currently under the mouse cursor.
 -- @property current_client
--- @tparam client|nil The client
+-- @tparam[opt=nil] client|nil current_client
+-- @propertytype nil When the mouse cursor is not over a client.
 
 function mouse.object.get_current_client()
     local obj = capi.mouse.object_under_pointer()
@@ -119,7 +128,8 @@ end
 
 --- Get the wibox currently under the mouse cursor.
 -- @property current_wibox
--- @tparam wibox|nil The wibox
+-- @tparam[opt=nil] wibox|nil current_wibox
+-- @propertytype nil When the mouse cursor is not over a wibox.
 
 function mouse.object.get_current_wibox()
     local obj = capi.mouse.object_under_pointer()
@@ -131,10 +141,10 @@ end
 --- Get the widgets currently under the mouse cursor.
 --
 -- @property current_widgets
--- @tparam nil|table list The widget list
--- @treturn table The list of widgets.The first element is the biggest
--- container while the last is the topmost widget. The table contains *x*, *y*,
--- *width*, *height* and *widget*.
+-- @tparam[opt=nil] nil|table current_widgets
+-- @tablerowtype table The list of `wibox.widget`s. The first element is the biggest
+-- container while the last is the topmost widget.
+-- @propertytype nil When the mouse cursor is not over any widget.
 
 function mouse.object.get_current_widgets()
     local w = mouse.object.get_current_wibox()
@@ -156,8 +166,8 @@ end
 
 --- Get the topmost widget currently under the mouse cursor.
 -- @property current_widget
--- @tparam widget|nil widget The widget
--- @treturn ?widget The widget
+-- @tparam[opt=nil] widget|nil current_widget
+-- @propertytype nil When the mouse cursor is not over a widget.
 -- @see current_widget_geometry
 
 function mouse.object.get_current_widget()
@@ -170,7 +180,13 @@ end
 
 --- Get the current widget geometry.
 -- @property current_widget_geometry
--- @tparam ?table The geometry.
+-- @tparam[opt=nil] table|nil current_widget_geometry
+-- @tparam number current_widget_geometry.x
+-- @tparam number current_widget_geometry.y
+-- @tparam number current_widget_geometry.width
+-- @tparam number current_widget_geometry.height
+-- @propertytype nil When there is no current widgets.
+-- @propertytype table
 -- @see current_widget
 
 function mouse.object.get_current_widget_geometry()
@@ -181,7 +197,13 @@ end
 
 --- Get the current widget geometries.
 -- @property current_widget_geometries
--- @tparam ?table A list of geometry tables.
+-- @tparam[opt=nil] table|nil current_widget_geometries A list of geometry tables.
+-- @propertytype nil When there is no widgets.
+-- @propertytype table A list of geometry tables.
+-- @tablerowkey x integer
+-- @tablerowkey y integer
+-- @tablerowkey width integer
+-- @tablerowkey height integer
 -- @see current_widgets
 
 function mouse.object.get_current_widget_geometries()
@@ -193,6 +215,7 @@ end
 --- Move the wibox under the cursor.
 -- @staticfct awful.mouse.wibox.move
 -- @tparam wibox w The wibox to move, or none to use that under the pointer
+-- @noreturn
 -- @request wibox geometry mouse.move granted Requests to move the wibox.
 function mouse.wibox.move(w)
     w = w or mouse.current_wibox
@@ -222,15 +245,15 @@ end
 
 --- True if the left mouse button is pressed.
 -- @property is_left_mouse_button_pressed
--- @param boolean
+-- @tparam[opt=false] boolean is_left_mouse_button_pressed
 
 --- True if the right mouse button is pressed.
 -- @property is_right_mouse_button_pressed
--- @param boolean
+-- @tparam[opt=false] boolean is_right_mouse_button_pressed
 
 --- True if the middle mouse button is pressed.
 -- @property is_middle_mouse_button_pressed
--- @param boolean
+-- @tparam[opt=false] boolean is_middle_mouse_button_pressed
 
 --- Add an `awful.button` based mousebinding to the global set.
 --
@@ -240,6 +263,7 @@ end
 --
 -- @staticfct awful.mouse.append_global_mousebinding
 -- @tparam awful.button button The button object.
+-- @noreturn
 -- @see awful.button
 
 function mouse.append_global_mousebinding(button)
@@ -252,9 +276,11 @@ end
 -- no focused client. If your intent is too add a mousebinding which acts on
 -- the focused client do **not** use this
 --
+-- @staticfct awful.mouse.append_global_mousebindings
 -- @tparam table buttons A table of `awful.button` objects. Optionally, it can have
 --  a `group` entry. If set, the `group` property will be set on all `awful.buttons`
 --  objects.
+-- @noreturn
 -- @see awful.button
 
 function mouse.append_global_mousebindings(buttons)
@@ -277,6 +303,7 @@ end
 --
 -- @staticfct awful.mouse.remove_global_mousebinding
 -- @tparam awful.button button The button object.
+-- @noreturn
 -- @see awful.button
 
 function mouse.remove_global_mousebinding(button)
@@ -289,6 +316,7 @@ local default_buttons = {}
 --
 -- @staticfct awful.mouse.append_client_mousebinding
 -- @tparam awful.button button The button.
+-- @noreturn
 -- @emits client_mousebinding::added
 -- @emitstparam client_mousebinding::added awful.button button The button.
 -- @see awful.button
@@ -308,6 +336,7 @@ end
 --
 -- @staticfct awful.mouse.append_client_mousebindings
 -- @tparam table buttons A table containing `awful.button` objects.
+-- @noreturn
 -- @see awful.button
 -- @see awful.keyboard.append_client_keybinding
 -- @see awful.mouse.append_client_mousebinding
@@ -387,11 +416,13 @@ end)
 -- @tparam[opt=nil] integer coords_table.y The mouse vertical position
 -- @tparam[opt=false] boolean silent Disable mouse::enter or mouse::leave events that
 --  could be triggered by the pointer when moving.
--- @treturn integer table.x The horizontal position
--- @treturn integer table.y The vertical position
--- @treturn table table.buttons Table containing the status of buttons, e.g. field [1] is true
---  when button 1 is pressed.
+-- @treturn table The coords. It contains the `x`, `y` and `buttons` keys.
+--  `buttons` contains the button number as key and a boolean as value (if it is
+--  pressed).
 -- @staticfct mouse.coords
+-- @see is_left_mouse_button_pressed
+-- @see is_right_mouse_button_pressed
+-- @see is_middle_mouse_button_pressed
 
 capi.client.connect_signal("scanning", function()
     capi.client.emit_signal("request::default_mousebindings", "startup")

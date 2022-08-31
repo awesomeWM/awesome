@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Container for the various system tray icons.
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @widgetmod wibox.widget.systray
@@ -27,20 +29,23 @@ local display_on_screen = "primary"
 
 --- The systray background color.
 --
+-- Please note that only solid+opaque colors are supported. It does **not**
+-- support gradients, patterns or transparent colors.
+--
 -- @beautiful beautiful.bg_systray
--- @param string The color (string like "#ff0000" only)
+-- @tparam string bg_systray The color (string like "#ff0000" only)
 
 --- The maximum number of rows for systray icons. Icons will fill the
 -- current column (orthogonally to the systray direction) before
 -- filling the next column.
 --
 -- @beautiful beautiful.systray_max_rows
--- @tparam[opt=1] integer The positive number of rows
+-- @tparam[opt=1] integer systray_max_rows The positive number of rows.
 
 --- The systray icon spacing.
 --
 -- @beautiful beautiful.systray_icon_spacing
--- @tparam[opt=0] integer The icon spacing
+-- @tparam[opt=0] integer systray_icon_spacing The icon spacing
 
 local function should_display_on(s)
     if display_on_screen == "primary" then
@@ -143,7 +148,11 @@ end
 -- available space. Otherwise, any single icon has a size of `size`x`size`.
 --
 -- @property base_size
--- @tparam integer|nil size The base size
+-- @tparam[opt=nil] integer|nil base_size
+-- @propertytype integer The size.
+-- @propertytype nil Select the size based on the availible space.
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits true false
 
 function systray:set_base_size(size)
@@ -157,7 +166,7 @@ end
 --- Decide between horizontal or vertical display.
 --
 -- @property horizontal
--- @tparam boolean horiz Use horizontal mode?
+-- @tparam[opt=true] boolean horizontal
 -- @propemits true false
 
 function systray:set_horizontal(horiz)
@@ -171,7 +180,7 @@ end
 --- Should the systray icons be displayed in reverse order?
 --
 -- @property reverse
--- @tparam boolean rev Display in reverse order.
+-- @tparam[opt=false] boolean reverse
 -- @propemits true false
 
 function systray:set_reverse(rev)
@@ -189,7 +198,9 @@ end
 -- visible on the primary screen. The default value is "primary".
 --
 -- @property screen
--- @tparam screen|"primary" s The screen to display on.
+-- @tparam[opt=nil] screen|nil screen
+-- @propertytype nil Valid as long as the `systray` widget is only being displayed
+--  on a single screen.
 -- @propemits true false
 
 function systray:set_screen(s)
@@ -204,9 +215,12 @@ end
 --
 -- Note that this widget can only exist once.
 --
--- @tparam boolean revers Show in the opposite direction
+-- @tparam boolean reverse Show in the opposite direction
 -- @treturn table The new `systray` widget
 -- @constructorfct wibox.widget.systray
+-- @usebeautiful beautiful.bg_systray
+-- @usebeautiful beautiful.systray_icon_spacing
+-- @usebeautiful beautiful.systray_max_rows
 
 local function new(revers)
     local ret = wbase.make_widget(nil, nil, {enable_properties = true})

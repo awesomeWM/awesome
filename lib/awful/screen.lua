@@ -49,10 +49,10 @@ end
 
 --- Get the square distance between a `screen` and a point.
 -- @deprecated awful.screen.getdistance_sq
--- @param s Screen
--- @param x X coordinate of point
--- @param y Y coordinate of point
--- @return The squared distance of the screen to the provided point.
+-- @tparam screen s Screen
+-- @tparam integer x X coordinate of point
+-- @tparam integer y Y coordinate of point
+-- @treturn number The squared distance of the screen to the provided point.
 -- @see screen.get_square_distance
 function screen.getdistance_sq(s, x, y)
     gdebug.deprecate("Use s:get_square_distance(x, y) instead of awful.screen.getdistance_sq", {deprecated_in=4})
@@ -90,7 +90,8 @@ end
 -- This moves the mouse pointer to the last known position on the new screen,
 -- or keeps its position relative to the current focused screen.
 -- @staticfct awful.screen.focus
--- @tparam screen _screen Screen number (defaults / falls back to mouse.screen).
+-- @tparam screen screen Screen number (defaults / falls back to mouse.screen).
+-- @treturn screen The newly focused screen.
 -- @request client activate screen.focus granted The most recent focused client
 --  for this screen should be re-activated.
 function screen.focus(_screen)
@@ -126,6 +127,8 @@ function screen.focus(_screen)
     if c then
         c:emit_signal("request::activate", "screen.focus", {raise=false})
     end
+
+    return _screen
 end
 
 --- Get the next screen in a specific direction.
@@ -134,8 +137,8 @@ end
 -- the specified direction.
 --
 -- @method get_next_in_direction
--- @param self Screen.
--- @param dir The direction, can be either "up", "down", "left" or "right".
+-- @tparam string dir The direction, can be either "up", "down", "left" or "right".
+-- @treturn screen The next screen.
 function screen.object.get_next_in_direction(self, dir)
     local sel = get_screen(self)
     if not sel then
@@ -156,7 +159,8 @@ end
 -- or keeps its position relative to the current focused screen.
 -- @staticfct awful.screen.focus_bydirection
 -- @tparam string dir The direction, can be either "up", "down", "left" or "right".
--- @tparam screen s Screen.
+-- @tparam[opt=awful.screen.focused()] screen s Screen.
+-- @treturn screen The next screen.
 function screen.focus_bydirection(dir, s)
     local sel = get_screen(s or screen.focused())
     local target = sel:get_next_in_direction(dir)
@@ -174,6 +178,7 @@ end
 -- @staticfct awful.screen.focus_relative
 -- @tparam int offset Value to add to the current focused screen index. 1 to
 --   focus the next one, -1 to focus the previous one.
+-- @treturn screen The newly focusd screen.
 function screen.focus_relative(offset)
     return screen.focus(gmath.cycle(capi.screen.count(),
                                    screen.focused().index + offset))
@@ -193,6 +198,8 @@ end
 -- @tparam number tiling_area.y
 -- @tparam number tiling_area.width
 -- @tparam number tiling_area.height
+-- @propertydefault This is the `workarea` substracted with the `padding` area.
+-- @propertyunit pixel
 -- @readonly
 -- @see padding
 -- @see get_bounding_geometry
@@ -209,8 +216,13 @@ end
 -- Reading this property returns a screenshot of the physical
 -- (Xinerama) screen as a cairo surface.
 --
+-- Use `gears.surface(c.content)` to convert the raw content into a static image.
+--
 -- @property content
--- @tparam gears.surface content
+-- @tparam raw_surface content
+-- @propertydefault The client raw pixels at the time the property is called.
+--  If there is no compositing manager running, it might be black.
+-- @see gears.surface
 -- @readonly
 
 function screen.object.get_content(s)
@@ -228,8 +240,8 @@ end
 --- Get or set the screen padding.
 --
 -- @deprecated awful.screen.padding
--- @param s The screen object to change the padding on
--- @param[opt=nil] padding The padding, a table with 'top', 'left', 'right' and/or
+-- @tparam screen s The screen object to change the padding on.
+-- @tparam[opt=nil] table|integer|nil padding The padding, a table with 'top', 'left', 'right' and/or
 -- 'bottom' or a number value to apply set the same padding on all sides. Can be
 --  nil if you only want to retrieve padding
 -- @treturn table A table with left, right, top and bottom number values.
@@ -246,18 +258,19 @@ end
 --
 -- This adds a "buffer" section on each side of the screen.
 --
--- **Signal:**
---
--- * *property::padding*
---
 -- @DOC_screen_padding_EXAMPLE@
 --
 -- @property padding
--- @param table
--- @tfield integer table.left The padding on the left.
--- @tfield integer table.right The padding on the right.
--- @tfield integer table.top The padding on the top.
--- @tfield integer table.bottom The padding on the bottom.
+-- @tparam[opt=0] table|number padding
+-- @tparam[opt=0] integer padding.left The padding on the left.
+-- @tparam[opt=0] integer padding.right The padding on the right.
+-- @tparam[opt=0] integer padding.top The padding on the top.
+-- @tparam[opt=0] integer padding.bottom The padding on the bottom.
+-- @negativeallowed false
+-- @propertyunit pixel
+-- @propertytype number A single value for each sides.
+-- @propertytype table A different value for each sides.
+-- @propemits true false
 -- @usebeautiful beautiful.maximized_honor_padding Honor the screen padding when maximizing.
 
 function screen.object.get_padding(self)
@@ -299,18 +312,18 @@ end
 --        -- do something
 --    end
 --
--- **Signal:**
---
---  * *property::outputs*
---
 -- @property outputs
--- @param table
--- @tfield table table.name A table with the screen name as key (like `eDP1` on a laptop)
--- @tfield integer table.mm_width The screen physical width.
--- @tfield integer table.mm_height The screen physical height.
--- @tfield integer table.name The output name.
--- @tfield integer table.viewport_id The identifier of the viewport this output
+-- @tparam table outputs
+-- @tablerowtype A key-value table with the output name as key and a table of
+--  metadata as value.
+-- @tablerowkey integer mm_width The screen physical width.
+-- @tablerowkey integer mm_height The screen physical height.
+-- @tablerowkey string name The output name.
+-- @tablerowkey string viewport_id The identifier of the viewport this output
 --  corresponds to.
+-- @propertydefault This may or may not be populated if the screen are based on
+--  an actual physical screen. For fake screen, this property content is undefined.
+-- @propemits true false
 -- @readonly
 
 function screen.object.get_outputs(s)
@@ -379,7 +392,7 @@ end
 --
 -- This method computes the different variants of the "usable" screen geometry.
 --
--- @staticfct screen.get_bounding_geometry
+-- @method screen.get_bounding_geometry
 -- @tparam[opt={}] table args The arguments
 -- @tparam[opt=false] boolean args.honor_padding Whether to honor the screen's padding.
 -- @tparam[opt=false] boolean args.honor_workarea Whether to honor the screen's workarea.
@@ -439,7 +452,8 @@ end
 -- default.
 --
 -- @property clients
--- @param table The clients list, ordered from top to bottom.
+-- @tparam[opt={}] table clients The clients list, ordered from top to bottom.
+-- @tablerowtype A list of `client` objects.
 -- @see all_clients
 -- @see hidden_clients
 -- @see client.get
@@ -467,7 +481,8 @@ end
 -- This includes minimized clients and clients on hidden tags.
 --
 -- @property hidden_clients
--- @param table The clients list, ordered from top to bottom.
+-- @tparam[opt={}] table hidden_clients The clients list, ordered from top to bottom.
+-- @tablerowtype A list of `client` objects.
 -- @see clients
 -- @see all_clients
 -- @see client.get
@@ -486,7 +501,8 @@ end
 --- All clients assigned to the screen.
 --
 -- @property all_clients
--- @param table The clients list, ordered from top to bottom.
+-- @tparam[opt={}] table all_clients The clients list, ordered from top to bottom.
+-- @tablerowtype A list of `client` objects.
 -- @see clients
 -- @see hidden_clients
 -- @see client.get
@@ -513,7 +529,8 @@ end
 -- @DOC_screen_tiled_clients_EXAMPLE@
 --
 -- @property tiled_clients
--- @param table The clients list, ordered from top to bottom.
+-- @tparam[opt={}] table tiled_clients The clients list, ordered from top to bottom.
+-- @tablerowtype A list of `client` objects.
 
 --- Get tiled clients for the screen.
 --
@@ -541,6 +558,7 @@ end
 -- @staticfct awful.screen.connect_for_each_screen
 -- @tparam function func The function to call.
 -- @tparam screen func.screen The screen.
+-- @noreturn
 function screen.connect_for_each_screen(func)
     for s in capi.screen do
         func(s)
@@ -548,9 +566,10 @@ function screen.connect_for_each_screen(func)
     capi.screen.connect_signal("added", func)
 end
 
---- Undo the effect of connect_for_each_screen.
+--- Undo the effect of `awful.screen.connect_for_each_screen`.
 -- @staticfct awful.screen.disconnect_for_each_screen
 -- @tparam function func The function that should no longer be called.
+-- @noreturn
 function screen.disconnect_for_each_screen(func)
     capi.screen.disconnect_signal("added", func)
 end
@@ -561,8 +580,8 @@ end
 -- `awful.tag.new` or `t:delete()` to alter this list.
 --
 -- @property tags
--- @param table
--- @treturn table A table with all available tags.
+-- @tparam[opt={}] table tags
+-- @tablerowtype A table with all available tags.
 -- @readonly
 
 function screen.object.get_tags(s, unordered)
@@ -585,8 +604,8 @@ end
 
 --- A list of all selected tags on the screen.
 -- @property selected_tags
--- @param table
--- @treturn table A table with all selected tags.
+-- @tparam[opt={}] table selected_tags
+-- @tablerowtype A table with all selected tags.
 -- @readonly
 -- @see tag.selected
 -- @see client.to_selected_tags
@@ -605,8 +624,7 @@ end
 
 --- The first selected tag.
 -- @property selected_tag
--- @param tag
--- @treturn ?tag The first selected tag or nil.
+-- @tparam[opt=nil] tag|nil selected_tag
 -- @readonly
 -- @see tag.selected
 -- @see selected_tags
@@ -651,10 +669,14 @@ end
 --
 -- @DOC_awful_screen_split2_EXAMPLE@
 --
--- @tparam[opt] table ratios The different ratios to split into. If none is
---  provided, it is split in half.
+-- @tparam[opt={50﹐50}] table ratios The different ratios to split into. If none
+--  is provided, it is split in half.
 -- @tparam[opt] string mode Either "vertical" or "horizontal". If none is
 --  specified, it will split along the longest axis.
+-- @treturn table A table with the screen objects. The first value is the
+--  original screen object (`s`) and the following one(s) are the new screen
+--  objects. The values are ordered from left to right or top to bottom depending
+--  on the value of `mode`.
 -- @method split
 function screen.object.split(s, ratios, mode, _geo)
     s = get_screen(s)
@@ -736,6 +758,7 @@ end
 -- defaulting to 96.
 --
 -- @tparam boolean enabled Enable or disable automatic DPI support.
+-- @noreturn
 -- @staticfct awful.screen.set_auto_dpi_enabled
 function screen.set_auto_dpi_enabled(enabled)
     for s in capi.screen do
@@ -753,16 +776,24 @@ end
 -- screen is duplicated on a projector).
 --
 -- @property dpi
--- @param number the DPI value.
+-- @tparam[opt=96] number dpi
+-- @propertyunit pixel\_per\_inch
+-- @negativeallowed false
 
 --- The lowest density DPI from all of the (physical) outputs.
 -- @property minimum_dpi
--- @param number the DPI value.
+-- @tparam number minimum_dpi
+-- @propertyunit pixel\_per\_inch
+-- @propertydefault This is extracted from `outputs`.
+-- @negativeallowed false
 -- @readonly
 
 --- The highest density DPI from all of the (physical) outputs.
 -- @property maximum_dpi
--- @param number the DPI value.
+-- @tparam number maximum_dpi
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit pixel\_per\_inch
+-- @negativeallowed false
 -- @readonly
 
 --- The preferred DPI from all of the (physical) outputs.
@@ -771,28 +802,42 @@ end
 -- the lowest of the resulting virtual DPIs.
 --
 -- @property preferred_dpi
--- @param number the DPI value.
+-- @tparam number preferred_dpi
+-- @propertydefault This is extracted from `outputs`.
+-- @negativeallowed false
 -- @readonly
 
 --- The maximum diagonal size in millimeters.
 --
 -- @property mm_maximum_size
--- @param number
+-- @tparam number mm_maximum_size
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit millimeter
+-- @negativeallowed false
 
 --- The minimum diagonal size in millimeters.
 --
 -- @property mm_minimum_size
--- @param number
+-- @tparam number mm_minimum_size
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit millimeter
+-- @negativeallowed false
 
 --- The maximum diagonal size in inches.
 --
 -- @property inch_maximum_size
--- @param number
+-- @tparam number inch_maximum_size
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit inch
+-- @negativeallowed false
 
 --- The minimum diagonal size in inches.
 --
 -- @property inch_minimum_size
--- @param number
+-- @tparam number inch_minimum_size
+-- @propertydefault This is extracted from `outputs`.
+-- @propertyunit inch
+-- @negativeallowed false
 
 --- Emitted when a new screen is added.
 --
@@ -952,6 +997,8 @@ end
 -- `request::remove` and `request::resize`.
 --
 -- @signalhandler awful.screen.create_screen_handler
+-- @tparam table viewport
+-- @sourcesignal screen request::create
 -- @see request::create
 
 --- Default handler for `request::remove`.
@@ -971,6 +1018,8 @@ end
 --    end
 --
 -- @signalhandler awful.screen.remove_screen_handler
+-- @tparam table viewport
+-- @sourcesignal screen request::remove
 -- @see request::remove
 
 --- Default handler for `request::resize`.
@@ -992,6 +1041,8 @@ end
 --    end
 --
 -- @signalhandler awful.screen.resize_screen_handler
+-- @tparam table viewport
+-- @sourcesignal screen request::resize
 -- @see request::resize
 
 -- Add the DPI properties.

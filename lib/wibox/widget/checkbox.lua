@@ -83,7 +83,9 @@ local checkbox = {}
 --- The outer (unchecked area) border width.
 --
 -- @property border_width
--- @tparam number border_width
+-- @tparam number|nil border_width
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propbeautiful
 -- @propemits true false
 
@@ -91,35 +93,37 @@ local checkbox = {}
 --
 --@DOC_wibox_widget_checkbox_bg_EXAMPLE@
 -- @property bg
--- @tparam color bg
+-- @tparam color|nil bg
 -- @propbeautiful
 -- @propemits true false
 
 --- The outer (unchecked area) border color.
 --
 -- @property border_color
--- @tparam color border_color
+-- @tparam color|nil border_color
 -- @propbeautiful
 -- @propemits true false
 
 --- The checked part border color.
 --
 -- @property check_border_color
--- @tparam color check_border_color
+-- @tparam color|nil check_border_color
 -- @propbeautiful
 -- @propemits true false
 
 --- The checked part border width.
 --
 -- @property check_border_width
--- @tparam number check_border_width
+-- @tparam number|nil check_border_width
 -- @propbeautiful
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propemits true false
 
 --- The checked part filling color.
 --
 -- @property check_color
--- @tparam color check_color
+-- @tparam color|nil check_color
 -- @propbeautiful
 -- @propemits true false
 
@@ -127,7 +131,7 @@ local checkbox = {}
 --
 --@DOC_wibox_widget_checkbox_shape_EXAMPLE@
 -- @property shape
--- @tparam gears.shape shape
+-- @tparam shape|nil shape
 -- @propbeautiful
 -- @propemits true false
 -- @see gears.shape
@@ -137,7 +141,7 @@ local checkbox = {}
 -- If none is set, then the `shape` property will be used.
 --@DOC_wibox_widget_checkbox_check_shape_EXAMPLE@
 -- @property check_shape
--- @tparam gears.shape shape
+-- @tparam shape|nil check_shape
 -- @propbeautiful
 -- @propemits true false
 -- @see gears.shape
@@ -145,11 +149,15 @@ local checkbox = {}
 --- The padding between the outline and the progressbar.
 --
 -- @property paddings
--- @tparam[opt=0] table|number paddings A number or a table
+-- @tparam[opt=0] table|number|nil paddings A number or a table
 -- @tparam[opt=0] number paddings.top
 -- @tparam[opt=0] number paddings.bottom
 -- @tparam[opt=0] number paddings.left
 -- @tparam[opt=0] number paddings.right
+-- @propertyunit pixel
+-- @negativeallowed true
+-- @propertytype number A single number for all sides.
+-- @propertytype table A different value for each sides:
 -- @propbeautiful
 -- @propemits false false
 
@@ -159,7 +167,7 @@ local checkbox = {}
 -- filling color. Note that `check_color` and `border_color` have priority
 -- over this property.
 -- @property color
--- @tparam color color
+-- @tparam color|nil color
 -- @propbeautiful
 -- @propemits true false
 
@@ -254,7 +262,7 @@ end
 
 --- If the checkbox is checked.
 -- @property checked
--- @param boolean
+-- @tparam[opt=false] boolean checked
 
 for _, prop in ipairs {"border_width", "bg", "border_color", "check_border_color",
     "check_border_width", "check_color", "shape", "check_shape", "paddings",

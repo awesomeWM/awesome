@@ -19,7 +19,7 @@
  *
  */
 
-/** AwesomeWM lifecycle API.
+/** AwesomeWM lifecycle and low-level APIs.
  *
  * This module contains the functions and signal to manage the lifecycle of the
  * AwesomeWM process. It allows to execute code at specific point from the early
@@ -36,6 +36,7 @@
  *
  * @tparam string name The name of the X11 property.
  * @tparam string type One of "string", "number" or "boolean".
+ * @noreturn
  * @staticfct register_xproperty
  */
 
@@ -97,7 +98,7 @@ signal_array_t global_signals;
  *
  * This signal is used in the example configuration, @{05-awesomerc.md},
  * to let a notification box pop up.
- * @param err Table with the error object, can be converted to a string with
+ * @tparam table err Table with the error object, can be converted to a string with
  * `tostring(err)`.
  * @signal debug::error
  */
@@ -151,7 +152,7 @@ signal_array_t global_signals;
 /** Keyboard group has changed.
  *
  * It's used in `awful.widget.keyboardlayout` to redraw the layout.
- * @param group Integer containing the changed group
+ * @tparam number group Integer containing the changed group
  * @signal xkb::group_changed.
  */
 
@@ -172,8 +173,8 @@ signal_array_t global_signals;
  *
  * This signal is emitted in the `atexit` handler as well when awesome
  * restarts.
- * @param reason_restart Boolean value is true if the signal was sent
- * because of a restart.
+ * @tparam boolean reason_restart Boolean value is true if the signal was sent
+ *  because of a restart.
  * @signal exit
  */
 
@@ -229,6 +230,7 @@ composite_manager_running(void)
 /** Quit awesome.
  * @tparam[opt=0] integer code The exit code to use when exiting.
  * @staticfct quit
+ * @noreturn
  */
 static int
 luaA_quit(lua_State *L)
@@ -244,8 +246,9 @@ luaA_quit(lua_State *L)
 /** Execute another application, probably a window manager, to replace
  * awesome.
  *
- * @param cmd The command line to execute.
+ * @tparam string cmd The command line to execute.
  * @staticfct exec
+ * @noreturn
  */
 static int
 luaA_exec(lua_State *L)
@@ -260,6 +263,7 @@ luaA_exec(lua_State *L)
 
 /** Restart awesome.
  * @staticfct restart
+ * @noreturn
  */
 static int
 luaA_restart(lua_State *L)
@@ -290,6 +294,7 @@ luaA_kill(lua_State *L)
 /** Synchronize with the X11 server. This is needed in the test suite to avoid
  * some race conditions. You should never need to use this function.
  * @staticfct sync
+ * @noreturn
  */
 static int
 luaA_sync(lua_State *L)
@@ -302,7 +307,7 @@ luaA_sync(lua_State *L)
  *
  * @param pixbuf The pixbuf as a light user datum.
  * @param path The pixbuf origin path
- * @return A cairo surface as light user datum.
+ * @treturn gears.surface A cairo surface as light user datum.
  * @staticfct pixbuf_to_surface
  */
 static int
@@ -318,10 +323,9 @@ luaA_pixbuf_to_surface(lua_State *L)
 
 /** Load an image from a given path.
  *
- * @param name The file name.
- * @return[1] A cairo surface as light user datum.
- * @return[2] nil
- * @treturn[2] string Error message
+ * @tparam string name The file name.
+ * @treturn gears.surface A cairo surface as light user datum.
+ * @treturn nil|string The error message, if any.
  * @staticfct load_image
  */
 static int
@@ -351,8 +355,9 @@ luaA_load_image(lua_State *L)
  * The closest equal or bigger size is picked if present, otherwise the closest
  * smaller size is picked. The default is 0 pixels, ie. the smallest icon.
  *
- * @param size The size of the icons in pixels.
+ * @tparam integer size The size of the icons in pixels.
  * @staticfct set_preferred_icon_size
+ * @noreturn
  */
 static int
 luaA_set_preferred_icon_size(lua_State *L)
@@ -806,9 +811,10 @@ luaA_awesome_index(lua_State *L)
 
 /** Add a global signal.
  *
- * @param name A string with the event name.
- * @param func The function to call.
+ * @tparam string name A string with the event name.
+ * @tparam function func The function to call.
  * @staticfct connect_signal
+ * @noreturn
  */
 static int
 luaA_awesome_connect_signal(lua_State *L)
@@ -821,9 +827,10 @@ luaA_awesome_connect_signal(lua_State *L)
 
 /** Remove a global signal.
  *
- * @param name A string with the event name.
- * @param func The function to call.
+ * @tparam string name A string with the event name.
+ * @tparam function func The function to call.
  * @staticfct disconnect_signal
+ * @noreturn
  */
 static int
 luaA_awesome_disconnect_signal(lua_State *L)
@@ -838,9 +845,10 @@ luaA_awesome_disconnect_signal(lua_State *L)
 
 /** Emit a global signal.
  *
- * @param name A string with the event name.
+ * @tparam function name A string with the event name.
  * @param ... The signal arguments.
  * @staticfct emit_signal
+ * @noreturn
  */
 static int
 luaA_awesome_emit_signal(lua_State *L)

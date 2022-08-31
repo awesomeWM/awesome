@@ -43,7 +43,7 @@ end
 --- The widget to be constrained.
 --
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam[opt=nil] widget|nil widget
 -- @interface container
 
 constraint.set_widget = base.set_widget_common
@@ -61,14 +61,12 @@ function constraint:set_children(children)
 end
 
 --- Set the strategy to use for the constraining.
--- Valid values are:
---
--- * **max**: Never allow the size to be larger than the limit.
--- * **min**: Never allow the size to tbe below the limit.
--- * **exact**: Force the widget size.
 --
 -- @property strategy
--- @tparam string strategy Either 'max', 'min' or 'exact'.
+-- @tparam[opt="max"] string strategy
+-- @propertyvalue "max" Never allow the size to be larger than the limit.
+-- @propertyvalue "min" Never allow the size to tbe below the limit.
+-- @propertyvalue "exact" Force the widget size.
 -- @propemits true false
 
 function constraint:set_strategy(val)
@@ -100,7 +98,11 @@ end
 --- Set the maximum width to val. nil for no width limit.
 --
 -- @property width
--- @tparam number width
+-- @tparam[opt=nil] number|nil width
+-- @negativeallowed false
+-- @propertyunit pixel
+-- @propertytype nil Do not set a width limit.
+-- @propertytype number Set a width limit.
 -- @propemits true false
 
 function constraint:set_width(val)
@@ -116,7 +118,11 @@ end
 --- Set the maximum height to val. nil for no height limit.
 --
 -- @property height
--- @tparam number height
+-- @tparam[opt=nil] number|nil height
+-- @negativeallowed false
+-- @propertyunit pixel
+-- @propertytype nil Do not set a height limit.
+-- @propertytype number Set a height limit.
 -- @propemits true false
 
 function constraint:set_height(val)
@@ -135,6 +141,7 @@ end
 -- and the constraints set to nil.
 --
 -- @method reset
+-- @noreturn
 -- @interface container
 function constraint:reset()
     self._private.width = nil

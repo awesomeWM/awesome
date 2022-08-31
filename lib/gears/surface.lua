@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Utilities to integrate and manipulate Cairo drawing surfaces.
+--
 -- @author Uli Schlachter
 -- @copyright 2012 Uli Schlachter
 -- @module gears.surface
@@ -9,7 +11,7 @@ local type = type
 local capi = { awesome = awesome }
 local cairo = require("lgi").cairo
 local GdkPixbuf = require("lgi").GdkPixbuf
-local color = nil
+local color, beautiful = nil, nil
 local gdebug = require("gears.debug")
 local hierarchy = require("wibox.hierarchy")
 
@@ -169,8 +171,8 @@ end
 -- @tparam number width The surface width
 -- @tparam number height The surface height
 -- @param shape A `gears.shape` compatible function
--- @param[opt=white] shape_color The shape color or pattern
--- @param[opt=transparent] bg_color The surface background color
+-- @param[opt="#000000"] shape_color The shape color or pattern
+-- @param[opt="#00000000"] bg_color The surface background color
 -- @treturn cairo.surface the new surface
 -- @staticfct load_from_shape
 function surface.load_from_shape(width, height, shape, shape_color, bg_color, ...)
@@ -195,11 +197,11 @@ end
 --
 --  If the wibox or client size change, this function need to be called
 --   again.
--- @param draw A wibox or a client
--- @param shape or gears.shape function or a custom function with a context,
---   width and height as parameter.
--- @param[opt] Any additional parameters will be passed to the shape function.
+-- @tparam client|wibox draw A wibox or a client.
+-- @tparam gears.shape|function shape The shape.
+-- @param[opt] ... Any additional parameters will be passed to the shape function.
 -- @staticfct apply_shape_bounding
+-- @noreturn
 function surface.apply_shape_bounding(draw, shape, ...)
   local geo = draw:geometry()
 
@@ -232,7 +234,7 @@ end
 --- Create an SVG file with this widget content.
 -- This is dynamic, so the SVG will be updated along with the widget content.
 -- because of this, the painting may happen hover multiple event loop cycles.
--- @deprecated draw_to_svg_file
+-- @deprecated widget_to_svg
 -- @tparam widget widget A widget
 -- @tparam string path The output file path
 -- @tparam number width The surface width
@@ -243,9 +245,14 @@ end
 -- @see wibox.widget.draw_to_image_surface
 function surface.widget_to_svg(widget, path, width, height)
     gdebug.deprecate("Use wibox.widget.draw_to_svg_file instead of "..
-        "gears.surface.render_to_svg", {deprecated_in=5})
+        "gears.surface.widget_to_svg", {deprecated_in=5})
     local img = cairo.SvgSurface.create(path, width, height)
     local cr = cairo.Context(img)
+
+    -- Bad dependecy, but this is deprecated.
+    beautiful = beautiful or require("beautiful")
+    color = color or require("gears.color")
+    cr:set_source(color(beautiful.fg_normal))
 
     return img, run_in_hierarchy(widget, cr, width, height)
 end
@@ -253,7 +260,7 @@ end
 --- Create a cairo surface with this widget content.
 -- This is dynamic, so the SVG will be updated along with the widget content.
 -- because of this, the painting may happen hover multiple event loop cycles.
--- @deprecated draw_to_image_surface
+-- @deprecated widget_to_surface
 -- @tparam widget widget A widget
 -- @tparam number width The surface width
 -- @tparam number height The surface height
@@ -267,6 +274,11 @@ function surface.widget_to_surface(widget, width, height, format)
         "gears.surface.render_to_surface", {deprecated_in=5})
     local img = cairo.ImageSurface(format or cairo.Format.ARGB32, width, height)
     local cr = cairo.Context(img)
+
+    -- Bad dependecy, but this is deprecated.
+    color = color or require("gears.color")
+    beautiful = beautiful or require("beautiful")
+    cr:set_source(color(beautiful.fg_normal))
 
     return img, run_in_hierarchy(widget, cr, width, height)
 end

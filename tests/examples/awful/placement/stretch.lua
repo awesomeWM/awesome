@@ -4,6 +4,9 @@ screen[1]._resize {width = 128, height = 96}
 screen._add_screen {x = 140, y = 0  , width = 128, height = 96}
 screen._add_screen {x = 0  , y = 110, width = 128, height = 96}
 screen._add_screen {x = 140, y = 110, width = 128, height = 96}
+for s in screen do
+    require("awful.tag").add("1", {screen=s, selected=true})
+end
 local placement = require("awful.placement")
 
 for k, pos in ipairs{

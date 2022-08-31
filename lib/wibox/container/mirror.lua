@@ -50,7 +50,7 @@ end
 --- The widget to be reflected.
 --
 -- @property widget
--- @tparam widget widget The widget.
+-- @tparam[opt=nil] widget|nil widget
 -- @interface container
 
 mirror.set_widget = base.set_widget_common
@@ -70,6 +70,7 @@ end
 --- Reset this layout. The widget will be removed and the axes reset.
 --
 -- @method reset
+-- @noreturn
 -- @interface container
 function mirror:reset()
     self._private.horizontal = false
@@ -95,8 +96,8 @@ end
 --
 -- @property reflection
 -- @tparam table reflection A table of booleans with the keys "horizontal", "vertical".
--- @tparam boolean reflection.horizontal
--- @tparam boolean reflection.vertical
+-- @tparam[opt=false] boolean reflection.horizontal
+-- @tparam[opt=false] boolean reflection.vertical
 -- @propemits true false
 
 function mirror:get_reflection()

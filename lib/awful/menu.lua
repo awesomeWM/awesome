@@ -1,5 +1,5 @@
 --------------------------------------------------------------------------------
---- A menu for awful.
+--- Create context menus, optionally with sub-menus.
 --
 -- @author Damien Leone &lt;damien.leone@gmail.com&gt;
 -- @author Julien Danjou &lt;julien@danjou.info&gt;
@@ -93,7 +93,7 @@ end
 -- @param color
 -- @see gears.color
 
---- The default sub-menu indicator if no menu_submenu_icon is provided.
+--- The default sub-menu indicator if no `menu_submenu_icon` is provided.
 -- @beautiful beautiful.menu_submenu
 -- @tparam[opt="▶"] string menu_submenu The sub-menu text.
 -- @see beautiful.menu_submenu_icon
@@ -357,8 +357,10 @@ end
 
 
 --- Show a menu.
--- @param args The arguments
--- @param args.coords Menu position defaulting to mouse.coords()
+-- @tparam[opt={}] table args The arguments
+-- @tparam[opt=mouse.coords] table args.coords The menu position. A table with
+--  `x` and `y` as keys and position (in pixels) as values.
+-- @noreturn
 -- @method show
 function menu:show(args)
     args = args or {}
@@ -374,6 +376,7 @@ end
 
 --- Hide a menu popup.
 -- @method hide
+-- @noreturn
 function menu:hide()
     -- Remove items from screen
     for i = 1, #self.items do
@@ -390,8 +393,10 @@ function menu:hide()
 end
 
 --- Toggle menu visibility.
--- @param args The arguments
--- @param args.coords Menu position {x,y}
+-- @tparam table args The arguments.
+-- @tparam[opt=mouse.coords] table args.coords The menu position. A table with
+--  `x` and `y` as keys and position (in pixels) as values.
+-- @noreturn
 -- @method toggle
 function menu:toggle(args)
     if self.wibox.visible then
@@ -403,6 +408,7 @@ end
 
 --- Update menu content.
 -- @method update
+-- @noreturn
 function menu:update()
     if self.wibox.visible then
         self:show({ coords = { x = self.x, y = self.y } })
@@ -413,16 +419,18 @@ end
 --- Get the elder parent so for example when you kill
 -- it, it will destroy the whole family.
 -- @method get_root
+-- @treturn awful.menu The root menu.
 function menu:get_root()
     return self.parent and menu.get_root(self.parent) or self
 end
 
 --- Add a new menu entry.
 -- args.* params needed for the menu entry constructor.
--- @param args The item params
--- @param args.new (Default: awful.menu.entry) The menu entry constructor.
--- @param[opt] args.theme The menu entry theme.
--- @param[opt] index The index where the new entry will inserted.
+-- @tparam table args The item params.
+-- @tparam[opt=awful.menu.entry] function args.new The menu entry constructor.
+-- @tparam[opt] table args.theme The menu entry theme.
+-- @tparam[opt] number index The index where the new entry will inserted.
+-- @treturn table|nil The new item.
 -- @method add
 function menu:add(args, index)
     if not args then return end
@@ -479,7 +487,8 @@ function menu:add(args, index)
 end
 
 --- Delete menu entry at given position.
--- @param num The position in the table of the menu entry to be deleted; can be also the menu entry itself.
+-- @tparam table|number num The index in the table of the menu entry to be deleted; can be also the menu entry itself.
+-- @noreturn
 -- @method delete
 function menu:delete(num)
     if type(num) == "table" then
@@ -580,8 +589,8 @@ end
 
 --- Default awful.menu.entry constructor.
 -- @param parent The parent menu (TODO: This is apparently unused)
--- @param args the item params
--- @return table with 'widget', 'cmd', 'akey' and all the properties the user wants to change
+-- @param args The item params
+-- @return table With 'widget', 'cmd', 'akey' and all the properties the user wants to change
 -- @constructorfct awful.menu.entry
 function menu.entry(parent, args) -- luacheck: no unused args
     args = args or {}
@@ -673,14 +682,24 @@ end
 --------------------------------------------------------------------------------
 
 --- Create a menu popup.
--- @param args Table containing the menu information.
 --
--- * Key items: Table containing the displayed items. Each element is a table by default (when element 'new' is
---   awful.menu.entry) containing: item name, triggered action (submenu table or function), item icon (optional).
--- * Keys theme.[fg|bg]_[focus|normal], theme.border_color, theme.border_width, theme.submenu_icon, theme.height
---   and theme.width override the default display for your menu and/or of your menu entry, each of them are optional.
--- * Key auto_expand controls the submenu auto expand behaviour by setting it to true (default) or false.
---
+-- @tparam table args Table containing the menu information.
+-- @tparam[opt=true] boolean args.auto_expand Controls the submenu auto expand behaviour.
+-- @tparam table args.items Table containing the displayed items. Each element is a
+--   table by default (when element 'new' is awful.menu.entry) containing: item
+--   name, triggered action (submenu table or function), item icon (optional).
+-- @tparam table args.theme
+-- @tparam[opt=beautiful.menu_fg_normal] color args.theme.fg_normal
+-- @tparam[opt=beautiful.menu_bg_normal] color args.theme.bg_normal
+-- @tparam[opt=beautiful.menu_fg_focus] color args.theme.fg_focus
+-- @tparam[opt=beautiful.menu_bg_focus] color args.theme.bg_focus
+-- @tparam[opt=beautiful.menu_border_color] color args.theme.border
+-- @tparam[opt=beautiful.menu_border_width] integer args.theme.border_width
+-- @tparam[opt=beautiful.menu_height] integer args.theme.height
+-- @tparam[opt=beautiful.menu_width] integer args.theme.width
+-- @tparam[opt=beautiful.menu_font] string args.theme.font
+-- @tparam[opt=beautiful.menu_submenu_icon] gears.surface|string args.theme.submenu_icon
+-- @tparam[opt=beautiful.menu_submenu] string args.theme.submenu
 -- @param parent Specify the parent menu if we want to open a submenu, this value should never be set by the user.
 -- @constructorfct awful.menu
 -- @usage -- The following function builds and shows a menu of clients that match

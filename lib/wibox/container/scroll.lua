@@ -222,6 +222,7 @@ end
 
 --- Pause the scrolling animation.
 -- @method pause
+-- @noreturn
 -- @see continue
 function scroll:pause()
     if self._private.paused then
@@ -233,6 +234,7 @@ end
 
 --- Continue the scrolling animation.
 -- @method continue
+-- @noreturn
 -- @see pause
 function scroll:continue()
     if not self._private.paused then
@@ -248,6 +250,7 @@ end
 -- display the widget without any scrolling applied.
 -- This function does not undo the effect of @{pause}.
 -- @method reset_scrolling
+-- @noreturn
 function scroll:reset_scrolling()
     self._private.timer:start()
     if self._private.paused then
@@ -258,6 +261,7 @@ end
 --- Set the direction in which this widget scroll.
 -- @method set_direction
 -- @param dir Either "h" for horizontal scrolling or "v" for vertical scrolling
+-- @noreturn
 function scroll:set_direction(dir)
     if dir == self._private.dir then
         return
@@ -272,7 +276,7 @@ end
 
 --- The widget to be scrolled.
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam[opt=nil] widget|nil widget
 
 function scroll:set_widget(widget)
     if widget == self._private.widget then
@@ -306,6 +310,7 @@ end
 -- @method set_expand
 -- @tparam boolean expand If true, the widget is expanded to include the extra
 -- space. If false, the extra space is simply left empty.
+-- @noreturn
 -- @see set_extra_space
 function scroll:set_expand(expand)
     if expand == self._private.expand then
@@ -318,6 +323,7 @@ end
 --- Set the number of frames per second that this widget should draw.
 -- @method set_fps
 -- @tparam number fps The number of frames per second
+-- @noreturn
 function scroll:set_fps(fps)
     if fps == self._private.fps then
         return
@@ -331,6 +337,7 @@ end
 -- extra space will likely be left empty between repetitions of the widgets.
 -- @method set_extra_space
 -- @tparam number extra_space The amount of extra space
+-- @noreturn
 -- @see set_expand
 function scroll:set_extra_space(extra_space)
     if extra_space == self._private.extra_space then
@@ -345,6 +352,7 @@ end
 -- in pixels per second.
 -- @method set_speed
 -- @tparam number speed The speed for the animation
+-- @noreturn
 function scroll:set_speed(speed)
     if speed == self._private.speed then
         return
@@ -359,6 +367,7 @@ end
 -- and the rest is made visible via scrolling.
 -- @method set_max_size
 -- @tparam number max_size The maximum size of this widget or nil for unlimited.
+-- @noreturn
 function scroll:set_max_size(max_size)
     if max_size == self._private.max_size then
         return
@@ -384,6 +393,7 @@ end
 -- which the widget is drawn and should be between 0 and `size+extra_space`.
 -- @method set_step_function
 -- @tparam function step_function A step function.
+-- @noreturn
 -- @see step_functions
 function scroll:set_step_function(step_function)
     -- Call the step functions once to see if it works
@@ -399,6 +409,7 @@ end
 -- This restricts the child widget's maximal size.
 -- @method set_space_for_scrolling
 -- @tparam number space_for_scrolling The space for scrolling
+-- @noreturn
 function scroll:set_space_for_scrolling(space_for_scrolling)
     if space_for_scrolling == self._private.space_for_scrolling then
         return

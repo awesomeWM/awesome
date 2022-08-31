@@ -29,4 +29,4 @@ local some_wibar = awful.wibar {position = "bottom", height = 48, visible = true
        }
    end
 
-require("gears.timer").run_delayed_calls_now()
+require("gears.timer").run_delayed_calls_now() --DOC_HIDE

@@ -76,115 +76,115 @@
          style="fill:#a800ff;fill-opacity:0.49019602;fill-rule:nonzero;stroke:#ffff00;stroke-width:2;stroke-linecap:butt;stroke-linejoin:miter;stroke-miterlimit:10;stroke-opacity:1" />
     </g>
     <rect
-       style="fill:none;stroke:#000000;stroke-width:5.72931957;stroke-miterlimit:4;stroke-dasharray:17.18795897, 5.72931965;stroke-dashoffset:0;stroke-opacity:0.19282514"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:5.72931957;stroke-miterlimit:4;stroke-dasharray:17.18795897, 5.72931965;stroke-dashoffset:0;stroke-opacity:0.19282514"
        id="rect6202"
        width="223.72885"
        height="103.9784"
        x="-65.681862"
        y="-44.285286" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -65.681858,-44.285287 v -9.346375 h 33.880606 v 7.593928"
        id="path6204"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -68.602599,-44.285289 h -8.908263 v 22.781787 h 8.762225"
        id="path6206"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -68.456562,36.181149 h -8.178079 v 20.883305 h 8.032042"
        id="path6208"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 129.4237,62.613864 v 7.593929 h 27.16289 v -7.886004"
        id="path6210"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -23.039026,31.946074 v 7.009781 h -7.886004 v -7.009781"
        id="path6212"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 106.64191,32.530222 v 6.717706 h 16.9403 v -7.593927"
        id="path6214"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 124.45843,-16.830315 h 7.0098 v 6.425632 h -7.30186 v 0"
        id="path6216"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 99.632131,-12.157128 v -3.796965 h 6.717709 v 4.381114"
        id="path6218"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -34.721994,-21.211428 h -4.089039 v 3.50489 h 4.381113"
        id="path6220"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 132.05237,-13.325425 h 34.17266"
        id="path6222"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 102.58345,-16.2321 V -52.580964"
        id="path6224"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m 115.18163,39.530362 v 40.06636"
        id="path6226"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 144.0955,70.509507 V 86.825191"
        id="path6228"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -26.702851,38.91078 v 27.261648 0"
        id="path6232"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -76.062956,45.313136 h -8.261102"
        id="path6234"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -78.541288,-33.580422 h -7.641524"
        id="path6236"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="m -47.975197,-54.646241 v -6.815411"
        id="path6238"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M -39.404301,-19.226751 H -86.905655"
        id="path6240"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 40.212104,-63.526928 V 7.1055221"
        id="path6242"
        inkscape:connector-curvature="0" />
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M 44.755712,28.584397 V 107.89101"
        id="path6244"
        inkscape:connector-curvature="0" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="-81.409393"
        y="-68.525108"
        id="text6248"><tspan
@@ -195,7 +195,7 @@
          style="stroke-width:1.43232989">margins.left</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="53.016815"
        y="88.064354"
        id="text6252"><tspan
@@ -206,7 +206,7 @@
          style="stroke-width:1.43232989">paddings.right</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="-173.14709"
        y="47.484715"
        id="text6256"><tspan
@@ -217,7 +217,7 @@
          style="stroke-width:1.43232989">margins.bottom</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="-68.008377"
        y="80.629356"
        id="text6260"><tspan
@@ -228,7 +228,7 @@
          id="tspan6262">paddings.left</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="25.046478"
        y="-68.112053"
        id="text6268"><tspan
@@ -239,7 +239,7 @@
          style="stroke-width:1.43232989">color</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="0.55879593"
        y="121.52184"
        id="text6272"><tspan
@@ -249,13 +249,13 @@
          y="121.52184"
          style="stroke-width:1.43232989">background_color</tspan></text>
     <path
-       style="fill:none;stroke:#000000;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
+       class=".svg_stroke" style="fill:none;stroke:currentcolor;;stroke-width:1.43232989px;stroke-linecap:butt;stroke-linejoin:miter;stroke-opacity:1"
        d="M -33.72479,8.7577433 H -101.0528"
        id="path6274"
        inkscape:connector-curvature="0" />
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="-171.67308"
        y="10.752149"
        id="text6278"><tspan
@@ -266,7 +266,7 @@
          style="stroke-width:1.43232989">border_color</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="59.921341"
        y="-56.416924"
        id="text6282"><tspan
@@ -277,7 +277,7 @@
          style="stroke-width:1.43232989">bar_border_width</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="176.52036"
        y="-13.960297"
        id="text6286"><tspan
@@ -288,7 +288,7 @@
          style="stroke-width:1.43232989">paddings.top</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="114.56205"
        y="103.76046"
        id="text6290"><tspan
@@ -299,7 +299,7 @@
          style="stroke-width:1.43232989">margins.right</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="-161.98454"
        y="-15.825125"
        id="text6294"><tspan
@@ -310,7 +310,7 @@
          style="stroke-width:1.43232989">border_width</tspan></text>
     <text
        xml:space="preserve"
-       style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#000000;fill-opacity:1;stroke:none;stroke-width:1.43232989"
+       class=".svg_fill" style="font-style:normal;font-weight:normal;font-size:11.45863914px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:currentcolor;;fill-opacity:1;stroke:none;stroke-width:1.43232989"
        x="-154.04338"
        y="-30.323574"
        id="text6298"><tspan

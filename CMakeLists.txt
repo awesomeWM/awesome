@@ -292,7 +292,7 @@ if(GENERATE_DOC)
     configure_file(${SOURCE_DIR}/docs/ldoc.ltp ${BUILD_DIR}/docs COPYONLY)
 
     add_custom_target(ldoc ALL
-        DEPENDS ${BUILD_DIR}/doc/index.html
+        DEPENDS ${BUILD_DIR}/doc/index.html DOC_EXAMPLES_PPOSTPROCESS_CLEANUP
     )
 
     if (STRICT_TESTS)

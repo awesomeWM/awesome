@@ -1,5 +1,6 @@
 ---------------------------------------------------------------------------
---- Watch widget.
+--- Execute a command at a set interval and display its output.
+--
 -- Here is an example of simple temperature widget which will update each 15
 -- seconds implemented in two different ways.
 -- The first, simpler one, will just display the return command output
@@ -7,20 +8,18 @@
 -- In the other example `sensors` returns to the widget its full output
 -- and it's trimmed in the widget callback function:
 --
---     211             mytextclock,
---     212             wibox.widget.textbox('  |  '),
---     213             -- one way to do that:
---     214             awful.widget.watch('bash -c "sensors | grep temp1"', 15),
---     215             -- another way:
---     216             awful.widget.watch('sensors', 15, function(widget, stdout)
---     217               for line in stdout:gmatch("[^\r\n]+") do
---     218                 if line:match("temp1") then
---     219                   widget:set_text(line)
---     220                   return
---     221                 end
---     222               end
---     223             end),
---     224             s.mylayoutbox,
+--    -- one way to do that:
+--    local w = awful.widget.watch('bash -c "sensors | grep temp1"', 15)
+--
+--    -- another way:
+--    local w = awful.widget.watch('sensors', 15, function(widget, stdout)
+--        for line in stdout:gmatch("[^\r\n]+") do
+--            if line:match("temp1") then
+--                widget:set_text(line)
+--                return
+--            end
+--        end
+--    end)
 --
 -- ![Example screenshot](../images/awful_widget_watch.png)
 --
@@ -32,6 +31,7 @@
 -- @author Yauheni Kirylau
 -- @copyright 2015, 2016 Benjamin Petrenko, Yauheni Kirylau
 -- @widgetmod awful.widget.watch
+-- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -55,7 +55,7 @@ local watch = { mt = {} }
 --     function(widget, stdout, stderr, exitreason, exitcode)
 --         widget:set_text(stdout)
 --     end
--- @param callback.widget Base widget instance.
+-- @tparam wibox.widget callback.widget Base widget instance.
 -- @tparam string callback.stdout Output on stdout.
 -- @tparam string callback.stderr Output on stderr.
 -- @tparam string callback.exitreason Exit Reason.
@@ -64,7 +64,7 @@ local watch = { mt = {} }
 -- For "exit" reason it's the exit code.
 -- For "signal" reason — the signal causing process termination.
 --
--- @param[opt=wibox.widget.textbox()] base_widget Base widget.
+-- @tparam[opt=wibox.widget.textbox()] wibox.widget base_widget Base widget.
 --
 -- @return The widget used by this watch.
 -- @return Its gears.timer.
@@ -91,8 +91,6 @@ end
 function watch.mt.__call(_, ...)
     return watch.new(...)
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 

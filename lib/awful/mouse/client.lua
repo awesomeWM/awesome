@@ -13,9 +13,9 @@ local module = {}
 
 --- Move a client.
 -- @staticfct awful.mouse.client.move
--- @param c The client to move, or the focused one if nil.
+-- @tparam client c The client to move, or the focused one if nil.
 -- @param snap The pixel to snap clients.
--- @param finished_cb Deprecated, do not use.
+-- @noreturn
 -- @request client geometry mouse.move granted When `awful.mouse.client.move` is
 --  called.
 function module.move(c, snap, finished_cb) --luacheck: no unused args
@@ -69,8 +69,8 @@ end
 --- Get a client corner coordinates.
 -- @deprecated awful.mouse.client.corner
 -- @tparam[opt=client.focus] client c The client to get corner from, focused one by default.
--- @tparam string corner The corner to use: auto, top_left, top_right, bottom_left,
--- bottom_right, left, right, top bottom. Default is auto, and auto find the
+-- @tparam string corner The corner to use: `auto`, `top_left`, `top_right`, `bottom_left`,
+-- `bottom_right`, `left`, `right`, `top` or `bottom`. Default is `auto`. `auto` finds the
 -- nearest corner.
 -- @treturn string The corner name
 -- @treturn number x The horizontal position

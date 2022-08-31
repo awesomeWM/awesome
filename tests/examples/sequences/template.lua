@@ -7,6 +7,7 @@ local file_path, image_path = ...
 require("_common_template")(...)
 local capi = {client = client, screen = screen}
 local Pango = require("lgi").Pango
+local cairo = require("lgi").cairo
 local PangoCairo = require("lgi").PangoCairo
 require("awful.screen")
 require("awful.tag")
@@ -95,7 +96,7 @@ local function draw_lines()
         if (not self.widget_pos) or (not self.pager_pos) then return end
 
         cr:set_line_width(1)
-        cr:set_source_rgba(0,0,0,0.3)
+        cr:set_source(color.change_opacity(beautiful.fg_normal, 0.3))
 
         local count = #self.widget_pos
 
@@ -130,7 +131,7 @@ local function gen_vertical_line(args)
     local w = wibox.widget.base.make_widget()
 
     function w:draw(_, cr, w2, h)
-        cr:set_source_rgba(0,0,0,0.5)
+        cr:set_source(color.change_opacity(beautiful.fg_normal, 0.5))
 
         if args.begin then
             cr:rectangle(w2/2-0.5, h/2, 1, h/2)
@@ -146,7 +147,7 @@ local function gen_vertical_line(args)
             cr:arc(w2/2, args.center and h/2 or w2/2 ,bar_size/4, 0, 2*math.pi)
             cr:set_source_rgb(1,1,1)
             cr:fill_preserve()
-            cr:set_source_rgba(0,0,0,0.5)
+            cr:set_source(color.change_opacity(beautiful.fg_normal, 0.5))
             cr:stroke()
         end
     end
@@ -301,7 +302,8 @@ local function fake_arrange(tag)
         focus            = focus_wrap,
         geometries       = setmetatable({}, {__mode = "k"}),
         workarea         = tag.screen.workarea,
-        useless_gap      = tag.gaps or 4,
+        useless_gap      = tag.gaps or beautiful.useless_gap or 4,
+        gap_single_client= tag.gap_single_client or beautiful.gap_single_client or nil,
         apply_size_hints = false,
     }
 
@@ -354,14 +356,14 @@ local function gen_fake_clients(tag, args)
             cr:stroke()
 
             if show_name and type(geom.c) == "table" and geom.c.name then
-                cr:set_source_rgb(0, 0, 0)
+                cr:set_source(beautiful.fg_normal)
                 cr:move_to(x + 2, y + height - 2)
                 cr:show_text(geom.c.name)
             end
         end
 
         -- Draw the screen outline.
-        cr:set_source(color("#00000044"))
+        cr:set_source(color.change_opacity(beautiful.fg_normal, 0.1725))
         cr:set_line_width(1.5)
         cr:set_dash({10,4},1)
         cr:rectangle(0, 0, w, h)
@@ -446,7 +448,7 @@ local function gen_label(text)
 end
 
 local function draw_info(s, cr, factor)
-    cr:set_source_rgba(0, 0, 0, 0.4)
+    cr:set_source(color.change_opacity(beautiful.fg_normal, 0.4))
 
     local pctx    = PangoCairo.font_map_get_default():create_context()
     local playout = Pango.Layout.new(pctx)
@@ -638,7 +640,7 @@ local function gen_screens(l, screens, args)
         end
 
         function s.widget:draw(_, cr, w, h)
-            cr:set_source(color("#00000044"))
+            cr:set_source(color.change_opacity(beautiful.fg_normal, 0.1725))
             cr:set_line_width(1.5)
             cr:set_dash({10,4},1)
             cr:rectangle(1,1,w-2,h-2)
@@ -714,7 +716,9 @@ local function gen_timeline(args)
     awesome.startup = false --luacheck: ignore
 
     for _, event in ipairs(history) do
+        require("gears.timer").run_delayed_calls_now()
         local ret = event.callback()
+        require("gears.timer").run_delayed_calls_now()
         if event.event == "event" then
             l:add(wrap_timeline(gen_vertical_space(5)))
             l:add(wrap_timeline(wibox.widget {
@@ -725,6 +729,8 @@ local function gen_timeline(args)
             gen_noscreen(l, ret[1].tags, args)
         elseif event.event == "tags" and (#ret > 1 or args.display_screen) then
             gen_screens(l, ret, args)
+        elseif event.event == "widget" then
+            l:add(wrap_timeline(ret))
         end
     end
 
@@ -783,6 +789,39 @@ local function wrap_with_arrows(widget)
         fit          = fixed_fit2,
         layout       = wibox.layout.fixed.vertical
     }
+end
+
+-- Use a recording surface to store the widget content.
+function module.display_widget(wdg, width, height, context)
+    local function do_it()
+        context = context or {dpi=96}
+
+        local w, h = wdg:fit(context, width or 9999, height or 9999)
+
+        w, h = math.min(w,  width or 9999), math.min(h, height or 9999)
+
+        local memento = cairo.RecordingSurface(
+            cairo.Content.CAIRO_FORMAT_ARGB32,
+            cairo.Rectangle { x = 0, y = 0, width = w, height = h }
+        )
+
+        local cr = cairo.Context(memento)
+
+        wibox.widget.draw_to_cairo_context(wdg, cr, w, h, context)
+
+        return wibox.widget {
+            fit = function()
+                return w, h+5
+            end,
+            draw = function(_, _, cr2)
+                cr2:translate(0, 5)
+                cr2:set_source_surface(memento)
+                cr2:paint()
+            end
+        }
+    end
+
+    table.insert(history, {event="widget", callback = do_it})
 end
 
 function module.display_tags()

@@ -29,7 +29,7 @@ local ratio = {}
 --@DOC_wibox_layout_ratio_spacing_widget_EXAMPLE@
 --
 -- @property spacing_widget
--- @tparam widget spacing_widget
+-- @tparam[opt=nil] widget|nil spacing_widget
 -- @propemits true false
 -- @interface layout
 
@@ -38,7 +38,8 @@ local ratio = {}
 --@DOC_wibox_layout_ratio_spacing_EXAMPLE@
 --
 -- @property spacing
--- @tparam number spacing Spacing between widgets.
+-- @tparam[opt=0] number spacing
+-- @negativeallowed true
 -- @propemits true false
 -- @interface layout
 
@@ -215,6 +216,7 @@ end
 -- @tparam number index The widget index to change
 -- @tparam number increment An floating point value between -1 and 1 where the
 --   end result is within 0 and 1
+-- @noreturn
 function ratio:inc_ratio(index, increment)
     if #self._private.widgets ==  1 or (not index) or (not self._private.ratios[index])
       or increment < -1 or increment > 1 then
@@ -234,6 +236,7 @@ end
 -- @tparam widget widget The widget to adjust
 -- @tparam number increment An floating point value between -1 and 1 where the
 --   end result is within 0 and 1
+-- @noreturn
 function ratio:inc_widget_ratio(widget, increment)
     if not widget or not increment then return end
 
@@ -247,6 +250,7 @@ end
 -- @method set_ratio
 -- @tparam number index The index of the widget to change
 -- @tparam number percent An floating point value between 0 and 1
+-- @noreturn
 function ratio:set_ratio(index, percent)
     if not percent or #self._private.widgets ==  1 or not index or not self._private.widgets[index]
         or percent < 0 or percent > 1 then
@@ -286,6 +290,7 @@ end
 -- @method set_widget_ratio
 -- @tparam widget widget The widget to adjust.
 -- @tparam number percent A floating point value between 0 and 1.
+-- @noreturn
 function ratio:set_widget_ratio(widget, percent)
     local index = self:index(widget)
 
@@ -302,6 +307,7 @@ end
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
 -- @tparam number after The sum of the ratio after the widget
+-- @noreturn
 function ratio:adjust_ratio(index, before, itself, after)
     if not self._private.widgets[index] or not before or not itself or not after then
         return
@@ -342,19 +348,15 @@ end
 -- @see wibox.layout.ratio.adjust_ratio
 -- @deprecated wibox.layout.ratio.ajust_ratio
 -- @tparam number index The index of the widget to change
--- @tparam number index The index of the widget to change
--- @tparam number before The sum of the ratio before the widget
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
--- @tparam number itself The ratio for "widget"
--- @tparam number after The sum of the ratio after the widget
 -- @tparam number after The sum of the ratio after the widget
 function ratio:ajust_ratio(...)
     require('gears.debug').deprecate(
         "Use `:adjust_ratio` rather than `:ajust_ratio`",
         { deprecated_in = 5 }
     )
-    return self:adjust_ratio(...)
+    self:adjust_ratio(...)
 end
 
 --- Update all widgets to match a set of a ratio.
@@ -364,6 +366,7 @@ end
 -- @tparam number before The sum of the ratio before the widget
 -- @tparam number itself The ratio for "widget"
 -- @tparam number after The sum of the ratio after the widget
+-- @noreturn
 function ratio:adjust_widget_ratio(widget, before, itself, after)
     local index = self:index(widget)
     self:adjust_ratio(index, before, itself, after)
@@ -375,11 +378,9 @@ end
 -- @deprecated wibox.layout.ratio.ajust_widget_ratio
 -- @tparam widget widget The widget to adjust
 -- @tparam number before The sum of the ratio before the widget
--- @tparam number before The sum of the ratio before the widget
--- @tparam number itself The ratio for "widget"
 -- @tparam number itself The ratio for "widget"
 -- @tparam number after The sum of the ratio after the widget
--- @tparam number after The sum of the ratio after the widget
+-- @noreturn
 function ratio:ajust_widget_ratio(...)
     require('gears.debug').deprecate(
         "Use `:adjust_widget_ratio` rather than `:ajust_widget_ratio`",
@@ -392,6 +393,7 @@ end
 --
 -- @method add
 -- @tparam widget ... Widgets that should be added (must at least be one)
+-- @noreturn
 -- @emits widget::added All new widgets are passed in the parameters.
 -- @emitstparam widget::added widget self The layout.
 function ratio:add(...)
@@ -439,6 +441,8 @@ end
 -- @method insert
 -- @tparam number index The position.
 -- @tparam widget widget The widget.
+-- @treturn boolean `true` if the widget was inserted and `false` if the index
+--  is invalid.
 -- @emits widget::inserted
 -- @emitstparam widget::inserted widget self The ratio layout.
 -- @emitstparam widget::inserted widget widget index The inserted widget.
@@ -454,24 +458,23 @@ function ratio:insert(index, widget)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::inserted", widget, #self._private.widgets)
+
+    return true
 end
 
 --- Set how the space of invisible or `0x0` sized widget is redistributed.
 --
--- Possible values:
---
--- * "default": Honor the ratio and do not redistribute the space.
--- * "justify": Distribute the space among remaining widgets.
--- * "center": Squash remaining widgets and leave equal space on both side.
--- * "inner_spacing": Add equal spacing between all widgets.
--- * "spacing": Add equal spacing between all widgets and on the outside.
--- * "left": Squash remaining widgets and leave empty space on the left.
--- * "right": Squash remaining widgets and leave empty space on the right.
---
 --@DOC_wibox_layout_ratio_strategy_EXAMPLE@
 --
 -- @property inner_fill_strategy
--- @tparam string inner_fill_strategy One of the value listed above.
+-- @tparam[opt="default"] string inner_fill_strategy One of the value listed above.
+-- @propertyvalue "default" Honor the ratio and do not redistribute the space.
+-- @propertyvalue "justify" Distribute the space among remaining widgets.
+-- @propertyvalue "center" Squash remaining widgets and leave equal space on both side.
+-- @propertyvalue "inner_spacing" Add equal spacing between all widgets.
+-- @propertyvalue "spacing" Add equal spacing between all widgets and on the outside.
+-- @propertyvalue "left" Squash remaining widgets and leave empty space on the left.
+-- @propertyvalue "right" Squash remaining widgets and leave empty space on the right.
 -- @propemits true false
 
 function ratio:get_inner_fill_strategy()

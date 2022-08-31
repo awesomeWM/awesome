@@ -74,7 +74,7 @@ end
 --- The widget to be wrapped the the margins.
 --
 -- @property widget
--- @tparam widget widget The widget
+-- @tparam[opt=nil] widget|nil widget
 -- @interface container
 
 margin.set_widget = base.set_widget_common
@@ -94,8 +94,15 @@ end
 --- Set all the margins to val.
 --
 -- @property margins
--- @tparam number|table val The margin value. It can be a number or a table with
---  the *left*/*right*/*top*/*bottom* keys.
+-- @tparam[opt=0] number|table margins
+-- @tparam[opt=0] number margins.left
+-- @tparam[opt=0] number margins.right
+-- @tparam[opt=0] number margins.top
+-- @tparam[opt=0] number margins.bottom
+-- @propertytype number A single value for all margins.
+-- @propertytype table A different value for each side.
+-- @propertyunit pixel
+-- @negativeallowed false
 -- @propemits false false
 
 function margin:set_margins(val)
@@ -126,7 +133,8 @@ end
 --- Set the margins color to create a border.
 --
 -- @property color
--- @param color A color used to fill the margin.
+-- @tparam[opt=nil] color|nil color A color used to fill the margin.
+-- @propertytype nil Transparent margins.
 -- @propemits true false
 
 function margin:set_color(color)
@@ -142,7 +150,7 @@ end
 --- Draw the margin even if the content size is 0x0.
 --
 -- @property draw_empty
--- @tparam[opt=true] boolean draw_empty Draw nothing is content is 0x0 or draw
+-- @tparam[opt=true] boolean draw_empty Draw nothing is content is `0x0` or draw
 --  the margin anyway.
 -- @propemits true false
 
@@ -156,9 +164,11 @@ function margin:get_draw_empty()
     return self._private.draw_empty
 end
 
---- Reset this layout. The widget will be unreferenced, the margins set to 0
+--- Reset this layout.
+-- The widget will be unreferenced, the margins set to 0
 -- and the color erased
 -- @method reset
+-- @noreturn
 -- @interface container
 function margin:reset()
     self:set_widget(nil)
@@ -169,25 +179,33 @@ end
 --- Set the left margin that this layout adds to its widget.
 --
 -- @property left
--- @tparam number left The new margin to use.
+-- @tparam[opt=0] number left
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propemits true false
 
 --- Set the right margin that this layout adds to its widget.
 --
 -- @property right
--- @tparam number right The new margin to use.
+-- @tparam[opt=0] number right
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propemits true false
 
 --- Set the top margin that this layout adds to its widget.
 --
 -- @property top
--- @tparam number top The new margin to use.
+-- @tparam[opt=0] number top
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propemits true false
 
 --- Set the bottom margin that this layout adds to its widget.
 --
 -- @property bottom
--- @tparam number bottom The new margin to use.
+-- @tparam[opt=0] number bottom
+-- @negativeallowed false
+-- @propertyunit pixel
 -- @propemits true false
 
 -- Create setters for each direction
@@ -206,13 +224,13 @@ end
 
 --- Returns a new margin container.
 --
--- @param[opt] widget A widget to use.
--- @param[opt] left A margin to use on the left side of the widget.
--- @param[opt] right A margin to use on the right side of the widget.
--- @param[opt] top A margin to use on the top side of the widget.
--- @param[opt] bottom A margin to use on the bottom side of the widget.
--- @param[opt] color A color for the margins.
--- @param[opt] draw_empty whether or not to draw the margin when the content is empty
+-- @tparam[opt] widget widget A widget to use.
+-- @tparam[opt] number left A margin to use on the left side of the widget.
+-- @tparam[opt] number right A margin to use on the right side of the widget.
+-- @tparam[opt] number top A margin to use on the top side of the widget.
+-- @tparam[opt] number bottom A margin to use on the bottom side of the widget.
+-- @tparam[opt] gears.color color A color for the margins.
+-- @tparam[opt] boolean draw_empty Whether or not to draw the margin when the content is empty
 -- @treturn table A new margin container
 -- @constructorfct wibox.container.margin
 local function new(widget, left, right, top, bottom, color, draw_empty)

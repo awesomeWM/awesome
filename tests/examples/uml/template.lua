@@ -6,7 +6,11 @@ local wibox = require("wibox")
 local beautiful = require("beautiful")
 
 -- Make the path relative.
-local relative_image_path = "../" .. image_path:match("/(images/[^/]+)$")
+local path = image_path:match("/(images/[^/]+)$")
+if not path then
+    path = image_path:match("/(raw_images/[^/]+)$"):gsub("raw_", "")
+end
+local relative_image_path = "../" .. path
 
 -- This template generates an HTML table with how other classes are associated
 -- with a given class.
@@ -162,27 +166,24 @@ local map = {
 }
 
 local function gen_table_header(title, o)
-    print([[<td valign="top"><table class='widget_list' border=1>
-  <colgroup span="3"></colgroup>
- <tr><th align='center' colspan=3 scope=colgroup>]]..map[title](o)..[[</th></tr>
- <tr style='font-weight: bold;'>
-  <th align='center'>Class</th>
-  <th align='center'></th>
-  <th align='center'>Property</th>
- </tr>]])
+    print(table.concat({[[<div class="components-relationship--diagram">]],
+        [[<table class='widget_list' border=1>]],
+           [[<colgroup span="3"></colgroup>]],
+           [[<tr><th align='center' colspan=3 scope=colgroup>]]..map[title](o)..[[</th></tr>]],
+           [[<tr style='font-weight: bold;'>]],
+             [[<th align='center'>Class</th><th align='center'></th><th align='center'>Property</th>]],
+          [[</tr>]]
+    }))
 
 end
 
-local function get_table_row(path, class, prop)
-    print([[<tr>
-  <td>]].. class ..[[</td>
-  <td><img src="]]..path..[["></td>
-  <td>]].. prop ..[[</td>
- </tr>]])
+local function get_table_row(rel_path, class, prop)
+    print([[<tr><td>]].. class ..[[</td><td><img src="]]..rel_path
+        ..[["></td><td>]].. prop ..[[</td></tr>]])
 end
 
 local function get_table_footer()
-    print '</table></td>'
+    print '</table></div>'
 end
 
 local module = {}
@@ -193,7 +194,7 @@ function module.generate_nav_table(t)
     assert(t.content and t.class)
 
     print("\n\nCore components relationship\n===\n")
-    print '<table><tr>'
+    print('<div class="components-relationship"><div class="components-relationship--diagrams">')
 
     -- Validate early to avoid debugging cryptic backtraces.
     for _, tab in ipairs {"to", "from"} do
@@ -204,24 +205,24 @@ function module.generate_nav_table(t)
                 assert(entry.class)
                 assert(entry.left.msg and entry.left.card)
                 assert(entry.right.msg and entry.right.card)
-                local path = relative_image_path..counter..".svg"
+                local rel_path = relative_image_path..counter..".svg"
                 local fpath = image_path..counter..".svg"
                 local widget = gen_table_uml(entry, t.class, entry.class, false)
                 wibox.widget.draw_to_svg_file(widget, fpath, 320, 50)
-                get_table_row(path, entry.class, entry[tab.."_property"])
+                get_table_row(rel_path, entry.class, entry[tab.."_property"])
                 counter = counter + 1
             end
         end
         get_table_footer()
     end
-    print([[</tr><tr>
-  <td colspan=2 style="color:#00000044">
-  <b>Legend:</b> <i>c</i>: a client object, <i>t</i>: a tag object,
-  <i>s</i>: a screen object, <i>k</i>: an awful.key object,
-  <i>b</i>: a awful.button object, <i>n</i>: a naughty.notification object
-  </td>
- </tr>
-</table>]])
+
+    -- End the last section and add a footer
+    print(table.concat({[[</div><div class="components-relationship--legend">]],
+        [[<b>Legend:</b> <i>c</i>: a client object, <i>t</i>: a tag object, <i>s</i>]],
+        [[: a screen object, <i>k</i>: an awful.key object, <i>b</i>: a awful.button object,]],
+        [[<i>n</i>: a naughty.notification object</div></div> ]],
+        [[<!-- .components-relationship -->]]
+    }))
 end
 
 loadfile(file_path)(module)

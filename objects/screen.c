@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome screen API.
+/** A physical or virtual screen object.
  *
  * Screen objects can be added and removed over time. To get a callback for all
  * current and future screens, use `awful.screen.connect_for_each_screen`:
@@ -36,9 +36,6 @@
  *
  * Most basic Awesome objects also have a screen property, see `mouse.screen`
  * `client.screen`, `wibox.screen` and `tag.screen`.
- *
- * Furthermore to the classes described here, one can also use signals as
- * described in @{signals}.
  *
  * @DOC_uml_nav_tables_screen_EXAMPLE@
  *
@@ -167,18 +164,19 @@
 /**
  * The screen coordinates.
  *
- * **Signal:**
- *
- *  * *property::geometry*
+ * The returned table contains the `x`, `y`, `width` and `height` keys.
  *
  * @DOC_screen_geometry_EXAMPLE@
  *
  * @property geometry
- * @param table
- * @tfield integer table.x The horizontal position
- * @tfield integer table.y The vertical position
- * @tfield integer table.width The width
- * @tfield integer table.height The height
+ * @tparam table geometry
+ * @tparam integer geometry.x The horizontal position.
+ * @tparam integer geometry.y The vertical position.
+ * @tparam integer geometry.width The width.
+ * @tparam integer geometry.height The height.
+ * @propertydefault Either from `xrandr` or from `fake_resize`.
+ * @propertyunit pixel
+ * @propemits false false
  * @readonly
  */
 
@@ -208,7 +206,10 @@
  *     screen[1].answer = 42
  *
  * @property index
- * @param integer
+ * @tparam integer index
+ * @propertydefault The index is not derived from the geometry. It may or may
+ *  not be from `xrandr`. It isn't a good idea to rely on indices.
+ * @negativeallowed false
  * @see screen
  * @readonly
  */
@@ -222,26 +223,26 @@
  *
  * It can be modified be altering the `wibox` or `client` struts.
  *
- * **Signal:**
- *
- *  * *property::workarea*
- *
  * @DOC_screen_workarea_EXAMPLE@
  *
  * @property workarea
+ * @tparam table workarea
+ * @tparam integer workarea.x The horizontal position
+ * @tparam integer workarea.y The vertical position
+ * @tparam integer workarea.width The width
+ * @tparam integer workarea.height The height
+ * @propertyunit pixel
+ * @propertydefault Based on `geometry` with the `awful.wibar` and docks area
+ *  substracted.
+ * @propemits false false
  * @see client.struts
- * @param table
- * @tfield integer table.x The horizontal position
- * @tfield integer table.y The vertical position
- * @tfield integer table.width The width
- * @tfield integer table.height The height
  * @readonly
  */
 
 
 /** Get the number of instances.
  *
- * @return The number of screen objects alive.
+ * @treturn table The number of screen objects alive.
  * @staticfct instances
  */
 
@@ -1571,6 +1572,7 @@ luaA_screen_module_newindex(lua_State *L)
  * for s in screen do
  *     print("Oh, wow, we have screen " .. tostring(s))
  * end
+ * @treturn function A lua iterator function.
  * @staticfct screen
  */
 static int
@@ -1657,7 +1659,7 @@ luaA_screen_get_name(lua_State *L, screen_t *s)
 
 /** Get the number of screens.
  *
- * @return The screen count, at least 1.
+ * @treturn number The screen count.
  * @staticfct count
  */
 static int
@@ -1681,9 +1683,9 @@ luaA_screen_count(lua_State *L)
  *
  * @tparam integer x X-coordinate for screen.
  * @tparam integer y Y-coordinate for screen.
- * @tparam integer width width for screen.
- * @tparam integer height height for screen.
- * @return The new screen.
+ * @tparam integer width Width for screen.
+ * @tparam integer height Height for screen.
+ * @treturn screen The new screen.
  * @constructorfct fake_add
  */
 static int
@@ -1732,6 +1734,7 @@ luaA_screen_fake_add(lua_State *L)
  * @DOC_sequences_screen_fake_remove_EXAMPLE@
  *
  * @method fake_remove
+ * @noreturn
  */
 static int
 luaA_screen_fake_remove(lua_State *L)
@@ -1770,6 +1773,9 @@ luaA_screen_fake_remove(lua_State *L)
  * @tparam integer width The new width for screen.
  * @tparam integer height The new height for screen.
  * @method fake_resize
+ * @noreturn
+ * @see split
+ * @see geometry
  */
 static int
 luaA_screen_fake_resize(lua_State *L)
@@ -1805,6 +1811,7 @@ luaA_screen_fake_resize(lua_State *L)
  *
  * @tparam client s A screen to swap with.
  * @method swap
+ * @noreturn
  */
 static int
 luaA_screen_swap(lua_State *L)

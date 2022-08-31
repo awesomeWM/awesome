@@ -19,7 +19,16 @@
  *
  */
 
-/** awesome root window API.
+/** APIs to interact with the root window.
+ *
+ * X11 windows (clients) are stored in a tree. Each window
+ * can have children. A common example of this are modal
+ * dialog windows.
+ *
+ * This tree goes beyond a process. The root window is where
+ * the wallpaper is drawn. It span the combined geometry of
+ * every screen. It also persist when AwesomeWM is restarted.
+ *
  * @author Julien Danjou &lt;julien@danjou.info&gt;
  * @copyright 2008-2009 Julien Danjou
  * @coreclassmod root
@@ -271,6 +280,7 @@ _string_to_key_code(const char *s)
  *  coordinates relatives.
  * @param x In case of a motion event, this is the X coordinate.
  * @param y In case of a motion event, this is the Y coordinate.
+ * @noreturn
  * @staticfct fake_input
  */
 static int
@@ -339,7 +349,8 @@ luaA_root_fake_input(lua_State *L)
  * (the wallpaper).
  *
  * @property keys
- * @param table
+ * @tparam[opt={}] table keys
+ * @tablerowtype A list of `awful.key` objects.
  * @see awful.key
  */
 static int
@@ -380,7 +391,8 @@ luaA_root_keys(lua_State *L)
  * known as root window).
  *
  * @property buttons
- * @tparam[opt={}] table buttons The list of buttons.
+ * @tparam[opt={}] table buttons
+ * @tablerowtype A list of `awful.button` objects.
  * @see awful.button
  *
  * @usage
@@ -427,7 +439,8 @@ luaA_root_buttons(lua_State *L)
  *
  *@DOC_cursor_c_COMMON@
  *
- * @param cursor_name A X cursor name.
+ * @tparam string cursor_name A X cursor name.
+ * @noreturn
  * @staticfct cursor
  */
 static int
@@ -453,7 +466,7 @@ luaA_root_cursor(lua_State *L)
 
 /** Get the drawins attached to a screen.
  *
- * @return A table with all drawins.
+ * @treturn table A table with all drawins.
  * @staticfct drawins
  */
 static int
@@ -474,7 +487,8 @@ luaA_root_drawins(lua_State *L)
  *
  * @param pattern A cairo pattern as light userdata
  * @return A cairo surface or nothing.
- * @staticfct wallpaper
+ * @deprecated wallpaper
+ * @see awful.wallpaper
  */
 static int
 luaA_root_wallpaper(lua_State *L)
@@ -504,7 +518,9 @@ luaA_root_wallpaper(lua_State *L)
 /** Get the content of the root window as a cairo surface.
  *
  * @property content
- * @tparam surface A cairo surface with the root window content (aka the whole surface from every screens).
+ * @tparam raw_surface content A cairo surface with the root window content (aka the whole surface from every screens).
+ * @propertydefault This is the live content. Use `gears.surface(root.content)` to
+ *  take a screenshot.
  * @see gears.surface
  */
 static int
@@ -515,7 +531,7 @@ luaA_root_get_content(lua_State *L)
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.screen->root,
                                        globalconf.default_visual,
-                                       globalconf.screen->width_in_pixels, 
+                                       globalconf.screen->width_in_pixels,
                                        globalconf.screen->height_in_pixels);
 
     lua_pushlightuserdata(L, surface);
@@ -525,8 +541,8 @@ luaA_root_get_content(lua_State *L)
 
 /** Get the size of the root window.
  *
- * @return Width of the root window.
- * @return height of the root window.
+ * @treturn integer Width of the root window.
+ * @treturn integer height of the root window.
  * @staticfct size
  */
 static int
@@ -539,8 +555,8 @@ luaA_root_size(lua_State *L)
 
 /** Get the physical size of the root window, in millimeter.
  *
- * @return Width of the root window, in millimeters.
- * @return height of the root window, in millimeters.
+ * @treturn integer Width of the root window, in millimeters.
+ * @treturn integer height of the root window, in millimeters.
  * @staticfct size_mm
  */
 static int
@@ -552,7 +568,7 @@ luaA_root_size_mm(lua_State *L)
 }
 
 /** Get the attached tags.
- * @return A table with all tags.
+ * @treturn table A table with all tags.
  * @staticfct tags
  */
 static int

@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Rules for notifications.
+--- Apply properties to a new `naughty.notification` based on pre-determined rules.
 --
 --@DOC_wibox_nwidget_rules_urgency_EXAMPLE@
 --
@@ -158,6 +158,7 @@ end
 --
 -- @tparam naughty.notification n The notification.
 -- @staticfct ruled.notification.apply
+-- @noreturn
 function module.apply(n)
     local callbacks, props = {}, {}
 
@@ -179,6 +180,7 @@ end
 --- Add a new rule to the default set.
 -- @tparam table rule A valid rule.
 -- @staticfct ruled.notification.append_rule
+-- @noreturn
 function module.append_rule(rule)
     nrules:append_rule("ruled.notifications", rule)
 end
@@ -186,16 +188,20 @@ end
 --- Add a new rules to the default set.
 -- @tparam table rule A table with rules.
 -- @staticfct ruled.notification.append_rules
+-- @noreturn
 function module.append_rules(rules)
     nrules:append_rules("ruled.notifications", rules)
 end
 
 --- Remove a new rule to the default set.
 -- @tparam table rule A valid rule.
+-- @treturn boolean `true` if the rule was removed.
 -- @staticfct ruled.notification.remove_rule
 function module.remove_rule(rule)
-    nrules:remove_rule("ruled.notifications", rule)
+    local ret = nrules:remove_rule("ruled.notifications", rule)
     module.emit_signal("rule::removed", rule)
+
+    return ret
 end
 
 --- Add a new rule source.

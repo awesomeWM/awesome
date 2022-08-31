@@ -24,25 +24,27 @@
 <body>
 
 <div id="container">
-
-<div id="product">
-    <div id="product_logo"></div>
-    <div id="product_name"><big><b></b></big></div>
-    <div id="product_description"></div>
-</div> <!-- id="product" -->
-
-
 <div id="main">
 
 # local no_spaces = ldoc.no_spaces
 # local use_li = ldoc.use_li
 # local display_name = ldoc.display_name
 # local iter = ldoc.modules.iter
-# local function un_cmake(s) return s:gsub("&#59", ";"):gsub("&#34", '"') end
+# local function un_cmake(s) return s:gsub("&#59", ";"):gsub("&#34", '"'):gsub('&amp;#34', '"') end
 # local function M(txt,item) return ldoc.markup(txt and un_cmake(txt) or nil,item,ldoc.plain) end
 # local nowrap = ldoc.wrap and '' or 'nowrap'
 # local html_space = function(s) return s:gsub(" ", "%%20") end
 # local no_underscores = function(s) return s:gsub("_", " ") end
+# local get_item = function(mod, name) for item in iter(mod.items) do if item.name == name then return item end end; return name == "" and mod or nil end
+
+# -- Poke a hole to allow config.ld code to have a global initialization.
+# for m in iter(ldoc.modules) do
+#    if #m.items > 0 then
+#      display_name(m.items[1])
+#      m.items[1].global_init(ldoc)
+#      break
+#    end
+# end
 
 # --------- modules hierarchy -------------
 # local hierarchy = {}
@@ -74,7 +76,7 @@
 #     local myitems = {}
 #     for item in items() do
 #       myitems[#myitems + 1] = item
-#      end
+#     end
 #     all_module_kinds[#all_module_kinds + 1] = { kind = kind,  items = myitems }
 # end
 # local filtered_kinds = { "Constructors", "Static module functions",
@@ -121,7 +123,6 @@
 <!-- Menu -->
 
 <div id="navigation">
-<br/>
 <h1>$(ldoc.project)</h1>
 
 # if not ldoc.single and module then -- reference back to project index
@@ -147,7 +148,7 @@
 # if ldoc.no_summary and module and not ldoc.one then -- bang out the functions on the side
 # for kind, items in module.kinds() do
 #  if not kind:match("^ldoc_skip") then
-<h2>$(kind)dasdasd</h2>
+<h2>$(kind)</h2>
 <ul class="nowrap">
 #  end
 # for item in items() do
@@ -180,7 +181,7 @@
 <div id="content">
 
 # if ldoc.body then -- verbatim HTML as contents; 'non-code' entries
-    $(ldoc.body)
+    $(un_cmake(ldoc.body))
 # elseif module then -- module documentation
 <h1>Module: <code>$(module.name)</code></h1>
 <p>$(M(module.summary,module))</p>
@@ -280,7 +281,7 @@
 #   local dn = display_name(item)
 #   local inherited = (item.baseclass ~= module.name)
 #   if item.sanitize_type then item.sanitize_type(item, ldoc) end
-    <tr>
+    <tr class="summary_row">
 #   if item.display_type and not item.compact_signature then
       <td class="shortname" $(nowrap)><a href="#$(item.name)">$(dn)</a></td>
       <td class="summarytype" nowrap>$(item.display_type)</td>
@@ -292,17 +293,20 @@
 #     end
       </td>
 #   end
-      <td colspan="$(inherited and 1 or 2)" class="summary">
+      <td class="summary">
         $(M(item.summary,item))
-#   if item.tags.readonly then
-        <span class="chips--readonly">read only</span>
-#   end
       </td>
-#   if inherited then
       <td class="baseclass" nowrap>
-        Inherited from $(item.baseclass)
-      </td>
+#   if item.tags.is_deprecated then
+        <span class="chips">Deprecated</span>
 #   end
+#   if item.tags.readonly then
+        <span class="chips">Read only</span>
+#   end
+#   if inherited then
+        <span class="chips">Inherited from $(item.baseclass)</span>
+#   end
+      </td>
     </tr>
 #  end end -- for items
 # last_kind = kind
@@ -345,7 +349,7 @@
 #  end
 #  for item in iter(k.items) do if not item.tags.hidden then
     <dt>
-    <a name = "$(item.name)"></a>
+    <a class="copy-link js-copy-link" name="$(item.name)" href="#$(item.name)">&#128279;</a>
     <strong>$(display_name(item))</strong>
 #   if item.display_inheritance then
     <span class="inheritance">
@@ -373,40 +377,106 @@
     <dd>
     $(M(ldoc.descript(item),item))
 
-#  if show_parms and item.params and #item.params > 0 and not item.hide_params then
+#  if kind == "Object properties" and item.params[1] and #item.metadata > 0 then
+    <h3>Constraints:</h3>
+    <span class="property_type">
+      <table class="see_also">
+#   local current_level
+#   current_level = function(metadata, level)
+#    for _, metadata in ldoc.ipairs(metadata, level) do
+       <tr class="$(level>0 and "see_also_sublist" or "")">
+        <td style="padding-left:$(level*15)px;">
+         <i>
+          $(metadata.title)$(#(metadata.metadata or {}) > 0 and ":" or "")
+         </i>
+#     if metadata.datatype then
+          <span class="inline_types"> ($(metadata.datatype))</span>
+#     end
+        </td>
+#     if metadata.description and not metadata.description:match("^[\t\n ]*$") then
+        <td>: $(metadata.description)</td>
+#     end
+       <tr/>
+#     current_level(metadata.metadata, level + 1)
+#    end
+#   end --current_level
+#   current_level(item.metadata or {}, 0)
+     </table>
+    </span>
+#  elseif show_parms and item.params and #item.params > 0 and not item.hide_params then
 #    local subnames = module.kinds:type_of(item).subnames
 #    if subnames then
     <h3>$(subnames):</h3>
 #    end
-    <ul>
+#   local has_optional, has_named_call = false, false
+#   for parm in iter(item.params) do
+#     local param,sublist = item:subparam(parm)
+#     has_named_call = has_named_call or (sublist and item.is_named_call)
+#     for p in iter(param) do
+#       local def = item:default_of_param(p)
+#       has_optional = has_optional or (def and def ~= true)
+#     end
+#   end
+#   if has_named_call then
+        <div class="important_box">
+          <b>Note:</b> This $(item.kind) uses named parameters calling convention. It
+          means you call it with $(M('`{}`')) and omit the parantheses. For example,
+          calling this will all default argument would be <code>$(item.name){}</code>.
+          This is a Lua shortcut syntax equivalent to <code>$(item.name)({})</code>.
+          <code>args</code> is only a placeholder name for the "lone table argument"
+          used in named parameters calls.
+        </div>
+#   end
+    <table class="see_also">
+         <tr class="param_header">
+            <th>Name</th>
+            <th></th>
+            <th>Type(s)</th>
+            <th>Description</th>
+#   if has_optional then
+            <th>Default value</th>
+#   end
+         </tr>
 #   for parm in iter(item.params) do
 #     local param,sublist = item:subparam(parm)
 #     if sublist then
-        <li><span class="parameter">$(sublist)</span>$(M(item.params.map[sublist],item))
-        <ul>
+#       local def = item:default_of_param(sublist)
+        <tr>
+           <td><span class="parameter">$(sublist)</span></td>
+           <td>$(def and '<span class="chips">Optional</span>' or '')</td>
+           <td><span class="types"><span class="type">table</span></span></td>
+           <td class="see_also_description">$(M(item.params.map[sublist],item)) </td>
+#      if has_optional then
+#       if def and def ~= true then
+          <td><span class="default_value"><code>$(def)</code></span></td>
+#       elseif def then
+           <td><span class="not_applicable">Undefined</span></td>
+#       else
+           <td><span class="not_applicable" title="This parameter is mandatory">Not applicable</span></td>
+#       end
+#      end
+         </tr>
 #     end
 #     for p in iter(param) do
 #        local name,tp,def = item:display_name_of(p), ldoc.typename(item:type_of_param(p)), item:default_of_param(p)
-        <li><span class="parameter">$(name)</span>
-#       if tp ~= '' then
-            <span class="types">$(tp)</span>
+         <tr$(sublist and ' class="see_also_sublist"' or '')>
+           <td><span class="parameter">$(name)</span></td>
+           <td>$(def and '<span class="chips">Optional</span>' or '')</td>
+           <td><span class="types">$(tp)</span></td>
+           <td class="see_also_description">$(M(item.params.map[p],item))</td>
+#      if has_optional then
+#       if def and def ~= true then
+           <td><span class="default_value"><code>$(def)</code></span></td>
+#       elseif def then
+           <td><span class="not_applicable">Undefined</span></td>
+#       else
+           <td><span class="not_applicable" title="This parameter is mandatory">Not applicable</span></td>
 #       end
-        $(M(item.params.map[p],item))
-#       if def == true then
-         (<em>optional</em>)
-#      elseif def then
-         (<em>default</em> <code>$(def)</code>)
-#       end
-#       if item:readonly(p) then
-          <em>readonly</em>
-#       end
-        </li>
-#     end
-#     if sublist then
-        </li></ul>
+#      end
+         </tr>
 #     end
 #   end -- for
-    </ul>
+        </table>
 #   end -- if params
 
 #  if show_return and item.retgroups then local groups = item.retgroups
@@ -444,11 +514,21 @@
 #   if item.see then
 #     local li,il = use_li(item.see)
     <h3>See also:</h3>
-    <ul>
-#     for see in iter(item.see) do
-         $(li)<a href="$(ldoc.href(see))">$(see.label)</a>$(il)
+    <table class="see_also">
+#    for see in iter(item.see) do
+#      local see_item = see.mod and get_item(see.mod, see.name)
+#      local see_mod = (see_item and see.mod and see.mod ~= item.module and see.mod.name ~= see_item.name) and "("..see.mod.name..")" or ""
+     <tr>
+         <td><a href="$(ldoc.href(see))" title="In the $(see.mod and see.mod.name) module.">$(see.label)</a></td>
+         <td>$(see_item and M(see_item.summary)) $(see_mod)</td>
+         <td>
+#       if see_item or see.name == "" then
+             <span class="chips">$(see.name == "" and "module" or (see_item and see_item.kind))</span>
+#       end
+         </td>
+     <tr>
 #    end -- for
-    </ul>
+    </table>
 #   end -- if see
 
 #   if item.usage then
@@ -487,7 +567,7 @@
 #       end -- if group_header then
 #       for value in iter(tag) do
           <$(row_type_begin)>$(custom.format and custom.format(value, item, M) or M(value))</$(row_type_end)>
-#         local sub_values, sub_custom = item.get_auto_params(custom[1], value)
+#         local sub_values, sub_custom, extra_data = item.get_auto_params(custom[1], value)
 #         if sub_values then
            <ul>
 #          for _, value in ldoc.ipairs(sub_values) do
@@ -495,6 +575,12 @@
 #          end -- for auto_params
            </ul>
 #         end -- if item.auto_params
+#          if extra_data.usage then
+           <br/>
+           <p>
+           <pre class="auto_genenerated_code">$(extra_data.usage)</pre>
+#          end -- extra_data.usage
+
 #       end -- for
      </$(group_end)>
 #      end -- if tag
@@ -537,5 +623,78 @@
 <i>generated by <a href="http://github.com/stevedonovan/LDoc">LDoc $(ldoc.version)</a></i>
 </div> <!-- id="about" -->
 </div> <!-- id="container" -->
+
+<script defer type="text/javascript">
+    const $nav = document.querySelector("#navigation");
+
+    // When clicking the sidebar, open it
+    $nav.addEventListener("click", function(ev) {
+        if (document.body.clientWidth >= 768) {
+            return;
+        }
+
+        const target = $nav;
+        if (!target.classList.contains("open")) {
+            target.classList.add("open");
+            ev.stopPropagation();
+        }
+    });
+
+    // When clicking anywhere else than the sidebar, close it
+    document.querySelector("body").addEventListener("click", function(ev) {
+        if (document.body.clientWidth >= 768 || ev.target.contains($nav)) {
+            return;
+        }
+
+        const target = $nav;
+        if (target.classList.contains("open")) {
+            target.classList.remove("open");
+        }
+    });
+
+    const copyResultClasses = {
+        success : "copy-link--success",
+        failure: "copy-link--failure"
+    };
+
+    const removeCopyResultClasses = ($target) =>
+        Object.values(copyResultClasses).forEach(c => $target.classList.remove(c));
+
+    document.querySelectorAll(".js-copy-link").forEach(copyLink => {
+        copyLink.addEventListener("click", function(e) {
+            e.preventDefault();
+            const $target = e.target;
+
+            removeCopyResultClasses($target);
+
+            let link = $target.href;
+            if (!link) {
+                return;
+            }
+            if (link.startsWith("#")) {
+                const curr = window.location.pathname;
+                link = curr.substring(0, curr.indexOf("#")) + link;
+            }
+
+            // We need to create a fake element to copy the text from
+            const fakeElement = document.createElement("textarea");
+            fakeElement.value = link;
+            document.body.appendChild(fakeElement);
+            fakeElement.select();
+
+            let success = false;
+            try {
+                success = document.execCommand("copy");
+            } catch(err) {
+                success = false;
+            }
+
+            fakeElement.remove();
+            $target.classList.add(success ? copyResultClasses.success : copyResultClasses.failure);
+            setInterval(() => removeCopyResultClasses($target), 1500);
+        });
+    });
+</script>
+
 </body>
 </html>

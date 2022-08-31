@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- A simple button widget.
+-- A simple button widget based on a background image.
 --
 -- @DOC_wibox_awidget_defaults_button_EXAMPLE@
 --

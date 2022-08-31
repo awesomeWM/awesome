@@ -296,15 +296,8 @@ end
 
 --- The image rendered by the `imagebox`.
 --
--- It can can be any of the following:
---
--- * A `string`: Interpreted as a path to an image file
--- * A cairo image surface: Directly used as-is
--- * A librsvg handle object: Directly used as-is
--- * `nil`: Unset the image.
---
 -- @property image
--- @tparam image image The image to render.
+-- @tparam[opt=nil] image|nil image
 -- @propemits false false
 
 --- Set the `imagebox` image.
@@ -370,7 +363,7 @@ end
 -- @DOC_wibox_widget_imagebox_clip_shape_EXAMPLE@
 --
 -- @property clip_shape
--- @tparam function|gears.shape clip_shape A `gears.shape` compatible shape function.
+-- @tparam[opt=gears.shape.rectangle] shape clip_shape A `gears.shape` compatible shape function.
 -- @propemits true false
 -- @see gears.shape
 
@@ -402,7 +395,7 @@ end
 -- @DOC_wibox_widget_imagebox_resize_EXAMPLE@
 -- @property resize
 -- @propemits true false
--- @tparam boolean resize
+-- @tparam[opt=true] boolean resize
 
 --- Allow the image to be upscaled (made bigger).
 --
@@ -412,7 +405,7 @@ end
 --
 -- @DOC_wibox_widget_imagebox_upscale_EXAMPLE@
 -- @property upscale
--- @tparam boolean upscale
+-- @tparam[opt=self.resize] boolean upscale
 -- @see downscale
 -- @see resize
 
@@ -424,7 +417,7 @@ end
 --
 -- @DOC_wibox_widget_imagebox_downscale_EXAMPLE@
 -- @property downscale
--- @tparam boolean downscale
+-- @tparam[opt=self.resize] boolean downscale
 -- @see upscale
 -- @see resize
 
@@ -439,7 +432,7 @@ end
 --@DOC_wibox_widget_imagebox_stylesheet_EXAMPLE@
 --
 -- @property stylesheet
--- @tparam string stylesheet
+-- @tparam[opt=""] string stylesheet
 -- @propemits true false
 
 --- Set the SVG DPI (dot per inch).
@@ -455,7 +448,8 @@ end
 --@DOC_wibox_widget_imagebox_dpi_EXAMPLE@
 --
 -- @property dpi
--- @tparam number|table dpi
+-- @tparam[opt=96] number|table dpi
+-- @negativeallowed false
 -- @propemits true false
 -- @see auto_dpi
 
@@ -516,38 +510,30 @@ end
 
 --- Set the horizontal fit policy.
 --
--- Valid values are:
---
---  * `"auto"`: Honor the `resize` variable and preserve the aspect ratio.
---   This is the default behaviour.
---  * `"none"`: Do not resize at all.
---  * `"fit"`: Resize to the widget width.
---
 -- Here is the result for a 22x32 image:
 --
 -- @DOC_wibox_widget_imagebox_horizontal_fit_policy_EXAMPLE@
 --
 -- @property horizontal_fit_policy
 -- @tparam[opt="auto"] string horizontal_fit_policy
+-- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
+-- @propertyvalue "none" Do not resize at all.
+-- @propertyvalue "fit" Resize to the widget width.
 -- @propemits true false
 -- @see vertical_fit_policy
 -- @see resize
 
 --- Set the vertical fit policy.
 --
--- Valid values are:
---
---  * `"auto"`: Honor the `resize` varible and preserve the aspect ratio.
---   This is the default behaviour.
---  * `"none"`: Do not resize at all.
---  * `"fit"`: Resize to the widget height.
---
 -- Here is the result for a 32x22 image:
 --
 -- @DOC_wibox_widget_imagebox_vertical_fit_policy_EXAMPLE@
 --
 -- @property vertical_fit_policy
--- @tparam[opt="auto"] string horizontal_fit_policy
+-- @tparam[opt="auto"] string vertical_fit_policy
+-- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
+-- @propertyvalue "none" Do not resize at all.
+-- @propertyvalue "fit" Resize to the widget height.
 -- @propemits true false
 -- @see horizontal_fit_policy
 -- @see resize
@@ -555,32 +541,26 @@ end
 
 --- The vertical alignment.
 --
--- Possible values are:
---
--- * `"top"`
--- * `"center"` (default)
--- * `"bottom"`
---
 -- @DOC_wibox_widget_imagebox_valign_EXAMPLE@
 --
 -- @property valign
 -- @tparam[opt="center"] string valign
+-- @propertyvalue "top"
+-- @propertyvalue "center"
+-- @propertyvalue "bottom"
 -- @propemits true false
 -- @see wibox.container.place
 -- @see halign
 
 --- The horizontal alignment.
 --
--- Possible values are:
---
--- * `"left"`
--- * `"center"` (default)
--- * `"right"`
---
 -- @DOC_wibox_widget_imagebox_halign_EXAMPLE@
 --
 -- @property halign
 -- @tparam[opt="center"] string halign
+-- @propertyvalue "left"
+-- @propertyvalue "center"
+-- @propertyvalue "right"
 -- @propemits true false
 -- @see wibox.container.place
 -- @see valign
@@ -597,7 +577,8 @@ end
 -- @DOC_wibox_widget_imagebox_max_scaling_factor_EXAMPLE@
 --
 -- @property max_scaling_factor
--- @tparam number max_scaling_factor
+-- @tparam[opt=0] number max_scaling_factor Use `0` for "no limit".
+-- @negativeallowed false
 -- @propemits true false
 -- @see valign
 -- @see halign
@@ -629,8 +610,12 @@ end
 -- @DOC_wibox_widget_imagebox_scaling_quality_EXAMPLE@
 --
 -- @property scaling_quality
--- @tparam string scaling_quality Either `"fast"`, `"good"`, `"best"`,
---   `"nearest"` or `"bilinear"`.
+-- @tparam[opt="good"] string scaling_quality
+-- @propertyvalue "fast" A high-performance filter.
+-- @propertyvalue "good" A reasonable-performance filter.
+-- @propertyvalue "best" The highest-quality available.
+-- @propertyvalue "nearest" Nearest-neighbor filtering (blocky).
+-- @propertyvalue "bilinear" Linear interpolation in two dimensions.
 -- @propemits true false
 -- @see resize
 -- @see horizontal_fit_policy

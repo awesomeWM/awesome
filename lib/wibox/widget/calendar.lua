@@ -1,15 +1,15 @@
 ---------------------------------------------------------------------------
--- A calendar widget.
+-- Display a monthly or yearly calendar.
 --
 -- This module defines two widgets: a month calendar and a year calendar
 --
 -- The two widgets have a `date` property, in the form of
--- a table {day=[number|nil], month=[number|nil], year=[number]}.
+-- a table `{day=[number|nil], month=[number|nil], year=[number]}`.
 --
--- The `year` widget displays the whole specified year, e.g. {year=2006}.
+-- The `year` widget displays the whole specified year, e.g. `{year=2006}`.
 --
--- The `month` widget displays the calendar for the specified month, e.g. {month=12, year=2006},
--- highlighting the specified day if the day is provided in the date, e.g. {day=22, month=12, year=2006}.
+-- The `month` widget displays the calendar for the specified month, e.g. `{month=12, year=2006}`,
+-- highlighting the specified day if the day is provided in the date, e.g. `{day=22, month=12, year=2006}`.
 --
 -- Cell and container styles can be overridden using the `fn_embed` callback function
 -- which is called before adding the widgets to the layouts. The `fn_embed` function
@@ -68,46 +68,57 @@ local properties = { "date"        , "font"         , "spacing" , "week_numbers"
 
 --- The calendar date.
 --
--- A table representing the date {day=[number|nil], month=[number|nil], year=[number]}.
---
--- E.g.. {day=21, month=2, year=2005}, {month=2, year=2005}, {year=2005}
--- @tparam date table Date table.
+-- E.g.. `{day=21, month=2, year=2005}`, `{month=2, year=2005}, {year=2005}`
+-- @tparam[opt=nil] table|nil date
 -- @tparam number date.year Date year
 -- @tparam number|nil date.month Date month
 -- @tparam number|nil date.day Date day
+-- @propertytype nil The current date.
 -- @property date
 
 --- The calendar font.
 --
 -- Choose a monospace font for a better rendering.
+--
 --@DOC_wibox_widget_calendar_font_EXAMPLE@
--- @param[opt="Monospace 10"] string Font of the calendar
+--
+-- @tparam[opt="Monospace 10"] font font Font of the calendar
 -- @property font
+-- @usebeautiful beautiful.calendar_font
 
 --- The calendar spacing.
 --
 -- The spacing between cells in the month.
 -- The spacing between months in a year calendar is twice this value.
--- @param[opt=5] number Spacing of the grid
+-- @tparam[opt=5] number spacing Spacing of the grid
 -- @property spacing
+-- @negativeallowed false
+-- @propertyunit pixel
+-- @usebeautiful beautiful.calendar_spacing
 
 --- Display the calendar week numbers.
 --
 --@DOC_wibox_widget_calendar_week_numbers_EXAMPLE@
--- @param[opt=false] boolean Display week numbers
+--
+-- @tparam[opt=false] boolean week_numbers Display week numbers
 -- @property week_numbers
+-- @usebeautiful beautiful.calendar_week_numbers
 
 --- Start the week on Sunday.
 --
 --@DOC_wibox_widget_calendar_start_sunday_EXAMPLE@
--- @param[opt=false] boolean Start the week on Sunday
+--
+-- @tparam[opt=false] boolean start_sunday Start the week on Sunday
 -- @property start_sunday
+-- @usebeautiful beautiful.calendar_start_sunday
 
 --- Format the weekdays with three characters instead of two
 --
 --@DOC_wibox_widget_calendar_long_weekdays_EXAMPLE@
--- @param[opt=false] boolean Use three characters for the weekdays instead of two
+--
+-- @tparam[opt=false] boolean long_weekdays Use three characters for the weekdays instead of two
 -- @property long_weekdays
+-- @usebeautiful beautiful.calendar_long_weekdays
 
 --- The widget encapsulating function.
 --
@@ -119,15 +130,22 @@ local properties = { "date"        , "font"         , "spacing" , "week_numbers"
 -- It is used to add a container to the grid layout and to the cells:
 --
 --@DOC_wibox_widget_calendar_fn_embed_cell_EXAMPLE@
--- @param function Function to embed the widget depending on its flag
+-- @tparam[opt=nil] function|nil fn_embed Function to embed the widget depending on its flag.
+-- @functionparam widget widget
+-- @functionparam string flag The type of widget. It is one of `"header"`, `"monthheader"`,
+--  `"weeknumber"` `"weekday"`, `"focus"`, `"month"` or `"normal"`.
+-- @functionparam table date A table with `day`, `month` and `year` keys.
+-- @functionreturn widget A new widget to insert into the calendar.
+-- @propertytype nil Use an uncustomized `wibox.widget.textbox`.
 -- @property fn_embed
 
 --- Allow cells to have flexible height
 --
 --@DOC_wibox_widget_calendar_flex_height_EXAMPLE@
 --
--- @param[opt=false] boolean Allow flex height.
+-- @tparam[opt=false] boolean flex_height Allow flex height.
 -- @property flex_height
+-- @usebeautiful beautiful.flex_height
 
 --- Make a textbox
 -- @tparam string text Text of the textbox
@@ -257,7 +275,7 @@ end
 
 --- Create a grid layout for the year calendar
 -- @tparam table props Table of year calendar properties
--- @param date Year to display (number or string)
+-- @tparam number|string date Year to display.
 -- @treturn widget Grid layout
 local function create_year(props, date)
     -- Create a grid widget with the 12 months

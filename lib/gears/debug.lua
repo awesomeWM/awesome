@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Utility functions to make development easier.
+--
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
 -- @utillib gears.debug
@@ -48,7 +50,7 @@ end
 -- @param data Value to inspect.
 -- @param tag The name of the value.
 -- @tparam[opt] int depth Depth of recursion.
--- @return string A string that contains the expanded value of data.
+-- @treturn string A string that contains the expanded value of data.
 -- @staticfct gears.debug.dump_return
 function debug.dump_return(data, tag, depth)
     return dump_raw(data, nil, tag, depth)
@@ -59,6 +61,7 @@ end
 -- @param tag The name of the table.
 -- @tparam[opt] int depth Depth of recursion.
 -- @staticfct gears.debug.dump
+-- @noreturn
 function debug.dump(data, tag, depth)
     print(debug.dump_return(data, tag, depth))
 end
@@ -66,6 +69,7 @@ end
 --- Print an warning message
 -- @tparam string message The warning message to print.
 -- @staticfct gears.debug.print_warning
+-- @noreturn
 function debug.print_warning(message)
     io.stderr:write(os.date("%Y-%m-%d %T W: awesome: ") .. tostring(message) .. "\n")
 end
@@ -73,6 +77,7 @@ end
 --- Print an error message
 -- @tparam string message The error message to print.
 -- @staticfct gears.debug.print_error
+-- @noreturn
 function debug.print_error(message)
     io.stderr:write(os.date("%Y-%m-%d %T E: awesome: ") .. tostring(message) .. "\n")
 end
@@ -91,6 +96,7 @@ local displayed_deprecations = {}
 -- @tparam integer args.deprecated_in Print the message only when Awesome's
 --   version is equal to or greater than deprecated_in.
 -- @staticfct gears.debug.deprecate
+-- @noreturn
 -- @emits debug::deprecation This is usually routed to stdout when the API is
 --  newly deprecated.
 -- @emitstparam debug::deprecation string msg The full formatted message.
@@ -141,7 +147,7 @@ end
 -- @tparam table fallback The new class.
 -- @tparam string old_name The old class name.
 -- @tparam string new_name The new class name.
--- @tparam[opt={}] args The name.
+-- @tparam[opt={}] table args The name.
 -- @tparam[opt] number args.deprecated_in The version which deprecated this
 --  class.
 -- @treturn table A proxy class.

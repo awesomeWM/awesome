@@ -46,6 +46,7 @@ capi.awesome.connect_signal("xkb::map_changed", function() conversion = nil end)
 -- @tparam table modifiers A modified table. Valid modifiers are: `Any`, `Mod1`,
 --   `Mod2`, `Mod3`, `Mod4`, `Mod5`, `Shift`, `Lock` and `Control`.
 -- @tparam string key The key.
+-- @noreturn
 -- @staticfct awful.keyboard.emulate_key_combination
 function module.emulate_key_combination(modifiers, key)
     local modmap = generate_conversion_map()
@@ -90,6 +91,7 @@ end
 --
 -- @staticfct awful.keyboard.append_global_keybinding
 -- @tparam awful.key key The key object.
+-- @noreturn
 -- @see awful.key
 -- @see awful.keyboard.append_global_keybindings
 -- @see awful.keyboard.remove_global_keybinding
@@ -107,6 +109,7 @@ end
 -- @tparam table keys A table of `awful.key` objects. Optionally, it can have
 --  a `group` entry. If set, the `group` property will be set on all `awful.keys`
 --  objects.
+-- @noreturn
 -- @see awful.key
 -- @see awful.keyboard.append_global_keybinding
 -- @see awful.keyboard.remove_global_keybinding
@@ -131,6 +134,7 @@ end
 --
 -- @staticfct awful.keyboard.remove_global_keybinding
 -- @tparam awful.key key The key object.
+-- @noreturn
 -- @see awful.key
 -- @see awful.keyboard.append_global_keybinding
 
@@ -145,6 +149,7 @@ local default_keys = {}
 --
 -- @staticfct awful.keyboard.append_client_keybinding
 -- @tparam awful.key key The key.
+-- @noreturn
 -- @emits client_keybinding::added
 -- @emitstparam client_keybinding::added awful.key key The key.
 -- @see awful.key
@@ -164,6 +169,7 @@ end
 --
 -- @staticfct awful.keyboard.append_client_keybindings
 -- @tparam table keys A table containing `awful.key` objects.
+-- @noreturn
 -- @emits client_keybinding::added
 -- @emitstparam client_keybinding::added awful.key key The key.
 -- @see awful.key

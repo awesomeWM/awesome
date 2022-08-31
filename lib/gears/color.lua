@@ -53,6 +53,7 @@ local surface = require("gears.surface")
 
 local color = { mt = {} }
 local pattern_cache
+local color_string_cache = setmetatable({}, { __mode = "k" })
 
 --- Parse a HTML-color.
 -- This function can parse colors like `#rrggbb` and `#rrggbbaa` and also `red`.
@@ -281,6 +282,7 @@ end
 
 --- Create a pattern from a given string, same as @{gears.color}.
 -- @see gears.color
+-- @treturn gears.color A cairo pattern object.
 -- @staticfct gears.color.create_pattern
 function color.create_pattern(col)
     if cairo.Pattern:is_type_of(col) then
@@ -354,12 +356,75 @@ function color.recolor_image(image, new_color)
     return image
 end
 
+--- Take an input color and set a different opacity.
+--
+-- @staticfct gears.color.change_opacity
+-- @tparam string|pattern input The input color.
+-- @tparam number opacity A floating point number between 0 and 1.
+-- @treturn color The new color if successful or `input` if invalid.
+function color.change_opacity(input, opacity)
+    input = color.create_pattern(input)
+
+    local error, r, g, b, _ = input:get_rgba()
+
+    if error ~= "SUCCESS" then return input end
+
+    return cairo.Pattern.create_rgba(r, g, b, opacity)
+end
+
+--- Convert a color back to an hexadecimal color code.
+--
+-- This takes an input color, pattern or gradient and attempt to convert it
+-- to a color. If this fails, `fallback` is returned. This is useful when a
+-- color needs to be concatenated into a Pango markup string.
+--
+-- @staticfct gears.color.to_rgba_string
+-- @tparam pattern|string|gradient color Note that only solid colors can be
+--  convedted to the `RGBA` format.
+-- @tparam[opt=nil]  pattern|string|gradient fallback The color to return
+--  if `color` cannot be converted to a string.
+-- @treturn string The color in `#rrggbbaa` format.
+-- @see gears.color.ensure_pango_color
+
+function color.to_rgba_string(col, fallback)
+    if (not col) and (not fallback) then return nil end
+
+    -- Prevent infinite recursion.
+    if not col then return color.to_rgba_string(fallback) end
+
+    if color_string_cache[col] then
+        return color_string_cache[col]
+    end
+
+    col = color.create_pattern(col)
+
+    local error1, error2, r, g, b, a = pcall(function () return col:get_rgba() end)
+
+    -- Surface patterns don't have an RGBA representation.
+    if (not error1) or error2 ~= "SUCCESS" then return color.to_rgba_string(fallback) end
+
+    color_string_cache[col] = string.format(
+        "#%02x%02x%02x%02x",
+        math.floor(r*255),
+        math.floor(g*255),
+        math.floor(b*255),
+        math.floor(a*255)
+    )
+
+    return color_string_cache[col]
+end
+
 --- Get a valid color for Pango markup
 -- @param check_color The color to check.
 -- @tparam string fallback The color to return if the first is invalid. (default: black)
 -- @treturn string color if it is valid, else fallback.
 -- @staticfct gears.color.ensure_pango_color
 function color.ensure_pango_color(check_color, fallback)
+    -- This will happen if `gears.color` has been called in the theme.
+    if type(check_color) == "userdata" then
+        return color.to_rgba_string(check_color, fallback)
+    end
+
     check_color = tostring(check_color)
     -- Pango markup supports alpha, PangoColor does not. Thus, check for this.
     local len = #check_color

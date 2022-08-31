@@ -19,7 +19,7 @@
  *
  */
 
-/** awesome mouse API.
+/** Manipulate and inspect the mouse cursor.
  *
  * The mouse buttons are represented as index. The common ones are:
  *
@@ -76,7 +76,15 @@ static int miss_newindex_handler = LUA_REFNIL;
 /**
  * The `screen` under the cursor
  * @property screen
- * @param screen
+ * @tparam screen|nil screen
+ * @propertytype nil This will only happen if `screen` is set to `off` in the
+ *  modeline or command line options. It happens very early in the initialization
+ *  before the screens are created. If you check the screen from a signal, then
+ *  you should never have to worry about this. Another corner case where this
+ *  *might* happen is if you use `fake_resize` to have a smaller area than the
+ *  physical screen.
+ * @propertydefault It checks where the cursor is and match it to one of the
+ *  screen `geometry`.
  */
 
 /** Get the pointer position.
@@ -273,7 +281,7 @@ luaA_mouse_coords(lua_State *L)
 
 /** Get the client or any object which is under the pointer.
  *
- * @treturn client.object|nil A client or nil.
+ * @treturn client|wibox|nil A client, wibox or nil.
  * @staticfct object_under_pointer
  */
 static int

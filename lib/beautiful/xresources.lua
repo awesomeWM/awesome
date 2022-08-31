@@ -119,6 +119,7 @@ end
 --- Set DPI for a given screen (defaults to global).
 -- @tparam number dpi DPI value.
 -- @tparam[opt] integer s Screen.
+-- @noreturn
 -- @staticfct beautiful.xresources.set_dpi
 function xresources.set_dpi(dpi, s)
     s = get_screen(s)

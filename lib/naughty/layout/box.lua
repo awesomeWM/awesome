@@ -167,6 +167,7 @@ end)
 --
 -- @property notification
 -- @tparam naughty.notification notification
+-- @propertydefault This must be provided by the constructor.
 -- @propemits true false
 
 --- The widget template to construct the box content.
@@ -208,7 +209,7 @@ end)
 --    }
 --
 -- @property widget_template
--- @param widget
+-- @tparam[opt=nil] template|nil widget_template
 -- @usebeautiful beautiful.notification_max_width The maximum width for the
 --  resulting widget.
 
@@ -395,7 +396,5 @@ local function new(args)
 
     return ret
 end
-
---@DOC_wibox_COMMON@
 
 return setmetatable(box, {__call = function(_, args) return new(args) end})

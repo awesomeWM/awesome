@@ -1,14 +1,19 @@
---DOC_GEN_IMAGE --DOC_HIDE
+--DOC_GEN_IMAGE
 --DOC_NO_USAGE
-local place = require("awful.placement") --DOC_HIDE
-local awful = { titlebar = require("awful.titlebar"), --DOC_HIDE
-                button   = require("awful.button"), --DOC_HIDE
-              } --DOC_HIDE
-local wibox = require("wibox") --DOC_HIDE
-local gears = {table = require("gears.table")} --DOC_HIDE
+--DOC_HIDE_START
+local place = require("awful.placement")
+local awful = { titlebar = require("awful.titlebar"),
+                button   = require("awful.button"),
+                tag      = require("awful.tag"),
+              }
+local wibox = require("wibox")
+local gears = {table = require("gears.table")}
 
-local c = client.gen_fake {hide_first=true} --DOC_HIDE
-place.maximize(c, {honor_padding=true, honor_workarea=true}) --DOC_HIDE
+awful.tag.add("1", {screen=screen[1], selected = true})
+
+local c = client.gen_fake {hide_first=true}
+place.maximize(c, {honor_padding=true, honor_workarea=true})
+--DOC_HIDE_END
 
     -- Create a titlebar for the client.
     -- By default, `ruled.client` will create one, but all it does is to call this
@@ -18,6 +23,8 @@ place.maximize(c, {honor_padding=true, honor_workarea=true}) --DOC_HIDE
         size      = 20,
         bg_normal = "#ff0000",
     })
+
+    --DOC_NEWLINE
 
     -- buttons for the titlebar
     local buttons = gears.table.join(
@@ -33,7 +40,9 @@ place.maximize(c, {honor_padding=true, honor_workarea=true}) --DOC_HIDE
         end)
     )
 
-    top_titlebar : setup {
+    --DOC_NEWLINE
+
+    top_titlebar.widget = {
         { -- Left
             awful.titlebar.widget.iconwidget(c),
             buttons = buttons,
@@ -59,3 +68,4 @@ place.maximize(c, {honor_padding=true, honor_workarea=true}) --DOC_HIDE
     }
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
+

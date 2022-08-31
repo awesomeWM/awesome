@@ -1,7 +1,7 @@
 --luacheck: no max line length
 
 ---------------------------------------------------------------------------
---- Spawning of programs.
+--- Spawn sub-processes and optionally get their output.
 --
 -- This module provides methods to start programs and supports startup
 -- notifications, which allows for callbacks and applying properties to the
@@ -364,6 +364,10 @@ end
 --- Spawn a program using the shell.
 -- This calls `cmd` with `$SHELL -c` (via `awful.util.shell`).
 -- @tparam string cmd The command.
+-- @treturn[1] integer The forked PID.
+-- @treturn[1] ?string The startup notification ID, if `sn` is not false, or
+--   a `callback` is provided.
+-- @treturn[2] string Error message.
 -- @staticfct awful.spawn.with_shell
 function spawn.with_shell(cmd)
     if cmd and cmd ~= "" then
@@ -500,6 +504,7 @@ end
 -- @tparam[opt] function done_callback Function that is called when the
 --   operation finishes (e.g. due to end of file).
 -- @tparam[opt=false] boolean close Should the stream be closed after end-of-file?
+-- @noreturn
 -- @staticfct awful.spawn.read_lines
 function spawn.read_lines(input_stream, line_callback, done_callback, close)
     local stream = Gio.DataInputStream.new(input_stream)
@@ -649,8 +654,9 @@ end
 -- @tparam[opt] string unique_id A string to identify the client so it isn't executed
 --  multiple time.
 -- @tparam[opt] function callback A callback function when the client is created.
--- @see ruled.client
+-- @noreturn
 -- @staticfct awful.spawn.once
+-- @see ruled.client
 function spawn.once(cmd, rules, matcher, unique_id, callback)
     local hash = unique_id or hash_command(cmd, rules)
     local status = register_common(hash, rules, matcher, callback)
@@ -682,8 +688,9 @@ end
 -- @tparam[opt] string unique_id A string to identify the client so it isn't executed
 --  multiple time.
 -- @tparam[opt] function callback A callback function when the client is created.
--- @see ruled.client
+-- @noreturn
 -- @staticfct awful.spawn.single_instance
+-- @see ruled.client
 function spawn.single_instance(cmd, rules, matcher, unique_id, callback)
     local hash = unique_id or hash_command(cmd, rules)
     register_common(hash, rules, matcher, callback)

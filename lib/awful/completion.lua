@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Completion module.
+--- Helper utilities for bash-like completion lists.
 --
 -- This module store a set of function using shell to complete commands name.
 --
@@ -31,7 +31,8 @@ local bashcomp_src = "@SYSCONFDIR@/bash_completion"
 
 --- Enable programmable bash completion in awful.completion.bash at the price of
 -- a slight overhead.
--- @param src The bash completion source file, /etc/bash_completion by default.
+-- @tparam string src The bash completion source file, `/etc/bash_completion` by default.
+-- @noreturn
 -- @staticfct awful.completion.bashcomp_load
 function completion.bashcomp_load(src)
     if src then bashcomp_src = src end
@@ -189,11 +190,13 @@ end
 --- Run a generic completion.
 -- For this function to run properly the awful.completion.keyword table should
 -- be fed up with all keywords. The completion is run against these keywords.
--- @param text The current text the user had typed yet.
--- @param cur_pos The current cursor position.
--- @param ncomp The number of yet requested completion using current text.
--- @param keywords The keywords table uised for completion.
--- @return The new match, the new cursor position, the table of all matches.
+-- @tparam string text The current text the user had typed yet.
+-- @tparam number cur_pos The current cursor position.
+-- @tparam number ncomp The number of yet requested completion using current text.
+-- @tparam table keywords The keywords table uised for completion.
+-- @treturn string The new match.
+-- @treturn number The new cursor position.
+-- @treturn table The table of all matches.
 -- @staticfct awful.completion.generic
 function completion.generic(text, cur_pos, ncomp, keywords) -- luacheck: no unused args
     -- The keywords table may be empty

@@ -296,7 +296,10 @@ end
 -- @DOC_text_awful_keygrabber_timeout_EXAMPLE@
 --
 -- @property timeout
--- @param number
+-- @tparam[opt=nil] number|nil timeout
+-- @propertyunit second
+-- @negativeallowed false
+-- @propertytype nil No timeout.
 -- @see gears.timer
 -- @see timeout_callback
 
@@ -313,26 +316,23 @@ end
 --
 -- It can also be a table containing many keys (as values).
 --
--- @DOC_text_awful_keygrabber_stop_keys_EXAMPLE@
---
--- @DOC_text_awful_keygrabber_stop_key_EXAMPLE@
---
 -- Please note that modkeys are not accepted as `stop_key`s. You have to use
 -- their corresponding key names such as `Control_L`.
 --
 -- @property stop_key
--- @param[opt=nil] string|table stop_key
+-- @tparam[opt=nil] string|table|nil stop_key
+-- @propertyunit nil No stop key.
+-- @propertyunit string A single stop key.
+-- @propertyunit table One or more stop key(s).
+-- @tablerowtype A list of key names, such as `"Control"` or `"a"`.
 -- @see stop_event
 
 --- The event on which the keygrabbing will be terminated.
 --
--- the valid values are:
---
--- * "press" (default)
--- * "release"
---
 -- @property stop_event
--- @param string
+-- @tparam[opt="press"] string stop_event
+-- @propertyvalue "press" When the keyboard key is first pressed.
+-- @propertyvalue "release" When the keyboard key is released.
 -- @see stop_key
 
 --- Whether or not to execute the key press/release callbacks when keybindings are called.
@@ -344,14 +344,14 @@ end
 -- By default, keybindings block those callbacks from being executed.
 --
 -- @property mask_event_callback
--- @param[opt=true] boolean
+-- @tparam[opt=true] boolean mask_event_callback
 -- @see keybindings
 -- @see keyreleased_callback
 -- @see keypressed_callback
 
 --- Do not call the callbacks on modifier keys (like `Control` or `Mod4`) events.
 -- @property mask_modkeys
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean mask_modkeys
 -- @see mask_event_callback
 
 --- Export all keygrabber keybindings as root (global) keybindings.
@@ -365,7 +365,7 @@ end
 -- have a single instance.
 --
 -- @property export_keybindings
--- @param[opt=false] boolean
+-- @tparam[opt=false] boolean export_keybindings
 
 --- The root (global) keybinding to start this keygrabber.
 --
@@ -376,7 +376,8 @@ end
 -- @DOC_text_awful_keygrabber_root_keybindings_EXAMPLE@
 --
 -- @property root_keybindings
--- @param table
+-- @tparam[opt={}] table root_keybindings
+-- @tablerowtype A list of `awful.key` objects.
 -- @see export_keybindings
 -- @see keybindings
 
@@ -385,7 +386,8 @@ end
 -- This property contains a table of `awful.key` objects.
 --
 -- @property keybindings
--- @param table
+-- @tparam[opt={}] table keybindings
+-- @tablerowtype A list of `awful.key` objects.
 -- @see export_keybindings
 -- @see root_keybindings
 -- @see awful.key
@@ -402,7 +404,10 @@ end
 -- @DOC_text_awful_keygrabber_allowed_keys_EXAMPLE@
 --
 -- @property allowed_keys
--- @tparam[opt=nil] table|nil allowed_keys The list of keys.
+-- @tparam[opt=nil] table|nil allowed_keys
+-- @propertytype nil All keys are allowed.
+-- @propertytype table Only some keys are allowed.
+-- @tablerowtype A list of key names, such as `"Control"` or `"a"`.
 
 --- The sequence of keys recorded since the start of the keygrabber.
 --
@@ -415,7 +420,7 @@ end
 -- @DOC_text_awful_keygrabber_autostart_EXAMPLE@
 --
 -- @property sequence
--- @param string
+-- @tparam[opt=""] string sequence
 --
 
 --- The current (running) instance of this keygrabber.
@@ -500,6 +505,7 @@ end
 -- @method stop
 -- @tparam string|nil stop_key Override the key passed to `stop_callback` **DEPRECATED**
 -- @tparam tale|nil Override the modifiers passed to `stop_callback` **DEPRECATED**
+-- @noreturn
 -- @emits stopped
 -- @emits property::current_instance
 function keygrabber:stop(stop_key, stop_mods)
@@ -535,6 +541,7 @@ end
 -- @method add_keybinding
 -- @tparam awful.key key The key.
 -- @tparam string description.group The keybinding group
+-- @noreturn
 
 function keygrabber:add_keybinding(key, keycode, callback, description)
     local mods = not key._is_awful_key and key or nil
@@ -652,7 +659,7 @@ end
 --
 -- @callback keypressed_callback
 -- @tparam table self The current transaction object.
--- @tparam table mod The current modifiers (like "Control" or "Shift").
+-- @tparam table mod The current modifiers (like `"Control"` or `"Shift"`).
 -- @tparam string key The key name.
 -- @tparam string event The event ("press" or "release").
 -- @usage local function my_keypressed_cb(self, mod, key, command)
@@ -666,7 +673,7 @@ end
 -- end
 -- @callback keyreleased_callback
 -- @tparam table self The current transaction object.
--- @tparam table mod The current modifiers (like "Control" or "Shift").
+-- @tparam table mod The current modifiers (like `"Control"` or `"Shift"`).
 -- @tparam string key The key name.
 -- @tparam string event The event ("press" or "release")
 
@@ -698,7 +705,7 @@ end
 -- @tparam[opt=false] boolean args.export_keybindings Create root (global) keybindings.
 -- @tparam[opt=false] boolean args.autostart Start the grabbing immediately
 -- @tparam[opt=false] boolean args.mask_modkeys Do not call the callbacks on
---  modifier keys (like `Control` or `Mod4`) events.
+--  modifier keys (like `"Control"` or `"Mod4"`) events.
 -- @constructorfct awful.keygrabber
 function keygrab.run_with_keybindings(args)
     args = args or {}
@@ -852,6 +859,7 @@ local signals = {}
 -- @staticfct awful.keygrabber.connect_signal
 -- @tparam string name The signal name.
 -- @tparam function callback The callback.
+-- @noreturn
 function keygrab.connect_signal(name, callback)
     signals[name] = signals[name] or {}
 
@@ -865,6 +873,7 @@ end
 -- @staticfct awful.keygrabber.disconnect_signal
 -- @tparam string name The signal name.
 -- @tparam function callback The callback.
+-- @noreturn
 function keygrab.disconnect_signal(name, callback)
     signals[name] = signals[name] or {}
 
@@ -885,6 +894,7 @@ end
 -- @staticfct awful.keygrabber.emit_signal
 -- @tparam string name The signal name.
 -- @param ... Other arguments for the callbacks.
+-- @noreturn
 function keygrab.emit_signal(name, ...)
     signals[name] = signals[name] or {}
 

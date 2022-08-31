@@ -82,6 +82,7 @@ local index_theme_cache = {}
 -- @tparam string icon_theme_name Internal name of icon theme
 -- @tparam table base_directories Paths used for lookup
 -- @treturn table An instance of the class `icon_theme`
+-- @usebeautiful beautiful.icon_theme
 icon_theme.new = function(icon_theme_name, base_directories)
     icon_theme_name = icon_theme_name or beautiful.icon_theme or get_default_icon_theme_name()
     base_directories = base_directories or get_pragmatic_base_directories()

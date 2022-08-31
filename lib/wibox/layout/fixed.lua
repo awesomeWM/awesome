@@ -1,4 +1,6 @@
 ---------------------------------------------------------------------------
+-- Place many widgets in a column or row, until the available space is used up.
+--
 -- A `fixed` layout may be initialized with any number of child widgets, and
 -- during runtime widgets may be added and removed dynamically.
 --
@@ -134,6 +136,7 @@ end
 --
 -- @method add
 -- @tparam widget ... Widgets that should be added (must at least be one).
+-- @noreturn
 -- @interface layout
 function fixed:add(...)
     -- No table.pack in Lua 5.1 :-(
@@ -296,7 +299,7 @@ end
 --@DOC_wibox_layout_fixed_spacing_widget_EXAMPLE@
 --
 -- @property spacing_widget
--- @tparam widget spacing_widget
+-- @tparam[opt=nil] widget|nil spacing_widget
 -- @propemits true false
 -- @interface layout
 
@@ -401,7 +404,7 @@ end
 -- widget will get all the space that is left. If this is false, the last widget
 -- won't be handled specially and there can be space left unused.
 -- @property fill_space
--- @tparam boolean fill_space
+-- @tparam[opt=false] boolean fill_space
 -- @propemits true false
 
 function fixed:fill_space(val)
@@ -452,7 +455,8 @@ end
 --@DOC_wibox_layout_fixed_spacing_EXAMPLE@
 --
 -- @property spacing
--- @tparam number spacing Spacing between widgets.
+-- @tparam[opt=0] number spacing Spacing between widgets.
+-- @negativeallowed true
 -- @propemits true false
 -- @interface layout
 

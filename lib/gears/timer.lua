@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Timer objects and functions.
+--- Class to execute code at specific intervals.
 --
 -- @usage
 --    -- Create a widget and update its content using the output of a shell
@@ -91,6 +91,7 @@ local timer = { mt = {} }
 
 --- Start the timer.
 -- @method start
+-- @noreturn
 -- @emits start
 function timer:start()
     if self.data.source_id ~= nil then
@@ -110,6 +111,7 @@ end
 -- Does nothing if the timer isn't running.
 --
 -- @method stop
+-- @noreturn
 -- @emits stop
 function timer:stop()
     if self.data.source_id == nil then
@@ -124,6 +126,7 @@ end
 -- This is equivalent to stopping the timer if it is running and then starting
 -- it.
 -- @method again
+-- @noreturn
 -- @emits start
 -- @emits stop
 function timer:again()
@@ -134,13 +137,20 @@ function timer:again()
 end
 
 --- The timer is started.
+--
+-- For this to be `true` by default, pass `autostart` to the constructor.
+--
 -- @property started
--- @param boolean
+-- @tparam[opt=false] boolean started
+-- @see start
+-- @see stop
 
 --- The timer timeout value.
--- **Signal:** property::timeout
+--
 -- @property timeout
--- @param number
+-- @tparam[opt=0] number timeout
+-- @propertyunit second
+-- @negativeallowed false
 -- @propemits true false
 
 local timer_instance_mt = {
@@ -264,6 +274,7 @@ local delayed_calls = {}
 -- all, because it means that less batching happens and the delayed calls run
 -- prematurely.
 -- @staticfct gears.timer.run_delayed_calls_now
+-- @noreturn
 function timer.run_delayed_calls_now()
     for _, callback in ipairs(delayed_calls) do
         protected_call(unpack(callback))
@@ -274,6 +285,7 @@ end
 --- Call the given function at the end of the current GLib event loop iteration.
 -- @tparam function callback The function that should be called
 -- @param ... Arguments to the callback function
+-- @noreturn
 -- @staticfct gears.timer.delayed_call
 function timer.delayed_call(callback, ...)
     assert(type(callback) == "function", "callback must be a function, got: " .. type(callback))

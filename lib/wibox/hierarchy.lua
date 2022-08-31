@@ -23,6 +23,7 @@ local widgets_to_count = setmetatable({}, { __mode = "k" })
 -- visible in any hierarchy.
 -- @param widget The widget that should be counted.
 -- @staticfct wibox.hierarchy.count_widget
+-- @noreturn
 function hierarchy.count_widget(widget)
     widgets_to_count[widget] = true
 end
@@ -232,6 +233,7 @@ end
 
 --- Get the widget that this hierarchy manages.
 -- @method get_widget
+-- @treturn wibox.widget The widget held by this node.
 function hierarchy:get_widget()
     return self._widget
 end
@@ -318,6 +320,7 @@ end
 -- @param context The context in which widgets are drawn.
 -- @param cr The cairo context that is used for drawing.
 -- @method draw
+-- @noreturn
 function hierarchy:draw(context, cr)
     local widget = self:get_widget()
     if not widget._private.visible then

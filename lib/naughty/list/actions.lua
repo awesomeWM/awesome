@@ -24,6 +24,7 @@
 -- @author Emmanuel Lepage Vallee &lt;elv1313@gmail.com&gt;
 -- @copyright 2017 Emmanuel Lepage Vallee
 -- @widgetmod naughty.list.actions
+-- @supermodule wibox.widget.base
 -- @see awful.widget.common
 ----------------------------------------------------------------------------
 
@@ -188,7 +189,7 @@ local actionlist = {}
 
 --- The actionlist parent notification.
 -- @property notification
--- @tparam naughty.notification notification
+-- @tparam[opt=nil] naughty.notification|nil notification
 -- @propemits true false
 -- @see naughty.notification
 
@@ -196,18 +197,33 @@ local actionlist = {}
 -- If no layout is specified, a `wibox.layout.fixed.horizontal` will be created
 -- automatically.
 -- @property base_layout
--- @tparam widget base_layout
+-- @tparam[opt=wibox.layout.fixed.horizontal] widget base_layout
 -- @propemits true false
 -- @see wibox.layout.fixed.horizontal
 
 --- The actionlist parent notification.
 -- @property widget_template
--- @tparam table widget_template
+-- @tparam[opt=nil] template|nil widget_template
 -- @propemits true false
 
 --- A table with values to override each `beautiful.notification_action` values.
 -- @property style
--- @tparam table style
+-- @tparam[opt={}] table|nil style
+-- @tparam boolean|nil style.underline_normal
+-- @tparam boolean|nil style.underline_selected
+-- @tparam shape|nil style.shape_normal
+-- @tparam shape|nil style.shape_selected
+-- @tparam gears.color|string|nil style.shape_border_color_normal
+-- @tparam gears.color|string|nil style.shape_border_color_selected
+-- @tparam number|nil style.shape_border_width_normal
+-- @tparam number|nil style.shape_border_width_selected
+-- @tparam number|nil style.icon_size
+-- @tparam color|string|nil style.bg_normal
+-- @tparam color|string|nil style.bg_selected
+-- @tparam color|string|nil style.fg_normal
+-- @tparam color|string|nil style.fg_selected
+-- @tparam surface|string|nil style.bgimage_normal
+-- @tparam surface|string|nil style.bgimage_selected
 -- @propemits true false
 -- @usebeautiful beautiful.font Fallback when the `font` property isn't set.
 -- @usebeautiful beautiful.notification_action_underline_normal Fallback.
@@ -348,8 +364,6 @@ local function new(_, args)
 
     return wdg
 end
-
---@DOC_widget_COMMON@
 
 --@DOC_object_COMMON@
 
