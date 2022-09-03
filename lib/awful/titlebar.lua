@@ -617,7 +617,7 @@ local default_tooltip_messages = {
 -- @see awful.tooltip
 
 --- Titlebar buttons tooltip parameter `align`.
--- This parameter `align` defines the alignment: 
+-- This parameter `align` defines the alignment:
 -- `right`, `top_right`, `left`, `bottom_left`, `top_left`, `bottom`, `top`
 -- @beautiful beautiful.titlebar_tooltip_align
 -- @tparam string align the alignment string type
