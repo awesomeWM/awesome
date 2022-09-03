@@ -39,6 +39,18 @@ local titlebar = {
     fallback_name = '<unknown>'
 }
 
+local default_tooltip_messages = {
+    close = "Close",
+    minimize = "Minimize",
+    maximized_active = "Unmaximize",
+    maximized_inactive = "Maximize",
+    floating_active = "Tiling",
+    floating_inactive = "Floating",
+    ontop_active = "NotOnTop",
+    ontop_inactive = "OnTop",
+    sticky_active = "NotSticky",
+    sticky_inactive = "Sticky"
+}
 
 --- Show tooltips when hover on titlebar buttons.
 --
@@ -530,6 +542,86 @@ local titlebar = {
 -- @tparam gears.surface|string path
 -- @see gears.surface
 
+--- Titlebar tooltip message for close button.
+-- @beautiful beautiful.titlebar_tooltip_messages_close
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for minimize button.
+-- @beautiful beautiful.titlebar_tooltip_messages_minimize
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for maximized button when client is maximized.
+-- @beautiful beautiful.titlebar_tooltip_messages_maximized_active
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for maximized button when client is unmaximized.
+-- @beautiful beautiful.titlebar_tooltip_messages_maximized_inactive
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for floating button when client is floating.
+-- @beautiful beautiful.titlebar_tooltip_messages_floating_active
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for floating button when client isn't floating.
+-- @beautiful beautiful.titlebar_tooltip_messages_floating_inactive
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for onTop button when client is onTop.
+-- @beautiful beautiful.titlebar_tooltip_messages_ontop_active
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for onTop button when client isn't onTop.
+-- @beautiful beautiful.titlebar_tooltip_messages_ontop_inactive
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for onTop button when client is sticky.
+-- @beautiful beautiful.titlebar_tooltip_messages_sticky_active
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar tooltip message for onTop button when client isn't sticky.
+-- @beautiful beautiful.titlebar_tooltip_messages_sticky_inactive
+-- @tparam string tooltip tooltip message
+-- @see awful.titlebar
+
+--- Titlebar buttons tooltip parameter `delay_show`.
+-- This parameter `delay_show` defines a delay in seconds before showing the tooltip.
+-- @beautiful beautiful.titlebar_tooltip_delay_show
+-- @tparam integer delay in seconds before showing the tooltip
+-- @see awful.tooltip
+
+--- Titlebar buttons tooltip parameter `margins_leftright`.
+-- This parameter `margins_leftright` defines the left/right margin for the tooltip text.
+-- @beautiful beautiful.titlebar_tooltip_margins_leftright
+-- @tparam integer margin for left/right corner for the tooltop text
+-- @see awful.tooltip
+
+--- Titlebar buttons tooltip parameter `margins_topbottom`.
+-- This parameter `margins_topbottom` defines the top/bottom margin for the tooltip text.
+-- @beautiful beautiful.titlebar_tooltip_margins_topbottom
+-- @tparam integer margin for top/bottom corner for the tooltip text
+-- @see awful.tooltip
+
+--- Titlebar buttons tooltip parameter `timeout`.
+-- This parameter `timeout` defines the timeout value for declared `timer_function`.
+-- @beautiful beautiful.titlebar_tooltip_timeout
+-- @tparam number timeout timeout value in seconds for activation of `timer_function`
+-- @see awful.tooltip
+
+--- Titlebar buttons tooltip parameter `align`.
+-- This parameter `align` defines the alignment: `right`, `top_right`, `left`, `bottom_left`, `top_left`, `bottom`, `top`
+-- @beautiful beautiful.titlebar_tooltip_align
+-- @tparam string align the alignment string type
+-- @see awful.tooltip
+
 --- Set a declarative widget hierarchy description.
 --
 -- See [The declarative layout system](../documentation/03-declarative-layout.md.html)
@@ -854,10 +946,15 @@ end
 -- @constructorfct awful.titlebar.widget.button
 function titlebar.widget.button(c, name, selector, action)
     local ret = imagebox()
-
     if titlebar.enable_tooltip then
-        ret._private.tooltip = atooltip({ objects = {ret}, delay_show = 1 })
-        ret._private.tooltip:set_text(name)
+        ret._private.tooltip = atooltip({
+            objects = {ret},
+            delay_show = beautiful["titlebar_tooltip_delay_show"] or 1,
+            margins_leftright = beautiful["titlebar_tooltip_margins_leftright"],
+            margins_topbottom = beautiful["titlebar_tooltip_margins_topbottom"],
+            timeout = beautiful["titlebar_tooltip_timeout"],
+            align = beautiful["titlebar_tooltip_align"]
+        })
     end
 
     local function update()
@@ -882,6 +979,12 @@ function titlebar.widget.button(c, name, selector, action)
             if state ~= "" then
                 state = "_" .. state
             end
+            -- try select user defined tooltip texts according to state
+            local tooltip_text = beautiful["titlebar_tooltip_messages_" .. name .. "_" .. img]
+                or beautiful["titlebar_tooltip_messages_" .. name]
+                or default_tooltip_messages[name .. "_" .. img]
+                or default_tooltip_messages[name]
+                or name
             -- First try with a prefix based on the client's focus state,
             -- then try again without that prefix if nothing was found,
             -- and finally, try a fallback for compatibility with Awesome 3.5 themes
@@ -892,7 +995,12 @@ function titlebar.widget.button(c, name, selector, action)
             if theme then
                 img = theme
             end
+            -- Set tooltip text for button
+            if titlebar.enable_tooltip then
+                ret._private.tooltip:set_text(tooltip_text)
+            end
         end
+        -- Set button image by focus and activity state
         ret:set_image(img)
     end
     ret.state = ""
