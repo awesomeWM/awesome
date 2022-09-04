@@ -405,6 +405,82 @@ function textbox:get_font()
     return self._private.font
 end
 
+--- Set the distance between the lines.
+--
+--@DOC_wibox_widget_textbox_line_spacing_EXAMPLE@
+--
+-- Please note that the Pango version (one of AwesomeWM dependency) must be at
+-- least 1.44 for this to work.
+--
+-- @property line_spacing_factor
+-- @tparam[opt=nil] number|nil line_spacing_factor
+-- @propertyunit Distance between lines as a ratio of the line height. `1.0` means
+--  no spacing. Less than `1.0` will squash the lines and more than `1.0` will move
+--  them further apart.
+-- @propertytype nil Automatic (most probably `1.0`).
+-- @negativeallowed false
+-- @propemits true false
+
+function textbox:set_line_spacing_factor(spacing)
+    if not pcall(function() return self._private.layout.set_line_spacing ~= nil end) then
+        gdebug.print_error(debug.traceback(
+            "Error your version of Pango is too old to support line_spacing"
+        ))
+    end
+
+    spacing = spacing or 0
+    self._private.layout:set_line_spacing(spacing)
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::line_spacing", spacing)
+end
+
+function textbox:get_line_spacing_factor()
+    return self._private.layout:get_line_spacing()
+end
+
+--- Justify the text when there is more space.
+--
+--@DOC_wibox_widget_textbox_justify_EXAMPLE@
+--
+-- @property justify
+-- @tparam[opt=false] boolean justify
+-- @propemits true false
+
+function textbox:set_justify(justify)
+    self._private.layout:set_justify(justify)
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::justify", justify)
+end
+
+function textbox:get_justify()
+    return self._private.layout:get_justify()
+end
+
+--- How to indent text with multiple lines.
+--
+-- Note that this does nothing if `align == "center"`.
+--
+--@DOC_wibox_widget_textbox_indent_EXAMPLE@
+--
+-- @property indent
+-- @tparam[opt=0.0] number indent
+-- @propertyunit points
+-- @negativeallowed true
+-- @propemits true false
+
+function textbox:set_indent(indent)
+    self._private.layout:set_indent(Pango.units_from_double(indent))
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::indent", indent)
+end
+
+function textbox:get_indent()
+    return self._private.layout:get_indent()
+end
+
 --- Create a new textbox.
 --
 -- @tparam[opt=""] string text The textbox content
