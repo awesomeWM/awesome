@@ -8,7 +8,7 @@ local ret = wibox.layout.fixed.vertical()
 --DOC_HIDE_END
 for _, align in ipairs {"left", "center", "right"} do
     local w = wibox.widget {
-        align  = align,
+        halign = align,
         text   = "some text",
         widget = wibox.widget.textbox,
     }

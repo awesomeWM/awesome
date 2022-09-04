@@ -40,7 +40,7 @@ for _, c in ipairs {c1, c2} do
         },
         { -- Middle
             { -- Title
-                align  = "center",
+                halign = "center",
                 widget = awful.titlebar.widget.titlewidget(c)
             },
             layout  = wibox.layout.flex.horizontal
@@ -66,7 +66,7 @@ awful.wibar {
     width    = 196,
     margins  = 24,
     widget   = {
-        align  = "center",
+        halign = "center",
         text   = "unform margins",
         widget = wibox.widget.textbox
     }
@@ -84,7 +84,7 @@ awful.wibar {
         bottom = 5
     },
     widget   = {
-        align  = "center",
+        halign = "center",
         text   = "non unform margins",
         widget = wibox.widget.textbox
     }

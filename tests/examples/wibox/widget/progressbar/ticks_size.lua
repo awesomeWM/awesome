@@ -22,7 +22,7 @@ l.spacing = 5
            pb,
            {
                text   = size,
-               align  = "center",
+               halign = "center",
                widget = wibox.widget.textbox,
            },
            forced_height = 30,

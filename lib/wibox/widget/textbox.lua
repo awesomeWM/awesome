@@ -324,14 +324,22 @@ end
 --
 --@DOC_wibox_widget_textbox_align1_EXAMPLE@
 --
--- @property align
--- @tparam[opt="left"] string align
+-- @property halign
+-- @tparam[opt="left"] string halign
 -- @propertyvalue "left"
 -- @propertyvalue "center"
 -- @propertyvalue "right"
 -- @propemits true false
 
-function textbox:set_align(mode)
+--- The horizontal text alignment.
+--
+-- Renamed to `halign` for consistency with other APIs.
+--
+-- @deprecatedproperty align
+-- @tparam[opt="left"] string align
+-- @propemits true false
+
+function textbox:set_halign(mode)
     local allowed = { left = "LEFT", center = "CENTER", right = "RIGHT" }
     if allowed[mode] then
         if self._private.layout:get_alignment() == allowed[mode] then
@@ -341,7 +349,16 @@ function textbox:set_align(mode)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
         self:emit_signal("property::align", mode)
+        self:emit_signal("property::halign", mode)
     end
+end
+
+function textbox:set_align(mode)
+    gdebug.deprecate(
+        "Use `textbox.halign` instead of `textbox.align`",
+        {deprecated_in=5, raw=true}
+    )
+    self:set_halign(mode)
 end
 
 --- Set a textbox font.
@@ -500,7 +517,7 @@ local function new(text, ignore_markup)
     ret:set_ellipsize("end")
     ret:set_wrap("word_char")
     ret:set_valign("center")
-    ret:set_align("left")
+    ret:set_halign("left")
 
     if text then
         if ignore_markup then

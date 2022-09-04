@@ -79,7 +79,7 @@ beautiful.notification_action_label_only = true --DOC_HIDE
         {
             {
                 text   = "Dismiss all",
-                align  = "center",
+                halign = "center",
                 valign = "center",
                 widget = wibox.widget.textbox
             },

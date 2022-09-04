@@ -23,7 +23,7 @@ local function generic_widget(text, col, margins)
             },
             {
                 id     = "text",
-                align  = "center",
+                halign = "center",
                 valign = "center",
                 text   = text or "foobar",
                 widget = wibox.widget.textbox

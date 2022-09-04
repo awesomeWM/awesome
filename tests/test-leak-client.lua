@@ -39,7 +39,7 @@ local function create_titlebar(c)
 
     -- The title goes in the middle
     parts.title = awful.titlebar.widget.titlewidget(c)
-    parts.title:set_align("center")
+    parts.title:set_halign("center")
     local middle_layout = wibox.layout.flex.horizontal(parts.title)
     middle_layout.buttons = buttons
 

@@ -20,7 +20,7 @@ local date = os.date("*t") --DOC_HIDE
             {
                 {
                     text = '{day='..date.day..', month='..date.month..',\n year='..date.year..'}',
-                    align = 'center',
+                    halign = 'center',
                     widget = wibox.widget.textbox
                 },
                 border_width = 2,
@@ -35,7 +35,7 @@ local date = os.date("*t") --DOC_HIDE
             {
                 {
                     text = '{month='..date.month..',\n year='..date.year..'}',
-                    align = 'center',
+                    halign = 'center',
                     widget = wibox.widget.textbox
                 },
                 border_width = 2,

@@ -79,7 +79,7 @@ local function wb_label(item, _, textbox)
     end
 
     if textbox and item.style.align or beautiful.layoutlist_align then
-        textbox:set_align(item.style.align or beautiful.layoutlist_align)
+        textbox:set_halign(item.style.align or beautiful.layoutlist_align)
     end
 
     local text = ""

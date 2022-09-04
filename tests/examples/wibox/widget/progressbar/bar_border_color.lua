@@ -21,7 +21,7 @@ for _, color in ipairs { {nil}, {"#ff0000"}, {"#00ff00"}, {"#0000ff44"} } do
         pb,
         {
             text   = color[1] and '"'..color[1]..'"' or "nil",
-            align  = "center",
+            halign = "center",
             widget = wibox.widget.textbox,
         },
         forced_height = 30,

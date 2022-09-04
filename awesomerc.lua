@@ -541,7 +541,7 @@ client.connect_signal("request::titlebars", function(c)
         },
         { -- Middle
             { -- Title
-                align  = "center",
+                halign = "center",
                 widget = awful.titlebar.widget.titlewidget(c)
             },
             buttons = buttons,

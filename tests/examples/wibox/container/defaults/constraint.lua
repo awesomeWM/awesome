@@ -4,7 +4,7 @@ local wibox = require("wibox")
 
 return {
     text   = "Some long text",
-    align  = "center",
+    halign = "center",
     valign = "center",
     widget = wibox.widget.textbox,
 },
@@ -13,7 +13,7 @@ return {
         {
             {
                 text   = "Some long text",
-                align  = "center",
+                halign = "center",
                 valign = "center",
                 widget = wibox.widget.textbox,
             },

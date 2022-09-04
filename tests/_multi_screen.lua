@@ -395,7 +395,7 @@ local function show_screens()
                     "+",s.geometry.x,",",s.geometry.y
                 },
                 valign = "center",
-                align  = "center",
+                halign = "center",
                 widget = wibox.widget.textbox,
             },
             bg                 = colors[i],

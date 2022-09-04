@@ -67,7 +67,7 @@ for i = 1, screen.count() do
             },
             { -- Middle
                 { -- Title
-                    align  = "center",
+                    halign = "center",
                     widget = awful.titlebar.widget.titlewidget(c)
                 },
                 layout  = wibox.layout.flex.horizontal

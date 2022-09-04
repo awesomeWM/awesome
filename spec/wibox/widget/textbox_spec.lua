@@ -98,15 +98,15 @@ describe("wibox.widget.textbox", function()
             assert.is.equal(1, layout_changed)
         end)
 
-        it("set_align", function()
+        it("set_halign", function()
             assert.is.equal(0, redraw_needed)
             assert.is.equal(0, layout_changed)
 
-            widget:set_align("left")
+            widget:set_halign("left")
             assert.is.equal(0, redraw_needed)
             assert.is.equal(0, layout_changed)
 
-            widget:set_align("right")
+            widget:set_halign("right")
             assert.is.equal(1, redraw_needed)
             assert.is.equal(1, layout_changed)
         end)

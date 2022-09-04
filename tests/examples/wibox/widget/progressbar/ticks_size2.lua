@@ -74,7 +74,7 @@ l3.spacing = 5
            pb,
            {
                text   = size,
-               align  = "center",
+               halign = "center",
                widget = wibox.widget.textbox,
            },
            forced_height = 30,
@@ -85,7 +85,7 @@ l3.spacing = 5
            pb3,
            {
                text   = size,
-               align  = "center",
+               halign = "center",
                widget = wibox.widget.textbox,
            },
            forced_height = 30,
@@ -100,7 +100,7 @@ l3.spacing = 5
                    {
                        {
                            text   = size,
-                           align  = "center",
+                           halign = "center",
                            widget = wibox.widget.textbox,
                        },
                        margins = 4,
@@ -110,7 +110,7 @@ l3.spacing = 5
                    shape = gears.shape.circle,
                    widget = wibox.container.background,
                },
-               align = "center",
+               halign = "center",
                valign = "center",
                widget = wibox.container.place,
            },

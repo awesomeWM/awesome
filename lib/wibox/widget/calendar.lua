@@ -155,7 +155,7 @@ local properties = { "date"        , "font"         , "spacing" , "week_numbers"
 local function make_cell(text, font, center)
     local w = textbox()
     w:set_markup(text)
-    w:set_align(center and "center" or "right")
+    w:set_halign(center and "center" or "right")
     w:set_valign("center")
     w:set_font(font)
     return w

@@ -50,7 +50,7 @@ place.maximize(c, {honor_padding=true, honor_workarea=true})
         },
         { -- Middle
             { -- Title
-                align  = "center",
+                halign = "center",
                 widget = awful.titlebar.widget.titlewidget(c)
             },
             buttons = buttons,

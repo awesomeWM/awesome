@@ -16,7 +16,7 @@ awful.wibar {
     width    = 196,
     widget   = {
         text   = "stretched",
-        align  = "center",
+        halign = "center",
         widget = wibox.widget.textbox
     },
 }

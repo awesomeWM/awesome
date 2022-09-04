@@ -22,7 +22,7 @@ for s, align in ipairs { "left", "centered", "right" } do
         align    = align,
         widget   = {
             text   = align,
-            align  = "center",
+            halign = "center",
             widget = wibox.widget.textbox
         },
     }

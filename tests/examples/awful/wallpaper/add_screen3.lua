@@ -37,9 +37,9 @@ require("_default_look")
                     widget = wibox.widget.base.make_widget()
                 },
                 {
-                    text = "Center",
+                    text   = "Center",
                     valign = "center",
-                    align  = "center",
+                    halign = "center",
                     widget = wibox.widget.textbox,
                 },
                 widget = wibox.layout.stack

@@ -4,7 +4,7 @@ local wibox     = require("wibox")
 
 return {
     text   = "Before",
-    align  = "center",
+    halign = "center",
     valign = "center",
     widget = wibox.widget.textbox,
 },
@@ -12,7 +12,7 @@ return {
     {
         {
             text   = "After",
-            align  = "center",
+            halign = "center",
             valign = "center",
             widget = wibox.widget.textbox,
         },

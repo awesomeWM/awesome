@@ -464,7 +464,7 @@ local function tasklist_label(c, args, tb)
     local minimized = args.minimized or theme.tasklist_minimized or '<b>_</b>'
 
     if tb then
-        tb:set_align(align)
+        tb:set_halign(align)
     end
 
     if not theme.tasklist_plain_task_name then

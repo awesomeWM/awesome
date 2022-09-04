@@ -52,7 +52,7 @@ local function create_info(text, x, y, width, height)
         {
             {
                 text = text,
-                align = "center",
+                halign = "center",
                 ellipsize = "none",
                 wrap = "word",
                 widget = wibox.widget.textbox
@@ -93,7 +93,7 @@ local function create_section(x1, y, x2, text)
 
     canvas:add_at(wibox.widget {
         text = text,
-        align = "center",
+        halign = "center",
         ellipsize = "none",
         wrap = "word",
         forced_width = x2-x1,

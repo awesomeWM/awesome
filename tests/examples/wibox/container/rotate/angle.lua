@@ -9,7 +9,7 @@ local function create_arrow(text)                     --DOC_HIDE
         {                                             --DOC_HIDE
             {                                         --DOC_HIDE
                 text   = text,                        --DOC_HIDE
-                align  = "center",                    --DOC_HIDE
+                halign = "center",                    --DOC_HIDE
                 valign = "center",                    --DOC_HIDE
                 widget = wibox.widget.textbox,        --DOC_HIDE
             },                                        --DOC_HIDE

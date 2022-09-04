@@ -21,7 +21,7 @@ for _, width in ipairs { 0, 2, 4, 6 } do
         pb,
         {
             text   = width,
-            align  = "center",
+            halign = "center",
             widget = wibox.widget.textbox,
         },
         forced_height = 30,

@@ -24,7 +24,7 @@ screen[1]._resize {width = 480, height = 196}
             widget   = {
                 {
                     text   = position,
-                    align  = "center",
+                    halign = "center",
                     widget = wibox.widget.textbox
                 },
                 direction = (position == "left" or position == "right") and

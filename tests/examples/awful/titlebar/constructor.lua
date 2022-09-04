@@ -21,7 +21,7 @@ local function setup(bar)
     bar:setup {
         awful.titlebar.widget.iconwidget(c),
         {
-            align  = "center",
+            halign = "center",
             widget = awful.titlebar.widget.titlewidget(c)
         },
         {
