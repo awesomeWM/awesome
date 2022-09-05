@@ -236,11 +236,18 @@ local function runner(self, modifiers, key, event)
                 for _,v2 in ipairs(v.modifiers) do
                     match = match and mod[v2]
                 end
-                if match and v.on_press then
-                    v.on_press(self)
 
-                    if self.mask_event_callback ~= false then
-                        return
+                if match then
+                    self:emit_signal("keybinding::triggered", v, event)
+
+                    if event == "press" and v.on_press then
+                        v.on_press(self)
+
+                        if self.mask_event_callback ~= false then
+                            return
+                        end
+                    elseif event == "release" and v.on_release then
+                        v.on_release(self)
                     end
                 end
             end
@@ -629,6 +636,12 @@ end
 
 --- When the keygrabber stops.
 -- @signal stopped
+
+--- When an `awful.key` is pressed.
+-- @signal keybinding::triggered
+-- @tparam awful.keybinding self
+-- @tparam awful.key key The keybinding.
+-- @tparam string event Either `"press"` or `"release"`.
 
 --- A function called when a keygrabber starts.
 -- @callback start_callback
