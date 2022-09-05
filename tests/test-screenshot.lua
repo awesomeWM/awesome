@@ -111,12 +111,7 @@ end
 local snipper_success = nil
 local function snipper_cb(ss)
     local img = ss.surface
-    if img and get_pixel(img, 10, 10) == "#00ff00" then
-        snipper_success = "true"
-        return
-    else
-        snipper_success = "false"
-    end
+    snipper_success = img and get_pixel(img, 10, 10) == "#00ff00"
 end
 
 local steps = {}
@@ -190,37 +185,25 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-
     --Make sure client from last test is gone
     if #client.get() ~= 0 then return end
 
-    local fake_screenshot_dir = string.gsub(fake_screenshot_dir, "/*$", "/", 1)
+    local fake_screenshot_dir2 = string.gsub(fake_screenshot_dir, "/*$", "/", 1)
 
-    awful.screenshot.set_defaults({})
-    awful.screenshot.set_defaults({directory = "/dev/null", prefix = "Screenshot-", frame_color = "#000000"})
-    awful.screenshot.set_defaults({directory = "~/"})
-    awful.screenshot.set_defaults({directory = fake_screenshot_dir})
+    local ss = awful.screenshot { directory = "/tmp" }
+    local name_prfx = fake_screenshot_dir2 .. "Screenshot-"
 
-    local ss = awful.screenshot.root()
-    local name_prfx = fake_screenshot_dir .. "Screenshot-"
-
-    local f, l = string.find(ss.filepath, name_prfx)
+    local f  = string.find(ss.file_path, name_prfx)
     if f ~= 1 then
-        print("Failed autogenerate filename: " .. ss.filepath .. " : " .. name_prfx)
+        error("Failed autogenerate filename: " .. ss.file_path .. " : " .. name_prfx)
         return false
     end
 
-    name_prfx = fake_screenshot_dir .. "MyShot.png"
-    ss.filepath = name_prfx
+    name_prfx = fake_screenshot_dir2 .. "MyShot.png"
+    ss.file_path = name_prfx
 
-    if ss.filepath ~= name_prfx then
-        print("Failed assign filename: " .. ss.filepath .. " : " .. name_prfx)
-        return false
-    end
-
-    ss:filepath_builder({directory = fake_screenshot_dir, prefix = "Screenshot-"})
-    if ss.directory ~= fake_screenshot_dir or ss.prefix ~= "Screenshot-" then
-        print("Failed assign directory/prefix: " .. ss.directory .. " : " .. ss.prefix)
+    if ss.file_path ~= name_prfx then
+        error("Failed assign filename: " .. ss.file_path .. " : " .. name_prfx)
         return false
     end
 
@@ -232,8 +215,11 @@ end)
 table.insert(steps, function()
 
     local root_width, root_height = root.size()
-    local ss = awful.screenshot.root()
+    local ss = awful.screenshot { directory = "/tmp" }
+    ss:refresh()
+
     local img = ss.surface
+    assert(img)
 
     assert(get_pixel(img, 100, 100) == "#00ff00")
     assert(get_pixel(img, 199, 199) == "#00ff00")
@@ -245,30 +231,28 @@ table.insert(steps, function()
     assert(get_pixel(img, root_width - 2, root_height - 2) == "#ff0000")
 
     if ss.screen ~= nil or ss.client ~= nil then
-        print("Returned non nil screen or client for root screenshot")
-        print(ss.screen)
-        print(ss.client)
+        error("Returned non nil screen or client for root screenshot")
         return false
     end
 
-    return true   
+    return true
 
 end)
 
 -- Check the awful.screenshot.screen() method
 table.insert(steps, function()
-
     for s in screen do
+        local geo = s.geometry
+        local ss = awful.screenshot {screen = s,  directory = "/tmp" }
+        ss:refresh()
 
-      local geo = s.geometry
-      local ss = awful.screenshot.screen({screen = s})
-      local img = ss.surface
+        local img = ss.surface
+        assert(img)
 
-      assert(get_pixel(img, 4, 4) == "#ff0000")
-      assert(get_pixel(img, geo.width - 4, 4) == "#ff0000")
-      assert(get_pixel(img, 4, geo.height - 4) == "#ff0000")
-      assert(get_pixel(img, geo.width - 4, geo.height - 4) == "#ff0000")
-
+        assert(get_pixel(img, 4, 4) == "#ff0000")
+        assert(get_pixel(img, geo.width - 4, 4) == "#ff0000")
+        assert(get_pixel(img, 4, geo.height - 4) == "#ff0000")
+        assert(get_pixel(img, geo.width - 4, geo.height - 4) == "#ff0000")
     end
 
     -- Spawn for the client.content test
@@ -286,8 +270,10 @@ table.insert(steps, function()
 
     local c = client.get()[1]
     local geo = c:geometry()
-    local ss = awful.screenshot.client({client = c})
+    local ss = awful.screenshot {client = c,  directory = "/tmp" }
+    ss:refresh()
     local img = ss.surface
+    assert(img)
 
     if get_pixel(img, math.floor(geo.width / 2), math.floor(geo.height / 2)) ~= "#0000ff" then
         return
@@ -308,23 +294,21 @@ table.insert(steps, function()
     if #client.get() ~= 0 then return end
     --Ensure mousegrabber is satisfied
     root.fake_input("button_press",1)
-    return true   
+    return true
 end)
 
 table.insert(steps, function()
     root.fake_input("button_release",1)
+    awesome.sync()
     return true
 end)
 
 table.insert(steps, function()
-    --Ensure prior mouse presses go through
-    local t0 = os.time()
-    while os.time() - t0 < 1 do end
-    return true
-end)
+    local ss = awful.screenshot { interactive = true,  directory = "/tmp"  }
+    ss:refresh()
 
-table.insert(steps, function()
-    awful.screenshot.snipper({on_success_cb = snipper_cb})
+    ss:connect_signal("snipping::success", snipper_cb)
+
     return true
 end)
 
@@ -339,24 +323,8 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    root.fake_input("button_release",1)
-    return true
-end)
-
-table.insert(steps, function()
     mouse.coords {x = 190, y = 190}
-    return true
-end)
-
-table.insert(steps, function()
-    --Ensure prior mouse presses and movements go through
-    local t0 = os.time()
-    while os.time() - t0 < 1 do end
-    return true
-end)
-
-table.insert(steps, function()
-    root.fake_input("button_press",1)
+    awesome.sync()
     return true
 end)
 
@@ -366,27 +334,9 @@ table.insert(steps, function()
 end)
 
 table.insert(steps, function()
-    --Ensure prior mouse presses go through and callback runs
-    local t0 = os.time()
-    while os.time() - t0 < 1 do end
-    return true
-end)
+    if snipper_success == nil then return end
 
-table.insert(steps, function()
-
-    --Check for success
-    if snipper_success then
-        if snipper_success == "true" then
-            return true
-        else
-            return false
-        end
-    else
-        return
-    end
-
-    return true
-
+    return snipper_success
 end)
 
 
@@ -396,23 +346,19 @@ table.insert(steps, function()
     if #client.get() ~= 0 then return end
     --Ensure mousegrabber is satisfied
     root.fake_input("button_press",1)
-    return true   
+    return true
 end)
 
 table.insert(steps, function()
     root.fake_input("button_release",1)
+
+    awesome.sync()
     return true
 end)
 
 table.insert(steps, function()
-    --Ensure prior mouse presses go through
-    local t0 = os.time()
-    while os.time() - t0 < 1 do end
-    return true
-end)
-
-table.insert(steps, function()
-    awful.screenshot.snipper({on_success_cb = snipper_cb})
+    local ss = awful.screenshot { interactive = true, directory = "/tmp"  }
+    ss:connect_signal("snipping::success", snipper_cb)
     return true
 end)
 
@@ -433,26 +379,14 @@ end)
 
 table.insert(steps, function()
     mouse.coords {x = 150, y = 150}
-    return true
-end)
-
-table.insert(steps, function()
-    --Ensure prior mouse presses and movements go through
-    local t0 = os.time()
-    while os.time() - t0 < 1 do end
+    awesome.sync()
     return true
 end)
 
 table.insert(steps, function()
     --Cause a rectangle collapse
     mouse.coords {x = 150, y = 110}
-    return true
-end)
-
-table.insert(steps, function()
-    --Ensure prior mouse presses and movements go through
-    local t0 = os.time()
-    while os.time() - t0 < 1 do end
+    awesome.sync()
     return true
 end)
 
@@ -464,24 +398,18 @@ end)
 
 table.insert(steps, function()
     root.fake_input("button_release",3)
+    awesome.sync()
     return true
 end)
 
 table.insert(steps, function()
-    --Ensure prior mouse presses go through and callback runs
-    local t0 = os.time()
-    while os.time() - t0 < 1 do end
-    return true
-end)
+    local ss = awful.screenshot {
+        geometry = {x = 100, y = 100, width = 100, height = 100}
+    }
+    ss:refresh()
 
-table.insert(steps, function()
-    local ss = awful.screenshot.snip({geometry = {x = 100, y = 100, width = 100, height = 100}})
     local img = ss.surface
-    if get_pixel(img, 10, 10) == "#00ff00" then
-        return true
-    else
-        return false
-    end
+    return get_pixel(img, 10, 10) == "#00ff00"
 end)
 
 require("_runner").run_steps(steps)

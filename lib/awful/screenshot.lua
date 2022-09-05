@@ -6,212 +6,139 @@
 -- @inputmodule awful.screenshot
 ---------------------------------------------------------------------------
 
+
 -- Grab environment we need
-local capi = { root = root,
-               screen = screen,
-               client = client,
-               mousegrabber = mousegrabber }
-local aw_screen = require("awful.screen")
-local gears = require("gears")
+local capi = {
+    root         = root,
+    screen       = screen,
+    client       = client,
+    mousegrabber = mousegrabber
+}
+
+local gears     = require("gears")
 local beautiful = require("beautiful")
-local wibox = require("wibox")
-local cairo = require("lgi").cairo
-local naughty = require("naughty")
+local wibox     = require("wibox")
+local cairo     = require("lgi").cairo
+local abutton   = require("awful.button")
+local akey      = require("awful.key")
+local glib      = require("lgi").GLib
+local datetime  = glib.DateTime
+local timezone  = glib.TimeZone
 
 -- The module to be returned
-local module = { mt = {} }
--- The screenshow object created by a call to the screenshow module
-local screenshot = {}
--- The various methods of taking a screenshow (root window, client, etc).
-local screenshot_methods = {}
+local module = { mt = {}, _screenshot_methods = {} }
+local screenshot_validation = {}
 
--- Configuration data
-local module_default_directory = nil
-local module_default_prefix = nil
-local module_default_frame_color = gears.color("#000000")
-local initialized = nil
+local datetime_obj = datetime.new_now
 
-
--- Internal function to get the default screenshot directory
--- 
--- Can be expanded to read X environment variables or configuration files.
-local function get_default_dir()
-  -- This can be expanded
-  local home_dir = os.getenv("HOME")
-  
-  if home_dir then
-    home_dir = string.gsub(home_dir, '/*$', '/', 1) .. 'Images/'
-    if gears.filesystem.dir_writable(home_dir) then
-      return home_dir
+-- When $SOURCE_DATE_EPOCH and $SOURCE_DIRECTORY are both set, then this code is
+-- most likely being run by the test runner. Ensure reproducible dates.
+local source_date_epoch = tonumber(os.getenv("SOURCE_DATE_EPOCH"))
+if source_date_epoch and os.getenv("SOURCE_DIRECTORY") then
+    datetime_obj = function()
+        return datetime.new_from_unix_utc(source_date_epoch)
     end
-  end
-
-  return nil
 end
 
--- Internal function to get the default filename prefix
-local function get_default_prefix()
-  return "Screenshot-"
+-- Generate a date string with the same format as the `textclock` and also with
+-- support Debian reproducible builds.
+local function get_date(format)
+    return datetime_obj(timezone.new_local()):format(format)
 end
 
--- Internal function to check a directory string for existence and writability.
--- This only checks if the requested directory exists and is writeable, not if
--- such a directory is legal (i.e. it behaves as 'mkdir' and not 'mkdir -p').
--- Adding 'mkdir -p' functionality can be considered in the future.
-local function check_directory(directory)
+-- Convert to a real image surface so it can be added to an imagebox.
+local function to_surface(raw_surface, width, height)
+    local img = cairo.ImageSurface(cairo.Format.RGB24, width, height)
+    local cr = cairo.Context(img)
+    cr:set_source_surface(gears.surface(raw_surface))
+    cr:paint()
 
-  if directory and type(directory) == "string"  then
+    return img
+end
 
+--- The screenshot interactive frame color.
+-- @beautiful beautiful.screenshot_frame_color
+-- @tparam[opt="#ff0000"] color screenshot_frame_color
+
+--- The screenshot interactive frame shape.
+-- @beautiful beautiful.screenshot_frame_shape
+-- @tparam[opt=gears.shape.rectangle] shape screenshot_frame_shape
+
+function screenshot_validation.directory(directory)
     -- Fully qualify a "~/" path or a relative path to $HOME. One might argue
     -- that the relative path should fully qualify to $PWD, but for a window
     -- manager this should be the same thing to the extent that anything else
     -- is arguably unexpected behavior.
     if string.find(directory, "^~/") then
-      directory = string.gsub(directory, "^~/",
+        directory = string.gsub(directory, "^~/",
                               string.gsub(os.getenv("HOME"), "/*$", "/", 1))
     elseif string.find(directory, "^[^/]") then
-      directory = string.gsub(os.getenv("HOME"), "/*$", "/", 1) .. directory
+        directory = string.gsub(os.getenv("HOME"), "/*$", "/", 1) .. directory
     end
 
     -- Assure that we return exactly one trailing slash
     directory = string.gsub(directory, '/*$', '/', 1)
 
-    if gears.filesystem.dir_writable(directory) then
-      return directory
-    else
-      -- Currently returns nil if the requested directory string cannot be used.
-      -- This can be swapped to a silent fallback to the default directory if
-      -- desired. It is debatable which way is better.
-      return nil
+    -- Add a trailing "/" if none is present.
+    if directory:sub(-1) ~= "/" then
+        directory = directory .. "/"
     end
 
-  else
-    -- No directory argument means use the default. Technically an outrageously
-    -- invalid argument (i.e. not even a string) currently falls back to the
-    -- default as well.
-    return get_default_dir()
-  end
+    -- If the directory eixsts, but cannot be used, print and error.
+    if gears.filesystem.is_dir(directory) and not gears.filesystem.dir_writable(directory) then
+        gears.debug.print_error("`"..directory.. "` is not writable.")
+    end
 
+    return directory
 end
 
 -- Internal function to sanitize a prefix string
 --
 -- Currently only strips all path separators ('/'). Allows for empty prefix.
-local function check_prefix(prefix)
-  -- Maybe add more sanitizing eventually
-  if prefix and type(prefix) == "string" then
-    prefix = string.gsub(prefix, '/', '')
+function screenshot_validation.prefix(prefix)
+    if prefix:match("[/.]") then
+        gears.debug.print_error("`"..prefix..
+            "` is not a valid prefix because it contains `/` or `.`")
+    end
+
     return prefix
-  end
-  return get_default_prefix()
 end
 
--- Internal routine to verify that a filepath is valid.
-local function check_filepath(filepath)
-
-  -- This module is forcing png for now. In the event of adding more
-  -- options, this function is basically unchanged, except for trying
-  -- to match a regex for each supported format (e.g. (png|jpe?g|gif|bmp))
-  -- NOTE: we should maybe make this case insensitive too?
-  local filename_start, filename_end = string.find(filepath,'/[^/]+%.png$')
-
-  if filename_start and filename_end then
-    local directory = string.sub(filepath, 1, filename_start)
-    local file_name = string.sub(filepath, filename_start + 1, filename_end)
-    directory = check_directory(directory)
-    if directory then
-      return directory .. file_name
-    else
-      return nil
+-- Internal routine to verify that a file_path is valid.
+function screenshot_validation.file_path(file_path)
+    if gears.filesystem.file_readable(file_path) then
+        gears.debug.print_error("`"..file_path.."` already exist.")
     end
-  end
 
-  return nil
-
+    return file_path
 end
 
--- Internal function to attempt to parse a filepath into directory and prefix.
--- Returns directory, prefix if both, directory if no prefix, or nil if invalid
-local function parse_filepath(filepath)
-
-  -- Same remark as above about adding more image formats in the future
-  local filename_start, filename_end = string.find(filepath,'/[^/]+%.png$')
-
-  if filename_start and filename_end then
-
-    if filename_end - filename_start > 14 + 4 then
-
-      local directory = string.sub(filepath, 1, filename_start)
-      local file_name = string.sub(filepath, filename_start + 1, filename_end)
-
-      local base_name = string.sub(file_name, 1, #file_name - 4)
-      -- Is there a repeat count in Lua, like %d{14}, as for most regexes?
-      local date_start, date_end =
-                      string.find(base_name, '%d%d%d%d%d%d%d%d%d%d%d%d%d%d$')
-
-      if date_start and date_end then
-        return directory, string.sub(base_name, 1, date_start - 1)
-      end
-
-      return directory
-
+-- Warn about invalid geometries.
+function screenshot_validation.geometry(geo)
+    for _, part in ipairs {"x", "y", "width", "height" } do
+        if not geo[part] then
+            gears.debug.print_error("The screenshot geometry must be a table with "..
+                "`x`, `y`, `width` and `height`"
+            )
+            break
+        end
     end
 
-  end
-
-  return nil
-
+    return geo
 end
 
--- Internal function to configure the directory/prefix pair for any call to the
--- screenshot API.
---
--- This supports using a different directory or filename prefix for a particular
--- use by passing the optional arguments. In the case of an initalized object
--- with  no arguments passed, the stored configuration parameters are quickly
--- returned. This also technically allows the user to take a screenshot in an
--- unitialized state and without passing any arguments.
-local function configure_path(directory, prefix)
-
-  local _directory, _prefix
-
-  if not initialized or directory then
-    _directory = check_directory(directory)
-    if not _directory then
-      return
-    end
-  else
-    _directory = module_default_directory
-  end
-
-
-  if not initialized or prefix then
-    _prefix = check_prefix(prefix)
-    if not _prefix then 
-      return
-    end
-  else
-    _prefix = module_default_prefix
-  end
-
-  -- In the case of taking a screenshot in an unitialized state, store the
-  -- configuration parameters and toggle to initialized going forward.
-  if not initialized then
-    module_default_directory = _directory
-    module_default_prefix = _prefix
-    initilialized = true
-  end
-  
-  return _directory, _prefix
-
+function screenshot_validation.screen(scr)
+    return capi.screen[scr]
 end
 
-local function make_filepath(directory, prefix)
-  local _directory, _prefix
-  local date_time = tostring(os.date("%Y%m%d%H%M%S"))
-  _directory, _prefix = configure_path(directory, prefix)
-  local filepath = _directory .. _prefix .. date_time .. ".png"
-  return _directory, _prefix, filepath
+local function make_file_name(self, method)
+    local date_time = get_date(self.date_format)
+    method = method and method.."_" or ""
+    return self.prefix .. "_" .. method .. date_time .. ".png"
+end
+
+local function make_file_path(self, method)
+    return self.directory .. (self._private.file_name or make_file_name(self, method))
 end
 
 -- Internal function to do the actual work of taking a cropped screenshot
@@ -220,383 +147,225 @@ end
 -- all data checking. This function was made to combine the interactive sipper
 -- run by the mousegrabber and the programmatically defined snip function,
 -- though there may be other uses.
-local function crop_shot(x, y, width, height)
+local function crop_shot(source, geo)
+    local target = source:create_similar(cairo.Content.COLOR, geo.width, geo.height)
 
-  local source, target, cr
+    local cr = cairo.Context(target)
+    cr:set_source_surface(source, -geo.x, -geo.y)
+    cr:rectangle(0, 0, geo.width, geo.height)
+    cr:fill()
 
-  source = gears.surface(root.content())
-  target = source:create_similar(cairo.Content.COLOR,
-                         width, height)
-
-  cr = cairo.Context(target)
-  cr:set_source_surface(source, -x, -y)
-  cr:rectangle(0, 0, width, height)
-  cr:fill()
-
-  return target
-
+    return target
 end
 
-
--- Internal function used by the snipper mousegrabber to update the frame outline
--- of the current state of the cropped screenshot
+-- Internal function used by the interactive mode mousegrabber to update the
+-- frame outline of the current state of the cropped screenshot
 --
 -- This function is largely a copy of awful.mouse.snap.show_placeholder(geo),
 -- so it is probably a good idea to create a utility routine to handle both use
 -- cases. It did not seem appropriate to make that change as a part of the pull
 -- request that was creating the screenshot API, as it would clutter and
 -- confuse the change.
-local function show_frame(ss, geo)
+local function show_frame(self, surface, geo)
+    local col = self._private.frame_color
+          or beautiful.screenshot_frame_color
+          or "#ff0000"
 
-  if not geo then
-      if ss._private.frame then
-          ss._private.frame.visible = false
-      end
-      return
-  end
+    local shape = self.frame_shape
+        or beautiful.screenshot_frame_shape
+        or gears.shape.rectangle
 
-  ss._private.frame = ss._private.frame or wibox {
-      ontop = true,
-      bg    = ss._private.frame_color
-  }
+    local w, h = root.size()
 
-  local frame = ss._private.frame
+    self._private.selection_widget = wibox.widget {
+        border_width  = 3,
+        border_color  = col,
+        shape         = shape,
+        color         = "transparent",
+        visible       = false,
+        widget        = wibox.widget.separator
+    }
+    self._private.selection_widget.point = {x=0, y=0}
+    self._private.selection_widget.fit = function() return 0,0 end
 
-  frame:geometry(geo)
+    self._private.canvas_widget = wibox.widget {
+        widget = wibox.layout.manual
+    }
 
-  -- Perhaps the preexisting image of frame can be reused? I tried but could
-  -- not get it to work. I am not sure if there is a performance penalty
-  -- incurred by making a new Cairo ImageSurface each execution.
-  local img = cairo.ImageSurface(cairo.Format.A1, geo.width, geo.height)
-  local cr = cairo.Context(img)
+    self._private.imagebox = wibox.widget {
+        image  = surface,
+        widget = wibox.widget.imagebox
+    }
 
-  cr:set_operator(cairo.Operator.CLEAR)
-  cr:set_source_rgba(0,0,0,1)
-  cr:paint()
-  cr:set_operator(cairo.Operator.SOURCE)
-  cr:set_source_rgba(1,1,1,1)
+    self._private.imagebox.point = geo
+    self._private.canvas_widget:add(self._private.imagebox)
+    self._private.canvas_widget:add(self._private.selection_widget)
 
-  local line_width = 1
-  cr:set_line_width(beautiful.xresources.apply_dpi(line_width))
-
-  cr:translate(line_width,line_width)
-  gears.shape.partially_rounded_rect(cr, geo.width - 2*line_width,
-                                     geo.height - 2*line_width,
-                                     false, false, false, false, nil)
-
-  cr:stroke()
-
-  frame.shape_bounding = img._native
-  img:finish()
-
-  frame.visible = true
-
+    self._private.frame = wibox {
+        ontop   = true,
+        x       = 0,
+        y       = 0,
+        width   = w,
+        height  = h,
+        widget  = self._private.canvas_widget,
+        visible = true,
+    }
 end
+
+--- Emitted when the interactive succeed.
+-- @signal snipping::success
+-- @tparam awful.screenshot self
+
+--- Emitted when the interactive is cancelled.
+-- @signal snipping::cancelled
+-- @tparam awful.screenshot self
+-- @tparam string reason Either `"mouse_button"`, `"key"`, or `"too_small"`.
 
 -- Internal function that generates the callback to be passed to the
--- mousegrabber that implements the snipper.
+-- mousegrabber that implements the interactive mode.
 --
--- The snipper tool is basically a mousegrabber, which takes a single function
--- of one argument, representing the mouse state data. This is a simple
--- starting point that hard codes the snipper tool as being a two press design
--- using button 1, with button 3 functioning as the cancel. These aspects of
--- the interface can be made into parameters at some point passed as arguments.
-local function mk_mg_callback(ss)
+-- The interactive tool is basically a mousegrabber, which takes a single function
+-- of one argument, representing the mouse state data.
+local function start_snipping(self, surface, geometry, method)
+    self._private.mg_first_pnt = {}
 
-  ss._private.mg_first_pnt = {}
+    local accept_buttons, reject_buttons = {}, {}
 
-  local function ret_mg_callback(mouse_data)
-
-    if mouse_data["buttons"][3] then
-      if ss._private.frame and ss._private.frame.visible then
-        show_frame(ss)
-      end
-      ss._private.mg_first_pnt = nil
-      ss._private.frame = nil
-      return false
+    --TODO support modifiers.
+    for _, btn in ipairs(self.accept_buttons) do
+        accept_buttons[btn.button] = true
     end
-  
-    if ss._private.mg_first_pnt[1] then
-  
-      local min_x, max_x, min_y, max_y
-      min_x = math.min(ss._private.mg_first_pnt[1], mouse_data["x"])
-      max_x = math.max(ss._private.mg_first_pnt[1], mouse_data["x"])
-      min_y = math.min(ss._private.mg_first_pnt[2], mouse_data["y"])
-      max_y = math.max(ss._private.mg_first_pnt[2], mouse_data["y"])
-  
-      -- Force a minimum size to the box
-      if  max_x - min_x < 4 or max_y - min_y < 4 then
-        if frame and frame.visible then
-          show_frame(ss)
-        end
-      elseif not mouse_data["buttons"][1] then
-        show_frame(ss, {x = min_x, y = min_y, width = max_x - min_x, height = max_y - min_y})
-      end
-  
-      if mouse_data["buttons"][1] then
-  
-        local snip_surf
-        local date_time
-  
-        if ss._private.frame and ss._private.frame.visible then
-          show_frame(ss)
-        end
-  
-        ss._private.frame = nil
-        ss._private.mg_first_pnt = nil
-  
-        -- This may fail gracefully anyway but require a minimum 3x3 of pixels
-        if min_x >= max_x-1 or min_y >= max_y-1 then
-          return false
-        end
-  
-        snip_surf = crop_shot(min_x, min_y, max_x - min_x, max_y - min_y)
-        ss:filepath_builder()
-        ss._private.surface = gears.surface(snip_surf) -- surface has no setter
-  
-        if ss._private.on_success_cb then
-          ss._private.on_success_cb(ss)
-        end
-  
-        return false
-  
-      end
-  
-    else
-      if mouse_data["buttons"][1] then
-        ss._private.mg_first_pnt[1] = mouse_data["x"]
-        ss._private.mg_first_pnt[2] = mouse_data["y"]
-      end
+    for _, btn in ipairs(self.reject_buttons) do
+        reject_buttons[btn.button] = true
     end
-  
-    return true
 
-  end
+    local pressed = false
 
-  return ret_mg_callback
+    show_frame(self, surface, geometry)
 
-end
+    local function ret_mg_callback(mouse_data, accept, reject)
+        local frame = self._private.frame
 
--- Internal function to be passed as the default callback upon completion of
--- the mousgrabber for the snipper if the user does not pass one.
-local function default_on_success_cb(ss)
-  ss:save()
+        for btn, status in pairs(mouse_data.buttons) do
+            accept = accept or (status and accept_buttons[btn])
+            reject = reject or (status and reject_buttons[btn])
+        end
+
+        if reject then
+            frame.visible = false
+            self._private.frame, self._private.mg_first_pnt = nil, nil
+            self:emit_signal("snipping::cancelled", "mouse_button")
+
+            return false
+        elseif pressed then
+            local min_x = math.min(self._private.mg_first_pnt[1], mouse_data.x)
+            local max_x = math.max(self._private.mg_first_pnt[1], mouse_data.x)
+            local min_y = math.min(self._private.mg_first_pnt[2], mouse_data.y)
+            local max_y = math.max(self._private.mg_first_pnt[2], mouse_data.y)
+
+            local new_geo = {
+                x      = min_x,
+                y      = min_y,
+                width  = max_x - min_x,
+                height = max_y - min_y,
+            }
+
+            if not accept then
+                -- Released
+
+                self._private.frame, self._private.mg_first_pnt = nil, nil
+
+                -- This may fail gracefully anyway but require a minimum 3x3 of pixels
+                if min_x >= max_x-1 or min_y >= max_y-1 then
+                    self:emit_signal("snipping::cancelled", "too_small")
+                    return false
+                end
+
+                self._private.selection_widget.visible = false
+
+                self._private.surfaces[method] = {
+                    surface  = crop_shot(surface, new_geo),
+                    geometry = new_geo
+                }
+
+                self:emit_signal("snipping::success")
+                self:save()
+
+                frame.visible = false
+                self._private.frame, self._private.mg_first_pnt = nil, nil
+
+                return false
+            else
+                -- Update position
+                self._private.selection_widget.point.x = min_x
+                self._private.selection_widget.point.y = min_y
+                self._private.selection_widget.fit = function()
+                    return new_geo.width, new_geo.height
+                end
+                self._private.selection_widget:emit_signal("widget::layout_changed")
+                self._private.canvas_widget:emit_signal("widget::redraw_needed")
+            end
+        elseif accept then
+            pressed = true
+            self._private.selection_widget.visible = true
+            self._private.selection_widget.point.x = mouse_data.x
+            self._private.selection_widget.point.y = mouse_data.y
+            self._private.mg_first_pnt[1] = mouse_data.x
+            self._private.mg_first_pnt[2] = mouse_data.y
+        end
+
+        return true
+    end
+
+    capi.mousegrabber.run(ret_mg_callback, self.cursor)
 end
 
 -- Internal function exected when a root window screenshot is taken.
-function screenshot_methods.root(ss)
-  local w, h = root.size()
-  ss._private.geometry = {x = 0, y = 0, width = w, height = h}
-  ss:filepath_builder()
-  ss._private.surface = gears.surface(capi.root.content()) -- surface has no setter
-  return ss
+function module._screenshot_methods.root()
+    local w, h = root.size()
+    return to_surface(capi.root.content(), w, h),  {x = 0, y = 0, width = w, height = h}
 end
 
 -- Internal function executed when a physical screen screenshot is taken.
-function screenshot_methods.screen(ss)
-
-  -- note the use of _private because screen has no setter
-  if ss.screen then
-    if type(ss.screen) == "number" then
-      ss._private.screen = capi.screen[ss.screen] or aw_screen.focused()
-    end
-  else
-    ss._private.screen = aw_screen.focused()
-  end
-
-  ss._private.geometry = ss.screen.geometry
-  ss:filepath_builder()
-  ss._private.surface = gears.surface(ss.screen.content) -- surface has no setter
-
-  return ss
-
+function module._screenshot_methods.screen(self)
+    local geo = self.screen.geometry
+    return to_surface(self.screen.content, geo.width, geo.height), geo
 end
 
 -- Internal function executed when a client window screenshot is taken.
-function screenshot_methods.client(ss)
-	--
-  -- note the use of _private becuase client has no setter
-  if not ss.client then
-    ss._private.client = capi.client.focus 
-  end
+function module._screenshot_methods.client(self)
+    local c = self.client
+    local bw = c.border_width
+    local _, top_size = c:titlebar_top()
+    local _, right_size = c:titlebar_right()
+    local _, bottom_size = c:titlebar_bottom()
+    local _, left_size = c:titlebar_left()
 
-  ss._private.geometry = ss.client:geometry()
-  ss:filepath_builder()
-  ss._private.surface = gears.surface(ss.client.content) -- surface has no setter
-  return ss
-end
+    local c_geo = c:geometry()
 
--- Internal function executed when a snipper screenshot tool is launched.
-function screenshot_methods.snipper(ss)
+    local actual_geo = {
+        x      = c_geo.x + left_size + bw,
+        y      = c_geo.y + top_size + bw,
+        width  = c_geo.width - right_size - left_size,
+        height = c_geo.height - bottom_size - top_size,
+    }
 
-  if type(ss._private.on_success_cb) ~= "function" then
-    ss._private.on_success_cb = default_on_success_cb -- the cb has no setter
-  end
-
-  local mg_callback = mk_mg_callback(ss)
-  capi.mousegrabber.run(mg_callback, "crosshair")
-
-  return true
-
+    return to_surface(c.content, actual_geo.width, actual_geo.height), actual_geo
 end
 
 -- Internal function executed when a snip screenshow (a defined geometry) is
 -- taken.
-function screenshot_methods.snip(ss)
+function module._screenshot_methods.geometry(self)
+    local root_w, root_h = root.size()
 
-  local root_w, root_h
-  local root_intrsct
-  local snip_surf
+    local root_intrsct = gears.geometry.rectangle.get_intersection(self.geometry, {
+        x      = 0,
+        y      = 0,
+        width  = root_w,
+        height = root_h
+    })
 
-  root_w, root_h = root.size()
-
-  if not(ss.geometry and
-         type(ss.geometry.x) == "number" and
-         type(ss.geometry.y) == "number" and
-         type(ss.geometry.width) == "number" and
-         type(ss.geometry.height) == "number") then
-
-    -- Default to entire root window. Also geometry has no setter.
-    ss._private.geometry = {x = 0, y = 0, width = root_w, height = root_h}
-
-  end
-
-  root_intrsct = gears.geometry.rectangle.get_intersection(ss.geometry,
-                                                           {x = 0, y = 0,
-                                                            width = root_w,
-                                                            height = root_h})
-
-  snip_surf = crop_shot(root_intrsct.x, root_intrsct.y,
-                          root_intrsct.width, root_intrsct.height)
-
-  ss:filepath_builder()
-  ss._private.surface = gears.surface(snip_surf) -- surface has no setter
-
-  return ss
-
-end
-
--- Default method is root
-screenshot_methods.default = screenshot_methods.root
-local default_method_name = "root"
-
--- Module routines
-
---- Function to initialize the screenshot library.
---
--- Currently only sets the screenshot directory, the filename, prefix and the
--- snipper tool outline color. More initialization can be added as the API
--- expands.
--- @staticfct awful.screenshot.set_defaults
--- @tparam[opt] table args Table passed with the configuration data.
--- @treturn boolean true or false depending on success
-function module.set_defaults(args)
-
-  local args = (type(args) == "table" and args) or {}
-  local tmp = check_directory(args.directory)
-
-  if tmp then
-    module_default_directory = tmp
-  else
-    initialized = nil
-    return false
-  end
-
-  tmp = check_prefix(args.prefix)
-
-  if tmp then
-    module_default_prefix = tmp
-  else
-    -- Should be unreachable as the default will always be taken
-    initialized = nil
-    return false
-  end
-
-  -- Don't throw out prior init data if only color is misformed
-  initialized = true
-
-  if args.frame_color then
-    tmp = gears.color(args.frame_color)
-    if tmp then
-      frame_color = tmp
-    end
-  end
-
-  return true
-
-end
-
---- Take root window screenshots.
---
--- This is a wrapper constructor for a root window screenshot. See the main
--- constructor, new(), for details about the arguments.
---
--- @constructorfct awful.screenshot.root
--- @tparam[opt] table args Table of arguments to pass to the constructor
--- @treturn screenshot The screenshot object
-function module.root(args)
-  local args = (type(args) == "table" and args) or {}
-  args.method = "root"
-  return module(args)
-end
-
---- Take physical screen screenshots.
---
--- This is a wrapper constructor for a physical screen screenshot. See the main
--- constructor, new(), for details about the arguments.
---
--- @constructorfct awful.screenshot.screen
--- @tparam[opt] table args Table of arguments to pass to the constructor
--- @treturn screenshot The screenshot object
-function module.screen(args)
-  local args = (type(args) == "table" and args) or {}
-  args.method = "screen"
-  return module(args)
-end
-
---- Take client window screenshots.
---
--- This is a wrapper constructor for a client window screenshot. See the main
--- constructor, new(), for details about the arguments.
---
--- @constructorfct awful.screenshot.client
--- @tparam[opt] table args Table of arguments to pass to the constructor
--- @treturn screenshot The screenshot object
-function module.client(args)
-  -- Looking at the properties and functions available, I'm not sure it is
-  -- wise to allow a "target" client argument, but if we want to add it as
-  -- arg 3 (which will match the screen ordering), we can.
-  local args = (type(args) == "table" and args) or {}
-  args.method = "client"
-  return module(args)
-end
-
---- Launch an interactive snipper tool to take cropped shots.
---
--- This is a wrapper constructor for a snipper tool screenshot. See the main
--- constructor, new(), for details about the arguments.
---
--- @constructorfct awful.screenshot.snipper
--- @tparam[opt] table args Table of arguments to pass to the constructor
--- @treturn screenshot The screenshot object
-function module.snipper(args)
-  local args = (type(args) == "table" and args) or {}
-  args.method = "snipper"
-  return module(args)
-end
-
---- Take a cropped screenshot of a defined geometry.
---
--- This is a wrapper constructor for a snip screenshot (defined geometry). See
--- the main constructor, new(), for details about the arguments.
---
--- @constructorfct awful.screenshot.snip
--- @tparam[opt] table args Table of arguments to pass to the constructor
--- @treturn screenshot The screenshot object
-function module.snip(args)
-  local args = (type(args) == "table" and args) or {}
-  args.method = "snip"
-  return module(args)
+    return crop_shot(module._screenshot_methods.root(self), root_intrsct), root_intrsct
 end
 
 -- Various accessors for the screenshot object returned by any public
@@ -605,258 +374,288 @@ end
 --- Get screenshot directory property.
 --
 -- @property directory
-function screenshot:get_directory()
-  return self._private.directory
-end
-
---- Set screenshot directory property.
---
--- @tparam string directory The path to the screenshot directory
-function screenshot:set_directory(directory)
-  if type(directory) == "string" then
-    local checked_dir = check_directory(directory)
-    if checked_dir then
-      self._private.directory = checked_dir
-    end
-  end
-end
+-- @tparam[opt=os.getenv("HOME")] string directory
+-- @propemits true false
 
 --- Get screenshot prefix property.
 --
 -- @property prefix
-function screenshot:get_prefix()
-  return self._private.prefix
-end
+-- @tparam[opt="Screenshot-"] string prefix
+-- @propemits true false
 
---- Set screenshot prefix property.
+--- Get screenshot file path.
 --
--- @tparam string prefix The prefix prepended to screenshot files names.
-function screenshot:set_prefix(prefix)
-  if type(prefix) == "string" then
-    local checked_prefix = check_prefix(prefix)
-    if checked_prefix then
-      self._private.prefix = checked_prefix
-    end
-  end
-end
+-- @property file_path
+-- @tparam[opt=self.directory..self.prefix..os.date()..".png"] string file_path
+-- @propemits true false
+-- @see file_name
 
---- Get screenshot filepath.
+--- Get screenshot file name.
 --
--- @property filepath
-function screenshot:get_filepath()
-  return self._private.filepath
-end
+-- @property file_name
+-- @tparam[opt=self.prefix..os.date()..".png"] string file_name
+-- @propemits true false
+-- @see file_path
 
---- Set screenshot filepath.
---
--- @tparam[opt] string fp The full path to the filepath
-function screenshot:set_filepath(fp)
-  self:filepath_builder({filepath = fp})
-end
+--- The date format used in the default suffix.
+-- @property date_format
+-- @tparam[opt="%Y%m%d%H%M%S"] string date_format
+-- @see wibox.widget.textclock
 
---- Get screenshot method name
+--- The cursor used in interactive mode.
 --
--- @property method_name
-function screenshot:get_method_name()
-  return self._private.method_name
-end
+-- @property cursor
+-- @tparam[opt="crosshair"] string cursor
+-- @propemits true false
+
+--- Use the mouse to select an area (snipping tool).
+--
+-- @property interactive
+-- @tparam[opt=false] boolean interactive
 
 --- Get screenshot screen.
 --
 -- @property screen
-function screenshot:get_screen()
-  if self.method_name == "screen" then
-    return self._private.screen
-  else
-    return nil
-  end
-end
+-- @tparam[opt=nil] screen|nil screen
+-- @see mouse.screen
+-- @see awful.screen.focused
+-- @see screen.primary
 
 --- Get screenshot client.
 --
 -- @property client
-function screenshot:get_client()
-  if self.method_name == "client" then
-    return self._private.client
-  else
-    return nil
-  end
-end
+-- @tparam[opt=nil] client|nil client
+-- @see mouse.client
+-- @see client.focus
 
 --- Get screenshot geometry.
 --
 -- @property geometry
-function screenshot:get_geometry()
-  return self._private.geometry
-end
+-- @tparam table geometry
+-- @tparam table geometry.x
+-- @tparam table geometry.y
+-- @tparam table geometry.width
+-- @tparam table geometry.height
 
 --- Get screenshot surface.
 --
--- @property surface
-function screenshot:get_surface()
-  return self._private.surface
-end
-
--- Methods for the screenshot object returned from taking a screenshot.
-
---- Set the filepath to save a screenshot.
+-- If none, or only one of: `screen`, `client` or `geometry` is provided, then
+-- this screenshot object will have a single target image. While specifying
+-- multiple target isn't recommended, you can use the `surfaces` properties
+-- to access them.
 --
--- @method awful.screenshot:filepath_builder
--- @tparam[opt] table args Table with the filepath parameters
-function screenshot:filepath_builder(args)
+-- Note that this is empty until either `save` or `refresh` is called.
+--
+-- @property surface
+-- @tparam nil|image surface
+-- @propertydefault `nil` if the screenshot hasn't been taken yet, a `gears.surface`
+--  compatible image otherwise.
+-- @readonly
+-- @see surfaces
 
-  local args = (type(args) == "table" and args) or {}
+--- Get screenshot surfaces.
+--
+-- When multiple methods are enabled for the same screenshot, then it will
+-- have multiple images. This property exposes each image individually.
+--
+-- Note that this is empty until either `save` or `refresh` is called. Also
+-- note that you should make multiple `awful.screenshot` objects rather than
+-- put multiple targets in the same object.
+--
+-- @property surfaces
+-- @tparam[opt={}] table surfaces
+-- @tparam[opt=nil] image surfaces.root The screenshot of all screens. This is
+--  the default if none of `client`, screen` or `geometry` have been set.
+-- @tparam[opt=nil] image surfaces.client The surface for the `client` property.
+-- @tparam[opt=nil] image surfaces.screen The surface for the `screen` property.
+-- @tparam[opt=nil] image surfaces.geometry The surface for the `geometry` property.
+-- @readonly
+-- @see surface
 
-  local filepath = args.filepath
-  local directory = args.directory
-  local prefix = args.prefix
+--- The interactive frame color.
+-- @property frame_color
+-- @tparam color|nil frame_color
+-- @propbeautiful
+-- @propemits true false
 
-  if filepath and check_filepath(filepath) then
+--- The interactive frame shape.
+-- @property frame_shape
+-- @tparam shape|nil frame_shape
+-- @propbeautiful
+-- @propemits true false
 
-    directory, prefix = parse_filepath(filepath)
+--- Define which mouse button exit the interactive snipping mode.
+--
+-- @property reject_buttons
+-- @tparam[opt={awful.button({}, 3)}}] table reject_buttons
+-- @tablerowtype A list of `awful.button` objects.
+-- @propemits true false
+-- @see accept_buttons
 
-  elseif directory or prefix then
+--- Mouse buttons used to save the screenshot when using the interactive snipping mode.
+--
+-- @property accept_buttons
+-- @tparam[opt={awful.button({}, 1)}}] table accept_buttons
+-- @tablerowtype A list of `awful.button` objects.
+-- @propemits true false
+-- @see reject_buttons
 
-    if directory and type(directory) == "string" then
-      directory = check_directory(directory)
-    elseif self.directory then
-      directory = self._private.directory -- The setter ran check_directory()
-    else
-      directory = get_default_dir()
+local defaults = {
+    prefix         = "Screenshot-",
+    directory      = screenshot_validation.directory(os.getenv("HOME")),
+    cursor         = "crosshair",
+    date_format    = "%Y%m%d%H%M%S",
+    interactive    = false,
+    reject_buttons = {abutton({}, 3)},
+    accept_buttons = {abutton({}, 1)},
+    reject_keys    = {akey({}, "Escape")},
+    accept_keys    = {akey({}, "Return")},
+}
+
+-- Create the standard properties.
+for _, prop in ipairs { "frame_color", "geometry", "screen", "client", "date_format",
+                        "prefix", "directory", "file_path", "file_name", "cursor",
+                        "interactive", "reject_buttons", "accept_buttons",
+                        "reject_keys", "accept_keys", "frame_shape" } do
+    module["set_"..prop] = function(self, value)
+        self._private[prop] = screenshot_validation[prop]
+            and screenshot_validation[prop](value) or value
+        self:emit_signal("property::"..prop, value)
     end
 
-    if prefix and type(prefix) == "string" then
-      prefix = check_prefix(prefix)
-    elseif self.prefix then
-      prefix = self._private.prefix -- The setter ran check_prefix()
-    else
-      prefix = get_default_prefix()
+    module["get_"..prop] = function(self)
+        return self._private[prop] or defaults[prop]
     end
-
-    directory, prefix, filepath = make_filepath(directory, prefix) 
-
-  elseif self.filepath and check_filepath(self.filepath) then
-
-    filepath = self.filepath
-    directory, prefix = parse_filepath(filepath)
-
-  else
-
-    if self.directory then
-      directory = self._private.directory -- The setter ran check_directory()
-    else
-      directory = get_default_dir()
-    end
-
-    if self.prefix then
-      prefix = self._private.prefix -- The setter ran check_prefix()
-    else
-      prefix = get_default_prefix()
-    end
-
-    directory, prefix, filepath = make_filepath(directory, prefix) 
-
-  end
-
-  if filepath then
-    self._private.directory = directory -- These have already
-    self._private.prefix = prefix       -- been checked.
-    self._private.filepath = filepath
-  end
-
 end
+
+function module:get_file_path()
+    return self._private.file_path or make_file_path(self)
+end
+
+function module:get_file_name()
+    return self._private.file_name or make_file_name(self)
+end
+
+function module:get_surface()
+    return self.surfaces[1]
+end
+
+function module:get_surfaces()
+    local ret = {}
+
+    for method, surface in pairs(self._private.surfaces or {}) do
+        ret[method] = surface.surface
+    end
+
+    return ret
+end
+
+function module:get_surfaces()
+    local ret = {}
+
+    for _, surface in pairs(self._private.surfaces or {}) do
+        table.insert(ret, surface.surface)
+    end
+
+    return ret
+end
+
+--- Take new screenshot(s) now.
+--
+--
+-- @method refresh
+-- @treturn table A table with the method name as key and the images as value.
+-- @see save
+
+function module:refresh()
+    local methods = {}
+    self._private.surfaces = {}
+
+    for method in pairs(module._screenshot_methods) do
+        if self._private[method] then
+            table.insert(methods, method)
+        end
+    end
+
+    -- Fallback to a screenshot of everything.
+    methods = #methods > 0 and methods or {"root"}
+
+    for _, method in ipairs(methods) do
+        local surface, geo = module._screenshot_methods[method](self)
+
+        if self.interactive then
+            start_snipping(self, surface, geo, method)
+        else
+            self._private.surfaces[method] = {surface = surface, geometry = geo}
+        end
+
+    end
+
+    return self.surfaces
+end
+
+--- Emitted when a the screenshot is saved.
+--
+-- This can be due to `:save()` being called, the `interactive` mode finishing
+-- or `auto_save_delay` timing out.
+--
+-- @signal file::saved
+-- @tparam awful.screenshot self The screenshot.
+-- @tparam string file_path The path.
+-- @tparam[opt] string|nil method The method associated with the file_path. This
+--  can be `root`, `geometry`, `client` or `screen`.
 
 --- Save screenshot.
 --
--- @method awful.screenshot:save
--- @tparam[opt] table args Table with the filepath parameters
-function screenshot:save(args)
+-- @method save
+-- @tparam[opt=self.file_path] string file_path Optionally override the file path.
+-- @noreturn
+-- @emits saved
+-- @see refresh
+function module:save(file_path)
+    if not self._private.surfaces then self:refresh() end
 
-  self:filepath_builder(args)
+    for method, surface in pairs(self._private.surfaces) do
+        file_path = file_path
+            or self._private.file_path
+            or make_file_path(self, #self._private.surfaces > 1 and method or nil)
 
-  if self._private.surface and self.filepath then
-    self._private.surface:write_to_png(self.filepath)
-  end
-
+        surface.surface:write_to_png(file_path)
+        self:emit_signal("file::saved", file_path, method)
+    end
 end
 
 --- Screenshot constructor - it is possible to call this directly, but it is.
 --  recommended to use the helper constructors, such as awful.screenshot.root
 --
 -- @constructorfct awful.screenshot
--- @tparam[opt] string args.directory The path to the screenshot directory.
--- @tparam[opt] string args.prefix The prefix to prepend to screenshot file names.
--- @tparam[opt] color args.frame_color The color of the frame for a snipper tool as
---              a gears color.
--- @tparam[opt] string args.method The method of screenshot to take (i.e. root window, etc).
--- @tparam[opt] screen args.screen The screen for a physical screen screenshot. Can be a
---              screen object of number.
--- @tparam[opt] function args.on_success_cb: the callback to run on the screenshot taken
---              with a snipper tool.
--- @tparam[opt] geometry args.geometry A gears geometry object for a snip screenshot.
+-- @tparam[opt={}] table args
+-- @tparam[opt] string args.directory Get screenshot directory property.
+-- @tparam[opt] string args.prefix Get screenshot prefix property.
+-- @tparam[opt] string args.file_path Get screenshot file path.
+-- @tparam[opt] string args.file_name Get screenshot file name.
+-- @tparam[opt] screen args.screen Get screenshot screen.
+-- @tparam[opt] string args.date_format The date format used in the default suffix.
+-- @tparam[opt] string args.cursor The cursor used in interactive mode.
+-- @tparam[opt] boolean args.interactive Rather than take a screenshot of an
+--  object, use the mouse to select an area.
+-- @tparam[opt] client args.client Get screenshot client.
+-- @tparam[opt] table args.geometry Get screenshot geometry.
+-- @tparam[opt] color args.frame_color The frame color.
+
 local function new(_, args)
+    args = (type(args) == "table" and args) or {}
+    local self = gears.object({
+        enable_auto_signals = true,
+        enable_properties   = true
+    })
 
-  local args = (type(args) == "table" and args) or {}
-  local ss = gears.object({
-    enable_auto_signals = true,
-    enable_properties = true
-  })
+    self._private = {}
+    gears.table.crush(self, module, true)
+    gears.table.crush(self, args)
 
-  local directory, prefix = configure_path(args.directory, args.prefix)
-
-  local method = nil
-  local method_name = ""
-  if screenshot_methods[args.method] then
-    method = screenshot_methods[args.method]
-    method_name = args.method
-  else
-    method = screenshot_methods.default
-    method_name = default_method_name
-  end
-
-  local screen, client, on_success_cb, frame_color, geometry
-  if method_name == "screen" then
-    screen = args.screen
-  elseif method_name == "client" then
-    client = args.client
-  elseif method_name == "snipper" then
-
-    if args.frame_color then
-      frame_color = gears.color(args.frame_color)
-      if not frame_color then
-        frame_color = module_default_frame_color
-      end
-    else
-      frame_color = module_default_frame_color
-    end
-
-    if type(args.on_success_cb) == "function" then
-      on_success_cb = args.on_success_cb
-    else
-      on_success_cb = default_on_success_cb
-    end
-
-  elseif method_name == "snip" then
-    geometry = args.geometry
-  end
-
-  ss._private = {
-    directory = directory,
-    prefix = prefix,
-    filepath = nil,
-    method_name = method_name,
-    frame_color = frame_color,
-    screen = screen,
-    client = client,
-    on_success_cb = on_success_cb,
-    geometry = geometry,
-    surface = nil
-  }
-
-  gears.table.crush(ss, screenshot, true)
-
-  return method(ss)
-
+    return self
 end
 
 return setmetatable(module, {__call = new})
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
