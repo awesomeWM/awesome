@@ -549,6 +549,7 @@ end
 -- @tparam awful.key key The key.
 -- @tparam string description.group The keybinding group
 -- @noreturn
+-- @see remove_keybinding
 
 function keygrabber:add_keybinding(key, keycode, callback, description)
     local mods = not key._is_awful_key and key or nil
@@ -579,6 +580,27 @@ function keygrabber:add_keybinding(key, keycode, callback, description)
     if self.export_keybindings then
         add_root_keybindings(self, {key})
     end
+end
+
+--- Remove a keybinding from the keygrabber.
+--
+-- @method remove_keybinding
+-- @treturn boolean `true` if removed, `false` if not found.
+-- @see add_keybinding
+
+function keygrabber:remove_keybinding(key)
+    for idx, obj in ipairs(self._private.keybindings[key.key]) do
+        if obj == key then
+            table.remove(self._private.keybindings[key.key], idx)
+
+            if #self._private.keybindings[key.key] == 0 then
+                self._private.keybindings[key.key] = nil
+            end
+
+            return true
+        end
+    end
+    return false
 end
 
 function keygrabber:set_root_keybindings(keys)
