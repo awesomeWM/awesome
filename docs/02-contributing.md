@@ -2,7 +2,7 @@
 
 ## Bugs
 
-Please look at [Github Issues](https://github.com/awesomeWM/awesome/issues).
+Please look at [GitHub Issues](https://github.com/awesomeWM/awesome/issues).
 
 ## Triage Issues [![Open Source Helpers](https://www.codetriage.com/AwesomeWM/awesome/badges/users.svg)](https://www.codetriage.com/AwesomeWM/awesome)
 
@@ -106,7 +106,7 @@ If you plan to submit patches, you should follow the following guidelines.
 
 ### Patches
 
-Submitting patches via pull requests on the Github project is the preferred
+Submitting patches via pull requests on the GitHub project is the preferred
 method.
 
 #### Pull request

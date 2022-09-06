@@ -65,7 +65,7 @@ overview now also provides a cheat sheet for controlling Vim.
 
 ## Change the theme
 
-Awesome has multiple builtin themes you can choose from:
+Awesome has multiple built-in themes you can choose from:
 
 * *default*
 * *gtk*

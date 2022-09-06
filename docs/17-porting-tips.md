@@ -258,7 +258,7 @@ Another dynamic screen related changes.
     -    awful.key({ modkey },            "r",     function () mypromptbox[mouse.screen]:run() end),
     +    awful.key({ modkey },            "r",     function () `awful.screen.focused`().mypromptbox:run() end),
 
-`awful.prompt` now uses a more future proof arguments table instead of many
+`awful.prompt` now uses a more future-proof arguments table instead of many
 optional arguments.
 
     ⠀    awful.key({ modkey }, "x",

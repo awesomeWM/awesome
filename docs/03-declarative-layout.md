@@ -36,7 +36,7 @@ configurable rules.
 
 ### Awful widgets
 
-This modules contains the higher level window manager widgets. Since most of them
+This module contains the higher level window manager widgets. Since most of them
 are used by the default config, here is how it maps:
 
 @DOC_awful_wibar_defaultwibar_EXAMPLE@
@@ -45,7 +45,7 @@ are used by the default config, here is how it maps:
 
 ### Titlebar widgets
 
-The titlebar comes with some convinient default widgets. It simplify the most
+The titlebar comes with some convenient default widgets. It simplifies the most
 basic "Windows/macOS" like titlebars.
 
 @DOC_awful_titlebar_defaulttitlebar_EXAMPLE@
@@ -124,7 +124,7 @@ to an object such as the mouse.
 The `naughty.layout.box` allows to provide custom widgets to use within the
 notifications.
 
-The `awful.wallpaper` provides a non-intereactive "backgroud" for one or more
+The `awful.wallpaper` provides a non-interactive "backgroud" for one or more
 `screen`. While it uses normal widget, it will not automatically be repainted
 if they change. It will also not provide any mouse events.
 
@@ -221,7 +221,7 @@ styles, but this creates very confusing code and should be avoided.
 ## Creating and placing widgets using the declarative style
 
 The examples below explain in detail how to use the declarative layout system.
-The imperative system is quite self explanatory and the respective widget API
+The imperative system is quite self-explanatory and the respective widget API
 documentation should be enough for most.
 
 ### A simple layout
@@ -254,7 +254,7 @@ Code:
     }
 
 
-This examples uses the `awful.widget.only_on_screen` container to display
+This example uses the `awful.widget.only_on_screen` container to display
 widgets only on some screens.
 
 ### Composite widgets
@@ -513,7 +513,7 @@ property of many widgets such as the `awful.widget.taglist`,
 `awful.widget.tasklist` and `naughty.layout.box`. These templates are a
 **table** using the exact same syntax as the declarative widgets, but without
 the `wibox.widget` prefix in front of the curly braces. These templates
-represents future widgets that will be created by their parent widget. This is
+represent future widgets that will be created by their parent widget. This is
 necessary for three reasons:
 
  * The widget must create many instances of the template at different points in

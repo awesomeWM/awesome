@@ -118,7 +118,7 @@ You can join us in the `#awesome` channel on the [OFTC](http://www.oftc.net/) IR
 You can ask questions on [Stack Overflow](http://stackoverflow.com/questions/tagged/awesome-wm).
 
 #### Reddit
-We also have a [awesome subreddit](https://www.reddit.com/r/awesomewm/) where you can share your work and ask questions.
+We also have an [awesome subreddit](https://www.reddit.com/r/awesomewm/) where you can share your work and ask questions.
 
 ## Reporting issues
 
@@ -126,7 +126,7 @@ Please report any issues you may find on [our bugtracker](https://github.com/awe
 
 ## Contributing code
 
-You can submit pull requests on the [github repository](https://github.com/awesomeWM/awesome).
+You can submit pull requests on the [GitHub repository](https://github.com/awesomeWM/awesome).
 Please read the [contributing guide](https://github.com/awesomeWM/awesome/blob/master/docs/02-contributing.md) for any coding, documentation or patch guidelines.
 
 ## Status
