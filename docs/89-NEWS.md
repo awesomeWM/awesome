@@ -45,7 +45,12 @@ This document was last updated at commit v4.3-197-g9085ed631.
   Lua code using `io.popen`. Usage of `io.popen` is still strongly discouraged.
 * `wibox{ input_passthrough = true }` now works correctly. Previously, the
   property could only be set on already-constructed wiboxes.
-* Remove unused first parameter from multiple widget constructors: `wibox.container.place`,  `wibox.container.radialprogressbar`,  `wibox.layout.stack`,  `wibox.widget.slider`.
+* Remove unused first parameter from multiple widget constructors:
+ `wibox.container.place`, * `wibox.container.radialprogressbar`,
+ `wibox.layout.stack`,
+ `wibox.widget.slider`.
+* Renamed some properties like `wibox.widget.textbox.align` to
+ `wibox.widget.textbox.halign` for consistency reasons.
 
 ## Behavior changes
 
@@ -80,6 +85,9 @@ This document was last updated at commit v4.3-197-g9085ed631.
    it's main layout. Use the `base_layout` property to access the layout.
    This allows to replace the layout at runtime. The previous behavior
    was undocumented.
+ * Pango 1.44 is now the oldest recommended Pango version. Older versions are
+   still supported, but will lack the ability to use some textbox properties,
+   mainly `wibox.widget.textbox.line_spacing_factor`.
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes
