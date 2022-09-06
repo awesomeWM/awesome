@@ -1,5 +1,23 @@
 ---------------------------------------------------------------------------
---- Screenshots and related configuration settings
+--- Take screenshots of clients, screens, geometry and export to files or widgets.
+--
+-- Common keybindings
+-- ==================
+--
+-- This example setups keybinding for the "Print Screen" key. Shift means
+-- interactive, Control means delayed and Mod4 (Super) means current client only.
+-- This example also creates convinient notifications.
+--
+-- @DOC_awful_screenshot_keybindings1_EXAMPLE@
+--
+-- Convert to widgets
+-- ==================
+--
+-- This example creates and `Alt+Tab` like popup with client images. Note that
+-- it might display black rectangles if you are not using a compositing manager
+-- such as `picom`.
+--
+-- @DOC_awful_screenshot_popup_EXAMPLE@
 --
 -- @author Brian Sobulefsky &lt;brian.sobulefsky@protonmail.com&gt;
 -- @copyright 2021 Brian Sobulefsky
@@ -437,10 +455,10 @@ end
 --
 -- @property geometry
 -- @tparam table geometry
--- @tparam table geometry.x
--- @tparam table geometry.y
--- @tparam table geometry.width
--- @tparam table geometry.height
+-- @tparam number geometry.x
+-- @tparam number geometry.y
+-- @tparam number geometry.width
+-- @tparam number geometry.height
 -- @propemits true false
 
 --- Get screenshot surface.
@@ -727,7 +745,6 @@ function module:set_auto_save_delay(value)
                 self:emit_signal("timer::timeout")
                 awesome.sync()
                 self:refresh()
-
                 if not self.interactive then
                     self:save()
                 end
@@ -786,7 +803,6 @@ function module:refresh()
         else
             self._private.surfaces[method] = {surface = surface, geometry = geo}
         end
-
     end
 
     if self._private.output_imagebox then
