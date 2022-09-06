@@ -5,6 +5,7 @@ local awful = require("awful")
 local wibox = require("wibox")
 local spawn = require("awful.spawn")
 local gsurface = require("gears.surface")
+local gdebug = require("gears.debug")
 local lgi = require('lgi')
 local cairo = lgi.cairo
 local gdk = lgi.require('Gdk', '3.0')
@@ -475,6 +476,40 @@ end)
 
 table.insert(steps, function()
     if not (timer_start and timer_tick and timer_timeout and saved) then return end
+    return true
+end)
+
+table.insert(steps, function()
+    local ss = awful.screenshot { auto_save_delay = 10 }
+
+    -- Reach into some `if`.
+    assert(not ss.selected_geometry)
+    assert(not ss.surface)
+    assert(#ss.surfaces == 0)
+    ss.auto_save_delay = 0
+    ss.minimum_size = 2
+    ss.minimum_size = {width = 1, height = 1}
+    ss.minimum_size = nil
+    assert(ss.surface)
+    assert(next(ss.surfaces) ~= nil)
+
+    local count = 0
+
+    local err = gdebug.print_error
+
+    function gdebug.print_error()
+        count = count + 1
+    end
+
+    -- Cause some validation failures.
+    ss.prefix = "//////"
+    assert(count == 1)
+    ss.directory = "/tmp/////"
+    ss.directory = "/tmp"
+    ss.directory = "/root/"
+    assert(count == 2)
+
+    gdebug.print_error = err
     return true
 end)
 
