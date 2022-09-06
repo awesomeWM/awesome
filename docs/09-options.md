@@ -195,7 +195,7 @@ the interpreter can attempt to execute it.
  </tr>
 </table>
 
-This option disable the built-in real transparency support. This means
+This option disables the built-in real transparency support. This means
 titlebars and wiboxes can no longer be made fully transparent. If you don't
 use a compositing manager such as `compton` or `picom`, this will only improve
 reliability and portability. Transparency is enabled by default and this should
