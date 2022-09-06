@@ -133,7 +133,7 @@ in the modeline either since at that point the file is already being read.
  </tr>
 </table>
 
-Usually, modeslines have the final say of which options to enable. This allows
+Usually, modelines have the final say of which options to enable. This allows
 `rc.lua` to be portable between computers without have to modify `~/.xinitrc`
 or your session files. However, sometime, it is useful to override these
 parameters. The most common use case is the to bump the API level to see more
@@ -176,7 +176,7 @@ useful for development.
 </table>
 
 This option only check if the file is a valid Lua script. It will not check if
-your custom logic makes sense. Even when this options says your config is fine,
+your custom logic makes sense. Even when this option says your config is fine,
 it does **NOT** mean it can load properly. It only means it can be parsed and
 the interpreter can attempt to execute it.
 
@@ -195,7 +195,7 @@ the interpreter can attempt to execute it.
  </tr>
 </table>
 
-This options disable the built-in real transparency support. This means
+This option disable the built-in real transparency support. This means
 titlebars and wiboxes can no longer be made fully transparent. If you don't
 use a compositing manager such as `compton` or `picom`, this will only improve
 reliability and portability. Transparency is enabled by default and this should

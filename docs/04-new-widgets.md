@@ -113,6 +113,6 @@ looks like this:
     widget:after_draw_children(context, cr, width, height)
 
 The `:set_children()` method gets called recursively when setting a widget with
-the declarative layout system, therefore the method should be well defined.
+the declarative layout system, therefore the method should be well-defined.
 It should probably hook into the `:add` or `:add_widget` methods or be
 overridden to do nothing.

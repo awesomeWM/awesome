@@ -24,7 +24,7 @@ There are two common causes for this:
 The first is a display driver issue where painting on the screen takes long
 time. All input events (keyboard and mouse) are processed in the main thread.
 The drawing is also locking the main thread to avoid artifacts and race
-ccontiditions. If there is a delay with the painting, it will delay the inputs.
+conditions. If there is a delay with the painting, it will delay the inputs.
 The solution to this problem is using a compositing manager such as 
 [compton](https://github.com/chjj/compton) or the older `xcompmgr`. This will
 move painting to another process and fully mitigate the issue.
@@ -34,7 +34,7 @@ and most commonly manifests itself as occasional freezes instead of a generic de
 Do **not** use such functions and prefer `awful.spawn.easy_async`,
 `awful.widget.watch` or the GIO async API. Even if you *think* a command is
 fast enough and won't impact the main event loop iteration time, you are wrong.
-*Every* calls to `io.open` are impacted by the system `iowait` queue and can
+*Every* call to `io.open` is impacted by the system `iowait` queue and can
 spend hundreds of milliseconds blocked *before* being executed. Note that
 some common widget or probe libraries do not follow this
 advice currently and are known to cause input lag on some systems (but not all).
@@ -399,7 +399,7 @@ To see where, run the following command:
 
     $ ls -l /proc/$(pidof awesome)/fd/2
 
-There's handy way to run Awesome and redirect both its standard output and error streams to files:
+There's a handy way to run Awesome and redirect both its standard output and error streams to files:
 
     exec /usr/bin/awesome >> ~/.cache/awesome/stdout 2>> ~/.cache/awesome/stderr
 
@@ -473,6 +473,6 @@ bugtracker](https://github.com/awesomeWM/awesome/issues).
 ### Do you accept patches and enhancements?
 
 Yes, we do.
-You can submit pull requests on the [github repository](https://github.com/awesomeWM/awesome).
+You can submit pull requests on the [GitHub repository](https://github.com/awesomeWM/awesome).
 Please read the [contributing guide](https://github.com/awesomeWM/awesome/blob/master/docs/02-contributing.md)
 for any coding, documentation or patch guidelines.
