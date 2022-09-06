@@ -412,4 +412,39 @@ table.insert(steps, function()
     return get_pixel(img, 10, 10) == "#00ff00"
 end)
 
+local escape_works, enter_works = false, false
+
+table.insert(steps, function()
+    local ss = awful.screenshot { interactive = true }
+
+    ss:connect_signal("snipping::start", function()
+        ss:connect_signal("snipping::cancelled", function() enter_works = true end)
+    end)
+
+    ss:refresh()
+    return true
+end)
+
+table.insert(steps, function()
+    if not enter_works then
+        root.fake_input("key_press","Return")
+        root.fake_input("key_release","Return")
+        return
+    end
+    local ss = awful.screenshot { interactive = true }
+    ss:connect_signal("snipping::cancelled", function() escape_works = true end)
+    ss:refresh()
+    return true
+end)
+
+table.insert(steps, function()
+    if not escape_works then
+        root.fake_input("key_press","Escape")
+        root.fake_input("key_release","Escape")
+        return
+    end
+
+    return true
+end)
+
 require("_runner").run_steps(steps)

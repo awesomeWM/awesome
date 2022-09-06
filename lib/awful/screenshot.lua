@@ -6,7 +6,6 @@
 -- @inputmodule awful.screenshot
 ---------------------------------------------------------------------------
 
-
 -- Grab environment we need
 local capi = {
     root         = root,
@@ -21,6 +20,7 @@ local wibox     = require("wibox")
 local cairo     = require("lgi").cairo
 local abutton   = require("awful.button")
 local akey      = require("awful.key")
+local akgrabber = require("awful.keygrabber")
 local glib      = require("lgi").GLib
 local datetime  = glib.DateTime
 local timezone  = glib.TimeZone
@@ -212,14 +212,19 @@ local function show_frame(self, surface, geo)
     }
 end
 
---- Emitted when the interactive succeed.
+--- Emitted when the interactive snipping starts.
+-- @signal snipping::start
+-- @tparam awful.screenshot self
+
+--- Emitted when the interactive snipping succeed.
 -- @signal snipping::success
 -- @tparam awful.screenshot self
 
---- Emitted when the interactive is cancelled.
+--- Emitted when the interactive snipping is cancelled.
 -- @signal snipping::cancelled
 -- @tparam awful.screenshot self
--- @tparam string reason Either `"mouse_button"`, `"key"`, or `"too_small"`.
+-- @tparam string reason Either `"mouse_button"`, `"key"`, `"no_selection"`
+--  or `"too_small"`.
 
 -- Internal function that generates the callback to be passed to the
 -- mousegrabber that implements the interactive mode.
@@ -244,18 +249,13 @@ local function start_snipping(self, surface, geometry, method)
     show_frame(self, surface, geometry)
 
     local function ret_mg_callback(mouse_data, accept, reject)
-        local frame = self._private.frame
-
         for btn, status in pairs(mouse_data.buttons) do
             accept = accept or (status and accept_buttons[btn])
             reject = reject or (status and reject_buttons[btn])
         end
 
         if reject then
-            frame.visible = false
-            self._private.frame, self._private.mg_first_pnt = nil, nil
-            self:emit_signal("snipping::cancelled", "mouse_button")
-
+            self:reject("mouse_button")
             return false
         elseif pressed then
             local min_x = math.min(self._private.mg_first_pnt[1], mouse_data.x)
@@ -263,44 +263,25 @@ local function start_snipping(self, surface, geometry, method)
             local min_y = math.min(self._private.mg_first_pnt[2], mouse_data.y)
             local max_y = math.max(self._private.mg_first_pnt[2], mouse_data.y)
 
-            local new_geo = {
-                x      = min_x,
-                y      = min_y,
-                width  = max_x - min_x,
-                height = max_y - min_y,
+            self._private.selected_geometry = {
+                x       = min_x,
+                y       = min_y,
+                width   = max_x - min_x,
+                height  = max_y - min_y,
+                method  = method,
+                surface = surface,
             }
+            self:emit_signal("property::selected_geometry", self._private.selected_geometry)
 
             if not accept then
                 -- Released
-
-                self._private.frame, self._private.mg_first_pnt = nil, nil
-
-                -- This may fail gracefully anyway but require a minimum 3x3 of pixels
-                if min_x >= max_x-1 or min_y >= max_y-1 then
-                    self:emit_signal("snipping::cancelled", "too_small")
-                    return false
-                end
-
-                self._private.selection_widget.visible = false
-
-                self._private.surfaces[method] = {
-                    surface  = crop_shot(surface, new_geo),
-                    geometry = new_geo
-                }
-
-                self:emit_signal("snipping::success")
-                self:save()
-
-                frame.visible = false
-                self._private.frame, self._private.mg_first_pnt = nil, nil
-
-                return false
+                return self:accept()
             else
                 -- Update position
                 self._private.selection_widget.point.x = min_x
                 self._private.selection_widget.point.y = min_y
                 self._private.selection_widget.fit = function()
-                    return new_geo.width, new_geo.height
+                    return self._private.selected_geometry.width, self._private.selected_geometry.height
                 end
                 self._private.selection_widget:emit_signal("widget::layout_changed")
                 self._private.canvas_widget:emit_signal("widget::redraw_needed")
@@ -317,7 +298,9 @@ local function start_snipping(self, surface, geometry, method)
         return true
     end
 
+    self.keygrabber:start()
     capi.mousegrabber.run(ret_mg_callback, self.cursor)
+    self:emit_signal("snipping::start")
 end
 
 -- Internal function exected when a root window screenshot is taken.
@@ -400,6 +383,7 @@ end
 --- The date format used in the default suffix.
 -- @property date_format
 -- @tparam[opt="%Y%m%d%H%M%S"] string date_format
+-- @propemits true false
 -- @see wibox.widget.textclock
 
 --- The cursor used in interactive mode.
@@ -412,11 +396,13 @@ end
 --
 -- @property interactive
 -- @tparam[opt=false] boolean interactive
+-- @propemits true false
 
 --- Get screenshot screen.
 --
 -- @property screen
 -- @tparam[opt=nil] screen|nil screen
+-- @propemits true false
 -- @see mouse.screen
 -- @see awful.screen.focused
 -- @see screen.primary
@@ -425,6 +411,7 @@ end
 --
 -- @property client
 -- @tparam[opt=nil] client|nil client
+-- @propemits true false
 -- @see mouse.client
 -- @see client.focus
 
@@ -436,6 +423,7 @@ end
 -- @tparam table geometry.y
 -- @tparam table geometry.width
 -- @tparam table geometry.height
+-- @propemits true false
 
 --- Get screenshot surface.
 --
@@ -472,6 +460,21 @@ end
 -- @readonly
 -- @see surface
 
+--- Set a minimum size to save a screenshot.
+--
+-- When the screenshot is very small (like 1x1 pixels), it is probably a mistake.
+-- Rather than save useless files, set this property to auto-reject tiny images.
+--
+-- @property minimum_size
+-- @tparam[opt={width=3, height=3}] nil|integer|table minimum_size
+-- @tparam integer minimum_size.width
+-- @tparam integer minimum_size.height
+-- @propertytype nil No minimum size.
+-- @propertytype integer Same minimum size for the height and width.
+-- @propertytype table Different size for the height and width.
+-- @negativeallowed false
+-- @propemits true false
+
 --- The interactive frame color.
 -- @property frame_color
 -- @tparam color|nil frame_color
@@ -500,6 +503,30 @@ end
 -- @propemits true false
 -- @see reject_buttons
 
+--- The `awful.keygrabber` object used for the accept and reject keys.
+--
+-- This can be used to add new keybindings to the interactive snipper mode. For
+-- examples, this can be used to change the saving path or add some annotations
+-- to the image.
+--
+-- @property keygrabber
+-- @tparam awful.keygrabber keygrabber
+-- @propertydefault Autogenerated.
+-- @readonly
+
+--- The current interactive snipping mode seletion.
+-- @property selected_geometry
+-- @tparam nil|table selected_geometry
+-- @tparam integer selected_geometry.x
+-- @tparam integer selected_geometry.y
+-- @tparam integer selected_geometry.width
+-- @tparam integer selected_geometry.height
+-- @tparam image selected_geometry.surface
+-- @tparam string selected_geometry.method Either `"root"`, `"client"`,
+--  `"screen"` or `"geometry"`.
+-- @propemits true false
+-- @readonly
+
 local defaults = {
     prefix         = "Screenshot-",
     directory      = screenshot_validation.directory(os.getenv("HOME")),
@@ -510,13 +537,14 @@ local defaults = {
     accept_buttons = {abutton({}, 1)},
     reject_keys    = {akey({}, "Escape")},
     accept_keys    = {akey({}, "Return")},
+    minimum_size   = {width = 3, height = 3},
 }
 
 -- Create the standard properties.
 for _, prop in ipairs { "frame_color", "geometry", "screen", "client", "date_format",
                         "prefix", "directory", "file_path", "file_name", "cursor",
                         "interactive", "reject_buttons", "accept_buttons",
-                        "reject_keys", "accept_keys", "frame_shape" } do
+                        "reject_keys", "accept_keys", "frame_shape", "minimum_size" } do
     module["set_"..prop] = function(self, value)
         self._private[prop] = screenshot_validation[prop]
             and screenshot_validation[prop](value) or value
@@ -526,6 +554,10 @@ for _, prop in ipairs { "frame_color", "geometry", "screen", "client", "date_for
     module["get_"..prop] = function(self)
         return self._private[prop] or defaults[prop]
     end
+end
+
+function module:get_selected_geometry()
+    return self._private.selected_geometry
 end
 
 function module:get_file_path()
@@ -558,6 +590,59 @@ function module:get_surfaces()
     end
 
     return ret
+end
+
+function module:get_keygrabber()
+    if self._private.keygrabber then return  self._private.keygrabber end
+
+    self._private.keygrabber = akgrabber {
+        stop_key = self.reject_buttons
+    }
+    self._private.keygrabber:connect_signal("keybinding::triggered", function(_, key, event)
+        if event == "press" then return end
+        if self._private.accept_keys_set[key] then
+            self:accept()
+        elseif self._private.reject_keys_set[key] then
+            self:reject()
+        end
+    end)
+
+    -- Reload the keys.
+    self.accept_keys, self.reject_keys = self.accept_keys, self.reject_keys
+
+    return self._private.keygrabber
+end
+
+-- Put the key in a set rather than a list and add/remove them from the keygrabber.
+for _, prop in ipairs {"accept_keys", "reject_keys"} do
+    local old = module["set_"..prop]
+
+    module["set_"..prop] = function(self, new_keys)
+        -- Remove old keys.
+        if self._private.keygrabber then
+            for _, key in ipairs(self._private[prop] or {}) do
+                self._private.keygrabber:remove_keybinding(key)
+            end
+        end
+
+        local new_set = {}
+        self._private[prop.."_set"] = new_set
+
+        for _, key in ipairs(new_keys) do
+            self.keygrabber:add_keybinding(key)
+            new_set[key] = true
+        end
+
+        old(self, new_keys)
+    end
+end
+
+function module:set_minimum_size(size)
+    if size and type(size) ~= "table" then
+        size = {width = math.ceil(size), height = math.ceil(size)}
+    end
+    self._private.minimum_size = size
+    self:emit_signal("property::minimum_size", size)
 end
 
 --- Take new screenshot(s) now.
@@ -623,6 +708,70 @@ function module:save(file_path)
         surface.surface:write_to_png(file_path)
         self:emit_signal("file::saved", file_path, method)
     end
+end
+
+--- Save and exit the interactive snipping mode.
+-- @method accept
+-- @treturn boolean `true` if the screenshot were save, `false` otherwise. It
+--  can be `false` because the selection is below `minimum_size` or because
+--  there is nothing to save (so selection).
+-- @emits snipping::cancelled
+-- @emits snipping::success
+
+function module:accept()
+    -- Nothing to do.
+    if not self.interactive then return true end
+
+    local new_geo = self._private.selected_geometry
+    local min_size = self.minimum_size
+
+    if not new_geo then
+        self:reject("no_selection")
+        return false
+    end
+
+    -- This may fail gracefully anyway but require a minimum 3x3 of pixels
+    if min_size and new_geo.width < min_size.width or  new_geo.height < min_size.height then
+        self:reject("too_small")
+        return false
+    end
+
+    self._private.selection_widget.visible = false
+
+    self._private.surfaces[new_geo.method] = {
+        surface  = crop_shot(new_geo.surface, new_geo),
+        geometry = new_geo
+    }
+
+    self:emit_signal("snipping::success")
+    self:save()
+
+    self._private.frame.visible = false
+    self._private.frame, self._private.mg_first_pnt = nil, nil
+    self.keygrabber:stop()
+    capi.mousegrabber.stop()
+
+    return true
+end
+
+--- Exit the interactive snipping mode without saving.
+-- @method reject
+-- @tparam[opt=nil] string||nil reason The reason why it was rejected. This is
+--  passed to the `"snipping::cancelled"` signal.
+-- @emits snipping::cancelled
+
+function module:reject(reason)
+    -- Nothing to do.
+    if not self.interactive then return end
+
+    if self._private.frame then
+        self._private.frame.visible = false
+        self._private.frame = nil
+    end
+    self._private.mg_first_pnt = nil
+    self:emit_signal("snipping::cancelled", reason or "reject_called")
+    capi.mousegrabber.stop()
+    self.keygrabber:stop()
 end
 
 --- Screenshot constructor - it is possible to call this directly, but it is.
