@@ -222,7 +222,7 @@ local function runner(self, modifiers, key, event)
     local filtered_modifiers = {}
 
     -- User defined cases
-    if self._private.keybindings[key] and event == "press" then
+    if self._private.keybindings[key] then
         -- Remove caps and num lock
         for _, m in ipairs(modifiers) do
             if not gtable.hasitem(akey.ignore_modifiers, m) then
