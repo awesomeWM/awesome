@@ -2,11 +2,123 @@ local file_path, image_path = ...
 require("_common_template")(...)
 
 local cairo      = require("lgi").cairo
+local color      = require( "gears.color"     )
+local shape      = require( "gears.shape"     )
+local beautiful  = require( "beautiful"       )
+local wibox      = require( "wibox"           )
+local screenshot = require( "awful.screenshot")
 
-local color     = require( "gears.color"    )
-local shape     = require( "gears.shape"    )
-local beautiful = require( "beautiful"      )
-local wibox     = require( "wibox"          )
+local function wrap_titlebar(tb, width, height, args)
+    local bg, fg
+
+    if args.honor_titlebar_colors then
+        bg = tb.drawable.background_color or tb.args.bg_normal
+        fg = tb.drawable.foreground_color or tb.args.fg_normal
+    else
+        bg, fg = tb.args.bg_normal, tb.args.fg_normal
+    end
+
+    return wibox.widget {
+        tb.drawable.widget,
+        bg            = bg,
+        fg            = fg,
+        forced_width  = width,
+        forced_height = height,
+        widget        = wibox.container.background
+    }
+end
+
+local function client_widget(c, col, label, args)
+    local geo = c:geometry()
+    local bw = c.border_width or beautiful.border_width or 0
+    local bc = c.border_color or beautiful.border_color
+
+    local l = wibox.layout.align.vertical()
+    l.fill_space = true
+
+    local tbs = c._private and c._private.titlebars or {}
+
+    local map = {
+        top    = "set_first",
+        left   = "set_first",
+        bottom = "set_third",
+        right  = "set_third",
+    }
+
+    for _, position in ipairs{"top", "bottom"} do
+        local tb = tbs[position]
+        if tb then
+            l[map[position]](l, wrap_titlebar(tb, c:geometry().width, tb.args.height or 16,  args))
+        end
+    end
+
+    for _, position in ipairs{"left", "right"} do
+        local tb = tbs[position]
+        if tb then
+            l[map[position]](l, wrap_titlebar(tb, tb.args.width or 16, c:geometry().height), args)
+        end
+    end
+
+    local l2 = wibox.layout.align.horizontal()
+    l2.fill_space = true
+    l:set_second(l2)
+    l.forced_width  = c.width
+    l.forced_height = c.height
+
+    return wibox.widget {
+        {
+            l,
+            {
+                text   = label or "",
+                halign = "center",
+                valign = "center",
+                widget = wibox.widget.textbox
+            },
+            layout = wibox.layout.stack
+        },
+        border_width    = bw,
+        border_color    = bc,
+        shape_clip      = true,
+        border_strategy = "inner",
+        opacity         = c.opacity,
+        fg              = beautiful.fg_normal or "#000000",
+        bg              = col,
+        shape           = function(cr2, w, h)
+            if c.shape then
+                c.shape(cr2, w, h)
+            else
+                return shape.rounded_rect(cr2, w, h, args.radius or 5)
+            end
+        end,
+
+        forced_width  = geo.width  + 2*bw,
+        forced_height = geo.height + 2*bw,
+        widget        = wibox.container.background,
+    }
+end
+
+-- Mock the c:content(), it cannot be shimmed because the "real" one uses
+-- a raw surface rather than a LGI one.
+function screenshot._screenshot_methods.client(self)
+    local c = self.client
+    local geo = c:geometry()
+
+    local wdg = client_widget(
+        c, c.color or geo._color or beautiful.bg_normal, "", {}
+    )
+
+    local sur = wibox.widget.draw_to_image_surface(wdg, geo.width, geo.height)
+
+    return sur, geo
+end
+
+function screenshot._screenshot_methods.root()
+    local w, h = root.size()
+
+    local img = cairo.ImageSurface.create(cairo.Format.ARGB32, 1, 1)
+
+    return img, {x=0,y=0,width=w,height=h}
+end
 
 -- Run the test
 local args = loadfile(file_path)() or {}
@@ -97,98 +209,6 @@ local total_area = wibox.layout {
     layout        = wibox.layout.manual,
 }
 
-local function wrap_titlebar(tb, width, height)
-
-    local bg, fg
-
-    if args.honor_titlebar_colors then
-        bg = tb.drawable.background_color or tb.args.bg_normal
-        fg = tb.drawable.foreground_color or tb.args.fg_normal
-    else
-        bg, fg = tb.args.bg_normal, tb.args.fg_normal
-    end
-
-    return wibox.widget {
-        tb.drawable.widget,
-        bg            = bg,
-        fg            = fg,
-        forced_width  = width,
-        forced_height = height,
-        widget        = wibox.container.background
-    }
-end
-
-local function client_widget(c, col, label)
-    local geo = c:geometry()
-    local bw = c.border_width or beautiful.border_width or 0
-    local bc = c.border_color or beautiful.border_color
-
-    local l = wibox.layout.align.vertical()
-    l.fill_space = true
-
-    local tbs = c._private and c._private.titlebars or {}
-
-    local map = {
-        top    = "set_first",
-        left   = "set_first",
-        bottom = "set_third",
-        right  = "set_third",
-    }
-
-    for _, position in ipairs{"top", "bottom"} do
-        local tb = tbs[position]
-        if tb then
-            l[map[position]](l, wrap_titlebar(tb, c:geometry().width, tb.args.height or 16))
-        end
-    end
-
-    for _, position in ipairs{"left", "right"} do
-        local tb = tbs[position]
-        if tb then
-            l[map[position]](l, wrap_titlebar(tb, tb.args.width or 16, c:geometry().height))
-        end
-    end
-
-    local l2 = wibox.layout.align.horizontal()
-    l2.fill_space = true
-    l:set_second(l2)
-    l.forced_width  = c.width
-    l.forced_height = c.height
-
-    return wibox.widget {
-        {
-            l,
-            {
-                text   = label or "",
-                halign = "center",
-                valign = "center",
-                widget = wibox.widget.textbox
-            },
-            layout = wibox.layout.stack
-        },
-        border_width    = bw,
-        border_color    = bc,
-        shape_clip      = true,
-        border_strategy = "inner",
-        opacity         = c.opacity,
-        fg              = beautiful.fg_normal or "#000000",
-        bg              = col,
-        shape           = function(cr2, w, h)
-            if c.shape then
-                c.shape(cr2, w, h)
-            else
-                return shape.rounded_rect(cr2, w, h, args.radius or 5)
-            end
-        end,
-
-        forced_width  = geo.width  + 2*bw,
-        forced_height = geo.height + 2*bw,
-        widget        = wibox.container.background,
-    }
-end
-
--- Add all wiboxes
-
 -- Fix the wibox geometries that have a dependency on their content
 for _, d in ipairs(drawin.get()) do
     local w = d.get_wibox and d:get_wibox() or nil
@@ -228,7 +248,7 @@ for _, c in ipairs(client.get()) do
         for _, geo in ipairs(c._old_geo) do
             if not geo._hide then
                 total_area:add_at(
-                    client_widget(c, c.color or geo._color or beautiful.bg_normal, geo._label),
+                    client_widget(c, c.color or geo._color or beautiful.bg_normal, geo._label, args),
                     {x=geo.x, y=geo.y}
                 )
             end
