@@ -437,6 +437,7 @@ table.insert(steps, function()
     return true
 end)
 
+-- Test auto-save
 table.insert(steps, function()
     if not escape_works then
         root.fake_input("key_press","Escape")
@@ -444,6 +445,36 @@ table.insert(steps, function()
         return
     end
 
+    local called = false
+    local save = awful.screenshot.save
+    awful.screenshot.save = function() called = true end
+    local ss = awful.screenshot { auto_save_delay = 0 }
+    ss:connect_signal("snipping::cancelled", function() escape_works = true end)
+    awful.screenshot.save = save
+
+    assert(called)
+
+    return true
+end)
+
+local timer_start, timer_tick, timer_timeout, saved = false, false, false, false
+
+-- Test delayed auto-save
+table.insert(steps, function()
+    local ss = awful.screenshot { auto_save_tick_duration = 0.05 }
+
+    ss:connect_signal("timer::started", function() timer_start = true end)
+    ss:connect_signal("timer::tick", function() timer_tick = true end)
+    ss:connect_signal("timer::timeout", function() timer_timeout = true end)
+    ss:connect_signal("file::saved", function() saved = true end)
+
+    ss.auto_save_delay = 1
+
+    return true
+end)
+
+table.insert(steps, function()
+    if not (timer_start and timer_tick and timer_timeout and saved) then return end
     return true
 end)
 

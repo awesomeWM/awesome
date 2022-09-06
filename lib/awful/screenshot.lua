@@ -3,7 +3,7 @@
 --
 -- @author Brian Sobulefsky &lt;brian.sobulefsky@protonmail.com&gt;
 -- @copyright 2021 Brian Sobulefsky
--- @inputmodule awful.screenshot
+-- @classmod awful.screenshot
 ---------------------------------------------------------------------------
 
 -- Grab environment we need
@@ -21,6 +21,7 @@ local cairo     = require("lgi").cairo
 local abutton   = require("awful.button")
 local akey      = require("awful.key")
 local akgrabber = require("awful.keygrabber")
+local gtimer    = require("gears.timer")
 local glib      = require("lgi").GLib
 local datetime  = glib.DateTime
 local timezone  = glib.TimeZone
@@ -225,6 +226,23 @@ end
 -- @tparam awful.screenshot self
 -- @tparam string reason Either `"mouse_button"`, `"key"`, `"no_selection"`
 --  or `"too_small"`.
+
+--- Emitted when the `auto_save_delay` timer starts.
+-- @signal timer::started
+-- @tparam awful.screenshot self
+
+--- Emitted after each elapsed second when `auto_save_delay` is set.
+-- @signal timer::tick
+-- @tparam awful.screenshot self
+-- @tparam integer remaining Number of seconds remaining.
+
+--- Emitted when the `auto_save_delay` timer stops.
+--
+-- This is before the screenshot is taken. If you need to hide notifications
+-- or other element, it has to be done using this signal.
+--
+-- @signal timer::timeout
+-- @tparam awful.screenshot self
 
 -- Internal function that generates the callback to be passed to the
 -- mousegrabber that implements the interactive mode.
@@ -527,24 +545,44 @@ end
 -- @propemits true false
 -- @readonly
 
+--- Number of seconds before auto-saving (or entering the interactive snipper).
+--
+-- You can use `0` to auto-save immediatly.
+--
+-- @property auto_save_delay
+-- @tparam[opt=nil] integer|nil auto_save_delay
+-- @propertytype nil Do not auto-save.
+-- @propertyunit second
+-- @negativeallowed false
+-- @propemits true false
+
+--- Duration between the `"timer::tick"` signals when using `auto_save_delay`.
+-- @property auto_save_tick_duration
+-- @tparam[opt=1.0] number auto_save_tick_duration
+-- @propertyunit second
+-- @negativeallowed false
+-- @propemits true false
+
 local defaults = {
-    prefix         = "Screenshot-",
-    directory      = screenshot_validation.directory(os.getenv("HOME")),
-    cursor         = "crosshair",
-    date_format    = "%Y%m%d%H%M%S",
-    interactive    = false,
-    reject_buttons = {abutton({}, 3)},
-    accept_buttons = {abutton({}, 1)},
-    reject_keys    = {akey({}, "Escape")},
-    accept_keys    = {akey({}, "Return")},
-    minimum_size   = {width = 3, height = 3},
+    prefix                  = "Screenshot-",
+    directory               = screenshot_validation.directory(os.getenv("HOME")),
+    cursor                  = "crosshair",
+    date_format             = "%Y%m%d%H%M%S",
+    interactive             = false,
+    reject_buttons          = {abutton({}, 3)},
+    accept_buttons          = {abutton({}, 1)},
+    reject_keys             = {akey({}, "Escape")},
+    accept_keys             = {akey({}, "Return")},
+    minimum_size            = {width = 3, height = 3},
+    auto_save_tick_duration = 1,
 }
 
 -- Create the standard properties.
 for _, prop in ipairs { "frame_color", "geometry", "screen", "client", "date_format",
-                        "prefix", "directory", "file_path", "file_name", "cursor",
-                        "interactive", "reject_buttons", "accept_buttons",
-                        "reject_keys", "accept_keys", "frame_shape", "minimum_size" } do
+                        "prefix", "directory", "file_path", "file_name", "auto_save_delay",
+                        "interactive", "reject_buttons", "accept_buttons", "cursor",
+                        "reject_keys", "accept_keys", "frame_shape", "minimum_size",
+                        "auto_save_tick_duration" } do
     module["set_"..prop] = function(self, value)
         self._private[prop] = screenshot_validation[prop]
             and screenshot_validation[prop](value) or value
@@ -643,6 +681,58 @@ function module:set_minimum_size(size)
     end
     self._private.minimum_size = size
     self:emit_signal("property::minimum_size", size)
+end
+
+function module:set_auto_save_delay(value)
+    self._private.auto_save_delay = math.ceil(value)
+    self:emit_signal("property::auto_save_delay", value)
+
+    if not value then
+        if self._private.timer then
+            self._private.timer:stop()
+            self._private.timer = nil
+        end
+        return
+    end
+
+    if value == 0 then
+        self:refresh()
+        if not self.interactive then
+            self:save()
+        end
+        return
+    end
+
+    self._private.current_delay = self._private.auto_save_delay
+
+    if not self._private.timer then
+        local dur = self.auto_save_tick_duration
+        self._private.timer = gtimer {timeout = dur}
+        local fct
+        fct = function()
+            self._private.current_delay = self._private.current_delay - dur
+            self:emit_signal("timer::tick", self._private.current_delay)
+
+            if self._private.current_delay <= 0 then
+                self:emit_signal("timer::timeout")
+                awesome.sync()
+                self:refresh()
+
+                if not self.interactive then
+                    self:save()
+                end
+
+                -- For garbage collection of the `awful.screenshot` object.
+                self._private.timer:stop()
+                self._private.timer:disconnect_signal("timeout", fct)
+                self._private.timer = nil
+            end
+        end
+        self._private.timer:connect_signal("timeout", fct)
+    end
+
+    self._private.timer:again()
+    self:emit_signal("timer::started")
 end
 
 --- Take new screenshot(s) now.
