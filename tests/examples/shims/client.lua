@@ -19,8 +19,10 @@ end
 
 local function titlebar_meta(c)
     for _, position in ipairs {"top", "bottom", "left", "right" } do
-        c["titlebar_"..position] = function(size) --luacheck: no unused
-            return drawin{}
+        c["titlebar_"..position] = function(_, size)
+            local prop = "titlebar_"..position.."_size"
+            c._private[prop] = c._private[prop] or size
+            return drawin{}, c._private[prop] or 0
         end
     end
 end
