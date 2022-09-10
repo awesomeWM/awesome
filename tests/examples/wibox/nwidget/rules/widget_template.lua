@@ -25,11 +25,11 @@ beautiful.notification_bg = beautiful.bg_normal --DOC_HIDE
                                    widget        = wibox.container.place
                                },
                                {
-                                   align  = "center",
+                                   halign = "center",
                                    widget = naughty.widget.title,
                                },
                                {
-                                   align  = "center",
+                                   halign = "center",
                                    widget = naughty.widget.message,
                                },
                                {

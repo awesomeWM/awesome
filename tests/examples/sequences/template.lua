@@ -780,7 +780,7 @@ local function wrap_with_arrows(widget)
         },
         {
             markup      = "<span color='#ff000055'>Code for this sequence</span>",
-            align       = "center",
+            halign      = "center",
             foced_width = w,
             widget      = wibox.widget.textbox,
         },

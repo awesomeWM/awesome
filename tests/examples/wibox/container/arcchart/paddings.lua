@@ -13,7 +13,7 @@ for _, v in ipairs {0, 2, 4} do
           {
               {
                   text   = v,
-                  align  = "center",
+                  halign = "center",
                   valign = "center",
                   widget = wibox.widget.textbox,
               },
@@ -45,7 +45,7 @@ l:add(wibox.widget {
       {
           {
               text   = 6,
-              align  = "center",
+              halign = "center",
               valign = "center",
               widget = wibox.widget.textbox,
           },

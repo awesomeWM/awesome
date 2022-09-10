@@ -277,7 +277,7 @@ Code:
             {
                 {
                     markup = "<b>Hello World!</b>",
-                    align  = "center",
+                    halign = "center",
                     widget = wibox.widget.textbox
                 },
                 bg     = "#ff0000",

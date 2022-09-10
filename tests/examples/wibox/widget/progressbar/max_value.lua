@@ -20,7 +20,7 @@ for _, value in ipairs { 0, 10, 42, 999 } do
         pb,
         {
             text   = value.."/42",
-            align  = "center",
+            halign = "center",
             widget = wibox.widget.textbox,
         },
         forced_height = 30,

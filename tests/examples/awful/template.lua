@@ -160,7 +160,7 @@ local function client_widget(c, col, label)
             l,
             {
                 text   = label or "",
-                align  = "center",
+                halign = "center",
                 valign = "center",
                 widget = wibox.widget.textbox
             },

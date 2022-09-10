@@ -21,7 +21,7 @@ local function gen_class(name)
             {
                 {
                     valign = "center",
-                    align  = "center",
+                    halign = "center",
                     markup = "<b>"..name.."</b>",
                     widget = wibox.widget.textbox
                 },

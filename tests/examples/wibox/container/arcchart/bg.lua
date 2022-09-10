@@ -12,7 +12,7 @@ for _, v in ipairs {"", "#00ff00", "#0000ff"} do
     l:add(wibox.widget {
           {
               text   = v~="" and v or "nil",
-              align  = "center",
+              halign = "center",
               valign = "center",
               widget = wibox.widget.textbox,
           },

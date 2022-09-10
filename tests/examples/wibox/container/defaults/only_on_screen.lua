@@ -5,14 +5,14 @@ local awful = { widget = { only_on_screen = require("awful.widget.only_on_screen
 
 return {
     text   = "Before",
-    align  = "center",
+    halign = "center",
     valign = "center",
     widget = wibox.widget.textbox,
 },
 {
     {
         text   = "After",
-        align  = "center",
+        halign = "center",
         valign = "center",
         widget = wibox.widget.textbox,
     },

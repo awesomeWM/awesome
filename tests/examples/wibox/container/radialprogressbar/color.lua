@@ -7,7 +7,7 @@ local function gen(val)
     return wibox.widget {
         {
             text   = "Value: "..val,
-            align  = "center",
+            halign = "center",
             valign = "center",
             widget = wibox.widget.textbox,
         },

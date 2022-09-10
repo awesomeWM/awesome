@@ -210,7 +210,7 @@ local function create_info(text, x, y, width, height)
         {
             {
                 text = text,
-                align = "center",
+                halign = "center",
                 ellipsize = "none",
                 wrap = "word",
                 widget = wibox.widget.textbox

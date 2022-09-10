@@ -45,7 +45,7 @@ require("_default_look")
 --DOC_HIDE_END
                text   = "DPI: " .. dpi,
                valign = "center",
-               align  = "center",
+               halign = "center",
                widget = wibox.widget.textbox,
                 }, --DOC_HIDE
                 widget = wibox.layout.stack --DOC_HIDE

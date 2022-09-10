@@ -3,6 +3,7 @@
 --DOC_HIDE_START
 local parent = ...
 local wibox  = require("wibox")
+local beautiful = require("beautiful")
 
 local widget = function(inner)
     return wibox.widget {
@@ -13,6 +14,7 @@ local widget = function(inner)
                 widget = wibox.container.margin,
             },
             border_width = 2,
+            border_color = beautiful.border_color,
             widget = wibox.container.background,
         },
         strategy = "max",

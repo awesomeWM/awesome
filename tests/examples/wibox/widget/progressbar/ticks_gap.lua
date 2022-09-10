@@ -22,7 +22,7 @@ for _, gap in ipairs { 0, 2, 4, 6 } do
         pb,
         {
             text   = gap,
-            align  = "center",
+            halign = "center",
             widget = wibox.widget.textbox,
         },
         forced_height = 30,

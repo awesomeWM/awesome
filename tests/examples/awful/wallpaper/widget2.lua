@@ -30,7 +30,7 @@ screen[1]._resize {x = 0, y = 0, width = 320, height = 196} --DOC_HIDE
                {
                    markup = "<tt><b>[SYSTEM FAILURE]</b></tt>",
                    valign = "center",
-                   align  = "center",
+                   halign = "center",
                    widget = wibox.widget.textbox
                },
                fg = "#00ff00",

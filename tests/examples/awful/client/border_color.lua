@@ -29,7 +29,7 @@ client.connect_signal("request::titlebars", function(c)--DOC_HIDE
         },--DOC_HIDE
         { -- Middle--DOC_HIDE
             { -- Title--DOC_HIDE
-                align  = "center",--DOC_HIDE
+                halign = "center",--DOC_HIDE
                 widget = awful.titlebar.widget.titlewidget(c)--DOC_HIDE
             },--DOC_HIDE
             layout  = wibox.layout.flex.horizontal--DOC_HIDE

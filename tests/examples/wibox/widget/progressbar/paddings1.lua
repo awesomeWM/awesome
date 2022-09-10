@@ -20,7 +20,7 @@ for _, padding in ipairs { 0, 2, 4, 6 } do
         pb,
         {
             text   = padding,
-            align  = "center",
+            halign = "center",
             widget = wibox.widget.textbox,
         },
         forced_height = 30,

@@ -12,7 +12,7 @@ for _, v in ipairs {1,3,7,10} do
     l:add(wibox.widget {
           {
               text   = v,
-              align  = "center",
+              halign = "center",
               valign = "center",
               widget = wibox.widget.textbox,
           },

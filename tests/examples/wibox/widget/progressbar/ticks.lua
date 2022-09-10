@@ -21,7 +21,7 @@ for _, has_ticks in ipairs { true, false } do
         pb,
         {
             text   = tostring(has_ticks),
-            align  = "center",
+            halign = "center",
             widget = wibox.widget.textbox,
         },
         forced_height = 30,

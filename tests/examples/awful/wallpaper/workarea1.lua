@@ -39,7 +39,7 @@ require("_default_look")
                 {
                     text   = "honor_workarea = " .. (s.index == 2 and "true" or "false"),
                     valign = "center",
-                    align  = "center",
+                    halign = "center",
                     widget = wibox.widget.textbox,
                 },
                 widget = wibox.layout.stack
