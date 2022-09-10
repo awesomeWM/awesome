@@ -1994,7 +1994,7 @@ local function detect_markdown_footguns(string)
 
             -- Detect unquoted code with 2 underscores. They will render as italic,
             -- which is definitively not wanted. Add "`" to fix.
-            for part in line:gmatch("[^`]*") do
+            for part in line:gmatch("[^`]*`?") do
                 if not is_tick then
                     local count = 0
 
