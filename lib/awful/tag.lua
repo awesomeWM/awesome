@@ -50,6 +50,7 @@ defaults.gap                 = 0
 
 -- The default gap_count.
 defaults.gap_single_client   = true
+defaults.gap_mult_client     = true
 
 -- The default master fill policy.
 defaults.master_fill_policy  = "expand"
@@ -1224,6 +1225,29 @@ function tag.object.get_gap_single_client(t)
         return val
     end
     return defaults.gap_single_client
+end
+
+--- Enable gaps for mult client.
+--
+-- @beautiful beautiful.gap_mult_client
+-- @param boolean (default: true)
+-- @see gap
+-- @see gap_single_client
+
+function tag.object.set_gap_mult_client(t, gap_mult_client)
+    tag.setproperty(t, "gap_mult_client", gap_mult_client == true)
+end
+
+function tag.object.get_gap_mult_client(t)
+    local val = tag.getproperty(t, "gap_mult_client")
+    if val ~= nil then
+        return val
+    end
+    val = beautiful.gap_mult_client
+    if val ~= nil then
+        return val
+    end
+    return defaults.gap_mult_client
 end
 
 --- Get the spacing between clients.

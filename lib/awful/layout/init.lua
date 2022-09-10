@@ -208,12 +208,18 @@ function layout.parameters(t, screen)
         gap_single_client = t.gap_single_client
     end
 
+    local gap_mult_client = true
+
+    if(t and t.gap_mult_client ~= nil) then
+        gap_mult_client = t.gap_mult_client
+    end
+
     local useless_gap = 0
     if t then
         local skip_gap = layout.get(screen).skip_gap or function(nclients)
             return nclients < 2
         end
-        if gap_single_client or not skip_gap(#clients, t) then
+        if (gap_single_client and skip_gap(#clients, t)) or (not skip_gap(#clients, t) and gap_mult_client) then
             useless_gap = t.gap
         end
     end
