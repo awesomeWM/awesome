@@ -674,7 +674,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                 cur_pos = 1
             elseif key == "b" then
                 if cur_pos > 1 then
-                    cur_pos = cur_pos - charlen(command, cur_pos)
+                    cur_pos = cur_pos - charlen(command, cur_pos - 1)
                 end
             elseif key == "d" then
                 if cur_pos <= #command then
@@ -723,7 +723,7 @@ function prompt.run(args, textbox, exe_callback, completion_callback,
                 end
             elseif key == "f" then
                 if cur_pos <= #command then
-                    cur_pos = cur_pos + charlen(command, cur_pos)
+                    cur_pos = cur_pos + charlen(command, cur_pos + 1)
                 end
             elseif key == "h" then
                 if cur_pos > 1 then
