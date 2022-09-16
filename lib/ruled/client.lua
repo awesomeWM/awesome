@@ -156,7 +156,7 @@ end
 --   "except_any" keys.
 -- @treturn table The list of matched rules.
 -- @staticfct ruled.client.matching_rules
-function module.matchingrules(c, rules)
+function module.matching_rules(c, rules)
     return crules:matching_rules(c, rules)
 end
 
