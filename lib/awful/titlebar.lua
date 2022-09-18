@@ -542,85 +542,94 @@ local default_tooltip_messages = {
 -- @tparam gears.surface|string path
 -- @see gears.surface
 
---- Titlebar tooltip message for close button.
+--- The message in the close button tooltip.
 -- @beautiful beautiful.titlebar_tooltip_messages_close
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_close
 -- @see awful.titlebar
 
---- Titlebar tooltip message for minimize button.
+--- The message in the minimize button tooltip.
 -- @beautiful beautiful.titlebar_tooltip_messages_minimize
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_minimize
 -- @see awful.titlebar
 
---- Titlebar tooltip message for maximized button when client is maximized.
+--- The message in the maximize button tooltip when the client is maximized.
 -- @beautiful beautiful.titlebar_tooltip_messages_maximized_active
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_maximized_active
 -- @see awful.titlebar
 
---- Titlebar tooltip message for maximized button when client is unmaximized.
+--- The message in the maximize button tooltip when the client is unmaximized.
 -- @beautiful beautiful.titlebar_tooltip_messages_maximized_inactive
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_maximized_inactive
 -- @see awful.titlebar
 
---- Titlebar tooltip message for floating button when client is floating.
+--- The message in the floating button tooltip when then client is floating.
 -- @beautiful beautiful.titlebar_tooltip_messages_floating_active
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_floating_active
 -- @see awful.titlebar
 
---- Titlebar tooltip message for floating button when client isn't floating.
+--- The message in the floating button tooltip when then client isn't floating.
 -- @beautiful beautiful.titlebar_tooltip_messages_floating_inactive
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_floating_inactive
 -- @see awful.titlebar
 
---- Titlebar tooltip message for onTop button when client is onTop.
+--- The message in the onTop button tooltip when the client is onTop.
 -- @beautiful beautiful.titlebar_tooltip_messages_ontop_active
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_ontop_active
 -- @see awful.titlebar
 
---- Titlebar tooltip message for onTop button when client isn't onTop.
+--- The message in the onTop button tooltip when client isn't onTop.
 -- @beautiful beautiful.titlebar_tooltip_messages_ontop_inactive
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_ontop_inactive
 -- @see awful.titlebar
 
---- Titlebar tooltip message for onTop button when client is sticky.
+--- The message in the sticky button tooltip when the client is sticky.
 -- @beautiful beautiful.titlebar_tooltip_messages_sticky_active
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_sticky_active
 -- @see awful.titlebar
 
---- Titlebar tooltip message for onTop button when client isn't sticky.
+--- The message in the sticky button tooltip when the client isn't sticky.
 -- @beautiful beautiful.titlebar_tooltip_messages_sticky_inactive
--- @tparam string tooltip tooltip message
+-- @tparam string titlebar_tooltip_messages_sticky_inactive
 -- @see awful.titlebar
 
---- Titlebar buttons tooltip parameter `delay_show`.
--- This parameter `delay_show` defines a delay in seconds before showing the tooltip.
+--- The delay in second before the titlebar buttons tooltip is shown.
+-- It is used as the `delay_show` parameter passed to the `awful.tooltip` constructor function.
 -- @beautiful beautiful.titlebar_tooltip_delay_show
--- @tparam integer delay in seconds before showing the tooltip
+-- @tparam integer titlebar_tooltip_delay_show
 -- @see awful.tooltip
 
---- Titlebar buttons tooltip parameter `margins_leftright`.
--- This parameter `margins_leftright` defines the left/right margin for the tooltip text.
+--- The inner left and right margins for tooltip messages.
+-- It is used as the `margins_leftright` parameter passed to the `awful.tooltip` constructor function.
 -- @beautiful beautiful.titlebar_tooltip_margins_leftright
--- @tparam integer margin for left/right corner for the tooltop text
+-- @tparam integer titlebar_tooltip_margins_leftright
 -- @see awful.tooltip
 
---- Titlebar buttons tooltip parameter `margins_topbottom`.
--- This parameter `margins_topbottom` defines the top/bottom margin for the tooltip text.
+--- The inner top and bottom margins for the tooltip messages.
+-- It is used as the `margins_topbottom` parameter passed to the `awful.tooltip` constructor function.
 -- @beautiful beautiful.titlebar_tooltip_margins_topbottom
--- @tparam integer margin for top/bottom corner for the tooltip text
+-- @tparam integer titlebar_tooltip_margins_topbottom
 -- @see awful.tooltip
 
---- Titlebar buttons tooltip parameter `timeout`.
--- This parameter `timeout` defines the timeout value for declared `timer_function`.
+--- The time in second before invoking the `timer_function` callback.
+-- It is used as the `timeout` parameter passed to the `awful.tooltip` constructor function.
 -- @beautiful beautiful.titlebar_tooltip_timeout
--- @tparam number timeout timeout value in seconds for activation of `timer_function`
--- @see awful.tooltip
+-- @tparam number titlebar_tooltip_timeout
+-- @see awful.tooltip.timeout
 
---- Titlebar buttons tooltip parameter `align`.
--- This parameter `align` defines the alignment:
--- `right`, `top_right`, `left`, `bottom_left`, `top_left`, `bottom`, `top`
+--- The text horizontal alignment in tooltips.
+-- It is used as the `align` parameter passed to the `awful.tooltip` constructor function.
+--
+-- Valid values are:
+--
+--  * `"right"`
+--  * `"top_right"`
+--  * `"left"`
+--  * `"bottom_left"`
+--  * `"top_left"`
+--  * `"bottom"`
+--  * `"top"`
 -- @beautiful beautiful.titlebar_tooltip_align
--- @tparam string align the alignment string type
+-- @tparam string titlebar_tooltip_align
 -- @see awful.tooltip
 
 --- Set a declarative widget hierarchy description.
@@ -945,6 +954,21 @@ end
 -- @tparam function action Function that is called when the button is clicked.
 -- @treturn wibox.widget The widget
 -- @constructorfct awful.titlebar.widget.button
+-- @usebeautiful beautiful.titlebar_tooltip_messages_close
+-- @usebeautiful beautiful.titlebar_tooltip_messages_minimize
+-- @usebeautiful beautiful.titlebar_tooltip_messages_maximized_active
+-- @usebeautiful beautiful.titlebar_tooltip_messages_maximized_inactive
+-- @usebeautiful beautiful.titlebar_tooltip_messages_floating_active
+-- @usebeautiful beautiful.titlebar_tooltip_messages_floating_inactive
+-- @usebeautiful beautiful.titlebar_tooltip_messages_ontop_active
+-- @usebeautiful beautiful.titlebar_tooltip_messages_ontop_inactive
+-- @usebeautiful beautiful.titlebar_tooltip_messages_sticky_active
+-- @usebeautiful beautiful.titlebar_tooltip_messages_sticky_inactive
+-- @usebeautiful beautiful.titlebar_tooltip_delay_show
+-- @usebeautiful beautiful.titlebar_tooltip_margins_leftright
+-- @usebeautiful beautiful.titlebar_tooltip_margins_topbottom
+-- @usebeautiful beautiful.titlebar_tooltip_timeout
+-- @usebeautiful beautiful.titlebar_tooltip_align
 function titlebar.widget.button(c, name, selector, action)
     local ret = imagebox()
     if titlebar.enable_tooltip then
