@@ -17,13 +17,15 @@ local gtable = require("gears.table")
 local beautiful = require("beautiful")
 local base = require("wibox.widget.base")
 local shape = require("gears.shape")
+local surface = require("gears.surface")
+local cairo = require("lgi").cairo
 local capi = {
     mouse        = mouse,
     mousegrabber = mousegrabber,
     root         = root,
 }
 
-local slider = {mt={}}
+local slider = { mt = {} }
 
 --- The slider handle shape.
 --
@@ -265,41 +267,42 @@ local slider = {mt={}}
 
 local properties = {
     -- Handle
-    handle_shape         = shape.rectangle,
-    handle_color         = false,
-    handle_margins       = {},
-    handle_width         = false,
-    handle_border_width  = 0,
-    handle_border_color  = false,
+    handle_shape        = shape.rectangle,
+    handle_color        = false,
+    handle_icon         = false,
+    handle_margins      = {},
+    handle_width        = false,
+    handle_border_width = 0,
+    handle_border_color = false,
 
     -- Bar
-    bar_shape            = shape.rectangle,
-    bar_height           = false,
-    bar_color            = false,
-    bar_active_color     = false,
-    bar_margins          = {},
-    bar_border_width     = 0,
-    bar_border_color     = false,
+    bar_shape        = shape.rectangle,
+    bar_height       = false,
+    bar_color        = false,
+    bar_active_color = false,
+    bar_margins      = {},
+    bar_border_width = 0,
+    bar_border_color = false,
 
     -- Content
-    value                = 0,
-    minimum              = 0,
-    maximum              = 100,
+    value   = 0,
+    minimum = 0,
+    maximum = 100,
 }
 
 -- Create the accessors
 for prop in pairs(properties) do
-    slider["set_"..prop] = function(self, value)
+    slider["set_" .. prop] = function(self, value)
         local changed = self._private[prop] ~= value
         self._private[prop] = value
 
         if changed then
-            self:emit_signal("property::"..prop, value)
+            self:emit_signal("property::" .. prop, value)
             self:emit_signal("widget::redraw_needed")
         end
     end
 
-    slider["get_"..prop] = function(self)
+    slider["get_" .. prop] = function(self)
         -- Ignoring the false's is on purpose
         return self._private[prop] == nil
             and properties[prop]
@@ -316,8 +319,8 @@ function slider:set_value(value)
     self._private.value = value
 
     if changed then
-        self:emit_signal( "property::value", value)
-        self:emit_signal( "widget::redraw_needed" )
+        self:emit_signal("property::value", value)
+        self:emit_signal("widget::redraw_needed")
     end
 end
 
@@ -329,7 +332,7 @@ local function get_extremums(self)
     return min, max, interval
 end
 
-function slider:draw(_, cr, width, height)
+function slider:draw(context, cr, width, height)
     local value = self._private.value or self._private.min or 0
 
     local maximum = self._private.maximum
@@ -343,7 +346,7 @@ function slider:draw(_, cr, width, height)
 
     local handle_height, handle_width = height, self._private.handle_width
         or beautiful.slider_handle_width
-        or math.floor(height/2)
+        or math.floor(height / 2)
 
     local handle_border_width = self._private.handle_border_width
         or beautiful.slider_handle_border_width
@@ -364,24 +367,23 @@ function slider:draw(_, cr, width, height)
 
     local margins = self._private.bar_margins
         or beautiful.slider_bar_margins
-
     local x_offset, right_margin, y_offset = 0, 0
 
     if margins then
         if type(margins) == "number" then
-            bar_height = bar_height or (height - 2*margins)
+            bar_height = bar_height or (height - 2 * margins)
             x_offset, y_offset = margins, margins
             right_margin = margins
         else
             bar_height = bar_height or (
                 height - (margins.top or 0) - (margins.bottom or 0)
-            )
+                )
             x_offset, y_offset = margins.left or 0, margins.top or 0
             right_margin = margins.right or 0
         end
     else
         bar_height = bar_height or beautiful.slider_bar_height or height
-        y_offset   = math.floor((height - bar_height)/2)
+        y_offset   = math.floor((height - bar_height) / 2)
     end
 
 
@@ -400,13 +402,13 @@ function slider:draw(_, cr, width, height)
     if bar_active_color and type(bar_color) == "string" and type(bar_active_color) == "string" then
         local bar_active_width = math.floor(
             active_rate * (width - x_offset - right_margin)
-            - (handle_width - handle_border_width/2) * (active_rate - 0.5)
+            - (handle_width - handle_border_width / 2) * (active_rate - 0.5)
         )
-        cr:set_source(color.create_pattern{
-            type        = "linear",
-            from        = {0,0},
-            to          = {bar_active_width, 0},
-            stops       = {{0.99, bar_active_color}, {0.99, bar_color}}
+        cr:set_source(color.create_pattern {
+            type  = "linear",
+            from  = { 0, 0 },
+            to    = { bar_active_width, 0 },
+            stops = { { 0.99, bar_active_color }, { 0.99, bar_color } }
         })
     end
 
@@ -460,24 +462,64 @@ function slider:draw(_, cr, width, height)
     if margins then
         if type(margins) == "number" then
             x_offset, y_offset = margins, margins
-            handle_width  = handle_width  - 2*margins
-            handle_height = handle_height - 2*margins
+            handle_width       = handle_width - 2 * margins
+            handle_height      = handle_height - 2 * margins
         else
             x_offset, y_offset = margins.left or 0, margins.top or 0
-            handle_width  = handle_width  -
-                (margins.left or 0) - (margins.right  or 0)
-            handle_height = handle_height -
-                (margins.top  or 0) - (margins.bottom or 0)
+            handle_width       = handle_width -
+                (margins.left or 0) - (margins.right or 0)
+            handle_height      = handle_height -
+                (margins.top or 0) - (margins.bottom or 0)
         end
     end
 
     -- Get the widget size back to it's non-transfored value
     local min, _, interval = get_extremums(self)
-    local rel_value = math.floor(((value-min)/interval) * (width-handle_width))
+    local rel_value = math.floor(((value - min) / interval) * (width - handle_width))
 
     cr:translate(x_offset + rel_value, y_offset)
 
     handle_shape(cr, handle_width, handle_height)
+
+    local handle_icon = self._private.handle_icon
+        or nil
+
+
+    if handle_icon then
+        cr:save()
+        -- set clip
+        -- cr:clip(self._private.handle_shape(cr, handle_height, handle_width))
+        --cr:translate(230, 230)
+        cr:scale(0.25, 0.25)
+        --cr:translate(handle_width*-0.5, handle_width*-0.5)
+        if type(handle_icon) == "function" then
+            handle_icon(context, cr, handle_width, handle_height, handle_icon_args)
+        else
+            local icon = surface.load(handle_icon)
+            cr:set_source_surface(icon, 0, 0)
+            cr:paint()
+        end
+        cr:restore()
+    end
+
+    --- The background image to use.
+    --
+    -- If `image` is a function, it will be called with `(context, cr, width, height)`
+    -- as arguments. Any other arguments passed to this method will be appended.
+    --
+    -- @property bgimage
+    -- @tparam[opt=nil] image|nil bgimage
+    -- @see gears.surface
+
+    --[[ function slider:set_handle_icon(icon, ...)
+        self._private.handle_icon = type(icon) == "function" and icon or surface.load(icon)
+        self._private.handle_icon_args = { ... }
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("property::handle_icon", icon)
+    end ]]
+
+
+
 
     if handle_border_width > 0 then
         cr:fill_preserve()
@@ -508,7 +550,7 @@ end
 -- Move the handle to the correct location
 local function move_handle(self, width, x, _)
     local _, _, interval = get_extremums(self)
-    self:set_value(math.floor((x*interval)/width))
+    self:set_value(math.floor((x * interval) / width))
 end
 
 local function mouse_press(self, x, y, button_id, _, geo)
@@ -535,7 +577,7 @@ local function mouse_press(self, x, y, button_id, _, geo)
         move_handle(self, width, matrix:transform_point(mouse.x, mouse.y))
 
         return true
-    end,"fleur")
+    end, "fleur")
 end
 
 --- Create a slider widget.
