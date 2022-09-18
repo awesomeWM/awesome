@@ -504,7 +504,7 @@ end
 --
 -- @method stop
 -- @tparam string|nil stop_key Override the key passed to `stop_callback` **DEPRECATED**
--- @tparam tale|nil Override the modifiers passed to `stop_callback` **DEPRECATED**
+-- @tparam tale|nil stop_mods Override the modifiers passed to `stop_callback` **DEPRECATED**
 -- @noreturn
 -- @emits stopped
 -- @emits property::current_instance
