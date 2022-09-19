@@ -271,6 +271,7 @@ local properties = {
     handle_width         = false,
     handle_border_width  = 0,
     handle_border_color  = false,
+    handle_widget       = false,
 
     -- Bar
     bar_shape            = shape.rectangle,
@@ -318,6 +319,7 @@ function slider:set_value(value)
     if changed then
         self:emit_signal( "property::value", value)
         self:emit_signal( "widget::redraw_needed" )
+        self:emit_signal("widget::layout_changed")
     end
 end
 
@@ -503,6 +505,45 @@ end
 function slider:fit(_, width, height)
     -- Use all the space, this should be used with a constraint widget
     return width, height
+end
+
+function slider:layout(context, width, height)
+    local handle_height, handle_width = height, self._private.handle_width
+        or beautiful.slider_handle_width
+        or math.floor(height / 2)
+    local handle_widget = self._private.handle_widget
+        or nil
+    if handle_widget then
+        local x, y = 0, 0
+        local w, h
+        local value = self._private.value or self._private.min or 0
+        local min, _, interval = get_extremums(self)
+        w, h = base.fit_widget(self, context, handle_widget, handle_width, handle_height)
+        local margins = self._private.handle_margins
+            or beautiful.slider_handle_margins
+
+        local x_offset, y_offset = 0, 0
+
+        if margins then
+            if type(margins) == "number" then
+                x_offset, y_offset = margins, margins
+                handle_width       = handle_width - 2 * margins
+                handle_height      = handle_height - 2 * margins
+            else
+                x_offset, y_offset = margins.left or 0, margins.top or 0
+                handle_width       = handle_width -
+                    (margins.left or 0) - (margins.right or 0)
+                handle_height      = handle_height -
+                    (margins.top or 0) - (margins.bottom or 0)
+            end
+        end
+
+        x_offset = x_offset + handle_width / 2 - w / 2
+
+        x = (((value - min) / interval) * (width - handle_width) + x_offset)
+        y = (height / 2) + y_offset - h / 2
+        return { base.place_widget_at(handle_widget, x, y, w, h) }
+    end
 end
 
 -- Move the handle to the correct location
