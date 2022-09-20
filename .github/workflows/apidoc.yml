@@ -17,12 +17,11 @@ defaults:
     # to improve debugging some of the longer scripts.
     shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
 
-permissions: {}
+permissions:
+  contents: read
+
 jobs:
   main:
-    permissions:
-      contents: write # for git push
-
     runs-on: ubuntu-20.04
 
     env:
