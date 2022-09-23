@@ -9,6 +9,7 @@ project='awesome' -- luacheck: globals project
 title='awesome API documentation'  -- luacheck: globals title
 description='API documentation for awesome, a highly configurable X window manager (version @AWESOME_VERSION@).'  -- luacheck: globals description
 
+format='discount'  -- luacheck: globals format
 dir='../doc'  -- luacheck: globals dir
 
 -- Make the docs prettier
