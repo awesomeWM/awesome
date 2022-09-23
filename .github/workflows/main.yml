@@ -17,6 +17,9 @@ defaults:
     # to improve debugging some of the longer scripts.
     shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
 
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
 jobs:
   main:
     # The type of runner that the job will run on
