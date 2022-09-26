@@ -281,6 +281,7 @@ local properties = {
     bar_margins          = {},
     bar_border_width     = 0,
     bar_border_color     = false,
+    bar_widget       = false,
 
     -- Content
     value                = 0,
@@ -319,7 +320,11 @@ function slider:set_value(value)
     if changed then
         self:emit_signal( "property::value", value)
         self:emit_signal( "widget::redraw_needed" )
-        self:emit_signal("widget::layout_changed")
+        if self._private.handle_widget then
+            self:emit_signal("widget::layout_changed")
+        elseif self._private.bar_widget then
+            self:emit_signal("widget::layout_changed")
+        end
     end
 end
 
@@ -329,6 +334,40 @@ local function get_extremums(self)
     local interval = max - min
 
     return min, max, interval
+end
+
+--TODO Document Margins
+
+function slider:set_handle_margins(value)
+    if type(value) == "number" then
+        value = {
+            top    = value,
+            bottom = value,
+            left   = value,
+            right  = value,
+         }
+    end
+
+    self._private.handle_margins = value
+    self:emit_signal( "property::handle_margins", value)
+    self:emit_signal( "widget::redraw_needed" )
+    self:emit_signal("widget::layout_changed")
+end
+
+function slider:set_bar_margins(value)
+    if type(value) == "number" then
+        value = {
+            top    = value,
+            bottom = value,
+            left   = value,
+            right  = value,
+         }
+    end
+
+    self._private.bar_margins = value
+    self:emit_signal( "property::bar_margins", value)
+    self:emit_signal( "widget::redraw_needed" )
+    self:emit_signal("widget::layout_changed")
 end
 
 function slider:draw(_, cr, width, height)
@@ -370,17 +409,11 @@ function slider:draw(_, cr, width, height)
     local x_offset, right_margin, y_offset = 0, 0
 
     if margins then
-        if type(margins) == "number" then
-            bar_height = bar_height or (height - 2*margins)
-            x_offset, y_offset = margins, margins
-            right_margin = margins
-        else
-            bar_height = bar_height or (
-                height - (margins.top or 0) - (margins.bottom or 0)
-            )
-            x_offset, y_offset = margins.left or 0, margins.top or 0
-            right_margin = margins.right or 0
-        end
+        bar_height = bar_height or (
+            height - (margins.top or 0) - (margins.bottom or 0)
+        )
+        x_offset, y_offset = margins.left or 0, margins.top or 0
+        right_margin = margins.right or 0
     else
         bar_height = bar_height or beautiful.slider_bar_height or height
         y_offset   = math.floor((height - bar_height)/2)
@@ -460,17 +493,11 @@ function slider:draw(_, cr, width, height)
     x_offset, y_offset = 0, 0
 
     if margins then
-        if type(margins) == "number" then
-            x_offset, y_offset = margins, margins
-            handle_width  = handle_width  - 2*margins
-            handle_height = handle_height - 2*margins
-        else
-            x_offset, y_offset = margins.left or 0, margins.top or 0
-            handle_width  = handle_width  -
-                (margins.left or 0) - (margins.right  or 0)
-            handle_height = handle_height -
-                (margins.top  or 0) - (margins.bottom or 0)
-        end
+        x_offset, y_offset = margins.left or 0, margins.top or 0
+        handle_width  = handle_width  -
+            (margins.left or 0) - (margins.right  or 0)
+        handle_height = handle_height -
+            (margins.top  or 0) - (margins.bottom or 0)
     end
 
     -- Get the widget size back to it's non-transfored value
@@ -507,43 +534,66 @@ function slider:fit(_, width, height)
     return width, height
 end
 
+-- @property handle_widget
+-- @tparam widget|nil handle_widget
+
+-- @property bar_widget
+-- @tparam widget|nil bar_widget
 function slider:layout(context, width, height)
+    local result = {}
+    local handle_widget = self._private.handle_widget
+        or nil
+    local bar_widget = self._private.bar_widget
+        or nil
+    --[[ if not handle_widget or not bar_widget then
+        return {}
+    end ]]
+
+
+    local value = self._private.value or self._private.min or 0
+    local min, _, interval = get_extremums(self)
+    local bar_height, bar_width = self._private.bar_height or height, width
     local handle_height, handle_width = height, self._private.handle_width
         or beautiful.slider_handle_width
         or math.floor(height / 2)
-    local handle_widget = self._private.handle_widget
-        or nil
+
+    if bar_widget then
+        bar_width = (((value - min) / interval) * width + handle_width / 2 - ((value - min) / interval ) * handle_width)
+        local w, h = base.fit_widget(self, context, bar_widget, bar_width, bar_height)
+        local margins = self._private.bar_margins
+            or beautiful.slider_bar_margins
+
+        local x_offset, y_offset = 0, 0
+
+        if margins then
+                x_offset, y_offset = margins.left or 0, margins.top or 0
+                bar_width       = bar_width -
+                    (margins.left or 0) - (margins.right or 0)
+        end
+        local x, y = 0 + x_offset, 0 + y_offset
+        table.insert(result, base.place_widget_at(bar_widget, x, y, w, h))
+    end
     if handle_widget then
-        local x, y = 0, 0
-        local w, h
-        local value = self._private.value or self._private.min or 0
-        local min, _, interval = get_extremums(self)
-        w, h = base.fit_widget(self, context, handle_widget, handle_width, handle_height)
+        local w, h = base.fit_widget(self, context, handle_widget, handle_width, handle_height)
         local margins = self._private.handle_margins
             or beautiful.slider_handle_margins
 
         local x_offset, y_offset = 0, 0
 
         if margins then
-            if type(margins) == "number" then
-                x_offset, y_offset = margins, margins
-                handle_width       = handle_width - 2 * margins
-                handle_height      = handle_height - 2 * margins
-            else
                 x_offset, y_offset = margins.left or 0, margins.top or 0
                 handle_width       = handle_width -
                     (margins.left or 0) - (margins.right or 0)
-                handle_height      = handle_height -
-                    (margins.top or 0) - (margins.bottom or 0)
-            end
         end
 
         x_offset = x_offset + handle_width / 2 - w / 2
 
-        x = (((value - min) / interval) * (width - handle_width) + x_offset)
-        y = (height / 2) + y_offset - h / 2
-        return { base.place_widget_at(handle_widget, x, y, w, h) }
+        local x = (((value - min) / interval) * (width - handle_width) + x_offset)
+        local y = (height / 2) + y_offset - h / 2
+        table.insert(result, base.place_widget_at(handle_widget, x, y, w, h))
     end
+
+    return result
 end
 
 -- Move the handle to the correct location
@@ -584,12 +634,14 @@ end
 -- @constructorfct wibox.widget.slider
 -- @tparam[opt={}] table args
 -- @tparam[opt] gears.shape args.handle_shape The slider handle shape.
+-- @tparam[opt] widget args.handle_widget The slider handle widget.
 -- @tparam[opt] color args.handle_color The slider handle color.
 -- @tparam[opt] table args.handle_margins The slider handle margins.
 -- @tparam[opt] number args.handle_width The slider handle width.
 -- @tparam[opt] color args.handle_border_color The handle border_color.
 -- @tparam[opt] number args.handle_border_width The handle border width.
 -- @tparam[opt] gears.shape args.bar_shape The bar (background) shape.
+-- @tparam[opt] widget args.bar_widget The active bar widget.
 -- @tparam[opt] number args.bar_height The bar (background) height.
 -- @tparam[opt] color args.bar_color The bar (background) color.
 -- @tparam[opt] color args.bar_active_color The bar (active) color.
@@ -604,9 +656,9 @@ local function new(args)
         enable_properties = true,
     })
 
-    gtable.crush(ret._private, args or {})
-
     gtable.crush(ret, slider, true)
+
+    gtable.crush(ret, args or {})
 
     ret:connect_signal("button::press", mouse_press)
 
