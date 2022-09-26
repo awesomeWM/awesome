@@ -431,7 +431,7 @@ function matcher:add_matching_function(name, callback, depends_on, precede)
 
     for _, v in ipairs(res) do
         if callbacks[v] then
-            table.insert(self._matching_source, 1, {
+            table.insert(self._matching_source, {
                 callback = callbacks[v],
                 name     = v
             })

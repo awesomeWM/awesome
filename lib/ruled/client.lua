@@ -264,7 +264,7 @@ end
 --
 -- @rulesources awful.rules
 
-crules:add_matching_rules("awful.rules", {}, {"awful.spawn"}, {})
+crules:add_matching_rules("awful.rules", {}, {}, {"awful.spawn"})
 
 -- Add startup_id overridden properties
 local function apply_spawn_rules(c, props, callbacks)
@@ -289,7 +289,7 @@ end
 --
 -- @rulesources awful.spawn
 
-module.add_rule_source("awful.spawn", apply_spawn_rules, {}, {"awful.rules"})
+module.add_rule_source("awful.spawn", apply_spawn_rules, {"awful.rules"}, {})
 
 local function apply_singleton_rules(c, props, callbacks)
     local persis_id, info = c.single_instance_id, nil
@@ -331,7 +331,7 @@ end
 --
 -- @rulesources awful.spawn_once
 
-module.add_rule_source("awful.spawn_once", apply_singleton_rules, {"awful.spawn"}, {"awful.rules"})
+module.add_rule_source("awful.spawn_once", apply_singleton_rules, {"awful.rules"}, {"awful.spawn"})
 
 local function add_to_tag(c, t)
     if not t then return end

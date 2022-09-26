@@ -1415,7 +1415,7 @@ lua_class_t client_class;
  *        -- subprocess or another window for the same process. While it makes sense
  *        -- in some case to apply the same rules, it is not always the case, so
  *        -- better doing nothing rather than something stupid.
- *        if blacklisted_snid[snid] then return end
+ *        if not snid or blacklisted_snid[snid] then return end
  *
  *        c.startup_id = snid
  *
@@ -1423,7 +1423,7 @@ lua_class_t client_class;
  *    end
  *
  *    ruled.client.add_rule_source(
- *        "snid", fix_startup_id, {}, {"awful.spawn", "ruled.client"}
+ *        "snid", fix_startup_id, {}, {"awful.spawn", "awful.rules"}
  *    )
  *
  * @property startup_id
