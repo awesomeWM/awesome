@@ -296,7 +296,7 @@ function utils.parse_desktop_file(file)
             corrected_actions[action] = {}
 
             for _, key in pairs(keyfile:get_keys(cur_action)) do
-                corrected_actions[action][key] = keyfile:get_locale_string(cur_action, key, nil)
+                corrected_actions[action][key] = keyfile:get_locale_string(cur_action, key)
             end
         end
 
