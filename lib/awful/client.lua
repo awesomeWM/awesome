@@ -1132,8 +1132,12 @@ function client.restore(s)
     local cls = capi.client.get(s)
     local tags = s.selected_tags
     for _, c in pairs(cls) do
-        local ctags = c:tags()
         if c.minimized then
+            if c.sticky then
+                c.minimized = false
+                return c
+            end
+            local ctags = c:tags()
             for _, t in ipairs(tags) do
                 if gtable.hasitem(ctags, t) then
                     c.minimized = false
