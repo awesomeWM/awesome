@@ -35,6 +35,17 @@ local slider = {mt={}}
 -- @propbeautiful
 -- @see gears.shape
 
+-- The slider handle widget
+
+--@DOC_wibox_widget_slider_handle_widget_EXAMPLE@
+
+-- @property handle_widget
+-- @tparam widget|nil handle_widget
+-- @propemits true false
+-- @propbeautiful
+-- @see wibox.widget
+
+
 --- The slider handle color.
 --
 --@DOC_wibox_widget_slider_handle_color_EXAMPLE@
@@ -98,6 +109,16 @@ local slider = {mt={}}
 -- @propemits true false
 -- @propbeautiful
 -- @see gears.shape
+
+-- The bar widget
+
+--@DOC_wibox_widget_slider_bar_widget_EXAMPLE@
+--
+-- @property bar_widget
+-- @tparam widget|nil bar_widget
+-- @propemits true false
+-- @propbeautiful
+-- @see wibox.widget
 
 --- The bar (background) height.
 --
@@ -320,9 +341,7 @@ function slider:set_value(value)
     if changed then
         self:emit_signal( "property::value", value)
         self:emit_signal( "widget::redraw_needed" )
-        if self._private.handle_widget then
-            self:emit_signal("widget::layout_changed")
-        elseif self._private.bar_widget then
+        if self._private.handle_widget or self._private.bar_widget then
             self:emit_signal("widget::layout_changed")
         end
     end
@@ -412,7 +431,8 @@ function slider:draw(_, cr, width, height)
         bar_height = bar_height or (
             height - (margins.top or 0) - (margins.bottom or 0)
         )
-        x_offset, y_offset = margins.left or 0, margins.top or 0
+        x_offset, y_offset = margins.left or 0,
+            margins.top or 0
         right_margin = margins.right or 0
     else
         bar_height = bar_height or beautiful.slider_bar_height or height
@@ -493,7 +513,8 @@ function slider:draw(_, cr, width, height)
     x_offset, y_offset = 0, 0
 
     if margins then
-        x_offset, y_offset = margins.left or 0, margins.top or 0
+        x_offset, y_offset = margins.left or 0,
+            margins.top or 0
         handle_width  = handle_width  -
             (margins.left or 0) - (margins.right  or 0)
         handle_height = handle_height -
@@ -534,11 +555,6 @@ function slider:fit(_, width, height)
     return width, height
 end
 
--- @property handle_widget
--- @tparam widget|nil handle_widget
-
--- @property bar_widget
--- @tparam widget|nil bar_widget
 function slider:layout(context, width, height)
     local result = {}
     local handle_widget = self._private.handle_widget
@@ -555,7 +571,7 @@ function slider:layout(context, width, height)
     local bar_height, bar_width = self._private.bar_height or height, width
     local handle_height, handle_width = height, self._private.handle_width
         or beautiful.slider_handle_width
-        or math.floor(height / 2)
+        or width
 
     if bar_widget then
         bar_width = (((value - min) / interval) * width + handle_width / 2 - ((value - min) / interval ) * handle_width)
