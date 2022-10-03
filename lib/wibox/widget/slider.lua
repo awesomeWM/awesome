@@ -327,7 +327,7 @@ end
 
 --- Set the slider's value
 -- @tparam number number Set value to number
--- @method set_value number
+-- @method set_value
 -- @noreturn
 
 function slider:set_value(value)
@@ -354,9 +354,22 @@ local function get_extremums(self)
     return min, max, interval
 end
 
---TODO Document Margins
+-- TODO add single number param to margin setters
+
+--- Set the slider's margins
+--
+-- @tparam[opt={}] table|number|nil handle_margins
+-- @tparam[opt=0] number handle_margins.left
+-- @tparam[opt=0] number handle_margins.right
+-- @tparam[opt=0] number handle_margins.top
+-- @tparam[opt=0] number handle_margins.bottom
+-- @propemits true false
+-- @propbeautiful
+-- @method set_handle_margins
+-- @noreturn
 
 function slider:set_handle_margins(value)
+    local value = value or 0
     if type(value) == "number" then
         value = {
             top    = value,
@@ -371,6 +384,18 @@ function slider:set_handle_margins(value)
     self:emit_signal( "widget::redraw_needed" )
     self:emit_signal("widget::layout_changed")
 end
+
+--- Set the bar's margins
+--
+-- @tparam[opt={}] table|number|nil bar_margins
+-- @tparam[opt=0] number bar_margins.left
+-- @tparam[opt=0] number bar_margins.right
+-- @tparam[opt=0] number bar_margins.top
+-- @tparam[opt=0] number bar_margins.bottom
+-- @propemits true false
+-- @propbeautiful
+-- @method set_bar_margins
+-- @noreturn
 
 function slider:set_bar_margins(value)
     if type(value) == "number" then
@@ -428,11 +453,11 @@ function slider:draw(_, cr, width, height)
 
     if margins then
         bar_height = bar_height or (
-            height - (margins.top or 0) - (margins.bottom or 0)
+            height - (margins.top) - (margins.bottom)
         )
-        x_offset, y_offset = margins.left or 0,
-            margins.top or 0
-        right_margin = margins.right or 0
+        x_offset, y_offset = margins.left,
+            margins.top
+        right_margin = margins.right
     else
         bar_height = bar_height or beautiful.slider_bar_height or height
         y_offset   = math.floor((height - bar_height)/2)
@@ -512,12 +537,11 @@ function slider:draw(_, cr, width, height)
     x_offset, y_offset = 0, 0
 
     if margins then
-        x_offset, y_offset = margins.left or 0,
-            margins.top or 0
+        x_offset, y_offset = margins.left, margins.top
         handle_width  = handle_width  -
-            (margins.left or 0) - (margins.right  or 0)
+            (margins.left) - (margins.right )
         handle_height = handle_height -
-            (margins.top  or 0) - (margins.bottom or 0)
+            (margins.top) - (margins.bottom)
     end
 
     -- Get the widget size back to it's non-transfored value
@@ -581,9 +605,9 @@ function slider:layout(context, width, height)
         local x_offset, y_offset = 0, 0
 
         if margins then
-                x_offset, y_offset = margins.left or 0, margins.top or 0
+                x_offset, y_offset = margins.left, margins.top
                 bar_width       = bar_width -
-                    (margins.left or 0) - (margins.right or 0)
+                    (margins.left) - (margins.right)
         end
         local x, y = 0 + x_offset, 0 + y_offset
         table.insert(result, base.place_widget_at(bar_widget, x, y, w, h))
@@ -596,9 +620,9 @@ function slider:layout(context, width, height)
         local x_offset, y_offset = 0, 0
 
         if margins then
-                x_offset, y_offset = margins.left or 0, margins.top or 0
+                x_offset, y_offset = margins.left, margins.top
                 handle_width       = handle_width -
-                    (margins.left or 0) - (margins.right or 0)
+                    (margins.left) - (margins.right)
         end
 
         x_offset = x_offset + handle_width / 2 - w / 2
