@@ -35,16 +35,12 @@ local slider = {mt={}}
 -- @propbeautiful
 -- @see gears.shape
 
--- The slider handle widget
-
+--- The slider handle widget.
+--
 --@DOC_wibox_widget_slider_handle_widget_EXAMPLE@
-
+--
 -- @property handle_widget
--- @tparam widget|nil handle_widget
--- @propemits true false
--- @propbeautiful
--- @see wibox.widget
-
+-- @tparam[opt=nil] widget|nil handle_widget The handle widget 
 
 --- The slider handle color.
 --
@@ -110,15 +106,12 @@ local slider = {mt={}}
 -- @propbeautiful
 -- @see gears.shape
 
--- The bar widget
-
+--- The bar widget
+--
 --@DOC_wibox_widget_slider_bar_widget_EXAMPLE@
 --
 -- @property bar_widget
--- @tparam widget|nil bar_widget
--- @propemits true false
--- @propbeautiful
--- @see wibox.widget
+-- @tparam[opt=nil] widget|nil bar_widget The widget that spans the active bar segment
 
 --- The bar (background) height.
 --
@@ -287,12 +280,12 @@ local slider = {mt={}}
 local properties = {
     -- Handle
     handle_shape         = shape.rectangle,
+    handle_widget       = false,
     handle_color         = false,
     handle_margins       = {},
     handle_width         = false,
     handle_border_width  = 0,
     handle_border_color  = false,
-    handle_widget       = false,
 
     -- Bar
     bar_shape            = shape.rectangle,
