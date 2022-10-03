@@ -324,6 +324,12 @@ for prop in pairs(properties) do
 end
 
 -- Add some validation to set_value
+
+--- Set the slider's value
+-- @tparam number number Set value to number
+-- @method set_value number
+-- @noreturn
+
 function slider:set_value(value)
     value = math.min(value, self:get_maximum())
     value = math.max(value, self:get_minimum())
