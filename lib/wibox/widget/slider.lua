@@ -323,6 +323,40 @@ for prop in pairs(properties) do
     end
 end
 
+--- Set the handle widget
+--
+-- @method set_handle_widget
+-- @tparam[opt=nil] widget|nil bar_widget Set the handle widget
+-- @noreturn
+
+
+
+function slider:set_handle_widget(value)
+    local changed = self._private.handle_widget ~= value
+        self._private.handle_widget = value
+    if changed then
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
+--- Set the bar widget
+--
+-- @method set_bar_widget
+-- @tparam[opt=nil] widget|nil bar_widget Set the widget that spans the active bar segment
+-- @noreturn
+
+
+
+function slider:set_bar_widget(value)
+    local changed = self._private.bar_widget ~= value
+        self._private.bar_widget = value
+    if changed then
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
 -- Add some validation to set_value
 
 --- Set the slider's value
