@@ -37,3 +37,13 @@
 -- @method weak_connect_signal
 -- @noreturn
 -- @baseclass gears.object
+
+--- Check if the callback is connected to the signal.
+--
+-- This function check both kind of signal connection (strong and weak).
+--
+-- @tparam string name The name of the signal.
+-- @tparam function func The callback to check if connected.
+-- @treturn boolean Whether the signal is connected.
+-- @method is_signal_connected
+-- @baseclass gears.object
