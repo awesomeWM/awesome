@@ -195,9 +195,9 @@ describe("gears.object", function()
 
     it("is_weak_signal_connected", function()
         local cb = function()end
-        assert.is_false(obj:is_weak_signal_connected("signal", cb))
+        assert.is_false(obj:is_signal_connected("signal", cb))
         obj:weak_connect_signal("signal", cb)
-        assert.is_true(obj:is_weak_signal_connected("signal", cb))
+        assert.is_true(obj:is_signal_connected("signal", cb))
     end)
 end)
 
