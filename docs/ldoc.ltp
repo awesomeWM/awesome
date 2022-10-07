@@ -125,6 +125,16 @@
 <div id="navigation">
 <h1>$(ldoc.project)</h1>
 
+<div class="select">
+    <select name="theme" id="theme-select">
+       <option selected disabled>Choose a theme</option>
+       <option value="light">LDoc Light</option>
+       <option value="dark">Awesome Dark</option>
+       <option value="monokai">Monokai</option>
+       <option value="onedark">One Dark</option>
+    </select>
+ </div>
+
 # if not ldoc.single and module then -- reference back to project index
 <ul>
   <li><a href="../$(ldoc.output).html">Index</a></li>
@@ -625,6 +635,21 @@
 </div> <!-- id="container" -->
 
 <script defer type="text/javascript">
+    // Theme selection and its local storage
+    var select = document.getElementById("theme-select");
+
+    var storedTheme = localStorage.getItem('theme') || (window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    if (storedTheme) {
+        select.value = storedTheme;
+        document.documentElement.setAttribute('data-theme', storedTheme)
+    }
+
+    select.addEventListener("change", function() {
+        var targetTheme = this.value;
+        document.documentElement.setAttribute('data-theme', targetTheme)
+        localStorage.setItem('theme', targetTheme);
+    });
+
     const $nav = document.querySelector("#navigation");
 
     // When clicking the sidebar, open it
