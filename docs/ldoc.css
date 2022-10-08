@@ -5,7 +5,7 @@
     --sidebar-width: 14em;
     --sidebar-toggle-width: 24px;
     --sidebar-theme-select: 13em;
-    --svg-filter: invert(100%);
+    --svg-filter: invert(1) contrast(0.95) saturate(0.5) hue-rotate(180deg);
 
     --background-color: var(--background);
     --color: var(--foreground);
