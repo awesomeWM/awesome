@@ -1,10 +1,11 @@
 :root {
-    color-scheme: dark light;
-    supported-color-schemes: dark light;
+    /* color-scheme: dark light;
+    supported-color-schemes: dark light; */
 
     --sidebar-width: 14em;
     --sidebar-toggle-width: 24px;
     --sidebar-theme-select: 13em;
+    --svg-filter: invert(100%);
 
     --background-color: var(--background);
     --color: var(--foreground);
@@ -94,6 +95,8 @@
 }
 
 html[data-theme='light'] {
+    --svg-filter: invert(0%);
+
     /* basic theme */
     --background: #eff4ff;
     --foreground: #47555c;
@@ -171,7 +174,7 @@ html[data-theme='light'] {
     --color10D: #0e7c6b;
     --color10E: #bbccaa;
     --color10F: #fedc56;
-    --color110: #ffffff;  
+    --color110: #ffffff;
 }
 
 html[data-theme='dark'] {
@@ -1197,10 +1200,21 @@ pre .url {
     background-color: var(--summary-row-hover-background-color);
 }
 
-/* CSS for beautiful.fg_normal */
+/*
 .svg_stroke,
 .svg_fill {
-    color: var(--svg-stroke-fill-color);
+    color: #fff;
+}
+
+svg {
+    color: #fff;
+    fill: #fff;
+    stroke: #fff;
+}
+*/
+
+img[src*='.svg'] {
+  filter: var(--svg-filter);
 }
 
 #content>.components-relationship {
@@ -1250,6 +1264,7 @@ pre .url {
 }
 
 .img-object {
+    filter: var(--svg-filter);
     max-width: 100%;
     padding: 5px;
 }
