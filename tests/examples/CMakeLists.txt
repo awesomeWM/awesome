@@ -383,7 +383,7 @@ add_custom_target(check-examples DEPENDS ${EXAMPLE_DOC_TEST_TARGETS})
 
 # Some tests produce multiple files, find them and post-process them.
 add_custom_target(DOC_EXAMPLES_PPOSTPROCESS_CLEANUP
-    COMMAND "${TOP_SOURCE_DIR}/tests/examples/_postprocess_cleanup.lua" ${RAW_IMAGE_DIR} ${IMAGE_DIR} "${TOP_SOURCE_DIR}/tests/examples/_postprocess.lua"
+    COMMAND "${LUA_EXECUTABLE}" "${TOP_SOURCE_DIR}/tests/examples/_postprocess_cleanup.lua" ${RAW_IMAGE_DIR} ${IMAGE_DIR} "${TOP_SOURCE_DIR}/tests/examples/_postprocess.lua"
     VERBATIM
     DEPENDS ${BUILD_DIR}/doc/index.html
 )
