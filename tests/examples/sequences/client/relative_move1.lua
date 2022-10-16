@@ -9,7 +9,11 @@ awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, screen[1], awful.layo
 local original_geo, geo
 
 function awful.spawn(name)
-    client.gen_fake{class = name, name = name, x = 4, y=10, width = 60, height =50, screen=screen[1]}
+    local c = client.gen_fake{class = name, name = name, x = 4, y=10, width = 60, height =50, screen=screen[1]}
+    assert(c:geometry().x == 4)
+    assert(c:geometry().y == 10)
+    assert(c:geometry().width == 60)
+    assert(c:geometry().height == 50)
 end
 
 --DOC_NEWLINE
@@ -21,6 +25,10 @@ module.add_event("Spawn a floating client.", function()
     --DOC_NEWLINE
 
     client.get()[1].floating = true
+    assert(client.get()[1]:geometry().x == 4) --DOC_HIDE
+    assert(client.get()[1]:geometry().y == 10) --DOC_HIDE
+    assert(client.get()[1]:geometry().width == 60) --DOC_HIDE
+    assert(client.get()[1]:geometry().height == 50) --DOC_HIDE
 
     --DOC_NEWLINE
 

@@ -74,48 +74,61 @@ function client.gen_fake(args)
     awesome._forward_class(ret, client)
 
     ret._private = {}
-    ret.type = "normal"
+
+    -- Make sure the layer properties are not `nil`
+    local defaults = {
+        ontop         = false,
+        below         = false,
+        above         = false,
+        sticky        = false,
+        urgent        = false,
+        focusable     = true,
+        hidden        = args.hidden or false,
+        minimized     = args.minimized or false,
+        type          = args.type or "normal",
+        icon_sizes    = args.icon_sizes or {{16,16}},
+        name          = args.name or "Example Client",
+        size_hints    = args.size_hints or {},
+        _border_width = args.border_width or 1,
+
+        -- This is a hack because there's a `:is_transient_for(c2)` method
+        -- and a `transient_for` property. It will cause a stack overflow
+        -- since the auto-alias will kick in if the property is allowed to
+        -- be `nil`.
+        transient_for = args.transient_for or false,
+    }
+
     ret.valid = true
-    ret.size_hints = {}
-    ret._border_width = 1
     ret._tags = args and args.tags or nil
-    ret.icon_sizes = {{16,16}}
-    ret.name = "Example Client"
     ret._private._struts = { top = 0, right = 0, left = 0, bottom = 0 }
 
     --TODO v5: remove this. This was a private API and thus doesn't need to be
     -- officially deprecated.
     ret.data = ret._private
 
-    -- This is a hack because there's a `:is_transient_for(c2)` method
-    -- and a `transient_for` property. It will cause a stack overflow
-    -- since the auto-alias will kick in if the property is allowed to
-    -- be `nil`.
-    ret.transient_for = false
-
     -- Apply all properties
     for k,v in pairs(args or {}) do
-        ret[k] = v
+        ret._private[k] = v
     end
 
     -- Tests should always set a geometry, but just in case
     for _, v in ipairs{"x","y","width","height"} do
-        ret[v] = ret[v] or 1
+        rawset(ret, v, math.floor(ret[v] or ret._private[v] or 1))
         assert((not args[v]) or ret[v] == args[v])
     end
 
     -- Emulate capi.client.geometry
     function ret:geometry(new)
         local new_full = new and {
-            x      = new.x or ret.x,
-            y      = new.y or ret.y,
-            width  = new.width  or ret.width,
-            height = new.height or ret.height,
+            x      = math.floor(new.x or ret.x),
+            y      = math.floor(new.y or ret.y),
+            width  = math.floor(new.width  or ret.width),
+            height = math.floor(new.height or ret.height),
         } or nil
 
         if new and not grect.are_equal(ret, new_full) then
             for k,v in pairs(new) do
-                ret[k] = v
+                rawset(ret, k, v)
                 ret:emit_signal("property::"..k, v)
             end
             ret:emit_signal("property::geometry", ret:geometry())
@@ -123,10 +136,10 @@ function client.gen_fake(args)
         end
 
         return {
-            x      = ret.x,
-            y      = ret.y,
-            width  = ret.width,
-            height = ret.height,
+            x      = math.floor(ret.x),
+            y      = math.floor(ret.y),
+            width  = math.floor(ret.width),
+            height = math.floor(ret.height),
             label  = ret._label,
         }
     end
@@ -292,16 +305,6 @@ function client.gen_fake(args)
     ret.drawin = ret
     ret.drawable = ret
 
-    -- Make sure the layer properties are not `nil`
-    local defaults = {
-        ontop     = false,
-        below     = false,
-        above     = false,
-        sticky    = false,
-        urgent    = false,
-        focusable = true,
-    }
-
     -- Declare the deprecated buttons and keys methods.
     function ret:_keys(new)
         if new then
@@ -330,6 +333,8 @@ function client.gen_fake(args)
                 return properties["get_"..key](self)
             elseif defaults[key] ~= nil then
                 return defaults[key]
+            elseif self._private[key] ~= nil then
+                return self._private[key]
             end
 
             return meta.__index(self, key)

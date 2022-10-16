@@ -19,6 +19,7 @@ for i=1, 3 do --DOC_HIDE
     c:tags{t_real} --DOC_HIDE
     c.icon = beautiful.awesome_icon --DOC_HIDE
     c.name = " Client "..i.."  " --DOC_HIDE
+    assert(c.name == " Client "..i.."  ") --DOC_HIDE
 end --DOC_HIDE
 
     s.mytasklist = awful.widget.tasklist {
