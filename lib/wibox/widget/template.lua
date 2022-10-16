@@ -17,11 +17,6 @@
 --
 --@DOC_wibox_widget_template_basic_textbox_EXAMPLE@
 --
--- Alternatively, you can declare the `template` widget instance using the
--- declarative pattern (both variants are strictly equivalent):
---
---@DOC_wibox_widget_template_basic_textbox_declarative_EXAMPLE@
---
 -- Usage in libraries
 -- ==================
 --
@@ -64,36 +59,62 @@ local template = {
     queued_updates = {},
 }
 
+local function lazy_load_child(self)
+    if self._private.widget then return self._private.widget end
+
+    local widget_instance = wbase.make_widget_from_value(self._private.widget_template)
+
+    if widget_instance then
+        wbase.check_widget(widget_instance)
+    end
+
+    self._private.widget = widget_instance
+
+    local rem = {}
+
+    for k, conn in ipairs(self._private.connections) do
+        conn.apply()
+
+        if conn.once then
+            if conn.src_obj then
+                conn.src_obj:disconnect_signal("property::"..conn.src_prop, conn.apply)
+            end
+            table.insert(rem, k)
+        end
+    end
+
+    for i = #rem, 1, -1 do
+        table.remove(self._private.connections, rem[i])
+    end
+
+    return self._private.widget
+end
+
 -- Layout this layout.
 -- @method layout
 -- @hidden
 function template:layout(_, width, height)
-    if not self._private.widget then
-        return
-    end
+    local w = lazy_load_child(self)
 
-    return { wbase.place_widget_at(self._private.widget, 0, 0, width, height) }
+    if not w then return end
+
+    return { wbase.place_widget_at(w, 0, 0, width, height) }
 end
 
 -- Fit this layout into the given area.
 -- @method fit
 -- @hidden
 function template:fit(context, width, height)
-    if not self._private.widget then
+    local w = lazy_load_child(self)
+
+    if not w then
         return 0, 0
     end
 
-    return wbase.fit_widget(self, context, self._private.widget, width, height)
+    return wbase.fit_widget(self, context, w, width, height)
 end
 
--- Draw the widget if it's actually a widget instance
--- @method draw
--- @hidden
-function template:draw(...)
-    if type(self._private.widget.draw) == "function" then
-        return self._private.widget:draw(...)
-    end
-end
+function template:draw() end
 
 -- Call the update widget method now and clean the queue for this widget
 -- instance.
@@ -109,14 +130,17 @@ function template:_do_update_now()
 end
 
 --- Update the widget.
+--
 -- This function will call the `update_callback` function at the end of the
 -- current GLib event loop. Updates are batched by event loop, it means that the
 -- widget can only be update once by event loop. If the `template:update` method
 -- is called multiple times during the same GLib event loop, only the first call
 -- will be run.
 -- All arguments are passed to the queued `update_callback` call.
--- @tparam[opt] table args A table to pass to the widget update function.
+--
+-- @tparam[opt={}] table args A table to pass to the widget update function.
 -- @method update
+-- @noreturn
 function template:update(args)
     if type(args) == "table" then
         self._private.update_args = gtable.crush(
@@ -134,36 +158,158 @@ function template:update(args)
 end
 
 --- Change the widget template.
--- @tparam table|widget widget_template The new widget to use as a
+--
+-- Note that this will discard the existing widget instance. Thus, any
+-- `set_property` will no longer be honored. `bind_property`, on the other hand,
+-- will still be honored.
+--
+-- @property template
+-- @tparam[opt=nil] template|nil template The new widget to use as a
 --   template.
--- @method set_template
 -- @emits widget::redraw_needed
--- @hidden
+-- @emits widget::layout_changed
+-- @propemits true false
+
 function template:set_template(widget_template)
-    local widget = widget_template or wbase.empty_widget()
+    if widget_template == self._private.widget_template then return end
 
-    local widget_instance = wbase.make_widget_from_value(widget)
-
-    if widget_instance then
-        wbase.check_widget(widget_instance)
-    end
-
-    self._private.template = widget
-    self._private.widget = widget_instance
-
-    -- We need to connect to these signals to actually redraw the template
-    -- widget when its child needs to.
-    local signals = {
-        "widget::redraw_needed",
-        "widget::layout_changed",
-    }
-    for _, signal in pairs(signals) do
-        self._private.widget:connect_signal(signal, function(...)
-            self:emit_signal(signal, ...)
-        end)
-    end
+    self._private.widget = nil
+    self._private.widget_template = widget_template
 
     self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::template", widget_template)
+end
+
+--- Set a property on one or more template sub-widget instances.
+--
+-- This method allows to set a value at any time on any of the sub widget of
+-- the template. To use this, you can set, or document a set of `ids` which
+-- your template support. These are usually referred as "roles" across the
+-- other APIs.
+--
+--@DOC_wibox_widget_template_set_property_existing_EXAMPLE@
+--
+-- It is also possible to take this one step further and apply a property
+-- to the entire sub-widget tree. This allows users to implement their own
+-- template even if it doesn't use the same "roles" as the default one:
+--
+--@DOC_wibox_widget_template_set_property_custom_EXAMPLE@
+--
+-- @method set_property
+-- @tparam string property The property name.
+-- @param value The property value.
+-- @tparam[opt=nil] nil|string|table ids A sub-widget `id` or list of `id`s. Use
+--  `nil` for "all sub widgets".
+-- @noreturn
+-- @see bind_property
+function template:set_property(property, value, ids)
+    local widgets
+    local target = self._private.widget
+
+    -- Lazy load later.
+    if not target then
+        table.insert(self._private.connections, {
+            src_obj  = nil,
+            src_prop = nil,
+            once     = true,
+            apply    = function()
+                self:set_property(property, value, ids)
+            end,
+        })
+        return
+    end
+
+    if ids then
+        widgets = {}
+        for _, id in ipairs(type(ids) == "string" and {ids} or ids) do
+            for _, widget in ipairs(target:get_children_by_id(id)) do
+                table.insert(widgets, widget)
+            end
+        end
+    end
+
+    widgets = widgets or {target}
+
+    for _, widget in ipairs(widgets) do
+        if widget["set_"..property] then
+            widget["set_"..property](widget, value)
+        end
+    end
+end
+
+-- Do not use, backward compatibility only.
+function template:_set_property_on_tree(w, property, value)
+    local apply_property
+    apply_property = function(wdgs)
+        for _, widget in ipairs(wdgs) do
+            if widget["set_"..property] then
+                widget["set_"..property](widget, value)
+            end
+
+            if widget.get_children then
+                apply_property(widget:get_children())
+            end
+        end
+    end
+
+    apply_property({w})
+end
+
+--- Monitor the value of a property on a source object and apply it on a target.
+--
+-- This is the equivalent of:
+--
+--    src_obj:connect_signal(
+--        "property::"..src_prop,
+--        function(v)
+--            self:set_property(dest_prop, v, dest_ids)
+--        end
+--    )
+--    self:set_property(dest_prop, v, dest_ids)
+--
+-- @DOC_sequences_widget_tmpl_bind_property_EXAMPLE@
+--
+-- @method bind_property
+-- @tparam object src_obj The source object (must be derived from `gears.object`).
+-- @tparam string src_prop The source object property name.
+-- @tparam string dest_prop The destination widget property name.
+-- @tparam[opt=nil] table|string|nil dest_ids A sub-widget `id` or list of `id`s.
+--  Use `nil` for "all sub widgets".
+-- @noreturn
+-- @see clear_bindings
+-- @see set_property
+
+function template:bind_property(src_obj, src_prop, dest_prop, dest_ids)
+    local function apply()
+        self:set_property(dest_prop, src_obj[src_prop], dest_ids)
+    end
+
+    table.insert(self._private.connections, {
+        src_obj  = src_obj,
+        src_prop = src_prop,
+        apply    = apply,
+    })
+
+    src_obj:connect_signal("property::"..src_prop, apply)
+
+    apply()
+end
+
+
+--- Disconnect all signals created in `bind_property`.
+-- @method clear_bindings
+-- @tparam[opt=nil] widget|nil src_obj Disconnect only for this specific object.
+-- @noreturn
+-- @see bind_property
+
+function template:clear_bindings(src_obj)
+    for _, conn in ipairs(self._private.connections) do
+        if conn.src_obj and (conn.src_obj == src_obj or not src_obj) then
+            conn.src_obj:disconnect_signal("property::"..conn.src_prop, conn.apply)
+        end
+    end
+    self._private.connections = {}
 end
 
 --- Give the internal widget instance.
@@ -171,7 +317,7 @@ end
 -- @method get_widget
 -- @hidden
 function template:get_widget()
-    return self._private.widget
+    return lazy_load_child(self)
 end
 
 --- Set the update_callback property.
@@ -200,6 +346,27 @@ function template:set_update_now(update_now)
     end
 end
 
+
+--- Create a new `wibox.widget.template` instance using the same template.
+--
+-- This copy will be blank. Note that `set_property`, `bind_property` or
+-- `update_callback` from `self` will **NOT** be transferred over to the copy.
+--
+-- The following example is a new widget to list a bunch of colors. It uses
+-- `wibox.widget.template` to let the module user define their own color
+-- widget. It does so by cloning the original template into new instances. This
+-- example doesn't handle removing or updating them to keep the size small.
+--
+--@DOC_wibox_widget_template_clone1_EXAMPLE@
+--
+-- @method clone
+-- @treturn wibox.widget.template The copy.
+function template:clone()
+    return template {
+        template = self._private.widget_template
+    }
+end
+
 --- Create a new `wibox.widget.template` instance.
 -- @tparam[opt] table args
 -- @tparam[opt] table|widget args.template The widget template to use.
@@ -215,6 +382,7 @@ function template.new(args)
     local ret = wbase.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, template, true)
+    ret._private.connections = {}
 
     ret:set_template(args.template)
     ret:set_update_callback(args.update_callback)
@@ -223,7 +391,30 @@ function template.new(args)
     -- Apply the received buttons, visible, forced_width and so on
     gtable.crush(ret, args)
 
+    rawset(ret, "_is_template", true)
+
     return ret
+end
+
+--- Create a `wibox.widget.template` from a table.
+--
+-- @staticfct wibox.widget.template.make_from_value
+-- @tparam[opt=nil] table|wibox.widget.template|nil value A template declaration.
+-- @treturn wibox.widget.template The template object.
+function template.make_from_value(value)
+    if not value then return nil end
+
+    assert(
+        not rawget(value, "is_widget"),
+        "This property requires a widget template, not a widget object.\n"..
+        "Use `wibox.template` instead of `wibox.widget`"
+    )
+
+    if rawget(value, "_is_template") then return value:clone() end
+
+    return template.new {
+        template = value
+    }
 end
 
 function template.mt:__call(...)
