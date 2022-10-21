@@ -8,7 +8,7 @@
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
-local awful = require("awful")
+local abutton = require("awful.button")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local gtable = require("gears.table")
@@ -467,8 +467,8 @@ function inputbox.new(args)
 
     ret.widget:buttons(
         gtable.join {
-            awful.button({}, 1, function()
-                if not awful.keygrabber.is_running then
+            abutton({}, 1, function()
+                if not keygrabber.is_running then
                     ret:focus()
                     ret:run(args.callbacks)
                 end
@@ -488,7 +488,7 @@ function inputbox.new(args)
                     capi.mouse.current_wibox.cursor
                 )
             end),
-            awful.button({}, 3, function()
+            abutton({}, 3, function()
                 -- TODO: Figure out how to paste with highlighted support
                 -- Maybe with a signal?
             end)
