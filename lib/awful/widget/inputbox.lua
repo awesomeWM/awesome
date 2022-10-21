@@ -1,10 +1,10 @@
 ---------------------------------------------------------------------------
 -- A widget to write text in
---@DOC_wibox_widget_defaults_inputtextbox_EXAMPLE@
+--@DOC_wibox_widget_defaults_inputbox_EXAMPLE@
 --
 -- @author Rene Kievits
 -- @copyright 2022, Rene Kievits
--- @module awful.widget.inputtextbox
+-- @module awful.widget.inputbox
 ---------------------------------------------------------------------------
 
 local setmetatable = setmetatable
@@ -79,7 +79,7 @@ end
 
 --- The inputbox border color
 --
--- @DOC_awful_widget_inpubox_border_color_EXAMPLE@
+-- @DOC_awful_widget_inputbox_border_color_EXAMPLE@
 --
 -- @property border_color
 -- @tparam[opt=gears.color] string border_color
@@ -93,7 +93,7 @@ end
 
 --- The inputbox border width
 --
--- @DOC_awful_widget_inpubox_border_width_EXAMPLE@
+-- @DOC_awful_widget_inputbox_border_width_EXAMPLE@
 --
 -- @property border_width
 -- @tparam[opt=0] number|nil border_width
@@ -108,7 +108,7 @@ end
 
 --- The inputbox background color
 --
--- @DOC_awful_widget_inpubox_bg_EXAMPLE@
+-- @DOC_awful_widget_inputbox_bg_EXAMPLE@
 --
 -- @property bg
 -- @tparam[opt=gears.color] string foreground
@@ -122,7 +122,7 @@ end
 
 --- The text foreground color
 --
--- @DOC_awful_widget_inpubox_fg_EXAMPLE@
+-- @DOC_awful_widget_inputbox_fg_EXAMPLE@
 --
 -- @property string
 -- @tparam[opt=gears.color] string foreground
@@ -136,7 +136,7 @@ end
 
 --- The shape of the inputbox
 --
--- @DOC_awful_widget_inpubox_shape_EXAMPLE@
+-- @DOC_awful_widget_inputbox_shape_EXAMPLE@
 --
 -- @property shape
 -- @tparam[opt=gears.shape.rectangle] shape|nil shape
@@ -401,14 +401,14 @@ function inputbox:run(callbacks)
         self:update(self._private.text, cursor_pos)
 
         if callbacks.pressed then
-            callbacks.pressed(key, mod_keys)
+            callbacks.pressed(mod_keys, key)
         end
     end)
 end
 
---- Creates a new inpubox widget
--- @tparam table args Arguments for the inpubox widget
--- @tparam string args.text The text to display in the inpubox
+--- Creates a new inputbox widget
+-- @tparam table args Arguments for the inputbox widget
+-- @tparam string args.text The text to display in the inputbox
 -- @tparam[opt=beautiful.fg_normal] string args.fg Text foreground color
 -- @tparam[opt=beautiful.border_focus] string args.border_focus_color Border color when focused
 -- @tparam[opt=""] string args.placeholder_text placeholder text to be shown when not focused and
@@ -436,6 +436,7 @@ function inputbox.new(args)
     ret._private.cursor_fg = args.cursor_fg or beautiful.inputbox_cursor_fg
     ret._private.highlight_bg = args.highlight_bg or beautiful.inputbox_highlight_bg
     ret._private.highlight_fg = args.highlight_fg or beautiful.inputbox_highlight_fg
+    ret._private.hover_cursor = args.hover_cursor or beautiful.inputbox_hover_cursor or "xterm"
 
     local inputbox_widget = wibox.widget {
         {
