@@ -34,13 +34,13 @@ local function text_with_cursor(text, cursor_pos, self)
     local cursor_fg = self._private.cursor_fg
     local cursor_bg = self._private.cursor_bg
     local text_color = self._private.fg
-    local hint_text = self._private.hint_text
-    local hint_fg = self._private.hint_fg or beautiful.fg_normal
+    local placeholder_text = self._private.placeholder_text
+    local placeholder_fg = self._private.placeholder_fg or beautiful.fg_normal
     local highlight_bg = self._private.highlight_bg
     local highlight_fg = self._private.highlight_fg
 
     if text == "" then
-        return "<span foreground='" .. hint_fg .. "'>" .. hint_text .. "</span>"
+        return "<span foreground='" .. placeholder_fg .. "'>" .. placeholder_text .. "</span>"
     end
 
     if #text < cursor_pos then
@@ -151,14 +151,14 @@ end
 --- Called when inputbox is focused to indicate a focus
 function inputbox:focus()
     self.widget.border_color = self._private.border_focus_color or beautiful.border_focus
-    self.widget.hint_text = ""
+    self.widget.placeholder_text = ""
 end
 
 --- Called when the inputbox loses its focus
 function inputbox:no_focus()
     self.widget.border_color = self._private.border_color or beautiful.border_normal
     if self.widget.text == "" then
-        self.widget.hint_text = self._private.hint_text or ""
+        self.widget.placeholder_text = self._private.placeholder_text or ""
     end
 end
 
@@ -411,8 +411,8 @@ end
 -- @tparam string args.text The text to display in the inpubox
 -- @tparam[opt=beautiful.fg_normal] string args.fg Text foreground color
 -- @tparam[opt=beautiful.border_focus] string args.border_focus_color Border color when focused
--- @tparam[opt=""] string args.hint_text Hint text to be shown when not focused and
--- @tparam[opt=beautiful.inputbox_hint_fg] string args.hint_fg Hint text foreground color
+-- @tparam[opt=""] string args.placeholder_text placeholder text to be shown when not focused and
+-- @tparam[opt=beautiful.inputbox_placeholder_fg] string args.placeholder_fg placeholder text foreground color
 -- @tparam[opt=beautiful.inputbox_cursor_bg] string args.cursor_bg Cursor background color
 -- @tparam[opt=beautiful.inputbox_cursor_fg] string args.cursor_fg Cursor foreground color
 -- @tparam[opt=beautiful.inputbox_highlight_bg] string args.highlight_bg Highlight background color
@@ -430,8 +430,8 @@ function inputbox.new(args)
     ret._private.text = args.text or ""
     ret._private.fg = args.fg or beautiful.fg_normal
     ret._private.border_focus_color = args.border_focus_color or beautiful.border_focus
-    ret._private.hint_text = args.inputbox_hint_text or ""
-    ret._private.hint_fg = args.hint_fg or beautiful.inputbox_hint_fg
+    ret._private.placeholder_text = args.inputbox_placeholder_text or ""
+    ret._private.placeholder_fg = args.placeholder_fg or beautiful.inputbox_placeholder_fg
     ret._private.cursor_bg = args.cursor_bg or beautiful.inputbox_cursor_bg
     ret._private.cursor_fg = args.cursor_fg or beautiful.inputbox_cursor_fg
     ret._private.highlight_bg = args.highlight_bg or beautiful.inputbox_highlight_bg
@@ -517,7 +517,7 @@ function inputbox.new(args)
         end
     )
 
-    -- Initialize the text and hint with a first update
+    -- Initialize the text and placeholder with a first update
     ret:update(ret._private.text, 1)
 
     return ret.widget
