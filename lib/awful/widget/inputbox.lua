@@ -27,6 +27,15 @@ local inputbox = { mt = {} }
 inputbox._private = {}
 inputbox._private.highlight = {}
 
+--- Set the widget text markup
+-- @property text
+-- @tparam[opt=""] string text
+-- @propemits true false
+local function set_text_markup(self, text)
+    self.widget:get_children_by_id("input_text")[1]:set_markup(text)
+    self:emit_signal("property::markup", text)
+end
+
 --- Formats the text with a cursor and highlights if set.
 local function text_with_cursor(text, cursor_pos, self)
     local char, spacer, text_start, text_end
@@ -164,28 +173,24 @@ end
 
 --- Clears the current text
 function inputbox:clear()
-    self._private.text = ""
-end
-
---- Set the widget text markup
--- @property text
--- @tparam[opt=""] string text
--- @propemits true false
-function inputbox:set_text_markup(text)
-    self.widget:get_children_by_id("input_text")[1]:set_markup(text)
-    self:emit_signal("property::markup", text)
+    self:set_text("")
 end
 
 function inputbox:get_text()
     return self._private.text
 end
 
+function inputbox:set_text(text)
+    self._private.text = text
+    self:emit_signal("property::text", text)
+end
+
 --- Update the text string
 -- @tparam string text The text
 -- @tparam[opt] number cursor_pos The cursor position
 function inputbox:update(text, cursor_pos)
-    self._private.text = text
-    self:set_text_markup(text_with_cursor(self._private.text, cursor_pos, self))
+    self:set_text(text)
+    set_text_markup(text_with_cursor(self._private.text, cursor_pos, self))
 end
 
 --- Stop the keygrabber and mousegrabber
@@ -195,22 +200,28 @@ function inputbox:stop()
 end
 
 --- Init the inputbox and start the keygrabber
--- @tparam[opt] table callbacks Table of callbacks to be called
-function inputbox:run(callbacks)
+function inputbox:run()
 
     -- Init the cursor position, but causes on refocus the cursor to move to the left
     local cursor_pos = #self._private.text + 1
 
-    if callbacks.started then callbacks.started() end
+    self:emit_signal("started")
 
     -- Init and reset(when refocused) the highlight
     self._private.highlight = {}
 
     -- Emitted when the keygrabber is stopped
-    self:connect_signal("keygrabber::stop", function()
+    self:connect_signal("cancel", function()
         self:no_focus()
         self:stop()
-        if callbacks.stopped then callbacks.stopped(self:get_text()) end
+        self:emit_signal("stopped")
+    end)
+
+    -- Emitted when the keygrabber should submit the text
+    self:connect_signal("submit", function(text)
+        self:no_focus()
+        self:stop()
+        self:emit_signal("stopped", text)
     end)
 
     keygrabber.run(function(mod, key, event)
@@ -225,13 +236,10 @@ function inputbox:run(callbacks)
         --Escape cases
         -- Just quit and leave the text as is
         if (not mod_keys.Control) and (key == "Escape") then
-            -- Pass nothing to not trigger the callback and to differenciate between an enter/return
-            self:emit_signal("keygrabber::stop", nil)
-
-            -- TODO: Make this function toggleable so enter doesn't return and delete. For example in a form this would be bad
+            self:emit_signal("cancel")
         elseif (not mod_keys.Control and key == "KP_Enter") or (not mod_keys.Control and key == "Return") then
-            self:emit_signal("keygrabber::stop", self:get_text())
-            self._private.text = ""
+            self:emit_signal("submit", self:get_text())
+            self:set_text("")
         end
 
         -- All shift, control or key cases
@@ -274,8 +282,8 @@ function inputbox:run(callbacks)
                 end
             else
                 if key:wlen() == 1 then
-                    self._private.text = self._private.text:sub(1, cursor_pos - 1) ..
-                        string.upper(key) .. self._private.text:sub(cursor_pos)
+                    self:set_text(self._private.text:sub(1, cursor_pos - 1) ..
+                        string.upper(key) .. self._private.text:sub(cursor_pos))
                     cursor_pos = cursor_pos + 1
                 end
             end
@@ -297,12 +305,12 @@ function inputbox:run(callbacks)
                         -- insert the text into the selected part
                         local text_start = self._private.text:sub(1, self._private.highlight.cur_pos_start - 1)
                         local text_end = self._private.text:sub(self._private.highlight.cur_pos_end + 1)
-                        self._private.text = text_start .. sel .. text_end
+                        self:set_text(text_start .. sel .. text_end)
                         self._private.highlight = {}
                         cursor_pos = #text_start + #sel + 1
                     else
-                        self._private.text = self._private.text:sub(1, cursor_pos - 1) ..
-                            sel .. self._private.text:sub(cursor_pos)
+                        self:set_text(self._private.text:sub(1, cursor_pos - 1) ..
+                            sel .. self._private.text:sub(cursor_pos))
                         cursor_pos = cursor_pos + #sel
                     end
                 end
@@ -342,13 +350,13 @@ function inputbox:run(callbacks)
                     self._private.highlight.cur_pos_end then
                     local text_start = self._private.text:sub(1, self._private.highlight.cur_pos_start - 1)
                     local text_end = self._private.text:sub(self._private.highlight.cur_pos_end + 1)
-                    self._private.text = text_start .. text_end
+                    self:set_text(text_start .. text_end)
                     self._private.highlight = {}
                     cursor_pos = #text_start + 1
                 else
                     if cursor_pos > 1 then
-                        self._private.text = self._private.text:sub(1, cursor_pos - 2) ..
-                            self._private.text:sub(cursor_pos)
+                        self:set_text(self._private.text:sub(1, cursor_pos - 2) ..
+                            self._private.text:sub(cursor_pos))
                         cursor_pos = cursor_pos - 1
                     end
                 end
@@ -358,13 +366,13 @@ function inputbox:run(callbacks)
                     self._private.highlight.cur_pos_end then
                     local text_start = self._private.text:sub(1, self._private.highlight.cur_pos_start - 1)
                     local text_end = self._private.text:sub(self._private.highlight.cur_pos_end + 1)
-                    self._private.text = text_start .. text_end
+                    self:set_text(text_start .. text_end)
                     self._private.highlight = {}
                     cursor_pos = #text_start + 1
                 else
                     if cursor_pos <= #self._private.text then
-                        self._private.text = self._private.text:sub(1, cursor_pos - 1) ..
-                            self._private.text:sub(cursor_pos + 1)
+                        self:set_text(self._private.text:sub(1, cursor_pos - 1) ..
+                            self._private.text:sub(cursor_pos + 1))
                     end
                 end
             elseif key == "Left" then
@@ -383,8 +391,8 @@ function inputbox:run(callbacks)
                 -- Print every alphanumeric key
                 -- It seems like gears.xmlescape doesn't support non alphanumeric characters
                 if key:wlen() == 1 then
-                    self._private.text = self._private.text:sub(1, cursor_pos - 1) ..
-                        key .. self._private.text:sub(cursor_pos)
+                    self:set_text(self._private.text:sub(1, cursor_pos - 1) ..
+                        key .. self._private.text:sub(cursor_pos))
                     cursor_pos = cursor_pos + 1
                 end
             end
@@ -400,9 +408,7 @@ function inputbox:run(callbacks)
         -- Update cycle
         self:update(self._private.text, cursor_pos)
 
-        if callbacks.pressed then
-            callbacks.pressed(mod_keys, key)
-        end
+        self:emit_signal("key_pressed", mod_keys, key)
     end)
 end
 
@@ -425,7 +431,6 @@ function inputbox.new(args)
     local ret = gobject { enable_properties = true }
     gtable.crush(ret, inputbox, true)
 
-    args.callbacks = args.callbacks or {}
     ret._private = {}
     ret._private.text = args.text or ""
     ret._private.fg = args.fg or beautiful.fg_normal
@@ -471,7 +476,7 @@ function inputbox.new(args)
             abutton({}, 1, function()
                 if not keygrabber.is_running then
                     ret:focus()
-                    ret:run(args.callbacks)
+                    ret:run()
                 end
 
                 -- Stops the mousegrabber when not clicked on the widget
