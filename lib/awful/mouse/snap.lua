@@ -130,7 +130,9 @@ local function detect_areasnap(c, distance)
         current_snap and build_placement(current_snap, current_axis)(c, {
             to_percent     = 0.5,
             honor_workarea = true,
-            pretend        = true
+            honor_padding  = true,
+            pretend        = true,
+            margins         = beautiful.snapper_gap
         }) or nil
     )
 
@@ -147,6 +149,8 @@ local function apply_areasnap(c, args)
     return build_placement(current_snap, current_axis)(c,{
         to_percent     = 0.5,
         honor_workarea = true,
+        honor_padding  = true,
+        margins        = beautiful.snapper_gap
     })
 end
 
@@ -217,7 +221,7 @@ function module.snap(c, snap, x, y, fixed_x, fixed_y)
     geom.height = geom.height + (2 * c.border_width) + (2 * snapper_gap)
 
     geom, edge = snap_inside(geom, c.screen.geometry, snap)
-    geom = snap_inside(geom, c.screen.workarea, snap)
+    geom = snap_inside(geom, c.screen.tiling_area, snap)
 
     -- Allow certain windows to snap to the edge of the workarea.
     -- Only allow docking to workarea for consistency/to avoid problems.
