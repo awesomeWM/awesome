@@ -1200,19 +1200,6 @@ pre .url {
     background-color: var(--summary-row-hover-background-color);
 }
 
-/*
-.svg_stroke,
-.svg_fill {
-    color: #fff;
-}
-
-svg {
-    color: #fff;
-    fill: #fff;
-    stroke: #fff;
-}
-*/
-
 img[src*='.svg'] {
   filter: var(--svg-filter);
 }
