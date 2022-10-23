@@ -6,7 +6,7 @@ local wibox = require("wibox")
 --DOC_HIDE_END
 
     local my_template_widget = wibox.widget.template {
-        template = wibox.widget.textbox,
+        widget = wibox.widget.textbox,
         update_callback = function(template_widget, args)
             local text = args.text or "???"
             template_widget.widget.text = text

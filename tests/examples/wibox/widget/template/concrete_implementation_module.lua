@@ -10,8 +10,8 @@ local wibox = require("wibox")
 
     -- Build the default widget used as a fallback if user doesn't provide a template
     local default_widget = {
-        template = wibox.widget.textbox,
-        text     = "N/A",
+        widget          = wibox.widget.textbox,
+        text            = "N/A",
         update_callback = function(widget_template, args)
             local text = args and args.text or "???"
             widget_template.widget.text = text

@@ -17,7 +17,7 @@ end
     -- Instanciate the widget with a custom template
     local custom_widget = concrete_widget_template_builder {
         widget_template = {
-            template = wibox.widget.imagebox,
+            widget = wibox.widget.imagebox,
             update_callback = function (template, args)
                 if args and args.text == "default text" then
                     template.widget.image = "/path/to/image.png"

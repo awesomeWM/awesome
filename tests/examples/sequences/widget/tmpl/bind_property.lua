@@ -13,29 +13,27 @@ client.focus = client.gen_fake{
     --DOC_HIDE_END
 
     local my_template_widget = wibox.widget.template {
-        template = {
+        {
             {
-                {
-                    set_icon = function(self, icon)
-                        self.image = gears.surface(icon)
-                    end,
-                    id     = "icon_role",
-                    widget = wibox.widget.imagebox
-                },
-                {
-                    id     = "title_role",
-                    widget = wibox.widget.textbox
-                },
-                widget = wibox.layout.fixed.horizontal,
+                set_icon = function(self, icon)
+                    self.image = gears.surface(icon)
+                end,
+                id     = "icon_role",
+                widget = wibox.widget.imagebox
             },
-            widget     = wibox.container.background,
-            id         = "background_role",
-            set_urgent = function(self, status)
-                self.bg = status and "#ff0000" or nil
-            end,
-            forced_width  = 200, --DOC_HIDE
-            forced_height = 24, --DOC_HIDE
-        }
+            {
+                id     = "title_role",
+                widget = wibox.widget.textbox
+            },
+            widget = wibox.layout.fixed.horizontal,
+        },
+        widget     = wibox.container.background,
+        id         = "background_role",
+        set_urgent = function(self, status)
+            self.bg = status and "#ff0000" or nil
+        end,
+        forced_width  = 200, --DOC_HIDE
+        forced_height = 24, --DOC_HIDE
     }
 
 --DOC_NEWLINE

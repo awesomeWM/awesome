@@ -23,37 +23,35 @@ client.focus = client.gen_fake{
     --DOC_NEWLINE
 
     local default_template = wibox.widget.template {
-        template = {
+        {
             {
                 {
-                    {
-                        forced_height = 16,
-                        forced_width  = 16,
-                        shape         = gears.shape.circle,
-                        widget        = wibox.widget.separator
-                    },
-                    margins = 3,
-                    widget  = wibox.container.margin
+                    forced_height = 16,
+                    forced_width  = 16,
+                    shape         = gears.shape.circle,
+                    widget        = wibox.widget.separator
                 },
-                {
-                    set_color = function(self, color)
-                        self.text = color
-                    end,
-                    text   = "N/A",
-                    widget = wibox.widget.textbox
-                },
-                spacing = 5,
-                widget  = wibox.layout.fixed.horizontal,
+                margins = 3,
+                widget  = wibox.container.margin
             },
-            set_color = function(self, color)
-                self.border_color = gears.color.to_rgba_string(color):sub(1,7).."44"
-                self.fg           = color
-            end,
-            border_width = 1,
-            shape        = gears.shape.octogon,
-            widget       = wibox.container.background,
-            forced_width = 100, --DOC_HIDE
-        }
+            {
+                set_color = function(self, color)
+                    self.text = color
+                end,
+                text   = "N/A",
+                widget = wibox.widget.textbox
+            },
+            spacing = 5,
+            widget  = wibox.layout.fixed.horizontal,
+        },
+        set_color = function(self, color)
+            self.border_color = gears.color.to_rgba_string(color):sub(1,7).."44"
+            self.fg           = color
+        end,
+        border_width = 1,
+        shape        = gears.shape.octogon,
+        widget       = wibox.container.background,
+        forced_width = 100, --DOC_HIDE
     }
     --DOC_NEWLINE
 

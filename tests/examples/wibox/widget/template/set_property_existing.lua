@@ -15,23 +15,21 @@ client.focus = client.gen_fake{
 --DOC_HIDE_END
 
     local my_template_widget = wibox.widget.template {
-        template = {
+        {
             {
-                {
-                    id     = "icon_role",
-                    widget = wibox.widget.imagebox
-                },
-                {
-                    id     = "title_role",
-                    widget = wibox.widget.textbox
-                },
-                widget = wibox.layout.fixed.horizontal,
+                id     = "icon_role",
+                widget = wibox.widget.imagebox
             },
-            id     = "background_role",
-            widget = wibox.container.background,
-            forced_width  = 200, --DOC_HIDE
-            forced_height = 24, --DOC_HIDE
-        }
+            {
+                id     = "title_role",
+                widget = wibox.widget.textbox
+            },
+            widget = wibox.layout.fixed.horizontal,
+        },
+        id     = "background_role",
+        widget = wibox.container.background,
+        forced_width  = 200, --DOC_HIDE
+        forced_height = 24, --DOC_HIDE
     }
 
 --DOC_NEWLINE

@@ -362,34 +362,28 @@ end
 -- @method clone
 -- @treturn wibox.widget.template The copy.
 function template:clone()
-    return template {
-        template = self._private.widget_template
-    }
+    return template(self._private.widget_template)
 end
 
 --- Create a new `wibox.widget.template` instance.
--- @tparam[opt] table args
--- @tparam[opt] table|widget args.template The widget template to use.
--- @tparam[opt] function args.update_callback The callback function to update
+-- @tparam[opt] table tmpl
+-- @tparam[opt] function tmpl.update_callback The callback function to update
 --   the widget.
--- @tparam[opt] boolean args.update_now Update the widget after its
+-- @tparam[opt] boolean tmpl.update_now Update the widget after its
 --   construction. This will call the `:update()` method with no parameter.
 -- @treturn wibox.widget.template The new instance.
 -- @constructorfct wibox.widget.template
-function template.new(args)
-    args = args or {}
+function template.new(tmpl)
+    tmpl = tmpl or {}
 
     local ret = wbase.make_widget(nil, nil, { enable_properties = true })
 
     gtable.crush(ret, template, true)
     ret._private.connections = {}
 
-    ret:set_template(args.template)
-    ret:set_update_callback(args.update_callback)
-    ret:set_update_now(args.update_now)
-
-    -- Apply the received buttons, visible, forced_width and so on
-    gtable.crush(ret, args)
+    ret:set_template(tmpl)
+    ret:set_update_callback(tmpl.update_callback)
+    ret:set_update_now(tmpl.update_now)
 
     rawset(ret, "_is_template", true)
 
@@ -412,9 +406,7 @@ function template.make_from_value(value)
 
     if rawget(value, "_is_template") then return value:clone() end
 
-    return template.new {
-        template = value
-    }
+    return template.new(value)
 end
 
 function template.mt:__call(...)
