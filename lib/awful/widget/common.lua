@@ -17,7 +17,6 @@ local capi = { button = button }
 local wibox = require("wibox")
 local gdebug = require("gears.debug")
 local dpi = require("beautiful").xresources.apply_dpi
-local base = require("wibox.widget.base")
 
 --- Common utilities for awful widgets
 local common = {}

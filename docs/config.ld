@@ -126,7 +126,7 @@ local type_fallback_description = {
         "string An [XFT string](https://wiki.archlinux.org/title/X_Logical_Font_Description), such as `\"-*-dejavu sans mono-medium-r-normal--*-80-*-*-*-*-iso10646-1\"`.",
 
     },
-    template = {
+    ["wibox.template"] = {
         "table A table containing a widget tree definition. WARNING: This is really a table"..
         " and **NOT** a widget object. Use the `widget = come.class.here` to define the "..
         " topmost class rather than construct an instance."
@@ -165,6 +165,7 @@ local type_name_linting = {
     ["double"]          = "number",
     ["float"]           = "number",
     ["bool"]            = "boolean",
+    ["template"]        = "wibox.template",
 }
 
 local metadata_tags = {

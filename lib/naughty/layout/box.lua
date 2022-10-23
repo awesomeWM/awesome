@@ -209,7 +209,7 @@ end)
 --    }
 --
 -- @property widget_template
--- @tparam[opt=nil] template|nil widget_template
+-- @tparam[opt=nil] wibox.template|nil widget_template
 -- @usebeautiful beautiful.notification_max_width The maximum width for the
 --  resulting widget.
 
@@ -324,7 +324,7 @@ end
 --
 -- @constructorfct naughty.layout.box
 -- @tparam[opt=nil] table args
--- @tparam table args.widget_template A widget definition template which will
+-- @tparam wibox.template args.widget_template A widget definition template which will
 --  be instantiated for each box.
 -- @tparam naughty.notification args.notification The notification object.
 -- @tparam string args.position The position. See `naughty.notification.position`.
@@ -364,7 +364,9 @@ local function new(args)
 
     local ret = popup(new_args)
     ret._private.notification = {}
-    ret._private.widget_template = args.widget_template
+    ret._private.widget_template = wibox.template.make_from_value(
+        args.widget_template
+    )
     ret._private.position = args.position
 
     gtable.crush(ret, box, true)

@@ -95,6 +95,7 @@ local wmargin = require("wibox.container.margin")
 local wtextbox = require("wibox.widget.textbox")
 local clienticon = require("awful.widget.clienticon")
 local wbackground = require("wibox.container.background")
+local wtemplate = require("wibox.template")
 local gtable = require("gears.table")
 
 local function get_screen(s)
@@ -678,7 +679,7 @@ end
 -- @DOC_sequences_client_tasklist_widget_template1_EXAMPLE@
 --
 -- @property widget_template
--- @tparam[opt=nil] template|nil widget_template
+-- @tparam[opt=nil] wibox.template|nil widget_template
 -- @propemits true false
 
 --- A function to gather the clients to display.
@@ -794,7 +795,7 @@ function tasklist:set_screen(value)
 end
 
 function tasklist:set_widget_template(widget_template)
-    self._private.widget_template = widget_template
+    self._private.widget_template = wtemplate.make_from_value(widget_template)
 
     -- Remove the existing instances
     self._private.data = setmetatable({}, { __mode = 'k' })
@@ -803,7 +804,7 @@ function tasklist:set_widget_template(widget_template)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
-    self:emit_signal("property::widget_template", widget_template)
+    self:emit_signal("property::widget_template", self._private.widget_template)
 end
 
 --- Create a new tasklist widget.
@@ -824,7 +825,7 @@ end
 --   is `wibox.layout.flex.horizontal`.
 -- @tparam[opt=awful.widget.tasklist.source.all_clients] function args.source The
 --  function used to generate the list of client.
--- @tparam[opt] table args.widget_template A custom widget to be used for each client
+-- @tparam[opt] wibox.template args.widget_template A custom widget to be used for each client
 -- @tparam[opt={}] table args.style The style overrides default theme.
 -- @tparam[opt=beautiful.tasklist_fg_normal] string|pattern args.style.fg_normal
 -- @tparam[opt=beautiful.tasklist_bg_normal] string|pattern args.style.bg_normal
@@ -922,7 +923,7 @@ function tasklist.new(args, filter, buttons, style, update_function, base_widget
         buttons           = args.buttons,
         style             = args.style or {},
         screen            = screen,
-        widget_template   = args.widget_template,
+        widget_template   = wtemplate.make_from_value(args.widget_template),
         source            = args.source,
         data              = setmetatable({}, { __mode = 'k' })
     })

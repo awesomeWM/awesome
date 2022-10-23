@@ -203,7 +203,7 @@ local actionlist = {}
 
 --- The actionlist parent notification.
 -- @property widget_template
--- @tparam[opt=nil] template|nil widget_template
+-- @tparam[opt=nil] wibox.template|nil widget_template
 -- @propemits true false
 
 --- A table with values to override each `beautiful.notification_action` values.
@@ -271,7 +271,7 @@ function actionlist:set_base_layout(layout)
 end
 
 function actionlist:set_widget_template(widget_template)
-    self._private.widget_template = widget_template
+    self._private.widget_template = wibox.template.make_from_value(widget_template)
 
     -- Remove the existing instances
     self._private.data = {}
@@ -280,7 +280,7 @@ function actionlist:set_widget_template(widget_template)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
-    self:emit_signal("property::widget_template", widget_template)
+    self:emit_signal("property::widget_template", self._private.widget_template)
 end
 
 function actionlist:set_style(style)

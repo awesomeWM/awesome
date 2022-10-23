@@ -88,6 +88,9 @@ This document was last updated at commit v4.3-197-g9085ed631.
  * Pango 1.44 is now the oldest recommended Pango version. Older versions are
    still supported, but will lack the ability to use some textbox properties,
    mainly `wibox.widget.textbox.line_spacing_factor`.
+ * Passing a widget to any `widget_template` property now prints an error. It
+   wasn't working before, but wasn't printing an error. Replace `wibox.widget`
+   with `wibox.template` in your widget definition.
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes

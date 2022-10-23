@@ -164,7 +164,7 @@ end
 -- will still be honored.
 --
 -- @property template
--- @tparam[opt=nil] template|nil template The new widget to use as a
+-- @tparam[opt=nil] table|nil template The new widget to use as a
 --   template.
 -- @emits widget::redraw_needed
 -- @emits widget::layout_changed
