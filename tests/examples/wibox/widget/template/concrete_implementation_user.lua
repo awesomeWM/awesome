@@ -6,7 +6,7 @@ local parent = ...
 local wibox = require("wibox")
 
 local function concrete_widget_template_builder(args)
-    return wibox.widget.template(args)
+    return wibox.template(args)
 end
 --DOC_HIDE_END
 

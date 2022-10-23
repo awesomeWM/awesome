@@ -6,9 +6,9 @@
 _G.awesome.connect_signal = function() end
 
 local gtimer = require("gears.timer")
-local template = require("wibox.widget.template")
+local template = require("wibox.template")
 
-describe("wibox.widget.template", function()
+describe("wibox.template", function()
     local widget
 
     before_each(function()

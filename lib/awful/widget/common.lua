@@ -51,7 +51,7 @@ function common.create_buttons(buttons, object)
 end
 
 local function custom_template(args)
-    local l = base.make_widget_from_value(args.widget_template)
+    local l = wibox.template.make_from_value(args.widget_template)
 
     -- The template system requires being able to get children elements by ids.
     -- This is not optimal, but for now there is no way around it.

@@ -14,7 +14,7 @@ client.focus = client.gen_fake{
 
 --DOC_HIDE_END
 
-    local my_template_widget = wibox.widget.template {
+    local my_template_widget = wibox.template {
         {
             {
                 id     = "icon_role",

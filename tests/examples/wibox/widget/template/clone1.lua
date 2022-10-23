@@ -22,7 +22,7 @@ client.focus = client.gen_fake{
     local module = {}
     --DOC_NEWLINE
 
-    local default_template = wibox.widget.template {
+    local default_template = wibox.template {
         {
             {
                 {
@@ -59,7 +59,7 @@ client.focus = client.gen_fake{
     -- @property widget_template
     -- @tparam[opt=nil] wibox.template|nil
     function module:set_widget_template(t)
-        self._private.widget_template = wibox.widget.template.make_from_value(t)
+        self._private.widget_template = wibox.template.make_from_value(t)
     end
 
     --DOC_NEWLINE

@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- An abstract widget that handles a preset of concrete widget.
 --
--- The `wibox.widget.template` widget is an abstraction layer that contains a
+-- The `wibox.template` widget is an abstraction layer that contains a
 -- concrete widget definition. The template widget can be used to build widgets
 -- that the user can customize at their will, thanks to the template mechanism.
 --
@@ -23,7 +23,7 @@
 -- (this part is to be completed according to awful.widget comming PRs to implement the widget_template usage)
 --
 -- This widget was designed to be used as a standard way to offer customization
--- over concrete widget implementation. We use the `wibox.widget.template` as a
+-- over concrete widget implementation. We use the `wibox.template` as a
 -- base to implement widgets from the `awful.widget` library. This way, it is
 -- easy for the final user to customize the standard widget offered by awesome!
 --
@@ -31,7 +31,7 @@
 -- widget module to offer more customization to the final user.
 --
 -- Here is an example of implementation for a custom widget inheriting from
--- `wibox.widget.template` :
+-- `wibox.template` :
 --
 -- The module definition should include a default widget and a builder function
 -- that can build the widget with either, the user values or the default.
@@ -46,7 +46,7 @@
 -- @author Aire-One
 -- @copyright 2021 Aire-One <aireone@aireone.xyz>
 --
--- @widgetmod wibox.widget.template
+-- @widgetmod wibox.template
 -- @supermodule wibox.widget.base
 ---------------------------------------------------------------------------
 
@@ -232,8 +232,10 @@ function template:set_property(property, value, ids)
     widgets = widgets or {target}
 
     for _, widget in ipairs(widgets) do
-        if widget["set_"..property] then
+        if rawget(widget, "set_"..property) then
             widget["set_"..property](widget, value)
+        else
+            widget[property] = value
         end
     end
 end
@@ -320,6 +322,10 @@ function template:get_widget()
     return lazy_load_child(self)
 end
 
+function template:get_children()
+    return { lazy_load_child(self) }
+end
+
 --- Set the update_callback property.
 -- @tparam function update_callback The new callback function.
 -- @method set_update_callback
@@ -328,6 +334,15 @@ function template:set_update_callback(update_callback)
     assert(type(update_callback) == "function" or update_callback == nil)
 
     self._private.update_callback = update_callback
+end
+
+function template:get_update_callback()
+    return self._private.update_callback
+end
+
+-- Undocumented, for backward compatibility
+function template:get_create_callback()
+    return rawget(lazy_load_child(self), "create_callback")
 end
 
 --- Hack to allow automatic update of the widget at construction time.
@@ -347,32 +362,32 @@ function template:set_update_now(update_now)
 end
 
 
---- Create a new `wibox.widget.template` instance using the same template.
+--- Create a new `wibox.template` instance using the same template.
 --
 -- This copy will be blank. Note that `set_property`, `bind_property` or
 -- `update_callback` from `self` will **NOT** be transferred over to the copy.
 --
 -- The following example is a new widget to list a bunch of colors. It uses
--- `wibox.widget.template` to let the module user define their own color
+-- `wibox.template` to let the module user define their own color
 -- widget. It does so by cloning the original template into new instances. This
 -- example doesn't handle removing or updating them to keep the size small.
 --
 --@DOC_wibox_widget_template_clone1_EXAMPLE@
 --
 -- @method clone
--- @treturn wibox.widget.template The copy.
+-- @treturn wibox.template The copy.
 function template:clone()
     return template(self._private.widget_template)
 end
 
---- Create a new `wibox.widget.template` instance.
+--- Create a new `wibox.template` instance.
 -- @tparam[opt] table tmpl
 -- @tparam[opt] function tmpl.update_callback The callback function to update
 --   the widget.
 -- @tparam[opt] boolean tmpl.update_now Update the widget after its
 --   construction. This will call the `:update()` method with no parameter.
--- @treturn wibox.widget.template The new instance.
--- @constructorfct wibox.widget.template
+-- @treturn wibox.template The new instance.
+-- @constructorfct wibox.template
 function template.new(tmpl)
     tmpl = tmpl or {}
 
@@ -390,21 +405,21 @@ function template.new(tmpl)
     return ret
 end
 
---- Create a `wibox.widget.template` from a table.
+--- Create a `wibox.template` from a table.
 --
--- @staticfct wibox.widget.template.make_from_value
--- @tparam[opt=nil] table|wibox.widget.template|nil value A template declaration.
--- @treturn wibox.widget.template The template object.
+-- @staticfct wibox.template.make_from_value
+-- @tparam[opt=nil] table|wibox.template|nil value A template declaration.
+-- @treturn wibox.template The template object.
 function template.make_from_value(value)
     if not value then return nil end
+
+    if rawget(value, "_is_template") then return value:clone() end
 
     assert(
         not rawget(value, "is_widget"),
         "This property requires a widget template, not a widget object.\n"..
         "Use `wibox.template` instead of `wibox.widget`"
     )
-
-    if rawget(value, "_is_template") then return value:clone() end
 
     return template.new(value)
 end

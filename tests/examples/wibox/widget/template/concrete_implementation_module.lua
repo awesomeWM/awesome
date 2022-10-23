@@ -25,9 +25,7 @@ local wibox = require("wibox")
 --DOC_NEWLINE
         -- Build an instance of the template widget with either, the
         -- user provided parameters or the default
-        local ret =  wibox.widget.template {
-            template = args.widget_template or default_widget
-        }
+        local ret =  wibox.template(args.widget_template or default_widget)
 
 --DOC_NEWLINE
         -- Patch the methods and fields the widget instance should have
