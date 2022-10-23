@@ -31,7 +31,7 @@ local tasklist_buttons = nil --DOC_HIDE
                 layout = wibox.layout.grid.horizontal
             },
 
-            widget_template = {
+            widget_template = wibox.template {
                 {
                     {
                         id     = "clienticon",

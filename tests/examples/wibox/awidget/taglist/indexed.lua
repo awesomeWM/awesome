@@ -40,7 +40,7 @@ c2:tags(tags[1]) --DOC_HIDE
             },
             layout  = wibox.layout.fixed.horizontal
         },
-        widget_template = {
+        widget_template = wibox.template {
             {
                 {
                     {
@@ -80,6 +80,7 @@ c2:tags(tags[1]) --DOC_HIDE
             -- Add support for hover colors and an index label
             create_callback = function(self, c3, index, objects) --luacheck: no unused args
                 self:get_children_by_id("index_role")[1].markup = "<b> "..c3.index.." </b>"
+                assert(self:get_children_by_id("index_role")[1]) --DOC_HIDE
 
                 self:connect_signal("mouse::enter", function()
                     if self.bg ~= "#ff0000" then

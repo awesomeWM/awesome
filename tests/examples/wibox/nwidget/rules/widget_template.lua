@@ -13,7 +13,7 @@ beautiful.notification_bg = beautiful.bg_normal --DOC_HIDE
        ruled.notification.append_rule {
            rule       = { app_name = "mdp" },
            properties = {
-               widget_template = {
+               widget_template = wibox.template {
                    {
                        {
                            {

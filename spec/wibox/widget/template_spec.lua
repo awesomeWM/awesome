@@ -7,6 +7,7 @@ _G.awesome.connect_signal = function() end
 
 local gtimer = require("gears.timer")
 local template = require("wibox.template")
+local base = require("wibox.widget.base").make_widget
 
 describe("wibox.template", function()
     local widget
@@ -79,6 +80,54 @@ describe("wibox.template", function()
                 match.is_ref(widget),
                 match.is_same { foo = "bar", bar = 10 }
             )
+        end)
+
+        it("set_property", function()
+            local called
+
+            widget = template {
+                {
+                    id     = "one",
+                    foo    = "bar",
+                    widget = base
+                },
+                {
+                    id         = "two",
+                    everything = 42,
+                    widget     = base
+                },
+                {
+                    id         = "three",
+                    set_prop   = function(_, val)
+                        called = val
+                    end,
+                    widget     = base
+                },
+                id     = "main",
+                widget = base,
+            }
+
+            assert.is.equal(widget:get_children_by_id("main")[1], widget.children[1])
+            assert.is.equal(widget:get_children_by_id("one")[1].foo, "bar")
+            assert.is.equal(widget:get_children_by_id("two")[1].everything, 42)
+            assert.is.equal(called, nil)
+
+            widget:set_property("prop", 1337, "three")
+            assert.is.equal(called, 1337)
+
+            widget:set_property("foo", "baz", "one")
+            assert.is.equal(widget:get_children_by_id("one")[1].foo, "baz")
+
+            widget:set_property("everything", -42, "two")
+            assert.is.equal(widget:get_children_by_id("two")[1].everything, -42)
+
+            widget:set_property("foobar", true, {"one", "two"})
+            assert.is_true(widget:get_children_by_id("one")[1].foobar)
+            assert.is_true(widget:get_children_by_id("two")[1].foobar)
+            assert.is_nil(widget:get_children_by_id("three")[1].foobar)
+
+            widget:set_property("test", 1337)
+            assert.is.equal(widget:get_children_by_id("main")[1].test, 1337)
         end)
     end)
 end)

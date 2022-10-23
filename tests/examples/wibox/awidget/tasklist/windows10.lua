@@ -44,7 +44,7 @@ end --DOC_HIDE
         },
         -- Notice that there is *NO* `wibox.wibox` prefix, it is a template,
         -- not a widget instance.
-        widget_template = {
+        widget_template = wibox.template {
             {
                 wibox.widget.base.make_widget(),
                 forced_height = 5,

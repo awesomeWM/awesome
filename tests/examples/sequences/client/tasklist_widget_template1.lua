@@ -53,7 +53,7 @@ module.display_widget(_tl, nil, 22)
 module.add_event("Change the widget template.", function()
     --DOC_HIDE_END
     -- Change the widget template.
-    tasklist.widget_template = {
+    tasklist.widget_template = wibox.template {
         {
             {
                 {

@@ -71,7 +71,7 @@ end
 
 local function default_template()
     return custom_template {
-        widget_template = {
+        widget_template = wibox.template {
             id = 'background_role',
             border_strategy = 'inner',
             widget = wibox.container.background,

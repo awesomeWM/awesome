@@ -176,7 +176,7 @@ end)
 --
 -- The default template is (less or more):
 --
---    {
+--    wibox.template {
 --        {
 --            {
 --                {

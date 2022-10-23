@@ -16,6 +16,7 @@ end
        local output = ""
        --DOC_NEWLINE
        for idx, c in ipairs(client.get()) do
+            assert(c.name ~= "Example Client") --DOC_HIDE
             output = output .. c.name .. ":" .. idx .. ", "
        end
 

@@ -392,7 +392,7 @@ local function default_template(self)
         or self._private.style.tasklist_disable_icon
         or beautiful.tasklist_disable_icon
 
-    return {
+    return wtemplate {
         {
             (not has_no_icon) and {
                 clienticon,
