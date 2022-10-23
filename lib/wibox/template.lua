@@ -181,6 +181,12 @@ function template:set_template(widget_template)
     self:emit_signal("property::template", widget_template)
 end
 
+function template:get_children_by_id(...)
+    local w = lazy_load_child(self)
+
+    return w:get_children_by_id(...)
+end
+
 --- Set a property on one or more template sub-widget instances.
 --
 -- This method allows to set a value at any time on any of the sub widget of
