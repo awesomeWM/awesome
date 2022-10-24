@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
--- A widget to write text in
+-- This widget can be used to type text and get the text from it.
 --@DOC_wibox_widget_defaults_inputbox_EXAMPLE@
 --
 -- @author Rene Kievits
@@ -14,6 +14,7 @@ local wibox = require("wibox")
 local gtable = require("gears.table")
 local gobject = require("gears.object")
 local gstring = require("gears.string")
+local gshape = require("gears.shape")
 local keygrabber = require("awful.keygrabber")
 
 local capi =
@@ -27,26 +28,17 @@ local inputbox = { mt = {} }
 inputbox._private = {}
 inputbox._private.highlight = {}
 
---- Set the widget text markup
--- @property text
--- @tparam[opt=""] string text
--- @propemits true false
-local function set_text_markup(self, text)
-    self.widget:get_children_by_id("input_text")[1]:set_markup(text)
-    self:emit_signal("property::markup", text)
-end
-
 --- Formats the text with a cursor and highlights if set.
 local function text_with_cursor(text, cursor_pos, self)
     local char, spacer, text_start, text_end
 
-    local cursor_fg = self._private.cursor_fg
-    local cursor_bg = self._private.cursor_bg
-    local text_color = self._private.fg
-    local placeholder_text = self._private.placeholder_text
-    local placeholder_fg = self._private.placeholder_fg or beautiful.fg_normal
-    local highlight_bg = self._private.highlight_bg
-    local highlight_fg = self._private.highlight_fg
+    local cursor_fg = beautiful.inputbox_cursor_fg or "#313131"
+    local cursor_bg = beautiful.inputbox_cursor_bg or "#0dccfc"
+    local text_color = beautiful.inputbox_fg or "#ffffff"
+    local placeholder_text = beautiful.inputbox_placeholder_text or "Type here..."
+    local placeholder_fg = beautiful.inputbox_placeholder_fg or "#777777"
+    local highlight_bg = beautiful.inputbox_highlight_bg or "#35ffe4"
+    local highlight_fg = beautiful.inputbox_highlight_fg or "#000000"
 
     if text == "" then
         return "<span foreground='" .. placeholder_fg .. "'>" .. placeholder_text .. "</span>"
@@ -157,40 +149,18 @@ function inputbox:set_shape(v)
     self:emit_signal("property::shape", v)
 end
 
---- Called when inputbox is focused to indicate a focus
-function inputbox:focus()
-    self.widget.border_color = self._private.border_focus_color or beautiful.border_focus
-    self.widget.placeholder_text = ""
-end
-
---- Called when the inputbox loses its focus
-function inputbox:no_focus()
-    self.widget.border_color = self._private.border_color or beautiful.border_normal
-    if self.widget.text == "" then
-        self.widget.placeholder_text = self._private.placeholder_text or ""
-    end
-end
-
 --- Clears the current text
 function inputbox:clear()
     self:set_text("")
 end
 
 function inputbox:get_text()
-    return self._private.text
+    return self._private.text or ""
 end
 
 function inputbox:set_text(text)
     self._private.text = text
     self:emit_signal("property::text", text)
-end
-
---- Update the text string
--- @tparam string text The text
--- @tparam[opt] number cursor_pos The cursor position
-function inputbox:update(text, cursor_pos)
-    self:set_text(text)
-    set_text_markup(text_with_cursor(self._private.text, cursor_pos, self))
 end
 
 --- Stop the keygrabber and mousegrabber
@@ -203,7 +173,7 @@ end
 function inputbox:run()
 
     -- Init the cursor position, but causes on refocus the cursor to move to the left
-    local cursor_pos = #self._private.text + 1
+    local cursor_pos = #self:get_text() + 1
 
     self:emit_signal("started")
 
@@ -212,14 +182,12 @@ function inputbox:run()
 
     -- Emitted when the keygrabber is stopped
     self:connect_signal("cancel", function()
-        self:no_focus()
         self:stop()
         self:emit_signal("stopped")
     end)
 
     -- Emitted when the keygrabber should submit the text
     self:connect_signal("submit", function(text)
-        self:no_focus()
         self:stop()
         self:emit_signal("stopped", text)
     end)
@@ -406,11 +374,54 @@ function inputbox:run()
         end
 
         -- Update cycle
-        self:update(self._private.text, cursor_pos)
+        self.widget:update {
+            text = self:get_text(),
+            cursor_pos = cursor_pos,
+            self = self
+        }
 
         self:emit_signal("key_pressed", mod_keys, key)
     end)
 end
+
+local default_widget = {
+    template = {
+        {
+            {
+                {
+                    widget = wibox.widget.textbox,
+                    text = "",
+                    halign = "left",
+                    valign = "center",
+                    id = "inputtext",
+                },
+                widget = wibox.container.margin,
+                margins = 5,
+            },
+            widget = wibox.container.constraint,
+            strategy = "exact",
+            width = 400,
+            height = 50,
+        },
+        widget = wibox.container.background,
+        bg = "#212121",
+        fg = "#F0F0F0",
+        border_color = "#414141",
+        border_width = 2,
+        shape = gshape.rounded_rect,
+        forced_width = 300,
+        forced_height = 50,
+    },
+    update_callback = function(widget_template, args)
+        local text = args and args.text or ""
+        local cursor_pos = args and args.cursor_pos or 1
+        local self = args and args.self
+        self:set_text(text)
+
+        widget_template.widget:get_children_by_id("inputtext")[1]:set_markup(text_with_cursor(text, cursor_pos, self))
+        self:emit_signal("property::markup", text)
+    end,
+}
 
 --- Creates a new inputbox widget
 -- @tparam table args Arguments for the inputbox widget
@@ -427,55 +438,25 @@ end
 -- @constructorfct awful.widget.inputbox
 function inputbox.new(args)
     args = args or {}
+    assert(type(args) == "table")
 
     local ret = gobject { enable_properties = true }
+
     gtable.crush(ret, inputbox, true)
 
-    ret._private = {}
-    ret._private.text = args.text or ""
-    ret._private.fg = args.fg or beautiful.fg_normal
-    ret._private.border_focus_color = args.border_focus_color or beautiful.border_focus
-    ret._private.placeholder_text = args.inputbox_placeholder_text or ""
-    ret._private.placeholder_fg = args.placeholder_fg or beautiful.inputbox_placeholder_fg
-    ret._private.cursor_bg = args.cursor_bg or beautiful.inputbox_cursor_bg
-    ret._private.cursor_fg = args.cursor_fg or beautiful.inputbox_cursor_fg
-    ret._private.highlight_bg = args.highlight_bg or beautiful.inputbox_highlight_bg
-    ret._private.highlight_fg = args.highlight_fg or beautiful.inputbox_highlight_fg
-    ret._private.hover_cursor = args.hover_cursor or beautiful.inputbox_hover_cursor or "xterm"
+    ret.widget = args.widget_template and wibox.widget.template(args.widget_template)
+        or wibox.widget.template {
+            template = default_widget.template,
+            update_callback = default_widget.update_callback,
+            update_now = true,
+        }
 
-    local inputbox_widget = wibox.widget {
-        {
-            {
-                {
-                    widget = wibox.widget.textbox,
-                    text = ret._private.text,
-                    halign = args.halign or beautiful.inputbox_halign,
-                    valign = args.valign or beautiful.inputbox_valign,
-                    id = "input_text",
-                },
-                widget = wibox.container.margin,
-                margins = args.margin or beautiful.inputbox_margin,
-            },
-            widget = wibox.container.constraint,
-            strategy = "exact",
-            width = args.width or beautiful.inputbox_width,
-            height = args.height or beautiful.inputbox_height,
-        },
-        widget = wibox.container.background,
-        bg = args.bg or beautiful.bg_normal,
-        fg = args.fg or beautiful.fg_normal,
-        border_color = args.border_color or beautiful.border_color,
-        border_width = args.border_width or beautiful.border_width,
-        shape = args.shape or beautiful.shape,
-    }
-
-    ret.widget = inputbox_widget
+    gtable.crush(ret.widget, args)
 
     ret.widget:buttons(
         gtable.join {
             abutton({}, 1, function()
                 if not keygrabber.is_running then
-                    ret:focus()
                     ret:run()
                 end
 
@@ -524,8 +505,11 @@ function inputbox.new(args)
     )
 
     -- Initialize the text and placeholder with a first update
-    ret:update(ret._private.text, 1)
-
+    ret.widget:update {
+        text = args.text or "",
+        cursor_pos = 1,
+        self = ret
+    }
     return ret.widget
 end
 
