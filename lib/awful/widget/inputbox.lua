@@ -10,12 +10,11 @@
 local setmetatable = setmetatable
 local abutton = require("awful.button")
 local beautiful = require("beautiful")
-local wibox = require("wibox")
 local gtable = require("gears.table")
-local gobject = require("gears.object")
+local base = require("wibox.widget.base")
 local gstring = require("gears.string")
-local gshape = require("gears.shape")
 local keygrabber = require("awful.keygrabber")
+local wtemplate = require("wibox.template")
 
 local capi =
 {
@@ -25,8 +24,6 @@ local capi =
 }
 
 local inputbox = { mt = {} }
-inputbox._private = {}
-inputbox._private.highlight = {}
 
 --- Formats the text with a cursor and highlights if set.
 local function text_with_cursor(text, cursor_pos, self)
@@ -76,6 +73,44 @@ local function text_with_cursor(text, cursor_pos, self)
             "<span background='" .. cursor_bg .. "' foreground='" .. cursor_fg .. "'>" ..
             char .. "</span>" .. "<span foreground='" .. text_color .. "'>" .. text_end .. spacer .. "</span>"
     end
+end
+
+function inputbox:layout(_, width, height)
+    if self._private.widget then
+        return { base.place_widget_at(self._private.widget, 0, 0, width, height) }
+    end
+end
+
+function inputbox:fit(context, width, height)
+    local w, h = 0, 0
+    if self._private.widget then
+        w, h = base.fit_widget(self, context, self._private.widget, width, height)
+    end
+    return w, h
+end
+
+inputbox.set_widget = base.set_widget_common
+
+function inputbox:set_widget_template(widget_template)
+    self._private.widget_template = widget_template
+    self:set_widget(widget_template)
+end
+
+function inputbox:get_widget()
+    return self._private.widget
+end
+
+function inputbox:get_children()
+    return { self._private.widget }
+end
+
+function inputbox:set_children(children)
+    self:set_widget(children[1])
+end
+
+function inputbox:reset()
+    self._private.widget_template = nil
+    self:set_widget(nil)
 end
 
 --- The inputbox border color
@@ -169,8 +204,17 @@ function inputbox:stop()
     capi.mousegrabber.stop()
 end
 
+local function widget_update(text, cursor_pos, widget)
+    text = text or ""
+    cursor_pos = cursor_pos or 1
+    widget:set_text(text)
+    widget:emit_signal("property::markup", text)
+end
+
 --- Init the inputbox and start the keygrabber
 function inputbox:run()
+
+    if not self._private.text then self._private.text = "" end
 
     -- Init the cursor position, but causes on refocus the cursor to move to the left
     local cursor_pos = #self:get_text() + 1
@@ -372,56 +416,14 @@ function inputbox:run()
                 cursor_pos = #self._private.text + 1
             end
         end
-
         -- Update cycle
-        self.widget:update {
-            text = self:get_text(),
-            cursor_pos = cursor_pos,
-            self = self
+        self:get_widget():update {
+            text = text_with_cursor(self:get_text(), cursor_pos, self)
         }
 
         self:emit_signal("key_pressed", mod_keys, key)
     end)
 end
-
-local default_widget = {
-    template = {
-        {
-            {
-                {
-                    widget = wibox.widget.textbox,
-                    text = "",
-                    halign = "left",
-                    valign = "center",
-                    id = "inputtext",
-                },
-                widget = wibox.container.margin,
-                margins = 5,
-            },
-            widget = wibox.container.constraint,
-            strategy = "exact",
-            width = 400,
-            height = 50,
-        },
-        widget = wibox.container.background,
-        bg = "#212121",
-        fg = "#F0F0F0",
-        border_color = "#414141",
-        border_width = 2,
-        shape = gshape.rounded_rect,
-        forced_width = 300,
-        forced_height = 50,
-    },
-    update_callback = function(widget_template, args)
-        local text = args and args.text or ""
-        local cursor_pos = args and args.cursor_pos or 1
-        local self = args and args.self
-        self:set_text(text)
-
-        widget_template.widget:get_children_by_id("inputtext")[1]:set_markup(text_with_cursor(text, cursor_pos, self))
-        self:emit_signal("property::markup", text)
-    end,
-}
 
 --- Creates a new inputbox widget
 -- @tparam table args Arguments for the inputbox widget
@@ -437,35 +439,26 @@ local default_widget = {
 -- @treturn awful.widget.inputbox The inputbox widget.
 -- @constructorfct awful.widget.inputbox
 function inputbox.new(args)
-    args = args or {}
-    assert(type(args) == "table")
 
-    local ret = gobject { enable_properties = true }
+    local w = base.make_widget(nil, nil, { enable_properties = true })
 
-    gtable.crush(ret, inputbox, true)
+    gtable.crush(w, inputbox, true)
 
-    ret.widget = args.widget_template and wibox.widget.template(args.widget_template)
-        or wibox.widget.template {
-            template = default_widget.template,
-            update_callback = default_widget.update_callback,
-            update_now = true,
-        }
+    w:set_widget(wtemplate.make_from_value(args.widget_template))
 
-    gtable.crush(ret.widget, args)
-
-    ret.widget:buttons(
+    w:buttons(
         gtable.join {
             abutton({}, 1, function()
                 if not keygrabber.is_running then
-                    ret:run()
+                    w:run()
                 end
 
                 -- Stops the mousegrabber when not clicked on the widget
                 capi.mousegrabber.run(
                     function(m)
                         if m.buttons[1] then
-                            if capi.mouse.current_wibox ~= ret.widget then
-                                ret:emit_signal("keygrabber::stop", "")
+                            if capi.mouse.current_wibox ~= w.widget then
+                                w:emit_signal("keygrabber::stop", "")
                                 return false
                             end
                         end
@@ -484,19 +477,19 @@ function inputbox.new(args)
 
     -- Change the cursor to "xterm" on hover over
     local old_cursor, old_wibox
-    ret.widget:connect_signal(
+    w:connect_signal(
         "mouse::enter",
         function()
-            local w = capi.mouse.current_wibox
-            if w then
-                old_cursor, old_wibox = w.cursor, w
-                w.cursor = "xterm"
+            local wid = capi.mouse.current_wibox
+            if wid then
+                old_cursor, old_wibox = wid.cursor, wid
+                wid.cursor = "xterm"
             end
         end
     )
 
     -- Change the cursor back once leaving the widget
-    ret.widget:connect_signal(
+    w:connect_signal(
         "mouse::leave",
         function()
             old_wibox.cursor = old_cursor
@@ -505,12 +498,10 @@ function inputbox.new(args)
     )
 
     -- Initialize the text and placeholder with a first update
-    ret.widget:update {
-        text = args.text or "",
-        cursor_pos = 1,
-        self = ret
+    w:get_widget():update {
+        text = text_with_cursor("", 1, w)
     }
-    return ret.widget
+    return w
 end
 
 function inputbox.mt:__call(...)
