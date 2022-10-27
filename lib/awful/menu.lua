@@ -140,6 +140,8 @@ local function load_theme(a, b)
     ret.width = a.width or b.menu_width or b.width or
                 fallback.menu_width or dpi(100)
     ret.font = a.font or b.font or fallback.menu_font or fallback.font
+    ret.opacity_disabled = a.opacity_disabled or b.menu_opacity_disabled or b.opacity_disabled or
+                           fallback.menu_opacity_disabled or 0.5
     for _, prop in ipairs({"width", "height", "menu_width"}) do
         if type(ret[prop]) ~= "number" then ret[prop] = tonumber(ret[prop]) end
     end
@@ -239,17 +241,37 @@ local function check_access_key(self, key)
    end
 end
 
+local function select_next(self, current, direction)
+    local count = #self.items
+    if count < 1 then
+        return
+    end
+
+    local index = current or self.sel or 0
+    for _ = 1, count do
+        index = index + direction
+        if index < 1 then
+            index = count
+        elseif index > count then
+            index = 1
+        end
+
+        local item = self.items[index]
+        if item and item.enabled then
+            self:item_enter(index)
+            return
+        end
+    end
+end
 
 local function grabber(self, _, key, event)
     if event ~= "press" then return end
 
     local sel = self.sel or 0
     if gtable.hasitem(menu.menu_keys.up, key) then
-        local sel_new = sel-1 < 1 and #self.items or sel-1
-        self:item_enter(sel_new)
+        select_next(self, sel, -1)
     elseif gtable.hasitem(menu.menu_keys.down, key) then
-        local sel_new = sel+1 > #self.items and 1 or sel+1
-        self:item_enter(sel_new)
+        select_next(self, sel, 1)
     elseif sel > 0 and gtable.hasitem(menu.menu_keys.enter, key) then
         self:exec(sel)
     elseif sel > 0 and gtable.hasitem(menu.menu_keys.exec, key) then
@@ -267,7 +289,7 @@ end
 function menu:exec(num, opts)
     opts = opts or {}
     local item = self.items[num]
-    if not item then return end
+    if not item or not item.enabled then return end
     local cmd = item.cmd
     if type(cmd) == "table" then
         local action = cmd.cmd
@@ -323,7 +345,7 @@ end
 function menu:item_enter(num, opts)
     opts = opts or {}
     local item = self.items[num]
-    if num == nil or self.sel == num or not item then
+    if num == nil or self.sel == num or not item or not item.enabled then
         return
     elseif self.sel then
         self:item_leave(self.sel)
@@ -443,6 +465,7 @@ function menu:add(args, index)
         return
     end
     item.parent = self
+    item.enabled = item.enabled == nil and true or item.enabled
     item.theme = item.theme or theme
     item.width = item.width or theme.width
     item.height = item.height or theme.height
@@ -458,6 +481,9 @@ function menu:add(args, index)
         button({}, 3, function () self:hide() end),
         button({}, 1, function ()
             local num = gtable.hasitem(self.items, item)
+            if not num or not item.enabled then
+            	return
+            end
             self:item_enter(num, { mouse = true })
             self:exec(num, { exec = true, mouse = true })
         end)
@@ -466,6 +492,9 @@ function menu:add(args, index)
 
     item._mouse = function ()
         local num = gtable.hasitem(self.items, item)
+        if not num or not item.enabled then
+        	return
+        end
         self:item_enter(num, { hover = true, mouse = true })
     end
     item.widget:connect_signal("mouse::enter", item._mouse)
@@ -669,7 +698,13 @@ function menu.entry(parent, args) -- luacheck: no unused args
         layout:set_right(submenu)
     end
 
+    local enabled = args.enabled == nil and true or args.enabled
+    if not enabled then
+        layout:set_opacity(args.theme.opacity_disabled)
+    end
+
     return table_update(ret, {
+        enabled = enabled,
         label = label,
         sep = submenu,
         icon = iconbox,
