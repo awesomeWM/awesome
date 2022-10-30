@@ -548,12 +548,11 @@ local function mouse_press(self, x, y, button_id, _, geo)
             return false
         end
 
-
         -- Calculate the point relative to the widget
         move_handle(self, width, matrix:transform_point(mouse.x, mouse.y))
 
         return true
-    end,self.handle_cursor)
+    end,handle_cursor)
 end
 
 --- Create a slider widget.
