@@ -91,7 +91,8 @@ local slider = {mt={}}
 
 --- The handle grab cursor.
 -- @property handle_cursor
--- @tparam[opt="fleur"] string handle_cursor
+-- @tparam[opt="fleur"] string|nil handle_cursor
+-- @propbeautiful
 -- @see mousegrabber
 
 --- The bar (background) shape.
@@ -227,6 +228,12 @@ local slider = {mt={}}
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
+--- The handle grab cursor.
+--
+-- @beautiful beautiful.slider_handle_cursor
+-- @tparam[opt="fleur"] string cursor
+-- @see mousegrabber
+
 --- The bar (background) shape.
 --
 -- @beautiful beautiful.slider_bar_shape
@@ -354,6 +361,10 @@ function slider:draw(_, cr, width, height)
     local handle_border_width = self._private.handle_border_width
         or beautiful.slider_handle_border_width
         or properties.handle_border_width or 0
+
+    local handle_cursor = self._private.handle_cursor
+        or beautiful.slider_handle_cursor
+        or properties.handle_cursor or "fleur"
 
     local bar_height = self._private.bar_height
 
