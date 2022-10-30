@@ -89,6 +89,11 @@ local slider = {mt={}}
 -- @propemits true false
 -- @propbeautiful
 
+--- The handle grab cursor.
+-- @property handle_cursor
+-- @tparam[opt="fleur"] string handle_cursor
+-- @see mousegrabber
+
 --- The bar (background) shape.
 --
 --@DOC_wibox_widget_slider_bar_shape_EXAMPLE@
@@ -271,6 +276,7 @@ local properties = {
     handle_width         = false,
     handle_border_width  = 0,
     handle_border_color  = false,
+    handle_cursor        = "fleur",
 
     -- Bar
     bar_shape            = shape.rectangle,
@@ -535,7 +541,7 @@ local function mouse_press(self, x, y, button_id, _, geo)
         move_handle(self, width, matrix:transform_point(mouse.x, mouse.y))
 
         return true
-    end,"fleur")
+    end,self.handle_cursor)
 end
 
 --- Create a slider widget.
@@ -548,6 +554,7 @@ end
 -- @tparam[opt] number args.handle_width The slider handle width.
 -- @tparam[opt] color args.handle_border_color The handle border_color.
 -- @tparam[opt] number args.handle_border_width The handle border width.
+-- @tparam[opt] string args.handle_cursor The handle grab cursor.
 -- @tparam[opt] gears.shape args.bar_shape The bar (background) shape.
 -- @tparam[opt] number args.bar_height The bar (background) height.
 -- @tparam[opt] color args.bar_color The bar (background) color.
