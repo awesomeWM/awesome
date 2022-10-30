@@ -362,10 +362,6 @@ function slider:draw(_, cr, width, height)
         or beautiful.slider_handle_border_width
         or properties.handle_border_width or 0
 
-    local handle_cursor = self._private.handle_cursor
-        or beautiful.slider_handle_cursor
-        or properties.handle_cursor
-
     local bar_height = self._private.bar_height
 
     -- If there is no background, then skip this
@@ -543,10 +539,15 @@ local function mouse_press(self, x, y, button_id, _, geo)
     local wgeo = geo.drawable.drawable:geometry()
     local matrix = matrix_from_device:translate(-wgeo.x, -wgeo.y)
 
+    local handle_cursor = self._private.handle_cursor
+        or beautiful.slider_handle_cursor
+        or properties.handle_cursor
+
     capi.mousegrabber.run(function(mouse)
         if not mouse.buttons[1] then
             return false
         end
+
 
         -- Calculate the point relative to the widget
         move_handle(self, width, matrix:transform_point(mouse.x, mouse.y))
