@@ -364,7 +364,7 @@ function slider:draw(_, cr, width, height)
 
     local handle_cursor = self._private.handle_cursor
         or beautiful.slider_handle_cursor
-        or properties.handle_cursor or "fleur"
+        or properties.handle_cursor
 
     local bar_height = self._private.bar_height
 
