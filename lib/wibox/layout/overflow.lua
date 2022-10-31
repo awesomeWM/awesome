@@ -275,7 +275,7 @@ end
 
 --- Scroll the layout's content by `amount * step`.
 --
--- A positive amount scroll down/right, a negative amount scrolls up/left.
+-- A positive amount scrolls down/right, a negative amount scrolls up/left.
 --
 -- The amount of units scrolled is affected by `step`.
 --
