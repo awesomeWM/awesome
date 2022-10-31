@@ -530,7 +530,7 @@ end
 -- widgets exceeds the height available whithin the layout's outer container
 -- a scrollbar will be added and scrolling behavior enabled.
 -- @tparam widget ... Widgets that should be added to the layout.
--- @constructorfct wibox.layout.overflow.horizontal
+-- @constructorfct wibox.layout.overflow.vertical
 function overflow.vertical(...)
     return new("vertical", ...)
 end
