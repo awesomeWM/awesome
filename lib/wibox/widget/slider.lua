@@ -89,6 +89,12 @@ local slider = {mt={}}
 -- @propemits true false
 -- @propbeautiful
 
+--- The handle grab cursor.
+-- @property handle_cursor
+-- @tparam[opt="fleur"] string|nil handle_cursor
+-- @propbeautiful
+-- @see mousegrabber
+
 --- The bar (background) shape.
 --
 --@DOC_wibox_widget_slider_bar_shape_EXAMPLE@
@@ -222,6 +228,12 @@ local slider = {mt={}}
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
+--- The handle grab cursor.
+--
+-- @beautiful beautiful.slider_handle_cursor
+-- @tparam[opt="fleur"] string cursor
+-- @see mousegrabber
+
 --- The bar (background) shape.
 --
 -- @beautiful beautiful.slider_bar_shape
@@ -271,6 +283,7 @@ local properties = {
     handle_width         = false,
     handle_border_width  = 0,
     handle_border_color  = false,
+    handle_cursor        = "fleur",
 
     -- Bar
     bar_shape            = shape.rectangle,
@@ -526,6 +539,10 @@ local function mouse_press(self, x, y, button_id, _, geo)
     local wgeo = geo.drawable.drawable:geometry()
     local matrix = matrix_from_device:translate(-wgeo.x, -wgeo.y)
 
+    local handle_cursor = self._private.handle_cursor
+        or beautiful.slider_handle_cursor
+        or properties.handle_cursor
+
     capi.mousegrabber.run(function(mouse)
         if not mouse.buttons[1] then
             return false
@@ -535,7 +552,7 @@ local function mouse_press(self, x, y, button_id, _, geo)
         move_handle(self, width, matrix:transform_point(mouse.x, mouse.y))
 
         return true
-    end,"fleur")
+    end,handle_cursor)
 end
 
 --- Create a slider widget.
@@ -548,6 +565,7 @@ end
 -- @tparam[opt] number args.handle_width The slider handle width.
 -- @tparam[opt] color args.handle_border_color The handle border_color.
 -- @tparam[opt] number args.handle_border_width The handle border width.
+-- @tparam[opt] string args.handle_cursor The handle grab cursor.
 -- @tparam[opt] gears.shape args.bar_shape The bar (background) shape.
 -- @tparam[opt] number args.bar_height The bar (background) height.
 -- @tparam[opt] color args.bar_color The bar (background) color.
