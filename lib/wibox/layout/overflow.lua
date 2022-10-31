@@ -476,6 +476,20 @@ function overflow:get_scrollbar_widget()
     return self._private.scrollbar_widget
 end
 
+
+function overflow:reset()
+    self._private.widgets = {}
+    self._private.scroll_factor = 0
+
+    local scrollbar_widget = separator({ shape = gshape.rectangle })
+    apply_scrollbar_mouse_signal(self, scrollbar_widget)
+    self._private.scrollbar_widget = scrollbar_widget
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::reset")
+    self:emit_signal("widget::reseted")
+end
+
 local function new(dir, ...)
     local ret = fixed[dir](...)
 
