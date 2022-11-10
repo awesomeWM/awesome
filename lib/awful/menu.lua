@@ -241,7 +241,7 @@ local function check_access_key(self, key)
    end
 end
 
-local function select_next(self, current, direction)
+function menu:select_next(direction, current)
     local count = #self.items
     if count < 1 then
         return
@@ -249,7 +249,7 @@ local function select_next(self, current, direction)
 
     local index = current or self.sel or 0
     for _ = 1, count do
-        index = index + direction
+        index = index + (direction or 1)
         if index < 1 then
             index = count
         elseif index > count then
@@ -269,9 +269,9 @@ local function grabber(self, _, key, event)
 
     local sel = self.sel or 0
     if gtable.hasitem(menu.menu_keys.up, key) then
-        select_next(self, sel, -1)
+        self:select_next(-1, sel)
     elseif gtable.hasitem(menu.menu_keys.down, key) then
-        select_next(self, sel, 1)
+        self:select_next(1, sel)
     elseif sel > 0 and gtable.hasitem(menu.menu_keys.enter, key) then
         self:exec(sel)
     elseif sel > 0 and gtable.hasitem(menu.menu_keys.exec, key) then
@@ -764,6 +764,7 @@ function menu.new(args, parent)
     args = args or {}
     args.layout = args.layout or wibox.layout.flex.vertical
     local _menu = table_update(object(), {
+        select_next = menu.select_next,
         item_enter = menu.item_enter,
         item_leave = menu.item_leave,
         get_root = menu.get_root,
