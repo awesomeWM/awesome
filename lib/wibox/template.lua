@@ -56,7 +56,7 @@ local gtimer = require("gears.timer")
 
 local template = {
     mt = {},
-    queued_updates = {},
+    queued_updates = setmetatable({}, {__mode="k"}),
 }
 
 local function lazy_load_child(self)
@@ -66,6 +66,14 @@ local function lazy_load_child(self)
 
     if widget_instance then
         wbase.check_widget(widget_instance)
+    end
+
+    -- If `forced_height` and `forced_width` are set on the template, then
+    -- that's equivalent of setting them on the child.
+    for _, prop in ipairs { "forced_width", "forced_height" } do
+        if not widget_instance[prop] then
+            widget_instance[prop] = self._private[prop]
+        end
     end
 
     self._private.widget = widget_instance
@@ -131,12 +139,11 @@ end
 
 --- Update the widget.
 --
--- This function will call the `update_callback` function at the end of the
--- current GLib event loop. Updates are batched by event loop, it means that the
--- widget can only be update once by event loop. If the `template:update` method
--- is called multiple times during the same GLib event loop, only the first call
--- will be run.
--- All arguments are passed to the queued `update_callback` call.
+-- Updates are batched. Multiple calls to @{update} within the same event loop
+-- iteration will be collected. At the end of the loop iteration, they will be
+-- combined into a single call to the function provided as @{update_callback}.
+-- All the properties of the table argument are collected and provided to the
+-- queued @{update_callback} in the table parameter.
 --
 -- @tparam[opt={}] table args A table to pass to the widget update function.
 -- @method update
@@ -161,7 +168,8 @@ end
 --
 -- Note that this will discard the existing widget instance. Thus, any
 -- `set_property` will no longer be honored. `bind_property`, on the other hand,
--- will still be honored.
+-- will still be honored. The connections stay intact, but until the signal
+-- fires again, the value will stay `nil`.
 --
 -- @property template
 -- @tparam[opt=nil] table|nil template The new widget to use as a
@@ -187,6 +195,24 @@ function template:get_children_by_id(...)
     return w:get_children_by_id(...)
 end
 
+-- The width and height need to be forwarded to the inner widget so it's fit
+-- is properly overriden. The other way would be to do it in `:fit()`, but
+-- since they are methods, they might have been overriden by the widget and
+-- have a special meaning.
+for _, prop in ipairs {"forced_width", "forced_height" } do
+    template["get_"..prop] = function(self)
+        return self._private.widget
+            and self._private.widget[prop]
+            or self._private[prop]
+    end
+    template["set_"..prop] = function(self, value)
+        if self._private.widget then
+            self._private.widget[prop] = value
+        end
+        self._private[prop] = value
+    end
+end
+
 --- Set a property on one or more template sub-widget instances.
 --
 -- This method allows to set a value at any time on any of the sub widget of
@@ -196,9 +222,7 @@ end
 --
 --@DOC_wibox_widget_template_set_property_existing_EXAMPLE@
 --
--- It is also possible to take this one step further and apply a property
--- to the entire sub-widget tree. This allows users to implement their own
--- template even if it doesn't use the same "roles" as the default one:
+-- This example adds an inline setter method for `client`:
 --
 --@DOC_wibox_widget_template_set_property_custom_EXAMPLE@
 --
@@ -347,6 +371,8 @@ function template:get_update_callback()
 end
 
 -- Undocumented, for backward compatibility
+-- @deprecatedmethod
+-- @hidden
 function template:get_create_callback()
     return rawget(lazy_load_child(self), "create_callback")
 end
