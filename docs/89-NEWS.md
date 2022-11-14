@@ -14,6 +14,7 @@ This document was last updated at commit v4.3-197-g9085ed631.
 
 ## New features
 
+* `mousegrabber` can now take `nil` as a cursor to not change the cursor at all.
 * `awful.screen` now has a `request::wallpaper` and a
   `request::desktop_decoration` signal. They make some workflow implementation
   cleaner.
