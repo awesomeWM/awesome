@@ -222,7 +222,7 @@ local function runner(self, modifiers, key, event)
     local filtered_modifiers = {}
 
     -- User defined cases
-    if self._private.keybindings[key] and event == "press" then
+    if self._private.keybindings[key] then
         -- Remove caps and num lock
         for _, m in ipairs(modifiers) do
             if not gtable.hasitem(akey.ignore_modifiers, m) then
@@ -236,11 +236,18 @@ local function runner(self, modifiers, key, event)
                 for _,v2 in ipairs(v.modifiers) do
                     match = match and mod[v2]
                 end
-                if match and v.on_press then
-                    v.on_press(self)
 
-                    if self.mask_event_callback ~= false then
-                        return
+                if match then
+                    self:emit_signal("keybinding::triggered", v, event)
+
+                    if event == "press" and v.on_press then
+                        v.on_press(self)
+
+                        if self.mask_event_callback ~= false then
+                            return
+                        end
+                    elseif event == "release" and v.on_release then
+                        v.on_release(self)
                     end
                 end
             end
@@ -542,6 +549,7 @@ end
 -- @tparam awful.key key The key.
 -- @tparam string description.group The keybinding group
 -- @noreturn
+-- @see remove_keybinding
 
 function keygrabber:add_keybinding(key, keycode, callback, description)
     local mods = not key._is_awful_key and key or nil
@@ -572,6 +580,27 @@ function keygrabber:add_keybinding(key, keycode, callback, description)
     if self.export_keybindings then
         add_root_keybindings(self, {key})
     end
+end
+
+--- Remove a keybinding from the keygrabber.
+--
+-- @method remove_keybinding
+-- @treturn boolean `true` if removed, `false` if not found.
+-- @see add_keybinding
+
+function keygrabber:remove_keybinding(key)
+    for idx, obj in ipairs(self._private.keybindings[key.key]) do
+        if obj == key then
+            table.remove(self._private.keybindings[key.key], idx)
+
+            if #self._private.keybindings[key.key] == 0 then
+                self._private.keybindings[key.key] = nil
+            end
+
+            return true
+        end
+    end
+    return false
 end
 
 function keygrabber:set_root_keybindings(keys)
@@ -629,6 +658,12 @@ end
 
 --- When the keygrabber stops.
 -- @signal stopped
+
+--- When an `awful.key` is pressed.
+-- @signal keybinding::triggered
+-- @tparam awful.keybinding self
+-- @tparam awful.key key The keybinding.
+-- @tparam string event Either `"press"` or `"release"`.
 
 --- A function called when a keygrabber starts.
 -- @callback start_callback

@@ -39,6 +39,7 @@ local ret = {
     rules = require("awful.rules");
     popup = require("awful.popup");
     spawn = require("awful.spawn");
+    screenshot = require("awful.screenshot");
 }
 
 -- Lazy load deprecated modules to reduce the numbers of loop dependencies.

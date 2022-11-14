@@ -321,7 +321,7 @@ local function new_common(mod, keys, press, release, data)
 
     -- append custom userdata (like description) to a hotkey
     data = data and gtable.clone(data) or {}
-    data.mod = mod
+    data.mod, data.modifiers = mod, mod
     data.keys = keys
     data.on_press = press
     data.on_release = release
