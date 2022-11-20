@@ -7,8 +7,15 @@
 --
 --@DOC_wibox_layout_grid_imperative_EXAMPLE@
 --
--- Using the declarative system, widgets are automatically added next to each
--- other spanning only one cell.
+-- The same can be done using the declarative syntax. When using this mode,
+-- all widgets will again the `row_span` and `col_span` properties:
+--
+--@DOC_wibox_layout_grid_declarative1_EXAMPLE@
+--
+-- When `col_index` and `row_index` are not provided, the widgets are
+-- automatically added next to each other spanning only one cell:
+--
+--@DOC_wibox_layout_grid_declarative2_EXAMPLE@
 --
 --@DOC_wibox_layout_defaults_grid_EXAMPLE@
 -- @author getzze
@@ -314,6 +321,9 @@ end
 --
 -- The widgets are assumed to span one cell.
 --
+-- If the widgets have a `row_index`, `col_index`, `col_span`
+-- or `row_span` property, it will be honorred.
+--
 -- @method add
 -- @tparam wibox.widget ... Widgets that should be added (must at least be one)
 -- @interface layout
@@ -323,9 +333,16 @@ function grid:add(...)
     assert(args.n > 0, "need at least one widget to add")
     local row, column
     for i=1, args.n do
+        local w = args[i]
         -- Get the next empty coordinate to insert the widget
         row, column = self:get_next_empty(row, column)
-        self:add_widget_at(args[i], row, column, 1, 1)
+        self:add_widget_at(
+            w,
+            w.row_index or row,
+            w.col_index or column,
+            w.row_span or 1,
+            w.col_span or 1
+        )
     end
 end
 
