@@ -664,9 +664,6 @@ screen_scan_randr_monitors(lua_State *L, screen_array_t *screens)
     {
         screen_t *new_screen;
 
-        if(!xcb_randr_monitor_info_outputs_length(monitor_iter.data))
-            continue;
-
         screen_output_t output = screen_get_randr_output(L, &monitor_iter);
 
         viewport_t *viewport = viewport_add(L,
