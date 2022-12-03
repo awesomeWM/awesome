@@ -117,7 +117,7 @@ local qutebrowser_keys = {
             [";y"] = "yank hinted URL to clipboard",
             [";Y"] = "yank hinted URL to selection",
             [";r"] = "rapid hinting",
-            [";R"] = "liek ;r, in new window",
+            [";R"] = "like ;r, in new window",
             [";d"] = "download hinted URL"
         }
     }},
