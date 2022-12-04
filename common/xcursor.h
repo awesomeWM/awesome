@@ -24,10 +24,12 @@
 
 #include <xcb/xcb.h>
 #include <xcb/xcb_cursor.h>
+#include "common/array.h"
 
-uint16_t xcursor_font_fromstr(const char *);
-const char * xcursor_font_tostr(uint16_t);
-xcb_cursor_t xcursor_new(xcb_cursor_context_t *, uint16_t);
+typedef struct cursor_cache_entry_t cursor_cache_entry_t;
+ARRAY_TYPE(cursor_cache_entry_t, cursors)
+
+xcb_cursor_t xcursor_new(cursors_array_t *, xcb_cursor_context_t *, const char *);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
