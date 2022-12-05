@@ -98,9 +98,9 @@ gen_client("C2")
                 align = "center"
             },
             layout   = {
-                spacing         = 5,
-                forced_num_rows = 1,
-                layout          = wibox.layout.grid.horizontal
+                spacing   = 5,
+                row_count = 1,
+                layout    = wibox.layout.grid.horizontal
             },
             widget_template = {
                 {

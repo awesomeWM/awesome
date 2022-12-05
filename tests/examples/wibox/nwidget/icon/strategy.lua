@@ -54,9 +54,9 @@ parent:add(
         icons[1],
         icons[2],
         icons[3],
-        forced_num_rows = 2,
-        forced_num_cols = 3,
-        spacing = 5,
-        widget = wibox.layout.grid,
+        column_count = 2,
+        row_count    = 3,
+        spacing      = 5,
+        widget       = wibox.layout.grid,
     }
 )

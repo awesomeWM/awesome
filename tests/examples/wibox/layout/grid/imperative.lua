@@ -11,11 +11,11 @@ local lorem  = generic_widget("Lorem ipsum dolor sit amet, consectetur " ..   --
     "adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.")  --DOC_HIDE
 
     local l = wibox.widget {
-        homogeneous   = true,
-        spacing       = 5,
-        min_cols_size = 10,
-        min_rows_size = 10,
-        layout        = wibox.layout.grid,
+        homogeneous          = true,
+        spacing              = 5,
+        minimum_column_width = 10,
+        minimum_row_height   = 10,
+        layout               = wibox.layout.grid,
     }
     l:add_widget_at(first , 2, 1, 1, 2)
     l:add_widget_at(second, 3, 1, 1, 2)

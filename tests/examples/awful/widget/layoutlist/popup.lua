@@ -12,9 +12,9 @@ local modkey = "mod4" --DOC_HIDE
     local ll = awful.widget.layoutlist {
         source      = awful.widget.layoutlist.source.default_layouts, --DOC_HIDE
         base_layout = wibox.widget {
-            spacing         = 5,
-            forced_num_cols = 5,
-            layout          = wibox.layout.grid.vertical,
+            spacing      = 5,
+            column_count = 5,
+            layout       = wibox.layout.grid.vertical,
         },
         widget_template = {
             {

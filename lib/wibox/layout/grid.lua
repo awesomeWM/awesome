@@ -32,16 +32,16 @@ local math = math
 local gtable = require("gears.table")
 local gmath = require("gears.math")
 local gcolor = require("gears.color")
+local gdebug = require("gears.debug")
 local base = require("wibox.widget.base")
 local cairo = require("lgi").cairo
 
 local grid = { mt = {} }
 
 local properties = {
-                    "orientation", "superpose",
-                    "forced_num_rows", "forced_num_cols",
-                    "min_cols_size", "min_rows_size",
-                   }
+    "orientation", "superpose",
+    "forced_row_count", "forced_column_count",
+}
 
 local dir_properties = { "spacing", "homogeneous", "expand" }
 
@@ -70,7 +70,10 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 -- @property superpose
 
 --- Force the number of rows of the layout.
--- @property forced_num_rows
+--
+-- Deprecated, use `row_count`.
+--
+-- @deprecatedproperty forced_num_rows
 -- @tparam[opt=nil] number|nil forced_num_rows
 -- @propertytype nil Automatically determine the number of rows.
 -- @propertyunit rows
@@ -79,7 +82,10 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 -- @see row_count
 
 --- Force the number of columns of the layout.
--- @property forced_num_cols
+--
+-- Deprecated, use `column_count`.
+--
+-- @deprecatedproperty forced_num_cols
 -- @tparam[opt=nil] number|nil forced_num_cols
 -- @propertytype nil Automatically determine the number of columns.'
 -- @propertyunit columns
@@ -90,23 +96,46 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 --- Set the minimum size for the columns.
 --
 --@DOC_wibox_layout_grid_min_size_EXAMPLE@
--- @tparam[opt=0] number min_cols_size Minimum size of the columns.
--- @property min_cols_size
+-- @tparam[opt=0] number minimum_column_width Minimum size of the columns.
+-- @property minimum_column_width
 -- @propertyunit pixel
 -- @negativeallowed false
--- @see min_rows_size
+-- @see minimum_row_height
+
+--- Set the minimum size for the columns.
+--
+-- Deprecated, use `minimum_column_width`.
+--
+--@DOC_wibox_layout_grid_min_size_EXAMPLE@
+-- @tparam[opt=0] number min_cols_size Minimum size of the columns.
+-- @deprecatedproperty min_cols_size
+-- @propertyunit pixel
+-- @negativeallowed false
+-- @see minimum_row_height
 
 --- Set the minimum size for the rows.
+-- @tparam[opt=0] number minimum_row_height Minimum size of the rows.
+-- @property minimum_row_height
+-- @propertyunit pixel
+-- @negativeallowed false
+-- @see min_cols_size
+
+--- Set the minimum size for the rows.
+--
+-- Deprecated, use `minimum_row_height`.
+--
 -- @tparam[opt=0] number min_rows_size Minimum size of the rows.
--- @property min_rows_size
+-- @deprecatedproperty min_rows_size
 -- @propertyunit pixel
 -- @negativeallowed false
 -- @see min_cols_size
 
 --- The spacing between columns.
 --
+-- Deprecated, use `spacing`.
+--
 -- @tparam[opt=0] number horizontal_spacing
--- @property horizontal_spacing
+-- @deprecatedproperty horizontal_spacing
 -- @propertyunit pixel
 -- @negativeallowed false
 -- @see spacing
@@ -114,8 +143,10 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 
 --- The spacing between rows.
 --
+-- Deprecated, use `spacing`.
+--
 -- @tparam[opt=0] number vertical_spacing
--- @property vertical_spacing
+-- @deprecatedproperty vertical_spacing
 -- @propertyunit pixel
 -- @negativeallowed false
 -- @see spacing
@@ -133,23 +164,34 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 --
 -- @DOC_wibox_layout_grid_border_width3_EXAMPLE@
 --
--- @tparam[opt=0] number spacing
 -- @property spacing
+-- @tparam[opt=0] number|table spacing
+-- @tparam number spacing.vertical The vertical spacing.
+-- @tparam number spacing.horizontal The horizontal spacing.
+-- @propertytype number The same value for the `"vertical"` and `"horizontal"`
+--  aspects.
+-- @propertytype table Different values for the `"vertical"` and `"horizontal"`
+--  aspects.
+-- @propertyunit pixel
 -- @negativeallowed false
 -- @see vertical_spacing
 -- @see horizontal_spacing
 
 --- Controls if the columns are expanded to use all the available width.
 --
+-- Deprecated, use `expand`.
+--
 -- @tparam[opt=false] boolean horizontal_expand Expand the grid into the available space
--- @property horizontal_expand
+-- @deprecatedproperty horizontal_expand
 -- @see expand
 -- @see vertical_expand
 
 --- Controls if the rows are expanded to use all the available height.
 --
+-- Deprecated, use `expand`.
+--
 -- @tparam[opt=false] boolean vertical_expand Expand the grid into the available space
--- @property vertical_expand
+-- @deprecatedproperty vertical_expand
 -- @see expand
 -- @see horizontal_expand
 
@@ -159,28 +201,34 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 -- preferred `orientation`.
 --
 --@DOC_wibox_layout_grid_expand_EXAMPLE@
--- @tparam[opt=false] boolean expand Expand the grid into the available space
 -- @property expand
+-- @tparam[opt=false] boolean|table expand Expand the grid into the available space
+-- @tparam boolean expand.vertical The vertical expand.
+-- @tparam boolean expand.horizontal The horizontal expand.
+-- @propertytype number The same value for the `"vertical"` and `"horizontal"`
+--  aspects.
+-- @propertytype table Different values for the `"vertical"` and `"horizontal"`
+--  aspects.
 -- @see horizontal_expand
 -- @see vertical_expand
 
 --- Controls if the columns all have the same width or if the width of each
 -- column depends on the content.
 --
--- see `homogeneous`
+-- Deprecated, use `homogeneous`
 --
 -- @tparam[opt=true] boolean horizontal_homogeneous All the columns have the same width.
--- @property horizontal_homogeneous
+-- @deprecatedproperty horizontal_homogeneous
 -- @see vertical_homogeneous
 -- @see homogeneous
 
 --- Controls if the rows all have the same height or if the height of each row
 -- depends on the content.
 --
--- see `homogeneous`
+-- Deprecated, use `homogeneous`
 --
 -- @tparam[opt=true] boolean vertical_homogeneous All the rows have the same height.
--- @property vertical_homogeneous
+-- @deprecatedproperty vertical_homogeneous
 -- @see homogeneous
 -- @see horizontal_homogeneous
 
@@ -191,29 +239,37 @@ local dir_properties = { "spacing", "homogeneous", "expand" }
 -- by the preferred `orientation`.
 --
 --@DOC_wibox_layout_grid_expand_EXAMPLE@
--- @tparam[opt=true] boolean homogeneous All the columns/rows have the same size.
 -- @property homogeneous
+-- @tparam[opt=true] boolean|table homogeneous All the columns/rows have the same size.
+-- @tparam boolean homogeneous.vertical The vertical homogeneous value.
+-- @tparam boolean homogeneous.horizontal The horizontal homogeneous value.
+-- @propertytype number The same value for the `"vertical"` and `"horizontal"`
+--  aspects.
+-- @propertytype table Different values for the `"vertical"` and `"horizontal"`
+--  aspects.
 -- @see vertical_homogeneous
 -- @see horizontal_homogeneous
 
 --- The number of rows.
 --
--- If `forced_num_rows` is set, then its value is returned, otherwise it will
--- return the maximum actual number of widgets in a row.
+-- Unless manually set, the value will be automatically determined base on the
+-- `orientation`.
 --
 -- @property row_count
 -- @tparam integer row_count
--- @readonly
+-- @negativeallowed false
+-- @propertydefault autogenerated
 -- @see forced_num_rows
 
 --- The number of columns.
 --
--- If `forced_num_cols` is set, then its value is returned, otherwise it will
--- return the maximum actual number of widgets in a column.
+-- Unless manually set, the value will be automatically determined base on the
+-- `orientation`.
 --
 -- @property column_count
--- @readonly
 -- @tparam integer column_count
+-- @negativeallowed false
+-- @propertydefault autogenerated
 -- @see forced_num_cols
 
 --- Child widget position. Return of `get_widget_position`.
@@ -286,8 +342,10 @@ local function find_widget(widgets_table, widget)
 end
 
 --- Get the number of rows and columns occupied by the widgets in the grid.
--- @method get_dimension
+-- @deprecatedmethod get_dimension
 -- @treturn number,number The number of rows and columns
+-- @see row_count
+-- @see column_count
 function grid:get_dimension()
     return self._private.num_rows, self._private.num_cols
 end
@@ -377,9 +435,11 @@ end
 
 --- Add a widget to the grid layout at specific coordinate.
 --
+-- You can now use `:add {row_index = 1, col_index = 1}` instead of this method.
+--
 --@DOC_wibox_layout_grid_add_EXAMPLE@
 --
--- @method add_widget_at
+-- @deprecatedmethod add_widget_at
 -- @tparam wibox.widget child Widget that should be added
 -- @tparam number row Row number for the top left corner of the widget
 -- @tparam number col Column number for the top left corner of the widget
@@ -810,30 +870,98 @@ function grid:set_min_rows_size(val)
     end
 end
 
--- Force the number of columns of the layout.
 function grid:set_forced_num_cols(val)
+    gdebug.deprecate(
+        "The `.column_count = "..tostring(val).."`.",
+        {deprecated_in=5}
+    )
+    self:set_column_count(val)
+end
+
+function grid:set_forced_num_rows(val)
+    gdebug.deprecate(
+        "The `row_count = "..tostring(val).."`.",
+        {deprecated_in=5}
+    )
+    self:set_row_count(val)
+end
+
+-- Force the number of columns of the layout.
+function grid:set_column_count(val)
     if self._private.forced_num_cols ~= val then
         self._private.forced_num_cols = val
         update_dimension(self)
+        self:emit_signal("property::column_count", val)
         self:emit_signal("widget::layout_changed")
     end
 end
 
 -- Force the number of rows of the layout.
-function grid:set_forced_num_rows(val)
+function grid:set_row_count(val)
     if self._private.forced_num_rows ~= val then
         self._private.forced_num_rows = val
         update_dimension(self)
+        self:emit_signal("property::row_count", val)
         self:emit_signal("widget::layout_changed")
     end
 end
 
 function grid:get_row_count()
-    return self._private.num_rows
+    return self._private.forced_num_rows or self._private.num_rows
 end
 
 function grid:get_column_count()
-    return self._private.num_cols
+    return self._private.forced_num_cols or self._private.num_cols
+end
+
+function grid:set_minimum_column_width(val)
+    if self._private.min_cols_size ~= val then
+        self._private.min_cols_size = val
+        update_dimension(self)
+        self:emit_signal("property::minimum_column_width", val)
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
+function grid:set_minimum_row_height(val)
+    if self._private.min_rows_size ~= val then
+        self._private.min_rows_size = val
+        update_dimension(self)
+        self:emit_signal("property::minimum_column_width", val)
+        self:emit_signal("widget::layout_changed")
+    end
+end
+
+function grid:set_min_cols_size(val)
+    gdebug.deprecate(
+        "The `.minimum_column_width = "..tostring(val).."`.",
+        {deprecated_in=5}
+    )
+    self:set_minimum_column_width(val)
+end
+
+function grid:set_min_rows_size(val)
+    gdebug.deprecate(
+        "The `.minimum_column_width = "..tostring(val).."`.",
+        {deprecated_in=5}
+    )
+    self:set_minimum_row_height(val)
+end
+
+function grid:get_minimum_column_width()
+    return self._private.min_cols_size
+end
+
+function grid:get_minimum_row_height()
+    return self._private.min_rows_size
+end
+
+function grid:get_min_cols_size()
+    return self._private.min_cols_size
+end
+
+function grid:get_min_rows_size()
+    return self._private.min_rows_size
 end
 
 function grid:set_border_width(val)
@@ -906,6 +1034,7 @@ for _, prop in ipairs(properties) do
         grid["set_"..prop] = function(self, value)
             if self._private[prop] ~= value then
                 self._private[prop] = value
+                self:emit_signal("property::"..prop, value)
                 self:emit_signal("widget::layout_changed")
             end
         end
@@ -927,26 +1056,46 @@ for _, prop in ipairs(dir_properties) do
     for _,dir in ipairs{"horizontal", "vertical"} do
         local dir_prop = dir .. "_" .. prop
         grid["set_"..dir_prop] = function(self, value)
+            gdebug.deprecate(
+                "The `".. dir_prop .."` property is deprecated. Use `".. prop .."`",
+                {deprecated_in=5}
+            )
             if self._private[dir_prop] ~= value then
                 self._private[dir_prop] = value
                 self:emit_signal("widget::layout_changed")
             end
         end
         grid["get_"..dir_prop] = function(self)
+            gdebug.deprecate(
+                "The `".. dir_prop .."` property is deprecated. Use `".. prop .."`",
+                {deprecated_in=5}
+            )
             return self._private[dir_prop]
         end
     end
 
-    -- Non-directional options
     grid["set_"..prop] = function(self, value)
-        if self._private["horizontal_"..prop] ~= value or self._private["vertical_"..prop] ~= value then
-            self._private["horizontal_"..prop] = value
-            self._private["vertical_"..prop] = value
+        if type(value) ~= "table" then
+            if self._private["horizontal_"..prop] ~= value
+              or self._private["vertical_"..prop] ~= value then
+                self._private["horizontal_"..prop] = value
+                self._private["vertical_"..prop] = value
+                self:emit_signal("property::"..prop, value)
+                self:emit_signal("widget::layout_changed")
+            end
+        else
+            self._private["horizontal_"..prop] = value.horizontal
+            self._private["vertical_"..prop] = value.vertical
+
+            self:emit_signal("property::"..prop, value)
             self:emit_signal("widget::layout_changed")
         end
     end
     grid["get_"..prop] = function(self)
-        return self._private[self._private.orientation .. "_" .. prop]
+        return {
+            vertical   = self._private["vertical_" .. prop],
+            horizontal = self._private["horizontal_" .. prop],
+        }
     end
 end
 

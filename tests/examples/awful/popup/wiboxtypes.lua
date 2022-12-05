@@ -107,9 +107,9 @@ awful.popup {
             filter      = awful.widget.layoutlist.source.for_screen,
             screen      = 1,
             base_layout = wibox.widget {
-                spacing         = 5,
-                forced_num_cols = 5,
-                layout          = wibox.layout.grid.vertical,
+                spacing      = 5,
+                column_count = 5,
+                layout       = wibox.layout.grid.vertical,
             },
             widget_template = {
                 {

@@ -19,15 +19,15 @@ end
            generic_widget( "second" ),
            generic_widget( "third"  ),
            generic_widget( "fourth" ),
-           forced_num_cols = 2,
-           forced_num_rows = 2,
-           homogeneous     = true,
-           spacing         = 10,
-           border_width    = {
+           column_count = 2,
+           row_count    = 2,
+           homogeneous  = true,
+           spacing      = 10,
+           border_width = {
                inner = width,
                outer = 10 - width,
            },
-           border_color    = {
+           border_color = {
                inner = gears.color {
                     type  = "linear",
                     from  = { 0  , 0 },
@@ -47,7 +47,7 @@ end
                     }
                 },
            },
-           layout          = wibox.layout.grid,
+           layout      = wibox.layout.grid,
        }
 
        --DOC_HIDE_START

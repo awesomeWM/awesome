@@ -8,11 +8,11 @@ local wibox     = require("wibox") --DOC_HIDE
         generic_widget("third"),
         generic_widget("fourth"),
         generic_widget("fifth"),
-        forced_num_cols = 2,
-        spacing         = 5,
-        min_cols_size   = 10,
-        min_rows_size   = 10,
-        layout          = wibox.layout.grid,
+        column_count         = 2,
+        spacing              = 5,
+        minimum_column_width = 10,
+        minimum_row_height   = 10,
+        layout               = wibox.layout.grid,
     }
 
 return l, l:fit({dpi=96}, 300, 200) --DOC_HIDE

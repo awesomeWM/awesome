@@ -18,13 +18,13 @@ end
            generic_widget( "second" ),
            generic_widget( "third"  ),
            generic_widget( "fourth" ),
-           forced_num_cols = 2,
-           forced_num_rows = 2,
-           homogeneous     = true,
-           spacing         = width,
-           border_width    = 1,
-           border_color    = "red",
-           layout          = wibox.layout.grid,
+           column_count = 2,
+           row_count    = 2,
+           homogeneous  = true,
+           spacing      = width,
+           border_width = 1,
+           border_color = "red",
+           layout       = wibox.layout.grid,
        }
 
        --DOC_HIDE_START

@@ -1,8 +1,8 @@
 l = wibox.layout {
-    forced_num_cols = 2,
-    forced_num_rows = 2,
-    homogeneous     = true,
-    layout = wibox.layout.grid
+    column_count = 2,
+    row_count    = 2,
+    homogeneous  = true,
+    layout       = wibox.layout.grid
 }
 l:set_orientation("vertical") -- change to "horizontal"
 l:add(...)

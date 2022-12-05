@@ -65,13 +65,13 @@ end
            widget    = generic_widget
        },
       --DOC_HIDE_END
-       homogeneous     = true,
-       spacing         = 0,
-       border_width    = 4,
-       border_color    = beautiful.border_color,
-       min_cols_size   = 10,
-       min_rows_size   = 10,
-       layout          = wibox.layout.grid,
+       homogeneous          = true,
+       spacing              = 0,
+       border_width         = 4,
+       border_color         = beautiful.border_color,
+       minimum_column_width = 10,
+       minimum_row_height   = 10,
+       layout               = wibox.layout.grid,
    }
 
    --DOC_NEWLINE

@@ -52,13 +52,13 @@ local beautiful = require("beautiful")
            col_span  = 2,
            widget    = generic_widget
        },
-       homogeneous     = true,
-       spacing         = 5,
-       border_width    = 1,
-       border_color    = beautiful.border_color,
-       min_cols_size   = 10,
-       min_rows_size   = 10,
-       layout          = wibox.layout.grid,
+       homogeneous          = true,
+       spacing              = 5,
+       border_width         = 1,
+       border_color         = beautiful.border_color,
+       minimum_column_width = 10,
+       minimum_row_height   = 10,
+       layout               = wibox.layout.grid,
    }
 
 return l, l:fit({dpi=96}, 400, 200) --DOC_HIDE

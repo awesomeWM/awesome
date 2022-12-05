@@ -89,6 +89,9 @@ This document was last updated at commit v4.3-197-g9085ed631.
  * Pango 1.44 is now the oldest recommended Pango version. Older versions are
    still supported, but will lack the ability to use some textbox properties,
    mainly `wibox.widget.textbox.line_spacing_factor`.
+ * The `wibox.layout.grid` layout `expand`, `spacing` and `homogeneous`
+   property getters now return a table instead of a number. The table contains
+   a `horizontal` and a `vertical` key.
 
 <a name="v43"></a>
 # Awesome window manager framework version 4.3 changes

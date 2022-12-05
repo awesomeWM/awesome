@@ -33,11 +33,11 @@ end
                   generic_widget( "fourth" ),
                   generic_widget( "fifth" ),
                   generic_widget( "sixth" ),
-                  forced_num_cols = 2,
-                  forced_num_rows = 2,
-                  homogeneous     = homogeneous,
-                  spacing         = 10,
-                  border_width    = {
+                  column_count = 2,
+                  row_count    = 2,
+                  homogeneous  = homogeneous,
+                  spacing      = 10,
+                  border_width = {
                       inner = width,
                       outer = 1.5 * width,
                   },

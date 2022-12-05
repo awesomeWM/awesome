@@ -24,9 +24,9 @@ local beautiful = require("beautiful") --DOC_HIDE
                 source      = awful.widget.layoutlist.source.default_layouts,
                 screen      = 1,
                 base_layout = wibox.widget {
-                    spacing         = 5,
-                    forced_num_cols = 3,
-                    layout          = wibox.layout.grid.vertical,
+                    spacing      = 5,
+                    column_count = 3,
+                    layout       = wibox.layout.grid.vertical,
                 },
                 widget_template = {
                     {
