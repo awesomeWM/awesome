@@ -1,18 +1,23 @@
 --DOC_GEN_IMAGE --DOC_HIDE_START
-local generic_widget = ... --DOC_NO_USAGE
+local generic_widget_ = ...
 local wibox     = require("wibox")
 local beautiful = require("beautiful")
 
+local l = wibox.widget {
+    spacing = 10,
+    layout  = wibox.layout.fixed.horizontal
+}
+
+local function generic_widget(txt)
+    return generic_widget_(txt, nil, 0)
+end
+
 --DOC_HIDE_END
-
-   local lorem  = "Lorem ipsum dolor sit amet, consectetur adipiscing " ..
-       "elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
-
---DOC_NEWLINE
-
-   local l = wibox.widget {
+   local w = wibox.widget {
+       -- [...] Some widgets here.
+       --DOC_HIDE_START
        {
-           text      = lorem,
+           text      = "none",
            row_index = 1,
            col_index = 1,
            col_span  = 3,
@@ -52,13 +57,29 @@ local beautiful = require("beautiful")
            col_span  = 2,
            widget    = generic_widget
        },
+       {
+           text      = "sixth",
+           row_index = 1,
+           col_index = 4,
+           row_span  = 4,
+           widget    = generic_widget
+       },
+      --DOC_HIDE_END
        homogeneous     = true,
-       spacing         = 5,
-       border_width    = 1,
+       spacing         = 0,
+       border_width    = 4,
        border_color    = beautiful.border_color,
        min_cols_size   = 10,
        min_rows_size   = 10,
        layout          = wibox.layout.grid,
    }
 
-return l, l:fit({dpi=96}, 400, 200) --DOC_HIDE
+   --DOC_NEWLINE
+   w:add_row_border(1, 40, { color = "red"   })
+   w:add_row_border(2, 5 , { color = "green" , dashes = {5, 3, 10, 3}})
+   w:add_row_border(3, 10, { color = "blue"  , dashes = {5, 3, 10, 3}, dash_offset = 5})
+   w:add_row_border(4, 30, { color = "orange", dashes = {5, 40}, caps = "round"})
+   w:add_row_border(5, 10, { color = "yellow"})
+
+l:add(w) --DOC_HIDE
+return l, l:fit({dpi=96}, 9999, 9999) --DOC_HIDE

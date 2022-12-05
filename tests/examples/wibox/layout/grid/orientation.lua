@@ -66,6 +66,7 @@ wibox.widget {
         },
         layout = wibox.layout.fixed.vertical
     },
+    spacing = 5,
     layout = wibox.layout.fixed.horizontal
 }
 , 300, 90 --DOC_HIDE

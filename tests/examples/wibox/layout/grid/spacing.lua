@@ -1,7 +1,11 @@
 --DOC_GEN_IMAGE
-local generic_widget = ... --DOC_HIDE_ALL
+local generic_widget_ = ... --DOC_HIDE_ALL
 local wibox     = require("wibox") --DOC_HIDE
 local beautiful = require("beautiful") --DOC_HIDE
+
+local function generic_widget(txt)
+    return generic_widget_(txt, nil, 0)
+end
 
 local w = wibox.widget {
     {
