@@ -39,7 +39,7 @@ local dbus = { config = {} }
 local bus_connection
 
 -- DBUS Notification constants
--- https://developer.gnome.org/notification-spec/#urgency-levels
+-- https://developer-old.gnome.org/notification-spec/#urgency-levels
 local urgency = {
     low      = "\0",
     normal   = "\1",
