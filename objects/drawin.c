@@ -53,6 +53,7 @@ lua_class_t drawin_class;
  * @field border_width Border width.
  * @field border_color Border color.
  * @field ontop On top of other windows.
+ * @field desktop Below other windows and widgets.
  * @field cursor The mouse cursor.
  * @field visible Visibility.
  * @field opacity The opacity of the drawin, between 0 and 1.
@@ -99,6 +100,10 @@ lua_class_t drawin_class;
 
 /**
  * @signal property::ontop
+ */
+
+/**
+ * @signal property::desktop
  */
 
 /**
