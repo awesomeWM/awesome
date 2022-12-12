@@ -39,6 +39,7 @@ local calendar = { mt = {} }
 
 local properties = { "date"        , "font"         , "spacing" , "week_numbers",
                      "start_sunday", "long_weekdays", "fn_embed", "flex_height",
+                     "border_width", "border_color" ,
                    }
 
 --- The calendar font.
@@ -65,6 +66,12 @@ local properties = { "date"        , "font"         , "spacing" , "week_numbers"
 -- Flexible height allow cells to adapt their height to fill the empty space at the bottom of the widget.
 -- @beautiful beautiful.flex_height
 -- @param boolean Cells can skretch to fill the empty space.
+
+--- Set the color for the empty space where there are no date widgets.
+--
+-- This happens when the month doesn't start on a Sunday or stop on a Saturday.
+-- @beautiful beautiful.calendar_empty_color
+-- @param color The empty area color.
 
 --- The calendar date.
 --
@@ -147,6 +154,54 @@ local properties = { "date"        , "font"         , "spacing" , "week_numbers"
 -- @property flex_height
 -- @usebeautiful beautiful.flex_height
 
+--- Set the calendar border width.
+-- @property border_width
+-- @tparam[opt=0] integer|table border_width
+-- @tparam color border_width.inner The border between the cells.
+-- @tparam color border_width.outer The border around the calendar.
+-- @propertytype color Use the same value for inner and outer borders.
+-- @propertytype table Specify a different value for the inner and outer borders.
+-- @negativeallowed false
+-- @see border_color
+-- @see wibox.layout.grid.border_width
+
+--- Set the calendar border color.
+-- @property border_color
+-- @tparam[opt=0] color|table border_color
+-- @tparam color border_color.inner The border between the cells.
+-- @tparam color border_color.outer The border around the calendar.
+-- @propertytype color Use the same value for inner and outer borders.
+-- @propertytype table Specify a different value for the inner and outer borders.
+-- @see border_width
+-- @see wibox.layout.grid.border_color
+
+--- Set the color for the empty cells.
+--
+-- @property empty_color
+-- @tparam[opt=nil] color|nil empty_color
+-- @usebeautiful beautiful.calendar_empty_color
+-- @see empty_widget
+-- @see empty_cell_mode
+
+--- Set a widget for the empty cells.
+--
+-- @property empty_widget
+-- @tparam[opt=nil] widget|nil empty_widget
+-- @see empty_color
+-- @see empty_cell_mode
+
+--- How should the cells outside of the current month should be handled.
+--
+-- @property empty_cell_mode
+-- @tparam[opt="merged"] string empty_cell_mode
+-- @propertyvalue "merged" Merge all cells and display the `empty_widget` or
+--  `empty_color`.
+-- @propertyvalue "split" Display one `empty_widget` per day rather than merge
+--  them.
+-- @propertyvalue "rolling" Display the dates from the previous or next month.
+-- @see empty_widget
+-- @see empty_color
+
 --- Make a textbox
 -- @tparam string text Text of the textbox
 -- @tparam string font Font of the text
@@ -209,6 +264,14 @@ local function create_month(props, date)
     layout:set_spacing(props.spacing)
     layout:set_forced_num_rows(num_rows)
     layout:set_forced_num_cols(num_columns)
+
+    if props.border_width then
+        layout:set_border_width(props.border_width)
+    end
+
+    if props.border_color then
+        layout:set_border_color(props.border_color)
+    end
 
     --local flags = {"header", "weekdays", "weeknumber", "normal", "focus"}
     local cell_date, t, i, j, w, flag, text
@@ -385,6 +448,7 @@ local function get_calendar(type, date, font)
     ret._private.long_weekdays = beautiful.calendar_long_weekdays or false
     ret._private.flex_height   = beautiful.calendar_flex_height or false
     ret._private.fn_embed      = function (w, _) return w end
+    ret._private.empty_widget  = bgcontainer(beautiful.calendar_empty_color)
 
     -- header specific
     ret._private.subtype = type=="year" and "monthheader" or "fullheader"
