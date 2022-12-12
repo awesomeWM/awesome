@@ -258,38 +258,6 @@ drawable_t *client_get_drawable(client_t *, int, int);
 drawable_t *client_get_drawable_offset(client_t *, int *, int *);
 area_t client_get_undecorated_geometry(client_t *);
 
-/** Put client on top of the stack.
- * \param c The client to raise.
- */
-static inline void
-client_raise(client_t *c)
-{
-    client_t *tc = c;
-    int counter = 0;
-
-    /* Find number of transient layers. */
-    for(counter = 0; tc->transient_for; counter++)
-        tc = tc->transient_for;
-
-    /* Push them in reverse order. */
-    for(; counter > 0; counter--)
-    {
-        tc = c;
-        for(int i = 0; i < counter; i++)
-            tc = tc->transient_for;
-        stack_client_append(tc);
-    }
-
-    /* Push c on top of the stack. */
-    stack_client_append(c);
-
-    /* Notify the listeners */
-    lua_State *L = globalconf_get_lua_State();
-    luaA_object_push(L, c);
-    luaA_object_emit_signal(L, -1, "raised", 0);
-    lua_pop(L, 1);
-}
-
 /** Check if a client has fixed size.
  * \param c A client.
  * \return A boolean value, true if the client has a fixed size.

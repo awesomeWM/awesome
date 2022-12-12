@@ -2241,7 +2241,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
     ewmh_client_check_hints(c);
 
     /* Push client in stack */
-    stack_client_push(c);
+    stack_client_push(L, c, "manage");
 
     /* Request our response */
     xcb_get_property_reply_t *reply =
@@ -2717,7 +2717,7 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
         /* Force a client resize, so that titlebars get shown/hidden */
         client_resize_do(c, c->geometry);
-        stack_windows();
+        stack_windows(L, "fullscreen", c, NULL);
     }
 }
 
@@ -2768,7 +2768,7 @@ client_set_maximized_common(lua_State *L, int cidx, bool s, const char* type, co
         if(max_before != c->maximized)
             luaA_object_emit_signal(L, abs_cidx, "property::maximized", 0);
 
-        stack_windows();
+        stack_windows(L, "maximized", c, NULL);
     }
 }
 
@@ -2816,7 +2816,7 @@ client_set_above(lua_State *L, int cidx, bool s)
             client_set_fullscreen(L, cidx, false);
         }
         c->above = s;
-        stack_windows();
+        stack_windows(L, "above", c, NULL);
         luaA_object_emit_signal(L, cidx, "property::above", 0);
     }
 }
@@ -2841,7 +2841,7 @@ client_set_below(lua_State *L, int cidx, bool s)
             client_set_fullscreen(L, cidx, false);
         }
         c->below = s;
-        stack_windows();
+        stack_windows(L, "below", c, NULL);
         luaA_object_emit_signal(L, cidx, "property::below", 0);
     }
 }
@@ -2859,7 +2859,7 @@ client_set_modal(lua_State *L, int cidx, bool s)
     if(c->modal != s)
     {
         c->modal = s;
-        stack_windows();
+        stack_windows(L, "modal", c, NULL);
         luaA_object_emit_signal(L, cidx, "property::modal", 0);
     }
 }
@@ -2884,7 +2884,7 @@ client_set_ontop(lua_State *L, int cidx, bool s)
             client_set_fullscreen(L, cidx, false);
         }
         c->ontop = s;
-        stack_windows();
+        stack_windows(L, "ontop", c, NULL);
         luaA_object_emit_signal(L, cidx, "property::ontop", 0);
     }
 }
@@ -2942,7 +2942,7 @@ client_unmanage(client_t *c, client_unmanage_t reason)
             client_array_remove(&globalconf.clients, elem);
             break;
         }
-    stack_client_remove(c);
+    stack_client_remove(L, c, false, "unmanage");
     for(int i = 0; i < globalconf.tags.len; i++)
         untag_client(c, globalconf.tags.tab[i]);
 
@@ -3402,7 +3402,29 @@ luaA_client_raise(lua_State *L)
     )
         return 0;
 
-    client_raise(c);
+    client_t *tc = c;
+    int counter = 0;
+
+    /* Find number of transient layers. */
+    for(counter = 0; tc->transient_for; counter++)
+        tc = tc->transient_for;
+
+    /* Push them in reverse order. */
+    for(; counter > 0; counter--)
+    {
+        tc = c;
+        for(int i = 0; i < counter; i++)
+            tc = tc->transient_for;
+        stack_client_append(L, tc, "raise");
+    }
+
+    /* Push c on top of the stack. */
+    stack_client_append(L, c, "raise");
+
+    /* Notify the listeners */
+    luaA_object_push(L, c);
+    luaA_object_emit_signal(L, -1, "raised", 0);
+    lua_pop(L, 1);
 
     return 0;
 }
@@ -3426,11 +3448,11 @@ luaA_client_lower(lua_State *L)
     if (globalconf.stack.len && globalconf.stack.tab[0] == c)
         return 0;
 
-    stack_client_push(c);
+    stack_client_push(L, c, "lower");
 
     /* Traverse all transient layers. */
     for(client_t *tc = c->transient_for; tc; tc = tc->transient_for)
-        stack_client_push(tc);
+        stack_client_push(L, tc, "lower");
 
     /* Notify the listeners */
     luaA_object_push(L, c);
