@@ -79,11 +79,11 @@ the file, and change `default` to one of the other values mentioned:
     beautiful.init(gears.filesystem.get_themes_dir() .. "default/theme.lua")
 
 However, for this tutorial we will copy and customize the default theme.
-Copy `/usr/share/awesome/themes/default/theme.lua` to `~/.config/awesome/`
+Copy the folder `/usr/share/awesome/themes/default/` to `~/.config/awesome/`
 and change the line shown above in `rc.lua` like this. Make sure to replace
 `USER` with your user name.
 
-    beautiful.init("/home/USER/.config/awesome/theme.lua")
+    beautiful.init("/home/USER/.config/awesome/default/theme.lua")
 
 ### Change the background image
 
