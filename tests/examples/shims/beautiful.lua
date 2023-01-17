@@ -40,6 +40,8 @@ local module = {
     bg_normal    = "#6181FF7D",
     bg_focus     = "#AA00FF7D",
     bg_highlight = "#AA00FF7D",
+    bg_urgent    = "#FF00377D",
+    fg_urgent    = "#FFFFFFFF",
     border_color = "#6181FF"  ,
     border_width = 1.5        ,
 

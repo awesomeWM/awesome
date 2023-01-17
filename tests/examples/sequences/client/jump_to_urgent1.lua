@@ -6,7 +6,6 @@ local beautiful = require("beautiful")
 require("awful.ewmh")
 screen[1]._resize {x = 0, width = 160, height = 90}
 awful.tag({ "one", "two", "three" }, screen[1], awful.layout.suit.tile)
-beautiful.bg_urgent = "#ff0000"
 
 function awful.spawn(name, properties)
     client.gen_fake{class = name, name = name, x = 10, y=10, width = 60, height =50, tags = properties.tags}
