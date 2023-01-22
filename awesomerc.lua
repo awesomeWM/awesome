@@ -572,11 +572,6 @@ ruled.notification.connect_signal('request::rules', function()
         }
     }
 end)
-
-naughty.connect_signal("request::display", function(n)
-    naughty.layout.box { notification = n }
-end)
-
 -- }}}
 
 -- Enable sloppy focus, so that focus follows mouse.
