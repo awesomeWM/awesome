@@ -340,7 +340,7 @@ lua_class_t client_class;
  *        end
  *    end)
  *
- * @signal request::urgent
+ * @signal property::urgent
  * @tparam client c The client whose property changed.
  * @classsignal
  */
