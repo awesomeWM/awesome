@@ -283,6 +283,38 @@ function surface.widget_to_surface(widget, width, height, format)
     return img, run_in_hierarchy(widget, cr, width, height)
 end
 
+--- Crop a surface to a given ratio
+-- this basically creates a copy of the surface, as surfaces seem to not be
+-- resizable after creation
+-- @param surf surface the Cairo surface to crop
+-- @param ratio number the ratio the image should be cropped to
+-- @return the a cropped copy of the input surface
+function surface.crop_surface(surf, ratio)
+    local old_w, old_h = surface.get_size(surf)
+    local old_ratio = old_w/old_h
+
+    if old_ratio == ratio then return surf end
+
+    local new_h, new_w = old_h, old_w
+    local offset_h, offset_w = 0, 0
+
+    if (old_ratio < ratio) then
+        new_h = old_w * (1/ratio)
+        offset_h = (old_h - new_h)/2
+    else
+        new_w = old_h * ratio
+        offset_w = (old_w - new_w)/2
+    end
+
+    local out_surf = cairo.ImageSurface(cairo.Format.ARGB32, new_w, new_h)
+    local cr = cairo.Context(out_surf)
+    cr:set_source_surface(surf, -offset_w, -offset_h)
+    cr.operator = cairo.Operator.SOURCE
+    cr:paint()
+
+    return out_surf
+end
+
 return setmetatable(surface, surface.mt)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
