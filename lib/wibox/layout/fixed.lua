@@ -26,9 +26,11 @@
 ---------------------------------------------------------------------------
 
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
-local base  = require("wibox.widget.base")
-local table = table
-local pairs = pairs
+local base   = require("wibox.widget.base")
+local table  = table
+local math   = math
+local ipairs = ipairs
+local select = select
 local gtable = require("gears.table")
 
 local fixed = {}
@@ -38,20 +40,22 @@ local fixed = {}
 -- @param width The available width.
 -- @param height The available height.
 function fixed:layout(context, width, height)
-    local result = {}
-    local spacing = self._private.spacing or 0
+    local widget_count = #self._private.widgets
     local is_y = self._private.dir == "y"
     local is_x = not is_y
-    local abspace = math.abs(spacing)
-    local spoffset = spacing < 0 and 0 or spacing
-    local widgets_nr = #self._private.widgets
-    local spacing_widget
+    local spacing = self._private.spacing or 0
+    local abs_spacing = math.abs(spacing)
+    local offset_spacing = math.min(0, spacing)
+    local spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
+
+    local result = {}
     local x, y = 0, 0
+    local empty = true
+    local last_widget_placement_info
 
-    spacing_widget = spacing ~= 0 and self._private.spacing_widget or nil
-
-    for index, widget in pairs(self._private.widgets) do
-        local w, h, local_spacing = width - x, height - y, spacing
+    for i = 1, widget_count do
+        local widget = self._private.widgets[i]
+        local w, h = width - x, height - y
 
         -- Some widget might be zero sized either because this is their
         -- minimum space or just because they are really empty. In this case,
@@ -61,71 +65,89 @@ function fixed:layout(context, width, height)
         local zero = false
 
         if is_y then
-            if index ~= widgets_nr or not self._private.fill_space then
-                h = select(2, base.fit_widget(self, context, widget, w, h))
-                zero = h == 0
+            if not empty and h > 0 then
+                -- If we want to place another widget we also need space for the spacing widget.
+                h = h - spacing
             end
 
-            if y - spacing >= height then
-                -- pop the spacing widget added in previous iteration if used
-                if spacing_widget then
-                    table.remove(result)
+            if h > 0 then
+                h = select(2, base.fit_widget(self, context, widget, w, h))
+            end
 
-                    -- Avoid adding zero-sized widgets at an out-of-bound
-                    -- position.
-                    y = y - spacing
-                end
-
-                -- Never display "random" widgets as soon as a non-zero sized
-                -- one doesn't fit.
-                if not zero then
-                    break
-                end
+            if h <= 0 then
+                h = 0
+                zero = true
             end
         else
-            if index ~= widgets_nr or not self._private.fill_space then
-                w = select(1, base.fit_widget(self, context, widget, w, h))
-                zero = w == 0
+            if not empty and w > 0 then
+                -- If we want to place another widget we also need space for the spacing widget.
+                w = w - spacing
             end
 
-            if x - spacing >= width then
-                -- pop the spacing widget added in previous iteration if used
-                if spacing_widget then
-                    table.remove(result)
+            if w > 0 then
+                w = select(1, base.fit_widget(self, context, widget, w, h))
+            end
 
-                    -- Avoid adding zero-sized widgets at an out-of-bound
-                    -- position.
-                    x = x - spacing
-                end
-
-                -- Never display "random" widgets as soon as a non-zero sized
-                -- one doesn't fit.
-                if not zero then
-                    break
-                end
+            if w <= 0 then
+                w = 0
+                zero = true
             end
         end
 
-        if zero then
-            local_spacing = 0
+        -- Add the spacing widget (if needed).
+        if spacing ~= 0 and i > 1 then
+            local nw = (empty or zero) and 0 or (is_x and abs_spacing or w)
+            local nh = (empty or zero) and 0 or (is_y and abs_spacing or h)
+
+            if spacing_widget then
+                local nx = is_x and x + offset_spacing or x
+                local ny = is_y and y + offset_spacing or y
+                table.insert(result, base.place_widget_at(spacing_widget, nx, ny, nw, nh))
+            end
+
+            x = is_x and x + (nw ~= 0 and spacing or 0) or x
+            y = is_y and y + (nh ~= 0 and spacing or 0) or y
         end
 
         -- Place widget, even if it has zero width/height. Otherwise
         -- any layout change for zero-sized widget would become invisible.
-        table.insert(result, base.place_widget_at(widget, x, y, w, h))
+        do
+            local nw = w
+            local nh = h
 
-        x = is_x and x + w + local_spacing or x
-        y = is_y and y + h + local_spacing or y
+            local widget_placement_info
+            do
+                local nx = x
+                local ny = y
 
-        -- Add the spacing widget (if needed)
-        if index < widgets_nr and spacing_widget then
-            table.insert(result, base.place_widget_at(
-                spacing_widget,
-                is_x and (x - spoffset) or x,
-                is_y and (y - spoffset) or y,
-                is_x and abspace or w,
-                is_y and abspace or h
-            ))
+                widget_placement_info = base.place_widget_at(widget, nx, ny, nw, nh)
+                table.insert(result, widget_placement_info)
+            end
+
+            x = is_x and x + nw or x
+            y = is_y and y + nh or y
+
+            if not zero then
+                last_widget_placement_info = widget_placement_info
+            end
+        end
+
+        empty = empty and zero
+    end
+
+    if self._private.fill_space and last_widget_placement_info then
+        if is_y then
+            local h = height - y
+            if h > 0 then
+                -- TODO: Is this `_height` and `_matrix` ok?
+                last_widget_placement_info._height = last_widget_placement_info._height + h
+            end
+        else
+            local w = width - x
+            if w > 0 then
+                -- TODO: Is changing `_width` and `_matrix` ok?
+                last_widget_placement_info._width = last_widget_placement_info._width + w
+            end
         end
     end
 
@@ -336,61 +358,102 @@ end
 -- @param orig_width The available width.
 -- @param orig_height The available height.
 function fixed:fit(context, orig_width, orig_height)
-    local width_left, height_left = orig_width, orig_height
-    local spacing = self._private.spacing or 0
-    local widgets_nr = #self._private.widgets
-    local is_y = self._private.dir == "y"
-    local used_max = 0
+    local widget_count = #self._private.widgets
 
-    -- when no widgets exist the function can be called with orig_width or
+    -- When no widgets exist the function can be called with orig_width or
     -- orig_height equal to nil. Exit early in this case.
-    if widgets_nr == 0 then
+    if widget_count == 0 then
         return 0, 0
     end
 
-    for k, v in pairs(self._private.widgets) do
-        local w, h = base.fit_widget(self, context, v, width_left, height_left)
-        local max
+    local is_y = self._private.dir == "y"
+    local is_x = not is_y
+    local spacing = self._private.spacing or 0
+    local abs_spacing = math.abs(spacing)
+
+    local x, y = 0, 0
+    local empty = true
+    local used_max = 0
+
+    for i = 1, widget_count do
+        local widget = self._private.widgets[i]
+        local w, h = orig_width - x, orig_height - y
+        local used = 0
+
+        -- Some widget might be zero sized either because this is their
+        -- minimum space or just because they are really empty. In this case,
+        -- they must still be added to the layout. Otherwise, if their size
+        -- change and this layout is resizable, they are lost "forever" until
+        -- a full relayout is called on this fixed layout object.
+        local zero = false
 
         if is_y then
-            max = w
-            height_left = height_left - h
+            if not empty and h > 0 then
+                -- If we want to place another widget we also need space for the spacing widget.
+                h = h - spacing
+            end
+
+            if h > 0 then
+                used, h = base.fit_widget(self, context, widget, w, h)
+            end
+
+            if h <= 0 then
+                h = 0
+                zero = true
+            end
         else
-            max = h
-            width_left = width_left - w
-        end
+            if not empty and w > 0 then
+                -- If we want to place another widget we also need space for the spacing widget.
+                w = w - spacing
+            end
 
-        if max > used_max then
-            used_max = max
-        end
+            if w > 0 then
+                w, used = base.fit_widget(self, context, widget, w, h)
+            end
 
-        if k < widgets_nr then
-            if is_y then
-                height_left = height_left - spacing
-            else
-                width_left = width_left - spacing
+            if w <= 0 then
+                w = 0
+                zero = true
             end
         end
 
-        if width_left <= 0 or height_left <= 0 then
-            -- this complicated two lines determine whether we're out-of-space
-            -- because of spacing, or if the last widget doesn't fit in
-            if is_y then
-                 height_left = k < widgets_nr and height_left + spacing or height_left
-                 height_left = height_left < 0 and 0 or height_left
-            else
-                 width_left = k < widgets_nr and width_left + spacing or width_left
-                 width_left = width_left < 0 and 0 or width_left
-            end
-            break
+        if used_max < used then
+            used_max = used
         end
+
+        -- Add the spacing widget (if needed).
+        if spacing ~= 0 and i > 1 then
+            local nw = (empty or zero) and 0 or (is_x and abs_spacing or w)
+            local nh = (empty or zero) and 0 or (is_y and abs_spacing or h)
+            x = is_x and x + (nw ~= 0 and spacing or 0) or x
+            y = is_y and y + (nh ~= 0 and spacing or 0) or y
+        end
+
+        -- Place widget, even if it has zero width/height. Otherwise
+        -- any layout change for zero-sized widget would become invisible.
+        x = is_x and x + w or x
+        y = is_y and y + h or y
+
+        empty = empty and zero
+    end
+
+    if empty then
+        return 0, 0
+    end
+
+    local size
+
+    if self._private.fill_space then
+        size = is_y and orig_height or orig_width
+    else
+        size = is_y and y or x
     end
 
     if is_y then
-        return used_max, orig_height - height_left
+        return used_max, size
+    else
+        return size, used_max
     end
-
-    return orig_width - width_left, used_max
 end
 
 function fixed:reset()
