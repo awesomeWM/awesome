@@ -296,6 +296,10 @@ widget.labels = {
 -- @beautiful beautiful.hotkeys_group_bg
 -- @tparam color hotkeys_group_bg
 
+--- Foreground color used for hotkeys groups
+-- @beautiful beautiful.hotkeys_group_fg
+-- @tparam color hotkeys_group_fg
+
 --- Shape for hotkeys group
 -- @beautiful beautiful.hotkeys_group_shape
 -- @tparam shape hotkeys_group_shape
