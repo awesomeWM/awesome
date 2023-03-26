@@ -747,6 +747,7 @@ function widget.new(args)
                 previous_page_last_layout:add(wibox.widget {
                     widget = wibox.container.background,
                     bg = self.group_bg,
+                    shape = self.group_shape,
                     {
                         widget = wibox.container.margin,
                         margins = { left = self.group_margin, right = self.group_margin },
@@ -761,6 +762,7 @@ function widget.new(args)
                     wibox.widget {
                         widget = wibox.container.background,
                         bg = self.group_bg,
+                        shape = self.group_shape,
                         {
                             widget = wibox.container.margin,
                             margins = { left = self.group_margin, right = self.group_margin },
@@ -798,7 +800,7 @@ function widget.new(args)
             shape = self.shape,
             placement = place_func,
             minimum_height = wibox_height,
-            maximum_width = wibox_width,
+            minimum_width = wibox_width,
             screen = s,
         }
 
