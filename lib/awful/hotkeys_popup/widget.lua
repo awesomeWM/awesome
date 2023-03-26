@@ -83,7 +83,7 @@ local matcher = require("gears.matcher")()
 local markup = {}
 -- Set the font.
 function markup.font(font, text)
-    return '<span font="'       .. tostring(font)                   .. '">' .. tostring(text) .. '</span>'
+    return '<span font="'    .. tostring(font)    .. '">' .. tostring(text) ..'</span>'
 end
 -- Set the foreground.
 function markup.fg(color, text)
@@ -91,7 +91,7 @@ function markup.fg(color, text)
 end
 -- Set the background.
 function markup.bg(color, text)
-    return '<span background="' .. rgba(color, beautiful.bg_normal) .. '">' .. tostring(text) .. "</span>"
+    return '<span background="' .. rgba(color, beautiful.bg_normal) .. '">' .. tostring(text) .. '</span>'
 end
 -- Enable bold.
 function markup.bold(text)
@@ -854,22 +854,22 @@ function widget.new(args)
         -- workarea. This will be called in the placement field of the
         -- awful.popup constructor.
         local place_func = function(c)
-            awful.placement.centered(c, { honor_workarea = true })
+            awful.placement.centered(c, {honor_workarea = true})
         end
 
         -- Construct the popup with the widget
         local mypopup = awful.popup {
             widget = pages[1],
             ontop = true,
-            bg = self.bg,
-            fg = self.fg,
+            bg=self.bg,
+            fg=self.fg,
             opacity = self.opacity,
             border_width = self.border_width,
             border_color = self.border_color,
             shape = self.shape,
             placement = place_func,
-            minimum_height = wibox_height,
             minimum_width = wibox_width,
+            minimum_height = wibox_height,
             screen = s,
         }
 
@@ -932,27 +932,24 @@ function widget.new(args)
         for group, _ in pairs(self._group_list) do
             local need_match
             for group_name, data in pairs(self.group_rules) do
-                if group_name == group and (data.rule or data.rule_any or data.except or data.except_any) then
-                    if
-                        not c
-                        or not matcher:matches_rule(c, {
+                if group_name==group and (
+                    data.rule or data.rule_any or data.except or data.except_any)
+                then
+                    if not c or not matcher:matches_rule(c, {
                             rule = data.rule,
                             rule_any = data.rule_any,
                             except = data.except,
                             except_any = data.except_any,
-                        })
-                    then
+                    }) then
                         need_match = true
                         break
                     end
                 end
             end
-            if not need_match then
-                table.insert(available_groups, group)
-            end
+            if not need_match then table.insert(available_groups, group) end
         end
 
-        local joined_groups = join_plus_sort(available_groups) .. tostring(show_awesome_keys)
+        local joined_groups = join_plus_sort(available_groups)..tostring(show_awesome_keys)
         if not self._cached_wiboxes[s] then
             self._cached_wiboxes[s] = {}
         end
