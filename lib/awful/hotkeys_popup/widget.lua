@@ -105,7 +105,7 @@ local function join_plus_sort(modifiers)
 end
 
 local function join_modifiers_and_style_with_sep(modifiers, bg, fg, sep)
-    if #modifiers < 1 then return "none" end
+    if #modifiers<1 then return "none" end
     local ret = ""
     for i, modifier in ipairs(modifiers) do
         ret = ret .. markup.fg(fg, markup.bg(bg, ' ' .. modifier .. ' ')) .. (i == #modifiers and '' or sep)
@@ -116,6 +116,7 @@ end
 local function get_screen(s)
     return s and capi.screen[s]
 end
+
 
 local widget = {
     group_rules = {},
@@ -415,9 +416,7 @@ function widget.new(args)
     end
 
     function widget_instance:_load_widget_settings()
-        if self._widget_settings_loaded then
-            return
-        end
+        if self._widget_settings_loaded then return end
 
         self.width = args.width or dpi(1200)
         self.height = args.height or dpi(800)
@@ -470,6 +469,7 @@ function widget.new(args)
         self._widget_settings_loaded = true
     end
 
+
     function widget_instance:_get_next_color(id)
         id = id or "default"
         if self._colors_counter[id] then
@@ -477,8 +477,9 @@ function widget.new(args)
         else
             self._colors_counter[id] = 1
         end
-        return self.label_colors["color" .. tostring(self._colors_counter[id], 15)]
+        return self.label_colors["color"..tostring(self._colors_counter[id], 15)]
     end
+
 
     function widget_instance:_add_hotkey(key, data, target)
         if self.hide_without_description and not data.description then return end
@@ -500,7 +501,7 @@ function widget.new(args)
             mod = joined_mods,
             description = data.description
         }
-        local index = data.description or "none" -- or use its hash?
+        local index = data.description or "none"  -- or use its hash?
         if not target[group][index] then
             target[group][index] = new_key
         else
@@ -525,9 +526,9 @@ function widget.new(args)
                 end
                 table.sort(
                     sorted_table,
-                    function(a, b)
+                    function(a,b)
                         local k1, k2 = a.key or a.keys[1][1], b.key or b.keys[1][1]
-                        return (a.mod or "") .. k1 < (b.mod or "") .. k2 end
+                        return (a.mod or "")..k1 < (b.mod or "")..k2 end
                 )
                 target[group] = sorted_table
             end
@@ -638,7 +639,7 @@ function widget.new(args)
         -- TODO: Calculate description height with using using something else idk?
         local joined_descriptions = ""
         for i, key in ipairs(keys) do
-            joined_descriptions = joined_descriptions .. key.description .. (i ~= #keys and "\n" or "")
+            joined_descriptions = joined_descriptions .. key.description .. (i~=#keys and "\n" or "")
         end
         -- +1 for group label:
         local joined_descriptions_count = gstring.linecount(joined_descriptions)
@@ -710,7 +711,7 @@ function widget.new(args)
                     for each_key_idx, each_key in ipairs(key.keylist) do
                         key_label = key_label .. gstring.xml_escape(each_key)
                         if each_key_idx ~= #key.keylist then
-                            key_label = key_label .. markup.fg(self.modifiers_fg, "/")
+                            key_label = key_label .. markup.fg(self.modifiers_fg, '/')
                         end
                     end
                     modifiers = modifiers .. " "
@@ -936,10 +937,10 @@ function widget.new(args)
                     data.rule or data.rule_any or data.except or data.except_any)
                 then
                     if not c or not matcher:matches_rule(c, {
-                            rule = data.rule,
-                            rule_any = data.rule_any,
-                            except = data.except,
-                            except_any = data.except_any,
+                            rule=data.rule,
+                            rule_any=data.rule_any,
+                            except=data.except,
+                            except_any=data.except_any
                     }) then
                         need_match = true
                         break
