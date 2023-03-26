@@ -383,6 +383,7 @@ function widget.new(args)
         self.label_fg = args.label_fg or beautiful.hotkeys_label_fg or self.bg
         self.opacity = args.opacity or beautiful.hotkeys_opacity or 1
         self.font = args.font or beautiful.hotkeys_font or "Monospace Bold 9"
+        self.align_description = args.align_description == nil and true or args.align_description
         self.description_font = args.description_font or beautiful.hotkeys_description_font or "Monospace 8"
         self.group_margin = args.group_margin or beautiful.hotkeys_group_margin or dpi(6)
         self.label_colors = beautiful.xresources.get_current_theme()
@@ -657,7 +658,7 @@ function widget.new(args)
                     max_keys_width = keys_width
                 end
                 local final_layout = wibox.widget {
-                    layout = wibox.layout.ratio.horizontal,
+                    layout = wibox.layout[self.align_description and "ratio" or "fixed"].horizontal,
                     {
                         widget = wibox.widget.textbox,
                         halign = "right",
