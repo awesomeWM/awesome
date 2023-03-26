@@ -264,21 +264,53 @@ widget.labels = {
 -- @tparam[opt] gears.shape hotkeys_shape
 -- @see gears.shape
 
+--- Main hotkeys widget font.
+-- @beautiful beautiful.hotkeys_font
+-- @tparam string|lgi.Pango.FontDescription hotkeys_font
+
 --- Foreground color used for hotkey modifiers (Ctrl, Alt, Super, etc).
 -- @beautiful beautiful.hotkeys_modifiers_fg
 -- @tparam color hotkeys_modifiers_fg
 
---- Main hotkeys widget font.
--- @beautiful beautiful.hotkeys_font
--- @tparam string|lgi.Pango.FontDescription hotkeys_font
+--- Background color used for hotkey modifiers (Ctrl, Alt, Super, etc).
+-- @beautiful beautiful.hotkeys_modifiers_bg
+-- @tparam color hotkeys_modifiers_bg
+
+--- Background color used for hotkeys (except modifiers)
+-- @beautiful beautiful.hotkeys_keys_bg
+-- @tparam color hotkeys_keys_bg
+
+--- Foreground color used for hotkeys (except modifiers)
+-- @beautiful beautiful.hotkeys_keys_fg
+-- @tparam color hotkeys_keys_fg
+
+--- Vertical spacing between hotkeys
+-- @beautiful beautiful.hotkeys_keys_spacing
+-- @tparam int hotkeys_keys_spacing
 
 --- Font used for hotkeys' descriptions.
 -- @beautiful beautiful.hotkeys_description_font
 -- @tparam string|lgi.Pango.FontDescription hotkeys_description_font
 
---- Margin between hotkeys groups.
+--- Background color used for hotkeys groups
+-- @beautiful beautiful.hotkeys_group_bg
+-- @tparam color hotkeys_group_bg
+
+--- Shape for hotkeys group
+-- @beautiful beautiful.hotkeys_group_shape
+-- @tparam shape hotkeys_group_shape
+
+--- Margins (or paddings) inside a hotkey group
 -- @beautiful beautiful.hotkeys_group_margin
 -- @tparam int hotkeys_group_margin
+
+--- Margins (or spacing) between hotkey groups
+-- @beautiful beautiful.hotkeys_group_spacing
+-- @tparam int hotkeys_group_spacing
+
+--- Font used for hotkeys' group icons.
+-- @beautiful beautiful.hotkeys_group_icon_font
+-- @tparam string|lgi.Pango.FontDescription hotkeys_group_icon_font
 
 --- Create an instance of widget with hotkeys help.
 -- @tparam[opt] table args Configuration options for the widget.
@@ -293,11 +325,32 @@ widget.labels = {
 -- @tparam[opt] int args.border_width Border width.
 -- @tparam[opt] color args.border_color Border color.
 -- @tparam[opt] gears.shape args.shape Widget shape.
+-- @tparam[opt] number args.opacity Widget opacity.
 -- @tparam[opt] string|lgi.Pango.FontDescription args.font Main widget font.
--- @tparam[opt] string|lgi.Pango.FontDescription args.description_font Font used for hotkeys' descriptions.
+-- @tparam[opt] color args.modifiers_bg Background color used for hotkey
+-- modifiers (Ctrl, Alt, Super, etc).
 -- @tparam[opt] color args.modifiers_fg Foreground color used for hotkey
 -- modifiers (Ctrl, Alt, Super, etc).
--- @tparam[opt] int args.group_margin Margin between hotkeys groups.
+-- @tparam[opt] string args.modifiers_separator String inserted between each
+-- modifier (Ctrl, Alt, Super, etc).
+-- @tparam[opt] color args.keys_bg Background color used for hotkey
+-- keys (except modifiers).
+-- @tparam[opt] color args.keys_fg Foreground color used for hotkey
+-- keys (except modifiers).
+-- @tparam[opt] int args.keys_spacing Vertical spacing between hotkeys.
+-- @tparam[opt] boolean args.align_description Whether to align all hotkeys'
+-- descriptions
+-- @tparam[opt] string|lgi.Pango.FontDescription args.description_font Font used for hotkeys' descriptions.
+-- ---
+-- @tparam[opt] color args.group_bg Background color used for hotkeys groups
+-- @tparam[opt] color args.group_fg Foreground color used for hotkeys groups
+-- @tparam[opt] gears.shape args.group_shape Shape for hotkeys groups
+-- @tparam[opt] int args.group_margin Margins (or paddings) inside a hotkeys
+-- group
+-- @tparam[opt] int args.group_spacing Margins (or spacing) between hotkey
+-- groups
+-- @tparam[opt] string|lgi.Pango.FontDescription args.group_icon_font Font used for hotkeys group icons.
+-- ---
 -- @tparam[opt] table args.labels Labels used for displaying human-readable keynames.
 -- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
 -- @return Widget instance.
@@ -307,10 +360,19 @@ widget.labels = {
 -- @usebeautiful beautiful.hotkeys_border_width
 -- @usebeautiful beautiful.hotkeys_border_color
 -- @usebeautiful beautiful.hotkeys_shape
--- @usebeautiful beautiful.hotkeys_modifiers_fg
 -- @usebeautiful beautiful.hotkeys_font
+-- @usebeautiful beautiful.hotkeys_modifiers_bg
+-- @usebeautiful beautiful.hotkeys_modifiers_fg
+-- @usebeautiful beautiful.hotkeys_keys_bg
+-- @usebeautiful beautiful.hotkeys_keys_fg
+-- @usebeautiful beautiful.hotkeys_keys_spacing
 -- @usebeautiful beautiful.hotkeys_description_font
+-- @usebeautiful beautiful.hotkeys_group_bg
+-- @usebeautiful beautiful.hotkeys_group_fg
+-- @usebeautiful beautiful.hotkeys_group_shape
 -- @usebeautiful beautiful.hotkeys_group_margin
+-- @usebeautiful beautiful.hotkeys_group_spacing
+-- @usebeautiful beautiful.hotkeys_group_icon_font
 -- @usebeautiful beautiful.bg_normal Fallback.
 -- @usebeautiful beautiful.fg_normal Fallback.
 -- @usebeautiful beautiful.fg_minimize Fallback.
@@ -365,22 +427,23 @@ function widget.new(args)
         self.font = args.font or beautiful.hotkeys_font or "Monospace Bold 9"
 
         -- Keys and their descriptions.
+        self.modifiers_bg = args.modifiers_bg or beautiful.hotkeys_modifiers_bg or beautiful.fg_minimize
         self.modifiers_fg = args.modifiers_fg or beautiful.hotkeys_modifiers_fg or beautiful.bg_minimize or "#555555"
-        self.modifiers_bg = args.modifiers_bg or beautiful.hotkeys_modifiers_bg or beautiful.bg_minimize
         self.modifiers_separator = args.modifiers_separator or "+"
-        self.key_bg = args.key_bg or self.modifiers_bg
-        self.keys_spacing = args.keys_spacing or 0
+        self.keys_fg = args.keys_fg or beautiful.hotkeys_keys_fg or self.fg
+        self.keys_bg = args.keys_bg or beautiful.hotkeys_keys_bg or self.modifiers_bg
+        self.keys_spacing = args.keys_spacing or beautiful.hotkeys_keys_spacing or 0
         self.align_description = args.align_description == nil and true or args.align_description
         self.description_font = args.description_font or beautiful.hotkeys_description_font or "Monospace 8"
 
         -- Groups and their labels/titles
-        self.label_colors = beautiful.xresources.get_current_theme()
         self.group_bg = args.group_bg or beautiful.hotkeys_group_bg or beautiful.bg_normal
-        self.group_icon_font = args.group_icon_font or self.font
         self.group_width = args.group_width or dpi(600)
-        self.group_shape = args.group_shape or beautiful.hotkeys_group_shape
-        self.group_spacing = args.group_spacing or dpi(12)
+        self.group_shape = args.group_shape or beautiful.hotkeys_group_shape or nil
         self.group_margin = args.group_margin or beautiful.hotkeys_group_margin or dpi(6)
+        self.group_spacing = args.group_spacing or beautiful.hotkeys_group_spacing or dpi(12)
+        self.group_icon_font = args.group_icon_font or beautiful.hotkeys_group_icon_font or self.font
+        self.label_colors = beautiful.xresources.get_current_theme()
 
         self._widget_settings_loaded = true
     end
@@ -639,7 +702,7 @@ function widget.new(args)
                 elseif key.key then
                     key_label = " " .. gstring.xml_escape(key.key) .. " "
                 end
-                key_label = markup.bg(self.key_bg, key_label)
+                key_label = markup.bg(self.keys_bg, key_label)
                 local keys_markup = markup.font(self.font, modifiers .. key_label)
                 local keys_width = wibox.widget.textbox.get_markup_geometry(keys_markup, s, self.font).width
                 if keys_width > max_keys_width then
