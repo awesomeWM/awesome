@@ -540,6 +540,9 @@ function widget.new(args)
 
     function widget_instance:_group_label(group, color)
         local group_icon = self.group_icons[group]
+        local fallback_color =
+            self.group_rules[group] and self.group_rules[group].color
+            or self:_get_next_color "group_title"
         local ret = wibox.widget {
             widget = wibox.container.margin,
             margins = { top = self.group_margin, bottom = self.group_margin },
@@ -550,18 +553,17 @@ function widget.new(args)
                 (group_icon ~= nil and group_icon ~= "") and {
                     widget = wibox.widget.textbox,
                     markup = markup.fg(
-                        color
-                            or (
-                                self.group_rules[group] and self.group_rules[group].color
-                                or self:_get_next_color "group_title"
-                            ),
+                        color or fallback_color,
                         markup.font(self.group_icon_font, group_icon)
                     ),
                     halign = "left",
                 } or nil,
                 {
                     widget = wibox.widget.textbox,
-                    markup = markup.fg(self.fg, markup.font(self.font, "<b>" .. group .. "</b>")),
+                    markup = markup.fg(
+                        (group_icon == nil or group_icon == "") and (color or fallback_color) or self.fg,
+                        markup.font(self.font, "<b>" .. group .. "</b>")
+                    ),
                     halign = "left",
                 },
             },
