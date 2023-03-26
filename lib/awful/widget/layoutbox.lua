@@ -36,7 +36,7 @@ local function update(w, screen)
     if img then
         w.imagebox:set_image(beautiful["layout_" .. name])
     end
-    w.textbox.text   = img and "" or name
+    w.textbox.text = img and "" or name
 end
 
 local function update_from_tag(t)
