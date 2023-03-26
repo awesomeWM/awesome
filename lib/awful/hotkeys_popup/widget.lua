@@ -737,8 +737,8 @@ function widget.new(args)
         local pages = {}
         local columns = wibox.layout.fixed.horizontal()
         local previous_page_last_layout
-        for _, item in ipairs(column_layouts) do
-            if item.max_width > available_width_px then
+        for _, column in ipairs(column_layouts) do
+            if column.max_width > available_width_px then
                 previous_page_last_layout:add(wibox.widget {
                     widget = wibox.container.background,
                     bg = self.group_bg,
@@ -750,8 +750,8 @@ function widget.new(args)
                 })
                 table.insert(pages, columns)
                 columns = wibox.layout.fixed.horizontal()
-                available_width_px = wibox_width - item.max_width
-                item.layout:insert(
+                available_width_px = wibox_width - column.max_width
+                column.layout:insert(
                     1,
                     wibox.widget {
                         widget = wibox.container.background,
@@ -764,13 +764,13 @@ function widget.new(args)
                     }
                 )
             else
-                available_width_px = available_width_px - item.max_width
+                available_width_px = available_width_px - column.max_width
             end
             local column_margin = wibox.container.margin()
-            column_margin:set_widget(item.layout)
+            column_margin:set_widget(column.layout)
             column_margin:set_margins(self.group_spacing)
             columns:add(column_margin)
-            previous_page_last_layout = item.layout
+            previous_page_last_layout = column.layout
         end
         table.insert(pages, columns)
 
