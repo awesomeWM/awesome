@@ -676,6 +676,10 @@ function widget.new(args)
             -- for _, w in pairs(keys_layout.children) do
             --   w:adjust_ratio(2, keys_ratio, 1 - keys_ratio, 0)
             -- end
+
+            -- Remove the header if overlaps
+            if ik_add_new_column and overlap_leftovers ~= nil then ret:remove(1) end
+
             current_column.layout:add {
                 widget = wibox.container.background,
                 bg = self.group_bg,
@@ -686,6 +690,8 @@ function widget.new(args)
                         bottom = self.group_margin,
                         left = self.group_margin,
                         right = self.group_margin,
+                        top = (ik_add_new_column and overlap_leftovers ~= nil)
+                            and self.group_margin or 0
                     },
                     ret,
                 },
@@ -727,14 +733,12 @@ function widget.new(args)
                 self._additional_hotkeys[group]
             )
             if #keys > 0 then
-                -- - 2 * self.group_margin for actual usable space
-                self:_create_group_columns(column_layouts, group, keys, s, wibox_height - 2 * self.group_margin)
+                self:_create_group_columns(column_layouts, group, keys, s, wibox_height)
             end
         end
 
         -- arrange columns into pages
-        -- - 2 * self.group_margin for actual usable space
-        local available_width_px = wibox_width - 2 * self.group_margin
+        local available_width_px = wibox_width
         local pages = {}
         local columns = wibox.layout.fixed.horizontal()
         local previous_page_last_layout
