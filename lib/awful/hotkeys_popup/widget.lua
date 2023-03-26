@@ -934,13 +934,13 @@ function widget.new(args)
             local need_match
             for group_name, data in pairs(self.group_rules) do
                 if group_name==group and (
-                    data.rule or data.rule_any or data.except or data.except_any)
-                then
+                    data.rule or data.rule_any or data.except or data.except_any
+                ) then
                     if not c or not matcher:matches_rule(c, {
-                            rule=data.rule,
-                            rule_any=data.rule_any,
-                            except=data.except,
-                            except_any=data.except_any
+                        rule=data.rule,
+                        rule_any=data.rule_any,
+                        except=data.except,
+                        except_any=data.except_any
                     }) then
                         need_match = true
                         break
