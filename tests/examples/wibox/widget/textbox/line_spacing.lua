@@ -22,7 +22,7 @@ local l = wibox.layout.grid.vertical(4)
 --DOC_HIDE_END
 
 for _, spacing in ipairs {0.0, 0.1, 0.5, 0.9, 1, 1.5, 2.0, 2.5} do
-    local text = "This text shas a line\nspacing of "..tostring(spacing).. "\nunits."
+    local text = "This text has a line\nspacing of "..tostring(spacing).. "\nunits."
     --DOC_NEWLINE
     l:add( --DOC_HIDE
     widget{
