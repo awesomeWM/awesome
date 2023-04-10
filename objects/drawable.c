@@ -141,10 +141,10 @@ drawable_set_geometry(lua_State *L, int didx, area_t geom)
     area_t old = d->geometry;
     d->geometry = geom;
 
-    bool size_changed = (old.width != geom.width) || (old.height != geom.height);
-    if (size_changed)
+    bool area_changed = !AREA_EQUAL(old, geom);
+    if (area_changed)
         drawable_unset_surface(d);
-    if (size_changed && geom.width > 0 && geom.height > 0)
+    if (area_changed && geom.width > 0 && geom.height > 0)
     {
         d->pixmap = xcb_generate_id(globalconf.connection);
         xcb_create_pixmap(globalconf.connection, globalconf.default_depth, d->pixmap,
@@ -155,7 +155,7 @@ drawable_set_geometry(lua_State *L, int didx, area_t geom)
         luaA_object_emit_signal(L, didx, "property::surface", 0);
     }
 
-    if (!AREA_EQUAL(old, geom))
+    if (area_changed)
         luaA_object_emit_signal(L, didx, "property::geometry", 0);
     if (old.x != geom.x)
         luaA_object_emit_signal(L, didx, "property::x", 0);
