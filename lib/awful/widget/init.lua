@@ -24,6 +24,7 @@ return
     clienticon = require("awful.widget.clienticon");
     calendar_popup = require("awful.widget.calendar_popup");
     common = require("awful.widget.common");
+    inputbox = require("awful.widget.inputbox");
 }
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
