@@ -233,7 +233,16 @@ function imagebox:draw(ctx, cr, width, height)
             cr:clip(self._private.clip_shape(cr, w*aspects.w, h*aspects.h, unpack(self._private.clip_args)))
         end
 
-        cr:scale(aspects.w, aspects.h)
+        if self._private.handle then
+            self._private.handle:render_document(cr, Rsvg.Rectangle {
+                x      = 0,
+                y      = 0,
+                width  = w * aspects.w,
+                height = h * aspects.h
+            })
+        else
+            cr:scale(aspects.w, aspects.h)
+        end
     else
         if self._private.halign == "center" then
             translate.x = math.floor((width - w)/2)
@@ -253,11 +262,13 @@ function imagebox:draw(ctx, cr, width, height)
         if self._private.clip_shape then
             cr:clip(self._private.clip_shape(cr, w, h, unpack(self._private.clip_args)))
         end
+
+        if self._private.handle then
+            self._private.handle:render_document(cr, Rsvg.Rectangle {x = 0, y = 0, width = w, height = h})
+        end
     end
 
-    if self._private.handle then
-        self._private.handle:render_cairo(cr)
-    else
+    if not self._private.handle then
         cr:set_source_surface(self._private.image, 0, 0)
 
         local filter = self._private.scaling_quality
