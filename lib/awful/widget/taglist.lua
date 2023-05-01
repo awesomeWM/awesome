@@ -522,7 +522,7 @@ end
 -- @see filter
 -- @see awful.widget.taglist.source.for_screen
 
---- A templete used to genetate the individual tag widgets.
+--- A template used to generate the individual tag widgets.
 --
 -- @property widget_template
 -- @tparam[opt=nil] template|nil widget_template
