@@ -98,8 +98,12 @@ signal_disconnect(signal_array_t *arr, const char *name, const void *ref)
             if(ref == *func)
             {
                 cptr_array_remove(&sigfound->sigfuncs, func);
-                if(sigfound->sigfuncs.len == 0)
+                if(sigfound->sigfuncs.len == 0) {
+                    if(sigfound->sigfuncs.tab) {
+                        cptr_array_wipe(&sigfound->sigfuncs);
+                    }
                     signal_array_remove(arr, sigfound);
+                }
                 return true;
             }
     }
