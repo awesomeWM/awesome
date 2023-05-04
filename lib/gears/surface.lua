@@ -14,6 +14,7 @@ local GdkPixbuf = require("lgi").GdkPixbuf
 local color, beautiful = nil, nil
 local gdebug = require("gears.debug")
 local hierarchy = require("wibox.hierarchy")
+local ceil = math.ceil
 
 -- Keep this in sync with build-utils/lgi-check.c!
 local ver_major, ver_minor, ver_patch = string.match(require('lgi.version'), '(%d)%.(%d)%.(%d)')
@@ -284,10 +285,11 @@ function surface.widget_to_surface(widget, width, height, format)
 end
 
 --- Crop a surface to a given ratio
--- this basically creates a copy of the surface, as surfaces seem to not be
--- resizable after creation
+-- This creates a copy of the surface, as surfaces seem to not be
+-- resizable after creation, so you have to use the functions return
+-- value. The resulting surface is in the center of the original surface
 -- @param surf surface the Cairo surface to crop
--- @param ratio number the ratio the image should be cropped to
+-- @param ratio number the ratio the image should be cropped to (widht/height)
 -- @return the a cropped copy of the input surface
 function surface.crop_surface(surf, ratio)
     local old_w, old_h = surface.get_size(surf)
@@ -299,11 +301,11 @@ function surface.crop_surface(surf, ratio)
     local offset_h, offset_w = 0, 0
 
     if (old_ratio < ratio) then
-        new_h = old_w * (1/ratio)
-        offset_h = (old_h - new_h)/2
+        new_h = ceil(old_w * (1/ratio))
+        offset_h = ceil((old_h - new_h)/2)
     else
-        new_w = old_h * ratio
-        offset_w = (old_w - new_w)/2
+        new_w = ceil(old_h * ratio)
+        offset_w = ceil((old_w - new_w)/2)
     end
 
     local out_surf = cairo.ImageSurface(cairo.Format.ARGB32, new_w, new_h)
