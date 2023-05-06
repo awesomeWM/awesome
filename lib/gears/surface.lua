@@ -284,6 +284,45 @@ function surface.widget_to_surface(widget, width, height, format)
     return img, run_in_hierarchy(widget, cr, width, height)
 end
 
+--- Crop a surface on its edges
+-- @tparam[opt=nil] table args
+-- @tparam int args.left Left cutoff
+-- @tparam int args.right Right cutoff
+-- @tparam int args.top Top cutoff
+-- @tparam int args.bottom Bottom cutoff
+-- @tparam[opt=nil] surface args.surf the surface to crop
+-- @return the cropped surface
+-- @staticfct crop_surface
+function surface.crop_surface(args)
+    args = args or {}
+    if not args.surface then
+        gdebug.print_error("No surface to crop_surface supplied")
+        return nil
+    end
+    local surf = args.surface
+    local left = args.left or 0
+    local right = args.right or 0
+    local top = args.top or 0
+    local bottom = args.bottom or 0
+
+    local old_w, old_h = surface.get_size(surf)
+    local new_w, new_h = old_w - left - right, old_h - top - bottom
+    -- breaking stuff with cairo crashes awesome with no way to restart in place
+    -- so here are checks for user error
+    if new_w < 0 or new_h < 0 then
+        gdebug.print_error("crop_surface target size too small")
+        return nil
+    end
+
+    local ret = cairo.ImageSurface(cairo.Format.ARGB32, new_w, new_h)
+    local cr = cairo.Context(ret)
+    cr:set_source_surface(surf, -left, -top)
+    cr.operator = cairo.Operator.SOURCE
+    cr:paint()
+
+    return ret
+end
+
 --- Crop a surface to a given ratio
 -- This creates a copy of the surface, as surfaces seem to not be
 -- resizable after creation, so you have to use the functions return
@@ -291,7 +330,8 @@ end
 -- @param surf surface the Cairo surface to crop
 -- @param ratio number the ratio the image should be cropped to (widht/height)
 -- @return the a cropped copy of the input surface
-function surface.crop_surface(surf, ratio)
+-- @staticfct crop_surface_by_ratio
+function surface.crop_surface_by_ratio(surf, ratio)
     local old_w, old_h = surface.get_size(surf)
     local old_ratio = old_w/old_h
 
