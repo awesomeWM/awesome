@@ -2,8 +2,7 @@ local surface = require("gears.surface")
 local color = require("gears.color")
 local lgi = require("lgi")
 local cairo = lgi.cairo
-local gdk = lgi.Gdk -- lgi.require("Gdk", "3")
---local pixbuf = lgi.GdkPixbuf
+local gdk = lgi.Gdk
 
 describe("gears.surface", function ()
     local function test_square()
@@ -55,9 +54,9 @@ describe("gears.surface", function ()
         end)
     end)
     describe("crop_surface", function ()
-        --TODO: Find a way to check for pixel colors to make sure th cutoff is
-        -- at the right spot
         ---@param args table
+        ---@param target_heigth integer
+        ---@param target_width integer
         local function test(args, target_width, target_heigth)
             -- extend args supplied for left right top and bottom
             args.surface = test_square()
