@@ -35,7 +35,10 @@ function icon:fit(_, width, height)
 
     local maximum  = math.min(width, height)
     local strategy = self._private.resize_strategy or "resize"
-    local optimal  = math.min(self._private.icon_size or beautiful.notification_icon_size or dpi(48), maximum)
+    local optimal  = math.min(
+        self._private.notification._private.icon_size or beautiful.notification_icon_size or dpi(48),
+        maximum
+    )
 
     local w = self._private.image:get_width()
     local h = self._private.image:get_height()
@@ -161,7 +164,6 @@ local function new(args)
 
     gtable.crush(tb, icon, true)
     tb._private.notification = {}
-    tb._private.icon_size = args.icon_size
 
     function tb._private.icon_changed_callback()
         local n = tb._private.notification[1]
