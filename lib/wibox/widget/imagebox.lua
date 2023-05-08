@@ -182,8 +182,7 @@ function imagebox:draw(ctx, cr, width, height)
 
     local w, h = self._private.default.width, self._private.default.height
 
-    local RsvgRect = Rsvg.Rectangle {x = 0, y = 0, width = w, height = h}
-    local svg_surf = cairo.ImageSurface(cairo.Format.ARGB32, w, h)
+    local svg_surf
 
     if self._private.resize then
         -- That's for the "fit" policy.
@@ -237,8 +236,8 @@ function imagebox:draw(ctx, cr, width, height)
         end
 
         if self._private.handle then
-            RsvgRect = Rsvg.Rectangle {x = 0, y = 0, width = w*aspects.w, height = h*aspects.h }
             svg_surf = cairo.ImageSurface(cairo.Format.ARGB32, w*aspects.w, h*aspects.h)
+            self._private.handle:render_document(cr, Rsvg.Rectangle {x = 0, y = 0, width = w*aspects.w, height = h*aspects.h})
         else
             cr:scale(aspects.w, aspects.h)
         end
@@ -261,11 +260,16 @@ function imagebox:draw(ctx, cr, width, height)
         if self._private.clip_shape then
             cr:clip(self._private.clip_shape(cr, w, h, unpack(self._private.clip_args)))
         end
+
+        if self._private.handle then
+            -- Translation is not needed in the new surface
+            svg_surf = cairo.ImageSurface(cairo.Format.ARGB32, 0, 0)
+            self._private.handle:render_document(cr, Rsvg.Rectangle {x = 0, y = 0, width = w, height = h})
+        end
     end
 
     if self._private.handle then
         cr:set_source_surface(svg_surf, 0, 0)
-        self._private.handle:render_document(cr, RsvgRect)
     else
         cr:set_source_surface(self._private.image, 0, 0)
 
