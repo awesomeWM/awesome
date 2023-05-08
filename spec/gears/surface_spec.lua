@@ -5,97 +5,154 @@ local cairo = lgi.cairo
 local gdk = lgi.Gdk
 
 describe("gears.surface", function ()
-    local function test_square()
-        local surf = cairo.ImageSurface(cairo.Format.ARGB32, 50, 50)
-        local ctx = cairo.Context(surf)
-        ctx:rectangle(0,0,50,50)
-        local pattern = cairo.Pattern.create_linear(0, 0, 50, 0)
-        pattern:add_color_stop_rgba(0, color.parse_color("#000000"))
-        pattern:add_color_stop_rgba(1, color.parse_color("#FFFFFF"))
-        ctx:set_source(pattern)
-        ctx:fill()
+    describe("crop_surface", function ()
+        local function test_square()
+            local surf = cairo.ImageSurface(cairo.Format.ARGB32, 50, 50)
+            local ctx = cairo.Context(surf)
+            -- creates complicated pattern, to make sure each pixel has a
+            -- different color value
+            ctx:rectangle(0,0,50,50)
+            local pattern = cairo.Pattern.create_linear(0, 0, 50, 50)
+            pattern:add_color_stop_rgba(0, color.parse_color("#00000000"))
+            pattern:add_color_stop_rgba(1, color.parse_color("#FF00FF55"))
+            ctx:set_source(pattern)
+            ctx:fill()
+            local ctx2 = cairo.Context(surf)
+            ctx2:rectangle(0,0,50,50)
+            local pattern2 = cairo.Pattern.create_linear(0, 50, 50, 0)
+            pattern2:add_color_stop_rgba(0, color.parse_color("#00FF0088"))
+            pattern2:add_color_stop_rgba(1, color.parse_color("#00000000"))
+            ctx2:set_source(pattern2)
+            ctx2:fill()
 
-        return surf
-    end
-    describe("crop_surface_by_ratio", function ()
-        ---@param ratio number target img ratio
-        ---@param target_width number target img width the crop is tested against
-        ---@param target_heigth number target img height the crop is tested against
-        local function test(ratio, target_width, target_heigth)
-            local surf = test_square()
-            local out = surface.crop_surface_by_ratio(surf, ratio)
-            local w, h = surface.get_size(out)
-            assert.is_equal(w, target_width)
-            assert.is_equal(h, target_heigth)
+            return surf
         end
 
-        it("keep size", function ()
-            test(1, 50, 50)
-        end)
-
-        it("to 50x25", function ()
-            test(2, 50, 25)
-        end)
-
-        it("to 25x50", function ()
-            test(0.5, 25, 50)
-        end)
-
-        it("test minwidth 1x50", function ()
-            test(0.001, 1, 50)
-        end)
-
-        it("test minheight 50x1", function ()
-            test(1000, 50, 1)
-        end)
-
-        it("weird calc edgecase 30x50", function ()
-            test(3/5, 30, 50)
-        end)
-    end)
-    describe("crop_surface", function ()
+        -- if cutoff + ratio are tested only right and bottom cutoff can be
+        -- used because the test should not rebuild the math logic of the actual
+        -- function
         ---@param args table
         ---@param target_heigth integer
         ---@param target_width integer
         local function test(args, target_width, target_heigth)
-            -- extend args supplied for left right top and bottom
             args.surface = test_square()
             local out = surface.crop_surface(args)
+
+            -- check size
             local w, h = surface.get_size(out)
             assert.is_equal(w, target_width)
             assert.is_equal(h, target_heigth)
 
-            -- pick 0,0 and w,h spot in cropped img and check color values
-            local pbuf1_in = gdk.pixbuf_get_from_surface(args.surface, args.left or 0, args.top or 0, 1, 1)
-            local pbuf1_out = gdk.pixbuf_get_from_surface(out, 0, 0, 1, 1)
+            -- check if area in img and cropped img are the same
+            local calc_w_offset = math.ceil((50 - w - (args.right or 0))/2)
+            local calc_h_offset = math.ceil((50 - h - (args.bottom or 0))/2)
+
+            local pbuf1_in = gdk.pixbuf_get_from_surface(
+                args.surface,
+                args.left or calc_w_offset,
+                args.top or calc_h_offset,
+                w,
+                h
+            )
+            local pbuf1_out = gdk.pixbuf_get_from_surface(out, 0, 0, w, h)
             assert.is_equal(pbuf1_in:get_pixels(), pbuf1_out:get_pixels())
-            local pbuf2_in = gdk.pixbuf_get_from_surface(args.surface, (args.left or 0) + w - 1, (args.top or 0) + h - 1, 1, 1)
-            local pbuf2_out = gdk.pixbuf_get_from_surface(out, w-1, h-1, 1, 1)
-            assert.is_equal(pbuf2_in:get_pixels(), pbuf2_out:get_pixels())
         end
 
-        it("keep size", function ()
-            test({}, 50, 50)
+        it("keep size using offsets", function ()
+            test({
+                left = 0,
+                top = 0,
+            }, 50, 50)
         end)
 
-        it("to 50x25", function ()
-            test({top = 12, bottom = 13}, 50, 25)
+        it("keep size using ratio", function ()
+            test({
+                ratio = 1,
+                left = 0,
+                top = 0,
+            }, 50, 50)
         end)
 
-        it("to 25x50", function ()
-            test({left = 12, right = 13}, 25, 50)
+        it("crop to 50x25 with offsets", function ()
+            test({
+                top = 12,
+                bottom = 13,
+                left = 0,
+            }, 50, 25)
         end)
 
-        it("test 1x50", function ()
-            test({left = 20, right = 29}, 1, 50)
-        end)
-
-        it("test 50x1", function ()
-            test({top = 23, bottom = 26}, 50, 1)
+        it("crop to 25x50 with offsets", function ()
+            test({
+                left = 12,
+                right = 13,
+                top = 0,
+            }, 25, 50)
         end)
 
         it("crop all edges", function ()
-            test({left = 7, right = 13, top = 9, bottom = 16}, 30, 25)
+            test({
+                left = 7,
+                right = 13,
+                top = 9,
+                bottom = 16
+            }, 30, 25)
+        end)
+
+        it("use ratio to crop width", function ()
+            test({
+                ratio = 3/5,
+            }, 30, 50)
+        end)
+
+        it("use ratio to crop height", function ()
+            test({
+                ratio = 5/3,
+            }, 50, 30)
+        end)
+
+        it("use very large ratio", function ()
+            test({
+                ratio = 10000
+            }, 50, 1)
+        end)
+
+        it("use very small ratio", function ()
+            test({
+                ratio = 0.0001
+            }, 1, 50)
+        end)
+
+        it("use ratio and offset", function ()
+            test({
+                bottom = 20,
+                ratio = 1
+            }, 30, 30)
+        end)
+
+        it("use too large offset", function ()
+            assert.has.errors(function ()
+                test({
+                    left = 55,
+                    top = 0,
+                }, 0, 0)
+            end)
+        end)
+
+        it("use negative offset", function ()
+            assert.has.errors(function ()
+                test({
+                    left = -1,
+                    top = 0
+                }, 0, 0)
+            end)
+        end)
+
+        it("use negative ratio", function ()
+            assert.has.errors(function ()
+                test({
+                    ratio = - 1,
+                }, 0, 0)
+            end)
         end)
     end)
 end)

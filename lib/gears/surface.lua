@@ -286,75 +286,78 @@ end
 
 --- Crop a surface on its edges
 -- @tparam[opt=nil] table args
--- @tparam int args.left Left cutoff
--- @tparam int args.right Right cutoff
--- @tparam int args.top Top cutoff
--- @tparam int args.bottom Bottom cutoff
--- @tparam[opt=nil] surface args.surf the surface to crop
+-- @tparam int args.left Left cutoff, cannot be negative
+-- @tparam int args.right Right cutoff, cannot be negative
+-- @tparam int args.top Top cutoff, cannot be negative
+-- @tparam int args.bottom Bottom cutoff, cannot be negative
+-- @tparam number args.ratio ratio to crop the image to. If edge cutoffs and
+-- ratio are given, the edge cutoffs are computed first. Using ratio will crop
+-- the center out of an image, similar to what "zoomed-fill" does in wallpaper
+-- setter programs. Cannot be negative
+-- @tparam[opt=nil] surface args.surface the surface to crop
 -- @return the cropped surface
 -- @staticfct crop_surface
 function surface.crop_surface(args)
     args = args or {}
+
     if not args.surface then
         gdebug.print_error("No surface to crop_surface supplied")
         return nil
     end
-    local surf = args.surface
-    local left = args.left or 0
-    local right = args.right or 0
-    local top = args.top or 0
-    local bottom = args.bottom or 0
 
-    local old_w, old_h = surface.get_size(surf)
-    local new_w, new_h = old_w - left - right, old_h - top - bottom
-    -- breaking stuff with cairo crashes awesome with no way to restart in place
-    -- so here are checks for user error
-    if new_w < 0 or new_h < 0 then
-        gdebug.print_error("crop_surface target size too small")
-        return nil
+    local surf = args.surface
+    local target_ratio = args.ratio
+
+    local w, h = surface.get_size(surf)
+    local offset_w, offset_h =  0, 0
+
+    if (args.top or args.right or args.bottom or args.left) then
+        local left = args.left or 0
+        local right = args.right or 0
+        local top = args.top or 0
+        local bottom = args.bottom or 0
+
+        if (top < 0 or right < 0 or bottom < 0 or left < 0) then
+            gdebug.print_error("negative offsets are not supported for crop_surface")
+        end
+
+        w = w - left - right
+        h = h - top - bottom
+
+        -- the offset needs to be negative
+        offset_w = - left
+        offset_h = - top
+
+        -- breaking stuff with cairo crashes awesome with no way to restart in place
+        -- so here are checks for user error
+        if w <= 0 or h <= 0 then
+            gdebug.print_error("crop_surface target size with top, right, bottom or left too small")
+            return nil
+        end
     end
 
-    local ret = cairo.ImageSurface(cairo.Format.ARGB32, new_w, new_h)
+    if target_ratio and target_ratio > 0 then
+        local prev_ratio = w/h
+        if prev_ratio ~= target_ratio then
+            if (prev_ratio < target_ratio) then
+                local old_h = h
+                h = ceil(w * (1/target_ratio))
+                offset_h = offset_h - ceil((old_h - h)/2)
+            else
+                local old_w = w
+                w = ceil(h * target_ratio)
+                offset_w = offset_w - ceil((old_w - w)/2)
+            end
+        end
+    end
+
+    local ret = cairo.ImageSurface(cairo.Format.ARGB32, w, h)
     local cr = cairo.Context(ret)
-    cr:set_source_surface(surf, -left, -top)
+    cr:set_source_surface(surf, offset_w, offset_h)
     cr.operator = cairo.Operator.SOURCE
     cr:paint()
 
     return ret
-end
-
---- Crop a surface to a given ratio
--- This creates a copy of the surface, as surfaces seem to not be
--- resizable after creation, so you have to use the functions return
--- value. The resulting surface is in the center of the original surface
--- @param surf surface the Cairo surface to crop
--- @param ratio number the ratio the image should be cropped to (widht/height)
--- @return the a cropped copy of the input surface
--- @staticfct crop_surface_by_ratio
-function surface.crop_surface_by_ratio(surf, ratio)
-    local old_w, old_h = surface.get_size(surf)
-    local old_ratio = old_w/old_h
-
-    if old_ratio == ratio then return surf end
-
-    local new_h, new_w = old_h, old_w
-    local offset_h, offset_w = 0, 0
-
-    if (old_ratio < ratio) then
-        new_h = ceil(old_w * (1/ratio))
-        offset_h = ceil((old_h - new_h)/2)
-    else
-        new_w = ceil(old_h * ratio)
-        offset_w = ceil((old_w - new_w)/2)
-    end
-
-    local out_surf = cairo.ImageSurface(cairo.Format.ARGB32, new_w, new_h)
-    local cr = cairo.Context(out_surf)
-    cr:set_source_surface(surf, -offset_w, -offset_h)
-    cr.operator = cairo.Operator.SOURCE
-    cr:paint()
-
-    return out_surf
 end
 
 return setmetatable(surface, surface.mt)
