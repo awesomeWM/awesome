@@ -301,7 +301,7 @@ function surface.crop_surface(args)
     args = args or {}
 
     if not args.surface then
-        gdebug.print_error("No surface to crop_surface supplied")
+        error("No surface to crop_surface supplied")
         return nil
     end
 
@@ -318,7 +318,7 @@ function surface.crop_surface(args)
         local bottom = args.bottom or 0
 
         if (top < 0 or right < 0 or bottom < 0 or left < 0) then
-            gdebug.print_error("negative offsets are not supported for crop_surface")
+            error("negative offsets are not supported for crop_surface")
         end
 
         w = w - left - right
@@ -331,7 +331,7 @@ function surface.crop_surface(args)
         -- breaking stuff with cairo crashes awesome with no way to restart in place
         -- so here are checks for user error
         if w <= 0 or h <= 0 then
-            gdebug.print_error("crop_surface target size with top, right, bottom or left too small")
+            error("crop_surface target size with top, right, bottom or left too small")
             return nil
         end
     end
