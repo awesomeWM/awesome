@@ -33,8 +33,9 @@ local function update(w, screen)
     w._layoutbox_tooltip:set_text(name or "[no name]")
 
     local img = surface.load_silently(beautiful["layout_" .. name], false)
+    local text = beautiful["layout_" .. name .. "_text"]
     w.imagebox.image = img
-    w.textbox.text   = img and "" or name
+    w.textbox.text   = img and "" or text or name
 end
 
 local function update_from_tag(t)
