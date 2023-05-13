@@ -15,7 +15,6 @@ local layout = require("awful.layout")
 local tooltip = require("awful.tooltip")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
-local surface = require("gears.surface")
 local gdebug = require("gears.debug")
 local gtable = require("gears.table")
 
