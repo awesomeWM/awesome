@@ -331,7 +331,7 @@ function surface.crop_surface(args)
         -- breaking stuff with cairo crashes awesome with no way to restart in place
         -- so here are checks for user error
         if w <= 0 or h <= 0 then
-            error("Area to remove cannot be larger than the image size. Reduce values for `top`, `right`, `bottom` or `left`.")
+            error("Area to remove cannot be larger than the image size")
             return nil
         end
     end
