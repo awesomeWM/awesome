@@ -3,8 +3,13 @@ pull_request_rules:
     conditions:
       - label!=no-mergify
       - '#approved-reviews-by>=2'
-      - check-success=Build & Test
-      - check-success=Update API docs
+      - check-success=lua5.4
+      - check-success=codecov-lua5.3
+      - check-success=lua5.2
+      - check-success=luajit
+      - check-success=fixed-lgi-lua5.2
+      - check-success=lua5.1
+      - check-success=main
       - status-success=codecov/patch
     actions:
       merge:
