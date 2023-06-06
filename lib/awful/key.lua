@@ -397,7 +397,7 @@ key.keygroups = {
 -- Technically, this isn't very popular, but we have been doing this for 12
 -- years and nobody complained too loudly.
 for i = 1, 10 do
-    table.insert(key.keygroups.numrow, {"#" .. i + 9, i == 10 and 0 or i})
+    table.insert(key.keygroups.numrow, {"#" .. i + 9, i})
 end
 for i = 1, 35 do
     table.insert(key.keygroups.fkeys, {"F" .. i, "F" .. i})
