@@ -13,6 +13,7 @@ local utils = require("menubar.utils")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
+local gdebug = require("gears.debug")
 
 local menu_gen = {}
 
@@ -21,6 +22,7 @@ local menu_gen = {}
 --- Get the path to the directories where XDG menu applications are installed.
 local function get_xdg_menu_dirs()
     local dirs = gfilesystem.get_xdg_data_dirs()
+    gdebug.dump(gfilesystem.get_xdg_data_home(), "xdg_data_home")
     table.insert(dirs, 1, gfilesystem.get_xdg_data_home())
     return gtable.map(function(dir) return dir .. 'applications/' end, dirs)
 end
@@ -95,7 +97,7 @@ function menu_gen.generate(callback)
             for _, entry in ipairs(entries) do
                 -- Check whether to include program in the menu
                 if entry.show and entry.Name and entry.cmdline then
-                    local unique_key = entry.Name .. '\0' .. entry.cmdline
+                    local unique_key = entry.desktop_file_id
                     if not unique_entries[unique_key] then
                         local target_category = nil
                         -- Check if the program falls into at least one of the
@@ -120,6 +122,8 @@ function menu_gen.generate(callback)
                                      icon = icon,
                                      category = target_category })
                         unique_entries[unique_key] = true
+                    else
+                        gdebug.dump(entry, "entry not included")
                     end
                 end
             end
