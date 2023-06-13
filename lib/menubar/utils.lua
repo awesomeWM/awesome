@@ -406,7 +406,13 @@ function utils.parse_dir(dir_path, callback)
 
     gio.Async.start(do_protected_call)(function()
         local result = {}
-        parser(gio.File.new_for_path(dir_path), result)
+        local f = gio.File.new_for_path(dir_path)
+        parser(f, result)
+        for i, entry in ipairs(result) do
+            local target = gio.File.new_for_path(entry.file)
+            entry.desktop_file_id = f:get_relative_path(target)
+            result[i] = entry
+        end
         call_callback(callback, result)
     end)
 end
