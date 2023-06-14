@@ -13,7 +13,6 @@ local utils = require("menubar.utils")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
-local gdebug = require("gears.debug")
 local lgi = require("lgi")
 local gio = lgi.Gio
 local protected_call = require("gears.protected_call")
@@ -146,8 +145,6 @@ function menu_gen.generate(callback)
                                 { name = name, cmdline = cmdline, icon = icon, category = target_category }
                             )
                             unique_entries[unique_key] = true
-                        else
-                            gdebug.dump(entry, "entry not included")
                         end
                     end
                 end

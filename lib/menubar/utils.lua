@@ -382,11 +382,11 @@ function utils.parse_dir(dir_path, callback)
     end
 
     local result = {}
-    local f = gio.File.new_for_path(dir_path)
-    parser(f, result)
+    local dir = gio.File.new_for_path(dir_path)
+    parser(dir, result)
     for i, entry in ipairs(result) do
-        local target = gio.File.new_for_path(entry.file)
-        local relative_path = f:get_relative_path(target)
+        local desktop_file = gio.File.new_for_path(entry.file)
+        local relative_path = dir:get_relative_path(desktop_file)
         entry.desktop_file_id = string.gsub(relative_path, "/", "-")
         result[i] = entry
     end
