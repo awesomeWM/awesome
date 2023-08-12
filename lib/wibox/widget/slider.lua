@@ -520,8 +520,8 @@ end
 
 -- Move the handle to the correct location
 local function move_handle(self, width, x, _)
-    local _, _, interval = get_extremums(self)
-    self:set_value(math.floor((x*interval)/width))
+    local min, _, interval = get_extremums(self)
+    self:set_value(min+math.floor((x*interval)/width))
 end
 
 local function mouse_press(self, x, y, button_id, _, geo)
