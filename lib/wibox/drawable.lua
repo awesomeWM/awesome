@@ -55,6 +55,10 @@ local function get_widget_context(self)
         for k, v in pairs(self._widget_context_skeleton) do
             context[k] = v
         end
+
+        -- Set the metatable to give access to the weak wibox.
+        setmetatable(context, getmetatable(self._widget_context_skeleton))
+
         self._widget_context = context
 
         -- Give widgets a chance to react to the new context
