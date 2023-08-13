@@ -90,25 +90,23 @@ end
 --- Split separates a string containing a delimiter into the list of
 -- substrings between that delimiter.
 -- @tparam string str String to be splitted
--- @tparam string delimiter Character where the string will be splitted
+-- @tparam string delimiter String or pattern the target string will be splitted by
 -- @treturn table list of the substrings
 -- @staticfct gears.string.split
 function gstring.split(str, delimiter)
     delimiter = delimiter or "\n"
     local result = {}
-    if gstring.startswith(str, delimiter) then
-        result[#result+1] = ""
+    local cursor_pos = 1
+    local matches =
+    for match in string.gmatch(str, delimiter) do
+        start_pos, end_pos = string.find(str, match, cursor_pos, true)
+        result[#result+1] = string.sub(str, cursor_pos, start_pos-1)
+        cursor_pos = end_pos+1
     end
-    local pattern = string.format("([^%s]+)", delimiter)
-    str:gsub(pattern, function(c) result[#result+1] = c end)
-    if gstring.endswith(str, delimiter) then
-        result[#result+1] = ""
-    end
-    if #result == 0 then
-        result[#result+1] = str
-    end
+    result[#result+1] = string.sub(str, cursor_pos, #str)
     return result
 end
+
 
 --- Check if a string starts with another string.
 -- @DOC_text_gears_string_startswith_EXAMPLE@
