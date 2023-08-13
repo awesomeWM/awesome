@@ -97,7 +97,6 @@ function gstring.split(str, delimiter)
     delimiter = delimiter or "\n"
     local result = {}
     local cursor_pos = 1
-    local matches =
     for match in string.gmatch(str, delimiter) do
         start_pos, end_pos = string.find(str, match, cursor_pos, true)
         result[#result+1] = string.sub(str, cursor_pos, start_pos-1)
