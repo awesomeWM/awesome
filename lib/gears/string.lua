@@ -90,25 +90,26 @@ end
 --- Split separates a string containing a delimiter into the list of
 -- substrings between that delimiter.
 -- @tparam string str String to be splitted
--- @tparam string delimiter String or pattern the target string will be splitted by
--- @treturn table list of the substrings
+-- @tparam string[opt="\n"] delimiter String or pattern the target string will
+--   be splitted by.
+-- @treturn table A list of substrings.
 -- @staticfct gears.string.split
 function gstring.split(str, delimiter)
     delimiter = delimiter or "\n"
     local result = {}
-    local cursor_pos = 1
-    if delimiter == '' then
-        for i = 1, #str do
-            result[#result+1] = string.sub(str, i, i)
+    if #delimiter == 0 then
+        for index = 1, #str do
+            result[#result+1] = str:sub(index, index)
         end
-    else
-        for match in string.gmatch(str, delimiter) do
-            local start_pos, end_pos = string.find(str, match, cursor_pos, true)
-            result[#result+1] = string.sub(str, cursor_pos, start_pos-1)
-            cursor_pos = end_pos+1
-        end
-        result[#result+1] = string.sub(str, cursor_pos, #str)
+        return result
     end
+    local pos = 1
+    for match in str:gmatch(delimiter) do
+        local start_pos, end_pos = str:find(match, pos, true)
+        result[#result+1] = str:sub(pos, start_pos-1)
+        pos = end_pos+1
+    end
+    result[#result+1] = str:sub(pos, #str)
     return result
 end
 
