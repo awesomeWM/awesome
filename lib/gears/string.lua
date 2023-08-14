@@ -87,24 +87,48 @@ function gstring.query_to_pattern(q)
     return s
 end
 
+
 --- Split separates a string containing a delimiter into the list of
 -- substrings between that delimiter.
 -- @tparam string str String to be splitted
--- @tparam string[opt="\n"] delimiter String or pattern the target string will
---   be splitted by.
--- @treturn table A list of substrings.
+-- @tparam string delimiter Character where the string will be splitted
+-- @treturn table list of the substrings
 -- @staticfct gears.string.split
 function gstring.split(str, delimiter)
     delimiter = delimiter or "\n"
     local result = {}
-    if #delimiter == 0 then
+    if gstring.startswith(str, delimiter) then
+        result[#result+1] = ""
+    end
+    local pattern = string.format("([^%s]+)", delimiter)
+    str:gsub(pattern, function(c) result[#result+1] = c end)
+    if gstring.endswith(str, delimiter) then
+        result[#result+1] = ""
+    end
+    if #result == 0 then
+        result[#result+1] = str
+    end
+    return result
+end
+
+
+--- Pattern split separates a string by a pattern to the table of substrings.
+-- @tparam string str String to be splitted
+-- @tparam string[opt="\n"] pattern Pattern the target string will
+--   be splitted by.
+-- @treturn table A list of substrings.
+-- @staticfct gears.string.split
+function gstring.psplit(str, pattern)
+    pattern = pattern or "\n"
+    local result = {}
+    if #pattern == 0 then
         for index = 1, #str do
             result[#result+1] = str:sub(index, index)
         end
         return result
     end
     local pos = 1
-    for match in str:gmatch(delimiter) do
+    for match in str:gmatch(pattern) do
         local start_pos, end_pos = str:find(match, pos, true)
         result[#result+1] = str:sub(pos, start_pos-1)
         pos = end_pos+1
