@@ -35,7 +35,12 @@ function icon:fit(_, width, height)
 
     local maximum  = math.min(width, height)
     local strategy = self._private.resize_strategy or "resize"
-    local optimal  = math.min(beautiful.notification_icon_size or dpi(48), maximum)
+    local optimal  = math.min(
+        (
+            self._private.notification[1] and self._private.notification[1].icon_size
+        ) or beautiful.notification_icon_size or dpi(48),
+        maximum
+    )
 
     local w = self._private.image:get_width()
     local h = self._private.image:get_height()
