@@ -49,7 +49,9 @@ tile.resize_jump_to_corner = true
 local function mouse_resize_handler(c, _, _, _, orientation)
     orientation = orientation or "tile"
     local wa = c.screen.workarea
-    local mwfact = c.screen.selected_tag.master_width_factor
+    local t = c.screen.selected_tag
+    local useless_gap = t.gap
+    local mwfact = t.master_width_factor
     local cursor
     local g = c:geometry()
     local offset = 0
@@ -58,37 +60,37 @@ local function mouse_resize_handler(c, _, _, _, orientation)
 
     if orientation == "tile" then
         cursor = "cross"
-        if g.height+15 > wa.height then
+        if g.height+useless_gap+15 > wa.height then
             offset = g.height * .5
             cursor = "sb_h_double_arrow"
-        elseif g.y+g.height+15 <= wa.y+wa.height then
+        elseif g.y+g.height+useless_gap+15 <= wa.y+wa.height then
             offset = g.height
         end
         corner_coords = { x = wa.x + wa.width * mwfact, y = g.y + offset }
     elseif orientation == "left" then
         cursor = "cross"
-        if g.height+15 >= wa.height then
+        if g.height+useless_gap+15 >= wa.height then
             offset = g.height * .5
             cursor = "sb_h_double_arrow"
-        elseif g.y+g.height+15 <= wa.y+wa.height then
+        elseif g.y+useless_gap+g.height+15 <= wa.y+wa.height then
             offset = g.height
         end
         corner_coords = { x = wa.x + wa.width * (1 - mwfact), y = g.y + offset }
     elseif orientation == "bottom" then
         cursor = "cross"
-        if g.width+15 >= wa.width then
+        if g.width+useless_gap+15 >= wa.width then
             offset = g.width * .5
             cursor = "sb_v_double_arrow"
-        elseif g.x+g.width+15 <= wa.x+wa.width then
+        elseif g.x+g.width+useless_gap+15 <= wa.x+wa.width then
             offset = g.width
         end
         corner_coords = { y = wa.y + wa.height * mwfact, x = g.x + offset}
     else
         cursor = "cross"
-        if g.width+15 >= wa.width then
+        if g.width+useless_gap+15 >= wa.width then
             offset = g.width * .5
             cursor = "sb_v_double_arrow"
-        elseif g.x+g.width+15 <= wa.x+wa.width then
+        elseif g.x+g.width+useless_gap+15 <= wa.x+wa.width then
             offset = g.width
         end
         corner_coords = { y = wa.y + wa.height * (1 - mwfact), x= g.x + offset }
@@ -122,13 +124,13 @@ local function mouse_resize_handler(c, _, _, _, orientation)
                                       -- client where we have to use different settings.
                                       local wfact
                                       local wfact_x, wfact_y
-                                      if (geom.y+geom.height+15) > (wa.y+wa.height) then
+                                      if (geom.y+geom.height+useless_gap+15) > (wa.y+wa.height) then
                                           wfact_y = (geom.y + geom.height - coords.y) / wa.height
                                       else
                                           wfact_y = (coords.y - geom.y) / wa.height
                                       end
 
-                                      if (geom.x+geom.width+15) > (wa.x+wa.width) then
+                                      if (geom.x+geom.width+useless_gap+15) > (wa.x+wa.width) then
                                           wfact_x = (geom.x + geom.width - coords.x) / wa.width
                                       else
                                           wfact_x = (coords.x - geom.x) / wa.width
@@ -155,7 +157,7 @@ local function mouse_resize_handler(c, _, _, _, orientation)
                                       return true
                                   end
                               end
-                              return prev_coords.x == coords.x and prev_coords.y == coords.y
+                              return (prev_coords.x == coords.x) and (prev_coords.y == coords.y)
                           end, cursor)
 end
 
