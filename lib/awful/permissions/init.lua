@@ -367,12 +367,17 @@ function permissions.geometry(c, context, hints)
 
     local layout = c.screen.selected_tag and c.screen.selected_tag.layout or nil
 
+    context = context or ""
+
     -- Setting the geometry will not work unless the client is floating.
-    if (not c.floating) and (layout ~= asuit.floating) then
+    if (
+            (context ~= "fullscreen")
+            and (context ~= "maximized")
+            and (not c.floating)
+            and (layout ~= asuit.floating)
+    ) then
         return
     end
-
-    context = context or ""
 
     local original_context = context
 
