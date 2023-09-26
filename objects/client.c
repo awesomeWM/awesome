@@ -3010,6 +3010,8 @@ client_unmanage(client_t *c, client_unmanage_t reason)
 
     if(reason != CLIENT_UNMANAGE_DESTROYED)
     {
+        xwindow_buttons_grab(c->window, &(button_array_t){ .len = 0 });
+        xwindow_grabkeys(c->window, &(key_array_t){ .len = 0 });
         area_t geometry = client_get_undecorated_geometry(c);
         xcb_unmap_window(globalconf.connection, c->window);
         xcb_reparent_window(globalconf.connection, c->window, globalconf.screen->root,
