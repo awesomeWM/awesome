@@ -1123,6 +1123,11 @@ end
 --
 -- * *axis*: The axis (vertical or horizontal). If none is
 --    specified, then the drawable will be resized on both axis.
+-- * *corner*: The corner to resize from. If not specified, then
+--    the corner nearest to the cursor is used.
+-- * *corner_lock*: Whether to lock the corner to *corner* or not.
+--    if not set, then the corner may be updated to the one nearest
+--    to the cursor in the middle of resizing operation.
 --
 --@DOC_awful_placement_resize_to_mouse_EXAMPLE@
 -- @tparam drawable d A drawable (like `client`, `mouse` or `wibox`)
@@ -1138,25 +1143,38 @@ function placement.resize_to_mouse(d, args)
     local h_only = args.axis == "horizontal"
     local v_only = args.axis == "vertical"
 
-    -- To support both growing and shrinking the drawable, it is necessary
-    -- to decide to use either "north or south" and "east or west" directions.
-    -- Otherwise, the result will always be 1x1
-    local _, closest_corner = placement.closest_corner(capi.mouse, {
-        parent        = d,
-        pretend       = true,
-        include_sides = args.include_sides or false,
-    })
+    if args.mouse_offset then
+        coords = {
+            x = coords.x - args.mouse_offset.x,
+            y = coords.y - args.mouse_offset.y
+        }
+    end
+
+    local corner
+    if args.corner and args.corner_lock then
+        corner = args.corner
+    else
+        -- To support both growing and shrinking the drawable, it is necessary
+        -- to decide to use either "north or south" and "east or west" directions.
+        -- Otherwise, the result will always be 1x1
+        local _, closest_corner = placement.closest_corner(capi.mouse, {
+            parent        = d,
+            pretend       = true,
+            include_sides = args.include_sides or false,
+        })
+        corner = closest_corner
+    end
 
     -- Given "include_sides" wasn't set, it will always return a name
     -- with the 2 axis. If only one axis is needed, adjust the result
     if h_only then
-        closest_corner = closest_corner:match("left") or closest_corner:match("right")
+        corner = corner:match("left") or corner:match("right")
     elseif v_only then
-        closest_corner = closest_corner:match("top")  or closest_corner:match("bottom")
+        corner = corner:match("top")  or corner:match("bottom")
     end
 
     -- Use p0 (mouse), p1 and p2 to create a rectangle
-    local pts = resize_to_point_map[closest_corner]
+    local pts = resize_to_point_map[corner]
     local p1  = pts.p1 and rect_to_point(ngeo, pts.p1[1], pts.p1[2]) or coords
     local p2  = pts.p2 and rect_to_point(ngeo, pts.p2[1], pts.p2[2]) or coords
 

@@ -26,6 +26,7 @@ local ipairs = ipairs
 local timer = require("gears.timer")
 local gtable = require("gears.table")
 local aclient = require("awful.client")
+local mresize = require("awful.mouse.resize")
 local aplace = require("awful.placement")
 local asuit = require("awful.layout.suit")
 local beautiful = require("beautiful")
@@ -567,6 +568,101 @@ function permissions.client_geometry_requests(c, context, hints)
     end
 end
 
+--- Begins moving a client with the mouse.
+--
+-- This is the default handler for `request::mouse_move`. When a request is
+-- received, it uses `awful.mouse.resize` to initiate a mouse movement transaction
+-- that lasts so long as the specified mouse button is held.
+--
+-- @signalhandler awful.permissions.client_mouse_move
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam table args Additional information describing the movement.
+-- @tparam number args.mouse_pos.x The x coordinate of the mouse when grabbed.
+-- @tparam number args.mouse_pos.y The y coordinate of the mouse when grabbed.
+-- @tparam number args.button The mouse button that initiated the movement.
+-- @sourcesignal client request::mouse_move
+function permissions.client_mouse_move(c, context, args)
+    if not pcommon.check(c, "client", "mouse_move", context) then return end
+
+    if not c
+        or c.fullscreen
+        or c.maximized
+        or c.type == "desktop"
+        or c.type == "splash"
+        or c.type == "dock" then
+        return
+    end
+
+    local center_pos = aplace.centered(mouse, {parent=c, pretend=true})
+    mresize(c, "mouse.move", {
+        placement = aplace.under_mouse,
+        offset = {
+            x = center_pos.x - args.mouse_pos.x,
+            y = center_pos.y - args.mouse_pos.y
+        },
+        mouse_buttons = {args.button}
+    })
+end
+
+--- Begins resizing a client with the mouse.
+--
+-- This is the default handler for `request::mouse_resize`. When a request is
+-- received, it uses `awful.mouse.resize` to initiate a mouse resizing transaction
+-- that lasts so long as the specified mouse button is held.
+--
+-- @signalhandler awful.permissions.client_mouse_resize
+-- @tparam client c The client
+-- @tparam string context The context
+-- @tparam table args Additional information describing the resizing.
+-- @tparam number args.mouse_pos.x The x coordinate of the mouse when grabbed.
+-- @tparam number args.mouse_pos.y The y coordinate of the mouse when grabbed.
+-- @tparam number args.button The mouse button that initiated the resizing.
+-- @tparam string args.corner The corner/side of the window being resized.
+-- @sourcesignal client request::mouse_resize
+function permissions.client_mouse_resize(c, context, args)
+    if not pcommon.check(c, "client", "mouse_resize", context) then return end
+
+    if not c
+        or c.fullscreen
+        or c.maximized
+        or c.type == "desktop"
+        or c.type == "splash"
+        or c.type == "dock" then
+        return
+    end
+
+    local corner_pos = aplace[args.corner](mouse, {parent = c, pretend = true})
+    mresize(c, "mouse.resize", {
+        corner = args.corner,
+        corner_lock = true,
+        mouse_offset = {
+            x = args.mouse_pos.x - corner_pos.x,
+            y = args.mouse_pos.y - corner_pos.y
+        },
+        mouse_buttons = {args.button}
+    })
+end
+
+--- Cancels a mouse movement/resizing operation.
+--
+-- This is the default handler for `request::mouse_cancel`. It simply ends any
+-- ongoing `mousegrabber` transaction.
+--
+-- @signalhandler awful.permissions.client_mouse_cancel
+-- @tparam client c The client
+-- @tparam string context The context
+-- @sourcesignal client request::mouse_cancel
+function permissions.client_mouse_cancel(c, context)
+    if not pcommon.check(c, "client", "mouse_cancel", context) then return end
+
+    -- This will also stop other mouse grabber transactions, but that's probably fine;
+    -- a well-behaved client should only raise this signal when a mouse movement or
+    -- resizing operation is in progress, and so no other mouse grabber transactions
+    -- should be happening at this time.
+    mousegrabber.stop()
+end
+
 -- The magnifier layout doesn't work with focus follow mouse.
 permissions.add_activate_filter(function(c)
     if alayout.get(c.screen) ~= alayout.suit.magnifier
@@ -799,6 +895,9 @@ client.connect_signal("request::urgent"        , permissions.urgent)
 client.connect_signal("request::geometry"      , permissions.geometry)
 client.connect_signal("request::geometry"      , permissions.merge_maximization)
 client.connect_signal("request::geometry"      , permissions.client_geometry_requests)
+client.connect_signal("request::mouse_move"    , permissions.client_mouse_move)
+client.connect_signal("request::mouse_resize"  , permissions.client_mouse_resize)
+client.connect_signal("request::mouse_cancel"  , permissions.client_mouse_cancel)
 client.connect_signal("property::border_width" , repair_geometry)
 client.connect_signal("property::screen"       , repair_geometry)
 client.connect_signal("request::unmanage"      , check_focus_delayed)
