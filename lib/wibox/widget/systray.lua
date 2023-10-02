@@ -66,6 +66,7 @@ function systray:draw(context, cr, width, height)
     local cols = math.ceil(num_entries / rows)
     local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
     local spacing = beautiful.systray_icon_spacing or 0
+    local y_offset = ((height - base_size) / 2) - 1
 
     if context and not context.wibox then
         error("The systray widget can only be placed inside a wibox.")
@@ -93,7 +94,7 @@ function systray:draw(context, cr, width, height)
         -- Solving the "width" formula above for "base" (with width=in_dir):
         base = (in_dir + spacing) / cols - spacing
     end
-    capi.awesome.systray(context.wibox.drawin, math.ceil(x), math.ceil(y),
+    capi.awesome.systray(context.wibox.drawin, math.ceil(x), math.ceil(y + y_offset),
                          base, is_rotated, bg, reverse, spacing, rows)
 end
 
