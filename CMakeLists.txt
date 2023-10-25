@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.0.0)
-project(awesome C)
+project(awesome_crylia C)
 
 # Require an out-of-source build. We generate an awesomerc.lua in the build dir
 # from the one in the source dir and this does not work otherwise.

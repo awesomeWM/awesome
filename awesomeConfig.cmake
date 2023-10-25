@@ -1,4 +1,4 @@
-set(PROJECT_AWE_NAME awesome)
+set(PROJECT_AWE_NAME awesome_crylia)
 
 # If ${SOURCE_DIR} is a git repository VERSION is set to
 # `git describe` later.
