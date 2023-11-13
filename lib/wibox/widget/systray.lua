@@ -66,7 +66,7 @@ function systray:draw(context, cr, width, height)
     local cols = math.ceil(num_entries / rows)
     local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
     local spacing = beautiful.systray_icon_spacing or 0
-    local y_offset = 0 
+    local y_offset = 0
     if base_size then
         y_offset = ((height - base_size) / 2) - 1
     end
