@@ -57,6 +57,20 @@ describe("gears.string", function()
         assert.is_same(gstring.split("foo.", "."), {"foo", ""})
         assert.is_same(gstring.split("foo.bar", "."), {"foo", "bar"})
     end)
+
+    describe("psplit", function()
+        assert.is_same(gstring.psplit("", ""), {})
+        assert.is_same(gstring.psplit(".", ""), {"."})
+        assert.is_same(gstring.psplit("foo", ""), {"f", "o", "o"})
+        assert.is_same(gstring.psplit("foo.", ""), {"f", "o", "o", "."})
+        assert.is_same(gstring.psplit("foo.bar", "%."), {"foo", "bar"})
+
+        assert.is_same(gstring.psplit("", "."), {""})
+        assert.is_same(gstring.psplit("a", "."), {"", ""})
+        assert.is_same(gstring.psplit("foo", "."), {"", "", "", ""})
+        assert.is_same(gstring.psplit("foo.", "%W"), {"foo", ""})
+        assert.is_same(gstring.psplit(".foo.2.5.bar.73", "%.%d"), {".foo", "", ".bar", "3"})
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
