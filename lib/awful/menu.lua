@@ -108,7 +108,7 @@ menu.menu_keys = { up = { "Up", "k" },
               down = { "Down", "j" },
               back = { "Left", "h" },
               exec = { "Return" },
-              enter = { "Right", "l" },
+              enter = { "Right", "l", "KP_Enter" },
               close = { "Escape" } }
 
 
