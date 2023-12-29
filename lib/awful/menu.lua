@@ -707,7 +707,7 @@ end
 -- -- Bound to a key, it can be used to select from dozens of terminals open on
 -- -- several tags.
 -- -- When using @{ruled.client.match_any} instead of @{ruled.client.match},
--- -- a menu of clients with different classes could be build.
+-- -- a menu of clients with different classes could be built.
 --
 -- function terminal_menu ()
 --   terms = {}
