@@ -162,28 +162,32 @@ end
 
 local function new(args)
     args = args or {}
-    local tb = imagebox()
+    local ib = imagebox()
 
-    gtable.crush(tb, icon, true)
-    tb._private.notification = {}
+    gtable.crush(ib, icon, true)
+    ib._private.notification = {}
 
-    function tb._private.icon_changed_callback()
-        local n = tb._private.notification[1]
+    function ib._private.icon_changed_callback()
+        local n = ib._private.notification[1]
 
         if not n then return end
 
         local icn = gsurface.load_silently(n.icon)
 
         if icn then
-            tb:set_image(icn)
+            ib:set_image(icn)
+
+            -- Some clients will write the image to the same path over and
+            -- over, but the content will change.
+            ib:refresh()
         end
     end
 
     if args.notification then
-        tb:set_notification(args.notification)
+        ib:set_notification(args.notification)
     end
 
-    return tb
+    return ib
 end
 
 --@DOC_object_COMMON@
