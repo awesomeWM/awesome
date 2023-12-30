@@ -333,7 +333,7 @@ end
 -- @tparam gears.color|string args.style.fg_selected
 -- @tparam gears.surface|string args.style.bgimage_normal
 -- @tparam gears.surface|string args.style.bgimage_selected
--- @tparam[opt] table widget_template A custom widget to be used for each action.
+-- @tparam[opt] table args.widget_template A custom widget to be used for each action.
 -- @treturn widget The action widget.
 -- @constructorfct naughty.list.actions
 
