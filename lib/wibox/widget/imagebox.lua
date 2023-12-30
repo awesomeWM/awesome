@@ -203,6 +203,8 @@ function imagebox:draw(ctx, cr, width, height)
                 aspects[aspect] = 1
             elseif policy[aspect] == "auto" then
                 aspects[aspect] = math.min(width / w, height / h)
+            elseif policy[aspect] == "cover" then
+                aspects[aspect] = math.max(width / w, height / h)
             end
         end
 
@@ -519,6 +521,7 @@ end
 -- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
 -- @propertyvalue "none" Do not resize at all.
 -- @propertyvalue "fit" Resize to the widget width.
+-- @propertyvalue "cover" Resize to fill widget and preserve the aspect ratio.
 -- @propemits true false
 -- @see vertical_fit_policy
 -- @see resize
@@ -534,6 +537,7 @@ end
 -- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
 -- @propertyvalue "none" Do not resize at all.
 -- @propertyvalue "fit" Resize to the widget height.
+-- @propertyvalue "cover" Resize to fill widget and preserve the aspect ratio.
 -- @propemits true false
 -- @see horizontal_fit_policy
 -- @see resize

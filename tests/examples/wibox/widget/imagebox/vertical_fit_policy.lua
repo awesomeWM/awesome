@@ -69,13 +69,15 @@ parent:add(l)
 l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "auto"'), 1, 1)
 l:add_widget_at(wibox.widget.textbox('versical_fit_policy = "none"'), 2, 1)
 l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "fit"'), 3, 1)
-l:add_widget_at(wibox.widget.textbox('imagebox size'), 4, 1)
+l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "cover"'), 4, 1)
+l:add_widget_at(wibox.widget.textbox('imagebox size'), 5, 1)
 
 for i,size in ipairs({16, 32, 64}) do
     l:add_widget_at(build_ib(size, "auto"), 1, i + 1)
     l:add_widget_at(build_ib(size, "none"), 2, i + 1)
     l:add_widget_at(build_ib(size, "fit" ), 3, i + 1)
-    l:add_widget_at(cell_centered_widget(wibox.widget.textbox(size..'x'..size)), 4, i + 1)
+    l:add_widget_at(build_ib(size, "cover"), 4, i + 1)
+    l:add_widget_at(cell_centered_widget(wibox.widget.textbox(size..'x'..size)), 5, i + 1)
 end
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
