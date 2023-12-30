@@ -26,6 +26,8 @@
 
 local lgi = require("lgi")
 local cairo = lgi.cairo
+local gio = require("lgi").Gio
+local glib = lgi.GLib
 
 local base = require("wibox.widget.base")
 local surface = require("gears.surface")
@@ -50,6 +52,10 @@ local imagebox = { mt = {} }
 
 local rsvg_handle_cache = setmetatable({}, { __mode = 'k' })
 
+local function is_svg_content(file)
+    return file:match("<[?]?xml") or file:match("<svg")
+end
+
 ---Load rsvg handle form image file
 -- @tparam string file Path to svg file.
 -- @return Rsvg handle
@@ -65,7 +71,7 @@ local function load_rsvg_handle(file)
 
     local handle, err
 
-    if file:match("<[?]?xml") or file:match("<svg") then
+    if is_svg_content(file) then
         handle, err = Rsvg.Handle.new_from_data(file)
     else
         handle, err = Rsvg.Handle.new_from_file(file)
@@ -166,6 +172,34 @@ local function update_dpi(self, ctx)
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
     end
+end
+
+-- Try to see if a new file has been written to the same path as the "old" one.
+--
+-- The file attibutes are only loaded when `:refresh()` is called for the first
+-- time. `GdkPixbuf` doesn't expose the right data, so it would cause the file
+-- info to be loaded twice for a rarely used method.
+local function detect_changes_async(self, path)
+    local gfile = gio.File.new_for_path(path)
+    gfile:query_info_async(
+        "standard::size,time::modified",
+        gio.FileQueryInfoFlags.NONE, glib.PRIORITY_DEFAULT, nil,
+        function(_, gfileinfo_result)
+            local gfileinfo = gfile:query_info_finish(gfileinfo_result)
+            local sec       = gfileinfo:get_modification_time().tv_sec
+            local size      = gfileinfo:get_size()
+
+            local has_changed = self._private.standard_size ~= size or
+                self._private.time_modified ~= sec
+
+            self._private.standard_size = size
+            self._private.time_modified = sec
+
+            if has_changed then
+                self:set_image(path, { force = true })
+            end
+        end, nil
+    )
 end
 
 -- Draw an imagebox with the given cairo context in the given geometry.
@@ -307,15 +341,26 @@ end
 -- @method set_image
 -- @hidden
 -- @tparam image image The image to render.
+-- @tparam[opt=nil] table|nil args
+-- @tparam[opt=false] boolean args.force Reload the image even if the path has
+--  not changed.
 -- @treturn boolean `true` on success, `false` if the image cannot be used.
 -- @usage my_imagebox:set_image(beautiful.awesome_icon)
 -- @usage my_imagebox:set_image('/usr/share/icons/theme/my_icon.png')
 -- @see image
-function imagebox:set_image(image)
+function imagebox:set_image(image, args)
+    args = args or {}
+
+    if (not args.force) and image == self._private.original_image then return end
+
     local setup_succeed
 
     -- Keep the original to prevent the cache from being GCed.
     self._private.original_image = image
+
+    -- Clear the file attributes.
+    self._private.standard_size = nil
+    self._private.time_modified = nil
 
     if type(image) == "userdata" and not (Rsvg and Rsvg.Handle:is_type_of(image)) then
         -- This function is not documented to handle userdata objects, but
@@ -330,7 +375,11 @@ function imagebox:set_image(image)
 
         if not setup_succeed then
             -- rsvg handle failed, try to load cairo surface with pixbuf
-            setup_succeed = load_and_apply(self, image, surface.load, set_surface)
+            if args.force then
+                setup_succeed = load_and_apply(self, image, surface.load_uncached, set_surface)
+            else
+                setup_succeed = load_and_apply(self, image, surface.load, set_surface)
+            end
         end
     elseif Rsvg and Rsvg.Handle:is_type_of(image) then
         -- try to apply given rsvg handle
@@ -384,6 +433,22 @@ function imagebox:set_clip_shape(clip_shape, ...)
     self._private.clip_args = {...}
     self:emit_signal("widget::redraw_needed")
     self:emit_signal("property::clip_shape", clip_shape)
+end
+
+--- Reload the image.
+--
+-- When called, it checks if the file modification time or its size has changed,
+-- then reload the image. It is a no-op when the `image` is a stringified SVG
+-- image or a Cairo surface.
+--
+-- @method refresh
+-- @noreturn
+function imagebox:refresh()
+    local path = self._private.original_image
+
+    if type(path) ~= "string" or is_svg_content(path) then return end
+
+    detect_changes_async(self, path)
 end
 
 --- Should the image be resized to fit into the available space?
