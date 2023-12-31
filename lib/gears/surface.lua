@@ -284,18 +284,18 @@ function surface.widget_to_surface(widget, width, height, format)
     return img, run_in_hierarchy(widget, cr, width, height)
 end
 
---- Crop a surface on its edges
+--- Crop a surface on its edges.
 -- @tparam[opt=nil] table args
--- @tparam int args.left Left cutoff, cannot be negative
--- @tparam int args.right Right cutoff, cannot be negative
--- @tparam int args.top Top cutoff, cannot be negative
--- @tparam int args.bottom Bottom cutoff, cannot be negative
--- @tparam number args.ratio ratio to crop the image to. If edge cutoffs and
+-- @tparam[opt=0] integer args.left Left cutoff, cannot be negative
+-- @tparam[opt=0] integer args.right Right cutoff, cannot be negative
+-- @tparam[opt=0] integer args.top Top cutoff, cannot be negative
+-- @tparam[opt=0] integer args.bottom Bottom cutoff, cannot be negative
+-- @tparam[opt=nil] number|nil args.ratio Ratio to crop the image to. If edge cutoffs and
 -- ratio are given, the edge cutoffs are computed first. Using ratio will crop
 -- the center out of an image, similar to what "zoomed-fill" does in wallpaper
 -- setter programs. Cannot be negative
--- @tparam[opt=nil] surface args.surface the surface to crop
--- @return the cropped surface
+-- @tparam[opt=nil] surface args.surface The surface to crop
+-- @return The cropped surface
 -- @staticfct crop_surface
 function surface.crop_surface(args)
     args = args or {}
