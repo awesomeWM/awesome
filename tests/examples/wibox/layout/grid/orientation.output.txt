@@ -1,8 +1,0 @@
-l = wibox.layout {
-    column_count = 2,
-    row_count    = 2,
-    homogeneous  = true,
-    layout       = wibox.layout.grid
-}
-l:set_orientation("vertical") -- change to "horizontal"
-l:add(...)
