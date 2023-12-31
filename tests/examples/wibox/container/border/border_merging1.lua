@@ -47,7 +47,7 @@ for _, side in ipairs { "top", "bottom", "left", "right" } do
             widget = wibox.widget.textbox
         },
         border_merging = {
-            -- This is the equaivalent "left = true,". "side" is the loop
+            -- This is the equaivalent "side = true,". "side" is the loop
             -- variable.
             [side] = true
         },

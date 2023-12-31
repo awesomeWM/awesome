@@ -8,8 +8,8 @@
 -- symmetric on both axis.
 --
 -- Note that because of legacy reasons, `wibox.container.background` also has
--- good support for borders. If you only need simple shaped strokes, the,
--- the `background` container is a much better choice. This module is better
+-- good support for borders. If you only need simple shaped strokes, the
+-- `background` container is a much better choice. This module is better
 -- suited for background images and border widgets.
 --
 -- Advanced usage
@@ -23,7 +23,7 @@
 --
 -- This example demonstrates how to use this module to create a client
 -- border with a top titlebar and borders. It does so by embedding a
--- `wibox.container.border` into another `wibox.container.border. The outer
+-- `wibox.container.border` into another `wibox.container.border`. The outer
 -- container acts as the border around the central area while the inner one
 -- spans the top area and contains the titlebar itself. The outer border
 -- widgets area can be used to implement border resize.
@@ -82,7 +82,7 @@ local function fit_common(widget, ctx, max_w, max_h)
 end
 
 local function uses_slice(self)
-    return (self._private.border_widgets or self._private.border_image_widgets) == nil
+    return not (self._private.border_widgets or self._private.border_image_widgets)
 end
 
 local function get_widget(self, ctx, component)
@@ -577,7 +577,7 @@ end
 --- The widget to display inside of the border.
 --
 -- @property widget
--- @tparam widget widget
+-- @tparam[opt=nil] widget|nil widget
 
 module.set_widget = base.set_widget_common
 
@@ -595,6 +595,7 @@ end
 
 --- Reset this layout. The widget will be removed and the rotation reset.
 -- @method reset
+-- @noreturn
 -- @interface container
 function module:reset()
     self:set_widget(nil)
@@ -605,7 +606,7 @@ end
 -- When using this property, the `borders` also **needs** to be specified.
 --
 -- @property border_image
--- @tparam string|gears.surface border_image
+-- @tparam[opt=nil] string|image|nil border_image
 -- @see borders
 -- @see border_images
 
@@ -671,7 +672,7 @@ end
 -- @DOC_wibox_container_border_stylesheet1_EXAMPLE@
 --
 -- @property border_image_stylesheet
--- @tparam string border_image_stylesheet CSS data or file path.
+-- @tparam[opt=""] string border_image_stylesheet CSS data or file path.
 -- @see wibox.widget.imagebox.stylesheet
 
 function module:set_border_image_stylesheet(value)
@@ -701,6 +702,11 @@ end
 --
 -- @property image_scaling_quality
 -- @tparam[opt="nearest"] string image_scaling_quality
+-- @propertyvalue "fast" A high-performance filter.
+-- @propertyvalue "good" A reasonable-performance filter.
+-- @propertyvalue "best" The highest-quality available.
+-- @propertyvalue "nearest" Nearest-neighbor filtering (blocky).
+-- @propertyvalue "bilinear" Linear interpolation in two dimensions.
 
 --- Use images for each of the side/corner/filling sections.
 --
@@ -713,15 +719,15 @@ end
 -- @DOC_wibox_container_border_border_images1_EXAMPLE@
 --
 -- @property border_images
--- @tparam[opt=nil] table|gears.surface|nil border_images
--- @tparam[opt=nil] string|gears.surface border_images.top_left
--- @tparam[opt=nil] string|gears.surface border_images.top
--- @tparam[opt=nil] string|gears.surface border_images.top_right
--- @tparam[opt=nil] string|gears.surface border_images.right
--- @tparam[opt=nil] string|gears.surface border_images.bottom_right
--- @tparam[opt=nil] string|gears.surface border_images.bottom
--- @tparam[opt=nil] string|gears.surface border_images.bottom_left
--- @tparam[opt=nil] string|gears.surface border_images.left
+-- @tparam[opt=nil] table|image|nil border_images
+-- @tparam[opt=nil] string|image|nil border_images.top_left
+-- @tparam[opt=nil] string|image|nil border_images.top
+-- @tparam[opt=nil] string|image|nil border_images.top_right
+-- @tparam[opt=nil] string|image|nil border_images.right
+-- @tparam[opt=nil] string|image|nil border_images.bottom_right
+-- @tparam[opt=nil] string|image|nil border_images.bottom
+-- @tparam[opt=nil] string|image|nil border_images.bottom_left
+-- @tparam[opt=nil] string|image|nil border_images.left
 -- @propemits true false
 -- @see border_image
 
@@ -754,6 +760,7 @@ end
 -- @tparam[opt=0] number borders.left
 -- @tparam[opt=0] number borders.right
 -- @tparam[opt=0] number borders.bottom
+-- @negativeallowed false
 
 function module:set_borders(value)
 
@@ -773,11 +780,6 @@ end
 
 --- How the sliced image is resized for the border sides.
 --
---  * "fit" (default)
---  * "repeat"
---  * "reflect"
---  * "pad"
---
 -- In the following example, the gradient based border works
 -- will with `fit` and `pad`. The repeated dot works well with
 -- `repeat` and `reflect`. The soft shadow one works regardless
@@ -787,6 +789,10 @@ end
 --
 -- @property sides_fit_policy
 -- @tparam[opt="fit"] string sides_fit_policy
+-- @propertyvalue "fit" (default)
+-- @propertyvalue "repeat"
+-- @propertyvalue "reflect"
+-- @propertyvalue "pad"
 -- @propemits true false
 -- @see wibox.widget.imagebox.vertical_fit_policy
 -- @see wibox.widget.imagebox.horizontal_fit_policy
@@ -796,30 +802,32 @@ end
 -- Also note that if `slice` is set to `false`, this will be used for
 -- the entire background.
 --
---  * "fit" (default)
---  * "repeat"
---  * "reflect"
---  * "pad"
---
 -- @DOC_wibox_container_border_filling_fit_policy1_EXAMPLE@
 --
 -- @property filling_fit_policy
 -- @tparam[opt="fit"] string filling_fit_policy
+-- @propertyvalue "fit" (default)
+-- @propertyvalue "repeat"
+-- @propertyvalue "reflect"
+-- @propertyvalue "pad"
 -- @propemits true false
 -- @see fill
+-- @see wibox.widget.imagebox.vertical_fit_policy
+-- @see wibox.widget.imagebox.horizontal_fit_policy
 
 --- How the sliced image is resized for the border corners.
---
---  * "fit" (default)
---  * "repeat"
---  * "reflect"
---  * "pad"
 --
 -- @DOC_wibox_container_border_corners_fit_policy1_EXAMPLE@
 --
 -- @property corners_fit_policy
 -- @tparam[opt="fit"] string corners_fit_policy
+-- @propertyvalue "fit" (default)
+-- @propertyvalue "repeat"
+-- @propertyvalue "reflect"
+-- @propertyvalue "pad"
 -- @propemits true false
+-- @see wibox.widget.imagebox.vertical_fit_policy
+-- @see wibox.widget.imagebox.horizontal_fit_policy
 
 for _, mode in ipairs {"corners", "sides", "filling" } do
     module["set_"..mode.."_fit_policy"] = function(self, value)
@@ -920,6 +928,7 @@ end
 -- @property paddings
 -- @tparam[opt=0] number|table paddings
 -- @propemits true false
+-- @negativeallowed false
 -- @see wibox.container.margin
 
 function module:set_paddings(value)

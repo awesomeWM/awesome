@@ -370,6 +370,8 @@ end
 --
 -- @property source_width
 -- @tparam number source_width
+-- @propertydefault This depends on the source image.
+-- @negativeallowed false
 -- @see image
 -- @see source_height
 
@@ -381,6 +383,8 @@ end
 --
 -- @property source_height
 -- @tparam number source_height
+-- @propertydefault This depends on the source image.
+-- @negativeallowed false
 -- @see image
 -- @see source_width
 
@@ -642,9 +646,9 @@ end
 -- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
 -- @propertyvalue "none" Do not resize at all.
 -- @propertyvalue "fit" Resize to the widget width.
--- @propertyvalue "repeat"` Repeat the image side by side.
--- @propertyvalue "reflect"` Like `repeat`, but alternate the reflection.
--- @propertyvalue "pad"` Take the last column of pixels and repeat them.
+-- @propertyvalue "repeat" Repeat the image side by side.
+-- @propertyvalue "reflect" Like `repeat`, but alternate the reflection.
+-- @propertyvalue "pad" Take the last column of pixels and repeat them.
 -- @propemits true false
 -- @see vertical_fit_policy
 -- @see resize
@@ -666,9 +670,9 @@ end
 -- @propertyvalue "none" Do not resize at all.
 -- @propertyvalue "fit" Resize to the widget height.
 -- @propertyvalue "fit" Resize to the widget width.
--- @propertyvalue "repeat"` Repeat the image side by side.
--- @propertyvalue "reflect"` Like `repeat`, but alternate the reflection.
--- @propertyvalue "pad"` Take the last column of pixels and repeat them.
+-- @propertyvalue "repeat" Repeat the image side by side.
+-- @propertyvalue "reflect" Like `repeat`, but alternate the reflection.
+-- @propertyvalue "pad" Take the last column of pixels and repeat them.
 -- @propemits true false
 -- @see horizontal_fit_policy
 -- @see resize
