@@ -114,7 +114,7 @@ function object:weak_connect_signal(name, func)
     sig.weak[func] = make_the_gc_obey(func)
 end
 
---- Disonnect from a signal.
+--- Disconnect from a signal.
 -- @tparam string name The name of the signal.
 -- @tparam function func The callback that should be disconnected.
 -- @method disconnect_signal
