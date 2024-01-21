@@ -41,7 +41,7 @@ parent:add( wibox.container.background(--DOC_HIDE
             },
             layout         = wibox.layout.flex.horizontal
         },
-        widget_template = {
+        widget_template = wibox.template {
             {
                 {
                     {

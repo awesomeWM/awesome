@@ -5,8 +5,8 @@ require "lgi"
 
 -- Always show deprecated messages
 _G.awesome = {
-   version = "v9999",
-   api_level = 9999,
+    version = "v9999",
+    api_level = 9999,
 }
 
 -- "fix" some intentional beautiful breakage done by .travis.yml

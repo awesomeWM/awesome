@@ -182,7 +182,7 @@ local notificationlist = {}
 
 --- The notificationlist parent notification.
 -- @property widget_template
--- @tparam[opt=nil] template|nil widget_template
+-- @tparam[opt=nil] wibox.template|nil widget_template
 -- @propertydefault The default template displays the icon, title, message and
 --  actions.
 -- @propemits true false
@@ -208,7 +208,7 @@ local notificationlist = {}
 -- @usebeautiful beautiful.notification_bgimage_selected Fallback.
 
 function notificationlist:set_widget_template(widget_template)
-    self._private.widget_template = widget_template
+    self._private.widget_template = wibox.template.make_from_value(widget_template)
 
     -- Remove the existing instances
     self._private.data = {}
@@ -217,7 +217,7 @@ function notificationlist:set_widget_template(widget_template)
 
     self:emit_signal("widget::layout_changed")
     self:emit_signal("widget::redraw_needed")
-    self:emit_signal("property::widget_template", widget_template)
+    self:emit_signal("property::widget_template", self._private.widget_template)
 end
 
 function notificationlist:set_style(style)
@@ -289,7 +289,7 @@ end
 -- @tparam gears.color|string args.style.fg_selected
 -- @tparam gears.surface|string args.style.bgimage_normal
 -- @tparam gears.surface|string args.style.bgimage_selected
--- @tparam[opt] table args.widget_template A custom widget to be used for each
+-- @tparam[opt] wibox.template args.widget_template A custom widget to be used for each
 --  notifications.
 -- @treturn widget The notification list widget.
 -- @constructorfct naughty.list.notifications

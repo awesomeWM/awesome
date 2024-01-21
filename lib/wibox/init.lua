@@ -31,6 +31,7 @@ wibox.container = require("wibox.container")
 wibox.widget = require("wibox.widget")
 wibox.drawable = require("wibox.drawable")
 wibox.hierarchy = require("wibox.hierarchy")
+wibox.template = require("wibox.template")
 
 local force_forward = {
     shape_bounding = true,

@@ -190,7 +190,7 @@ local layoutlist = {}
 --- The delegate widget template.
 --
 -- @property widget_template
--- @tparam[opt=nil] template|nil widget_template
+-- @tparam[opt=nil] wibox.template|nil widget_template
 -- @propemits true false
 
 --- The layoutlist screen.
@@ -362,7 +362,7 @@ function layoutlist:get_count()
 end
 
 function layoutlist:set_widget_template(widget_template)
-    self._private.widget_template = widget_template
+    self._private.widget_template = wibox.template.make_from_value(widget_template)
 
     -- Remove the existing instances
     self._private.data = setmetatable({}, { __mode = 'k' })

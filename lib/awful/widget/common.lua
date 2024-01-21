@@ -17,7 +17,6 @@ local capi = { button = button }
 local wibox = require("wibox")
 local gdebug = require("gears.debug")
 local dpi = require("beautiful").xresources.apply_dpi
-local base = require("wibox.widget.base")
 
 --- Common utilities for awful widgets
 local common = {}
@@ -51,7 +50,7 @@ function common.create_buttons(buttons, object)
 end
 
 local function custom_template(args)
-    local l = base.make_widget_from_value(args.widget_template)
+    local l = wibox.template.make_from_value(args.widget_template)
 
     -- The template system requires being able to get children elements by ids.
     -- This is not optimal, but for now there is no way around it.
@@ -72,7 +71,7 @@ end
 
 local function default_template()
     return custom_template {
-        widget_template = {
+        widget_template = wibox.template {
             id = 'background_role',
             border_strategy = 'inner',
             widget = wibox.container.background,

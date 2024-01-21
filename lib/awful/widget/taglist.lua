@@ -56,6 +56,7 @@ local gstring = require("gears.string")
 local gdebug = require("gears.debug")
 local base = require("wibox.widget.base")
 local gtable = require("gears.table")
+local wtemplate = require("wibox.template")
 
 local function get_screen(s)
     return s and capi.screen[s]
@@ -525,7 +526,7 @@ end
 --- A template used to generate the individual tag widgets.
 --
 -- @property widget_template
--- @tparam[opt=nil] template|nil widget_template
+-- @tparam[opt=nil] wibox.template|nil widget_template
 
 for _, prop in ipairs { "filter", "update_function", "widget_template", "source", "screen" } do
     taglist["set_"..prop] = function(self, value)
@@ -545,6 +546,16 @@ for _, prop in ipairs { "filter", "update_function", "widget_template", "source"
     end
 end
 
+function taglist:set_widget_template(widget_template)
+    self._private.widget_template = wtemplate.make_from_value(widget_template)
+
+    self._do_taglist_update()
+
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("property::widget_template", self._private.widget_template)
+end
+
 --- Create a new taglist widget. The last two arguments (update_function
 -- and layout) serve to customize the layout of the taglist (eg. to
 -- make it vertical). For that, you will need to copy the
@@ -561,7 +572,7 @@ end
 --   is wibox.layout.fixed.horizontal().
 -- @tparam[opt=awful.widget.taglist.source.for_screen] function args.source The
 --  function used to generate the list of tag.
--- @tparam[opt] table args.widget_template A custom widget to be used for each tag
+-- @tparam[opt] wibox.template args.widget_template A custom widget to be used for each tag
 -- @tparam[opt={}] table args.style The style overrides default theme.
 -- @tparam[opt=beautiful.taglist_fg_focus] string|pattern args.style.fg_focus
 -- @tparam[opt=beautiful.taglist_bg_focus] string|pattern args.style.bg_focus
@@ -658,7 +669,7 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
         buttons         = args.buttons,
         filter          = args.filter,
         update_function = args.update_function,
-        widget_template = args.widget_template,
+        widget_template = wtemplate.make_from_value(args.widget_template),
         source          = args.source,
         screen          = screen
     })

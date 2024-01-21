@@ -44,7 +44,7 @@ beautiful.notification_action_label_only = true --DOC_HIDE
                 spacing       = 3,
                 layout        = wibox.layout.flex.horizontal
             },
-            widget_template = {
+            widget_template = wibox.template {
                 {
                     naughty.widget.icon,
                     {

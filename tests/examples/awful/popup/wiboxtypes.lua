@@ -111,7 +111,7 @@ awful.popup {
                 forced_num_cols = 5,
                 layout          = wibox.layout.grid.vertical,
             },
-            widget_template = {
+            widget_template = wibox.template {
                 {
                     {
                         id            = 'icon_role',

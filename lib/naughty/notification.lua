@@ -15,15 +15,16 @@
 -- @copyright 2017 Emmanuel Lepage Vallee
 -- @coreclassmod naughty.notification
 ---------------------------------------------------------------------------
-local capi     = { screen = screen }
-local gobject  = require("gears.object")
-local gtable   = require("gears.table")
-local timer    = require("gears.timer")
-local gfs      = require("gears.filesystem")
-local cst      = require("naughty.constants")
-local naughty  = require("naughty.core")
-local gdebug   = require("gears.debug")
-local pcommon = require("awful.permissions._common")
+local capi      = { screen = screen }
+local gobject   = require("gears.object")
+local gtable    = require("gears.table")
+local timer     = require("gears.timer")
+local gfs       = require("gears.filesystem")
+local cst       = require("naughty.constants")
+local naughty   = require("naughty.core")
+local gdebug    = require("gears.debug")
+local pcommon   = require("awful.permissions._common")
+local wtemplate = require("wibox.template")
 
 local notification = {}
 
@@ -514,7 +515,7 @@ local notification = {}
 -- off with a specialized notification widget.
 --
 -- @property widget_template
--- @tparam[opt=nil] template|nil widget_template
+-- @tparam[opt=nil] wibox.template|nil widget_template
 -- @propertydefault The default template as the icon, title, message and actions.
 -- @propemits true false
 
@@ -855,6 +856,21 @@ function notification:append_actions(new_actions)
         table.insert(self._private.actions, a)
     end
 
+end
+
+function notification:set_widget_template(value)
+    self._private.widget_template = wtemplate.make_from_value(value)
+    self:emit_signal("property::widget_template", value)
+
+    -- When a notification is updated over dbus or by setting a property,
+    -- it is usually convenient to reset the timeout.
+    local reset = ((not self.suspended) or self._private.ignore_suspend)
+        and self.auto_reset_timeout ~= false
+        and naughty.auto_reset_timeout
+
+    if reset then
+        self:reset_timeout()
+    end
 end
 
 function notification:set_screen(s)
