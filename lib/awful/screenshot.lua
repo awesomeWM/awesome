@@ -440,15 +440,15 @@ end
 -- @tparam[opt=nil] screen|nil screen
 -- @propemits true false
 -- @see mouse.screen
--- @see awful.screen.focused
+-- @see screen.focused
 -- @see screen.primary
 
 --- Get screenshot client.
 --
 -- @property client
--- @tparam[opt=nil] client|nil client
+-- @tparam[opt=nil] client|nil client The client.
 -- @propemits true false
--- @see mouse.client
+-- @see mouse.current_client
 -- @see client.focus
 
 --- Get screenshot geometry.
@@ -891,6 +891,7 @@ end
 -- @method reject
 -- @tparam[opt=nil] string||nil reason The reason why it was rejected. This is
 --  passed to the `"snipping::cancelled"` signal.
+-- @noreturn
 -- @emits snipping::cancelled
 
 function module:reject(reason)

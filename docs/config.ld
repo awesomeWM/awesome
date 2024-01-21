@@ -1739,6 +1739,13 @@ local summarize = {
     readonly      = {index = 8, title = "read only"       , count = false},
 }
 
+local no_prefix = {
+    property           = true,
+    signal             = true,
+    clientruleproperty = true,
+    deprecatedproperty = true,
+}
+
 local delimiter_for_tag = {
     usebeautiful  = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
     propbeautiful = { "table class='widget_list' border=1", "table", "tr", "tr", {"Theme variable", "Usage"}},
@@ -2126,7 +2133,11 @@ local function global_init(_ldoc)
                 -- Decorate the item with our customizations.
                 init_custom_types(item)
 
-                -- print(item.description)
+                -- Remove the "namespace" from the signals and properties
+                if no_prefix[item.type] then
+                    local name = item.name:match("%.([^.]+)$")
+                    item.name = name ~= "" and name or item.name
+                end
 
                 if item.summary and not detect_markdown_footguns(item.summary) then
                     print(
@@ -2247,13 +2258,6 @@ local function compare_module_name(input, module)
     return false
 end
 
-local no_prefix = {
-    property           = true,
-    signal             = true,
-    clientruleproperty = true,
-    deprecatedproperty = true,
-}
-
 -- These modules merge the doc of their `awful` siblings.
 local coreclassmap = {
     tag    = "tag<span class='listplusign'> and awful.tag</span>",
@@ -2364,12 +2368,6 @@ custom_display_name_handler = function(item, default_handler)
     if show_return[item.type] and item.tags["return"] then
         item.ret = item.tags["return"]
         item:build_return_groups()
-    end
-
-    -- Remove the "namespace" from the signals and properties
-    if no_prefix[item.type] then
-        local name = item.name:match("%.([^.]+)$")
-        return name ~= "" and name or item.name
     end
 
     -- Handle the left sidebar modules.

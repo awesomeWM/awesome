@@ -7,6 +7,64 @@ local client, meta = awesome._shim_fake_class()
 
 rawset(client, "_autotags", true)
 
+-- Make sure `awful.client` properties like `floating` get handled by the
+-- miss handler rather than set directly on the object. The reason it's done
+-- than way is ancient and convoluted.
+local native_property_defaults = {
+    -- Layers.
+    ontop     = false,
+    below     = false,
+    above     = false,
+    sticky    = false,
+    urgent    = false,
+    modal     = false,
+    focusable = true,
+    hidden    = false,
+
+    -- Other properties.
+    name             = "",
+    transient_for    = nil,
+    skip_taskbar     = false,
+    type             = "normal",
+    class            = "",
+    instance         = "",
+    role             = "",
+    pid              = 1,
+    leader_window    = nil,
+    machine          = "",
+    icon_name        = "",
+    screen           = nil,
+    minimized        = false,
+    motif_wm_hints   = {},
+    group_window     = nil,
+    icon             = nil,
+    icon_sizes       = {},
+    size_hints_honor = true,
+    size_hints       = {},
+    startup_id       = nil,
+    valid            = true,
+
+    -- The shims can't really handle those properly.
+    shape_bounding        = nil,
+    content               = nil,
+    shape_clip            = nil,
+    shape_input           = nil,
+    client_shape_bounding = nil,
+    client_shape_clip     = nil,
+
+    -- Those have special code.
+    maximized            = nil,
+    fullscreen           = nil,
+    maximized_horizontal = nil,
+    maximized_vertical   = nil,
+
+    -- Those are not really native, but it simplify the shims a lot.
+    x      = 0,
+    y      = 0,
+    width  = 1,
+    height = 1,
+}
+
 -- Keep an history of the geometry for validation and images
 local function push_geometry(c)
     table.insert(c._old_geo, c:geometry())
@@ -76,9 +134,9 @@ function client.gen_fake(args)
     awesome._forward_class(ret, client)
 
     ret._private = {}
-    ret.type = "normal"
-    ret.valid = true
-    ret.size_hints = {}
+    ret.type = native_property_defaults.type
+    ret.valid = native_property_defaults.valid
+    ret.size_hints = native_property_defaults.size_hints
     ret._border_width = 1
     ret._tags = args and args.tags or nil
     ret.icon_sizes = {{16,16}}
@@ -95,9 +153,11 @@ function client.gen_fake(args)
     -- be `nil`.
     ret.transient_for = false
 
-    -- Apply all properties
+    -- Apply the native (capi) properties.
     for k,v in pairs(args or {}) do
-        ret[k] = v
+        if native_property_defaults[k] then
+            ret[k] = v
+        end
     end
 
     -- Tests should always set a geometry, but just in case
@@ -295,14 +355,7 @@ function client.gen_fake(args)
     ret.drawable = ret
 
     -- Make sure the layer properties are not `nil`
-    local defaults = {
-        ontop     = false,
-        below     = false,
-        above     = false,
-        sticky    = false,
-        urgent    = false,
-        focusable = true,
-    }
+    local defaults = setmetatable({}, {__index = native_property_defaults})
 
     -- Declare the deprecated buttons and keys methods.
     function ret:_keys(new)
@@ -351,6 +404,13 @@ function client.gen_fake(args)
             --client.emit_signal("property::"..key, ret, value)
         end
     })
+
+    -- Apply non-native (`awful.client`) properties.
+    for k,v in pairs(args or {}) do
+        if (not native_property_defaults[k]) and (not rawget(ret, k)) then
+            ret[k] = v
+        end
+    end
 
     client.emit_signal("request::manage", ret)
 
