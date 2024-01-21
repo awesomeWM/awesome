@@ -1,0 +1,6 @@
+[Desktop Entry]
+
+Type=Application
+Name=path test
+Path=/home/
+Exec=ls
