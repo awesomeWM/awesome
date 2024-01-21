@@ -103,14 +103,12 @@ luaA_mousegrabber_run(lua_State *L)
 
     if(!lua_isnil(L, 2))
     {
-        uint16_t cfont = xcursor_font_fromstr(luaL_checkstring(L, 2));
-        if(!cfont)
+        cursor = xcursor_new(&globalconf.cursor_cache, globalconf.cursor_ctx, luaL_checkstring(L, 2));
+        if (!cursor)
         {
             luaA_warn(L, "invalid cursor");
             return 0;
         }
-
-        cursor = xcursor_new(globalconf.cursor_ctx, cfont);
     }
 
     luaA_registerfct(L, 1, &globalconf.mousegrabber);
