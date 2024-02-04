@@ -58,6 +58,7 @@ ${TOP_SOURCE_DIR}/lib/?/init.lua\\;\
 ${TOP_SOURCE_DIR}/lib/?\\;\
 ${TOP_SOURCE_DIR}/themes/?.lua\\;\
 ${TOP_SOURCE_DIR}/themes/?\\;\
+${TOP_SOURCE_DIR}/tests/examples/?.lua\\;\
 ${LUA_PATH_}")
 
 # Add the C API shims.

@@ -23,6 +23,141 @@ local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility
 
 local background = { mt = {} }
 
+-- If a background is resized with the mouse, it might create a large
+-- number of scaled texture. After the cache grows beyond this number, it
+-- is purged.
+local MAX_CACHE_SIZE = 10
+local global_scaled_pattern_cache = setmetatable({}, {__mode = "k"})
+
+local function clone_stops(input, output)
+    local err, count = input:get_color_stop_count()
+
+    if err ~= "SUCCESS" then return end
+
+    for idx = 0, count-1 do
+        local _, off, r, g, b, a = input:get_color_stop_rgba(idx)
+        output:add_color_stop_rgba(off, r, g, b, a)
+    end
+end
+
+local function stretch_lineal_gradient(input, width, height)
+    -- First, get the original values.
+    local err, x0, y0, x1, y1 = input:get_linear_points()
+
+    if err ~= "SUCCESS" then
+        return input
+    end
+
+
+    local new_x0, new_y0 = x1 == 0 and 0 or ((x0/x1)*width), y1 == 0 and 0 or ((y0/y1)*height)
+
+    local output = cairo.Pattern.create_linear(new_x0, new_y0, width, height)
+
+    clone_stops(input, output)
+
+    return output
+end
+
+local function stretch_radial_gradient(input, width, height)
+    local err, cx0, cy0, radius0, cx1, cy1, radius1 = input:get_radial_circles()
+
+    if err ~= "SUCCESS" then
+        return input
+    end
+
+    -- Create a box for the original gradient, starting at 0x0.
+    local x1 = math.max(cx0 + radius0, cx1 + radius1)
+    local y1 = math.max(cy0 + radius0, cy1 + radius1)
+
+    -- Now scale this box to `width`x`height`
+    local x_factor, y_factor = width/x1, height/y1
+    local rad_factor = math.sqrt(width^2 + height^2) / math.sqrt(x1^1+y1^2)
+
+    local output = cairo.Pattern.create_radial(
+        cx0*x_factor, cy0*y_factor, radius0*rad_factor, cx1*x_factor, cx1*y_factor, radius1*rad_factor
+    )
+
+    clone_stops(input, output)
+
+    return output
+end
+
+local function get_pattern_size(pat)
+    local t = pat.type
+
+    if t == "LINEAR" then
+        local _, _, _, x1, y1 = pat:get_linear_points()
+
+        return x1, y1
+    elseif t == "RADIAL" then
+        local _, _, _, cx1, cy1, _ = pat:get_radial_circles()
+
+        return cx1, cy1
+    end
+end
+
+local function stretch_common(self, width, height)
+    if (not self._private.background) and (not self._private.bgimage) then return end
+
+    if not (self._private.stretch_horizontally or self._private.stretch_vertically) then
+        return self._private.background, self._private.bgimage
+    end
+
+    local old = self._private.background
+    local size_w, size_h = get_pattern_size(old)
+
+    -- Note that technically, we could handle cairo.SurfacePattern and
+    -- cairo.RasterSourcePattern. However, this might create some surprising
+    -- results. For example switching to a different theme which uses tiled
+    -- pattern would change the "meaning" of this property.
+    if not size_w then return end
+
+    -- Don't try to resize zero-sized patterns. They are used for
+    -- generic liear gradient means "there is no gradient in this axis"
+    if self._private.stretch_vertically and size_h ~= 0 then
+        size_h = height
+    end
+
+    if self._private.stretch_horizontally and size_w ~= 0 then
+        size_w = width
+    end
+
+    local hash = size_w.."x"..size_h
+
+    if self._private.scale_cache[hash] then
+        return self._private.scale_cache[hash]
+    end
+
+    if global_scaled_pattern_cache[old] and global_scaled_pattern_cache[old][hash] then
+        -- Don't bother clearing the cache, if the pattern is already cached
+        -- elsewhere, it will remain in memory anyway.
+        self._private.scale_cache[hash] = global_scaled_pattern_cache[old][hash]
+        self._private.scale_cache_size = self._private.scale_cache_size + 1
+    end
+
+    local t, new = old.type
+
+    if t == "LINEAR" then
+        new = stretch_lineal_gradient(old, size_w, size_h)
+    elseif t == "RADIAL" then
+        new = stretch_radial_gradient(old, size_w, size_h)
+    end
+
+    global_scaled_pattern_cache[old] = global_scaled_pattern_cache[old] or setmetatable({}, {__mode = "v"})
+    global_scaled_pattern_cache[old][hash] = new
+
+    -- Prevent the memory leak.
+    if self._private.scale_cache_size > MAX_CACHE_SIZE then
+        self._private.scale_cache_size = 0
+        self._private.scale_cache = {}
+    end
+
+    self._private.scale_cache[hash] = new
+    self._private.scale_cache_size = self._private.scale_cache_size + 1
+
+    return new, self._private.bgimage
+end
+
 -- The Cairo SVG backend doesn't support surface as patterns correctly.
 -- The result is both glitchy and blocky. It is also impossible to introspect.
 -- Calling this function replace the normal code path is a "less correct", but
@@ -39,9 +174,11 @@ function background._use_fallback_algorithm()
 
         shape(cr, width, height)
 
-        if self._private.background then
+        local bg = stretch_common(self, width, height)
+
+        if bg then
             cr:save() --Save to avoid messing with the original source
-            cr:set_source(self._private.background)
+            cr:set_source(bg)
             cr:fill_preserve()
             cr:restore()
         end
@@ -115,15 +252,18 @@ function background:before_draw_children(context, cr, width, height)
         cr:push_group_with_content(cairo.Content.COLOR_ALPHA)
     end
 
+    local bg, bgimage = stretch_common(self, width, height)
+
     -- Draw the background
-    if self._private.background then
+    if bg then
         cr:save()
-        cr:set_source(self._private.background)
+        cr:set_source(bg)
         cr:rectangle(0, 0, width, height)
         cr:fill()
         cr:restore()
     end
-    if self._private.bgimage then
+
+    if bgimage then
         cr:save()
         if type(self._private.bgimage) == "function" then
             self._private.bgimage(context, cr, width, height,unpack(self._private.bgimage_args))
@@ -253,6 +393,42 @@ function background:set_children(children)
     self:set_widget(children[1])
 end
 
+--- Stretch the background gradient horizontally.
+--
+-- This only works for linear or radial gradients. It does nothing
+-- for solid colors, `bgimage` or raster patterns.
+--
+--@DOC_wibox_container_background_stretch_horizontally_EXAMPLE@
+--
+-- @property stretch_horizontally
+-- @tparam[opt=false] boolean stretch_horizontally
+-- @propemits true false
+-- @see stretch_vertically
+-- @see bg
+-- @see gears.color
+
+--- Stretch the background gradient vertically.
+--
+-- This only works for linear or radial gradients. It does nothing
+-- for solid colors, `bgimage` or raster patterns.
+--
+--@DOC_wibox_container_background_stretch_vertically_EXAMPLE@
+--
+-- @property stretch_vertically
+-- @tparam[opt=false] boolean stretch_vertically
+-- @propemits true false
+-- @see stretch_horizontally
+-- @see bg
+-- @see gears.color
+
+for _, orientation in ipairs {"horizontally", "vertically"} do
+    background["set_stretch_"..orientation] = function(self, value)
+        self._private["stretch_"..orientation] = value
+        self:emit_signal("widget::redraw_needed")
+        self:emit_signal("property::stretch_"..orientation, value)
+    end
+end
+
 --- The background color/pattern/gradient to use.
 --
 --@DOC_wibox_container_background_bg_EXAMPLE@
@@ -352,7 +528,8 @@ end
 --
 -- If the shape is set, the border will also be shaped.
 --
--- See `wibox.container.background.shape` for an usage example.
+--@DOC_wibox_container_background_border_width_EXAMPLE@
+--
 -- @property border_width
 -- @tparam[opt=0] number border_width
 -- @propertyunit pixel
@@ -399,6 +576,8 @@ end
 -- @see border_color
 
 --- Set the color for the border.
+--
+--@DOC_wibox_container_background_border_color_EXAMPLE@
 --
 -- See `wibox.container.background.shape` for an usage example.
 -- @property border_color
@@ -450,10 +629,13 @@ end
 
 --- How the border width affects the contained widget.
 --
+--@DOC_wibox_container_background_border_strategy_EXAMPLE@
+--
 -- @property border_strategy
 -- @tparam[opt="none"] string border_strategy
 -- @propertyvalue "none" Just apply the border, do not affect the content size (default).
 -- @propertyvalue "inner" Squeeze the size of the content by the border width.
+-- @propemits true false
 
 function background:set_border_strategy(value)
     self._private.border_strategy = value
@@ -463,12 +645,24 @@ end
 
 --- The background image to use.
 --
+-- This property is deprecated. The `wibox.container.border` provides a much
+-- more fine-grained support for background images. It is now out of the
+-- `wibox.container.background` scope. `wibox.layout.stack` can also be used
+-- to overlay a widget on top of a `wibox.widget.imagebox`. This solution
+-- exposes all availible imagebox properties. Finally, if you wish to use the
+-- `function` callback support, implement the `before_draw_children` method
+-- on any widget. This gives you the same level of control without all the
+-- `bgimage` corner cases.
+--
 -- If `image` is a function, it will be called with `(context, cr, width, height)`
 -- as arguments. Any other arguments passed to this method will be appended.
 --
--- @property bgimage
--- @tparam[opt=nil] image|nil bgimage
+-- @deprecatedproperty bgimage
+-- @tparam string|surface|function bgimage A background image or a function.
 -- @see gears.surface
+-- @see wibox.container.border
+-- @see wibox.widget.imagebox
+-- @see wibox.layout.stack
 
 function background:set_bgimage(image, ...)
     self._private.bgimage = type(image) == "function" and image or surface.load(image)
@@ -498,6 +692,8 @@ local function new(widget, bg, shape)
     gtable.crush(ret, background, true)
 
     ret._private.shape = shape
+    ret._private.scale_cache = {}
+    ret._private.scale_cache_size = 0
 
     ret:set_widget(widget)
     ret:set_bg(bg)

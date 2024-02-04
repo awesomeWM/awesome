@@ -180,26 +180,27 @@ html[data-theme='light'] {
 html[data-theme='dark'] {
     /* basic theme */
     --background: #222222;
-    --foreground: #c4c5c8;
+    --foreground: #DCDDDF;
     --color0:  #000300; /* black */
-    --color1:  #b44631; /* red */
+    --color1:  #F3826C; /* red */
     --color2:  #6fc24e; /* green */
     --color3:  #cab14c; /* yellow */
-    --color4:  #59929d; /* blue */
+    --color4:  #81A6C7; /* blue */
     --color5:  #926090; /* magenta */
     --color6:  #668d96; /* cyan */
-    --color7:  #728c8d; /* white */
+    --color7:  #87A9AA; /* white */
     --color8:  #3f5f47; /* bright black */
     --color9:  #c1605d; /* bright red */
     --colorA:  #a9c68e; /* bright green */
     --colorB:  #decf50; /* bright yellow */
     --colorC:  #a6bbcb; /* bright blue */
     --colorD:  #ad79a2; /* bright magenta */
-    --colorE:  #8aa1af; /* bright cyan */
+    --colorE:  #92ABBA; /* bright cyan */
     --colorF:  #bababa; /* bright white */
 
     /* extended ldoc theme */
-    --background-bright: #201e27;
+    --background-bright: #24242A;
+    --background-bright-alt: #28282F;
     --color10: #c4c5c8;
     --color11: #00000044;
     --color12: var(--color7);
@@ -213,16 +214,16 @@ html[data-theme='dark'] {
     --color1A: var(--color6);
     --color1B: #00bcd4;
     --color1C: #bababa;
-    --color1D: #2c2a37;
+    --color1D: #333140;
     --color1E: var(--color4);
-    --color1F: var(--colorE);
+    --color1F: var(--colorA);
     --color20: var(--color13);
     --color21: var(--colorE);
     --color22: var(--colorC);
     --color23: var(--colorA);
     --color24: var(--color1D);
-    --color25: var(--background-bright);
-    --color26: var(--background-bright);
+    --color25: var(--background-bright-alt);
+    --color26: var(--background-bright-alt);
     --color27: var(--color1);
     --color28: var(--color23);
     --color29: var(--color20);
@@ -239,7 +240,7 @@ html[data-theme='dark'] {
     --color40: var(--color1A);
 
     /* source code theme */
-    --color100: var(--background-bright);
+    --color100: var(--background-bright-alt);
     --color101: #512b1e;
     --color102: #844631;
     --color103: #a8660d;
@@ -255,7 +256,7 @@ html[data-theme='dark'] {
     --color10D: #0e7c6b;
     --color10E: #bbccaa;
     --color10F: #fedc56;
-    --color110: #ffffff;
+    --color110: #DCDDDF;
 }
 
 html[data-theme='monokai'] {

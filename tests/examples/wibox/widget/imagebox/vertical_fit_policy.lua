@@ -24,7 +24,14 @@ local function demo()
     cr:set_source_rgb(0,1,0)
 
     cr:arc(16, 11, 8, 0, 2*math.pi)
-    cr:fill()
+    cr:fill_preserve()
+
+    cr:clip()
+
+    cr:move_to(0 ,0 )
+    cr:line_to(32,22)
+    cr:set_source_rgb(1,1,0)
+    cr:stroke()
 
     return img
 end
@@ -66,16 +73,22 @@ local l = wibox.widget {
 }
 parent:add(l)
 
-l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "auto"'), 1, 1)
-l:add_widget_at(wibox.widget.textbox('versical_fit_policy = "none"'), 2, 1)
-l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "fit"'), 3, 1)
+l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "auto"'   ), 1, 1)
+l:add_widget_at(wibox.widget.textbox('versical_fit_policy = "none"'   ), 2, 1)
+l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "fit"'    ), 3, 1)
+l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "repeat"' ), 4, 1)
+l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "reflect"'), 5, 1)
+l:add_widget_at(wibox.widget.textbox('vertical_fit_policy = "pad"'    ), 6, 1)
 l:add_widget_at(wibox.widget.textbox('imagebox size'), 4, 1)
 
 for i,size in ipairs({16, 32, 64}) do
-    l:add_widget_at(build_ib(size, "auto"), 1, i + 1)
-    l:add_widget_at(build_ib(size, "none"), 2, i + 1)
-    l:add_widget_at(build_ib(size, "fit" ), 3, i + 1)
-    l:add_widget_at(cell_centered_widget(wibox.widget.textbox(size..'x'..size)), 4, i + 1)
+    l:add_widget_at(build_ib(size, "auto"    ), 1, i + 1)
+    l:add_widget_at(build_ib(size, "none"    ), 2, i + 1)
+    l:add_widget_at(build_ib(size, "fit"     ), 3, i + 1)
+    l:add_widget_at(build_ib(size, "repeat"  ), 4, i + 1)
+    l:add_widget_at(build_ib(size, "reflect" ), 5, i + 1)
+    l:add_widget_at(build_ib(size, "pad"     ), 6, i + 1)
+    l:add_widget_at(cell_centered_widget(wibox.widget.textbox(size..'x'..size)), 7, i + 1)
 end
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

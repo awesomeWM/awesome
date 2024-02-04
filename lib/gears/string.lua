@@ -87,6 +87,7 @@ function gstring.query_to_pattern(q)
     return s
 end
 
+
 --- Split separates a string containing a delimiter into the list of
 -- substrings between that delimiter.
 -- @tparam string str String to be splitted
@@ -109,6 +110,33 @@ function gstring.split(str, delimiter)
     end
     return result
 end
+
+
+--- Pattern split separates a string by a pattern to the table of substrings.
+-- @tparam string str String to be splitted
+-- @tparam string[opt="\n"] pattern Pattern the target string will
+--   be splitted by.
+-- @treturn table A list of substrings.
+-- @staticfct gears.string.split
+function gstring.psplit(str, pattern)
+    pattern = pattern or "\n"
+    local result = {}
+    if #pattern == 0 then
+        for index = 1, #str do
+            result[#result+1] = str:sub(index, index)
+        end
+        return result
+    end
+    local pos = 1
+    for match in str:gmatch(pattern) do
+        local start_pos, end_pos = str:find(match, pos, true)
+        result[#result+1] = str:sub(pos, start_pos-1)
+        pos = end_pos+1
+    end
+    result[#result+1] = str:sub(pos, #str)
+    return result
+end
+
 
 --- Check if a string starts with another string.
 -- @DOC_text_gears_string_startswith_EXAMPLE@

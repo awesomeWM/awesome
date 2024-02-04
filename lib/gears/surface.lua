@@ -14,6 +14,7 @@ local GdkPixbuf = require("lgi").GdkPixbuf
 local color, beautiful = nil, nil
 local gdebug = require("gears.debug")
 local hierarchy = require("wibox.hierarchy")
+local ceil = math.ceil
 
 -- Keep this in sync with build-utils/lgi-check.c!
 local ver_major, ver_minor, ver_patch = string.match(require('lgi.version'), '(%d)%.(%d)%.(%d)')
@@ -281,6 +282,82 @@ function surface.widget_to_surface(widget, width, height, format)
     cr:set_source(color(beautiful.fg_normal))
 
     return img, run_in_hierarchy(widget, cr, width, height)
+end
+
+--- Crop a surface on its edges.
+-- @tparam[opt=nil] table args
+-- @tparam[opt=0] integer args.left Left cutoff, cannot be negative
+-- @tparam[opt=0] integer args.right Right cutoff, cannot be negative
+-- @tparam[opt=0] integer args.top Top cutoff, cannot be negative
+-- @tparam[opt=0] integer args.bottom Bottom cutoff, cannot be negative
+-- @tparam[opt=nil] number|nil args.ratio Ratio to crop the image to. If edge cutoffs and
+-- ratio are given, the edge cutoffs are computed first. Using ratio will crop
+-- the center out of an image, similar to what "zoomed-fill" does in wallpaper
+-- setter programs. Cannot be negative
+-- @tparam[opt=nil] surface args.surface The surface to crop
+-- @return The cropped surface
+-- @staticfct crop_surface
+function surface.crop_surface(args)
+    args = args or {}
+
+    if not args.surface then
+        error("No surface to crop_surface supplied")
+        return nil
+    end
+
+    local surf = args.surface
+    local target_ratio = args.ratio
+
+    local w, h = surface.get_size(surf)
+    local offset_w, offset_h =  0, 0
+
+    if (args.top or args.right or args.bottom or args.left) then
+        local left = args.left or 0
+        local right = args.right or 0
+        local top = args.top or 0
+        local bottom = args.bottom or 0
+
+        if (top < 0 or right < 0 or bottom < 0 or left < 0) then
+            error("negative offsets are not supported for crop_surface")
+        end
+
+        w = w - left - right
+        h = h - top - bottom
+
+        -- the offset needs to be negative
+        offset_w = - left
+        offset_h = - top
+
+        -- breaking stuff with cairo crashes awesome with no way to restart in place
+        -- so here are checks for user error
+        if w <= 0 or h <= 0 then
+            error("Area to remove cannot be larger than the image size")
+            return nil
+        end
+    end
+
+    if target_ratio and target_ratio > 0 then
+        local prev_ratio = w/h
+        if prev_ratio ~= target_ratio then
+            if (prev_ratio < target_ratio) then
+                local old_h = h
+                h = ceil(w * (1/target_ratio))
+                offset_h = offset_h - ceil((old_h - h)/2)
+            else
+                local old_w = w
+                w = ceil(h * target_ratio)
+                offset_w = offset_w - ceil((old_w - w)/2)
+            end
+        end
+    end
+
+    local ret = cairo.ImageSurface(cairo.Format.ARGB32, w, h)
+    local cr = cairo.Context(ret)
+    cr:set_source_surface(surf, offset_w, offset_h)
+    cr.operator = cairo.Operator.SOURCE
+    cr:paint()
+
+    return ret
 end
 
 return setmetatable(surface, surface.mt)

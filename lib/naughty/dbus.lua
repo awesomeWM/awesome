@@ -69,6 +69,9 @@ local function sendNotificationClosed(notificationId, reason)
     if reason <= 0 then
         reason = cst.notification_closed_reason.undefined
     end
+    if reason == cst.notification_closed_reason.dismissed_by_user then
+        sendActionInvoked(notificationId, "default")
+    end
     if bus_connection then
         bus_connection:emit_signal(nil, "/org/freedesktop/Notifications",
         "org.freedesktop.Notifications", "NotificationClosed",

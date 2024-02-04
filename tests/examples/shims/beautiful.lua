@@ -3,15 +3,24 @@ local Pango = lgi.Pango
 local cairo = lgi.cairo
 
 -- A simple Awesome logo
-local function logo()
+local function logo(fg, bg)
     local img = cairo.ImageSurface.create(cairo.Format.ARGB32, 22, 22)
     local cr = cairo.Context(img)
 
     -- Awesome default #555555
-    cr:set_source_rgb(0.21568627451, 0.21568627451, 0.21568627451)
+    if bg then
+        cr:set_source(bg)
+    else
+        cr:set_source_rgb(0.21568627451, 0.21568627451, 0.21568627451)
+    end
+
     cr:paint()
 
-    cr:set_source_rgb(1,1,1)
+    if fg then
+        cr:set_source(fg)
+    else
+        cr:set_source_rgb(1,1,1)
+    end
 
     cr:rectangle(0, 7, 15, 1)
     cr:fill()
@@ -40,6 +49,8 @@ local module = {
     bg_normal    = "#6181FF7D",
     bg_focus     = "#AA00FF7D",
     bg_highlight = "#AA00FF7D",
+    bg_urgent    = "#FF00377D",
+    fg_urgent    = "#FFFFFFFF",
     border_color = "#6181FF"  ,
     border_width = 1.5        ,
 
@@ -48,7 +59,8 @@ local module = {
     -- Fake resources handling
     xresources = require("beautiful.xresources"),
 
-    awesome_icon = logo()
+    awesome_icon = logo(),
+    _logo        = logo,
 }
 
 module.graph_bg = module.bg_normal

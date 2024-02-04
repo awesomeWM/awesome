@@ -267,6 +267,7 @@ options_init_config(xdgHandle *xdg, char *execpath, char *configpath, int *init_
                         state = MODELINE_STATE_KEY_DELIM;
                         break;
                     case '\n': case '\r':
+                        push_arg(&argv, key_buf, &pos);
                         state = MODELINE_STATE_COMPLETE;
                         break;
                     default:
@@ -291,7 +292,7 @@ options_init_config(xdgHandle *xdg, char *execpath, char *configpath, int *init_
             break;
 
         /* Try the next line */
-        if (((i == READ_BUF_MAX || file_buf[i+1] == '\0') && !feof(fp)) || state == MODELINE_STATE_INVALID) {
+        if (((i == READ_BUF_MAX || file_buf[i] == '\0') && !feof(fp)) || state == MODELINE_STATE_INVALID) {
             if (state == MODELINE_STATE_KEY || state == MODELINE_STATE_VALUE)
                 push_arg(&argv, key_buf, &pos);
 

@@ -31,11 +31,22 @@ local base = require("wibox.widget.base")
 local surface = require("gears.surface")
 local gtable = require("gears.table")
 local gdebug = require("gears.debug")
+local gfs = require("gears.filesystem")
 local setmetatable = setmetatable
 local type = type
 local math = math
 
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
+
+-- Placeholder table to represent an emty stylesheet.
+-- It has to be defined here to avoid being GCed
+local empty_stylesheet = {}
+
+local policies_to_extents = {
+    ["pad"]     = cairo.Extend.PAD,
+    ["repeat"]  = cairo.Extend.REPEAT,
+    ["reflect"] = cairo.Extend.REFLECT,
+}
 
 -- Safe load for optional Rsvg module
 local Rsvg = nil
@@ -49,18 +60,25 @@ end
 local imagebox = { mt = {} }
 
 local rsvg_handle_cache = setmetatable({}, { __mode = 'k' })
+local stylesheet_cache = {}
 
----Load rsvg handle form image file
+--Load rsvg handle form image file
 -- @tparam string file Path to svg file.
 -- @return Rsvg handle
 -- @treturn table A table where cached data can be stored.
-local function load_rsvg_handle(file)
+function imagebox._load_rsvg_handle(file, style)
+    -- Make sure this is called in the right order.
+    assert((not style) or (style and stylesheet_cache[style]))
+
+    local style_ref = style and stylesheet_cache[style] or empty_stylesheet
+
     if not Rsvg then return end
 
-    local cache = (rsvg_handle_cache[file] or {})["handle"]
+    local bucket = rsvg_handle_cache[file] or {}
+    local cache = (bucket[style_ref] or {})["handle"]
 
     if cache then
-        return cache, rsvg_handle_cache[file]
+        return cache, bucket[style_ref]
     end
 
     local handle, err
@@ -72,9 +90,10 @@ local function load_rsvg_handle(file)
     end
 
     if not err then
-        rsvg_handle_cache[file] = rsvg_handle_cache[file] or {}
-        rsvg_handle_cache[file]["handle"] = handle
-        return handle, rsvg_handle_cache[file]
+        rsvg_handle_cache[file] = rsvg_handle_cache[file] or setmetatable({}, {__mode = "k"})
+        rsvg_handle_cache[file][style_ref] = rsvg_handle_cache[file][style_ref] or {}
+        rsvg_handle_cache[file][style_ref]["handle"] = handle
+        return handle, rsvg_handle_cache[file][style_ref]
     end
 end
 
@@ -111,12 +130,44 @@ end
 ---@treturn boolean True if image was successfully applied
 local function load_and_apply(ib, file, image_loader, image_setter)
     local image_applied
-    local object, cache = image_loader(file)
+    local object, cache = image_loader(file, ib._private.stylesheet_og)
 
     if object then
         image_applied = image_setter(ib, object, cache)
     end
     return image_applied
+end
+
+--- Support both CSS data and filepath for the stylsheet.
+function imagebox._get_stylesheet(self, content_or_path)
+    if not content_or_path then return nil end
+
+    -- Always set the entry because the image cache uses it.
+    stylesheet_cache[content_or_path] = stylesheet_cache[content_or_path]
+        or setmetatable({}, {__mode = "v"})
+
+    if gfs.file_readable(content_or_path) then
+        local ret
+
+        local _, obj = next(stylesheet_cache[content_or_path])
+
+        if obj then
+            ret = obj._private.stylesheet
+            table.insert(stylesheet_cache[content_or_path], self)
+        else
+            local f = io.open(content_or_path, 'r')
+
+            if not f then return nil end
+
+            ret = f:read("*all")
+            f:close()
+            table.insert(stylesheet_cache[content_or_path], self)
+        end
+
+        return ret
+    else
+        return content_or_path
+    end
 end
 
 ---Update the cached size depending on the stylesheet and dpi.
@@ -182,6 +233,11 @@ function imagebox:draw(ctx, cr, width, height)
 
     local w, h = self._private.default.width, self._private.default.height
 
+    local policy = {
+        w = self._private.horizontal_fit_policy or "auto",
+        h = self._private.vertical_fit_policy or "auto"
+    }
+
     if self._private.resize then
         -- That's for the "fit" policy.
         local aspects = {
@@ -189,17 +245,12 @@ function imagebox:draw(ctx, cr, width, height)
             h = height / h
         }
 
-        local policy = {
-            w = self._private.horizontal_fit_policy or "auto",
-            h = self._private.vertical_fit_policy or "auto"
-        }
-
         for _, aspect in ipairs {"w", "h"} do
             if self._private.upscale == false and (w < width and h < height) then
                 aspects[aspect] = 1
             elseif self._private.downscale == false and (w >= width and h >= height) then
                 aspects[aspect] = 1
-            elseif policy[aspect] == "none" then
+            elseif policy[aspect] == "none" or policies_to_extents[policy[aspect]] then
                 aspects[aspect] = 1
             elseif policy[aspect] == "auto" then
                 aspects[aspect] = math.min(width / w, height / h)
@@ -258,7 +309,18 @@ function imagebox:draw(ctx, cr, width, height)
     if self._private.handle then
         self._private.handle:render_cairo(cr)
     else
-        cr:set_source_surface(self._private.image, 0, 0)
+        -- Yes, it is possible that the vertical or horizontal policies both
+        -- have extends, but Cairo doesn't support this. So be it.
+        local pol = policies_to_extents[policy.w]
+        pol = pol or policies_to_extents[policy.h]
+
+        if pol then
+            local pat = cairo.Pattern.create_for_surface(self._private.image)
+            pat:set_extend(pol)
+            cr:set_source(pat)
+        else
+            cr:set_source_surface(self._private.image, 0, 0)
+        end
 
         local filter = self._private.scaling_quality
 
@@ -300,6 +362,32 @@ end
 -- @tparam[opt=nil] image|nil image
 -- @propemits false false
 
+--- Return the source image width.
+--
+-- For SVG images, this may be affected by the DPI and might not
+-- reflect the size the images will be rendered at. For PNG or
+-- JPG images, this will return the file resolution.
+--
+-- @property source_width
+-- @tparam number source_width
+-- @propertydefault This depends on the source image.
+-- @negativeallowed false
+-- @see image
+-- @see source_height
+
+--- Return the source image height.
+--
+-- For SVG images, this may be affected by the DPI and might not
+-- reflect the size the images will be rendered at. For PNG or
+-- JPG images, this will return the file resolution.
+--
+-- @property source_height
+-- @tparam number source_height
+-- @propertydefault This depends on the source image.
+-- @negativeallowed false
+-- @see image
+-- @see source_width
+
 --- Set the `imagebox` image.
 --
 -- The image can be a file, a cairo image surface, or an rsvg handle object
@@ -326,7 +414,7 @@ function imagebox:set_image(image)
 
     if type(image) == "string" then
         -- try to load rsvg handle from file
-        setup_succeed = load_and_apply(self, image, load_rsvg_handle, set_handle)
+        setup_succeed = load_and_apply(self, image, imagebox._load_rsvg_handle, set_handle)
 
         if not setup_succeed then
             -- rsvg handle failed, try to load cairo surface with pixbuf
@@ -353,6 +441,14 @@ function imagebox:set_image(image)
     self:emit_signal("widget::layout_changed")
     self:emit_signal("property::image")
     return true
+end
+
+for _, dim in ipairs { "width", "height" } do
+    imagebox["get_source_"..dim] = function(self)
+        if not self._private.default then return nil end
+
+        return self._private.default[dim]
+    end
 end
 
 --- Set a clip shape for this imagebox.
@@ -426,8 +522,7 @@ end
 -- If the image is an SVG (vector graphics), this property allows to set
 -- a CSS stylesheet. It can be used to set colors and much more.
 --
--- Note that this property is a string, not a path. If the stylesheet is
--- stored on disk, read the content first.
+-- The value can be either CSS data or a file path.
 --
 --@DOC_wibox_widget_imagebox_stylesheet_EXAMPLE@
 --
@@ -466,16 +561,45 @@ end
 -- @propemits true false
 -- @see dpi
 
-for _, prop in ipairs {"stylesheet", "dpi", "auto_dpi"} do
+for _, prop in ipairs {"dpi", "auto_dpi"} do
     imagebox["set_" .. prop] = function(self, value)
+        local old = self._private[prop]
+
         -- It will be set in :fit and :draw. The handle is shared
         -- by multiple imagebox, so it cannot be set just once.
         self._private[prop] = value
 
         self:emit_signal("widget::redraw_needed")
         self:emit_signal("widget::layout_changed")
-        self:emit_signal("property::" .. prop)
+        self:emit_signal("property::" .. prop, value, old)
     end
+end
+
+function imagebox:set_stylesheet(value)
+    if value == self._private.stylesheet_og then return end
+
+    local old = self._private.stylesheet_og
+
+    if old and stylesheet_cache[old] then
+        for k, v in ipairs(stylesheet_cache[old]) do
+            if self == v then
+                table.remove(stylesheet_cache[old], k)
+                break
+            end
+        end
+    end
+
+    local content = imagebox._get_stylesheet(self, value)
+
+    self._private.stylesheet    = content
+    self._private.stylesheet_og = value
+
+    -- Refresh the pixmap.
+    self.image = self._private.original_image
+
+    self:emit_signal("widget::redraw_needed")
+    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::stylesheet", value)
 end
 
 function imagebox:set_resize(allowed)
@@ -510,6 +634,9 @@ end
 
 --- Set the horizontal fit policy.
 --
+-- Note that `repeat`, `reflect` and `pad` cannot be mixed across
+-- the vertical and horizontal axis.
+--
 -- Here is the result for a 22x32 image:
 --
 -- @DOC_wibox_widget_imagebox_horizontal_fit_policy_EXAMPLE@
@@ -519,11 +646,19 @@ end
 -- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
 -- @propertyvalue "none" Do not resize at all.
 -- @propertyvalue "fit" Resize to the widget width.
+-- @propertyvalue "repeat" Repeat the image side by side.
+-- @propertyvalue "reflect" Like `repeat`, but alternate the reflection.
+-- @propertyvalue "pad" Take the last column of pixels and repeat them.
 -- @propemits true false
 -- @see vertical_fit_policy
 -- @see resize
 
 --- Set the vertical fit policy.
+--
+-- Valid values are:
+--
+-- Note that `repeat`, `reflect` and `pad` cannot be mixed across
+-- the vertical and horizontal axis.
 --
 -- Here is the result for a 32x22 image:
 --
@@ -534,6 +669,10 @@ end
 -- @propertyvalue "auto" Honor the `resize` variable and preserve the aspect ratio.
 -- @propertyvalue "none" Do not resize at all.
 -- @propertyvalue "fit" Resize to the widget height.
+-- @propertyvalue "fit" Resize to the widget width.
+-- @propertyvalue "repeat" Repeat the image side by side.
+-- @propertyvalue "reflect" Like `repeat`, but alternate the reflection.
+-- @propertyvalue "pad" Take the last column of pixels and repeat them.
 -- @propemits true false
 -- @see horizontal_fit_policy
 -- @see resize

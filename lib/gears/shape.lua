@@ -778,6 +778,7 @@ end
 -- @tparam number height The shape height
 -- @tparam[opt=5] number x_offset The shadow area horizontal offset.
 -- @tparam[opt=5] number y_offset The shadow area vertical offset.
+-- @noreturn
 function module.solid_rectangle_shadow(cr, w, h, x_offset, y_offset)
     x_offset, y_offset = x_offset or 5, y_offset or 5
     w, h = w - math.abs(x_offset), h - math.abs(y_offset)

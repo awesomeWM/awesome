@@ -18,6 +18,7 @@ return setmetatable({
     arcchart = require("wibox.container.arcchart");
     place = require("wibox.container.place");
     tile = require("wibox.container.tile");
+    border = require("wibox.container.border");
 }, {__call = function(_, args) return base.make_widget_declarative(args) end})
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

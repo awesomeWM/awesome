@@ -3,10 +3,10 @@ name: Build & Test
 on:
   # Trigger on push to branches `master` and `3.5`.
   push:
-    branches: [ master, 3.5 ]
+    branches: [master, 3.5]
   # Trigger on pull request events for PRs that have `master` as their target branch
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
   # Allow running the workflow manually
   workflow_dispatch:
@@ -75,15 +75,15 @@ jobs:
       LUAINCLUDE: ${{ matrix.lua_include || format('/usr/include/lua{0}', matrix.lua_version) }}
       LUALIBRARY: ${{ matrix.lua_library || format('/usr/lib/x86_64-linux-gnu/liblua{0}.so', matrix.lua_version) }}
       TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }}
-      TEST_TIMEOUT: '100'
-      CI: 'true'
+      TEST_TIMEOUT: "100"
+      CI: "true"
 
     steps:
       # Create a cache invalidation key based on the current year + week.
       # This way, packages will be checked for updates once every week.
       - name: Get Date
         id: get-date
-        run: echo "::set-output name=date::$(/bin/date -u "+%Y%W")"
+        run: echo "date=$(/bin/date -u "+%Y%W")" >> $GITHUB_OUTPUT
 
       - name: Cache apt packages
         id: cache-apt
