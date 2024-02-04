@@ -66,10 +66,8 @@ function systray:draw(context, cr, width, height)
     local cols = math.ceil(num_entries / rows)
     local bg = beautiful.bg_systray or beautiful.bg_normal or "#000000"
     local spacing = beautiful.systray_icon_spacing or 0
-    local y_offset = 0
-    if base_size then
-        y_offset = ((height - base_size) / 2) - 1
-    end
+
+    local y_offset = instance:_get_top_offset(height)
 
     if context and not context.wibox then
         error("The systray widget can only be placed inside a wibox.")
@@ -99,6 +97,35 @@ function systray:draw(context, cr, width, height)
     end
     capi.awesome.systray(context.wibox.drawin, math.ceil(x), math.ceil(y + y_offset),
                          base, is_rotated, bg, reverse, spacing, rows)
+end
+
+-- Private API. Does not appear in LDoc. This function is called
+-- some time to vertically align the systray according to the arguments. 
+function systray:_get_top_offset(height, valign)
+    if not base_size then
+        return 0
+    end
+
+    local valign = self._private.valign
+
+    if not valign then
+       return 0
+    end
+    
+    if valign == "top" then
+       return 0
+    end
+       
+    if valign == "center" then
+	return math.floor((height - base_size) / 2)
+    end
+
+    if valign == "bottom" then
+	return (height - base_size)
+    end
+
+    return 0
+
 end
 
 -- Private API. Does not appear in LDoc on purpose. This function is called
@@ -179,6 +206,27 @@ function systray:set_horizontal(horiz)
         instance:emit_signal("widget::layout_changed")
         instance:emit_signal("property::horizontal", horiz)
     end
+end
+
+--- The vertical alignment.
+--
+--@DOC_wibox_widget_systray_valign_EXAMPLE@
+--
+-- @property valign
+-- @tparam[opt="center"] string valign
+-- @propertyvalue "top"
+-- @propertyvalue "center"
+-- @propertyvalue "bottom"
+-- @propemits true false
+
+function systray:set_valign(value)
+    if value ~= "center" and value ~= "top" and value ~= "bottom" then
+        return
+    end
+
+    self._private.valign = value
+--    self:emit_signal("widget::layout_changed")
+    self:emit_signal("property::valign", value)
 end
 
 --- Should the systray icons be displayed in reverse order?
