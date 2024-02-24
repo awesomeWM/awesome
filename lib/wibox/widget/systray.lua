@@ -100,8 +100,8 @@ function systray:draw(context, cr, width, height)
 end
 
 -- Private API. Does not appear in LDoc. This function is called
--- some time to vertically align the systray according to the arguments. 
-function systray:_get_top_offset(height, valign)
+-- some time to vertically align the systray according to the arguments.
+function systray:_get_top_offset(height)
     if not base_size then
         return 0
     end
@@ -111,11 +111,11 @@ function systray:_get_top_offset(height, valign)
     if not valign then
        return 0
     end
-    
+
     if valign == "top" then
        return 0
     end
-       
+
     if valign == "center" then
 	return math.floor((height - base_size) / 2)
     end
