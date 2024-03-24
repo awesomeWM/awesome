@@ -27,7 +27,7 @@ local tasklist_buttons = nil --DOC_HIDE
             },
             layout   = {
                 spacing = 5,
-                forced_num_rows = 2,
+                row_count = 2,
                 layout = wibox.layout.grid.horizontal
             },
 
