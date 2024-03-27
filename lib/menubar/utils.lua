@@ -283,6 +283,26 @@ function utils.parse_desktop_file(file)
         program[key] = getter(keyfile, key)
     end
 
+    -- By default, only the identifier of each action is added to `program`.
+    -- This will replace those actions with a (localized) table holding the
+    -- "actual" action data, including its Exec and Icon.
+    -- See https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html#extra-actions
+    if program.Actions then
+        local corrected_actions = {}
+        local cur_action
+
+        for _, action in pairs(program.Actions) do
+            cur_action = "Desktop Action "..action
+            corrected_actions[action] = {}
+
+            for _, key in pairs(keyfile:get_keys(cur_action)) do
+                corrected_actions[action][key] = keyfile:get_locale_string(cur_action, key)
+            end
+        end
+
+        program.Actions = corrected_actions
+    end
+
     -- In case the (required) 'Name' entry was not found
     if not program.Name or program.Name == '' then return nil end
 
