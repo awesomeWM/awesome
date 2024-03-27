@@ -54,7 +54,9 @@ menu_gen.all_categories = {
     tools = { app_type = "System", name = "System Tools",
                icon_name = "applications-system", use = true },
     utility = { app_type = "Utility", name = "Accessories",
-                icon_name = "applications-accessories", use = true }
+                icon_name = "applications-accessories", use = true },
+    other = { app_type = nil, name = "Other",
+                icon_name = "applications-other", use = true }
 }
 
 -- Find icons for category entries.
@@ -101,6 +103,7 @@ function menu_gen.generate(callback)
                         -- Check if the program falls into at least one of the
                         -- usable categories. Set target_category to be the id
                         -- of the first category it finds.
+                        -- Or without category.
                         if entry.categories then
                             for _, category in pairs(entry.categories) do
                                 local cat_key, cat_use =
@@ -110,6 +113,8 @@ function menu_gen.generate(callback)
                                     break
                                 end
                             end
+                        else
+                            target_category = "other"
                         end
 
                         local name = utils.rtrim(entry.Name) or ""
