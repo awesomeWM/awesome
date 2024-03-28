@@ -384,7 +384,7 @@ local function new(args)
             local n = ret._private.notification[1]
 
             if n then
-                n:destroy()
+                n:destroy(reason)
             end
         end
     end
