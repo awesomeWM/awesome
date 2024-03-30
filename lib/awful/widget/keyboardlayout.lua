@@ -265,8 +265,16 @@ end
 -- It shows current keyboard layout name in a textbox.
 --
 -- @constructorfct awful.widget.keyboardlayout
+-- @tparam[opt] table args The argument table containing any of the arguments below.
+-- @tparam[opt] table args.country_codes Array of names of custom keyboard layouts.
 -- @treturn awful.widget.keyboardlayout A keyboard layout widget.
-function keyboardlayout.new()
+function keyboardlayout.new(args)
+    if args and args.country_codes then
+        for _, country_code in ipairs(args.country_codes) do
+            keyboardlayout.xkeyboard_country_code[country_code] = true
+        end
+    end
+
     local widget = textbox()
     local self = widget_base.make_widget(widget, nil, {enable_properties=true})
 
