@@ -7,8 +7,9 @@
 ---------------------------------------------------------------------------
 
 local rtable = table
+local bezier = require("gears.math.bezier")
 
-local gmath = {}
+local gmath = { bezier = bezier }
 
 local function subset_mask_apply(mask, set)
     local ret = {}
