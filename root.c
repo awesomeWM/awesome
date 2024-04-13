@@ -193,13 +193,13 @@ root_update_wallpaper(void)
     }
 
     /* Only the default visual makes sense, so just the default depth */
-    if (geom_r->depth != draw_visual_depth(globalconf.screen, globalconf.default_visual->visual_id))
+    if (geom_r->depth != draw_visual_depth(globalconf.screen, globalconf.screen_visual->visual_id))
         warn("Got a pixmap with depth %d, but the default depth is %d, continuing anyway",
-                geom_r->depth, draw_visual_depth(globalconf.screen, globalconf.default_visual->visual_id));
+                geom_r->depth, draw_visual_depth(globalconf.screen, globalconf.screen_visual->visual_id));
 
     globalconf.wallpaper = cairo_xcb_surface_create(globalconf.connection,
                                                     *rootpix,
-                                                    globalconf.default_visual,
+                                                    globalconf.screen_visual,
                                                     geom_r->width,
                                                     geom_r->height);
 
@@ -530,7 +530,7 @@ luaA_root_get_content(lua_State *L)
 
     surface = cairo_xcb_surface_create(globalconf.connection,
                                        globalconf.screen->root,
-                                       globalconf.default_visual,
+                                       globalconf.screen_visual,
                                        globalconf.screen->width_in_pixels,
                                        globalconf.screen->height_in_pixels);
 

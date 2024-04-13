@@ -1891,8 +1891,8 @@ client_get_nofocus_window(client_t *c)
 {
     if (c->nofocus_window == XCB_NONE) {
         c->nofocus_window = xcb_generate_id(globalconf.connection);
-        xcb_create_window(globalconf.connection, globalconf.default_depth, c->nofocus_window, c->frame_window,
-                          -2, -2, 1, 1, 0, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+        xcb_create_window(globalconf.connection, globalconf.screen_depth, c->nofocus_window, c->frame_window,
+                          -2, -2, 1, 1, 0, XCB_COPY_FROM_PARENT, globalconf.screen_visual->visual_id,
                           0, NULL);
         xcb_map_window(globalconf.connection, c->nofocus_window);
         xwindow_grabkeys(c->nofocus_window, &c->keys);
@@ -2137,17 +2137,26 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     client_t *c = client_new(L);
     xcb_screen_t *s = globalconf.screen;
+    uint8_t depth = globalconf.screen_depth, window_depth = draw_visual_depth(globalconf.screen, wattr->visual);
+    xcb_colormap_t cmap = globalconf.screen_cmap;
     c->border_width_callback = (void (*) (void *, uint16_t, uint16_t)) border_width_callback;
 
     /* consider the window banned */
     c->isbanned = true;
     /* Store window and visual */
     c->window = w;
-    c->visualtype = draw_find_visual(globalconf.screen, wattr->visual);
+    c->client_visualtype = draw_find_visual(globalconf.screen, wattr->visual);
     c->frame_window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, globalconf.default_depth, c->frame_window, s->root,
+    c->visualtype = globalconf.screen_visual;
+    if ((globalconf.argb_mode == ARGB_MODE_FULL || window_depth == 32) && globalconf.argb_mode != ARGB_MODE_DISABLED)
+    {
+        c->visualtype = globalconf.argb_visual;
+        depth = 32;
+        cmap = globalconf.argb_cmap;
+    }
+    xcb_create_window(globalconf.connection, depth, c->frame_window, s->root,
                       wgeom->x, wgeom->y, wgeom->width, wgeom->height,
-                      wgeom->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+                      wgeom->border_width, XCB_COPY_FROM_PARENT, c->visualtype->visual_id,
                       XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY | XCB_CW_WIN_GRAVITY
                       | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
                       (const uint32_t [])
@@ -2157,7 +2166,7 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
                           XCB_GRAVITY_NORTH_WEST,
                           1,
                           FRAME_SELECT_INPUT_EVENT_MASK,
-                          globalconf.default_cmap
+                          cmap
                       });
 
     /* The client may already be mapped, thus we must be sure that we don't send
@@ -3195,7 +3204,7 @@ client_set_icon_from_pixmaps(client_t *c, xcb_pixmap_t icon, xcb_pixmap_t mask)
         s_icon = cairo_xcb_surface_create_for_bitmap(globalconf.connection,
                 globalconf.screen, icon, geom_icon_r->width, geom_icon_r->height);
     else
-        s_icon = cairo_xcb_surface_create(globalconf.connection, icon, globalconf.default_visual,
+        s_icon = cairo_xcb_surface_create(globalconf.connection, icon, globalconf.screen_visual,
                 geom_icon_r->width, geom_icon_r->height);
     result = s_icon;
 
@@ -3568,21 +3577,28 @@ client_refresh_partial(client_t *c, int16_t x, int16_t y, uint16_t width, uint16
 static drawable_t *
 titlebar_get_drawable(lua_State *L, client_t *c, int cl_idx, client_titlebar_t bar)
 {
+    uint8_t depth = globalconf.screen_depth;
+    xcb_visualtype_t *visual = globalconf.screen_visual;
+    if (globalconf.argb_mode == ARGB_MODE_FULL)
+    {
+        visual = globalconf.argb_visual;
+        depth = 32;
+    }
     if (c->titlebar[bar].drawable == NULL)
     {
         cl_idx = luaA_absindex(L, cl_idx);
         switch (bar) {
         case CLIENT_TITLEBAR_TOP:
-            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_top, c);
+            drawable_allocator(L, depth, visual, (drawable_refresh_callback *) client_refresh_titlebar_top, c);
             break;
         case CLIENT_TITLEBAR_BOTTOM:
-            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_bottom, c);
+            drawable_allocator(L, depth, visual, (drawable_refresh_callback *) client_refresh_titlebar_bottom, c);
             break;
         case CLIENT_TITLEBAR_RIGHT:
-            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_right, c);
+            drawable_allocator(L, depth, visual, (drawable_refresh_callback *) client_refresh_titlebar_right, c);
             break;
         case CLIENT_TITLEBAR_LEFT:
-            drawable_allocator(L, (drawable_refresh_callback *) client_refresh_titlebar_left, c);
+            drawable_allocator(L, depth, visual, (drawable_refresh_callback *) client_refresh_titlebar_left, c);
             break;
         default:
             fatal("Unknown titlebar kind %d\n", (int) bar);
@@ -4022,7 +4038,7 @@ luaA_client_get_content(lua_State *L, client_t *c)
     height -= c->titlebar[CLIENT_TITLEBAR_TOP].size + c->titlebar[CLIENT_TITLEBAR_BOTTOM].size;
 
     surface = cairo_xcb_surface_create(globalconf.connection, c->window,
-                                       c->visualtype, width, height);
+                                       c->client_visualtype, width, height);
 
     /* lua has to make sure to free the ref or we have a leak */
     lua_pushlightuserdata(L, surface);

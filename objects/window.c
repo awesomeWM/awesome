@@ -195,7 +195,7 @@ luaA_window_set_border_color(lua_State *L, window_t *window)
     const char *color_name = luaL_checklstring(L, -1, &len);
 
     if(color_name &&
-       color_init_reply(color_init_unchecked(&window->border_color, color_name, len, globalconf.visual)))
+       color_init_reply(color_init_unchecked(&window->border_color, color_name, len, window->visualtype)))
     {
         window->border_need_update = true;
         luaA_object_emit_signal(L, -3, "property::border_color", 0);

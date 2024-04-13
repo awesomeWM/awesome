@@ -159,7 +159,7 @@ color_init_unchecked(color_t *color, const char *colstr, ssize_t len, xcb_visual
         return req;
     }
     req.cookie_hexa = xcb_alloc_color_unchecked(globalconf.connection,
-                                                globalconf.default_cmap,
+                                                globalconf.screen_cmap,
                                                 RGB_8TO16(red),
                                                 RGB_8TO16(green),
                                                 RGB_8TO16(blue));

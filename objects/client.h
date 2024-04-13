@@ -173,7 +173,7 @@ struct client_t
     /** Size hints */
     xcb_size_hints_t size_hints;
     /** The visualtype that c->window uses */
-    xcb_visualtype_t *visualtype;
+    xcb_visualtype_t *client_visualtype;
     /** Do we honor the client's size hints? */
     bool size_hints_honor;
     /** Machine the client is running on. */
