@@ -32,6 +32,7 @@ typedef enum {
     INIT_FLAG_AUTO_SCREEN    = 0x1 << 3,
     INIT_FLAG_ALLOW_FALLBACK = 0x1 << 4,
     INIT_FLAG_FORCE_CMD_ARGS = 0x1 << 5,
+    INIT_FLAG_FULL_ARGB      = 0x1 << 6,
 } awesome_init_config_t;
 
 char *options_detect_shebang(int argc, char **argv);
