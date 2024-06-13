@@ -55,6 +55,10 @@ local function get_widget_context(self)
         for k, v in pairs(self._widget_context_skeleton) do
             context[k] = v
         end
+
+        -- Set the metatable to give access to the weak wibox.
+        setmetatable(context, getmetatable(self._widget_context_skeleton))
+
         self._widget_context = context
 
         -- Give widgets a chance to react to the new context
@@ -121,7 +125,7 @@ local function do_redraw(self)
     -- Draw the background
     cr:save()
 
-    if not capi.awesome.composite_manager_running then
+    if (not capi.awesome.composite_manager_running) and capi.root.wallpaper then
         -- This is pseudo-transparency: We draw the wallpaper in the background
         local wallpaper = surface.load_silently(capi.root.wallpaper(), false)
         cr.operator = cairo.Operator.SOURCE

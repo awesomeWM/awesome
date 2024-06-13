@@ -193,6 +193,12 @@ static int
 luaA_drawable_refresh(lua_State *L)
 {
     drawable_t *drawable = luaA_checkudata(L, 1, &drawable_class);
+
+    /* GC race condition where the drawin is gone, but the drawable as a
+     * refresh in a delayed call */
+    if (!drawable->refresh_callback)
+        return 0;
+
     drawable->refreshed = true;
     (*drawable->refresh_callback)(drawable->refresh_data);
 
@@ -238,6 +244,12 @@ drawable_class_setup(lua_State *L)
                             NULL,
                             (lua_class_propfunc_t) luaA_drawable_get_surface,
                             NULL);
+}
+
+void drawable_invalidate(drawable_t *d)
+{
+    d->refresh_callback = NULL;
+    d->refresh_data = NULL;
 }
 
 /* @DOC_cobject_COMMON@ */
