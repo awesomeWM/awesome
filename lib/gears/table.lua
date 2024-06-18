@@ -1,5 +1,5 @@
 ---------------------------------------------------------------------------
---- Various functions to worj with tables.
+--- Various functions to work with tables.
 --
 -- Examples
 -- ========
