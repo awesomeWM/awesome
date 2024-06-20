@@ -12,7 +12,9 @@ local Gio = require("lgi").Gio
 local gstring = require("gears.string")
 local gtable = require("gears.table")
 
-local filesystem = {}
+local filesystem = {
+    subdirectory_cache = require("gears.filesystem.subdirectory_cache")
+}
 
 local function make_directory(gfile)
     local success, err = gfile:make_directory_with_parents()
@@ -223,3 +225,5 @@ function filesystem.get_random_file_from_dir(path, exts, absolute_path)
 end
 
 return filesystem
+
+-- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
