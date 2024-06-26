@@ -71,7 +71,7 @@ function margin:fit(context, width, height)
     return w + extra_w, h + extra_h
 end
 
---- The widget to be wrapped the the margins.
+--- The widget to be wrapped by the margins.
 --
 -- @property widget
 -- @tparam[opt=nil] widget|nil widget
