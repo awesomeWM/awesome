@@ -10,6 +10,7 @@ end
 
 local spawns_done = 0
 local async_spawns_done = 0
+local io_spawns_done = 0
 local exit_yay, exit_snd = nil, nil
 
 -- * Using spawn with array is already covered by the test client.
@@ -158,6 +159,72 @@ local steps = {
             assert(exit_yay == 0)
             assert(exit_snd == 42)
             assert(async_spawns_done == 2)
+            return true
+        end
+    end,
+    -- Test inheriting stdio
+    function(count)
+        if count == 1 then
+            do -- Test that DEV_NULL works and doesn't return a fd
+                local read_line = false
+                local pid, _, _, stdout, stderr = awesome.spawn({ 'readlink', '/proc/self/fd/2' },
+                        false, false, true, "DEV_NULL")
+                assert(type(pid) ~= "string", pid)
+                assert(stderr == nil)
+                spawn.read_lines(require("lgi").Gio.UnixInputStream.new(stdout, true),
+                    function(line)
+                        assert(not read_line)
+                        read_line = true
+                        assert(line == "/dev/null", line)
+                        io_spawns_done = io_spawns_done + 1
+                    end, nil, true)
+            end
+
+            do -- Test that INHERIT works and doesn't return a fd
+                -- Note: if this is /dev/null, this test is useless.
+                local test_stdin = require('lgi').GLib.file_read_link('/proc/self/fd/0')
+
+                local read_line = false
+                local pid, _, stdin, stdout = awesome.spawn({ 'readlink', '/proc/self/fd/0' },
+                        false, "INHERIT", true, false)
+                assert(type(pid) ~= "string", pid)
+                assert(stdin == nil)
+                spawn.read_lines(require("lgi").Gio.UnixInputStream.new(stdout, true),
+                    function(line)
+                        assert(not read_line)
+                        read_line = true
+                        assert(line == test_stdin, line)
+                        io_spawns_done = io_spawns_done + 1
+                    end, nil, true)
+            end
+
+            do -- Test that false doesn't return a pointer (behavior is untested - GLib defaults)
+                local pid, _, stdin, stdout, stderr = awesome.spawn({"true"},
+                        false, false, false, false)
+                assert(type(pid) ~= "string", pid)
+                assert(stdin == nil)
+                assert(stdout == nil)
+                assert(stderr == nil)
+            end
+
+            do -- Test that true returns a pipe
+                local read_line = false
+                local pid, _, stdin, stdout, stderr = awesome.spawn({ 'readlink', '/proc/self/fd/0' },
+                        false, true, true, true)
+                assert(type(pid) ~= "string", pid)
+                assert(stdin ~= nil)
+                assert(stdout ~= nil)
+                assert(stderr ~= nil)
+                spawn.read_lines(require("lgi").Gio.UnixInputStream.new(stdout, true),
+                    function(line)
+                        assert(not read_line)
+                        read_line = true
+                        assert(line:find("^pipe:%[[0-9]+%]$"), line)
+                        io_spawns_done = io_spawns_done + 1
+                    end, nil, true)
+            end
+        end
+        if io_spawns_done == 3 then
             return true
         end
     end,
