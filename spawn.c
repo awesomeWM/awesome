@@ -412,9 +412,9 @@ spawn_child_exited(pid_t pid, int status)
  *
  * @tparam string|table cmd The command to launch.
  * @tparam[opt=true] boolean use_sn Use startup-notification?
- * @tparam[opt=false] boolean stdin Return a fd for stdin?
- * @tparam[opt=false] boolean stdout Return a fd for stdout?
- * @tparam[opt=false] boolean stderr Return a fd for stderr?
+ * @tparam[opt=false] boolean|string stdin Return a fd for stdin?
+ * @tparam[opt=false] boolean|string stdout Return a fd for stdout?
+ * @tparam[opt=false] boolean|string stderr Return a fd for stderr?
  * @tparam[opt=nil] function exit_callback Function to call on process exit. The
  *   function arguments will be type of exit ("exit" or "signal") and the exit
  *   code / the signal number causing process termination.
@@ -441,12 +441,57 @@ luaA_spawn(lua_State *L)
 
     if(lua_gettop(L) >= 2)
         use_sn = luaA_checkboolean(L, 2);
-    if(lua_gettop(L) >= 3)
-        return_stdin = luaA_checkboolean(L, 3);
-    if(lua_gettop(L) >= 4)
-        return_stdout = luaA_checkboolean(L, 4);
-    if(lua_gettop(L) >= 5)
-        return_stderr = luaA_checkboolean(L, 5);
+    /* Valid values for return_std* are:
+    * true -> return a fd
+    * false -> keep glib's default behaviour
+    * "DEV_NULL" -> use direct output to /dev/null
+    * "INHERIT" -> use the same fd as the parent
+    */
+    if(lua_gettop(L) >= 3) {
+        if (lua_isstring(L, 3)) {
+            const char *str = lua_tostring(L, 3);
+            if (a_strcmp(str, "DEV_NULL") == 0)
+                flags |= G_SPAWN_STDIN_FROM_DEV_NULL;
+            else if (a_strcmp(str, "INHERIT") == 0)
+                flags |= G_SPAWN_CHILD_INHERITS_STDIN;
+            else
+                luaA_typerror(L, 3, "DEV_NULL or INHERIT");
+        } else if(lua_isboolean(L, 3)) {
+            return_stdin = lua_toboolean(L, 3);
+        } else {
+            luaA_typerror(L, 3, "boolean or string");
+        }
+    }
+    if(lua_gettop(L) >= 4) {
+        if (lua_isstring(L, 4)) {
+            const char *str = lua_tostring(L, 4);
+            if (a_strcmp(str, "DEV_NULL") == 0)
+                flags |= G_SPAWN_STDOUT_TO_DEV_NULL;
+            else if (a_strcmp(str, "INHERIT") == 0)
+                flags |= G_SPAWN_CHILD_INHERITS_STDOUT;
+            else
+                luaA_typerror(L, 4, "DEV_NULL or INHERIT");
+        } else if(lua_isboolean(L, 4)) {
+            return_stdout = lua_toboolean(L, 4);
+        } else {
+            luaA_typerror(L, 4, "boolean or string");
+        }
+    }
+    if(lua_gettop(L) >= 5) {
+        if (lua_isstring(L, 5)) {
+            const char *str = lua_tostring(L, 5);
+            if (a_strcmp(str, "DEV_NULL") == 0)
+                flags |= G_SPAWN_STDERR_TO_DEV_NULL;
+            else if (a_strcmp(str, "INHERIT") == 0)
+                flags |= G_SPAWN_CHILD_INHERITS_STDERR;
+            else
+                luaA_typerror(L, 5, "DEV_NULL or INHERIT");
+        } else if(lua_isboolean(L, 5)) {
+            return_stderr = lua_toboolean(L, 5);
+        } else {
+            luaA_typerror(L, 5, "boolean or string");
+        }
+    }
     if (!lua_isnoneornil(L, 6))
     {
         luaA_checkfunction(L, 6);
