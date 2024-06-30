@@ -205,12 +205,11 @@ function timer.new(args)
     end
 
     if args.callback then
-        if args.call_now then
-            args.callback()
-        end
         ret:connect_signal("timeout", args.callback)
     end
-
+    if args.call_now then
+        ret:emit_signal("timeout")
+    end
     if args.single_shot then
         ret:connect_signal("timeout", function() ret:stop() end)
     end
