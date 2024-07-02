@@ -450,9 +450,12 @@ luaA_spawn(lua_State *L)
     if(lua_gettop(L) >= 3) {
         if (lua_isstring(L, 3)) {
             const char *str = lua_tostring(L, 3);
-            if (a_strcmp(str, "DEV_NULL") == 0)
+            if (a_strcmp(str, "DEV_NULL") == 0){
+                // This is the default behaviour. Compiles to a no-op before 2.74.
+                #if GLIB_CHECK_VERSION(2, 74, 0)
                 flags |= G_SPAWN_STDIN_FROM_DEV_NULL;
-            else if (a_strcmp(str, "INHERIT") == 0)
+                # endif
+            } else if (a_strcmp(str, "INHERIT") == 0)
                 flags |= G_SPAWN_CHILD_INHERITS_STDIN;
             else
                 luaA_typerror(L, 3, "DEV_NULL or INHERIT");
@@ -467,9 +470,12 @@ luaA_spawn(lua_State *L)
             const char *str = lua_tostring(L, 4);
             if (a_strcmp(str, "DEV_NULL") == 0)
                 flags |= G_SPAWN_STDOUT_TO_DEV_NULL;
-            else if (a_strcmp(str, "INHERIT") == 0)
+            else if (a_strcmp(str, "INHERIT") == 0) {
+                // This is the default behaviour. Compiles to a no-op before 2.74.
+                #if GLIB_CHECK_VERSION(2, 74, 0)
                 flags |= G_SPAWN_CHILD_INHERITS_STDOUT;
-            else
+                # endif
+            } else
                 luaA_typerror(L, 4, "DEV_NULL or INHERIT");
         } else if(lua_isboolean(L, 4)) {
             return_stdout = lua_toboolean(L, 4);
@@ -482,9 +488,12 @@ luaA_spawn(lua_State *L)
             const char *str = lua_tostring(L, 5);
             if (a_strcmp(str, "DEV_NULL") == 0)
                 flags |= G_SPAWN_STDERR_TO_DEV_NULL;
-            else if (a_strcmp(str, "INHERIT") == 0)
+            else if (a_strcmp(str, "INHERIT") == 0) {
+                // This is the default behaviour. Compiles to a no-op before 2.74.
+                #if GLIB_CHECK_VERSION(2, 74, 0)
                 flags |= G_SPAWN_CHILD_INHERITS_STDERR;
-            else
+                # endif
+            } else
                 luaA_typerror(L, 5, "DEV_NULL or INHERIT");
         } else if(lua_isboolean(L, 5)) {
             return_stderr = lua_toboolean(L, 5);
