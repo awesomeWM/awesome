@@ -10,6 +10,7 @@ end
 
 local spawns_done = 0
 local async_spawns_done = 0
+local io_spawns_done = 0
 local exit_yay, exit_snd = nil, nil
 
 -- * Using spawn with array is already covered by the test client.
@@ -175,7 +176,7 @@ local steps = {
                         assert(not read_line)
                         read_line = true
                         assert(line == "/dev/null", line)
-                        spawns_done = spawns_done + 1
+                        io_spawns_done = io_spawns_done + 1
                     end, nil, true)
             end
 
@@ -193,7 +194,7 @@ local steps = {
                         assert(not read_line)
                         read_line = true
                         assert(line == test_stdin, line)
-                        spawns_done = spawns_done + 1
+                        io_spawns_done = io_spawns_done + 1
                     end, nil, true)
             end
 
@@ -219,11 +220,11 @@ local steps = {
                         assert(not read_line)
                         read_line = true
                         assert(line:find("^pipe:%[[0-9]+%]$"), line)
-                        spawns_done = spawns_done + 1
+                        io_spawns_done = io_spawns_done + 1
                     end, nil, true)
             end
         end
-        if spawns_done == 3 then
+        if io_spawns_done == 3 then
             return true
         end
     end,
