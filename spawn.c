@@ -412,9 +412,15 @@ spawn_child_exited(pid_t pid, int status)
  *
  * @tparam string|table cmd The command to launch.
  * @tparam[opt=true] boolean use_sn Use startup-notification?
- * @tparam[opt=false] boolean|string stdin Return a fd for stdin?
- * @tparam[opt=false] boolean|string stdout Return a fd for stdout?
- * @tparam[opt=false] boolean|string stderr Return a fd for stderr?
+ * @tparam[opt=false] boolean|string stdin Pass `true` to return a fd for stdin.
+ *   Use `"DEV_NULL"` to redirect to /dev/null, or `"INHERIT"` to inherit the
+ *   parent's stdin.
+ * @tparam[opt=false] boolean|string stdout Pass `true` to return a fd for
+ *   stdout. Use `"DEV_NULL"` to redirect to /dev/null, or `"INHERIT"` to inherit
+ *   the parent's stdout.
+ * @tparam[opt=false] boolean|string stderr Pass `true` to return a fd for
+ *   stderr. Use `"DEV_NULL"` to redirect to /dev/null, or `"INHERIT"` to inherit
+ *   the parent's stderr.
  * @tparam[opt=nil] function exit_callback Function to call on process exit. The
  *   function arguments will be type of exit ("exit" or "signal") and the exit
  *   code / the signal number causing process termination.
