@@ -145,7 +145,7 @@ end
 -- @see start
 -- @see stop
 
---- The timer timeout value.
+--- The timer timeout value in seconds.
 --
 -- @property timeout
 -- @tparam[opt=0] number timeout
