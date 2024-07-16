@@ -182,8 +182,8 @@ local timer_instance_mt = {
 --
 -- @tparam table args Arguments.
 -- @tparam number args.timeout Timeout in seconds (e.g. `1.5`).
--- @tparam[opt=false] boolean args.autostart Automatically start the timer.
--- @tparam[opt=false] boolean args.call_now Call the callback at timer creation.
+-- @tparam[opt=false] boolean args.autostart Immediately start the timer countdown.
+-- @tparam[opt=false] boolean args.call_now Immediately call the callback function.
 -- @tparam[opt] function args.callback Callback function to connect to the
 --  "timeout" signal.
 -- @tparam[opt=false] boolean args.single_shot Run only once then stop.
