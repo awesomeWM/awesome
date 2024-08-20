@@ -30,6 +30,11 @@
 --
 --@DOC_awful_wallpaper_mazimized3_EXAMPLE@
 --
+-- To maintain the image's aspect ratio while filling the
+-- screen, the image can be cropped using `gears.surface`:
+--
+--@DOC_awful_wallpaper_mazimized4_EXAMPLE@
+--
 -- Finally, it is also possible to use simpler "branding" in a corner using
 -- `awful.placement`:
 --
