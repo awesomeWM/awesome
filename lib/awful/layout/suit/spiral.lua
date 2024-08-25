@@ -11,7 +11,7 @@
 -- Grab environment we need
 local ipairs = ipairs
 local math = math
-local tag = require("awful.tag")
+local capi = { screen = screen }
 
 --- The spiral layout layoutbox icon.
 -- @beautiful beautiful.layout_spiral
@@ -26,7 +26,7 @@ local tag = require("awful.tag")
 local spiral = {}
 
 local function do_spiral(p, is_spiral)
-    local t = p.tag or screen[p.screen].selected_tag
+    local t = p.tag or capi.screen[p.screen].selected_tag
     local wa = p.workarea
     local cls = p.clients
     local n = #cls
