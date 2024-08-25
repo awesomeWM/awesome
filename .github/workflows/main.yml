@@ -318,13 +318,11 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-themes
 
       - name: Upload Lua code coverage report
-        if: matrix.coverage == 'codecov'
+        uses: codecov/codecov-action@v3
         with:
-          token: ${{ secrets.codecov_token }}
-          verbose: true
-        run: |
-          luacov
-          bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
+          files: build/luacov.report.out
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       - name: Upload C code coverage report
         if: matrix.coverage == 'codecov'
