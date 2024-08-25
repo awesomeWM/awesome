@@ -11,6 +11,7 @@
 -- Grab environment we need
 local ipairs = ipairs
 local math = math
+local tag = require("awful.tag")
 
 --- The spiral layout layoutbox icon.
 -- @beautiful beautiful.layout_spiral
@@ -25,13 +26,22 @@ local math = math
 local spiral = {}
 
 local function do_spiral(p, is_spiral)
+    local t = p.tag or screen[p.screen].selected_tag
     local wa = p.workarea
     local cls = p.clients
     local n = #cls
     local old_width, old_height = wa.width, 2 * wa.height
+    local mwfact = t.master_width_factor + 0.5
 
     for k, c in ipairs(cls) do
-        if k % 2 == 0 then
+        if k == 1 and n ~= 1 then
+            wa.width, old_width = math.floor((wa.width / 2) * mwfact), wa.width
+        elseif k == 2 then
+            wa.width, old_width = math.ceil((old_width / 2) * (2 - mwfact)), wa.width
+            if k ~= n then
+                wa.height, old_height = math.floor(wa.height / 2), wa.height
+            end
+        elseif k % 2 == 0 then
             wa.width, old_width = math.ceil(old_width / 2), wa.width
             if k ~= n then
                 wa.height, old_height = math.floor(wa.height / 2), wa.height
