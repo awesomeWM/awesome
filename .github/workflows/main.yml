@@ -315,12 +315,12 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-requires
 
       - name: Run themes tests
-        run: cd "${{ github.workspace }}/build" && make check-themes
+        run: cd "${{ github.workspace }}/build" && make check-themes && find / -iname 'luacov.report.out'
 
       - name: Upload Lua code coverage report
         uses: codecov/codecov-action@v3
         with:
-          files: build/luacov.report.out
+          files: "${{ github.workspace }}/build/luacov.report.out"
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
