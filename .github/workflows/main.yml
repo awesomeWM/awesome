@@ -319,6 +319,10 @@ jobs:
 
       - name: Upload Lua code coverage report
         if: matrix.coverage == 'codecov'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.codecov_token }}
+          verbose: true
         run: |
           luacov
           bash /tmp/codecov-bash -f build/luacov.report.out -X gcov -X coveragepy -F luacov
