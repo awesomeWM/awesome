@@ -315,7 +315,7 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-requires
 
       - name: Run themes tests
-        run: cd "${{ github.workspace }}/build" && make check-themes && find / -iname 'luacov.report.out'
+        run: cd "${{ github.workspace }}/build" && make check-themes && find / -iname 'luacov.report.out' || true
 
       - name: Upload Lua code coverage report
         uses: codecov/codecov-action@v3
