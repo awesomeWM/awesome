@@ -240,10 +240,6 @@ jobs:
         if: matrix.coverage
         run: sudo -H luarocks install cluacov
 
-      - name: Install codecov.io uploader
-        if: matrix.coverage == 'codecov'
-        run: wget -O /tmp/codecov-bash https://codecov.io/bash
-
       # Check out repository to ${{ github.workspace }}
       # Automatically picks the current branch/PR
       - uses: actions/checkout@v2
@@ -308,7 +304,7 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-unit
 
       - name: Run examples tests
-        run: cd "${{ github.workspace }}/build" && make check-examples
+        run: cd "${{ github.workspace }}/build" && make check-examples -j8
 
       - name: Run requires tests
         if: matrix.coverage
@@ -330,7 +326,7 @@ jobs:
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Upload C code coverage report
+      - name: Generate C coverage report
         if: matrix.coverage == 'codecov'
         run: |
           # Report coverage for each .gcno file separately.
@@ -349,9 +345,13 @@ jobs:
             # with Code Climate.
             find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
           done
-
-          # Upload to Codecov.
-          bash /tmp/codecov-bash -X gcov -X coveragepy -F gcov
+      - name: Upload C code coverage report
+        if: matrix.coverage == 'codecov'
+        uses: codecov/codecov-action@v3
+        with:
+          files: "${{ github.workspace }}/gcov"
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
 
       # `check-qa` is the only test that doesn't get a coverage report, so it has to run after all of that.
       - name: Run qa tests
