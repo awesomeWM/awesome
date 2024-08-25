@@ -317,10 +317,10 @@ jobs:
       - name: Run themes tests
         run: cd "${{ github.workspace }}/build" && make check-themes
 
-      - name: Generage Lua coverage report
+      - name: Generate Lua coverage report
         if: matrix.coverage == 'codecov'
         run: |
-          luacov && find / -iname 'luacov.report.out' || true
+          luacov
 
       - name: Upload Lua code coverage report
         if: matrix.coverage == 'codecov'
