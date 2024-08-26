@@ -89,10 +89,8 @@ local slider = {mt={}}
 -- @propemits true false
 -- @propbeautiful
 
---[[
-    The cursor icon while grabbing the handle.
-    The available cursor names are located in "/usr/include/X11/cursorfont.h" without the XC_ prefixes.
---]]
+--- The cursor icon while grabbing the handle.
+--  The available cursor names are located in "/usr/include/X11/cursorfont.h" without the XC_ prefixes.
 -- @property handle_cursor
 -- @tparam[opt="fleur"] string|nil handle_cursor
 -- @propbeautiful
@@ -231,10 +229,8 @@ local slider = {mt={}}
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
---[[
-    The cursor icon while grabbing the handle.
-    The available cursor names are located in "/usr/include/X11/cursorfont.h" without the XC_ prefixes.
---]]
+--- The cursor icon while grabbing the handle.
+--  The available cursor names are located in "/usr/include/X11/cursorfont.h" without the XC_ prefixes.
 --
 -- @beautiful beautiful.slider_handle_cursor
 -- @tparam[opt="fleur"] string cursor
