@@ -23,6 +23,7 @@ local abutton    = require("awful.button")
 local ascreen    = require("awful.screen")
 local gpcall     = require("gears.protected_call")
 local dpi        = require("beautiful").xresources.apply_dpi
+local cst        = require("naughty.constants")
 
 local default_widget = require("naughty.widget._default")
 
@@ -378,18 +379,20 @@ local function new(args)
     end
 
     --TODO remove
-    local function hide()
-        local n = ret._private.notification[1]
+    local function hide(reason)
+        return function ()
+            local n = ret._private.notification[1]
 
-        if n then
-            n:destroy()
+            if n then
+                n:destroy(reason)
+            end
         end
     end
 
-    --FIXME there's another pull request for this
+    -- On right click, close the notification without triggering the default action
     ret:buttons(gtable.join(
-        abutton({ }, 1, hide),
-        abutton({ }, 3, hide)
+        abutton({ }, 1, hide(cst.notification_closed_reason.dismissed_by_user)),
+        abutton({ }, 3, hide(cst.notification_closed_reason.silent))
     ))
 
     gtable.crush(ret, box, false)
