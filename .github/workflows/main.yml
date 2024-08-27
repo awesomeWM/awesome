@@ -304,7 +304,7 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-unit
 
       - name: Run examples tests
-        run: cd "${{ github.workspace }}/build" && make check-examples -j16
+        run: cd "${{ github.workspace }}/build" && make check-examples -j24
 
       - name: Run requires tests
         if: matrix.coverage
@@ -337,6 +337,7 @@ jobs:
             # with Code Climate.
             find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
           done
+          find .. -iname '*gcov*' 2> /dev/null || true
           
       - name: Upload code coverage report
         if: matrix.coverage == 'codecov'
