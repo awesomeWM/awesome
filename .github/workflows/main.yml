@@ -337,7 +337,9 @@ jobs:
             # with Code Climate.
             find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
           done
-          find .. -iname '*gcov*' 2> /dev/null || true
+          echo "All gcov files:"
+          find / -iname '*gcov*' 2> /dev/null || true
+          echo "PWD ${PWD}"
           
       - name: Upload code coverage report
         if: matrix.coverage == 'codecov'
