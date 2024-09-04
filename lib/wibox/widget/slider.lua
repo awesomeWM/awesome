@@ -90,7 +90,7 @@ local slider = {mt={}}
 -- @propbeautiful
 
 --- The cursor icon while grabbing the handle.
--- The availabe cursor names are:
+-- The available cursor names are:
 --
 --@DOC_cursor_c_lua_COMMON@
 --
@@ -233,7 +233,7 @@ local slider = {mt={}}
 -- @see gears.shape
 
 --- The cursor icon while grabbing the handle.
--- The availabe cursor names are:
+-- The available cursor names are:
 --
 --@DOC_cursor_c_lua_COMMON@
 --
@@ -574,7 +574,7 @@ end
 -- @tparam[opt] number args.handle_border_width The handle border width.
 -- @tparam[opt] string args.handle_cursor
 -- The cursor icon while grabbing the handle.
--- The availabe cursor names are availabe in the "Object properties" section under handle_cursor
+-- The available cursor names are listed under handle_cursor, in the "Object properties" section.
 -- @tparam[opt] gears.shape args.bar_shape The bar (background) shape.
 -- @tparam[opt] number args.bar_height The bar (background) height.
 -- @tparam[opt] color args.bar_color The bar (background) color.
