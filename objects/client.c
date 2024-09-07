@@ -1375,7 +1375,7 @@ lua_class_t client_class;
 /**
  * The FreeDesktop StartId.
  *
- * When a client is spawned (like using a terminal or `awful.spawn`, a startup
+ * When a client is spawned (like using a terminal or `awful.spawn`), a startup
  * notification identifier is created. When the client is created, this
  * identifier remain the same. This allow to match a spawn event to an actual
  * client.
