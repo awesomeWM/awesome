@@ -32,6 +32,8 @@ struct drawin_t
     WINDOW_OBJECT_HEADER
     /** Ontop */
     bool ontop;
+    /** Desktop */
+    bool desktop;
     /** Visible */
     bool visible;
     /** Cursor */
@@ -49,7 +51,8 @@ ARRAY_FUNCS(drawin_t *, drawin, DO_NOTHING)
 drawin_t * drawin_getbywin(xcb_window_t);
 void drawin_refresh_pixmap_partial(drawin_t *, int16_t, int16_t, uint16_t, uint16_t);
 void luaA_drawin_systray_kickout(lua_State *);
-
+void drawin_set_ontop(lua_State *, drawin_t *, bool);
+void drawin_set_desktop(lua_State *, drawin_t *, bool);
 void drawin_class_setup(lua_State *);
 
 extern lua_class_t drawin_class;
