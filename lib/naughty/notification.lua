@@ -576,6 +576,19 @@ function notification:set_id(new_id)
     self:emit_signal("property::id", new_id)
 end
 
+
+local function die(self, reason)
+    if reason == cst.notification_closed_reason.expired then
+        self.is_expired = true
+        if naughty.expiration_paused then
+            table.insert(naughty.notifications._expired[1], self)
+            return
+        end
+    end
+
+    self:destroy(reason)
+end
+
 -- Return true if `self` is suspended.
 local function get_suspended(self)
     return naughty.suspended and (not self._private.ignore_suspend)
@@ -584,26 +597,18 @@ end
 function notification:set_timeout(timeout)
     timeout = timeout or 0
 
-    local die = function (reason)
-        if reason == cst.notification_closed_reason.expired then
-            self.is_expired = true
-            if naughty.expiration_paused then
-                table.insert(naughty.notifications._expired[1], self)
-                return
-            end
-        end
-
-        self:destroy(reason)
+    -- Even if the value is the same, the internal timer might be in an incorrect state.
+    -- We need to check that first, and continue with the stuff below, if necessary.
+    if self._private.timeout == timeout and ((not self.timer and timeout == 0) or self.timer) then
+        return
     end
-
-    if self.timer and self._private.timeout == timeout then return end
 
     -- 0 == never
     if timeout > 0 then
         local timer_die = timer { timeout = timeout }
 
         timer_die:connect_signal("timeout", function()
-            pcall(die, cst.notification_closed_reason.expired)
+            pcall(die, self, cst.notification_closed_reason.expired)
 
             -- Prevent infinite timers events on errors.
             if timer_die.started then
@@ -622,8 +627,11 @@ function notification:set_timeout(timeout)
         end
 
         self.timer = timer_die
+    elseif timeout == 0 and self.timer then
+        self.timer:stop()
+        self.timer = nil
     end
-    self.die = die
+
     self._private.timeout = timeout
     self:emit_signal("property::timeout", timeout)
 end
@@ -981,7 +989,7 @@ end
 -- @tparam[opt] function args.run Function to run on left click.  The notification
 --   object will be passed to it as an argument.
 --   You need to call e.g.
---   `notification.die(naughty.notification_closed_reason.dismissedByUser)` from
+--   `notification:destroy(naughty.notification_closed_reason.dismissedByUser)` from
 --   there to dismiss the notification yourself.
 -- @tparam[opt] function args.destroy Function to run when notification is destroyed.
 -- @tparam[opt] table args.preset Table with any of the above parameters.
