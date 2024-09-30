@@ -38,7 +38,7 @@
 --            awful.spawn.easy_async(
 --                {"sh", "-c", "acpi | sed -n 's/^.*, \([0-9]*\)%/\1/p'"},
 --                function(out)
---                    mybatterybar.battery = out
+--                    mybatterybar.set_battery(out)
 --                end
 --            )
 --        end
