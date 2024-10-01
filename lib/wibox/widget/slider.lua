@@ -281,6 +281,28 @@ local slider = {mt={}}
 -- @beautiful beautiful.slider_bar_active_color
 -- @param color
 
+--- Emitted when the user starts dragging the handle.
+--
+-- @signal drag_start
+-- @tparam number value The current value
+
+--- Emitted for every mouse move while the handle is being dragged.
+--
+-- This signal is only emitted by the user dragging the handle. It is therefore
+-- preferrable over `property::value`, as it cannot create a loop when trying to
+-- hook up the slider as representation of an external value (e.g. system
+-- volume).
+--
+-- @signal drag
+-- @tparam number value The current value
+
+--- Emitted when the user stops dragging the handle.
+--
+-- This signal is emitted when the user releases the mouse button after dragging
+-- the handle.
+--
+-- @signal drag_end
+-- @tparam number value The current value
 
 local properties = {
     -- Handle
@@ -339,6 +361,14 @@ function slider:set_value(value)
         self:emit_signal( "property::value", value)
         self:emit_signal( "widget::redraw_needed" )
     end
+end
+
+--- Returns `true` while the user is dragging the handle.
+--
+-- @method is_dragging
+-- @treturn boolean
+function slider:is_dragging()
+    return self._private.is_dragging
 end
 
 local function get_extremums(self)
@@ -542,6 +572,9 @@ local function mouse_press(self, x, y, button_id, _, geo)
 
     move_handle(self, width, x, y)
 
+    self._private.is_dragging = true
+    self:emit_signal("drag_start", self.value)
+
     -- Calculate a matrix transforming from screen coordinates into widget coordinates
     local wgeo = geo.drawable.drawable:geometry()
     local matrix = matrix_from_device:translate(-wgeo.x, -wgeo.y)
@@ -552,11 +585,14 @@ local function mouse_press(self, x, y, button_id, _, geo)
 
     capi.mousegrabber.run(function(mouse)
         if not mouse.buttons[1] then
+            self._private.is_dragging = false
+            self:emit_signal("drag_end", self.value)
             return false
         end
 
         -- Calculate the point relative to the widget
         move_handle(self, width, matrix:transform_point(mouse.x, mouse.y))
+        self:emit_signal("drag", self.value)
 
         return true
     end,handle_cursor)
