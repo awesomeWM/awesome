@@ -11,7 +11,7 @@ local awful = { --DOC_HIDE
     -- Wibars and docked clients are the main users of the struts.
     local wibar = awful.wibar {
         position = "top",
-        height   = 24, -- this will set the wibar won :struts() to top=24
+        height   = 24, -- this will set the wibar own :struts() to top=24
     }
 
 awful.tag.add("1", { --DOC_HIDE
