@@ -693,21 +693,23 @@ main(int argc, char **argv)
     if(xcb_connection_has_error(globalconf.connection))
         fatal("cannot open display (error %d)", xcb_connection_has_error(globalconf.connection));
 
+    if (!(default_init_flags & INIT_FLAG_ARGB))
+        globalconf.argb_mode = ARGB_MODE_DISABLED;
+    else if (default_init_flags & INIT_FLAG_FULL_ARGB)
+        globalconf.argb_mode = ARGB_MODE_FULL;
+    else
+        globalconf.argb_mode = ARGB_MODE_ENABLED;
     globalconf.screen = xcb_aux_get_screen(globalconf.connection, globalconf.default_screen);
-    globalconf.default_visual = draw_default_visual(globalconf.screen);
-    if(default_init_flags & INIT_FLAG_ARGB)
-        globalconf.visual = draw_argb_visual(globalconf.screen);
-    if(!globalconf.visual)
-        globalconf.visual = globalconf.default_visual;
-    globalconf.default_depth = draw_visual_depth(globalconf.screen, globalconf.visual->visual_id);
-    globalconf.default_cmap = globalconf.screen->default_colormap;
-    if(globalconf.default_depth != globalconf.screen->root_depth)
+    globalconf.screen_visual = draw_default_visual(globalconf.screen);
+    globalconf.screen_depth = draw_visual_depth(globalconf.screen, globalconf.screen_visual->visual_id);
+    globalconf.screen_cmap = globalconf.screen->default_colormap;
+    if (globalconf.argb_mode != ARGB_MODE_DISABLED)
     {
-        // We need our own color map if we aren't using the default depth
-        globalconf.default_cmap = xcb_generate_id(globalconf.connection);
+        globalconf.argb_visual = draw_argb_visual(globalconf.screen);
+        globalconf.argb_cmap = xcb_generate_id(globalconf.connection);
         xcb_create_colormap(globalconf.connection, XCB_COLORMAP_ALLOC_NONE,
-                globalconf.default_cmap, globalconf.screen->root,
-                globalconf.visual->visual_id);
+                globalconf.argb_cmap, globalconf.screen->root,
+                globalconf.argb_visual->visual_id);
     }
 
 #ifdef WITH_XCB_ERRORS
@@ -815,10 +817,10 @@ main(int argc, char **argv)
      * The window_no_focus is used for "nothing has the input focus". */
     globalconf.focus.window_no_focus = xcb_generate_id(globalconf.connection);
     globalconf.gc = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, globalconf.default_depth,
+    xcb_create_window(globalconf.connection, globalconf.screen_depth,
                       globalconf.focus.window_no_focus, globalconf.screen->root,
                       -1, -1, 1, 1, 0,
-                      XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+                      XCB_COPY_FROM_PARENT, globalconf.screen_visual->visual_id,
                       XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL |
                       XCB_CW_OVERRIDE_REDIRECT | XCB_CW_COLORMAP,
                       (const uint32_t [])
@@ -826,7 +828,7 @@ main(int argc, char **argv)
                           globalconf.screen->black_pixel,
                           globalconf.screen->black_pixel,
                           1,
-                          globalconf.default_cmap
+                          globalconf.screen_cmap
                       });
     xwindow_set_class_instance(globalconf.focus.window_no_focus);
     xwindow_set_name_static(globalconf.focus.window_no_focus, "Awesome no input window");
