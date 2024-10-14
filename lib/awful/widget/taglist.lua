@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 --- Taglist widget module for awful.
 --
--- Here is a more advanced example of how to extent the `taglist`. It provides:
+-- Here is a more advanced example of how to extend the `taglist`. It provides:
 --
 -- * mouse "hover" color
 -- * an extra index field
@@ -431,7 +431,7 @@ end
 
 --- The current number of tags.
 --
--- Note that the `tasklist` is usually lazy-loaded. Reading this property
+-- Note that the `taglist` is usually lazy-loaded. Reading this property
 -- may cause the widgets to be created. Depending on where the property is called
 -- from, it might, in theory, cause an infinite loop.
 --
