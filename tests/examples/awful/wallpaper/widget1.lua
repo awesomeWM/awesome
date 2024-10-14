@@ -31,7 +31,7 @@ local s = screen[1] --DOC_HIDE
 
                 --DOC_NEWLINE
 
-                -- Clip-out some increasingly large sections of add the sun "bars"
+                -- Clip-out some increasingly large sections to add the sun "bars"
                 for i=0, 6 do
                     cr:rectangle(0, height*.28 + i*(height*.055 + i/2), width, height*.055)
                 end
