@@ -40,7 +40,7 @@ local notif =  --DOC_HIDE
 
 --DOC_NEWLINE
 
-   -- Create a normal notification.
+   -- Create a critical notification.
 local notif2 =  --DOC_HIDE
    naughty.notification {
        title   = "A notification 2",
