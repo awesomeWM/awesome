@@ -78,7 +78,7 @@ local notif2 =  --DOC_HIDE
    naughty.notification {  --DOC_HIDE
        title     = "Daft Punk",  --DOC_HIDE
        message   = "Harder, Better, Faster, Stronger",  --DOC_HIDE
-       icon      = beautiful.awesome_icon,
+       icon      = beautiful.awesome_icon, --DOC_HIDE
        icon_size = 128,  --DOC_HIDE
        app_name  = "mdp",  --DOC_HIDE
    }  --DOC_HIDE
