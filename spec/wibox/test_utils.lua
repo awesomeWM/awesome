@@ -39,20 +39,36 @@ end
 say:set("assertion.widget_fit.positive", "Offering (%s, %s) to widget and expected (%s, %s), but got (%s, %s)")
 assert:register("assertion", "widget_fit", widget_fit, "assertion.widget_fit.positive", "assertion.widget_fit.positive")
 
+local function times(char, len)
+    local chars = {}
+    for _ = 1, len do
+        table.insert(chars, char)
+    end
+    return table.concat(chars, "")
+end
+
+--- Pad the `str` with `len` amount of characters `char`.
+-- When `is_after == true`, the padding will be appended.
+-- This allows exceeding the limit of 99 in `string.format`.
+local function pad_string(str, char, len, is_after)
+    len = len - #str
+    local pad = times(char, len)
+
+    if is_after == true then
+        return str .. pad
+    else
+        return pad .. str
+    end
+end
+
 local function draw_layout_comparison(actual, expected)
     local lines = {
         "Widget layout does not match:\n",
     }
 
     local left, right = {}, {}
-
-    local function times(char, len)
-        local chars = {}
-        for _ = 1, len do
-            table.insert(chars, char)
-        end
-        return table.concat(chars, "")
-    end
+    local too_small = false
+    local too_big = false
 
     local function wrap_line(width, x, line)
         -- Two columns occupied by the `|` characters
@@ -67,68 +83,139 @@ local function draw_layout_comparison(actual, expected)
     end
 
     local function draw_widget(widget)
-        local height = widget._height
-        local width = widget._width
-        local x = widget._matrix.x0
-        -- Two lines removed for the horizontal lines,
-        -- three for the lines with text
-        local fixed = 5
-        local buffer_top = math.floor((height - fixed) / 2)
-        local buffer_bottom = height - fixed - buffer_top
+        -- We need a minimum size to render the data in.
+        -- One line/column on all sides for the boundary.
+        -- Three lines, 12 columns for the text.
+        local min_size = { 14, 5 }
 
-        local widget_lines = {times("-", width)}
-        for _ = 1, buffer_top do
-            table.insert(widget_lines, wrap_line(width, x, " "))
+        if widget._width < min_size[1] or widget._height < min_size[2] then
+            too_small = true
+        elseif widget._width > 25 or widget._height > 25 then
+            too_big = true
         end
 
-        table.insert(widget_lines, wrap_line(width, x, widget._name or "Widget"))
-        table.insert(widget_lines, wrap_line(width, x, string.format(
-            "Size %d,%d",
-            widget._width, widget._height
-        )))
-        table.insert(widget_lines, wrap_line(width, x, string.format(
-            "Pos %d,%d",
-            widget._matrix.x0, widget._matrix.y0
-        )))
+        local width = math.max(min_size[1], widget._width)
+        local height = math.max(min_size[2], widget._height)
+        local x = widget._matrix.x0
+        local y = widget._matrix.y0
+
+        local buffer_top = math.floor(height / 2)
+        local buffer_bottom = height - buffer_top
+
+        local line_start = x + 1
+        local lines_index = y + 1
+        local widget_lines = {}
+        widget_lines[lines_index] = pad_string(times("-", width), " ", line_start)
+
+        for _ = 1, buffer_top do
+            lines_index = lines_index + 1
+            widget_lines[lines_index] = pad_string(
+                wrap_line(width, x, " "),
+                " ",
+                line_start
+            )
+        end
+
+        lines_index = lines_index + 1
+        widget_lines[lines_index] = pad_string(
+            wrap_line(width, x, widget._name or "Widget"),
+            " ",
+            line_start
+        )
+
+        lines_index = lines_index + 1
+        widget_lines[lines_index] = pad_string(
+            wrap_line(width, x, string.format(
+                "Size %d,%d",
+                widget._width, widget._height
+            )),
+            " ",
+            line_start
+        )
+
+        lines_index = lines_index + 1
+        widget_lines[lines_index] = pad_string(
+            wrap_line(width, x, string.format(
+                "Pos %d,%d",
+                widget._matrix.x0, widget._matrix.y0
+            )),
+            " ",
+            line_start
+        )
 
         for _ = 1, buffer_bottom do
-            table.insert(widget_lines, wrap_line(width, x, " "))
+            lines_index = lines_index + 1
+            widget_lines[lines_index] = pad_string(
+                wrap_line(width, x, " "),
+                " ",
+                line_start
+            )
         end
 
-        table.insert(widget_lines, times("-", width))
+        lines_index = lines_index + 1
+        widget_lines[lines_index] = pad_string(times("-", width), " ", line_start)
 
-        return widget_lines
+        return widget_lines, lines_index
     end
 
     local max_len = 0
+    local left_len = 0
+    local right_len = 0
 
     for _, widget in ipairs(actual) do
-        for _, line in ipairs(draw_widget(widget)) do
+        local widget_lines, last_index = draw_widget(widget)
+        left_len = math.max(left_len, last_index)
+
+        for i, line in pairs(widget_lines) do
             max_len = math.max(max_len, #line)
-            table.insert(left, line)
+            left[i] = line
         end
     end
 
     for _, widget in ipairs(expected) do
-        for _, line in ipairs(draw_widget(widget)) do
-            table.insert(right, line)
+        local widget_lines, last_index = draw_widget(widget)
+        right_len = math.max(right_len, last_index)
+
+        for i, line in pairs(widget_lines) do
+            right_len = right_len + 1
+            right[i] = line
         end
     end
 
-    table.insert(lines, string.format(
-        "%-"..max_len.."s   %-"..max_len.."s",
-        "Actual:", "Expected:"
-    ))
+    if too_small then
+        table.insert(lines,
+            "!!! Widget size is too small for proper drawing. Please " ..
+            "adjust the test case to use widgets with a dimension " ..
+            "of at least (14, 5)\n"
+        )
+    end
 
-    for i = 1, math.max(#left, #right) do
-        table.insert(lines, string.format("%-"..max_len.."s   %s", left[i] or "", right[i] or ""))
+    if too_big then
+        table.insert(lines,
+            "!!! Widget size is too big for proper drawing. Please " ..
+            "adjust the test case to keep widgets below a dimension " ..
+            "of (25, 25)\n"
+        )
+    end
+
+    table.insert(
+        lines,
+        pad_string("Actual:", " ", max_len, true) .. "   Expected:"
+    )
+
+    for i = 1, math.max(left_len, right_len) do
+        table.insert(
+            lines,
+            pad_string(left[i] or "", " ", max_len, true) .. "   " .. (right[i] or "")
+        )
     end
 
     -- Force one additional newline. Due to how the error message has to be set
     -- up, we want to force `say`'s trailing quote into a new line.
     table.insert(lines, "")
 
-    return table.concat(lines, "\n")
+    local rendered = table.concat(lines, "\n")
+    return rendered:gsub("%s*$", "")
 end
 
 local function widget_layout(state, arguments)
