@@ -628,6 +628,10 @@ function widget.new(args)
         local wibox_width = (self.width < wa.width) and self.width or
             (wa.width - self.border_width * 2)
 
+        local find_textbox = wibox.widget.textbox("", true)
+        local find_textbox_container = wibox.container.margin(find_textbox, self.group_margin, self.group_margin, self.group_margin, self.group_margin)
+        local find_textbox_height = wibox.widget.textbox.get_markup_geometry("X", s).height + 2 * self.group_margin
+
         -- arrange hotkey groups into columns
         local column_layouts = {}
         for _, group in ipairs(available_groups) do
@@ -636,7 +640,7 @@ function widget.new(args)
                 self._additional_hotkeys[group]
             )
             if #keys > 0 then
-                self:_create_group_columns(column_layouts, group, keys, s, wibox_height)
+                self:_create_group_columns(column_layouts, group, keys, s, wibox_height - find_textbox_height)
             end
         end
 
@@ -645,12 +649,16 @@ function widget.new(args)
         local pages = {}
         local columns = wibox.layout.fixed.horizontal()
         local previous_page_last_layout
+        local function add_page()
+            local page_widget = wibox.layout.align.vertical(nil, columns, find_textbox_container)
+            table.insert(pages, page_widget)
+        end
         for _, item in ipairs(column_layouts) do
             if item.max_width > available_width_px then
                 previous_page_last_layout:add(
                     self:_group_label("PgDn - Next Page", self.label_bg)
                 )
-                table.insert(pages, columns)
+                add_page()
                 columns = wibox.layout.fixed.horizontal()
                 available_width_px = wibox_width - item.max_width
                 item.layout:insert(
@@ -665,7 +673,7 @@ function widget.new(args)
             columns:add(column_margin)
             previous_page_last_layout = item.layout
         end
-        table.insert(pages, columns)
+        add_page()
 
         -- Function to place the widget in the center and account for the
         -- workarea. This will be called in the placement field of the
@@ -693,6 +701,7 @@ function widget.new(args)
         local widget_obj = {
             current_page = 1,
             popup = mypopup,
+            find_textbox = find_textbox,
         }
 
         -- Set up the mouse buttons to hide the popup
@@ -715,12 +724,29 @@ function widget.new(args)
         end
         function widget_obj.show(w_self)
             w_self.popup.visible = true
+            awful.prompt.run {
+                textbox = w_self.find_textbox,
+                changed_callback = function(input)
+                end,
+                done_callback = function()
+                    w_self:hide()
+                end,
+                keypressed_callback = function(_, key)
+                    if key == "Return" or key == "KP_Enter" then
+                        return true
+                    elseif key == "Prior" or key == "Up" then
+                        w_self:page_prev()
+                        return true
+                    elseif key == "Next" or key == "Down" then
+                        w_self:page_next()
+                        return true
+                    end
+                end,
+            }
         end
         function widget_obj.hide(w_self)
+            awful.keygrabber.stop()
             w_self.popup.visible = false
-            if w_self.keygrabber then
-                awful.keygrabber.stop(w_self.keygrabber)
-            end
         end
 
         return widget_obj
@@ -776,20 +802,6 @@ function widget.new(args)
         end
         local help_wibox = self._cached_wiboxes[s][joined_groups]
         help_wibox:show()
-
-        help_wibox.keygrabber = awful.keygrabber.run(function(_, key, event)
-            if event == "release" then return end
-            if key then
-                if key == "Next" then
-                    help_wibox:page_next()
-                elseif key == "Prior" then
-                    help_wibox:page_prev()
-                else
-                    help_wibox:hide()
-                end
-            end
-        end)
-        return help_wibox.keygrabber
     end
 
     --- Add hotkey descriptions for third-party applications.
