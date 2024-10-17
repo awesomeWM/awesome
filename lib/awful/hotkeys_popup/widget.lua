@@ -69,6 +69,8 @@ local capi = {
     screen = screen,
     client = client,
 }
+local table = table
+local string = string
 local awful = require("awful")
 local gtable = require("gears.table")
 local gstring = require("gears.string")
@@ -81,9 +83,15 @@ local matcher = require("gears.matcher")()
 
 -- Stripped copy of this module https://github.com/copycat-killer/lain/blob/master/util/markup.lua:
 local markup = {}
+function markup.font_start(font)
+    return '<span font="' .. tostring(font) .. '">'
+end
+function markup.font_end()
+    return '</span>'
+end
 -- Set the font.
 function markup.font(font, text)
-    return '<span font="'    .. tostring(font)    .. '">' .. tostring(text) ..'</span>'
+    return markup.font_start(font) .. tostring(text) .. markup.font_end()
 end
 -- Set the foreground.
 function markup.fg(color, text)
@@ -371,6 +379,20 @@ function widget.new(args)
             beautiful.hotkeys_description_font or "Monospace 8"
         self.group_margin = args.group_margin or
             beautiful.hotkeys_group_margin or dpi(6)
+        self.highlight_bg = args.highlight_bg or
+            beautiful.hotkeys_highlight_bg or "#ffff00"
+        self.highlight_fg = args.highlight_fg or
+            beautiful.hotkeys_highlight_fg or "#000000"
+        self.find_prompt = args.find_prompt or
+            beautiful.hotkeys_find_prompt or "<b>Find: </b>"
+        self.find_fg_cursor = args.find_fg_cursor or
+            beautiful.hotkeys_find_fg_cursor
+        self.find_bg_cursor = args.find_bg_cursor or
+            beautiful.hotkeys_find_bg_cursor
+        self.find_ul_cursor = args.find_ul_cursor or
+            beautiful.hotkeys_find_ul_cursor
+        self.find_font = args.find_font or
+            beautiful.hotkeys_find_font or self.font
         self.label_colors = beautiful.xresources.get_current_theme()
         self._widget_settings_loaded = true
     end
@@ -523,14 +545,86 @@ function widget.new(args)
         return margin
     end
 
-    function widget_instance:_create_group_columns(column_layouts, group, keys, s, wibox_height)
+    function widget_instance:_render_hotkey(label, find_keywords)
+        local rendered_text = label.text or ""
+
+        if #rendered_text > 0 and find_keywords and #find_keywords > 0 then
+            local text = string.lower(rendered_text)
+
+            local parts = {}
+            local found_keyword_count = 0
+
+            local function is_available(from, to)
+                for _, s in ipairs(parts) do
+                    if from <= s.to and to >= s.from then
+                        return false
+                    end
+                end
+                return true
+            end
+
+            for _, keyword in ipairs(find_keywords) do
+                local from, to = 1, nil
+                while true do
+                    from, to = string.find(text, keyword, from, true)
+                    if not from then
+                        break
+                    end
+                    if is_available(from, to) then
+                        table.insert(parts, { highlight = true, from = from, to = to })
+                        found_keyword_count = found_keyword_count + 1
+                        break
+                    end
+                    from = to + 1
+                end
+            end
+
+            if found_keyword_count == #find_keywords then
+                table.sort(parts, function(a, b) return a.from < b.from end)
+
+                local merged_parts = {}
+                local length = #text
+                local next_part = parts[1]
+                local i = 1
+                while i <= length do
+                    if next_part then
+                        if next_part.from == i then
+                            table.insert(merged_parts, next_part)
+                            i = next_part.to + 1
+                            table.remove(parts, 1)
+                            next_part = parts[1]
+                        else
+                            table.insert(merged_parts, { from = i, to = next_part.from - 1 })
+                            i = next_part.from
+                        end
+                    else
+                        table.insert(merged_parts, { from = i, to = length })
+                        break
+                    end
+                end
+
+                rendered_text = table.concat(gtable.map(function(part)
+                    local capture = string.sub(text, part.from, part.to)
+                    if part.highlight then
+                        return markup.bg(self.highlight_bg, markup.fg(self.highlight_fg, capture))
+                    else
+                        return capture
+                    end
+                end, merged_parts), "")
+            end
+        end
+
+        return label.prefix .. rendered_text .. label.suffix
+    end
+
+    function widget_instance:_create_group_columns(column_layouts, group, keys, s, wibox_height, find_data)
         local line_height = math.max(
             beautiful.get_font_height(self.font),
             beautiful.get_font_height(self.description_font)
         )
         local group_label_height = line_height + self.group_margin
         -- -1 for possible pagination:
-        local max_height_px = wibox_height - group_label_height
+        local max_height_px = wibox_height - group_label_height - find_data.height
 
         local joined_descriptions = ""
         for i, key in ipairs(keys) do
@@ -569,6 +663,7 @@ function widget.new(args)
         current_column.layout:add(self:_group_label(group))
 
         local function insert_keys(ik_keys, ik_add_new_column)
+            local labels = {}
             local max_label_width = 0
             local joined_labels = ""
             for i, key in ipairs(ik_keys) do
@@ -589,18 +684,25 @@ function widget.new(args)
                 elseif key.key then
                     key_label = gstring.xml_escape(key.key)
                 end
-                local rendered_hotkey = markup.font(self.font,
-                    modifiers .. key_label .. " "
-                ) .. markup.font(self.description_font,
-                    key.description or ""
-                )
+                local label = {
+                    prefix = markup.font(self.font, modifiers .. key_label .. " ") .. markup.font_start(self.description_font),
+                    suffix = markup.font_end(),
+                    text = tostring(key.description or ""),
+                }
+                table.insert(labels, label)
+                local rendered_hotkey = self:_render_hotkey(label)
                 local label_width = wibox.widget.textbox.get_markup_geometry(rendered_hotkey, s).width
                 if label_width > max_label_width then
                     max_label_width = label_width
                 end
                 joined_labels = joined_labels .. rendered_hotkey .. (i~=#ik_keys and "\n" or "")
-                end
-            current_column.layout:add(wibox.widget.textbox(joined_labels))
+            end
+            local textbox = wibox.widget.textbox(joined_labels)
+            current_column.layout:add(textbox)
+            table.insert(find_data.rows, {
+                textbox = textbox,
+                labels = labels,
+            })
             local max_width = max_label_width + self.group_margin
             if not current_column.max_width or (max_width > current_column.max_width) then
                 current_column.max_width = max_width
@@ -620,17 +722,7 @@ function widget.new(args)
         end
     end
 
-    function widget_instance:_create_wibox(s, available_groups, show_awesome_keys)
-        s = get_screen(s)
-        local wa = s.workarea
-        local wibox_height = (self.height < wa.height) and self.height or
-            (wa.height - self.border_width * 2)
-        local wibox_width = (self.width < wa.width) and self.width or
-            (wa.width - self.border_width * 2)
-
-        local find_textbox = wibox.widget.textbox("", true)
-        local find_textbox_container = wibox.container.margin(find_textbox, self.group_margin, self.group_margin, self.group_margin, self.group_margin)
-        local find_textbox_height = wibox.widget.textbox.get_markup_geometry("X", s).height + 2 * self.group_margin
+    function widget_instance:_create_pages(s, available_groups, show_awesome_keys, wibox_width, wibox_height, find_data)
 
         -- arrange hotkey groups into columns
         local column_layouts = {}
@@ -640,7 +732,7 @@ function widget.new(args)
                 self._additional_hotkeys[group]
             )
             if #keys > 0 then
-                self:_create_group_columns(column_layouts, group, keys, s, wibox_height - find_textbox_height)
+                self:_create_group_columns(column_layouts, group, keys, s, wibox_height, find_data)
             end
         end
 
@@ -650,7 +742,7 @@ function widget.new(args)
         local columns = wibox.layout.fixed.horizontal()
         local previous_page_last_layout
         local function add_page()
-            local page_widget = wibox.layout.align.vertical(nil, columns, find_textbox_container)
+            local page_widget = wibox.layout.align.vertical(nil, columns, find_data.container)
             table.insert(pages, page_widget)
         end
         for _, item in ipairs(column_layouts) do
@@ -674,6 +766,35 @@ function widget.new(args)
             previous_page_last_layout = item.layout
         end
         add_page()
+
+        return pages
+    end
+
+    function widget_instance:_create_find_data()
+        local margin = self.group_margin
+        local textbox = wibox.widget.textbox("", true)
+        local container = wibox.container.margin(textbox, margin, margin, margin, margin)
+        local height = beautiful.get_font_height(self.find_font) + 2 * margin
+        return {
+            textbox = textbox,
+            container = container,
+            height = height,
+            rows = {},
+            last_query = "",
+        }
+    end
+
+    function widget_instance:_create_wibox(s, available_groups, show_awesome_keys)
+        s = get_screen(s)
+        local wa = s.workarea
+        local wibox_height = (self.height < wa.height) and self.height or
+            (wa.height - self.border_width * 2)
+        local wibox_width = (self.width < wa.width) and self.width or
+            (wa.width - self.border_width * 2)
+
+        local find_data = self:_create_find_data()
+
+        local pages = self:_create_pages(s, available_groups, show_awesome_keys, wibox_width, wibox_height, find_data)
 
         -- Function to place the widget in the center and account for the
         -- workarea. This will be called in the placement field of the
@@ -701,7 +822,7 @@ function widget.new(args)
         local widget_obj = {
             current_page = 1,
             popup = mypopup,
-            find_textbox = find_textbox,
+            find_data = find_data,
         }
 
         -- Set up the mouse buttons to hide the popup
@@ -723,18 +844,22 @@ function widget.new(args)
             w_self.popup:set_widget(pages[w_self.current_page])
         end
         function widget_obj.show(w_self)
-            w_self.popup.visible = true
+            w_self:find(nil)
             awful.prompt.run {
-                textbox = w_self.find_textbox,
+                textbox = w_self.find_data.textbox,
+                prompt = self.find_prompt,
+                fg_cursor = self.find_fg_cursor,
+                bg_cursor = self.find_bg_cursor,
+                ul_cursor = self.find_ul_cursor,
+                font = self.find_font,
                 changed_callback = function(input)
+                    w_self:find(input)
                 end,
                 done_callback = function()
                     w_self:hide()
                 end,
                 keypressed_callback = function(_, key)
-                    if key == "Return" or key == "KP_Enter" then
-                        return true
-                    elseif key == "Prior" or key == "Up" then
+                    if key == "Prior" or key == "Up" then
                         w_self:page_prev()
                         return true
                     elseif key == "Next" or key == "Down" then
@@ -743,10 +868,39 @@ function widget.new(args)
                     end
                 end,
             }
+            w_self.popup.visible = true
         end
         function widget_obj.hide(w_self)
             awful.keygrabber.stop()
             w_self.popup.visible = false
+        end
+        function widget_obj.find(w_self, input)
+            local keywords = {}
+            for keyword in string.gmatch(input or "", "([^%s]+)") do
+                keyword = string.lower(keyword)
+                if #keyword > 0 and not keywords[keyword] then
+                    keywords[keyword] = true
+                    if pcall(string.find, "", keyword) then
+                        table.insert(keywords, keyword)
+                    end
+                end
+            end
+
+            table.sort(keywords, function(a, b) return #a > #b end)
+
+            local query = table.concat(keywords, " ")
+            if w_self.find_data.last_query == query then
+                return
+            end
+            w_self.find_data.last_query = query
+
+            for _, row in ipairs(w_self.find_data.rows) do
+                local rendered_hotkeys = {}
+                for _, label in ipairs(row.labels) do
+                    table.insert(rendered_hotkeys, self:_render_hotkey(label, keywords))
+                end
+                row.textbox:set_markup(table.concat(rendered_hotkeys, "\n"))
+            end
         end
 
         return widget_obj
