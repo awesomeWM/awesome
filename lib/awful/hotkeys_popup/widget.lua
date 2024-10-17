@@ -699,7 +699,7 @@ function widget.new(args)
             end
             local textbox = wibox.widget.textbox(joined_labels)
             current_column.layout:add(textbox)
-            table.insert(find_data.rows, {
+            table.insert(find_data.groups, {
                 textbox = textbox,
                 labels = labels,
             })
@@ -779,7 +779,7 @@ function widget.new(args)
             textbox = textbox,
             container = container,
             height = height,
-            rows = {},
+            groups = {},
             last_query = "",
         }
     end
@@ -894,7 +894,7 @@ function widget.new(args)
             end
             w_self.find_data.last_query = query
 
-            for _, row in ipairs(w_self.find_data.rows) do
+            for _, row in ipairs(w_self.find_data.groups) do
                 local rendered_hotkeys = {}
                 for _, label in ipairs(row.labels) do
                     table.insert(rendered_hotkeys, self:_render_hotkey(label, keywords))
