@@ -274,6 +274,38 @@ widget.labels = {
 -- @beautiful beautiful.hotkeys_group_margin
 -- @tparam int hotkeys_group_margin
 
+--- The highlighted text background color.
+-- @beautiful beautiful.hotkeys_highlight_bg
+-- @tparam color hotkeys_highlight_bg
+
+--- The highlighted text foreground color.
+-- @beautiful beautiful.hotkeys_highlight_fg
+-- @tparam color hotkeys_highlight_fg
+
+--- The find prompt cursor foreground color.
+-- @beautiful beautiful.hotkeys_find_fg_cursor
+-- @tparam color hotkeys_find_fg_cursor
+
+--- The find prompt cursor background color.
+-- @beautiful beautiful.hotkeys_find_bg_cursor
+-- @tparam color hotkeys_find_bg_cursor
+
+--- The find prompt cursor underline style.
+-- @beautiful beautiful.hotkeys_find_ul_cursor
+-- @tparam string hotkeys_find_ul_cursor
+
+--- The find prompt text.
+-- @beautiful beautiful.hotkeys_find_prompt
+-- @tparam string hotkeys_find_prompt
+
+--- The find prompt text font.
+-- @beautiful beautiful.hotkeys_find_font
+-- @tparam string|lgi.Pango.FontDescription hotkeys_find_font
+
+--- Margin around the find prompt.
+-- @beautiful beautiful.hotkeys_find_margin
+-- @tparam int hotkeys_find_margin
+
 
 --- Create an instance of widget with hotkeys help.
 -- @tparam[opt] table args Configuration options for the widget.
@@ -296,6 +328,14 @@ widget.labels = {
 -- @tparam[opt] color args.label_fg Foreground color used for group and other
 -- labels.
 -- @tparam[opt] int args.group_margin Margin between hotkeys groups.
+-- @tparam[opt] color args.highlight_bg The highlighted text background color.
+-- @tparam[opt] color args.highlight_fg The highlighted text foreground color.
+-- @tparam[opt] color args.find_fg_cursor The find prompt cursor foreground color.
+-- @tparam[opt] color args.find_bg_cursor The find prompt cursor background color.
+-- @tparam[opt] string args.find_ul_cursor The find prompt cursor underline style.
+-- @tparam[opt] string args.find_prompt The find prompt text.
+-- @tparam[opt] string|lgi.Pango.FontDescription args.find_font The find prompt text font.
+-- @tparam[opt] int args.find_margin Margin around the find prompt.
 -- @tparam[opt] table args.labels Labels used for displaying human-readable keynames.
 -- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
 -- @return Widget instance.
@@ -311,6 +351,14 @@ widget.labels = {
 -- @usebeautiful beautiful.hotkeys_font
 -- @usebeautiful beautiful.hotkeys_description_font
 -- @usebeautiful beautiful.hotkeys_group_margin
+-- @usebeautiful beautiful.hotkeys_highlight_bg
+-- @usebeautiful beautiful.hotkeys_highlight_fg
+-- @usebeautiful beautiful.hotkeys_find_fg_cursor
+-- @usebeautiful beautiful.hotkeys_find_bg_cursor
+-- @usebeautiful beautiful.hotkeys_find_ul_cursor
+-- @usebeautiful beautiful.hotkeys_find_prompt
+-- @usebeautiful beautiful.hotkeys_find_font
+-- @usebeautiful beautiful.hotkeys_find_margin
 -- @usebeautiful beautiful.bg_normal Fallback.
 -- @usebeautiful beautiful.fg_normal Fallback.
 -- @usebeautiful beautiful.fg_minimize Fallback.
@@ -828,8 +876,6 @@ function widget.new(args)
         }
 
         -- Set up the mouse buttons to hide the popup
-        -- Any keybinding except what the keygrabber wants wil hide the popup
-        -- too
         mypopup.buttons = {
             awful.button({ }, 1, function () widget_obj:hide() end),
             awful.button({ }, 3, function () widget_obj:hide() end)
@@ -915,8 +961,7 @@ function widget.new(args)
     -- @tparam[opt={}] table show_args Additional arguments.
     -- @tparam[opt=true] boolean show_args.show_awesome_keys Show AwesomeWM hotkeys.
     -- When set to `false` only app-specific hotkeys will be shown.
-    -- @treturn awful.keygrabber The keybrabber used to detect when the key is
-    --  released.
+    -- @noreturn
     -- @method show_help
     function widget_instance:show_help(c, s, show_args)
         show_args = show_args or {}
@@ -1009,11 +1054,10 @@ end
 -- @tparam[opt] table args Additional arguments.
 -- @tparam[opt=true] boolean args.show_awesome_keys Show AwesomeWM hotkeys.
 -- When set to `false` only app-specific hotkeys will be shown.
--- @treturn awful.keygrabber The keybrabber used to detect when the key is
---  released.
+-- @noreturn
 -- @staticfct awful.hotkeys_popup.widget.show_help
 function widget.show_help(...)
-    return get_default_widget():show_help(...)
+    get_default_widget():show_help(...)
 end
 
 --- Add hotkey descriptions for third-party applications
