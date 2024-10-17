@@ -606,7 +606,7 @@ function widget.new(args)
                 end
 
                 rendered_text = table.concat(gtable.map(function(part)
-                    local capture = string.sub(text, part.from, part.to)
+                    local capture = string.sub(rendered_text, part.from, part.to)
                     if part.highlight then
                         return markup.bg(self.highlight_bg, markup.fg(self.highlight_fg, capture))
                     else
