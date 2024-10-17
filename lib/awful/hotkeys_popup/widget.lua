@@ -791,16 +791,12 @@ function widget.new(args)
         local pages = {}
         local columns = wibox.layout.fixed.horizontal()
         local previous_page_last_layout
-        local function add_page()
-            local page_widget = wibox.layout.align.vertical(nil, columns, find_data.container)
-            table.insert(pages, page_widget)
-        end
         for _, item in ipairs(column_layouts) do
             if item.max_width > available_width_px then
                 previous_page_last_layout:add(
                     self:_group_label("PgDn - Next Page", self.label_bg)
                 )
-                add_page()
+                table.insert(pages, columns)
                 columns = wibox.layout.fixed.horizontal()
                 available_width_px = wibox_width - item.max_width
                 item.layout:insert(
@@ -815,7 +811,7 @@ function widget.new(args)
             columns:add(column_margin)
             previous_page_last_layout = item.layout
         end
-        add_page()
+        table.insert(pages, columns)
 
         return pages
     end
@@ -846,6 +842,8 @@ function widget.new(args)
 
         local pages = self:_create_pages(s, available_groups, show_awesome_keys, wibox_width, wibox_height, find_data)
 
+        local popup_widget = wibox.layout.align.vertical(nil, pages[1], find_data.container)
+
         -- Function to place the widget in the center and account for the
         -- workarea. This will be called in the placement field of the
         -- awful.popup constructor.
@@ -855,7 +853,7 @@ function widget.new(args)
 
         -- Construct the popup with the widget
         local mypopup = awful.popup {
-            widget = pages[1],
+            widget = popup_widget,
             ontop = true,
             bg=self.bg,
             fg=self.fg,
@@ -875,6 +873,21 @@ function widget.new(args)
             find_data = find_data,
         }
 
+        local function set_page(page)
+            if page < 1 then
+                page = 1
+            elseif page >= #pages then
+                page = #pages
+            end
+
+            if widget_obj.current_page == page then
+                return
+            end
+            widget_obj.current_page = page
+
+            popup_widget:set_middle(pages[page])
+        end
+
         -- Set up the mouse buttons to hide the popup
         mypopup.buttons = {
             awful.button({ }, 1, function () widget_obj:hide() end),
@@ -882,14 +895,10 @@ function widget.new(args)
         }
 
         function widget_obj.page_next(w_self)
-            if w_self.current_page == #pages then return end
-            w_self.current_page = w_self.current_page + 1
-            w_self.popup:set_widget(pages[w_self.current_page])
+            set_page(w_self.current_page + 1)
         end
         function widget_obj.page_prev(w_self)
-            if w_self.current_page == 1 then return end
-            w_self.current_page = w_self.current_page - 1
-            w_self.popup:set_widget(pages[w_self.current_page])
+            set_page(w_self.current_page - 1)
         end
         function widget_obj.show(w_self)
             w_self:find(nil)
@@ -907,10 +916,10 @@ function widget.new(args)
                     w_self:hide()
                 end,
                 keypressed_callback = function(_, key)
-                    if key == "Prior" or key == "Up" then
+                    if key == "Prior" then
                         w_self:page_prev()
                         return true
-                    elseif key == "Next" or key == "Down" then
+                    elseif key == "Next" then
                         w_self:page_next()
                         return true
                     end
