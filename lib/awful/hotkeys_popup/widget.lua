@@ -393,6 +393,8 @@ function widget.new(args)
             beautiful.hotkeys_find_ul_cursor
         self.find_font = args.find_font or
             beautiful.hotkeys_find_font or self.font
+        self.find_margin = args.find_margin or
+            beautiful.hotkeys_find_margin or self.group_margin
         self.label_colors = beautiful.xresources.get_current_theme()
         self._widget_settings_loaded = true
     end
@@ -771,8 +773,8 @@ function widget.new(args)
     end
 
     function widget_instance:_create_find_data()
-        local margin = self.group_margin
-        local textbox = wibox.widget.textbox("", true)
+        local margin = self.find_margin
+        local textbox = wibox.widget.textbox()
         local container = wibox.container.margin(textbox, margin, margin, margin, margin)
         local height = beautiful.get_font_height(self.find_font) + 2 * margin
         return {
