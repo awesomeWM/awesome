@@ -403,7 +403,7 @@ function widget.new(args)
     function widget_instance:_load_widget_settings()
         if self._widget_settings_loaded then return end
         self.width = args.width or dpi(1200)
-        self.height = args.height or dpi(300)
+        self.height = args.height or dpi(800)
         self.bg = args.bg or
             beautiful.hotkeys_bg or beautiful.bg_normal
         self.fg = args.fg or
