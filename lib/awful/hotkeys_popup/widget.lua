@@ -403,7 +403,7 @@ function widget.new(args)
     function widget_instance:_load_widget_settings()
         if self._widget_settings_loaded then return end
         self.width = args.width or dpi(1200)
-        self.height = args.height or dpi(800)
+        self.height = args.height or dpi(300)
         self.bg = args.bg or
             beautiful.hotkeys_bg or beautiful.bg_normal
         self.fg = args.fg or
@@ -595,6 +595,14 @@ function widget.new(args)
         return margin
     end
 
+    function widget_instance:_render_all_hotkeys(labels, find_keywords)
+        local rendered_hotkeys = {}
+        for _, label in ipairs(labels) do
+            table.insert(rendered_hotkeys, self:_render_hotkey(label, find_keywords))
+        end
+        return table.concat(rendered_hotkeys, "\n")
+    end
+
     function widget_instance:_render_hotkey(label, find_keywords)
         local rendered_text = label.text or ""
 
@@ -714,9 +722,7 @@ function widget.new(args)
 
         local function insert_keys(ik_keys, ik_add_new_column)
             local labels = {}
-            local max_label_width = 0
-            local joined_labels = ""
-            for i, key in ipairs(ik_keys) do
+            for _, key in ipairs(ik_keys) do
                 local modifiers = key.mod
                 if not modifiers or modifiers == "none" then
                     modifiers = ""
@@ -740,26 +746,22 @@ function widget.new(args)
                     text = tostring(key.description or ""),
                 }
                 table.insert(labels, label)
-                local rendered_hotkey = self:_render_hotkey(label)
-                local label_width = wibox.widget.textbox.get_markup_geometry(rendered_hotkey, s).width
-                if label_width > max_label_width then
-                    max_label_width = label_width
-                end
-                joined_labels = joined_labels .. rendered_hotkey .. (i~=#ik_keys and "\n" or "")
             end
-            local textbox = wibox.widget.textbox(joined_labels)
+            local rendered_hotkeys = self:_render_all_hotkeys(labels)
+            local textbox = wibox.widget.textbox(rendered_hotkeys)
             current_column.layout:add(textbox)
             table.insert(find_data.groups, {
                 textbox = textbox,
                 labels = labels,
             })
+            local max_label_width = wibox.widget.textbox.get_markup_geometry(rendered_hotkeys, s).width
             local max_width = max_label_width + self.group_margin
             if not current_column.max_width or (max_width > current_column.max_width) then
                 current_column.max_width = max_width
             end
             -- +1 for group label:
             current_column.height_px = (current_column.height_px or 0) +
-                gstring.linecount(joined_labels)*line_height + group_label_height
+                gstring.linecount(rendered_hotkeys)*line_height + group_label_height
             if ik_add_new_column then
                 table.insert(column_layouts, current_column)
             end
@@ -951,12 +953,8 @@ function widget.new(args)
             end
             w_self.find_data.last_query = query
 
-            for _, row in ipairs(w_self.find_data.groups) do
-                local rendered_hotkeys = {}
-                for _, label in ipairs(row.labels) do
-                    table.insert(rendered_hotkeys, self:_render_hotkey(label, keywords))
-                end
-                row.textbox:set_markup(table.concat(rendered_hotkeys, "\n"))
+            for _, group in ipairs(w_self.find_data.groups) do
+                group.textbox:set_markup(self:_render_all_hotkeys(group.labels, keywords))
             end
         end
 
