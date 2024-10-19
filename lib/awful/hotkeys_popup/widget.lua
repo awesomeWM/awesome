@@ -428,9 +428,9 @@ function widget.new(args)
         self.group_margin = args.group_margin or
             beautiful.hotkeys_group_margin or dpi(6)
         self.highlight_bg = args.highlight_bg or
-            beautiful.hotkeys_highlight_bg or "#ffff00"
+            beautiful.hotkeys_highlight_bg or beautiful.bg_urgent
         self.highlight_fg = args.highlight_fg or
-            beautiful.hotkeys_highlight_fg or "#000000"
+            beautiful.hotkeys_highlight_fg or beautiful.fg_urgent
         self.find_prompt = args.find_prompt or
             beautiful.hotkeys_find_prompt or "<b>Find: </b>"
         self.find_fg_cursor = args.find_fg_cursor or
