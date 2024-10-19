@@ -682,7 +682,7 @@ function widget.new(args)
         )
         local group_label_height = line_height + self.group_margin
         -- -1 for possible pagination:
-        local max_height_px = wibox_height - group_label_height - find_data.height
+        local max_height_px = wibox_height - group_label_height - find_data.container_height
 
         local joined_descriptions = ""
         for i, key in ipairs(keys) do
@@ -818,21 +818,27 @@ function widget.new(args)
         return pages
     end
 
-    function widget_instance:_create_find_data()
-        local margin = self.find_margin
-        local textbox = wibox.widget.textbox()
-        local container = wibox.container.margin(textbox, margin, margin, margin, margin)
-        local height = beautiful.get_font_height(self.find_font) + 2 * margin
-        return {
-            textbox = textbox,
-            container = container,
-            height = height,
+    function widget_instance:_create_find_data(enable_find)
+        local data = {
+            enabled = enable_find,
+            textbox = wibox.widget.textbox(),
             groups = {},
             last_query = "",
         }
+
+        if enable_find then
+            local margin = self.find_margin
+            data.container = wibox.container.margin(data.textbox, margin, margin, margin, margin)
+            data.container_height = beautiful.get_font_height(self.find_font) + 2 * margin
+        else
+            data.container = wibox.widget.empty
+            data.container_height = 0
+        end
+
+        return data
     end
 
-    function widget_instance:_create_wibox(s, available_groups, show_awesome_keys)
+    function widget_instance:_create_wibox(s, available_groups, show_awesome_keys, enable_find)
         s = get_screen(s)
         local wa = s.workarea
         local wibox_height = (self.height < wa.height) and self.height or
@@ -840,7 +846,7 @@ function widget.new(args)
         local wibox_width = (self.width < wa.width) and self.width or
             (wa.width - self.border_width * 2)
 
-        local find_data = self:_create_find_data()
+        local find_data = self:_create_find_data(enable_find)
 
         local pages = self:_create_pages(s, available_groups, show_awesome_keys, wibox_width, wibox_height, find_data)
 
@@ -920,10 +926,10 @@ function widget.new(args)
                 keypressed_callback = function(_, key)
                     if key == "Prior" then
                         w_self:page_prev()
-                        return true
                     elseif key == "Next" then
                         w_self:page_next()
-                        return true
+                    elseif not w_self.find_data.enabled then
+                        w_self:hide()
                     end
                 end,
             }
@@ -934,6 +940,10 @@ function widget.new(args)
             w_self.popup.visible = false
         end
         function widget_obj.find(w_self, input)
+            if not w_self.find_data.enabled then
+                return
+            end
+
             local keywords = {}
             for keyword in string.gmatch(input or "", "([^%s]+)") do
                 keyword = string.lower(keyword)
@@ -972,6 +982,7 @@ function widget.new(args)
     -- @method show_help
     function widget_instance:show_help(c, s, show_args)
         show_args = show_args or {}
+        local enable_find = show_args.enable_find ~= false
         local show_awesome_keys = show_args.show_awesome_keys ~= false
 
         self:_import_awful_keys()
@@ -1001,14 +1012,14 @@ function widget.new(args)
             if not need_match then table.insert(available_groups, group) end
         end
 
-        local joined_groups = join_plus_sort(available_groups)..tostring(show_awesome_keys)
+        local cache_key = join_plus_sort(available_groups)..tostring(show_awesome_keys)..tostring(enable_find)
         if not self._cached_wiboxes[s] then
             self._cached_wiboxes[s] = {}
         end
-        if not self._cached_wiboxes[s][joined_groups] then
-            self._cached_wiboxes[s][joined_groups] = self:_create_wibox(s, available_groups, show_awesome_keys)
+        if not self._cached_wiboxes[s][cache_key] then
+            self._cached_wiboxes[s][cache_key] = self:_create_wibox(s, available_groups, show_awesome_keys, enable_find)
         end
-        local help_wibox = self._cached_wiboxes[s][joined_groups]
+        local help_wibox = self._cached_wiboxes[s][cache_key]
         help_wibox:show()
     end
 
@@ -1059,6 +1070,7 @@ end
 -- @tparam[opt] client c Client.
 -- @tparam[opt] screen s Screen.
 -- @tparam[opt] table args Additional arguments.
+-- @tparam[opt=true] boolean args.enable_find Enable find.
 -- @tparam[opt=true] boolean args.show_awesome_keys Show AwesomeWM hotkeys.
 -- When set to `false` only app-specific hotkeys will be shown.
 -- @noreturn
