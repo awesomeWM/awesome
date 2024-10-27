@@ -11,7 +11,7 @@ beautiful.notification_bg = beautiful.bg_normal --DOC_HIDE
    ruled.notification.connect_signal("request::rules", function()
        -- Add a red background for urgent notifications.
        ruled.notification.append_rule {
-           rule       = { app_name = "mdp" },
+           rule       = { app_name = "mpd" },
            properties = {
                widget_template = {
                    {
@@ -80,10 +80,10 @@ local notif2 =  --DOC_HIDE
        message   = "Harder, Better, Faster, Stronger",  --DOC_HIDE
        icon      = beautiful.awesome_icon, --DOC_HIDE
        icon_size = 128,  --DOC_HIDE
-       app_name  = "mdp",  --DOC_HIDE
+       app_name  = "mpd",  --DOC_HIDE
    }  --DOC_HIDE
 
-assert(notif2.app_name == "mdp") --DOC_HIDE
+assert(notif2.app_name == "mpd") --DOC_HIDE
 assert(box) --DOC_HIDE
 
 box.widget.forced_width = 250 --DOC_HIDE
