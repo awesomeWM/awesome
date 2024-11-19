@@ -15,6 +15,7 @@ local wibox = require("wibox") --DOC_HIDE
         maximum_height = #awful.layout.layouts * 24,
         minimum_height = #awful.layout.layouts * 24,
         placement      = awful.placement.centered,
+        hide_on_right_click = true,
     }
 
 --DOC_HIDE vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
