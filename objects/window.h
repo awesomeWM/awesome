@@ -69,6 +69,8 @@ typedef enum
     color_t border_color; \
     /** Border width */ \
     uint16_t border_width; \
+    /** The visual type */ \
+    xcb_visualtype_t *visualtype; \
     /** The window type */ \
     window_type_t type; \
     /** The border width callback */ \
