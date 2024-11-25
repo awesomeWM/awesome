@@ -167,6 +167,13 @@ stack_refresh()
 
     xcb_window_t next = XCB_NONE;
 
+    foreach(drawin, globalconf.drawins)
+        if ((*drawin)->desktop)
+        {
+            stack_window_above((*drawin)->window, next);
+            next = (*drawin)->window;
+        }   
+
     /* stack desktop windows */
     for(window_layer_t layer = WINDOW_LAYER_DESKTOP; layer < WINDOW_LAYER_BELOW; layer++)
         foreach(node, globalconf.stack)
@@ -175,7 +182,7 @@ stack_refresh()
 
     /* first stack not ontop drawin window */
     foreach(drawin, globalconf.drawins)
-        if(!(*drawin)->ontop)
+        if(!(*drawin)->ontop && !(*drawin)->desktop)
         {
             stack_window_above((*drawin)->window, next);
             next = (*drawin)->window;
