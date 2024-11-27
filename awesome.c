@@ -683,7 +683,7 @@ main(int argc, char **argv)
     sigaction(SIGCHLD, &sa, 0);
 
     /* We have no clue where the input focus is right now */
-    globalconf.focus.need_update = true;
+    client_focus_need_update();
 
     /* set the default preferred icon size */
     globalconf.preferred_icon_size = 0;
