@@ -448,7 +448,7 @@ if(BUSTED_EXECUTABLE)
         set(BUSTED_ARGS)
     endif()
     add_custom_target(check-unit
-        COMMAND ${BUSTED_EXECUTABLE} ${BUSTED_ARGS}
+        COMMAND ${BUSTED_EXECUTABLE} --lua=${LUA_EXECUTABLE} ${BUSTED_ARGS}
         WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
         COMMENT "Running unit tests"
         VERBATIM)
