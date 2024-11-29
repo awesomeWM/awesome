@@ -67,6 +67,8 @@ ewmh_client_update_hints(lua_State *L)
         state[i++] = _NET_WM_STATE_HIDDEN;
     if(c->urgent)
         state[i++] = _NET_WM_STATE_DEMANDS_ATTENTION;
+    if(c->ontop)
+        state[i++] = _NET_WM_STATE_ONTOP;
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
                         c->window, _NET_WM_STATE, XCB_ATOM_ATOM, 32, i, state);
@@ -174,7 +176,8 @@ ewmh_init(void)
         _NET_WM_STATE_BELOW,
         _NET_WM_STATE_MODAL,
         _NET_WM_STATE_HIDDEN,
-        _NET_WM_STATE_DEMANDS_ATTENTION
+        _NET_WM_STATE_DEMANDS_ATTENTION,
+        _NET_WM_STATE_ONTOP
     };
     int i;
 
@@ -247,6 +250,7 @@ ewmh_init_lua(void)
     luaA_class_connect_signal(L, &client_class, "property::maximized" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::sticky" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::skip_taskbar" , ewmh_client_update_hints);
+    luaA_class_connect_signal(L, &client_class, "property::ontop", ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::above" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::below" , ewmh_client_update_hints);
     luaA_class_connect_signal(L, &client_class, "property::minimized" , ewmh_client_update_hints);
@@ -407,6 +411,15 @@ ewmh_process_state_atom(client_t *c, xcb_atom_t state, int set)
             client_set_minimized(L, -1, true);
         else if(set == _NET_WM_STATE_TOGGLE)
             client_set_minimized(L, -1, !c->minimized);
+    }
+    else if(state == _NET_WM_STATE_ONTOP)
+    {
+        if(set == _NET_WM_STATE_REMOVE)
+            client_set_ontop(L, -1, false);
+        else if(set == _NET_WM_STATE_ADD)
+            client_set_ontop(L, -1, true);
+        else if(set == _NET_WM_STATE_TOGGLE)
+            client_set_ontop(L, -1, !c->ontop);
     }
     else if(state == _NET_WM_STATE_DEMANDS_ATTENTION)
     {
