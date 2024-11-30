@@ -294,10 +294,6 @@ widget.labels = {
 -- @beautiful beautiful.hotkeys_find_ul_cursor
 -- @tparam string hotkeys_find_ul_cursor
 
---- The find prompt text.
--- @beautiful beautiful.hotkeys_find_prompt
--- @tparam string hotkeys_find_prompt
-
 --- The find prompt text font.
 -- @beautiful beautiful.hotkeys_find_font
 -- @tparam string|lgi.Pango.FontDescription hotkeys_find_font
@@ -333,7 +329,6 @@ widget.labels = {
 -- @tparam[opt] color args.find_fg_cursor The find prompt cursor foreground color.
 -- @tparam[opt] color args.find_bg_cursor The find prompt cursor background color.
 -- @tparam[opt] string args.find_ul_cursor The find prompt cursor underline style.
--- @tparam[opt] string args.find_prompt The find prompt text.
 -- @tparam[opt] string|lgi.Pango.FontDescription args.find_font The find prompt text font.
 -- @tparam[opt] int args.find_margin Margin around the find prompt.
 -- @tparam[opt] table args.labels Labels used for displaying human-readable keynames.
@@ -356,7 +351,6 @@ widget.labels = {
 -- @usebeautiful beautiful.hotkeys_find_fg_cursor
 -- @usebeautiful beautiful.hotkeys_find_bg_cursor
 -- @usebeautiful beautiful.hotkeys_find_ul_cursor
--- @usebeautiful beautiful.hotkeys_find_prompt
 -- @usebeautiful beautiful.hotkeys_find_font
 -- @usebeautiful beautiful.hotkeys_find_margin
 -- @usebeautiful beautiful.bg_normal Fallback.
@@ -431,8 +425,6 @@ function widget.new(args)
             beautiful.hotkeys_highlight_bg or beautiful.bg_urgent
         self.highlight_fg = args.highlight_fg or
             beautiful.hotkeys_highlight_fg or beautiful.fg_urgent
-        self.find_prompt = args.find_prompt or
-            beautiful.hotkeys_find_prompt or "<b>Find: </b>"
         self.find_fg_cursor = args.find_fg_cursor or
             beautiful.hotkeys_find_fg_cursor
         self.find_bg_cursor = args.find_bg_cursor or
@@ -622,7 +614,8 @@ function widget.new(args)
             end
 
             for _, keyword in ipairs(find_keywords) do
-                local from, to = 1, nil
+                local from = 1
+                local to
                 while true do
                     from, to = string.find(text, keyword, from, true)
                     if not from then
@@ -741,7 +734,8 @@ function widget.new(args)
                     key_label = gstring.xml_escape(key.key)
                 end
                 local label = {
-                    prefix = markup.font(self.font, modifiers .. key_label .. " ") .. markup.font_start(self.description_font),
+                    prefix = markup.font(self.font, modifiers .. key_label .. " ") ..
+                        markup.font_start(self.description_font),
                     suffix = markup.font_end(),
                     text = tostring(key.description or ""),
                 }
@@ -818,15 +812,15 @@ function widget.new(args)
         return pages
     end
 
-    function widget_instance:_create_find_data(enable_find)
+    function widget_instance:_create_find_data(find_args)
         local data = {
-            enabled = enable_find,
+            enabled = find_args.enabled,
             textbox = wibox.widget.textbox(),
             groups = {},
             last_query = "",
         }
 
-        if enable_find then
+        if find_args.enabled then
             local margin = self.find_margin
             data.container = wibox.container.margin(data.textbox, margin, margin, margin, margin)
             data.container_height = beautiful.get_font_height(self.find_font) + 2 * margin
@@ -838,7 +832,7 @@ function widget.new(args)
         return data
     end
 
-    function widget_instance:_create_wibox(s, available_groups, show_awesome_keys, enable_find)
+    function widget_instance:_create_wibox(s, available_groups, show_awesome_keys, find_args)
         s = get_screen(s)
         local wa = s.workarea
         local wibox_height = (self.height < wa.height) and self.height or
@@ -846,7 +840,7 @@ function widget.new(args)
         local wibox_width = (self.width < wa.width) and self.width or
             (wa.width - self.border_width * 2)
 
-        local find_data = self:_create_find_data(enable_find)
+        local find_data = self:_create_find_data(find_args)
 
         local pages = self:_create_pages(s, available_groups, show_awesome_keys, wibox_width, wibox_height, find_data)
 
@@ -912,7 +906,7 @@ function widget.new(args)
             w_self:find(nil)
             awful.prompt.run {
                 textbox = w_self.find_data.textbox,
-                prompt = self.find_prompt,
+                prompt = find_args.prompt,
                 fg_cursor = self.find_fg_cursor,
                 bg_cursor = self.find_bg_cursor,
                 ul_cursor = self.find_ul_cursor,
@@ -976,14 +970,25 @@ function widget.new(args)
     -- @tparam[opt=client.focus] client c Client.
     -- @tparam[opt=c.screen] screen s Screen.
     -- @tparam[opt={}] table show_args Additional arguments.
+    -- @tparam[opt=true] boolean show_args.enable_find Enable find feature.
+    -- @tparam[opt="<b>Find: </b>"] string show_args.find_prompt The find prompt text.
     -- @tparam[opt=true] boolean show_args.show_awesome_keys Show AwesomeWM hotkeys.
     -- When set to `false` only app-specific hotkeys will be shown.
     -- @noreturn
     -- @method show_help
     function widget_instance:show_help(c, s, show_args)
         show_args = show_args or {}
-        local enable_find = show_args.enable_find ~= false
         local show_awesome_keys = show_args.show_awesome_keys ~= false
+
+        local find_args = {
+            enabled = show_args.enable_find ~= false,
+            prompt = type(show_args.find_prompt) == "string"
+                and show_args.find_prompt
+                or "<b>Find: </b>",
+            get_cache_key = function(self)
+                return tostring(self.enabled) .. self.prompt
+            end,
+        }
 
         self:_import_awful_keys()
         self:_load_widget_settings()
@@ -1012,12 +1017,12 @@ function widget.new(args)
             if not need_match then table.insert(available_groups, group) end
         end
 
-        local cache_key = join_plus_sort(available_groups)..tostring(show_awesome_keys)..tostring(enable_find)
+        local cache_key = join_plus_sort(available_groups)..tostring(show_awesome_keys)..find_args:get_cache_key()
         if not self._cached_wiboxes[s] then
             self._cached_wiboxes[s] = {}
         end
         if not self._cached_wiboxes[s][cache_key] then
-            self._cached_wiboxes[s][cache_key] = self:_create_wibox(s, available_groups, show_awesome_keys, enable_find)
+            self._cached_wiboxes[s][cache_key] = self:_create_wibox(s, available_groups, show_awesome_keys, find_args)
         end
         local help_wibox = self._cached_wiboxes[s][cache_key]
         help_wibox:show()
