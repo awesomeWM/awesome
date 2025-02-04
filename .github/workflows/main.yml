@@ -199,9 +199,11 @@ jobs:
       - name: Install fresh xcb-errors
         if: steps.cache-xcb-errors.outputs.cache-hit != 'true'
         run: |
-          git clone --recursive --depth 1 --branch 1.0 https://gitlab.freedesktop.org/xorg/lib/libxcb-errors.git /tmp/xcb-errors
+          wget -O /tmp/xcb-errors.tar.xz https://xorg.freedesktop.org/archive/individual/lib/xcb-util-errors-1.0.1.tar.xz
+          mkdir /tmp/xcb-errors
+          tar -xf /tmp/xcb-errors.tar.xz -C /tmp/xcb-errors/ --strip-components=1
           cd /tmp/xcb-errors
-          ./autogen.sh --prefix=/usr
+          ./configure --prefix=/usr
           make
           sudo make install
 
@@ -337,7 +339,7 @@ jobs:
             # with Code Climate.
             find "gcov.$i" -maxdepth 1 -type f -name '#usr#*.gcov' -delete
           done
-          
+
       - name: Upload Lua code coverage report
         if: matrix.coverage == 'codecov'
         uses: codecov/codecov-action@v3
@@ -345,7 +347,7 @@ jobs:
           files: "${{ github.workspace }}/build/luacov.report.out"
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
-          
+
       - name: Upload C code coverage report
         if: matrix.coverage == 'codecov'
         uses: codecov/codecov-action@v3
