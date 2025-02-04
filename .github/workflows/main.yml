@@ -194,7 +194,7 @@ jobs:
         uses: actions/cache@v2
         with:
           path: /tmp/xcb-errors
-          key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-1.0
+          key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-1.0.1
 
       - name: Install fresh xcb-errors
         if: steps.cache-xcb-errors.outputs.cache-hit != 'true'
