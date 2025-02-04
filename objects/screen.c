@@ -192,7 +192,7 @@
  * If you really want to keep an array of screens you should use something
  * along:
  *
- *     local myscreens = setmetatable({}. {__mode="k"})
+ *     local myscreens = setmetatable({}, {__mode="k"})
  *     myscreens[ screen[1] ] = "mydata"
  *
  * But it might be a better option to simply store the data directly in the
