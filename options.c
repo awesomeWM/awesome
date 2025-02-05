@@ -418,6 +418,7 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
         { "screen"    , ARG   , NULL, 'm'  },
         { "api-level" , ARG   , NULL, 'l'  },
         { "reap"      , ARG   , NULL, '\1' },
+        { "full-argb" , NO_ARG, NULL, 'A'  },
         { NULL        , NO_ARG, NULL, 0    }
     };
 
@@ -466,6 +467,9 @@ options_check_args(int argc, char **argv, int *init_flags, string_array_t *paths
           case 'a':
             globalconf.had_overriden_depth = true;
             (*init_flags) &= ~INIT_FLAG_ARGB;
+            break;
+          case 'A':
+            (*init_flags) |= INIT_FLAG_FULL_ARGB | INIT_FLAG_ARGB;
             break;
           case 'r':
             (*init_flags) |= INIT_FLAG_REPLACE_WM;

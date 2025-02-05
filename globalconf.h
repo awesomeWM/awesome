@@ -77,6 +77,15 @@ ARRAY_TYPE(xproperty_t, xproperty)
 DO_ARRAY(sequence_pair_t, sequence_pair, DO_NOTHING)
 DO_ARRAY(xcb_window_t, window, DO_NOTHING)
 
+enum argb_mode {
+    /** No window will be created with an ARGB visual */
+    ARGB_MODE_DISABLED = 0,
+    /** Client window with an ARGB visual will be reparented an ARGB window */
+    ARGB_MODE_ENABLED,
+    /** All windows will be created with an ARGB visual */
+    ARGB_MODE_FULL
+};
+
 /** Main configuration structure */
 typedef struct
 {
@@ -185,20 +194,24 @@ typedef struct
     } systray;
     /** The monitor of startup notifications */
     SnMonitorContext *snmonitor;
-    /** The visual, used to draw */
-    xcb_visualtype_t *visual;
     /** The screen's default visual */
-    xcb_visualtype_t *default_visual;
+    xcb_visualtype_t *screen_visual;
+    /** An ARGB visual */
+    xcb_visualtype_t *argb_visual;
     /** The screen's information */
     xcb_screen_t *screen;
     /** A graphic context. */
     xcb_gcontext_t gc;
-    /** Our default depth */
-    uint8_t default_depth;
-    /** Our default color map */
-    xcb_colormap_t default_cmap;
+    /** The screen's depth */
+    uint8_t screen_depth;
+    /** The screen's default color map */
+    xcb_colormap_t screen_cmap;
+    /** ARGB color map */
+    xcb_colormap_t argb_cmap;
     /** Do we have to reban clients? */
     bool need_lazy_banning;
+    /** Should we use ARGB visual for all windows? */
+    enum argb_mode argb_mode;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */
