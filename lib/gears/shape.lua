@@ -317,6 +317,66 @@ function module.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
     cr:close_path()
 end
 
+--- A rounded rect with individually defined corner radii.
+--
+-- @DOC_gears_shape_individually_rounded_rect_EXAMPLE@
+--
+-- @param cr A cairo context
+-- @tparam number width The shape width
+-- @tparam number height The shape height
+-- @tparam boolean tl The top left corner's radius
+-- @tparam boolean tr The top right corner's radius
+-- @tparam boolean br The bottom right corner's radius
+-- @tparam boolean bl The bottom left corner's radius
+-- @noreturn
+-- @staticfct gears.shape.individually_rounded_rect
+function module.individually_rounded_rect(cr, width, height, tl, tr, br, bl)
+    local corners = {tl = tl, tr = tr, br = br, bl =  bl}
+    for key, val in pairs(corners) do
+        corners[key] = val or 10
+        if width / 2 < val then
+            corners[key] = width / 2
+        end
+        if height / 2 < val then
+            corners[key] = height / 2
+        end
+    end
+
+    -- In case there is already some other path on the cairo context:
+    -- Make sure the close_path() below goes to the right position.
+    cr:new_sub_path()
+
+    -- Top left
+    if tl then
+        cr:arc( corners.tl, corners.tl, corners.tl, math.pi, 3*(math.pi/2))
+    else
+        cr:move_to(0,0)
+    end
+
+    -- Top right
+    if tr then
+        cr:arc( width-corners.tr, corners.tr, corners.tr, 3*(math.pi/2), math.pi*2)
+    else
+        cr:line_to(width, 0)
+    end
+
+    -- Bottom right
+    if br then
+        cr:arc( width-corners.br, height-corners.br, corners.br, math.pi*2 , math.pi/2)
+    else
+        cr:line_to(width, height)
+    end
+
+    -- Bottom left
+    if bl then
+        cr:arc( corners.bl, height-corners.bl, corners.bl, math.pi/2, math.pi)
+    else
+        cr:line_to(0, height)
+    end
+
+    cr:close_path()
+end
+
 --- A rounded rectangle with a triangle at the top.
 --
 -- @DOC_gears_shape_infobubble_EXAMPLE@
