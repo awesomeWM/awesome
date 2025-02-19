@@ -318,22 +318,18 @@ function module.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
 end
 
 --- A rounded rect with individually defined corner radii.
---
--- @DOC_gears_shape_individually_rounded_rect_EXAMPLE@
---
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
--- @tparam boolean tl The top left corner's radius
--- @tparam boolean tr The top right corner's radius
--- @tparam boolean br The bottom right corner's radius
--- @tparam boolean bl The bottom left corner's radius
+-- @tparam number tl The top left corner's radius
+-- @tparam number tr The top right corner's radius
+-- @tparam number br The bottom right corner's radius
+-- @tparam number bl The bottom left corner's radius
 -- @noreturn
 -- @staticfct gears.shape.individually_rounded_rect
 function module.individually_rounded_rect(cr, width, height, tl, tr, br, bl)
     local corners = {tl = tl, tr = tr, br = br, bl =  bl}
     for key, val in pairs(corners) do
-        corners[key] = val or 10
         if width / 2 < val then
             corners[key] = width / 2
         end
