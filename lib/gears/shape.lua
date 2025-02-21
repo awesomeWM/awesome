@@ -318,6 +318,9 @@ function module.partially_rounded_rect(cr, width, height, tl, tr, br, bl, rad)
 end
 
 --- A rounded rect with individually defined corner radii.
+--
+-- @DOC_gears_shape_individually_rounded_rect_EXAMPLE@
+--
 -- @param cr A cairo context
 -- @tparam number width The shape width
 -- @tparam number height The shape height
