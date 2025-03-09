@@ -315,6 +315,10 @@ if(GENERATE_DOC)
             generate_awesomerc
             generate-examples
         COMMENT "Generating API documentation${ldoc_desc_suffix}")
+else()
+    add_custom_target(ldoc false
+        COMMENT "ldoc target not available, re-configure CMake with GENERATE_DOC=1."
+        VERBATIM)
 endif()
 # }}}
 
