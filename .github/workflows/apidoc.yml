@@ -37,7 +37,7 @@ jobs:
 
       - name: Cache apt packages
         id: cache-apt
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /var/cache/apt/archives
           # The trailing number serves as a version flag that can be incremented
@@ -87,7 +87,7 @@ jobs:
 
       - name: Cache luarocks
         id: cache-luarocks
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /tmp/luarocks
           key: ${{ github.workflow }}-${{ runner.os }}-luarocks-3.5.0

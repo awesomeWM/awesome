@@ -87,7 +87,7 @@ jobs:
 
       - name: Cache apt packages
         id: cache-apt
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /var/cache/apt/archives
           # The trailing number serves as a version flag that can be incremented
@@ -166,7 +166,7 @@ jobs:
 
       - name: Cache luarocks
         id: cache-luarocks
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /tmp/luarocks
           # The build input for luarocks changes per test, so we need separate caches
@@ -191,7 +191,7 @@ jobs:
 
       - name: Cache xcb-errors
         id: cache-xcb-errors
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: /tmp/xcb-errors
           key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-1.0.1
