@@ -23,7 +23,7 @@ permissions:
 jobs:
   main:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     name: ${{ matrix.test_name }}
 
     strategy:
@@ -140,7 +140,10 @@ jobs:
             fonts-noto-core \
             fonts-dejavu-core \
             fonts-roboto-unhinted \
-            fonts-open-sans
+            fonts-open-sans \
+            imagemagick \
+            libgdk-pixbuf-2.0-dev \
+            librsvg2-dev
 
       - name: Install downloaded packages
         run: sudo dpkg -i /var/cache/apt/archives/*.deb
