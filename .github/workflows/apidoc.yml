@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   main:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     env:
       # Used for stable dates in documentation examples. See #2070.
@@ -56,10 +56,13 @@ jobs:
             gir1.2-gtk-3.0 \
             gir1.2-pango-1.0 \
             git \
+            imagemagick \
             libdbus-1-dev \
+            libgdk-pixbuf-2.0-dev \
             libgirepository1.0-dev \
             libnotify-bin \
             libpango1.0-dev \
+            librsvg2-dev \
             libstartup-notification0-dev \
             libx11-xcb-dev \
             libxcb-cursor-dev \
