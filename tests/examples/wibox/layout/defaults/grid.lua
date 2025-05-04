@@ -8,10 +8,10 @@ wibox.widget {
     generic_widget( "second" ),
     generic_widget( "third"  ),
     generic_widget( "fourth" ),
-    forced_num_cols = 2,
-    forced_num_rows = 2,
-    homogeneous     = true,
-    expand          = true,
-    layout = wibox.layout.grid
+    column_count = 2,
+    row_count    = 2,
+    homogeneous  = true,
+    expand       = true,
+    layout       = wibox.layout.grid
 }
 , nil, 60 --DOC_HIDE

@@ -89,7 +89,11 @@ local slider = {mt={}}
 -- @propemits true false
 -- @propbeautiful
 
---- The handle grab cursor.
+--- The cursor icon while grabbing the handle.
+-- The available cursor names are:
+--
+--@DOC_cursor_COMMON@
+--
 -- @property handle_cursor
 -- @tparam[opt="fleur"] string|nil handle_cursor
 -- @propbeautiful
@@ -228,7 +232,10 @@ local slider = {mt={}}
 -- @tparam[opt=gears.shape.rectangle] gears.shape shape
 -- @see gears.shape
 
---- The handle grab cursor.
+--- The cursor icon while grabbing the handle.
+-- The available cursor names are:
+--
+--@DOC_cursor_COMMON@
 --
 -- @beautiful beautiful.slider_handle_cursor
 -- @tparam[opt="fleur"] string cursor
@@ -565,7 +572,9 @@ end
 -- @tparam[opt] number args.handle_width The slider handle width.
 -- @tparam[opt] color args.handle_border_color The handle border_color.
 -- @tparam[opt] number args.handle_border_width The handle border width.
--- @tparam[opt] string args.handle_cursor The handle grab cursor.
+-- @tparam[opt] string args.handle_cursor
+--   The cursor icon while grabbing the handle.
+--   The available cursor names are listed under handle_cursor, in the "Object properties" section.
 -- @tparam[opt] gears.shape args.bar_shape The bar (background) shape.
 -- @tparam[opt] number args.bar_height The bar (background) height.
 -- @tparam[opt] color args.bar_color The bar (background) color.

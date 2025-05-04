@@ -42,11 +42,11 @@ local s = screen[1]
         --DOC_NEWLINE
         if count > 5 and not self.is_grid then
             self.base_layout = wibox.widget {
-                forced_num_rows = 2,
-                homogeneous     = true,
-                expand          = true,
-                spacing         = 2,
-                layout          = wibox.layout.grid.horizontal
+                row_count   = 2,
+                homogeneous = true,
+                expand      = true,
+                spacing     = 2,
+                layout      = wibox.layout.grid.horizontal
             }
             --DOC_NEWLINE
             self.is_grid = true

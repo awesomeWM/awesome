@@ -145,7 +145,7 @@ end
 -- @see start
 -- @see stop
 
---- The timer timeout value.
+--- The timer timeout value in seconds.
 --
 -- @property timeout
 -- @tparam[opt=0] number timeout
@@ -182,8 +182,8 @@ local timer_instance_mt = {
 --
 -- @tparam table args Arguments.
 -- @tparam number args.timeout Timeout in seconds (e.g. `1.5`).
--- @tparam[opt=false] boolean args.autostart Automatically start the timer.
--- @tparam[opt=false] boolean args.call_now Call the callback at timer creation.
+-- @tparam[opt=false] boolean args.autostart Immediately start the timer countdown.
+-- @tparam[opt=false] boolean args.call_now Immediately call the callback function.
 -- @tparam[opt] function args.callback Callback function to connect to the
 --  "timeout" signal.
 -- @tparam[opt=false] boolean args.single_shot Run only once then stop.
@@ -205,12 +205,11 @@ function timer.new(args)
     end
 
     if args.callback then
-        if args.call_now then
-            args.callback()
-        end
         ret:connect_signal("timeout", args.callback)
     end
-
+    if args.call_now then
+        ret:emit_signal("timeout")
+    end
     if args.single_shot then
         ret:connect_signal("timeout", function() ret:stop() end)
     end

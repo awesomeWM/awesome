@@ -27,7 +27,7 @@ widget:connect_signal("property::value", function(_, new_value)
         error(string.format("unexpected value %s", new_value))
     end
     --DOC_HIDE_END
-    naughty.notify { title = "Slider changed", message = new_value }
+    naughty.notify { title = "Slider changed", message = tostring(new_value) }
 end)
 
 --DOC_HIDE_START

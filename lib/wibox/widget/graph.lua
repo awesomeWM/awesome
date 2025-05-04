@@ -1,9 +1,9 @@
 ---------------------------------------------------------------------------
 --- Display multiple values as a stream of bars.
 --
--- The graph goes from left to right. To change this to right to left, use
--- a `wibox.container.mirror` widget. This can also be used to have data
--- shown from top to bottom.
+-- The graph goes from left to right. To change the movement's direction,
+-- use a `wibox.container.mirror` widget. This can also be used to have
+-- data shown from top to bottom.
 --
 -- To add text on top of the graph, use a `wibox.layout.stack` and a
 -- `wibox.container.align` widgets.

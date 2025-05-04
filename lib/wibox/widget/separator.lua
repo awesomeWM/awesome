@@ -1,7 +1,7 @@
 ---------------------------------------------------------------------------
 -- A flexible separator widget.
 --
--- By default, this widget display a simple line, but can be extended by themes
+-- By default, this widget displays a simple line, but can be extended by themes
 -- (or directly) to display much more complex visuals.
 --
 -- This widget is mainly intended to be used alongside the `spacing_widget`

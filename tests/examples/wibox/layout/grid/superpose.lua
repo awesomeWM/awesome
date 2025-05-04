@@ -8,11 +8,11 @@ local w = wibox.widget {
     generic_widget( "second" ),
     generic_widget( "third"  ),
     generic_widget( "fourth" ),
-    forced_num_cols = 2,
-    forced_num_rows = 2,
-    superpose       = true,
-    homogeneous     = true,
-    layout          = wibox.layout.grid,
+    column_count = 2,
+    row_count    = 2,
+    superpose    = true,
+    homogeneous  = true,
+    layout       = wibox.layout.grid,
 }
 w:add_widget_at(
     generic_widget("fifth",beautiful.bg_highlight)

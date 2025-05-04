@@ -6,9 +6,9 @@ local beautiful = require("beautiful") --DOC_HIDE
 print("l:add_widget_at(new, 1, 4, 1, 1)") --DOC_HIDE
 
 local w = generic_before_after(wibox.layout.grid, {
-    forced_num_cols = 3,
-    forced_num_rows = 2,
-    homogeneous     = true,
+    column_count = 3,
+    row_count    = 2,
+    homogeneous  = true,
 }, 6, "add_widget_at", {--DOC_HIDE
     generic_widget("__new__",beautiful.bg_highlight) --DOC_HIDE
     , 1, 4, 1, 1 --DOC_HIDE
