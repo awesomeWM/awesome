@@ -16,6 +16,7 @@ local GLib = lgi.require('GLib')
 local Gdk  = lgi.require('Gdk')
 local Gtk  = lgi.require('Gtk', '3.0')
 local Gio  = lgi.require('Gio')
+local GioUnix  = lgi.require('GioUnix')
 Gtk.init()
 
 local function open_window(class, title, options)
@@ -88,7 +89,7 @@ end)
 coro()
 
 -- Read lines from stdin and feed them to the coroutine
-local stdin = Gio.UnixInputStream.new(0, false)
+local stdin = GioUnix.InputStream.new(0, false)
 stdin = Gio.DataInputStream.new(stdin)
 
 local read_start, read_finish
@@ -116,7 +117,7 @@ Gtk:main{...}
 ]]
 
 local lgi = require("lgi")
-local Gio = lgi.require("Gio")
+local GioUnix = lgi.require("GioUnix")
 
 local initialized = false
 local pipe, pid
@@ -126,10 +127,10 @@ local function init()
     initialized = true
     local cmd = { lua_executable, "-e", test_client_source }
     local _pid, _, stdin, stdout, stderr = awesome.spawn(cmd, false, true, true, true)
-    pipe =  Gio.UnixOutputStream.new(stdin, true)
+    pipe =  GioUnix.OutputStream.new(stdin, true)
     pid = _pid
-    stdout = Gio.UnixInputStream.new(stdout, true)
-    stderr = Gio.UnixInputStream.new(stderr, true)
+    stdout = GioUnix.InputStream.new(stdout, true)
+    stderr = GioUnix.InputStream.new(stderr, true)
     spawn.read_lines(stdout, function(...) print("_client", ...) end)
     spawn.read_lines(stderr, function(...) print("_client", ...) end)
 end

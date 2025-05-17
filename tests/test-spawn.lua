@@ -109,7 +109,7 @@ local steps = {
             local pid, _, _, stdout = awesome.spawn({ "sh", "-c", "echo $AWESOME_SPAWN_TEST_VAR $HOME $USER" },
                     false, false, true, false, nil, { "AWESOME_SPAWN_TEST_VAR=42" })
             assert(type(pid) ~= "string", pid)
-            spawn.read_lines(require("lgi").Gio.UnixInputStream.new(stdout, true),
+            spawn.read_lines(require("lgi").GioUnix.InputStream.new(stdout, true),
                     function(line)
                         assert(not read_line)
                         read_line = true
@@ -171,7 +171,7 @@ local steps = {
                         false, false, true, "DEV_NULL")
                 assert(type(pid) ~= "string", pid)
                 assert(stderr == nil)
-                spawn.read_lines(require("lgi").Gio.UnixInputStream.new(stdout, true),
+                spawn.read_lines(require("lgi").GioUnix.InputStream.new(stdout, true),
                     function(line)
                         assert(not read_line)
                         read_line = true
@@ -189,7 +189,7 @@ local steps = {
                         false, "INHERIT", true, false)
                 assert(type(pid) ~= "string", pid)
                 assert(stdin == nil)
-                spawn.read_lines(require("lgi").Gio.UnixInputStream.new(stdout, true),
+                spawn.read_lines(require("lgi").GioUnix.InputStream.new(stdout, true),
                     function(line)
                         assert(not read_line)
                         read_line = true
@@ -215,7 +215,7 @@ local steps = {
                 assert(stdin ~= nil)
                 assert(stdout ~= nil)
                 assert(stderr ~= nil)
-                spawn.read_lines(require("lgi").Gio.UnixInputStream.new(stdout, true),
+                spawn.read_lines(require("lgi").GioUnix.InputStream.new(stdout, true),
                     function(line)
                         assert(not read_line)
                         read_line = true

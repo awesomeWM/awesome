@@ -225,6 +225,7 @@ local capi =
 }
 local lgi = require("lgi")
 local Gio = lgi.Gio
+local GioUnix = lgi.GioUnix
 local GLib = lgi.GLib
 local util   = require("awful.util")
 local gtable = require("gears.table")
@@ -418,11 +419,11 @@ function spawn.with_line_callback(cmd, callbacks)
         end
     end
     if have_stdout then
-        spawn.read_lines(Gio.UnixInputStream.new(stdout, true),
+        spawn.read_lines(GioUnix.InputStream.new(stdout, true),
                 stdout_callback, step_done, true)
     end
     if have_stderr then
-        spawn.read_lines(Gio.UnixInputStream.new(stderr, true),
+        spawn.read_lines(GioUnix.InputStream.new(stderr, true),
                 stderr_callback, step_done, true)
     end
     assert(stdin == nil)
