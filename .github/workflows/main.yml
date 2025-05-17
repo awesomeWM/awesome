@@ -23,7 +23,7 @@ permissions:
 jobs:
   main:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     name: ${{ matrix.test_name }}
 
     strategy:
@@ -87,7 +87,7 @@ jobs:
 
       - name: Cache apt packages
         id: cache-apt
-        uses: actions/cache@v2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: /var/cache/apt/archives
           # The trailing number serves as a version flag that can be incremented
@@ -140,7 +140,10 @@ jobs:
             fonts-noto-core \
             fonts-dejavu-core \
             fonts-roboto-unhinted \
-            fonts-open-sans
+            fonts-open-sans \
+            imagemagick \
+            libgdk-pixbuf-2.0-dev \
+            librsvg2-dev
 
       - name: Install downloaded packages
         run: sudo dpkg -i /var/cache/apt/archives/*.deb
@@ -166,7 +169,7 @@ jobs:
 
       - name: Cache luarocks
         id: cache-luarocks
-        uses: actions/cache@v2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: /tmp/luarocks
           # The build input for luarocks changes per test, so we need separate caches
@@ -191,7 +194,7 @@ jobs:
 
       - name: Cache xcb-errors
         id: cache-xcb-errors
-        uses: actions/cache@v2
+        uses: actions/cache@5a3ec84eff668545956fd18022155c47e93e2684 # v4.2.3
         with:
           path: /tmp/xcb-errors
           key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-1.0.1
@@ -244,7 +247,7 @@ jobs:
 
       # Check out repository to ${{ github.workspace }}
       # Automatically picks the current branch/PR
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
       - name: Create Build Environment
         run: cmake -E make_directory -B "${{ github.workspace }}/build"
