@@ -34,6 +34,11 @@ local utils = {}
 -- @param[opt="xterm"] string
 utils.terminal = 'xterm'
 
+--- Terminal argument which indicates the execution of command
+-- Usually something like '-e', '-x', '--'
+-- @tfield string menubar.utils.terminal_execute_option
+utils.terminal_execute_option = '-e'
+
 --- The default icon for applications that don't provide any icon in
 -- their .desktop files.
 local default_icon = nil
@@ -344,7 +349,7 @@ function utils.parse_desktop_file(file)
             cmdline = cmdline:gsub('%%i', '')
         end
         if program.Terminal == true then
-            cmdline = utils.terminal .. ' -e ' .. cmdline
+            cmdline = utils.terminal .. ' ' .. utils.terminal_execute_option .. ' ' .. cmdline
         end
         program.cmdline = cmdline
     end

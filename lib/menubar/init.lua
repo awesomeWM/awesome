@@ -443,8 +443,8 @@ local function prompt_keypressed_callback(mod, key, comm)
             current_item = #shownitems
             if mod.Mod1 then
                 -- add a terminal to the cmdline
-                shownitems[current_item].cmdline = menubar.utils.terminal
-                        .. " -e " .. shownitems[current_item].cmdline
+                shownitems[current_item].cmdline = menubar.utils.terminal .. ' ' ..
+                        menubar.utils.terminal_execute_option .. ' ' .. shownitems[current_item].cmdline
             end
         end
         return perform_action(shownitems[current_item])
