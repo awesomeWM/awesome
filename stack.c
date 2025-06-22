@@ -61,14 +61,6 @@ stack_client_append(client_t *c)
     stack_windows();
 }
 
-static bool need_stack_refresh = false;
-
-void
-stack_windows(void)
-{
-    need_stack_refresh = true;
-}
-
 /** Stack a window above another window, without causing errors.
  * \param w The window.
  * \param previous The window which should be below this window.
@@ -159,11 +151,11 @@ client_layer_translator(client_t *c)
  * \todo It might be worth stopping to restack everyone and only stack `c'
  * relatively to the first matching in the list.
  */
-void
-stack_refresh()
+static gboolean
+stack_refresh(gpointer unused)
 {
-    if(!need_stack_refresh)
-        return;
+    assert(globalconf.stacking_update_id != 0);
+    globalconf.stacking_update_id = 0;
 
     xcb_window_t next = XCB_NONE;
 
@@ -195,7 +187,14 @@ stack_refresh()
             next = (*drawin)->window;
         }
 
-    need_stack_refresh = false;
+    return G_SOURCE_REMOVE;
+}
+
+void
+stack_windows(void)
+{
+    if (globalconf.stacking_update_id == 0)
+        globalconf.stacking_update_id = g_idle_add(stack_refresh, NULL);
 }
 
 
