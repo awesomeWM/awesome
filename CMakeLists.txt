@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.5)
 project(awesome C)
 
 # Require an out-of-source build. We generate an awesomerc.lua in the build dir
