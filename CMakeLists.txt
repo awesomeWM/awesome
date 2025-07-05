@@ -17,10 +17,6 @@ endif()
 
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS  TRUE)
 
-if(COMMAND cmake_policy)
-    cmake_policy(VERSION 2.6)
-endif()
-
 set(SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(BUILD_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
