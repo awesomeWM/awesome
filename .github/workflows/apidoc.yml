@@ -27,6 +27,7 @@ jobs:
     env:
       # Used for stable dates in documentation examples. See #2070.
       SOURCE_DATE_EPOCH: "1893456000"
+      DEBIAN_FRONTEND: "noninteractive"
 
     steps:
       # Create a cache invalidation key based on the current year + week.

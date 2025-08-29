@@ -77,6 +77,7 @@ jobs:
       TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }}
       TEST_TIMEOUT: "100"
       CI: "true"
+      DEBIAN_FRONTEND: "noninteractive"
 
     steps:
       # Create a cache invalidation key based on the current year + week.
