@@ -590,7 +590,8 @@ function permissions.client_mouse_move(c, context, args)
         or c.maximized
         or c.type == "desktop"
         or c.type == "splash"
-        or c.type == "dock" then
+        or c.type == "dock"
+        or mousegrabber.isrunning() then
         return
     end
 
@@ -628,7 +629,8 @@ function permissions.client_mouse_resize(c, context, args)
         or c.maximized
         or c.type == "desktop"
         or c.type == "splash"
-        or c.type == "dock" then
+        or c.type == "dock"
+        or mousegrabber.isrunning() then
         return
     end
 
