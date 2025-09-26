@@ -56,9 +56,8 @@ jobs:
           - test_name: "luajit"
             lua_version: "5.1"
             lua_name: "luajit"
-            lua_library: "/usr/lib/x86_64-linux-gnu/libluajit-5.1.so"
-            lua_include: "/usr/include/luajit-2.1"
-            luarocks_args: "--lua-suffix=jit-2.1.0-beta3"
+            lua_library: ".lua/lib/libluajit-5.1.a"
+            lua_include: ".lua/include/luajit-2.0"
 
           # Lua 5.2 with fixed lgi version and screen size not divisible by 2.
           - test_name: "fixed-lgi-lua5.2"
@@ -151,10 +150,17 @@ jobs:
       - name: Install Lua packages
         if: matrix.lua_version != '5.4'
         run: |
-          if [ "${{ matrix.lua_name }}" = "luajit" ]; then
-            sudo apt-get install libluajit-5.1-dev luajit
-          fi
           sudo apt-get install liblua${{ matrix.lua_version }}-dev lua${{ matrix.lua_version }}
+          
+      # Check out repository to ${{ github.workspace }}
+      # Automatically picks the current branch/PR
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Install LuaJIT
+        if: matrix.lua_name == 'luajit'
+        uses: luarocks/gh-actions-lua@989f8e6ffba55ce1817e236478c98558e598776c #v11
+        with:
+          luaVersion: luajit-master
 
       # Ubuntu 20.04 hasn't a package for Lua 5.4, we need to build it from source.
       - name: Build and Install Lua 5.4
@@ -244,10 +250,6 @@ jobs:
       - name: Install cluacov rock
         if: matrix.coverage
         run: sudo -H luarocks install cluacov
-
-      # Check out repository to ${{ github.workspace }}
-      # Automatically picks the current branch/PR
-      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Create Build Environment
         run: cmake -E make_directory -B "${{ github.workspace }}/build"
