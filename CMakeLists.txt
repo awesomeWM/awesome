@@ -470,7 +470,10 @@ if(LUACHECK_EXECUTABLE)
     list(APPEND CHECK_QA_TARGETS luacheck)
 endif()
 add_custom_target(check-qa DEPENDS ${CHECK_QA_TARGETS})
-add_dependencies(check check-qa check-examples)
+add_dependencies(check check-qa)
+if (TARGET check-examples)
+    add_dependencies(check check-examples)
+endif()
 # }}}
 
 INCLUDE(${CMAKE_SOURCE_DIR}/Packaging.cmake)
