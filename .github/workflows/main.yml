@@ -84,6 +84,15 @@ jobs:
         id: get-date
         run: echo "date=$(/bin/date -u "+%Y%W")" >> $GITHUB_OUTPUT
 
+      # Varibales doesn't work in matrix definition. The gh-actions-lua Actions
+      # install Lua in the workspace directory, so we refer to it with a relative
+      # path.
+      # This step corrects LUAINCLUDE and LUALIBRARY to absolute paths.
+      - name: Correct Lua variables paths
+        run: |
+          [[ $LUAINCLUDE != /* ]] && echo LUAINCLUDE="${{ github.workspace }}/$LUAINCLUDE" >> $GITHUB_ENV || true
+          [[ $LUALIBRARY != /* ]] && echo LUALIBRARY="${{ github.workspace }}/$LUALIBRARY" >> $GITHUB_ENV || true
+
       - name: Cache apt packages
         id: cache-apt
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
