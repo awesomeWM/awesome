@@ -23,7 +23,7 @@ permissions:
 jobs:
   main:
     # The type of runner that the job will run on
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     name: ${{ matrix.test_name }}
 
     strategy:
@@ -56,9 +56,8 @@ jobs:
           - test_name: "luajit"
             lua_version: "5.1"
             lua_name: "luajit"
-            lua_library: "/usr/lib/x86_64-linux-gnu/libluajit-5.1.so"
-            lua_include: "/usr/include/luajit-2.1"
-            luarocks_args: "--lua-suffix=jit-2.1.0-beta3"
+            lua_library: ".lua/lib/libluajit-5.1.a"
+            lua_include: ".lua/include/luajit-2.0"
 
           # Lua 5.2 with fixed lgi version and screen size not divisible by 2.
           - test_name: "fixed-lgi-lua5.2"
@@ -85,9 +84,18 @@ jobs:
         id: get-date
         run: echo "date=$(/bin/date -u "+%Y%W")" >> $GITHUB_OUTPUT
 
+      # Varibales doesn't work in matrix definition. The gh-actions-lua Actions
+      # install Lua in the workspace directory, so we refer to it with a relative
+      # path.
+      # This step corrects LUAINCLUDE and LUALIBRARY to absolute paths.
+      - name: Correct Lua variables paths
+        run: |
+          [[ $LUAINCLUDE != /* ]] && echo LUAINCLUDE="${{ github.workspace }}/$LUAINCLUDE" >> $GITHUB_ENV || true
+          [[ $LUALIBRARY != /* ]] && echo LUALIBRARY="${{ github.workspace }}/$LUALIBRARY" >> $GITHUB_ENV || true
+
       - name: Cache apt packages
         id: cache-apt
-        uses: actions/cache@v2
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: /var/cache/apt/archives
           # The trailing number serves as a version flag that can be incremented
@@ -140,7 +148,10 @@ jobs:
             fonts-noto-core \
             fonts-dejavu-core \
             fonts-roboto-unhinted \
-            fonts-open-sans
+            fonts-open-sans \
+            imagemagick \
+            libgdk-pixbuf-2.0-dev \
+            librsvg2-dev
 
       - name: Install downloaded packages
         run: sudo dpkg -i /var/cache/apt/archives/*.deb
@@ -148,10 +159,17 @@ jobs:
       - name: Install Lua packages
         if: matrix.lua_version != '5.4'
         run: |
-          if [ "${{ matrix.lua_name }}" = "luajit" ]; then
-            sudo apt-get install libluajit-5.1-dev luajit
-          fi
           sudo apt-get install liblua${{ matrix.lua_version }}-dev lua${{ matrix.lua_version }}
+          
+      # Check out repository to ${{ github.workspace }}
+      # Automatically picks the current branch/PR
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - name: Install LuaJIT
+        if: matrix.lua_name == 'luajit'
+        uses: luarocks/gh-actions-lua@989f8e6ffba55ce1817e236478c98558e598776c #v11
+        with:
+          luaVersion: luajit-master
 
       # Ubuntu 20.04 hasn't a package for Lua 5.4, we need to build it from source.
       - name: Build and Install Lua 5.4
@@ -166,7 +184,7 @@ jobs:
 
       - name: Cache luarocks
         id: cache-luarocks
-        uses: actions/cache@v2
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: /tmp/luarocks
           # The build input for luarocks changes per test, so we need separate caches
@@ -191,7 +209,7 @@ jobs:
 
       - name: Cache xcb-errors
         id: cache-xcb-errors
-        uses: actions/cache@v2
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: /tmp/xcb-errors
           key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-1.0.1
@@ -241,10 +259,6 @@ jobs:
       - name: Install cluacov rock
         if: matrix.coverage
         run: sudo -H luarocks install cluacov
-
-      # Check out repository to ${{ github.workspace }}
-      # Automatically picks the current branch/PR
-      - uses: actions/checkout@v2
 
       - name: Create Build Environment
         run: cmake -E make_directory -B "${{ github.workspace }}/build"
@@ -342,7 +356,7 @@ jobs:
 
       - name: Upload Lua code coverage report
         if: matrix.coverage == 'codecov'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
           files: "${{ github.workspace }}/build/luacov.report.out"
         env:
@@ -350,7 +364,7 @@ jobs:
 
       - name: Upload C code coverage report
         if: matrix.coverage == 'codecov'
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@5a1091511ad55cbe89839c7260b706298ca349f7 # v5.5.1
         with:
           files: "${{ github.workspace }}/build/*/*.gcov"
         env:

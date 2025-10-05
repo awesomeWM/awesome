@@ -22,7 +22,7 @@ permissions:
 
 jobs:
   main:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     env:
       # Used for stable dates in documentation examples. See #2070.
@@ -37,7 +37,7 @@ jobs:
 
       - name: Cache apt packages
         id: cache-apt
-        uses: actions/cache@v2
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: /var/cache/apt/archives
           # The trailing number serves as a version flag that can be incremented
@@ -56,10 +56,13 @@ jobs:
             gir1.2-gtk-3.0 \
             gir1.2-pango-1.0 \
             git \
+            imagemagick \
             libdbus-1-dev \
+            libgdk-pixbuf-2.0-dev \
             libgirepository1.0-dev \
             libnotify-bin \
             libpango1.0-dev \
+            librsvg2-dev \
             libstartup-notification0-dev \
             libx11-xcb-dev \
             libxcb-cursor-dev \
@@ -87,7 +90,7 @@ jobs:
 
       - name: Cache luarocks
         id: cache-luarocks
-        uses: actions/cache@v2
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
         with:
           path: /tmp/luarocks
           key: ${{ github.workflow }}-${{ runner.os }}-luarocks-3.5.0
@@ -114,7 +117,7 @@ jobs:
           sudo -H luarocks install lgi
           sudo -H luarocks install ldoc
 
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
       - name: Build Awesome version string
         run: |
