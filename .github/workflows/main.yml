@@ -56,8 +56,8 @@ jobs:
           - test_name: "luajit"
             lua_version: "5.1"
             lua_name: "luajit"
-            lua_library: "/home/runner/work/awesome/awesome/.lua/lib/libluajit-5.1.a"
-            lua_include: "/home/runner/work/awesome/awesome/.lua/include/luajit-2.0"
+            lua_library: ".lua/lib/libluajit-5.1.a"
+            lua_include: ".lua/include/luajit-2.0"
 
           # Lua 5.2 with fixed lgi version and screen size not divisible by 2.
           - test_name: "fixed-lgi-lua5.2"
@@ -83,6 +83,11 @@ jobs:
       - name: Get Date
         id: get-date
         run: echo "date=$(/bin/date -u "+%Y%W")" >> $GITHUB_OUTPUT
+
+      - name: Correct Lua variables paths
+        run: |
+          [[ $LUAINCLUDE != /* ]] && LUAINCLUDE="${{ github.workspace }}/$LUAINCLUDE"
+          [[ $LUALIBRARY != /* ]] && LUALIBRARY="${{ github.workspace }}/$LUALIBRARY"
 
       - name: Cache apt packages
         id: cache-apt
