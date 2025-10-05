@@ -86,8 +86,8 @@ jobs:
 
       - name: Correct Lua variables paths
         run: |
-          [[ $LUAINCLUDE != /* ]] && LUAINCLUDE="${{ github.workspace }}/$LUAINCLUDE"
-          [[ $LUALIBRARY != /* ]] && LUALIBRARY="${{ github.workspace }}/$LUALIBRARY"
+          [[ $LUAINCLUDE != /* ]] && echo LUAINCLUDE="${{ github.workspace }}/$LUAINCLUDE" >> $GITHUB_ENV || true
+          [[ $LUALIBRARY != /* ]] && echo LUALIBRARY="${{ github.workspace }}/$LUALIBRARY" >> $GITHUB_ENV || true
 
       - name: Cache apt packages
         id: cache-apt
