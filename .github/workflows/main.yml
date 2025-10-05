@@ -56,8 +56,8 @@ jobs:
           - test_name: "luajit"
             lua_version: "5.1"
             lua_name: "luajit"
-            lua_library: ".lua/lib/libluajit-5.1.a"
-            lua_include: ".lua/include/luajit-2.0"
+            lua_library: "/home/runner/work/awesome/awesome/.lua/lib/libluajit-5.1.a"
+            lua_include: "/home/runner/work/awesome/awesome/.lua/include/luajit-2.0"
 
           # Lua 5.2 with fixed lgi version and screen size not divisible by 2.
           - test_name: "fixed-lgi-lua5.2"
