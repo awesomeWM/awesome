@@ -132,7 +132,7 @@ pkg_check_modules(AWESOME_COMMON_REQUIRED REQUIRED
 
 set(AWESOME_DEPENDENCIES
     glib-2.0
-    glib-2.0>=2.40
+    glib-2.0>=2.79.2
     gdk-pixbuf-2.0
     cairo
     x11
