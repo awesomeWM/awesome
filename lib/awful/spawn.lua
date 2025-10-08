@@ -417,13 +417,20 @@ function spawn.with_line_callback(cmd, callbacks)
             done_callback()
         end
     end
+    -- Determine InputStream compatibly
+    local InputStream
+    pcall(function()
+        InputStream = lgi.GioUnix.InputStream
+    end)
+    if not InputStream then
+        InputStream = lgi.Gio.UnixInputStream
+    end
+
     if have_stdout then
-        spawn.read_lines(Gio.UnixInputStream.new(stdout, true),
-                stdout_callback, step_done, true)
+        spawn.read_lines(InputStream.new(stdout, true), stdout_callback, step_done, true)
     end
     if have_stderr then
-        spawn.read_lines(Gio.UnixInputStream.new(stderr, true),
-                stderr_callback, step_done, true)
+        spawn.read_lines(InputStream.new(stderr, true), stderr_callback, step_done, true)
     end
     assert(stdin == nil)
     return pid
