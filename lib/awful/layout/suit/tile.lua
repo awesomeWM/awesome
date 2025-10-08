@@ -218,10 +218,12 @@ local function tile_group(gs, cls, wa, orientation, fact, group, useless_gap)
         geom[y] = coord
         gs[cls[c]] = geom
         hints.width, hints.height = apply_size_hints(cls[c], geom.width, geom.height, useless_gap)
-        coord = coord + hints[height]
-        unused = unused - hints[height]
+
+        local space_to_use = math.min(hints[height], unused)
+        coord = coord + space_to_use
+        unused = unused - space_to_use
         total_fact = total_fact - fact[i]
-        used_size = math.max(used_size, hints[width])
+        used_size = math.max(used_size, math.min(hints[width], available))
     end
 
     return used_size

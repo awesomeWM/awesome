@@ -5,7 +5,7 @@
 # when used with "|tail".
 set -o pipefail
 
-if [ -t 0 ]  # is a tty.
+if [ -t 0 -a $# = 0 ]  # is a tty.
 then
     # rlwrap provides readline functionality for "read", which is more enhanced
     # than bash's "read" itself.
