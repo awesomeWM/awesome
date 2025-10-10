@@ -291,7 +291,8 @@ widget.labels = {
 -- @tparam[opt] color args.label_bg Background color used for miscellaneous labels.
 -- @tparam[opt] color args.label_fg Foreground color used for group and other
 -- labels.
--- @tparam[opt] boolean args.override_label_bgs Override label background colors instead of cycling through xresources colors.
+-- @tparam[opt] boolean args.override_label_bgs Override label background colors instead
+-- of cycling through xresources colors.
 -- @tparam[opt] int args.group_margin Margin between hotkeys groups.
 -- @tparam[opt] table args.labels Labels used for displaying human-readable keynames.
 -- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
