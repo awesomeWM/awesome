@@ -37,6 +37,13 @@
 -- @tparam[opt=false] boolean ontop
 -- @propemits false false
 
+--- Below other windows and widgets.
+--
+-- @baseclass wibox
+-- @property desktop
+-- @tparam[opt=false] boolean desktop
+-- @propemits false false
+
 --- The mouse cursor.
 --
 -- @baseclass wibox
