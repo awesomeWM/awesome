@@ -49,6 +49,7 @@ makepkg -fsri
 
 ```sh
 sudo apt build-dep awesome
+sudo apt install libxcb-xfixes0-dev 
 git clone https://github.com/awesomewm/awesome
 cd awesome
 make package
