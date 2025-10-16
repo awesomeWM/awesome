@@ -375,6 +375,7 @@ add_custom_target(lgi-check-run ALL
 add_custom_target(setup_directories DEPENDS lgi-check-run)
 
 add_custom_command(TARGET setup_directories
+        POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/script_files/
         COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/docs/common/
         COMMAND ${CMAKE_COMMAND} -E make_directory ${BUILD_DIR}/doc/images/
