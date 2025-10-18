@@ -34,11 +34,13 @@
 local ipairs = ipairs
 local type = type
 local capi = {
-    screen = screen,
-    mouse  = mouse,
+    screen  = screen,
+    mouse   = mouse,
     awesome = awesome,
-    client = client,
-    tag = tag
+    client  = client,
+    drawin  = drawin,
+    tag     = tag,
+    root    = root,
 }
 local tag = require("awful.tag")
 local client = require("awful.client")
@@ -55,6 +57,9 @@ end
 
 local layout = {}
 
+-- Avoid restacking the clients and drawins too often.
+local need_restack = true
+
 -- Support `table.insert()` to avoid breaking old code.
 local default_layouts = setmetatable({}, {
     __newindex = function(self, key, value)
@@ -64,6 +69,17 @@ local default_layouts = setmetatable({}, {
     end
 })
 
+local x11_layers_ordered, x11_layers_keys = {
+    "WINDOW_LAYER_IGNORE",
+    "WINDOW_LAYER_DESKTOP",
+    "WINDOW_LAYER_BELOW",
+    "WINDOW_LAYER_NORMAL",
+    "WINDOW_LAYER_ABOVE",
+    "WINDOW_LAYER_FULLSCREEN",
+    "WINDOW_LAYER_ONTOP"
+}, {}
+
+for k, v in ipairs(x11_layers_ordered) do x11_layers_keys[v] = k end
 
 layout.suit = require("awful.layout.suit")
 
@@ -107,6 +123,27 @@ end
 local arrange_lock = false
 -- Delay one arrange call per screen.
 local delayed_arrange = {}
+
+local function client_to_layer(o)
+    if o.type == "desktop" then
+        return x11_layers_keys.WINDOW_LAYER_DESKTOP
+    elseif o.ontop then
+        -- first deal with user set attributes
+        return x11_layers_keys.WINDOW_LAYER_ONTOP;
+    elseif o.fullscreen and capi.client.focus == o then
+        -- Fullscreen windows only get their own layer when they have the focus
+        return x11_layers_keys.WINDOW_LAYER_FULLSCREEN;
+    elseif o.above then
+        return x11_layers_keys.WINDOW_LAYER_ABOVE;
+    elseif o.below then
+        return x11_layers_keys.WINDOW_LAYER_BELOW;
+    elseif o.transient_for then
+        -- check for transient attr
+        return x11_layers_keys.WINDOW_LAYER_IGNORE;
+    else
+        return x11_layers_keys.WINDOW_LAYER_NORMAL
+    end
+end
 
 --- Get the current layout.
 -- @tparam screen screen The screen.
@@ -237,6 +274,7 @@ end
 -- @tparam screen screen The screen to arrange.
 -- @noreturn
 -- @staticfct awful.layout.arrange
+-- @see restack
 function layout.arrange(screen)
     screen = get_screen(screen)
     if not screen or delayed_arrange[screen] then return end
@@ -417,7 +455,76 @@ function layout.move_handler(c, context, hints) --luacheck: no unused args
     end
 end
 
+-- [UNDOCUMENTED] Handler for `request::restack`.
+--
+-- @signalhandler awful.layout.move_handler
+-- @tparam string context The context
+-- @tparam table hints Additional hints
+-- @tparam[opt=nil] client|nil hints.client The client
+-- @tparam[opt=nil] drawin|nil hints.drawin Additional hints
+function layout._restack_handler(context, hints) -- luacheck: no unused args
+    --TODO Support permissions
+    need_restack = true
+end
+
+--- Arrange the clients on the Z axis.
+-- @staticfct awful.layout.restack
+-- @noreturn
+-- @see arrange
+function layout.restack()
+
+    local layers = {}
+
+    local function append(o)
+        local layer = client_to_layer(o)
+        layers[layer] = layers[layer] or {}
+        table.insert(layers[layer], 1, o.drawin and o.drawin or o)
+    end
+
+    local drawins, clients = capi.drawin.get(), capi.client.get(nil, true)
+
+    for _, c in ipairs(clients) do append(c) end
+    for i=#drawins, 1, -1 do append(drawins[i].get_wibox()) end
+
+    local result = {}
+
+    for i = 1, #x11_layers_ordered do
+        if layers[i] then
+            for _, v in ipairs(layers[i] or {}) do
+                table.insert(result, v)
+            end
+        end
+    end
+
+    capi.root.set_stacking_order(result)
+end
+
 capi.client.connect_signal("request::geometry", layout.move_handler)
+
+-- Translate the `request::raise`, which will trigger a  `"request::restack"`.
+capi.client.connect_signal("request::raise", function(c, context, hints) --luacheck: no unused args
+    hints.client:raise()
+end)
+
+capi.client.connect_signal("request::restack", layout._restack_handler)
+
+-- Check if the type is `"desktop"`, which goes below everything.
+for _, class in ipairs(capi.client, capi.drawin) do
+    class.connect_signal("property::type", function(o)
+        capi.client.emit_signal("request::restack", "type", {
+            client = o.modal ~= nil and o or nil,
+            drawin = o.modal == nil and o or nil,
+        })
+    end)
+end
+
+-- Place the clients and drawin on top of each other.
+capi.awesome.connect_signal("refresh", function()
+    if need_restack then
+        layout.restack()
+        need_restack = false
+    end
+end)
 
 -- When a screen is moved, make (floating) clients follow it
 capi.screen.connect_signal("property::geometry", function(s, old_geom)
