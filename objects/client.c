@@ -528,7 +528,7 @@ lua_class_t client_class;
  * <tr><td><b>normal</b></td><td>A normal application main window.</td></tr>
  * </table>
  *
- * More information can be found [here](https://specifications.freedesktop.org/wm-spec/wm-spec-latest.html#idm140200472629520)
+ * More information can be found [here](https://specifications.freedesktop.org/wm-spec/latest/ar01s05.html#id-1.6.7)
  *
  * @property type
  * @tparam string type

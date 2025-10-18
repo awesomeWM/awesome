@@ -149,7 +149,7 @@
 --
 -- If the intent is to open a file/document, then it is recommended to use the
 -- following standard command. The default application will be selected
--- according to the [Shared MIME-info Database](https://specifications.freedesktop.org/shared-mime-info-spec/shared-mime-info-spec-latest.html)
+-- according to the [Shared MIME-info Database](https://specifications.freedesktop.org/shared-mime-info-spec/latest/)
 -- specification. The `xdg-utils` package provided by most distributions
 -- includes the `xdg-open` command:
 --
@@ -160,7 +160,7 @@
 -- [ARCH Linux Wiki](https://wiki.archlinux.org/index.php/default_applications).
 --
 -- If you wish to change how the default applications behave, then consult the
--- [Desktop Entry](https://specifications.freedesktop.org/desktop-entry-spec/desktop-entry-spec-latest.html)
+-- [Desktop Entry](https://specifications.freedesktop.org/desktop-entry-spec/latest/)
 -- specification.
 --
 -- Spawning applications with specific properties

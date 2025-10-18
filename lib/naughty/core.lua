@@ -103,7 +103,7 @@ gtable.crush(naughty, require("naughty.constants"))
 
 --- The reason why a notification is to be closed.
 --
--- See [the specification](https://specifications.freedesktop.org/notification-spec/notification-spec-latest.html#signals)
+-- See [the specification](https://specifications.freedesktop.org/notification-spec/latest/protocol.html#id-1.10.4.2.4)
 -- for more details.
 --
 -- @table naughty.notification_closed_reason
