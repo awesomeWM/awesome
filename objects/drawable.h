@@ -44,10 +44,14 @@ struct drawable_t
     drawable_refresh_callback *refresh_callback;
     /** Data for refresh callback. */
     void *refresh_data;
+    /** Drawable depth */
+    uint8_t depth;
+    /** Drawable visual */
+    xcb_visualtype_t *visual;
 };
 typedef struct drawable_t drawable_t;
 
-drawable_t *drawable_allocator(lua_State *, drawable_refresh_callback *, void *);
+drawable_t *drawable_allocator(lua_State *, uint8_t depth, xcb_visualtype_t *visual, drawable_refresh_callback *, void *);
 void drawable_set_geometry(lua_State *, int, area_t);
 void drawable_class_setup(lua_State *);
 

@@ -242,10 +242,10 @@ uint8_t draw_visual_depth(const xcb_screen_t *s, xcb_visualid_t vis)
 void draw_test_cairo_xcb(void)
 {
     xcb_pixmap_t pixmap = xcb_generate_id(globalconf.connection);
-    xcb_create_pixmap(globalconf.connection, globalconf.default_depth, pixmap,
+    xcb_create_pixmap(globalconf.connection, globalconf.screen_depth, pixmap,
                       globalconf.screen->root, 1, 1);
     cairo_surface_t *surface = cairo_xcb_surface_create(globalconf.connection,
-                                          pixmap, globalconf.visual, 1, 1);
+                                          pixmap, globalconf.screen_visual, 1, 1);
     if(cairo_surface_status(surface) != CAIRO_STATUS_SUCCESS)
         fatal("Could not set up display: got cairo surface with status %s",
                 cairo_status_to_string(cairo_surface_status(surface)));

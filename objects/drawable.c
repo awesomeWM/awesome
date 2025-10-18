@@ -105,7 +105,7 @@ static lua_class_t drawable_class;
 LUA_OBJECT_FUNCS(drawable_class, drawable_t, drawable)
 
 drawable_t *
-drawable_allocator(lua_State *L, drawable_refresh_callback *callback, void *data)
+drawable_allocator(lua_State *L, uint8_t depth, xcb_visualtype_t *visual, drawable_refresh_callback *callback, void *data)
 {
     drawable_t *d = drawable_new(L);
     d->refresh_callback = callback;
@@ -113,6 +113,8 @@ drawable_allocator(lua_State *L, drawable_refresh_callback *callback, void *data
     d->refreshed = false;
     d->surface = NULL;
     d->pixmap = XCB_NONE;
+    d->depth = depth;
+    d->visual = visual;
     return d;
 }
 
@@ -147,10 +149,10 @@ drawable_set_geometry(lua_State *L, int didx, area_t geom)
     if (area_changed && geom.width > 0 && geom.height > 0)
     {
         d->pixmap = xcb_generate_id(globalconf.connection);
-        xcb_create_pixmap(globalconf.connection, globalconf.default_depth, d->pixmap,
+        xcb_create_pixmap(globalconf.connection, d->depth, d->pixmap,
                           globalconf.screen->root, geom.width, geom.height);
         d->surface = cairo_xcb_surface_create(globalconf.connection,
-                                              d->pixmap, globalconf.visual,
+                                              d->pixmap, d->visual,
                                               geom.width, geom.height);
         luaA_object_emit_signal(L, didx, "property::surface", 0);
     }

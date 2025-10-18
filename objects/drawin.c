@@ -416,6 +416,15 @@ drawin_allocator(lua_State *L)
 {
     xcb_screen_t *s = globalconf.screen;
     drawin_t *w = drawin_new(L);
+    uint8_t depth = globalconf.screen_depth;
+    xcb_visualtype_t *visual = globalconf.screen_visual;
+    xcb_colormap_t cmap = globalconf.screen_cmap;
+    if (globalconf.argb_mode == ARGB_MODE_FULL)
+    {
+        visual = globalconf.argb_visual;
+        cmap = globalconf.argb_cmap;
+        depth = 32;
+    }
 
     w->visible = false;
 
@@ -425,15 +434,16 @@ drawin_allocator(lua_State *L)
     w->geometry.height = 1;
     w->geometry_dirty = false;
     w->type = _NET_WM_WINDOW_TYPE_NORMAL;
+    w->visualtype = visual;
 
-    drawable_allocator(L, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
+    drawable_allocator(L, depth, visual, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
     w->drawable = luaA_object_ref_item(L, -2, -1);
 
     w->window = xcb_generate_id(globalconf.connection);
-    xcb_create_window(globalconf.connection, globalconf.default_depth, w->window, s->root,
+    xcb_create_window(globalconf.connection, depth, w->window, s->root,
                       w->geometry.x, w->geometry.y,
                       w->geometry.width, w->geometry.height,
-                      w->border_width, XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+                      w->border_width, XCB_COPY_FROM_PARENT, visual->visual_id,
                       XCB_CW_BORDER_PIXEL | XCB_CW_BIT_GRAVITY
                       | XCB_CW_OVERRIDE_REDIRECT | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP
                       | XCB_CW_CURSOR,
@@ -448,7 +458,7 @@ drawin_allocator(lua_State *L)
                           | XCB_EVENT_MASK_POINTER_MOTION | XCB_EVENT_MASK_BUTTON_PRESS
                           | XCB_EVENT_MASK_BUTTON_RELEASE | XCB_EVENT_MASK_EXPOSURE
                           | XCB_EVENT_MASK_PROPERTY_CHANGE,
-                          globalconf.default_cmap,
+                          cmap,
                           xcursor_new(globalconf.cursor_ctx, xcursor_font_fromstr(w->cursor))
                       });
     xwindow_set_class_instance(w->window);
