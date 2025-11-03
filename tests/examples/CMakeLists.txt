@@ -14,7 +14,7 @@ if(NOT DEFINED PROJECT_NAME)
     project(awesome-tests-examples NONE)
 endif()
 
-cmake_minimum_required(VERSION 3.0.0)
+cmake_minimum_required(VERSION 3.5)
 
 # Get and update the LUA_PATH so the scripts can be executed without awesome.
 execute_process(COMMAND ${LUA_EXECUTABLE} -e "p = package.path:gsub(';', '\\\\;'); io.stdout:write(p)"
