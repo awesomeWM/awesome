@@ -362,6 +362,7 @@ endif()
 
 # {{{ Check for LGI
 add_executable(lgi-check build-utils/lgi-check.c)
+set_target_properties(lgi-check PROPERTIES ENABLE_EXPORTS ON)
 target_link_libraries(lgi-check ${LUA_LIBRARIES})
 target_include_directories(lgi-check PRIVATE ${LUA_INCLUDE_DIR})
 add_custom_target(lgi-check-run ALL

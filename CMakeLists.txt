@@ -108,6 +108,11 @@ endif()
 add_executable(${PROJECT_AWE_NAME}
     ${AWE_SRCS})
 
+# Enable symbol exports for dynamically loaded modules
+# Required for CMake 3.4+ when linking against static Lua libraries on the
+# GitHub Actions where we build Lua from source as a static library.
+set_target_properties(${PROJECT_AWE_NAME} PROPERTIES ENABLE_EXPORTS ON)
+
 # CFLAGS
 set(AWESOME_C_FLAGS
     -O1 -std=gnu99 -ggdb3 -fno-strict-aliasing -Wall -Wextra
