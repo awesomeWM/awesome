@@ -323,6 +323,7 @@ end
 function fixed:insert(index, widget)
     if not index or index < 1 or index > #self._private.widgets + 1 then return false end
 
+    widget = base.make_widget_from_value(widget)
     base.check_widget(widget)
     table.insert(self._private.widgets, index, widget)
     self:emit_signal("widget::layout_changed")
