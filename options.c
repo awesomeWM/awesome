@@ -1,5 +1,5 @@
 /*
- * stack.h - client stack management header
+ * options.c
  *
  * Copyright © 2020 Emmanuel Lepage-Vallee <elv1313@gmail.com>
  *
