@@ -20,7 +20,7 @@ shape.update = {}
 --- Get one of a client's shapes and transform it to include window decorations.
 -- @function awful.client.shape.get_transformed
 -- @tparam client c The client whose shape should be retrieved
--- @tparam string shape_name Either "bounding" or "clip"
+-- @tparam string shape_name Either "input", "bounding" or "clip"
 function shape.get_transformed(c, shape_name)
     local border = shape_name == "bounding" and c.border_width or 0
     local shape_img = surface.load_silently(c["client_shape_" .. shape_name], false)
@@ -95,6 +95,7 @@ end
 function shape.update.all(c)
     shape.update.bounding(c)
     shape.update.clip(c)
+    shape.update.input(c)
 end
 
 --- Update a client's bounding shape from the shape the client set itself.
@@ -121,10 +122,23 @@ function shape.update.clip(c)
     end
 end
 
+--- Update a client's input shape from the shape the client set itself.
+-- @function awful.client.shape.update.input
+-- @tparam client c The client to act on
+function shape.update.input(c)
+    local res = shape.get_transformed(c, "input")
+    c.shape_input = res and res._native
+    if res then
+        res:finish()
+    end
+end
+
 capi.client.connect_signal("property::shape_client_bounding", shape.update.bounding)
 capi.client.connect_signal("property::shape_client_clip", shape.update.clip)
+capi.client.connect_signal("property::shape_client_input", shape.update.input)
 capi.client.connect_signal("property::size", shape.update.all)
 capi.client.connect_signal("property::border_width", shape.update.all)
+capi.client.connect_signal("internal::update_shapes", shape.update.all)
 
 return shape
 
