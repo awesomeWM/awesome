@@ -6,7 +6,9 @@
 function(add_to_table name namespace group current_table new_table)
     set(URI_PATH "${group}")
 
-    if(NOT ${URI_PATH} STREQUAL "widget")
+    if(${URI_PATH} STREQUAL "awidget")
+        set(URI_PATH "widget")
+    elseif(NOT ${URI_PATH} STREQUAL "widget")
         set(URI_PATH "widget_${group}")
     endif()
 
@@ -26,6 +28,12 @@ function(generate_widget_list name)
     "${SOURCE_DIR}/tests/examples/wibox/${name}/defaults/*")
     list(SORT ex_files)
 
+    # Generate namespace prefix
+    set(NAMESPACE_PREFIX "wibox.${name}.")
+    if(${name} STREQUAL "awidget")
+        set(NAMESPACE_PREFIX "awful.widget.")
+    endif()
+
     # Add the table header
     set(MY_LIST "<table class='widget_list' border=1>\n\
  <tr style='font-weight: bold;'>\n\
@@ -39,7 +47,7 @@ function(generate_widget_list name)
         string(REGEX REPLACE "\\.lua" "" ex_file_name ${ex_file_name})
 
         if(NOT ${ex_file_name} STREQUAL "template")
-            add_to_table(${ex_file_name} "wibox.${name}." "${name}" "${MY_LIST}" MY_LIST)
+            add_to_table(${ex_file_name} "${NAMESPACE_PREFIX}" "${name}" "${MY_LIST}" MY_LIST)
         endif()
     endforeach()
 
