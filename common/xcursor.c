@@ -22,112 +22,23 @@
 #include "common/xcursor.h"
 #include "common/util.h"
 
-#include <X11/cursorfont.h>
-
-static char const * const xcursor_font[] =
-{
-    [XC_X_cursor] = "X_cursor",
-    [XC_arrow] = "arrow",
-    [XC_based_arrow_down] = "based_arrow_down",
-    [XC_based_arrow_up] = "based_arrow_up",
-    [XC_boat] = "boat",
-    [XC_bogosity] = "bogosity",
-    [XC_bottom_left_corner] = "bottom_left_corner",
-    [XC_bottom_right_corner] = "bottom_right_corner",
-    [XC_bottom_side] = "bottom_side",
-    [XC_bottom_tee] = "bottom_tee",
-    [XC_box_spiral] = "box_spiral",
-    [XC_center_ptr] = "center_ptr",
-    [XC_circle] = "circle",
-    [XC_clock] = "clock",
-    [XC_coffee_mug] = "coffee_mug",
-    [XC_cross] = "cross",
-    [XC_cross_reverse] = "cross_reverse",
-    [XC_crosshair] = "crosshair",
-    [XC_diamond_cross] = "diamond_cross",
-    [XC_dot] = "dot",
-    [XC_dotbox] = "dotbox",
-    [XC_double_arrow] = "double_arrow",
-    [XC_draft_large] = "draft_large",
-    [XC_draft_small] = "draft_small",
-    [XC_draped_box] = "draped_box",
-    [XC_exchange] = "exchange",
-    [XC_fleur] = "fleur",
-    [XC_gobbler] = "gobbler",
-    [XC_gumby] = "gumby",
-    [XC_hand1] = "hand1",
-    [XC_hand2] = "hand2",
-    [XC_heart] = "heart",
-    [XC_icon] = "icon",
-    [XC_iron_cross] = "iron_cross",
-    [XC_left_ptr] = "left_ptr",
-    [XC_left_side] = "left_side",
-    [XC_left_tee] = "left_tee",
-    [XC_leftbutton] = "leftbutton",
-    [XC_ll_angle] = "ll_angle",
-    [XC_lr_angle] = "lr_angle",
-    [XC_man] = "man",
-    [XC_middlebutton] = "middlebutton",
-    [XC_mouse] = "mouse",
-    [XC_pencil] = "pencil",
-    [XC_pirate] = "pirate",
-    [XC_plus] = "plus",
-    [XC_question_arrow] = "question_arrow",
-    [XC_right_ptr] = "right_ptr",
-    [XC_right_side] = "right_side",
-    [XC_right_tee] = "right_tee",
-    [XC_rightbutton] = "rightbutton",
-    [XC_rtl_logo] = "rtl_logo",
-    [XC_sailboat] = "sailboat",
-    [XC_sb_down_arrow] = "sb_down_arrow",
-    [XC_sb_h_double_arrow] = "sb_h_double_arrow",
-    [XC_sb_left_arrow] = "sb_left_arrow",
-    [XC_sb_right_arrow] = "sb_right_arrow",
-    [XC_sb_up_arrow] = "sb_up_arrow",
-    [XC_sb_v_double_arrow] = "sb_v_double_arrow",
-    [XC_shuttle] = "shuttle",
-    [XC_sizing] = "sizing",
-    [XC_spider] = "spider",
-    [XC_spraycan] = "spraycan",
-    [XC_star] = "star",
-    [XC_target] = "target",
-    [XC_tcross] = "tcross",
-    [XC_top_left_arrow] = "top_left_arrow",
-    [XC_top_left_corner] = "top_left_corner",
-    [XC_top_right_corner] = "top_right_corner",
-    [XC_top_side] = "top_side",
-    [XC_top_tee] = "top_tee",
-    [XC_trek] = "trek",
-    [XC_ul_angle] = "ul_angle",
-    [XC_umbrella] = "umbrella",
-    [XC_ur_angle] = "ur_angle",
-    [XC_watch] = "watch",
-    [XC_xterm] = "xterm",
+struct cursor_cache_entry_t {
+    char const * name;
+    xcb_cursor_t cursor;
 };
 
-/** Get a cursor from a string.
- * \param s The string.
- */
-uint16_t
-xcursor_font_fromstr(const char *s)
-{
-    if(s)
-        for(int i = 0; i < countof(xcursor_font); i++)
-            if(xcursor_font[i] && A_STREQ(s, xcursor_font[i]))
-                return i;
-    return 0;
+static int
+cursor_cache_entry_cmp(const void *a, const void *b) {
+    return a_strcmp(((cursor_cache_entry_t *) a)->name, ((cursor_cache_entry_t *) b)->name);
 }
 
-/** Get a cursor name.
- * \param c The cursor.
- */
-const char *
-xcursor_font_tostr(uint16_t c)
+static void
+cursor_cache_entry_wipe(cursor_cache_entry_t *entry)
 {
-    if(c < countof(xcursor_font))
-        return xcursor_font[c];
-    return NULL;
+    p_delete(&entry->name);
 }
+
+BARRAY_FUNCS(cursor_cache_entry_t, cursors, cursor_cache_entry_wipe, cursor_cache_entry_cmp)
 
 /** Equivalent to 'XCreateFontCursor()', error are handled by the
  * default current error handler.
@@ -136,15 +47,20 @@ xcursor_font_tostr(uint16_t c)
  * \return Allocated cursor font.
  */
 xcb_cursor_t
-xcursor_new(xcb_cursor_context_t *ctx, uint16_t cursor_font)
+xcursor_new(cursors_array_t *array, xcb_cursor_context_t *ctx, const char *cursor_name)
 {
-    static xcb_cursor_t xcursor[countof(xcursor_font)];
+    cursor_cache_entry_t entry;
+    entry.name = cursor_name;
 
-    if (!xcursor[cursor_font]) {
-        xcursor[cursor_font] = xcb_cursor_load_cursor(ctx, xcursor_font_tostr(cursor_font));
+    cursor_cache_entry_t *found = cursors_array_lookup(array, &entry);
+    if (NULL == found) {
+        entry.name = a_strdup(cursor_name);
+        entry.cursor = xcb_cursor_load_cursor(ctx, cursor_name);
+        cursors_array_insert(array, entry);
+        found = &entry;
     }
 
-    return xcursor[cursor_font];
+    return found->cursor;
 }
 
 

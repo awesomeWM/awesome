@@ -40,6 +40,7 @@
 
 #include "objects/key.h"
 #include "common/xembed.h"
+#include "common/xcursor.h"
 #include "common/buffer.h"
 
 #define ROOT_WINDOW_EVENT_MASK \
@@ -88,6 +89,8 @@ typedef struct
     int default_screen;
     /** xcb-cursor context */
     xcb_cursor_context_t *cursor_ctx;
+    /** cache of already loaded cursors */
+    cursors_array_t cursor_cache;
 #ifdef WITH_XCB_ERRORS
     /** xcb-errors context */
     xcb_errors_context_t *errors_ctx;

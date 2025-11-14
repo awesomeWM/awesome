@@ -447,11 +447,11 @@ static int
 luaA_root_cursor(lua_State *L)
 {
     const char *cursor_name = luaL_checkstring(L, 1);
-    uint16_t cursor_font = xcursor_font_fromstr(cursor_name);
+    xcb_cursor_t cursor = xcursor_new(&globalconf.cursor_cache, globalconf.cursor_ctx, cursor_name);
 
-    if(cursor_font)
+    if(cursor)
     {
-        uint32_t change_win_vals[] = { xcursor_new(globalconf.cursor_ctx, cursor_font) };
+        uint32_t change_win_vals[] = { cursor };
 
         xcb_change_window_attributes(globalconf.connection,
                                      globalconf.screen->root,
