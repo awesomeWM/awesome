@@ -187,6 +187,7 @@ drawin_wipe(drawin_t *w)
         w->window = XCB_NONE;
     }
     /* No unref needed because we are being garbage collected */
+    drawable_invalidate(w->drawable);
     w->drawable = NULL;
 }
 
