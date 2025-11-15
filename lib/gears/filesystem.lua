@@ -104,28 +104,28 @@ function filesystem.is_dir(path)
 end
 
 --- Get the config home according to the XDG basedir specification.
--- @return the config home (XDG_CONFIG_HOME) with a slash at the end.
+-- @return the config home (XDG\_CONFIG\_HOME) with a slash at the end.
 -- @staticfct gears.filesystem.get_xdg_config_home
 function filesystem.get_xdg_config_home()
     return (os.getenv("XDG_CONFIG_HOME") or os.getenv("HOME") .. "/.config") .. "/"
 end
 
 --- Get the cache home according to the XDG basedir specification.
--- @return the cache home (XDG_CACHE_HOME) with a slash at the end.
+-- @return the cache home (XDG\_CACHE\_HOME) with a slash at the end.
 -- @staticfct gears.filesystem.get_xdg_cache_home
 function filesystem.get_xdg_cache_home()
     return (os.getenv("XDG_CACHE_HOME") or os.getenv("HOME") .. "/.cache") .. "/"
 end
 
 --- Get the data home according to the XDG basedir specification.
--- @treturn string the data home (XDG_DATA_HOME) with a slash at the end.
+-- @treturn string the data home (XDG\_DATA\_HOME) with a slash at the end.
 -- @staticfct gears.filesystem.get_xdg_data_home
 function filesystem.get_xdg_data_home()
     return (os.getenv("XDG_DATA_HOME") or os.getenv("HOME") .. "/.local/share") .. "/"
 end
 
 --- Get the data dirs according to the XDG basedir specification.
--- @treturn table the data dirs (XDG_DATA_DIRS) with a slash at the end of each entry.
+-- @treturn table the data dirs (XDG\_DATA\_DIRS) with a slash at the end of each entry.
 -- @staticfct gears.filesystem.get_xdg_data_dirs
 function filesystem.get_xdg_data_dirs()
     local xdg_data_dirs = os.getenv("XDG_DATA_DIRS") or "/usr/share:/usr/local/share"
@@ -166,7 +166,7 @@ function filesystem.get_awesome_icon_dir()
 end
 
 --- Get the user's config or cache dir.
--- It first checks XDG_CONFIG_HOME / XDG_CACHE_HOME, but then goes with the
+-- It first checks XDG\_CONFIG\_HOME / XDG\_CACHE\_HOME, but then goes with the
 -- default paths.
 -- @param d The directory to get (either "config" or "cache").
 -- @return A string containing the requested path.
