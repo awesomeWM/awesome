@@ -13,6 +13,6 @@ pull_request_rules:
       - status-success=codecov/patch
     actions:
       merge:
-        method: merge
+        method: squash
       delete_head_branch: {}
       dismiss_reviews: {}
