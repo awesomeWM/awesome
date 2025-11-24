@@ -100,6 +100,14 @@ local function join_plus_sort(modifiers)
     return table.concat(modifiers, '+')
 end
 
+--- Use spacial order for hotkey modifier sorting
+-- @tfield boolean widget.use_special_hotkey_mod_sort
+-- @param boolean
+widget.use_special_hotkey_mod_sort = false
+
+--- Spacial modifier sort order
+-- Default: Super -> Ctrl -> Alt -> Shift
+-- @table
 local special_hotkey_mod_order = {
     Super = 1,
     Ctrl = 2,
@@ -411,10 +419,10 @@ function widget.new(args)
         end
         local joined_mods = {}
 
-        if _use_special_hotkey_sort == nil then
-            joined_mods = join_plus_sort(readable_mods)
-        else
+        if widget.use_special_hotkey_mod_sort then
             joined_mods = special_hotkey_join_plus_sort(readable_mods)
+        else
+            joined_mods = join_plus_sort(readable_mods)
         end
 
         local group = data.group or "none"
