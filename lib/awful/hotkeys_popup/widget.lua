@@ -100,6 +100,21 @@ local function join_plus_sort(modifiers)
     return table.concat(modifiers, '+')
 end
 
+local special_hotkey_mod_order = {
+    Super = 1,
+    Ctrl = 2,
+    Alt = 3,
+    Shift = 4,
+}
+
+local function special_hotkey_join_plus_sort(modifier)
+    if #modifiers<1 then return "none" end
+    table.sort(modifiers, function(a,b)
+            return special_hotkey_mod_order[a] < special_hotkey_mod_order[b]
+        end)
+    return table.concat(modifiers, '+')
+end
+
 local function get_screen(s)
     return s and capi.screen[s]
 end
@@ -394,7 +409,13 @@ function widget.new(args)
         for _, mod in ipairs(data.mod) do
             table.insert(readable_mods, self.labels[mod] or mod)
         end
-        local joined_mods = join_plus_sort(readable_mods)
+        local joined_mods = {}
+
+        if _use_special_hotkey_sort == nil then
+            joined_mods = join_plus_sort(readable_mods)
+        else
+            joined_mods = special_hotkey_join_plus_sort(readable_mods)
+        end
 
         local group = data.group or "none"
         self._group_list[group] = true
