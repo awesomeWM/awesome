@@ -100,10 +100,30 @@ local function join_plus_sort(modifiers)
     return table.concat(modifiers, '+')
 end
 
+local function get_screen(s)
+    return s and capi.screen[s]
+end
+
+
+local widget = {
+    group_rules = {},
+}
+
+--- Use special order for hotkey modifier sorting
+-- @tfield boolean use_special_hotkey_mod_sort
+-- @param boolean
+widget.use_special_hotkey_mod_sort = false
+
+--- Don't show hotkeys without descriptions.
+-- @tfield boolean widget.hide_without_description
+-- @param boolean
+widget.hide_without_description = true
+
+
 --- Spacial modifier sort order
 -- ( Default: Super -> Ctrl -> Alt -> Shift )
 -- @table special_hotkey_mod_order
-local special_hotkey_mod_order = {
+widget.special_hotkey_mod_order = {
     Super = 1,
     Ctrl = 2,
     Alt = 3,
@@ -117,20 +137,6 @@ local function special_hotkey_join_plus_sort(modifiers)
         end)
     return table.concat(modifiers, '+')
 end
-
-local function get_screen(s)
-    return s and capi.screen[s]
-end
-
-
-local widget = {
-    group_rules = {},
-}
-
---- Don't show hotkeys without descriptions.
--- @tfield boolean widget.hide_without_description
--- @param boolean
-widget.hide_without_description = true
 
 --- Merge hotkey records into one if they have the same modifiers and
 -- description. Records with five or more keys will abbreviate them.
@@ -334,6 +340,9 @@ function widget.new(args)
         merge_duplicates = (
             args.merge_duplicates == nil
         ) and widget.merge_duplicates or args.merge_duplicates,
+        use_special_hotkey_mod_sort = (
+            args.use_special_hotkey_mod_sort == nil
+        ) and widget.use_special_hotkey_mod_sort or args.use_special_hotkey_mod_sort,
         group_rules = args.group_rules or gtable.clone(widget.group_rules),
         -- For every key in every `awful.key` binding, the first non-nil result
         -- in this lists is chosen as a human-readable name:
@@ -344,6 +353,7 @@ function widget.new(args)
         -- be presented to the user as-is. (This is useful for cheatsheets for
         -- external programs.)
         labels = args.labels or widget.labels,
+        special_mod_order = args.special_hotkey_mod_order or widget.special_hotkey_mod_order,
         _additional_hotkeys = {},
         _cached_wiboxes = {},
         _cached_awful_keys = {},
