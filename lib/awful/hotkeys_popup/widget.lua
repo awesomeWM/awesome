@@ -109,6 +109,24 @@ local widget = {
     group_rules = {},
 }
 
+-- To use special sortingm for hotkey modifiers, add the following line 
+-- your rc.lua file, after `local hotkeys_popup = require("awful.hotkeys_popup")`:
+--
+-- hotkeys_popup.widget.use_special_hotkey_mod_sort = true
+--
+-- And optionally, to customize the order, add, for example: 
+--
+-- hotkeys_popup.widget.special_hotkey_mod_order = {
+--         Shift = 1,
+--         Ctrl = 2,
+--         Super = 3,
+--         Alt = 4,
+-- }
+-- 
+-- Setting 2 or more modifiers to the same number will cause their relative
+-- sorting order to be undefined.
+
+
 --- Use special order for hotkey modifier sorting
 -- @tfield boolean use_special_hotkey_mod_sort
 -- @param boolean
