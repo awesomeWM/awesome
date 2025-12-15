@@ -114,26 +114,33 @@ local widget = {
 -- @param boolean
 widget.use_special_hotkey_mod_sort = false
 
+--- Special modifier sort order.
+-- Defines the order in which modifier keys are displayed.
+--
+-- @tfield table awful.hotkeys_popup.widget.special_hotkey_mod_order
+--
+-- @tfield[opt=1] int Super
+-- @tfield[opt=2] int Ctrl
+-- @tfield[opt=3] int Alt
+-- @tfield[opt=4] int Shift
+widget.special_hotkey_mod_order = {
+    Super = 1,
+    Ctrl  = 2,
+    Alt   = 3,
+    Shift = 4,
+}
+
 --- Don't show hotkeys without descriptions.
 -- @tfield boolean widget.hide_without_description
 -- @param boolean
 widget.hide_without_description = true
 
 
---- Spacial modifier sort order
--- ( Default: Super -> Ctrl -> Alt -> Shift )
--- @table special_hotkey_mod_order
-widget.special_hotkey_mod_order = {
-    Super = 1,
-    Ctrl = 2,
-    Alt = 3,
-    Shift = 4,
-}
 
 local function special_hotkey_join_plus_sort(modifiers)
     if #modifiers<1 then return "none" end
     table.sort(modifiers, function(a,b)
-            return special_hotkey_mod_order[a] < special_hotkey_mod_order[b]
+            return widget.special_hotkey_mod_order[a] < widget.special_hotkey_mod_order[b]
         end)
     return table.concat(modifiers, '+')
 end
