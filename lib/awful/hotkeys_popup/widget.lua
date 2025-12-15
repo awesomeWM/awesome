@@ -100,14 +100,9 @@ local function join_plus_sort(modifiers)
     return table.concat(modifiers, '+')
 end
 
---- Use spacial order for hotkey modifier sorting
--- @tfield boolean widget.use_special_hotkey_mod_sort
--- @param boolean
-widget.use_special_hotkey_mod_sort = false
-
 --- Spacial modifier sort order
--- Default: Super -> Ctrl -> Alt -> Shift
--- @table
+-- ( Default: Super -> Ctrl -> Alt -> Shift )
+-- @table special_hotkey_mod_order
 local special_hotkey_mod_order = {
     Super = 1,
     Ctrl = 2,
@@ -115,7 +110,7 @@ local special_hotkey_mod_order = {
     Shift = 4,
 }
 
-local function special_hotkey_join_plus_sort(modifier)
+local function special_hotkey_join_plus_sort(modifiers)
     if #modifiers<1 then return "none" end
     table.sort(modifiers, function(a,b)
             return special_hotkey_mod_order[a] < special_hotkey_mod_order[b]
