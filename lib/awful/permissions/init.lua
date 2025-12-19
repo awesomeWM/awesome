@@ -237,7 +237,7 @@ end
 --
 --    awful.permissions.add_activate_filter(function(c)
 --        if c.class == "Firefox" then return false end
---    end, "permissions")
+--    end)
 --
 -- @tparam function f The callback
 -- @tparam[opt] string context The `request::activate` context
