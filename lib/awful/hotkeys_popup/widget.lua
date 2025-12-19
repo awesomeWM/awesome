@@ -109,43 +109,33 @@ local widget = {
     group_rules = {},
 }
 
--- To use special sortingm for hotkey modifiers, add the following line 
+-- To use change the sorting order for hotkey modifiers, add the following line
 -- your rc.lua file, after `local hotkeys_popup = require("awful.hotkeys_popup")`:
 --
--- hotkeys_popup.widget.use_special_hotkey_mod_sort = true
---
--- And optionally, to customize the order, add, for example: 
---
--- hotkeys_popup.widget.special_hotkey_mod_order = {
+-- hotkeys_popup.widget.modifier_sort_order = {
 --         Shift = 1,
 --         Ctrl = 2,
 --         Super = 3,
 --         Alt = 4,
 -- }
--- 
+--
 -- Setting 2 or more modifiers to the same number will cause their relative
 -- sorting order to be undefined.
 
-
---- Use special order for hotkey modifier sorting
--- @tfield boolean use_special_hotkey_mod_sort
--- @param boolean
-widget.use_special_hotkey_mod_sort = false
-
---- Special modifier sort order.
+--- Modifier sort order.
 -- Defines the order in which modifier keys are displayed.
 --
--- @tfield table awful.hotkeys_popup.widget.special_hotkey_mod_order
+-- @tfield table awful.hotkeys_popup.widget.modifier_sort_order
 --
--- @tfield[opt=1] int Super
+-- @tfield[opt=1] int Alt
 -- @tfield[opt=2] int Ctrl
--- @tfield[opt=3] int Alt
--- @tfield[opt=4] int Shift
-widget.special_hotkey_mod_order = {
-    Super = 1,
+-- @tfield[opt=3] int Shift
+-- @tfield[opt=4] int Super
+widget.modifier_sort_order = {
+    Alt   = 1,
     Ctrl  = 2,
-    Alt   = 3,
-    Shift = 4,
+    Shift = 3,
+    Super = 4,
 }
 
 --- Don't show hotkeys without descriptions.
@@ -155,10 +145,10 @@ widget.hide_without_description = true
 
 
 
-local function special_hotkey_join_plus_sort(modifiers)
+local function modifier_join_plus_sort(modifiers)
     if #modifiers<1 then return "none" end
     table.sort(modifiers, function(a,b)
-            return widget.special_hotkey_mod_order[a] < widget.special_hotkey_mod_order[b]
+            return widget.modifier_sort_order[a] < widget.modifier_sort_order[b]
         end)
     return table.concat(modifiers, '+')
 end
@@ -365,9 +355,6 @@ function widget.new(args)
         merge_duplicates = (
             args.merge_duplicates == nil
         ) and widget.merge_duplicates or args.merge_duplicates,
-        use_special_hotkey_mod_sort = (
-            args.use_special_hotkey_mod_sort == nil
-        ) and widget.use_special_hotkey_mod_sort or args.use_special_hotkey_mod_sort,
         group_rules = args.group_rules or gtable.clone(widget.group_rules),
         -- For every key in every `awful.key` binding, the first non-nil result
         -- in this lists is chosen as a human-readable name:
@@ -378,7 +365,7 @@ function widget.new(args)
         -- be presented to the user as-is. (This is useful for cheatsheets for
         -- external programs.)
         labels = args.labels or widget.labels,
-        special_mod_order = args.special_hotkey_mod_order or widget.special_hotkey_mod_order,
+        modifier_order = args.modifier_order or widget.modifier_order,
         _additional_hotkeys = {},
         _cached_wiboxes = {},
         _cached_awful_keys = {},
@@ -447,13 +434,7 @@ function widget.new(args)
         for _, mod in ipairs(data.mod) do
             table.insert(readable_mods, self.labels[mod] or mod)
         end
-        local joined_mods = {}
-
-        if widget.use_special_hotkey_mod_sort then
-            joined_mods = special_hotkey_join_plus_sort(readable_mods)
-        else
-            joined_mods = join_plus_sort(readable_mods)
-        end
+        local joined_mods = modifier_join_plus_sort(readable_mods)
 
         local group = data.group or "none"
         self._group_list[group] = true
