@@ -119,7 +119,7 @@ end
 
 client.connect_signal("property::icon", function(c)
     for obj in pairs(instances) do
-        if obj._private.client.valid and obj._private.client == c then
+        if obj._private.client == c and obj._private.client.valid then
             obj:emit_signal("widget::layout_changed")
             obj:emit_signal("widget::redraw_needed")
         end
