@@ -18,7 +18,6 @@ local gio = lgi.Gio
 local glib = lgi.GLib
 local w_textbox = require("wibox.widget.textbox")
 local gdebug = require("gears.debug")
-local protected_call = require("gears.protected_call")
 local unpack = unpack or table.unpack -- luacheck: globals unpack (compatibility with Lua 5.1)
 
 local utils = {}
@@ -91,28 +90,6 @@ do
 end
 
 -- Private section
-
-local do_protected_call, call_callback
-do
-    -- Lua 5.1 cannot yield across a protected call. Instead of hardcoding a
-    -- check, we check for this problem: The following coroutine yields true on
-    -- success (so resume() returns true, true). On failure, pcall returns
-    -- false and a message, so resume() returns true, false, message.
-    local _, has_yieldable_pcall = coroutine.resume(coroutine.create(function()
-        return pcall(coroutine.yield, true)
-    end))
-    if has_yieldable_pcall then
-        do_protected_call = protected_call.call
-        call_callback = function(callback, ...)
-            return callback(...)
-        end
-    else
-        do_protected_call = function(f, ...)
-            return f(...)
-        end
-        call_callback = protected_call.call
-    end
-end
 
 local all_icon_sizes = {
     'scalable',
@@ -404,11 +381,15 @@ function utils.parse_dir(dir_path, callback)
         enum:async_close()
     end
 
-    gio.Async.start(do_protected_call)(function()
-        local result = {}
-        parser(gio.File.new_for_path(dir_path), result)
-        call_callback(callback, result)
-    end)
+    local result = {}
+    local dir = gio.File.new_for_path(dir_path)
+    parser(dir, result)
+    for _, entry in ipairs(result) do
+        local desktop_file = gio.File.new_for_path(entry.file)
+        local relative_path = dir:get_relative_path(desktop_file)
+        entry.desktop_file_id = string.gsub(relative_path, "/", "-")
+    end
+    callback(result)
 end
 
 -- luacov: disable
