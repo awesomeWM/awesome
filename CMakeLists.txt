@@ -410,6 +410,10 @@ add_dependencies(test-systray generated_sources)
 target_link_libraries(test-systray
     ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
 
+add_executable(test-client-shape-input tests/test-client-shape-input.c)
+target_link_libraries(test-client-shape-input
+    -lXext ${AWESOME_COMMON_REQUIRED_LDFLAGS} ${AWESOME_REQUIRED_LDFLAGS})
+
 if(DO_COVERAGE)
     set(TESTS_RUN_ENV DO_COVERAGE=1)
 endif()
