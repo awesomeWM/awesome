@@ -319,8 +319,15 @@ jobs:
       - name: Run unit tests
         run: cd "${{ github.workspace }}/build" && make check-unit
 
-      - name: Run examples tests
+      - name: Run examples tests (non-coverage)
+        if: matrix.coverage != 'codecov'
         run: cd "${{ github.workspace }}/build" && make check-examples -j24
+
+      # Parallel tests interfere with coverage collection. All processes write
+      # to the same luacov.stats.out file, corrupting it.
+      - name: Run examples tests (with coverage)
+        if: matrix.coverage == 'codecov'
+        run: cd "${{ github.workspace }}/build" && make check-examples
 
       - name: Run requires tests
         if: matrix.coverage
