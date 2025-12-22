@@ -109,10 +109,54 @@ local widget = {
     group_rules = {},
 }
 
+--- Sort order for the hotkey modifiers
+--
+-- @tfield table awful.hotkeys_popup.widget.modifier_sort_order
+-- @tfield int Alt   Alt key priority
+-- @tfield int Ctrl  Ctrl key priority
+-- @tfield int Shift Shift key priority
+-- @tfield int Super Super key priority
+--
+-- @usage
+-- To use change the sorting order for hotkey modifiers, add the following line
+-- to your rc.lua file, after require("awful.hotkeys_popup"):
+--
+--     hotkeys_popup.widget.modifier_sort_order = {
+--         Shift = 1,
+--         Ctrl  = 2,
+--         Super = 3,
+--         Alt   = 4,
+--     }
+--
+-- Setting 2 or more modifiers to the same number will cause their relative
+-- sorting order to be undefined.
+--
+-- @tfield table awful.hotkeys_popup.widget.modifier_sort_order
+-- @tfield int Alt   Alt key priority
+-- @tfield int Ctrl  Ctrl key priority
+-- @tfield int Shift Shift key priority
+-- @tfield int Super Super key priority
+widget.modifier_sort_order = {
+    Alt   = 1,
+    Ctrl  = 2,
+    Shift = 3,
+    Super = 4,
+}
+
 --- Don't show hotkeys without descriptions.
 -- @tfield boolean widget.hide_without_description
 -- @param boolean
 widget.hide_without_description = true
+
+
+
+local function modifier_join_plus_sort(modifiers)
+    if #modifiers<1 then return "none" end
+    table.sort(modifiers, function(a,b)
+            return widget.modifier_sort_order[a] < widget.modifier_sort_order[b]
+        end)
+    return table.concat(modifiers, '+')
+end
 
 --- Merge hotkey records into one if they have the same modifiers and
 -- description. Records with five or more keys will abbreviate them.
@@ -326,6 +370,7 @@ function widget.new(args)
         -- be presented to the user as-is. (This is useful for cheatsheets for
         -- external programs.)
         labels = args.labels or widget.labels,
+        modifier_order = args.modifier_order or widget.modifier_order,
         _additional_hotkeys = {},
         _cached_wiboxes = {},
         _cached_awful_keys = {},
@@ -394,7 +439,7 @@ function widget.new(args)
         for _, mod in ipairs(data.mod) do
             table.insert(readable_mods, self.labels[mod] or mod)
         end
-        local joined_mods = join_plus_sort(readable_mods)
+        local joined_mods = modifier_join_plus_sort(readable_mods)
 
         local group = data.group or "none"
         self._group_list[group] = true
