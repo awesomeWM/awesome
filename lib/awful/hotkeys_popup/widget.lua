@@ -109,28 +109,33 @@ local widget = {
     group_rules = {},
 }
 
--- To use change the sorting order for hotkey modifiers, add the following line
--- your rc.lua file, after `local hotkeys_popup = require("awful.hotkeys_popup")`:
+--- Sort order for the hotkey modifiers
 --
--- hotkeys_popup.widget.modifier_sort_order = {
+-- @tfield table awful.hotkeys_popup.widget.modifier_sort_order
+-- @tfield int Alt   Alt key priority
+-- @tfield int Ctrl  Ctrl key priority
+-- @tfield int Shift Shift key priority
+-- @tfield int Super Super key priority
+--
+-- @usage
+-- To use change the sorting order for hotkey modifiers, add the following line
+-- to your rc.lua file, after require("awful.hotkeys_popup"):
+--
+--     hotkeys_popup.widget.modifier_sort_order = {
 --         Shift = 1,
---         Ctrl = 2,
+--         Ctrl  = 2,
 --         Super = 3,
---         Alt = 4,
--- }
+--         Alt   = 4,
+--     }
 --
 -- Setting 2 or more modifiers to the same number will cause their relative
 -- sorting order to be undefined.
-
---- Modifier sort order.
--- Defines the order in which modifier keys are displayed.
 --
 -- @tfield table awful.hotkeys_popup.widget.modifier_sort_order
---
--- @tfield[opt=1] int Alt
--- @tfield[opt=2] int Ctrl
--- @tfield[opt=3] int Shift
--- @tfield[opt=4] int Super
+-- @tfield int Alt   Alt key priority
+-- @tfield int Ctrl  Ctrl key priority
+-- @tfield int Shift Shift key priority
+-- @tfield int Super Super key priority
 widget.modifier_sort_order = {
     Alt   = 1,
     Ctrl  = 2,
