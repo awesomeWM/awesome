@@ -130,12 +130,6 @@ local widget = {
 --
 -- Setting 2 or more modifiers to the same number will cause their relative
 -- sorting order to be undefined.
---
--- @tfield table awful.hotkeys_popup.widget.modifier_sort_order
--- @tfield int Alt   Alt key priority
--- @tfield int Ctrl  Ctrl key priority
--- @tfield int Shift Shift key priority
--- @tfield int Super Super key priority
 widget.modifier_sort_order = {
     Alt   = 1,
     Ctrl  = 2,
