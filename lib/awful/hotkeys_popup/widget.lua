@@ -142,8 +142,6 @@ widget.modifier_sort_order = {
 -- @param boolean
 widget.hide_without_description = true
 
-
-
 local function modifier_join_plus_sort(modifiers)
     if #modifiers<1 then return "none" end
     table.sort(modifiers, function(a,b)
@@ -364,7 +362,6 @@ function widget.new(args)
         -- be presented to the user as-is. (This is useful for cheatsheets for
         -- external programs.)
         labels = args.labels or widget.labels,
-        modifier_order = args.modifier_order or widget.modifier_order,
         _additional_hotkeys = {},
         _cached_wiboxes = {},
         _cached_awful_keys = {},
