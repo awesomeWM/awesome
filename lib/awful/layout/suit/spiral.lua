@@ -31,6 +31,11 @@ local function do_spiral(p, is_spiral)
     local cls = p.clients
     local n = #cls
     local old_width, old_height = wa.width, 2 * wa.height
+    -- The left window of the spiral is considered th mw.
+    -- mwfact offset of 0.5 makes the spiral be split at the center
+    -- of the screen for the default mwfact.
+    -- Without the offset, the mw would occupy a smaller part on the left screen
+    -- and could not be resized to its fullest extent.
     local mwfact = t.master_width_factor + 0.5
 
     for k, c in ipairs(cls) do
