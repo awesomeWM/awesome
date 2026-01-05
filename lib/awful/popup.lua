@@ -22,6 +22,7 @@
 -- @supermodule wibox
 ---------------------------------------------------------------------------
 local wibox     = require( "wibox"           )
+local gdebug    = require( "gears.debug"     )
 local gtable    = require( "gears.table"     )
 local placement = require( "awful.placement" )
 local xresources= require("beautiful.xresources")
@@ -297,17 +298,28 @@ function popup:unbind_to_widget(widget)
     widget:disconnect_signal("button::press", self._private.show_fct)
 end
 
---- Hide the popup when right clicked.
+--- Hide the popup when clicked inside.
 --
--- @property hide_on_right_click
--- @tparam[opt=false] boolean hide_on_right_click
+-- @property hide_on_click
+-- @tparam[opt=false] boolean hide_on_click
 -- @propemits true false
-
-function popup:set_hide_on_right_click(value)
+function popup:set_hide_on_click(value)
     self[value and "connect_signal" or "disconnect_signal"](
-        self, "button::press", self._private.hide_fct
+        self,
+        "button::press",
+        self._private.hide_fct
     )
-    self:emit_signal("property::hide_on_right_click", value)
+    self:emit_signal("property::hide_on_click", value)
+end
+function popup:set_hide_on_right_click(value)
+    gdebug.deprecate(
+        "Use popup:set_hide_on_click() instead of set_hide_on_right_click",
+        { deprecated_in = 4 }
+    )
+    self:set_hide_on_click(value)
+end
+function popup:get_hide_on_click()
+    return self:is_signal_connected("button::press", self._private.hide_fct)
 end
 
 --- The popup minimum width.
@@ -453,8 +465,8 @@ end
 -- @tparam string|table args.preferred_positions
 -- @tparam string|table args.preferred_anchors
 -- @tparam table|number args.offset The X and Y offset compared to the parent object
--- @tparam boolean args.hide_on_right_click Whether or not to hide the popup on
---  right clicks.
+-- @tparam boolean args.hide_on_click Whether or not to hide the popup on
+--  clicks.
 -- @constructorfct awful.popup
 local function create_popup(_, args)
     assert(args)
@@ -509,10 +521,18 @@ local function create_popup(_, args)
     -- when set_position is called before the limits
     for _,v in ipairs{"minimum_width", "minimum_height", "maximum_height",
       "maximum_width", "offset", "placement","preferred_positions",
-      "preferred_anchors", "hide_on_right_click"} do
+      "preferred_anchors", "hide_on_right_click", "hide_on_click"} do
         if args[v] ~= nil then
             w["set_"..v](w, args[v])
         end
+    end
+
+    -- TODO : remove when we are ready to break backward compatibility
+    if args.hide_on_right_click ~= nil then
+        gdebug.deprecate(
+            "Use the hide_on_click parameter instead of hide_on_right_click",
+            { deprecated_in = 4 }
+        )
     end
 
     -- Default to visible

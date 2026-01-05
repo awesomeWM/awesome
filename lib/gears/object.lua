@@ -60,6 +60,23 @@ function object:connect_signal(name, func)
     sig.strong[func] = true
 end
 
+--- Check if the callback is connected to the signal.
+--
+-- This function check both kind of signal connection (strong and weak).
+--
+-- @tparam string name The name of the signal.
+-- @tparam function func The callback to check if connected.
+-- @treturn boolean Whether the signal is connected.
+-- @method is_signal_connected
+function object:is_signal_connected(name, func)
+    assert(
+        type(func) == "function",
+        "callback must be a function, got: " .. type(func)
+    )
+    local sig = find_signal(self, name)
+    return not not (sig and (sig.strong[func] or sig.weak[func]))
+end
+
 -- Register a global signal receiver.
 function object:_connect_everything(callback)
     table.insert(self._global_receivers, callback)
