@@ -290,6 +290,10 @@ widget.labels = {
 -- @beautiful beautiful.hotkeys_label_fg
 -- @tparam color hotkeys_label_fg
 
+--- Override label background colors instead of cycling through xresources colors.
+-- @beautiful beautiful.hotkeys_override_label_bgs
+-- @tparam boolean hotkeys_override_label_bgs
+
 --- Main hotkeys widget font.
 -- @beautiful beautiful.hotkeys_font
 -- @tparam string|lgi.Pango.FontDescription hotkeys_font
@@ -323,6 +327,8 @@ widget.labels = {
 -- @tparam[opt] color args.label_bg Background color used for miscellaneous labels.
 -- @tparam[opt] color args.label_fg Foreground color used for group and other
 -- labels.
+-- @tparam[opt] boolean args.override_label_bgs Override label background colors instead
+-- of cycling through xresources colors.
 -- @tparam[opt] int args.group_margin Margin between hotkeys groups.
 -- @tparam[opt] table args.labels Labels used for displaying human-readable keynames.
 -- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
@@ -336,6 +342,7 @@ widget.labels = {
 -- @usebeautiful beautiful.hotkeys_modifiers_fg
 -- @usebeautiful beautiful.hotkeys_label_bg
 -- @usebeautiful beautiful.hotkeys_label_fg
+-- @usebeautiful beautiful.hotkeys_override_label_bgs
 -- @usebeautiful beautiful.hotkeys_font
 -- @usebeautiful beautiful.hotkeys_description_font
 -- @usebeautiful beautiful.hotkeys_group_margin
@@ -399,6 +406,8 @@ function widget.new(args)
             beautiful.hotkeys_label_bg or self.fg
         self.label_fg = args.label_fg or
             beautiful.hotkeys_label_fg or self.bg
+        self.override_label_bgs = args.override_label_bgs or
+            beautiful.hotkeys_override_label_bgs or false
         self.opacity = args.opacity or
             beautiful.hotkeys_opacity or 1
         self.font = args.font or
@@ -543,12 +552,19 @@ function widget.new(args)
 
 
     function widget_instance:_group_label(group, color)
+        local bg_color = color
+        if not bg_color then
+            if self.override_label_bgs then
+                bg_color = self.label_bg
+            else
+                bg_color = self.group_rules[group] and
+                    self.group_rules[group].color or self:_get_next_color("group_title")
+            end
+        end
         local textbox = wibox.widget.textbox(
             markup.font(self.font,
                 markup.bg(
-                    color or (self.group_rules[group] and
-                        self.group_rules[group].color or self:_get_next_color("group_title")
-                    ),
+                    bg_color,
                     markup.fg(self.label_fg, " "..group.." ")
                 )
             )
