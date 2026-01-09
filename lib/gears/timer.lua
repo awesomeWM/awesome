@@ -101,7 +101,7 @@ function timer:start()
     local timeout_ms = gmath.round(self.data.timeout * 1000)
     self.data.source_id = glib.timeout_add(glib.PRIORITY_DEFAULT, timeout_ms, function()
         protected_call(self.emit_signal, self, "timeout")
-        return true
+        return glib.SOURCE_CONTINUE
     end)
     self:emit_signal("start")
 end
