@@ -260,6 +260,10 @@ end
 -- @noreturn
 -- @method next_layout
 
+--- Select the previous layout.
+-- @noreturn
+-- @method prev_layout
+
 --- Create a keyboard layout widget.
 --
 -- It shows current keyboard layout name in a textbox.
@@ -292,6 +296,10 @@ function keyboardlayout.new(args)
         self.set_layout((self._current + 1) % (#self._layout + 1))
     end
 
+    self.prev_layout = function()
+        self.set_layout((self._current - 1) % (#self._layout))
+    end
+
     self.set_layout = function(group_number)
         if (0 > group_number) or (group_number > #self._layout) then
             error("Invalid group number: " .. group_number ..
@@ -311,7 +319,8 @@ function keyboardlayout.new(args)
 
     -- Mouse bindings
     self.buttons = {
-        button({ }, 1, self.next_layout)
+        button({ }, 1, self.next_layout),
+        button({ }, 3, self.prev_layout)
     }
 
     return self
