@@ -337,6 +337,11 @@ function notif_methods.Notify(sender, object_path, interface, method, parameters
                 )
             end
 
+            -- The rules are attached to this.
+            if naughty._has_preset_handler then
+                naughty.emit_signal("request::preset", notification, "update", args)
+            end
+
             -- Even if no property changed, restart the timeout.
             notification:reset_timeout()
         else
