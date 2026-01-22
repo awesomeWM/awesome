@@ -13,6 +13,7 @@
 -- Grab environment we need
 local type = type
 local ipairs = ipairs
+local pairs = pairs
 local capi = { button = button }
 local wibox = require("wibox")
 local gdebug = require("gears.debug")
@@ -159,11 +160,40 @@ function common.list_update(w, buttons, label, data, objects, args)
         local text, bg, bg_image, icon, item_args = label(o, cache.tb)
         item_args = item_args or {}
 
-        -- The text might be invalid, so use pcall.
         if cache.tbm and (text == nil or text == "") then
-            cache.tbm:set_margins(0)
-        elseif cache.tb then
-            if not cache.tb:set_markup_silently(text) then
+            -- Remove text margin when there is no text
+
+            local current_margins = { left = cache.tbm:get_left(),
+                                      right = cache.tbm:get_right(),
+                                      top = cache.tbm:get_top(),
+                                      bottom = cache.tbm:get_bottom() }
+
+            local has_any_margin = false
+            for _, m in pairs(current_margins) do
+                if m > 0 then
+                    has_any_margin = true
+                    break
+                end
+            end
+
+            if has_any_margin then
+                -- Save current margin values so they can be restored in case
+                -- text will be present in future update
+                cache.tbm.saved_margins = current_margins
+                cache.tbm:set_margins(0)
+            end
+        elseif cache.tbm and cache.tbm.saved_margins then
+            -- We saved margins before, and now when we have text we need
+            -- to restore them
+            cache.tbm:set_left(cache.tbm.saved_margins.left)
+            cache.tbm:set_right(cache.tbm.saved_margins.right)
+            cache.tbm:set_top(cache.tbm.saved_margins.top)
+            cache.tbm:set_bottom(cache.tbm.saved_margins.bottom)
+            cache.tbm.saved_margins = nil
+        end
+
+        if cache.tb then
+            if not cache.tb:set_markup_silently(text or "") then
                 cache.tb:set_markup("<i>&lt;Invalid text&gt;</i>")
             end
         end
