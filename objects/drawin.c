@@ -178,6 +178,12 @@ drawin_wipe(drawin_t *w)
 {
     /* The drawin must already be unmapped, else it
      * couldn't be garbage collected -> no unmap needed */
+    window_cancel_border_refresh((window_t *) w);
+    if(w->geometry_dirty_id != 0)
+    {
+        g_source_remove(w->geometry_dirty_id);
+        w->geometry_dirty_id = 0;
+    }
     p_delete(&w->cursor);
     if(w->window)
     {
@@ -209,12 +215,8 @@ drawin_refresh_pixmap(drawin_t *w)
 }
 
 static void
-drawin_apply_moveresize(drawin_t *w)
+drawin_apply_moveresize_internal(drawin_t *w)
 {
-    if (!w->geometry_dirty)
-        return;
-
-    w->geometry_dirty = false;
     client_ignore_enterleave_events();
     xcb_configure_window(globalconf.connection, w->window,
                          XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y
@@ -229,14 +231,32 @@ drawin_apply_moveresize(drawin_t *w)
     client_restore_enterleave_events();
 }
 
-void
-drawin_refresh(void)
+static void
+drawin_apply_moveresize_now(drawin_t *w)
 {
-    foreach(item, globalconf.drawins)
-    {
-        drawin_apply_moveresize(*item);
-        window_border_refresh((window_t *) *item);
-    }
+    if (w->geometry_dirty_id == 0)
+        return;
+    g_source_remove(w->geometry_dirty_id);
+    w->geometry_dirty_id = 0;
+    drawin_apply_moveresize_internal(w);
+}
+
+static gboolean
+drawin_apply_moveresize_callback(gpointer user_data)
+{
+    drawin_t *w = user_data;
+    assert(w->geometry_dirty_id != 0);
+    drawin_apply_moveresize_internal(w);
+    w->geometry_dirty_id = 0;
+    return G_SOURCE_REMOVE;
+}
+
+static void
+drawin_set_geometry_dirty(drawin_t *w)
+{
+    if (w->geometry_dirty_id != 0)
+        return;
+    w->geometry_dirty_id = g_idle_add(drawin_apply_moveresize_callback, w);
 }
 
 /** Get all drawins into a table.
@@ -275,7 +295,7 @@ drawin_moveresize(lua_State *L, int udx, area_t geometry)
     if(w->geometry.height <= 0)
         w->geometry.height = old_geometry.height;
 
-    w->geometry_dirty = true;
+    drawin_set_geometry_dirty(w);
     drawin_update_drawing(L, udx);
 
     if (!AREA_EQUAL(old_geometry, w->geometry))
@@ -314,7 +334,7 @@ drawin_refresh_pixmap_partial(drawin_t *drawin,
         return;
 
     /* Make sure it really has the size it should have */
-    drawin_apply_moveresize(drawin);
+    drawin_apply_moveresize_now(drawin);
 
     /* Make cairo do all pending drawing */
     cairo_surface_flush(drawin->drawable->surface);
@@ -328,7 +348,7 @@ drawin_map(lua_State *L, int widx)
 {
     drawin_t *drawin = luaA_checkudata(L, widx, &drawin_class);
     /* Apply any pending changes */
-    drawin_apply_moveresize(drawin);
+    drawin_apply_moveresize_now(drawin);
     /* Activate BMA */
     client_ignore_enterleave_events();
     /* Map the drawin */
@@ -423,7 +443,7 @@ drawin_allocator(lua_State *L)
     w->cursor = a_strdup("left_ptr");
     w->geometry.width = 1;
     w->geometry.height = 1;
-    w->geometry_dirty = false;
+    w->geometry_dirty_id = 0;
     w->type = _NET_WM_WINDOW_TYPE_NORMAL;
 
     drawable_allocator(L, (drawable_refresh_callback *) drawin_refresh_pixmap, w);
@@ -673,7 +693,7 @@ luaA_drawin_set_shape_bounding(lua_State *L, drawin_t *drawin)
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
 
     /* The drawin might have been resized to a larger size. Apply that. */
-    drawin_apply_moveresize(drawin);
+    drawin_apply_moveresize_now(drawin);
 
     xwindow_set_shape(drawin->window,
             drawin->geometry.width + 2*drawin->border_width,
@@ -712,7 +732,7 @@ luaA_drawin_set_shape_clip(lua_State *L, drawin_t *drawin)
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
 
     /* The drawin might have been resized to a larger size. Apply that. */
-    drawin_apply_moveresize(drawin);
+    drawin_apply_moveresize_now(drawin);
 
     xwindow_set_shape(drawin->window, drawin->geometry.width, drawin->geometry.height,
             XCB_SHAPE_SK_CLIP, surf, 0);
@@ -749,7 +769,7 @@ luaA_drawin_set_shape_input(lua_State *L, drawin_t *drawin)
         surf = (cairo_surface_t *)lua_touserdata(L, -1);
 
     /* The drawin might have been resized to a larger size. Apply that. */
-    drawin_apply_moveresize(drawin);
+    drawin_apply_moveresize_now(drawin);
 
     xwindow_set_shape(drawin->window,
             drawin->geometry.width + 2*drawin->border_width,

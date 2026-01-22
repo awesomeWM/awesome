@@ -23,7 +23,6 @@
 #define AWESOME_BANNING_H
 
 void banning_need_update(void);
-void banning_refresh(void);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
