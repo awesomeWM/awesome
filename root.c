@@ -42,6 +42,7 @@
 #include "objects/button.h"
 #include "common/luaclass.h"
 #include "xwindow.h"
+#include "stack.h"
 
 #include "math.h"
 
@@ -653,6 +654,7 @@ const struct luaL_Reg awesome_root_methods[] =
     { "tags", luaA_root_tags },
     { "__index", luaA_root_index },
     { "__newindex", luaA_root_newindex },
+    { "set_stacking_order", luaA_set_stacking_order},
     { "set_index_miss_handler", luaA_root_set_index_miss_handler},
     { "set_call_handler", luaA_root_set_call_handler},
     { "set_newindex_miss_handler", luaA_root_set_newindex_miss_handler},
