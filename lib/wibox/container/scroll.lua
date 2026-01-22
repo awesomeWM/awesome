@@ -561,6 +561,17 @@ function scroll.step_functions.waiting_nonlinear_back_and_forth(elapsed, size, v
     return (size - visible_size) * state
 end
 
+--- A step function that scrolls the widget to its end and back to its
+-- beginning, then back to its end, etc. The speed is null at the ends and
+-- maximal in the middle. It’s smoothed by the use of a cosine function.
+-- @callback scroll.step_functions.smooth_back_and_forth
+function scroll.step_functions.smooth_back_and_forth(elapsed, size, visible_size, speed)
+    local state = ((elapsed * speed) % (size)) / size
+    -- The cosine function is scaled to map [0,1] to [0,2π] then it’s output is
+    -- scaled from [1 -- -1 -- 1]  to [0 -- 1 -- 0]
+    return (size - visible_size) * (0.5 - 0.5*math.cos(state * 2 * math.pi))
+end
+
 return scroll
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
