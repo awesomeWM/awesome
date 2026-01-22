@@ -536,12 +536,19 @@ exit_on_signal(gpointer data)
     return TRUE;
 }
 
-void
-awesome_restart(void)
+static gboolean
+awesome_restart_delayed(gpointer unused)
 {
     awesome_atexit(true);
     execvp(awesome_argv[0], awesome_argv);
     fatal("execv() failed: %s", strerror(errno));
+    return true;
+}
+
+void
+awesome_restart(void)
+{
+    g_idle_add_full(G_PRIORITY_DEFAULT, awesome_restart_delayed, NULL, NULL);
 }
 
 /** Function to restart awesome on some signals.
