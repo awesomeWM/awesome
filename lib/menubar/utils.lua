@@ -360,53 +360,16 @@ end
 -- @staticfct menubar.utils.parse_dir
 -- @noreturn
 function utils.parse_dir(dir_path, callback)
-
-    local function get_readable_path(file)
-        return file:get_path() or file:get_uri()
-    end
-
-    local function parser(file, programs)
-        -- Except for "NONE" there is also NOFOLLOW_SYMLINKS
-        local query = gio.FILE_ATTRIBUTE_STANDARD_NAME .. "," .. gio.FILE_ATTRIBUTE_STANDARD_TYPE
-        local enum, err = file:async_enumerate_children(query, gio.FileQueryInfoFlags.NONE)
-        if not enum then
-            gdebug.print_warning(get_readable_path(file) .. ": " .. tostring(err))
-            return
-        end
-        local files_per_call = 100 -- Actual value is not that important
-        while true do
-            local list, enum_err = enum:async_next_files(files_per_call)
-            if enum_err then
-                gdebug.print_error(get_readable_path(file) .. ": " .. tostring(enum_err))
-                return
-            end
-            for _, info in ipairs(list) do
-                local file_type = info:get_file_type()
-                local file_child = enum:get_child(info)
-                if file_type == 'REGULAR' then
-                    local path = file_child:get_path()
-                    if path then
-                        local success, program = pcall(utils.parse_desktop_file, path)
-                        if not success then
-                            gdebug.print_error("Error while reading '" .. path .. "': " .. program)
-                        elseif program then
-                            table.insert(programs, program)
-                        end
-                    end
-                elseif file_type == 'DIRECTORY' then
-                    parser(file_child, programs)
-                end
-            end
-            if #list == 0 then
-                break
-            end
-        end
-        enum:async_close()
-    end
-
     gio.Async.start(do_protected_call)(function()
         local result = {}
-        parser(gio.File.new_for_path(dir_path), result)
+        for path in pairs(gfs.subdirectory_cache.async_new(dir_path).known_paths) do
+        local success, program = pcall(utils.parse_desktop_file, path)
+            if not success then
+                gdebug.print_error("Error while reading '" .. path .. "': " .. program)
+            elseif program then
+                table.insert(result, program)
+            end
+        end
         call_callback(callback, result)
     end)
 end
