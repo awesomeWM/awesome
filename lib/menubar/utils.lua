@@ -262,7 +262,7 @@ end
 -- @return A table with file entries.
 -- @staticfct menubar.utils.parse_desktop_file
 function utils.parse_desktop_file(file)
-    local program = { show = true, file = file }
+    local program = { show = true, file = file, with_shell = false }
 
     -- Parse the .desktop file.
     -- We are interested in [Desktop Entry] group only.
@@ -344,7 +344,12 @@ function utils.parse_desktop_file(file)
             cmdline = cmdline:gsub('%%i', '')
         end
         if program.Terminal == true then
+            program.with_shell = true
             cmdline = utils.terminal .. ' -e ' .. cmdline
+        end
+        if program.Path then
+            program.with_shell = true
+            cmdline = 'cd ' .. program.Path .. ' && ' .. cmdline
         end
         program.cmdline = cmdline
     end
