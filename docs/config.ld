@@ -783,6 +783,14 @@ create_type {
     subfield_title = "Parameters",
 }
 
+-- Documentation for objects depecated static methods
+create_type {
+    name           = "deprecatedstaticmtd",
+    title          = "Deprecated static object methods",
+    project_level  = false,
+    subfield_title = "Parameters",
+}
+
 -- Use a custom type for the methods to bypass the faulty ldoc built-in detection.
 -- (yes, the space after Methods *is* on purpose to avoid clashing with ldoc
 --  internal "methods" concept)
@@ -2304,6 +2312,7 @@ local display_return_type = {
     method           = true,
     deprecatedmethod = true,
     staticfct        = true,
+    deprecatedstaticmtd = true,
 }
 
 -- Show return values.
@@ -2316,6 +2325,7 @@ local show_return = {
     method           = true,
     deprecated       = true,
     deprecatedmethod = true,
+    deprecatedstaticmtd = true,
 }
 
 -- The different type of deprecation.
@@ -2324,6 +2334,7 @@ local is_deprecated = {
     deprecatedproperty = true,
     deprecatedmethod   = true,
     deprecatedsignal   = true,
+    deprecatedstaticmtd = true,
 }
 
 custom_display_name_handler = function(item, default_handler)

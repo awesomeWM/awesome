@@ -326,8 +326,8 @@ luaA_pixbuf_to_surface(lua_State *L)
  * @tparam string name The file name.
  * @treturn gears.surface A cairo surface as light user datum.
  * @treturn nil|string The error message, if any.
- * @staticfct load_image
- * @deprecated awesome.pixbuf_to_surface
+ * @deprecatedstaticmtd awesome.load_image
+ * @see awesome.pixbuf_to_surface
  */
 static int
 luaA_load_image(lua_State *L)
