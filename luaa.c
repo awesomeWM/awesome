@@ -1088,7 +1088,7 @@ void
 luaA_init(xdgHandle* xdg, string_array_t *searchpath)
 {
     lua_State *L;
-    static const struct luaL_Reg awesome_lib[] =
+    const struct luaL_Reg awesome_lib[] =
     {
         { "quit", luaA_quit },
         { "exec", luaA_exec },

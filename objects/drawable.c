@@ -214,13 +214,13 @@ luaA_drawable_geometry(lua_State *L)
 void
 drawable_class_setup(lua_State *L)
 {
-    static const struct luaL_Reg drawable_methods[] =
+    const struct luaL_Reg drawable_methods[] =
     {
         LUA_CLASS_METHODS(drawable)
         { NULL, NULL }
     };
 
-    static const struct luaL_Reg drawable_meta[] =
+    const struct luaL_Reg drawable_meta[] =
     {
         LUA_OBJECT_META(drawable)
         LUA_CLASS_META
