@@ -1293,6 +1293,7 @@ lua_class_t client_class;
  * @see shape_input
  * @see client_shape_bounding
  * @see client_shape_clip
+ * @see client_shape_input
  * @see gears.surface
  */
 
@@ -1313,6 +1314,7 @@ lua_class_t client_class;
  * @see gears.shape
  * @see client_shape_bounding
  * @see client_shape_clip
+ * @see client_shape_input
  * @see gears.surface
  */
 
@@ -1333,6 +1335,7 @@ lua_class_t client_class;
  * @see gears.shape
  * @see client_shape_bounding
  * @see client_shape_clip
+ * @see client_shape_input
  * @see gears.surface
  */
 
@@ -1351,6 +1354,7 @@ lua_class_t client_class;
  * @see gears.surface.apply_shape_bounding
  * @see gears.shape
  * @see client_shape_clip
+ * @see client_shape_input
  * @see gears.surface
  */
 
@@ -1368,6 +1372,26 @@ lua_class_t client_class;
  * @see shape
  * @see gears.surface.apply_shape_bounding
  * @see gears.shape
+ * @see client_shape_bounding
+ * @see client_shape_input
+ * @see gears.surface
+ */
+
+ /**
+ * The client's input shape as set by the program as a (native) cairo surface.
+ *
+ * @property client_shape_input
+ * @tparam image client_shape_input
+ * @propertydefault An A1 surface where all pixels are white.
+ * @propemits false false
+ * @readonly
+ * @see shape_bounding
+ * @see shape_clip
+ * @see shape_input
+ * @see shape
+ * @see gears.surface.apply_shape_bounding
+ * @see gears.shape
+ * @see client_shape_clip
  * @see client_shape_bounding
  * @see gears.surface
  */
@@ -2016,6 +2040,12 @@ client_geometry_refresh(void)
         /* ICCCM 4.2.3 says something else, but Java always needs this... */
         client_send_configure(c);
         c->got_configure_request = false;
+
+        // Refresh client's shapes after xcb_configure_window, since they are queried with xcb_shape_get_rectangles.
+        lua_State *L = globalconf_get_lua_State();
+        luaA_object_push(L, c);
+        luaA_object_emit_signal(L, -1, "internal::update_shapes", 0);
+        lua_pop(L, 1);
     }
     if (ignored_enterleave)
         client_restore_enterleave_events();
@@ -4309,6 +4339,21 @@ luaA_client_set_shape_clip(lua_State *L, client_t *c)
     return 0;
 }
 
+/** Get the client's child window input shape.
+ * \param L The Lua VM state.
+ * \param client The client object.
+ * \return The number of elements pushed on stack.
+ */
+static int
+luaA_client_get_client_shape_input(lua_State *L, client_t *c)
+{
+    cairo_surface_t *surf = xwindow_get_shape(c->window, XCB_SHAPE_SK_INPUT);
+    assert(surf); /* we always have an input shape */
+    /* lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(L, surf);
+    return 1;
+}
+
 /** Get the client's frame window input shape.
  * \param L The Lua VM state.
  * \param client The client object.
@@ -4674,6 +4719,10 @@ client_class_setup(lua_State *L)
     luaA_class_add_property(&client_class, "client_shape_clip",
                             NULL,
                             (lua_class_propfunc_t) luaA_client_get_client_shape_clip,
+                            NULL);
+    luaA_class_add_property(&client_class, "client_shape_input",
+                            NULL,
+                            (lua_class_propfunc_t) luaA_client_get_client_shape_input,
                             NULL);
     luaA_class_add_property(&client_class, "first_tag",
                             NULL,

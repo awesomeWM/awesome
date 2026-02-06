@@ -953,6 +953,8 @@ event_handle_shape_notify(xcb_shape_notify_event_t *ev)
             luaA_object_emit_signal(L, -1, "property::shape_client_bounding", 0);
         if (ev->shape_kind == XCB_SHAPE_SK_CLIP)
             luaA_object_emit_signal(L, -1, "property::shape_client_clip", 0);
+        if (ev->shape_kind == XCB_SHAPE_SK_INPUT)
+            luaA_object_emit_signal(L, -1, "property::shape_client_input", 0);
         lua_pop(L, 1);
     }
 }
