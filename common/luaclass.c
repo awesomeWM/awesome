@@ -24,18 +24,6 @@
 
 #define CONNECTED_SUFFIX "::connected"
 
-struct lua_class_property
-{
-    /** Name of the property */
-    const char *name;
-    /** Callback function called when the property is found in object creation. */
-    lua_class_propfunc_t new;
-    /** Callback function called when the property is found in object __index. */
-    lua_class_propfunc_t index;
-    /** Callback function called when the property is found in object __newindex. */
-    lua_class_propfunc_t newindex;
-};
-
 DO_ARRAY(lua_class_t *, lua_class, DO_NOTHING)
 
 static lua_class_array_t luaA_classes;
@@ -163,6 +151,16 @@ luaA_class_add_property(lua_class_t *lua_class,
                                         .index = cb_index,
                                         .newindex = cb_newindex
                                     });
+}
+
+void
+luaA_class_add_properties(lua_class_t* lua_class,
+                          lua_class_property_t properties[],
+                          size_t count)
+{
+    lua_class_property_array_grow(&lua_class->properties, lua_class->properties.len+count);
+    for(size_t i = 0; i < count; i++)
+        lua_class_property_array_insert(&lua_class->properties, properties[i]);
 }
 
 /** Newindex meta function for objects after they were GC'd.
