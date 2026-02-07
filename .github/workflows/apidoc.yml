@@ -151,7 +151,7 @@ jobs:
             -DDO_COVERAGE=OFF
 
       - name: Build
-        run: cd "${{ github.workspace }}/build" && make
+        run: cd "${{ github.workspace }}/build" && "${{ github.workspace }}/.github/scripts/ldoc-check-errors.sh" make -j24
 
       - name: Run apidoc script
         env:

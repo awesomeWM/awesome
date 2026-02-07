@@ -1725,6 +1725,7 @@ local param_name_whitelist = {
     XF86MonBrightnessUp = true, XF86MonBrightnessDown = true,
     XF86AudioRaiseVolume = true, XF86AudioLowerVolume = true, XF86AudioMute = true,
     XF86AudioPlay = true, XF86AudioPrev = true, XF86AudioNext = true, XF86AudioStop = true,
+    Alt = true, Ctrl = true, Shift = true, Super = true,
 }
 
 -- Sections which are hidden by default, but visible when clicked.

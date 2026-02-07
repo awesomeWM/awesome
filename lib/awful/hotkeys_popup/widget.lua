@@ -112,8 +112,8 @@ local widget = {
 --- Sort order for the hotkey modifiers
 --
 -- @tfield table awful.hotkeys_popup.widget.modifier_sort_order
--- @tfield int Alt   Alt key priority
--- @tfield int Ctrl  Ctrl key priority
+-- @tfield int Alt Alt key priority
+-- @tfield int Ctrl Ctrl key priority
 -- @tfield int Shift Shift key priority
 -- @tfield int Super Super key priority
 --
