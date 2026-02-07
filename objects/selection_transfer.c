@@ -358,12 +358,12 @@ selection_transfer_checker(selection_transfer_t *transfer)
 void
 selection_transfer_class_setup(lua_State *L)
 {
-    static const struct luaL_Reg selection_transfer_methods[] =
+    const struct luaL_Reg selection_transfer_methods[] =
     {
         { NULL, NULL }
     };
 
-    static const struct luaL_Reg selection_transfer_meta[] =
+    const struct luaL_Reg selection_transfer_meta[] =
     {
         LUA_OBJECT_META(selection_transfer)
         LUA_CLASS_META

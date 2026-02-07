@@ -344,14 +344,14 @@ luaA_key_set_key(lua_State *L, keyb_t *k)
 void
 key_class_setup(lua_State *L)
 {
-    static const struct luaL_Reg key_methods[] =
+    const struct luaL_Reg key_methods[] =
     {
         LUA_CLASS_METHODS(key)
         { "__call", luaA_key_new },
         { NULL, NULL }
     };
 
-    static const struct luaL_Reg key_meta[] =
+    const struct luaL_Reg key_meta[] =
     {
         LUA_OBJECT_META(key)
         LUA_CLASS_META

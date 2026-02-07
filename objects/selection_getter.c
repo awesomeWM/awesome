@@ -253,13 +253,13 @@ event_handle_selectionnotify(xcb_selection_notify_event_t *ev)
 void
 selection_getter_class_setup(lua_State *L)
 {
-    static const struct luaL_Reg selection_getter_methods[] =
+    const struct luaL_Reg selection_getter_methods[] =
     {
         { "__call", luaA_selection_getter_new },
         { NULL, NULL }
     };
 
-    static const struct luaL_Reg selection_getter_metha[] = {
+    const struct luaL_Reg selection_getter_metha[] = {
         LUA_OBJECT_META(selection_getter)
         LUA_CLASS_META
         { NULL, NULL }

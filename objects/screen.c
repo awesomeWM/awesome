@@ -1853,7 +1853,7 @@ luaA_screen_swap(lua_State *L)
 void
 screen_class_setup(lua_State *L)
 {
-    static const struct luaL_Reg screen_methods[] =
+    const struct luaL_Reg screen_methods[] =
     {
         LUA_CLASS_METHODS(screen)
         { "count", luaA_screen_count },
@@ -1866,7 +1866,7 @@ screen_class_setup(lua_State *L)
         { NULL, NULL }
     };
 
-    static const struct luaL_Reg screen_meta[] =
+    const struct luaL_Reg screen_meta[] =
     {
         LUA_OBJECT_META(screen)
         LUA_CLASS_META

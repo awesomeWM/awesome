@@ -214,13 +214,13 @@ selection_acquire_checker(selection_acquire_t *selection)
 void
 selection_acquire_class_setup(lua_State *L)
 {
-    static const struct luaL_Reg selection_acquire_methods[] =
+    const struct luaL_Reg selection_acquire_methods[] =
     {
         { "__call", luaA_selection_acquire_new },
         { NULL, NULL }
     };
 
-    static const struct luaL_Reg selection_acquire_meta[] =
+    const struct luaL_Reg selection_acquire_meta[] =
     {
         LUA_OBJECT_META(selection_acquire)
         LUA_CLASS_META
