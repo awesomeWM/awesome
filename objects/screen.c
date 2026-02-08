@@ -1107,12 +1107,11 @@ screen_refresh(gpointer unused)
 
     monitor_unmark();
 
-    screen_array_t new_screens;
-    screen_array_t removed_screens;
+    screen_array_t new_screens = {};
+    screen_array_t removed_screens = {};
     lua_State *L = globalconf_get_lua_State();
     bool list_changed = false;
 
-    screen_array_init(&new_screens);
     if (globalconf.have_randr_15)
         screen_scan_randr_monitors(L, &new_screens);
     else
@@ -1146,7 +1145,6 @@ screen_refresh(gpointer unused)
     }
 
     /* Remove screens which are gone */
-    screen_array_init(&removed_screens);
     for(int i = 0; i < globalconf.screens.len; i++) {
         screen_t *old_screen = globalconf.screens.tab[i];
         bool found = old_screen->xid == FAKE_SCREEN_XID;

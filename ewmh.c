@@ -768,10 +768,9 @@ static cairo_surface_array_t
 ewmh_window_icon_from_reply(xcb_get_property_reply_t *r)
 {
     uint32_t *data, *data_end;
-    cairo_surface_array_t result;
+    cairo_surface_array_t result = {};
     cairo_surface_t *s;
 
-    cairo_surface_array_init(&result);
     if(!r || r->type != XCB_ATOM_CARDINAL || r->format != 32)
         return result;
 

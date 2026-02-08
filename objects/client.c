@@ -3184,8 +3184,7 @@ client_set_icons(client_t *c, cairo_surface_array_t array)
 static void
 client_set_icon(client_t *c, cairo_surface_t *s)
 {
-    cairo_surface_array_t array;
-    cairo_surface_array_init(&array);
+    cairo_surface_array_t array = {};
     if (s && cairo_surface_status(s) == CAIRO_STATUS_SUCCESS)
         cairo_surface_array_push(&array, draw_dup_image_surface(s));
     client_set_icons(c, array);
