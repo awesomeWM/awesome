@@ -568,7 +568,7 @@ true_config_callback(const char *unused)
 int
 main(int argc, char **argv)
 {
-    string_array_t searchpath;
+    string_array_t searchpath = {};
     int xfd;
     xdgHandle xdg;
     xcb_query_tree_cookie_t tree_c;
@@ -589,7 +589,6 @@ main(int argc, char **argv)
     globalconf.exit_code = EXIT_SUCCESS;
     globalconf.api_level = awesome_default_api_level();
     buffer_init(&globalconf.startup_errors);
-    string_array_init(&searchpath);
 
     /* save argv */
     awesome_argv = argv;
