@@ -158,7 +158,7 @@ luaA_class_add_properties(lua_class_t* lua_class,
                           lua_class_property_t properties[],
                           size_t count)
 {
-    lua_class_property_array_grow(&lua_class->properties, lua_class->properties.len+count);
+    lua_class_property_array_growx(&lua_class->properties, lua_class->properties.len+count);
     for(size_t i = 0; i < count; i++)
         lua_class_property_array_insert(&lua_class->properties, properties[i]);
 }
