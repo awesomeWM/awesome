@@ -79,6 +79,13 @@
             p_realloc(pp, *(allocnb));               \
         }                                            \
     } while (0)
+#define p_growx(pp, goalnb, allocnb)                 \
+    do {                                             \
+        if ((goalnb) > *(allocnb)) {                 \
+            *(allocnb) = (goalnb);                   \
+            p_realloc(pp, *(allocnb));               \
+        }                                            \
+    } while (0)
 
 #define p_delete(mem_p)                              \
     do {                                             \

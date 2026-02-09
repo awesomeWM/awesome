@@ -76,6 +76,9 @@
     static inline void pfx##_array_grow(pfx##_array_t *arr, int newlen) {   \
         p_grow(&arr->tab, newlen, &arr->size);                              \
     }                                                                       \
+    static inline void pfx##_array_growx(pfx##_array_t *arr, int newlen) {  \
+        p_growx(&arr->tab, newlen, &arr->size);                             \
+    }                                                                       \
     static inline void                                                      \
     pfx##_array_splice(pfx##_array_t *arr, int pos, int len,                \
                        type_t items[], int count)                           \
