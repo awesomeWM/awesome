@@ -608,8 +608,8 @@ main(int argc, char **argv)
         fatal("Function xdgInitHandle() failed, is $HOME unset?");
 
     /* add XDG_CONFIG_DIR as include path */
-    const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(&xdg);
-    for(; *xdgconfigdirs; xdgconfigdirs++)
+    for(const char * const *xdgconfigdirs = xdgSearchableConfigDirectories(&xdg);
+            *xdgconfigdirs; xdgconfigdirs++)
     {
         /* Append /awesome to *xdgconfigdirs */
         const char *suffix = "/awesome";
