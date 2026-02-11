@@ -315,6 +315,60 @@ lua_class_t client_class;
  * @classsignal
  */
 
+/** Emitted when something requests for a client to be moved by the mouse.
+ *
+ * This is used to allow clients to manage their own "grabbable" areas, such
+ * as in custom title bars, but to then delegate the task of actually moving
+ * the client to the window manager.
+ *
+ * **Contexts are:**
+ * * *ewmh*: When the client requests the movement (via _NET_WM_MOVERESIZE)
+ *
+ * @signal request::mouse_move
+ * @tparam client c The client.
+ * @tparam string context Why the mouse movement was requested.
+ * @tparam table args Additional information describing the movement.
+ * @tparam number args.mouse_pos.x The x coordinate of the mouse when grabbed.
+ * @tparam number args.mouse_pos.y The y coordinate of the mouse when grabbed.
+ * @tparam number args.button The mouse button that initiated the movement.
+ * @classsignal
+*/
+
+/** Emitted when something requests for a client to be resized by the mouse.
+ *
+ * This is used to allow clients to manage their own "grabbable" areas, such
+ * as in custom window frames, but to then delegate the task of actually
+ * resizing the client to the window manager.
+ *
+ * **Contexts are:**
+ * * *ewmh*: When the client requests the resizing (via _NET_WM_MOVERESIZE)
+ *
+ * @signal request::mouse_resize
+ * @tparam client c The client.
+ * @tparam string context Why the mouse resizing was requested.
+ * @tparam table args Additional information describing the resizing.
+ * @tparam number args.mouse_pos.x The x coordinate of the mouse when grabbed.
+ * @tparam number args.mouse_pos.y The y coordinate of the mouse when grabbed.
+ * @tparam number args.button The mouse button that initiated the resizing.
+ * @tparam string args.corner The corner/side of the window being resized.
+ * @classsignal
+*/
+
+/** Emitted when something requests for a grabbed client to be released.
+ *
+ * This is used to allow clients to cancel a mouse movement or resizing
+ * operation that may have been started by an earlier `request::mouse_move`
+ * or `request::mouse_resize` signal.
+ *
+ * **Contexts are:**
+ * * *ewmh*: When the client requests the release (via _NET_WM_MOVERESIZE)
+ *
+ * @signal request::mouse_cancel
+ * @tparam client c The client
+ * @tparam string context Why the mouse release was requested.
+ * @classsignal
+*/
+
 /** Emitted when a client requests to be moved to a tag or needs a new tag.
  *
  * @signal request::tag
