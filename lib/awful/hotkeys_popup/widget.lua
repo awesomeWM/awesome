@@ -69,6 +69,8 @@ local capi = {
     screen = screen,
     client = client,
 }
+local table = table
+local string = string
 local awful = require("awful")
 local gtable = require("gears.table")
 local gstring = require("gears.string")
@@ -81,9 +83,15 @@ local matcher = require("gears.matcher")()
 
 -- Stripped copy of this module https://github.com/copycat-killer/lain/blob/master/util/markup.lua:
 local markup = {}
+function markup.font_start(font)
+    return '<span font="' .. tostring(font) .. '">'
+end
+function markup.font_end()
+    return '</span>'
+end
 -- Set the font.
 function markup.font(font, text)
-    return '<span font="'    .. tostring(font)    .. '">' .. tostring(text) ..'</span>'
+    return markup.font_start(font) .. tostring(text) .. markup.font_end()
 end
 -- Set the foreground.
 function markup.fg(color, text)
@@ -302,6 +310,34 @@ widget.labels = {
 -- @beautiful beautiful.hotkeys_group_margin
 -- @tparam int hotkeys_group_margin
 
+--- The highlighted text background color.
+-- @beautiful beautiful.hotkeys_highlight_bg
+-- @tparam color hotkeys_highlight_bg
+
+--- The highlighted text foreground color.
+-- @beautiful beautiful.hotkeys_highlight_fg
+-- @tparam color hotkeys_highlight_fg
+
+--- The find prompt cursor foreground color.
+-- @beautiful beautiful.hotkeys_find_fg_cursor
+-- @tparam color hotkeys_find_fg_cursor
+
+--- The find prompt cursor background color.
+-- @beautiful beautiful.hotkeys_find_bg_cursor
+-- @tparam color hotkeys_find_bg_cursor
+
+--- The find prompt cursor underline style.
+-- @beautiful beautiful.hotkeys_find_ul_cursor
+-- @tparam string hotkeys_find_ul_cursor
+
+--- The find prompt text font.
+-- @beautiful beautiful.hotkeys_find_font
+-- @tparam string|lgi.Pango.FontDescription hotkeys_find_font
+
+--- Margin around the find prompt.
+-- @beautiful beautiful.hotkeys_find_margin
+-- @tparam int hotkeys_find_margin
+
 
 --- Create an instance of widget with hotkeys help.
 -- @tparam[opt] table args Configuration options for the widget.
@@ -324,6 +360,13 @@ widget.labels = {
 -- @tparam[opt] color args.label_fg Foreground color used for group and other
 -- labels.
 -- @tparam[opt] int args.group_margin Margin between hotkeys groups.
+-- @tparam[opt] color args.highlight_bg The highlighted text background color.
+-- @tparam[opt] color args.highlight_fg The highlighted text foreground color.
+-- @tparam[opt] color args.find_fg_cursor The find prompt cursor foreground color.
+-- @tparam[opt] color args.find_bg_cursor The find prompt cursor background color.
+-- @tparam[opt] string args.find_ul_cursor The find prompt cursor underline style.
+-- @tparam[opt] string|lgi.Pango.FontDescription args.find_font The find prompt text font.
+-- @tparam[opt] int args.find_margin Margin around the find prompt.
 -- @tparam[opt] table args.labels Labels used for displaying human-readable keynames.
 -- @tparam[opt] table args.group_rules Rules for showing 3rd-party hotkeys. @see `awful.hotkeys_popup.keys.vim`.
 -- @return Widget instance.
@@ -339,6 +382,13 @@ widget.labels = {
 -- @usebeautiful beautiful.hotkeys_font
 -- @usebeautiful beautiful.hotkeys_description_font
 -- @usebeautiful beautiful.hotkeys_group_margin
+-- @usebeautiful beautiful.hotkeys_highlight_bg
+-- @usebeautiful beautiful.hotkeys_highlight_fg
+-- @usebeautiful beautiful.hotkeys_find_fg_cursor
+-- @usebeautiful beautiful.hotkeys_find_bg_cursor
+-- @usebeautiful beautiful.hotkeys_find_ul_cursor
+-- @usebeautiful beautiful.hotkeys_find_font
+-- @usebeautiful beautiful.hotkeys_find_margin
 -- @usebeautiful beautiful.bg_normal Fallback.
 -- @usebeautiful beautiful.fg_normal Fallback.
 -- @usebeautiful beautiful.fg_minimize Fallback.
@@ -407,6 +457,20 @@ function widget.new(args)
             beautiful.hotkeys_description_font or "Monospace 8"
         self.group_margin = args.group_margin or
             beautiful.hotkeys_group_margin or dpi(6)
+        self.highlight_bg = args.highlight_bg or
+            beautiful.hotkeys_highlight_bg or beautiful.bg_urgent
+        self.highlight_fg = args.highlight_fg or
+            beautiful.hotkeys_highlight_fg or beautiful.fg_urgent
+        self.find_fg_cursor = args.find_fg_cursor or
+            beautiful.hotkeys_find_fg_cursor
+        self.find_bg_cursor = args.find_bg_cursor or
+            beautiful.hotkeys_find_bg_cursor
+        self.find_ul_cursor = args.find_ul_cursor or
+            beautiful.hotkeys_find_ul_cursor
+        self.find_font = args.find_font or
+            beautiful.hotkeys_find_font or self.font
+        self.find_margin = args.find_margin or
+            beautiful.hotkeys_find_margin or self.group_margin
         self.label_colors = beautiful.xresources.get_current_theme()
         self._widget_settings_loaded = true
     end
@@ -559,14 +623,95 @@ function widget.new(args)
         return margin
     end
 
-    function widget_instance:_create_group_columns(column_layouts, group, keys, s, wibox_height)
+    function widget_instance:_render_all_hotkeys(labels, find_keywords)
+        local rendered_hotkeys = {}
+        for _, label in ipairs(labels) do
+            table.insert(rendered_hotkeys, self:_render_hotkey(label, find_keywords))
+        end
+        return table.concat(rendered_hotkeys, "\n")
+    end
+
+    function widget_instance:_render_hotkey(label, find_keywords)
+        local rendered_text = label.text or ""
+
+        if #rendered_text > 0 and find_keywords and #find_keywords > 0 then
+            local text = string.lower(rendered_text)
+
+            local parts = {}
+            local found_keyword_count = 0
+
+            local function is_available(from, to)
+                for _, s in ipairs(parts) do
+                    if from <= s.to and to >= s.from then
+                        return false
+                    end
+                end
+                return true
+            end
+
+            for _, keyword in ipairs(find_keywords) do
+                local from = 1
+                local to
+                while true do
+                    from, to = string.find(text, keyword, from, true)
+                    if not from then
+                        break
+                    end
+                    if is_available(from, to) then
+                        table.insert(parts, { highlight = true, from = from, to = to })
+                        found_keyword_count = found_keyword_count + 1
+                        break
+                    end
+                    from = to + 1
+                end
+            end
+
+            if found_keyword_count == #find_keywords then
+                table.sort(parts, function(a, b) return a.from < b.from end)
+
+                local merged_parts = {}
+                local length = #text
+                local next_part = parts[1]
+                local i = 1
+                while i <= length do
+                    if next_part then
+                        if next_part.from == i then
+                            table.insert(merged_parts, next_part)
+                            i = next_part.to + 1
+                            table.remove(parts, 1)
+                            next_part = parts[1]
+                        else
+                            table.insert(merged_parts, { from = i, to = next_part.from - 1 })
+                            i = next_part.from
+                        end
+                    else
+                        table.insert(merged_parts, { from = i, to = length })
+                        break
+                    end
+                end
+
+                rendered_text = table.concat(gtable.map(function(part)
+                    local capture = string.sub(rendered_text, part.from, part.to)
+                    if part.highlight then
+                        return markup.bg(self.highlight_bg, markup.fg(self.highlight_fg, capture))
+                    else
+                        return capture
+                    end
+                end, merged_parts), "")
+            end
+        end
+
+        return label.prefix .. rendered_text .. label.suffix
+    end
+
+    function widget_instance:_create_group_columns(column_layouts, group, keys, s, wibox_height, find_data)
         local line_height = math.max(
             beautiful.get_font_height(self.font),
             beautiful.get_font_height(self.description_font)
         )
         local group_label_height = line_height + self.group_margin
         -- -1 for possible pagination:
-        local max_height_px = wibox_height - group_label_height
+        local max_height_px = wibox_height - group_label_height - find_data.container_height
 
         local joined_descriptions = ""
         for i, key in ipairs(keys) do
@@ -605,9 +750,8 @@ function widget.new(args)
         current_column.layout:add(self:_group_label(group))
 
         local function insert_keys(ik_keys, ik_add_new_column)
-            local max_label_width = 0
-            local joined_labels = ""
-            for i, key in ipairs(ik_keys) do
+            local labels = {}
+            for _, key in ipairs(ik_keys) do
                 local modifiers = key.mod
                 if not modifiers or modifiers == "none" then
                     modifiers = ""
@@ -625,25 +769,29 @@ function widget.new(args)
                 elseif key.key then
                     key_label = gstring.xml_escape(key.key)
                 end
-                local rendered_hotkey = markup.font(self.font,
-                    modifiers .. key_label .. " "
-                ) .. markup.font(self.description_font,
-                    key.description or ""
-                )
-                local label_width = wibox.widget.textbox.get_markup_geometry(rendered_hotkey, s).width
-                if label_width > max_label_width then
-                    max_label_width = label_width
-                end
-                joined_labels = joined_labels .. rendered_hotkey .. (i~=#ik_keys and "\n" or "")
-                end
-            current_column.layout:add(wibox.widget.textbox(joined_labels))
+                local label = {
+                    prefix = markup.font(self.font, modifiers .. key_label .. " ") ..
+                        markup.font_start(self.description_font),
+                    suffix = markup.font_end(),
+                    text = tostring(key.description or ""),
+                }
+                table.insert(labels, label)
+            end
+            local rendered_hotkeys = self:_render_all_hotkeys(labels)
+            local textbox = wibox.widget.textbox(rendered_hotkeys)
+            current_column.layout:add(textbox)
+            table.insert(find_data.groups, {
+                textbox = textbox,
+                labels = labels,
+            })
+            local max_label_width = wibox.widget.textbox.get_markup_geometry(rendered_hotkeys, s).width
             local max_width = max_label_width + self.group_margin
             if not current_column.max_width or (max_width > current_column.max_width) then
                 current_column.max_width = max_width
             end
             -- +1 for group label:
             current_column.height_px = (current_column.height_px or 0) +
-                gstring.linecount(joined_labels)*line_height + group_label_height
+                gstring.linecount(rendered_hotkeys)*line_height + group_label_height
             if ik_add_new_column then
                 table.insert(column_layouts, current_column)
             end
@@ -656,13 +804,7 @@ function widget.new(args)
         end
     end
 
-    function widget_instance:_create_wibox(s, available_groups, show_awesome_keys)
-        s = get_screen(s)
-        local wa = s.workarea
-        local wibox_height = (self.height < wa.height) and self.height or
-            (wa.height - self.border_width * 2)
-        local wibox_width = (self.width < wa.width) and self.width or
-            (wa.width - self.border_width * 2)
+    function widget_instance:_create_pages(s, available_groups, show_awesome_keys, wibox_width, wibox_height, find_data)
 
         -- arrange hotkey groups into columns
         local column_layouts = {}
@@ -672,7 +814,7 @@ function widget.new(args)
                 self._additional_hotkeys[group]
             )
             if #keys > 0 then
-                self:_create_group_columns(column_layouts, group, keys, s, wibox_height)
+                self:_create_group_columns(column_layouts, group, keys, s, wibox_height, find_data)
             end
         end
 
@@ -703,6 +845,43 @@ function widget.new(args)
         end
         table.insert(pages, columns)
 
+        return pages
+    end
+
+    function widget_instance:_create_find_data(find_args)
+        local data = {
+            enabled = find_args.enabled,
+            textbox = wibox.widget.textbox(),
+            groups = {},
+            last_query = "",
+        }
+
+        if find_args.enabled then
+            local margin = self.find_margin
+            data.container = wibox.container.margin(data.textbox, margin, margin, margin, margin)
+            data.container_height = beautiful.get_font_height(self.find_font) + 2 * margin
+        else
+            data.container = wibox.widget.empty
+            data.container_height = 0
+        end
+
+        return data
+    end
+
+    function widget_instance:_create_wibox(s, available_groups, show_awesome_keys, find_args)
+        s = get_screen(s)
+        local wa = s.workarea
+        local wibox_height = (self.height < wa.height) and self.height or
+            (wa.height - self.border_width * 2)
+        local wibox_width = (self.width < wa.width) and self.width or
+            (wa.width - self.border_width * 2)
+
+        local find_data = self:_create_find_data(find_args)
+
+        local pages = self:_create_pages(s, available_groups, show_awesome_keys, wibox_width, wibox_height, find_data)
+
+        local popup_widget = wibox.layout.align.vertical(nil, pages[1], find_data.container)
+
         -- Function to place the widget in the center and account for the
         -- workarea. This will be called in the placement field of the
         -- awful.popup constructor.
@@ -712,7 +891,7 @@ function widget.new(args)
 
         -- Construct the popup with the widget
         local mypopup = awful.popup {
-            widget = pages[1],
+            widget = popup_widget,
             ontop = true,
             bg=self.bg,
             fg=self.fg,
@@ -729,33 +908,93 @@ function widget.new(args)
         local widget_obj = {
             current_page = 1,
             popup = mypopup,
+            find_data = find_data,
         }
 
+        local function set_page(page)
+            if page < 1 then
+                page = 1
+            elseif page >= #pages then
+                page = #pages
+            end
+
+            if widget_obj.current_page == page then
+                return
+            end
+            widget_obj.current_page = page
+
+            popup_widget:set_middle(pages[page])
+        end
+
         -- Set up the mouse buttons to hide the popup
-        -- Any keybinding except what the keygrabber wants wil hide the popup
-        -- too
         mypopup.buttons = {
             awful.button({ }, 1, function () widget_obj:hide() end),
             awful.button({ }, 3, function () widget_obj:hide() end)
         }
 
         function widget_obj.page_next(w_self)
-            if w_self.current_page == #pages then return end
-            w_self.current_page = w_self.current_page + 1
-            w_self.popup:set_widget(pages[w_self.current_page])
+            set_page(w_self.current_page + 1)
         end
         function widget_obj.page_prev(w_self)
-            if w_self.current_page == 1 then return end
-            w_self.current_page = w_self.current_page - 1
-            w_self.popup:set_widget(pages[w_self.current_page])
+            set_page(w_self.current_page - 1)
         end
         function widget_obj.show(w_self)
+            w_self:find(nil)
+            awful.prompt.run {
+                textbox = w_self.find_data.textbox,
+                prompt = find_args.prompt,
+                fg_cursor = self.find_fg_cursor,
+                bg_cursor = self.find_bg_cursor,
+                ul_cursor = self.find_ul_cursor,
+                font = self.find_font,
+                changed_callback = function(input)
+                    w_self:find(input)
+                end,
+                done_callback = function()
+                    w_self:hide()
+                end,
+                keypressed_callback = function(_, key)
+                    if key == "Prior" then
+                        w_self:page_prev()
+                    elseif key == "Next" then
+                        w_self:page_next()
+                    elseif not w_self.find_data.enabled then
+                        w_self:hide()
+                    end
+                end,
+            }
             w_self.popup.visible = true
         end
         function widget_obj.hide(w_self)
+            awful.keygrabber.stop()
             w_self.popup.visible = false
-            if w_self.keygrabber then
-                awful.keygrabber.stop(w_self.keygrabber)
+        end
+        function widget_obj.find(w_self, input)
+            if not w_self.find_data.enabled then
+                return
+            end
+
+            local keywords = {}
+            for keyword in string.gmatch(input or "", "([^%s]+)") do
+                keyword = string.lower(keyword)
+                if #keyword > 0 and not keywords[keyword] then
+                    keywords[keyword] = true
+                    if pcall(string.find, "", keyword) then
+                        table.insert(keywords, keyword)
+                    end
+                end
+            end
+
+            table.sort(keywords, function(a, b) return #a > #b end)
+
+            local query = table.concat(keywords, " ")
+            if w_self.find_data.last_query == query then
+                return
+            end
+            w_self.find_data.last_query = query
+
+            for _, group in ipairs(w_self.find_data.groups) do
+                group.textbox:set_markup(self:_render_all_hotkeys(group.labels, keywords))
             end
         end
 
@@ -767,14 +1006,25 @@ function widget.new(args)
     -- @tparam[opt=client.focus] client c Client.
     -- @tparam[opt=c.screen] screen s Screen.
     -- @tparam[opt={}] table show_args Additional arguments.
+    -- @tparam[opt=true] boolean show_args.enable_find Enable find feature.
+    -- @tparam[opt="<b>Find: </b>"] string show_args.find_prompt The find prompt text.
     -- @tparam[opt=true] boolean show_args.show_awesome_keys Show AwesomeWM hotkeys.
     -- When set to `false` only app-specific hotkeys will be shown.
-    -- @treturn awful.keygrabber The keybrabber used to detect when the key is
-    --  released.
+    -- @noreturn
     -- @method show_help
     function widget_instance:show_help(c, s, show_args)
         show_args = show_args or {}
         local show_awesome_keys = show_args.show_awesome_keys ~= false
+
+        local find_args = {
+            enabled = show_args.enable_find ~= false,
+            prompt = type(show_args.find_prompt) == "string"
+                and show_args.find_prompt
+                or "<b>Find: </b>",
+            get_cache_key = function(self)
+                return tostring(self.enabled) .. self.prompt
+            end,
+        }
 
         self:_import_awful_keys()
         self:_load_widget_settings()
@@ -803,29 +1053,15 @@ function widget.new(args)
             if not need_match then table.insert(available_groups, group) end
         end
 
-        local joined_groups = join_plus_sort(available_groups)..tostring(show_awesome_keys)
+        local cache_key = join_plus_sort(available_groups)..tostring(show_awesome_keys)..find_args:get_cache_key()
         if not self._cached_wiboxes[s] then
             self._cached_wiboxes[s] = {}
         end
-        if not self._cached_wiboxes[s][joined_groups] then
-            self._cached_wiboxes[s][joined_groups] = self:_create_wibox(s, available_groups, show_awesome_keys)
+        if not self._cached_wiboxes[s][cache_key] then
+            self._cached_wiboxes[s][cache_key] = self:_create_wibox(s, available_groups, show_awesome_keys, find_args)
         end
-        local help_wibox = self._cached_wiboxes[s][joined_groups]
+        local help_wibox = self._cached_wiboxes[s][cache_key]
         help_wibox:show()
-
-        help_wibox.keygrabber = awful.keygrabber.run(function(_, key, event)
-            if event == "release" then return end
-            if key then
-                if key == "Next" then
-                    help_wibox:page_next()
-                elseif key == "Prior" then
-                    help_wibox:page_prev()
-                else
-                    help_wibox:hide()
-                end
-            end
-        end)
-        return help_wibox.keygrabber
     end
 
     --- Add hotkey descriptions for third-party applications.
@@ -875,13 +1111,13 @@ end
 -- @tparam[opt] client c Client.
 -- @tparam[opt] screen s Screen.
 -- @tparam[opt] table args Additional arguments.
+-- @tparam[opt=true] boolean args.enable_find Enable find.
 -- @tparam[opt=true] boolean args.show_awesome_keys Show AwesomeWM hotkeys.
 -- When set to `false` only app-specific hotkeys will be shown.
--- @treturn awful.keygrabber The keybrabber used to detect when the key is
---  released.
+-- @noreturn
 -- @staticfct awful.hotkeys_popup.widget.show_help
 function widget.show_help(...)
-    return get_default_widget():show_help(...)
+    get_default_widget():show_help(...)
 end
 
 --- Add hotkey descriptions for third-party applications

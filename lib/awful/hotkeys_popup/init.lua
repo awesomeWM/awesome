@@ -22,6 +22,7 @@ local hotkeys_popup = {
 -- see `awful.hotkeys_popup.widget.show_help` for more information
 -- @tparam[opt] client c The hostkeys for the client "c".
 -- @tparam[opt] screen s The screen.
+-- @tparam[opt=true] boolean show_args.enable_find Enable find.
 -- @tparam[opt=true] boolean show_args.show_awesome_keys Show AwesomeWM hotkeys.
 -- When set to `false` only app-specific hotkeys will be shown.
 -- @staticfct awful.hotkeys_popup.show_help
