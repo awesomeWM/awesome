@@ -53,6 +53,7 @@ lua_class_t drawin_class;
  * @field border_width Border width.
  * @field border_color Border color.
  * @field ontop On top of other windows.
+ * @field desktop Below other windows and widgets.
  * @field cursor The mouse cursor.
  * @field visible Visibility.
  * @field opacity The opacity of the drawin, between 0 and 1.
@@ -99,6 +100,10 @@ lua_class_t drawin_class;
 
 /**
  * @signal property::ontop
+ */
+
+/**
+ * @signal property::desktop
  */
 
 /**
@@ -504,6 +509,7 @@ luaA_drawin_geometry(lua_State *L)
 
 
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, ontop, lua_pushboolean)
+LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, desktop, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, cursor, lua_pushstring)
 LUA_OBJECT_EXPORT_PROPERTY(drawin, drawin_t, visible, lua_pushboolean)
 
@@ -584,16 +590,48 @@ luaA_drawin_get_height(lua_State *L, drawin_t *drawin)
  * \param drawin The drawin object.
  * \return The number of elements pushed on stack.
  */
-static int
-luaA_drawin_set_ontop(lua_State *L, drawin_t *drawin)
+void
+drawin_set_ontop(lua_State *L, drawin_t *drawin, bool b)
 {
-    bool b = luaA_checkboolean(L, -1);
     if(b != drawin->ontop)
     {
+        if(b)
+            drawin_set_desktop(L, drawin, false);
         drawin->ontop = b;
         stack_windows();
         luaA_object_emit_signal(L, -3, "property::ontop", 0);
     }
+}
+
+/** Set the drawin on desktop status.
+ * \param L The Lua VM state.
+ * \param drawin The drawin object.
+ * \return The number of elements pushed on stack.
+ */
+void
+drawin_set_desktop(lua_State *L, drawin_t *drawin, bool b)
+{
+    if(b != drawin->desktop)
+    {
+        if(b)
+            drawin_set_ontop(L, drawin, false);
+        drawin->desktop = b;
+        stack_windows();
+        luaA_object_emit_signal(L, -3, "property::desktop", 0);
+    }
+}
+
+static int
+luaA_drawin_set_ontop(lua_State *L, drawin_t *drawin)
+{
+    drawin_set_ontop(L, drawin, luaA_checkboolean(L, -1));
+    return 0;
+}
+
+static int
+luaA_drawin_set_desktop(lua_State *L, drawin_t *drawin)
+{
+    drawin_set_desktop(L, drawin, luaA_checkboolean(L, -1));
     return 0;
 }
 
@@ -796,6 +834,10 @@ drawin_class_setup(lua_State *L)
                             (lua_class_propfunc_t) luaA_drawin_set_ontop,
                             (lua_class_propfunc_t) luaA_drawin_get_ontop,
                             (lua_class_propfunc_t) luaA_drawin_set_ontop);
+    luaA_class_add_property(&drawin_class, "desktop",
+                            (lua_class_propfunc_t) luaA_drawin_set_desktop,
+                            (lua_class_propfunc_t) luaA_drawin_get_desktop,
+                            (lua_class_propfunc_t) luaA_drawin_set_desktop);
     luaA_class_add_property(&drawin_class, "cursor",
                             (lua_class_propfunc_t) luaA_drawin_set_cursor,
                             (lua_class_propfunc_t) luaA_drawin_get_cursor,
