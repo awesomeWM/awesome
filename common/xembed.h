@@ -41,6 +41,7 @@ typedef struct xembed_window xembed_window_t;
 struct xembed_window
 {
     xcb_window_t win;
+    uint8_t depth;
     xembed_info_t info;
 };
 
