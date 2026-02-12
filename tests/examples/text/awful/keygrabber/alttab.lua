@@ -7,8 +7,6 @@ local awful = { keygrabber = require("awful.keygrabber"), --DOC_HIDE
     client={focus={history={--DOC_HIDE
         disable_tracking = function() was_called[1] = true end, --DOC_HIDE
         enable_tracking  = function() was_called[2] = true end, --DOC_HIDE
-        select_next      = function() was_called[3] = true end, --DOC_HIDE
-        select_previous  = function() was_called[4] = true end, --DOC_HIDE
 }}}}--DOC_HIDE
 
     awful.keygrabber {
