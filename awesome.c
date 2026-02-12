@@ -582,8 +582,6 @@ main(int argc, char **argv)
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IOLBF, 0);
 
-    /* clear the globalconf structure */
-    p_clear(&globalconf, 1);
     globalconf.keygrabber = LUA_REFNIL;
     globalconf.mousegrabber = LUA_REFNIL;
     globalconf.exit_code = EXIT_SUCCESS;
