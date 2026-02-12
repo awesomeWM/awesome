@@ -433,7 +433,7 @@ a_xcb_check(void)
 }
 
 static gboolean
-a_xcb_io_cb(GIOChannel *source, GIOCondition cond, gpointer data)
+a_xcb_io_cb(gint fd, GIOCondition cond, gpointer data)
 {
     /* a_xcb_check() already handled all events */
 
@@ -509,7 +509,7 @@ signal_child(int signum)
 
 /* There was a SIGCHLD signal. Read from sigchld_pipe and reap children. */
 static gboolean
-reap_children(GIOChannel *channel, GIOCondition condition, gpointer user_data)
+reap_children(gint fd, GIOCondition cond, gpointer data)
 {
     pid_t child;
     int status;
@@ -655,14 +655,9 @@ main(int argc, char **argv)
         options_init_config(&xdg, awesome_argv[0], confpath, &default_init_flags, &searchpath);
 
     /* Setup pipe for SIGCHLD processing */
-    {
-        if (!g_unix_open_pipe(sigchld_pipe, FD_CLOEXEC, NULL))
-            fatal("Failed to create pipe");
-
-        GIOChannel *channel = g_io_channel_unix_new(sigchld_pipe[0]);
-        g_io_add_watch(channel, G_IO_IN, reap_children, NULL);
-        g_io_channel_unref(channel);
-    }
+    if (!g_unix_open_pipe(sigchld_pipe, FD_CLOEXEC, NULL))
+        fatal("Failed to create pipe");
+    g_unix_fd_add(sigchld_pipe[0], G_IO_IN, reap_children, NULL);
 
     /* register function for signals */
     g_unix_signal_add(SIGINT, exit_on_signal, NULL);
@@ -745,9 +740,7 @@ main(int argc, char **argv)
 
     /* Get the file descriptor corresponding to the X connection */
     xfd = xcb_get_file_descriptor(globalconf.connection);
-    GIOChannel *channel = g_io_channel_unix_new(xfd);
-    g_io_add_watch(channel, G_IO_IN, a_xcb_io_cb, NULL);
-    g_io_channel_unref(channel);
+    g_unix_fd_add(xfd, G_IO_IN, a_xcb_io_cb, NULL);
 
     /* Grab server */
     xcb_grab_server(globalconf.connection);
