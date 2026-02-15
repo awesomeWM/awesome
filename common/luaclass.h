@@ -27,10 +27,6 @@
 #include <lua.h>
 #include <lauxlib.h>
 
-typedef struct lua_class_property lua_class_property_t;
-
-ARRAY_TYPE(lua_class_property_t, lua_class_property)
-
 #define LUA_OBJECT_HEADER \
         signal_array_t signals;
 
@@ -48,6 +44,21 @@ typedef void (*lua_class_collector_t)(lua_object_t *);
 typedef int (*lua_class_propfunc_t)(lua_State *, lua_object_t *);
 
 typedef bool (*lua_class_checker_t)(lua_object_t *);
+
+typedef struct
+{
+    /** Name of the property */
+    const char *name;
+    /** Callback function called when the property is found in object creation. */
+    lua_class_propfunc_t new;
+    /** Callback function called when the property is found in object __index. */
+    lua_class_propfunc_t index;
+    /** Callback function called when the property is found in object __newindex. */
+    lua_class_propfunc_t newindex;
+}
+lua_class_property_t;
+
+ARRAY_TYPE(lua_class_property_t, lua_class_property)
 
 typedef struct lua_class_t lua_class_t;
 struct lua_class_t
@@ -97,6 +108,7 @@ void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_t *,
 
 void luaA_class_add_property(lua_class_t *, const char *,
                              lua_class_propfunc_t, lua_class_propfunc_t, lua_class_propfunc_t);
+void luaA_class_add_properties(lua_class_t *, lua_class_property_t[] , size_t);
 
 int luaA_usemetatable(lua_State *, int, int);
 int luaA_class_index(lua_State *);

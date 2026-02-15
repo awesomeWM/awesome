@@ -76,6 +76,9 @@
     static inline void pfx##_array_grow(pfx##_array_t *arr, int newlen) {   \
         p_grow(&arr->tab, newlen, &arr->size);                              \
     }                                                                       \
+    static inline void pfx##_array_growx(pfx##_array_t *arr, int newlen) {  \
+        p_growx(&arr->tab, newlen, &arr->size);                             \
+    }                                                                       \
     static inline void                                                      \
     pfx##_array_splice(pfx##_array_t *arr, int pos, int len,                \
                        type_t items[], int count)                           \
@@ -135,6 +138,14 @@
                 l = i + 1;                                                  \
         }                                                                   \
         pfx##_array_splice(arr, r, 0, &e, 1);                               \
+    }                                                                       \
+    static inline void                                                      \
+    pfx##_array_inserts(pfx##_array_t *arr, type_t items[], int count)      \
+    {                                                                       \
+        pfx##_array_growx(arr, arr->len + count);                           \
+        memcpy(arr->tab + arr->len, items, count * sizeof(*items));         \
+        arr->len += count;                                                  \
+        qsort(arr->tab, arr->len, sizeof(*items), cmp);                     \
     }                                                                       \
     static inline type_t *                                                  \
     pfx##_array_lookup(pfx##_array_t *arr, type_t *e)                       \
