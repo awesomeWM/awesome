@@ -113,7 +113,9 @@
         pfx##_array_splice(arr, 0, 0, &e, 1);                               \
     }                                                                       \
     static inline void pfx##_array_append(pfx##_array_t *arr, type_t e) {   \
-        pfx##_array_splice(arr, arr->len, 0, &e, 1);                        \
+        pfx##_array_grow(arr, arr->len + 1);                                \
+        arr->tab[arr->len] = e;                                             \
+        arr->len++;                                                         \
     }                                                                       \
 
 /** Binary ordered array functions */
