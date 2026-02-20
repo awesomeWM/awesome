@@ -190,10 +190,16 @@ selection_watcher_class_setup(lua_State *L)
             (lua_class_allocator_t) selection_watcher_new, NULL, NULL,
             luaA_class_index_miss_property, luaA_class_newindex_miss_property,
             selection_watcher_methods, selection_watcher_meta);
-    luaA_class_add_property(&selection_watcher_class, "active",
-            (lua_class_propfunc_t) luaA_selection_watcher_set_active,
-            (lua_class_propfunc_t) luaA_selection_watcher_get_active,
-            (lua_class_propfunc_t) luaA_selection_watcher_set_active);
+
+    const lua_class_property_t properties[] = {
+        {
+            .name = "active",
+            .new = (lua_class_propfunc_t)luaA_selection_watcher_set_active,
+            .index = (lua_class_propfunc_t)luaA_selection_watcher_get_active,
+            .newindex = (lua_class_propfunc_t)luaA_selection_watcher_set_active,
+        },
+    };
+    luaA_class_add_properties(&selection_watcher_class, properties, G_N_ELEMENTS(properties));
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

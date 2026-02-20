@@ -615,18 +615,28 @@ tag_class_setup(lua_State *L)
                      NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      tag_methods, tag_meta);
-    luaA_class_add_property(&tag_class, "name",
-                            (lua_class_propfunc_t) luaA_tag_set_name,
-                            (lua_class_propfunc_t) luaA_tag_get_name,
-                            (lua_class_propfunc_t) luaA_tag_set_name);
-    luaA_class_add_property(&tag_class, "selected",
-                            (lua_class_propfunc_t) luaA_tag_set_selected,
-                            (lua_class_propfunc_t) luaA_tag_get_selected,
-                            (lua_class_propfunc_t) luaA_tag_set_selected);
-    luaA_class_add_property(&tag_class, "activated",
-                            (lua_class_propfunc_t) luaA_tag_set_activated,
-                            (lua_class_propfunc_t) luaA_tag_get_activated,
-                            (lua_class_propfunc_t) luaA_tag_set_activated);
+
+    const lua_class_property_t properties[] = {
+        {
+            .name = "name",
+            .new = (lua_class_propfunc_t)luaA_tag_set_name,
+            .index = (lua_class_propfunc_t)luaA_tag_get_name,
+            .newindex = (lua_class_propfunc_t)luaA_tag_set_name,
+        },
+        {
+            .name = "selected",
+            .new = (lua_class_propfunc_t)luaA_tag_set_selected,
+            .index = (lua_class_propfunc_t)luaA_tag_get_selected,
+            .newindex = (lua_class_propfunc_t)luaA_tag_set_selected,
+        },
+        {
+            .name = "activated",
+            .new = (lua_class_propfunc_t)luaA_tag_set_activated,
+            .index = (lua_class_propfunc_t)luaA_tag_get_activated,
+            .newindex = (lua_class_propfunc_t)luaA_tag_set_activated,
+        },
+    };
+    luaA_class_add_properties(&tag_class, properties, G_N_ELEMENTS(properties));
 }
 
 /* @DOC_cobject_COMMON@ */

@@ -4567,7 +4567,7 @@ client_class_setup(lua_State *L)
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      client_methods, client_meta);
     luaA_class_set_tostring(&client_class, (lua_class_propfunc_t) client_tostring);
-    lua_class_property_t properties[] = {
+    const lua_class_property_t properties[] = {
         {
             .name = "name",
             .new = (lua_class_propfunc_t) luaA_client_set_name,

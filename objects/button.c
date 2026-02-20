@@ -171,14 +171,22 @@ button_class_setup(lua_State *L)
                      (lua_class_allocator_t) button_new, NULL, NULL,
                      luaA_class_index_miss_property, luaA_class_newindex_miss_property,
                      button_methods, button_meta);
-    luaA_class_add_property(&button_class, "button",
-                            (lua_class_propfunc_t) luaA_button_set_button,
-                            (lua_class_propfunc_t) luaA_button_get_button,
-                            (lua_class_propfunc_t) luaA_button_set_button);
-    luaA_class_add_property(&button_class, "modifiers",
-                            (lua_class_propfunc_t) luaA_button_set_modifiers,
-                            (lua_class_propfunc_t) luaA_button_get_modifiers,
-                            (lua_class_propfunc_t) luaA_button_set_modifiers);
+
+    const lua_class_property_t properties[] = {
+        {
+            .name = "button",
+            .new = (lua_class_propfunc_t)luaA_button_set_button,
+            .index = (lua_class_propfunc_t)luaA_button_get_button,
+            .newindex = (lua_class_propfunc_t)luaA_button_set_button,
+        },
+        {
+            .name = "modifiers",
+            .new = (lua_class_propfunc_t)luaA_button_set_modifiers,
+            .index = (lua_class_propfunc_t)luaA_button_get_modifiers,
+            .newindex = (lua_class_propfunc_t)luaA_button_set_modifiers,
+        },
+    };
+    luaA_class_add_properties(&button_class, properties, G_N_ELEMENTS(properties));
 }
 
 /* @DOC_cobject_COMMON@ */
