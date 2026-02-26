@@ -862,9 +862,8 @@ luaA_panic(lua_State *L)
 {
     warn("unprotected error in call to Lua API (%s)",
          lua_tostring(L, -1));
-    buffer_t buf;
-    backtrace_get(&buf);
-    warn("dumping backtrace\n%s", buf.s);
+    GString* buf = backtrace_get();
+    warn("dumping backtrace\n%s", buf->str);
     warn("restarting awesome");
     awesome_restart();
     return 0;

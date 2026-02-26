@@ -492,9 +492,8 @@ a_glib_poll(GPollFD *ufds, guint nfsd, gint timeout)
 static void
 signal_fatal(int signum)
 {
-    buffer_t buf;
-    backtrace_get(&buf);
-    fatal("signal %d, dumping backtrace\n%s", signum, buf.s);
+    GString* buf = backtrace_get();
+    fatal("signal %d, dumping backtrace\n%s", signum, buf->str);
 }
 
 /* Signal handler for SIGCHLD. Causes reap_children() to be called. */
