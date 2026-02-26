@@ -435,11 +435,10 @@ property_handle_propertynotify_xproperty(xcb_property_notify_event_t *ev)
     lua_State *L = globalconf_get_lua_State();
     xproperty_t *prop;
     xproperty_t lookup = { .atom = ev->atom };
-    buffer_t buf;
     void *obj;
 
     prop = xproperty_array_lookup(&globalconf.xproperties, &lookup);
-    if(!prop)
+    if (!prop)
         /* Property is not registered */
         return;
 
@@ -454,18 +453,19 @@ property_handle_propertynotify_xproperty(xcb_property_notify_event_t *ev)
         obj = NULL;
 
     /* Get us the name of the property */
-    buffer_inita(&buf, a_strlen(prop->name) + a_strlen("xproperty::") + 1);
-    buffer_addf(&buf, "xproperty::%s", prop->name);
+    const char prefix[] = "xproperty::";
+    char buf[a_strlen(prop->name) + sizeof(prefix)];
+    memcpy(buf, prefix, sizeof(prefix));
+    a_strcat(buf, sizeof(buf), prop->name);
 
     /* And emit the right signal */
     if (obj)
     {
         luaA_object_push(L, obj);
-        luaA_object_emit_signal(L, -1, buf.s, 0);
+        luaA_object_emit_signal(L, -1, buf, 0);
         lua_pop(L, 1);
     } else
-        signal_object_emit(L, &global_signals, buf.s, 0);
-    buffer_wipe(&buf);
+        signal_object_emit(L, &global_signals, buf, 0);
 }
 
 /** The property notify event handler.
