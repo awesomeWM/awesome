@@ -591,14 +591,14 @@ static int luaA_get_modifiers(lua_State *L)
 
                 lua_newtable(L);
 
-                lua_pushstring(L, "keycode");
+                lua_pushliteral(L, "keycode");
                 lua_pushinteger(L, key_code);
                 lua_settable(L, -3);
 
                 /* Technically it is possible to get multiple keysyms here,
                  * but... we just use the first one.
                  */
-                lua_pushstring(L, "keysym");
+                lua_pushliteral(L, "keysym");
                 char *string = key_get_keysym_name(keysyms[0]);
                 lua_pushstring(L, string);
                 p_delete(&string);
@@ -900,7 +900,7 @@ luaA_tolstring(lua_State *L, int idx, size_t *len)
         lua_pushfstring(L, "%f", lua_tonumber(L, -1));
         break;
     case LUA_TNIL:
-        lua_pushstring(L, "nil");
+        lua_pushliteral(L, "nil");
         break;
     default:
         lua_pushfstring(L, "%s: %p",
@@ -941,7 +941,7 @@ static void
 setup_awesome_signals(lua_State *L)
 {
     lua_getglobal(L, "awesome");
-    lua_pushstring(L, "unix_signal");
+    lua_pushliteral(L, "unix_signal");
     lua_newtable(L);
 
 #define SETUP_SIGNAL(sig)                             \
@@ -951,7 +951,7 @@ setup_awesome_signals(lua_State *L)
         lua_setfield(L, -2, #sig);                    \
         /* Set awesome.unix_signal[42] = "SIGSTOP" */ \
         lua_pushinteger(L, sig);                      \
-        lua_pushstring(L, #sig);                      \
+        lua_pushliteral(L, #sig);                     \
         lua_settable(L, -3);                          \
     } while (0)
 

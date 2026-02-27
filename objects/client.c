@@ -2297,9 +2297,9 @@ client_manage(xcb_window_t w, xcb_get_geometry_reply_t *wgeom, xcb_get_window_at
 
     /* Add the context */
     if (globalconf.loop == NULL)
-        lua_pushstring(L, "startup");
+        lua_pushliteral(L, "startup");
     else
-        lua_pushstring(L, "new");
+        lua_pushliteral(L, "new");
 
     /* Hints */
     lua_newtable(L);
@@ -2741,7 +2741,7 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
             client_set_ontop(L, cidx, false);
         }
         int abs_cidx = luaA_absindex(L, cidx); \
-        lua_pushstring(L, "fullscreen");
+        lua_pushliteral(L, "fullscreen");
         c->fullscreen = s;
         luaA_object_emit_signal(L, abs_cidx, "request::geometry", 1);
         luaA_object_emit_signal(L, abs_cidx, "property::fullscreen", 0);
@@ -2983,15 +2983,15 @@ client_unmanage(client_t *c, client_unmanage_t reason)
     {
             break;
         case CLIENT_UNMANAGE_USER:
-            lua_pushstring(L, "user");
+            lua_pushliteral(L, "user");
             break;
         case CLIENT_UNMANAGE_REPARENT:
-            lua_pushstring(L, "reparented");
+            lua_pushliteral(L, "reparented");
             break;
         case CLIENT_UNMANAGE_UNMAP:
         case CLIENT_UNMANAGE_FAILED:
         case CLIENT_UNMANAGE_DESTROYED:
-            lua_pushstring(L, "destroyed");
+            lua_pushliteral(L, "destroyed");
             break;
     }
 
@@ -4480,7 +4480,7 @@ client_tostring(lua_State *L, client_t *c)
 
     lua_pushlstring(L, name, MIN(len, limit));
     if (len > limit)
-        lua_pushstring(L, "...");
+        lua_pushliteral(L, "...");
     return len > limit ? 2 : 1;
 }
 
