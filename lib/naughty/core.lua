@@ -503,6 +503,7 @@ local function cleanup(self, reason)
          if n == self then
             table.remove(naughty._active, k)
             naughty.emit_signal("property::active")
+            break  -- each notification appears only once
          end
     end
 
