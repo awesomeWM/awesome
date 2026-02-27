@@ -326,34 +326,35 @@ local steps = {
     -- Test hotkeys popup with override_label_bgs option
     function()
         -- Test with override_label_bgs = true
-        local custom_hotkeys_widget = hotkeys_widget.new({
+        local custom_widget = hotkeys_widget.new({
             override_label_bgs = true,
             label_bg = "#FF0000"
         })
 
-        assert(custom_hotkeys_widget.override_label_bgs == true)
-        assert(custom_hotkeys_widget.label_bg == "#FF0000")
-
-        -- Show and immediately hide to exercise the code path
+        -- show_help triggers _load_widget_settings which sets properties
         local s = awful.screen.focused()
-        custom_hotkeys_widget:show_help(nil, s)
+        custom_widget:show_help(nil, s)
 
-        -- Verify the wibox was created
-        assert(custom_hotkeys_widget._cached_wiboxes)
+        assert(custom_widget.override_label_bgs == true)
+        assert(custom_widget.label_bg == "#FF0000")
+        assert(custom_widget._cached_wiboxes)
 
-        -- Hide the popup
+        -- Dismiss the popup (processed on next event loop iteration)
         root.fake_input("key_press", "Escape")
         root.fake_input("key_release", "Escape")
 
-        -- Test with override_label_bgs = false (default)
+        return true
+    end,
+    -- Test hotkeys popup with override_label_bgs = false (default)
+    function()
         local default_widget = hotkeys_widget.new({
             override_label_bgs = false
         })
 
-        assert(default_widget.override_label_bgs == false)
-
-        -- Show and hide to exercise the code path
+        local s = awful.screen.focused()
         default_widget:show_help(nil, s)
+
+        assert(default_widget.override_label_bgs == false)
         assert(default_widget._cached_wiboxes)
 
         root.fake_input("key_press", "Escape")
