@@ -229,10 +229,12 @@ luaA_class_gc(lua_State *L)
  * \param newindex_miss_property Function to call when an object of this class
  * receive a __newindex request on an unknown property.
  * \param methods The methods to set on the class table.
+ * \param n_methods The number of methods.
  * \param meta The meta-methods to set on the class objects.
+ * \param n_meta The number of meta-methods.
  */
 void
-luaA_class_setup(lua_State *L, lua_class_t *class,
+luaA_class_setupx(lua_State *L, lua_class_t *class,
                  const char *name,
                  lua_class_t *parent,
                  lua_class_allocator_t allocator,
@@ -241,10 +243,12 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
                  lua_class_propfunc_t index_miss_property,
                  lua_class_propfunc_t newindex_miss_property,
                  const struct luaL_Reg methods[],
-                 const struct luaL_Reg meta[])
+                 int n_methods,
+                 const struct luaL_Reg meta[],
+                 int n_meta)
 {
     /* Create the object metatable */
-    lua_newtable(L);
+    lua_createtable(L, 0, n_meta + 2);  /* The +2 is for __gc and __index. */
     /* Register it with class pointer as key in the registry
      * class-pointer -> metatable */
     lua_pushlightuserdata(L, class);
@@ -266,7 +270,11 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     lua_setfield(L, -2, "__index"); /* metatable.__index = metatable      1 */
 
     luaA_setfuncs(L, meta);                                            /* 1 */
-    luaA_registerlib(L, name, methods);                                /* 2 */
+    lua_createtable(L, 0, n_methods);                       /* 2 */
+    luaA_setfuncs(L, methods);
+    lua_pushvalue(L, -1);
+    lua_setglobal(L, name);
+
     lua_pushvalue(L, -1);           /* dup self as metatable              3 */
     lua_setmetatable(L, -2);        /* set self as metatable              2 */
     lua_pop(L, 2);
