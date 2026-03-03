@@ -336,7 +336,7 @@ drawin_map(lua_State *L, int widx)
     /* Deactivate BMA */
     client_restore_enterleave_events();
     /* Stack this drawin correctly */
-    stack_windows();
+    stack_windows(L, "append", NULL, drawin);
     /* Add it to the list of visible drawins */
     drawin_array_append(&globalconf.drawins, drawin);
     /* Make sure it has a surface */
@@ -591,7 +591,7 @@ luaA_drawin_set_ontop(lua_State *L, drawin_t *drawin)
     if(b != drawin->ontop)
     {
         drawin->ontop = b;
-        stack_windows();
+        stack_windows(L, "ontop", NULL, drawin);
         luaA_object_emit_signal(L, -3, "property::ontop", 0);
     }
     return 0;
