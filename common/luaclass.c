@@ -155,8 +155,8 @@ luaA_class_add_property(lua_class_t *lua_class,
 
 void
 luaA_class_add_properties(lua_class_t* lua_class,
-                          lua_class_property_t properties[],
-                          size_t count)
+                          const lua_class_property_t properties[],
+                          int count)
 {
     lua_class_property_array_inserts(&lua_class->properties, properties, count);
 }

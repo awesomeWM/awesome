@@ -142,7 +142,7 @@
         pfx##_array_splice(arr, r, 0, &e, 1);                               \
     }                                                                       \
     static inline void                                                      \
-    pfx##_array_inserts(pfx##_array_t *arr, type_t items[], int count)      \
+    pfx##_array_inserts(pfx##_array_t *arr, const type_t items[], int count)\
     {                                                                       \
         pfx##_array_growx(arr, arr->len + count);                           \
         memcpy(arr->tab + arr->len, items, count * sizeof(*items));         \

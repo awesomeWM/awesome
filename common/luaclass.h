@@ -108,7 +108,7 @@ void luaA_class_setup(lua_State *, lua_class_t *, const char *, lua_class_t *,
 
 void luaA_class_add_property(lua_class_t *, const char *,
                              lua_class_propfunc_t, lua_class_propfunc_t, lua_class_propfunc_t);
-void luaA_class_add_properties(lua_class_t *, lua_class_property_t[] , size_t);
+void luaA_class_add_properties(lua_class_t *, const lua_class_property_t[] , int);
 
 int luaA_usemetatable(lua_State *, int, int);
 int luaA_class_index(lua_State *);
