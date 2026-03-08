@@ -94,7 +94,7 @@ ewmh_update_net_active_window(lua_State *L)
 static int
 ewmh_update_net_client_list(lua_State *L)
 {
-    xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.clients.len);
+    xcb_window_t wins[globalconf.clients.len];
 
     int n = 0;
     foreach(client, globalconf.clients)
@@ -271,7 +271,7 @@ void
 ewmh_update_net_client_list_stacking(void)
 {
     int n = 0;
-    xcb_window_t *wins = p_alloca(xcb_window_t, globalconf.stack.len);
+    xcb_window_t wins[globalconf.stack.len];
 
     foreach(client, globalconf.stack)
         wins[n++] = (*client)->window;

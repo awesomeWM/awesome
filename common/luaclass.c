@@ -302,7 +302,7 @@ luaA_class_connect_signal_from_stack(lua_State *L, lua_class_t *lua_class,
     /* Duplicate the function in the stack */
     lua_pushvalue(L, ud);
 
-    char *buf = p_alloca(char, a_strlen(name) + a_strlen(CONNECTED_SUFFIX) + 1);
+    char buf[a_strlen(name) + a_strlen(CONNECTED_SUFFIX) + 1];
 
     /* Create a new signal to notify there is a global connection. */
     sprintf(buf, "%s%s", name, CONNECTED_SUFFIX);
