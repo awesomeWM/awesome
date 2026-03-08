@@ -102,8 +102,7 @@ options_init_config(xdgHandle *xdg, char *execpath, char *configpath, int *init_
     char file_buf[READ_BUF_MAX+1     ] = {'\0'};
     size_t pos = 0;
 
-    string_array_t argv;
-    string_array_init(&argv);
+    string_array_t argv = {};
     string_array_append(&argv, a_strdup(execpath));
 
     FILE *fp = NULL;
