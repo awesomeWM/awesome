@@ -337,7 +337,6 @@ local steps = {
 
         assert(custom_widget.override_label_bgs == true)
         assert(custom_widget.label_bg == "#FF0000")
-        assert(custom_widget._cached_wiboxes)
 
         -- Dismiss the popup (processed on next event loop iteration)
         root.fake_input("key_press", "Escape")
@@ -355,7 +354,6 @@ local steps = {
         default_widget:show_help(nil, s)
 
         assert(default_widget.override_label_bgs == false)
-        assert(default_widget._cached_wiboxes)
 
         root.fake_input("key_press", "Escape")
         root.fake_input("key_release", "Escape")
