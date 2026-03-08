@@ -609,8 +609,8 @@ main(int argc, char **argv)
     for(; *xdgconfigdirs; xdgconfigdirs++)
     {
         /* Append /awesome to *xdgconfigdirs */
-        const char *suffix = "/awesome";
-        size_t len = a_strlen(*xdgconfigdirs) + a_strlen(suffix) + 1;
+        const char suffix[] = "/awesome";
+        size_t len = a_strlen(*xdgconfigdirs) + sizeof(suffix);
         char *entry = p_new(char, len);
         a_strcat(entry, len, *xdgconfigdirs);
         a_strcat(entry, len, suffix);
