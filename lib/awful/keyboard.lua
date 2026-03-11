@@ -168,16 +168,31 @@ end
 --- Add a `awful.key`s to the default client keys.
 --
 -- @staticfct awful.keyboard.append_client_keybindings
--- @tparam table keys A table containing `awful.key` objects.
+-- @tparam table keys A table of `awful.key` objects. Optionally, it can have
+--  a `group` entry. If set, the `group` property will be set on all `awful.keys`
+--  objects.
 -- @noreturn
 -- @emits client_keybinding::added
 -- @emitstparam client_keybinding::added awful.key key The key.
 -- @see awful.key
 -- @see awful.keyboard.append_client_keybinding
 function module.append_client_keybindings(keys)
+    local g = keys.group
+    keys.group = nil
+
+    -- Avoid the boilerplate. If the user is adding multiple keys at once, then
+    -- they are probably related.
+    if g then
+        for _, k in ipairs(keys) do
+            k.group = g
+        end
+    end
+
     for _, key in ipairs(keys) do
         module.append_client_keybinding(key)
     end
+
+    keys.group = g
 end
 
 --- Remove a key from the default client keys.
