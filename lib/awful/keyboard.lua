@@ -100,21 +100,7 @@ function module.append_global_keybinding(key)
     capi.root._append_key(key)
 end
 
---- Add multiple `awful.key` based keybindings to the global set.
---
--- A **global** keybinding is one which is always present, even when there is
--- no focused client. If your intent is too add a keybinding which acts on
--- the focused client do **not** use this
---
--- @tparam table keys A table of `awful.key` objects. Optionally, it can have
---  a `group` entry. If set, the `group` property will be set on all `awful.keys`
---  objects.
--- @noreturn
--- @see awful.key
--- @see awful.keyboard.append_global_keybinding
--- @see awful.keyboard.remove_global_keybinding
-
-function module.append_global_keybindings(keys)
+local function append_keybindings(keys, cb)
     local g = keys.group
     keys.group = nil
 
@@ -126,8 +112,28 @@ function module.append_global_keybindings(keys)
         end
     end
 
-    capi.root._append_keys(keys)
+    cb(keys)
+
     keys.group = g
+end
+
+--- Add multiple `awful.key` based keybindings to the global set.
+--
+-- A **global** keybinding is one which is always present, even when there is
+-- no focused client. If your intent is too add a keybinding which acts on
+-- the focused client do **not** use this
+--
+-- @tparam table keys A table of `awful.key` objects.
+-- @tparam[opt] string keys.group If set, the `group` property will be set on all `awful.keys`objects.
+-- @noreturn
+-- @see awful.key
+-- @see awful.keyboard.append_global_keybinding
+-- @see awful.keyboard.remove_global_keybinding
+
+function module.append_global_keybindings(keys)
+    append_keybindings(keys, function(ks)
+        capi.root._append_keys(ks)
+    end)
 end
 
 --- Remove a keybinding from the global set.
@@ -168,16 +174,19 @@ end
 --- Add a `awful.key`s to the default client keys.
 --
 -- @staticfct awful.keyboard.append_client_keybindings
--- @tparam table keys A table containing `awful.key` objects.
+-- @tparam table keys A table of `awful.key` objects.
+-- @tparam[opt] string keys.group If set, the `group` property will be set on all `awful.keys`objects.
 -- @noreturn
 -- @emits client_keybinding::added
 -- @emitstparam client_keybinding::added awful.key key The key.
 -- @see awful.key
 -- @see awful.keyboard.append_client_keybinding
 function module.append_client_keybindings(keys)
-    for _, key in ipairs(keys) do
-        module.append_client_keybinding(key)
-    end
+    append_keybindings(keys, function(ks)
+        for _, key in ipairs(ks) do
+            module.append_client_keybinding(key)
+        end
+    end)
 end
 
 --- Remove a key from the default client keys.
