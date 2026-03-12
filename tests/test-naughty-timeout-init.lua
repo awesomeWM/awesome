@@ -36,7 +36,7 @@ local steps = {}
 table.insert(steps, function()
     n_timeout_zero = notification {
         title   = "timeout zero after creation",
-        text    = "Setting timeout=0 should stop the timer",
+        message = "Setting timeout=0 should stop the timer",
         timeout = 5,
     }
 
@@ -81,7 +81,7 @@ end)
 table.insert(steps, function()
     n_default = notification {
         title = "default timeout test",
-        text  = "Should expire with default timeout",
+        message = "Should expire with default timeout",
         -- No timeout specified - should get default from cst.config
     }
 
