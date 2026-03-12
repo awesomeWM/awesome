@@ -940,9 +940,17 @@ luaA_dofunction_on_error(lua_State *L)
 static void
 setup_awesome_signals(lua_State *L)
 {
+    int count = 0;
+#define SETUP_SIGNAL(sig) \
+    do {                  \
+        count++;          \
+    } while (0)
+#include "unix_signals.h"
+#undef SETUP_SIGNAL
+
     lua_getglobal(L, "awesome");
     lua_pushstring(L, "unix_signal");
-    lua_newtable(L);
+    lua_createtable(L, 0, count);
 
 #define SETUP_SIGNAL(sig)                             \
     do {                                              \
@@ -954,76 +962,7 @@ setup_awesome_signals(lua_State *L)
         lua_pushstring(L, #sig);                      \
         lua_settable(L, -3);                          \
     } while (0)
-
-    /* Non-standard signals. These are first so that e.g. (on my system)
-     * signals[29] is SIGPOLL and not SIGIO (the value gets overwritten).
-     */
-#ifdef SIGIOT
-    SETUP_SIGNAL(SIGIOT);
-#endif
-#ifdef SIGEMT
-    SETUP_SIGNAL(SIGEMT);
-#endif
-#ifdef SIGSTKFLT
-    SETUP_SIGNAL(SIGSTKFLT);
-#endif
-#ifdef SIGIO
-    SETUP_SIGNAL(SIGIO);
-#endif
-#ifdef SIGCLD
-    SETUP_SIGNAL(SIGCLD);
-#endif
-#ifdef SIGPWR
-    SETUP_SIGNAL(SIGPWR);
-#endif
-#ifdef SIGINFO
-    SETUP_SIGNAL(SIGINFO);
-#endif
-#ifdef SIGLOST
-    SETUP_SIGNAL(SIGLOST);
-#endif
-#ifdef SIGWINCH
-    SETUP_SIGNAL(SIGWINCH);
-#endif
-#ifdef SIGUNUSED
-    SETUP_SIGNAL(SIGUNUSED);
-#endif
-
-    /* POSIX.1-1990, according to man 7 signal */
-    SETUP_SIGNAL(SIGHUP);
-    SETUP_SIGNAL(SIGINT);
-    SETUP_SIGNAL(SIGQUIT);
-    SETUP_SIGNAL(SIGILL);
-    SETUP_SIGNAL(SIGABRT);
-    SETUP_SIGNAL(SIGFPE);
-    SETUP_SIGNAL(SIGKILL);
-    SETUP_SIGNAL(SIGSEGV);
-    SETUP_SIGNAL(SIGPIPE);
-    SETUP_SIGNAL(SIGALRM);
-    SETUP_SIGNAL(SIGTERM);
-    SETUP_SIGNAL(SIGUSR1);
-    SETUP_SIGNAL(SIGUSR2);
-    SETUP_SIGNAL(SIGCHLD);
-    SETUP_SIGNAL(SIGCONT);
-    SETUP_SIGNAL(SIGSTOP);
-    SETUP_SIGNAL(SIGTSTP);
-    SETUP_SIGNAL(SIGTTIN);
-    SETUP_SIGNAL(SIGTTOU);
-
-    /* POSIX.1-2001, according to man 7 signal */
-    SETUP_SIGNAL(SIGBUS);
-    /* Some Operating Systems doesn't have SIGPOLL (e.g. FreeBSD) */
-#ifdef SIGPOLL
-    SETUP_SIGNAL(SIGPOLL);
-#endif
-    SETUP_SIGNAL(SIGPROF);
-    SETUP_SIGNAL(SIGSYS);
-    SETUP_SIGNAL(SIGTRAP);
-    SETUP_SIGNAL(SIGURG);
-    SETUP_SIGNAL(SIGVTALRM);
-    SETUP_SIGNAL(SIGXCPU);
-    SETUP_SIGNAL(SIGXFSZ);
-
+#include "unix_signals.h"
 #undef SETUP_SIGNAL
 
     /* Set awesome.signal to the table we just created, key was already pushed */
