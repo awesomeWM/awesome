@@ -323,6 +323,43 @@ local steps = {
             end
         end
     end,
+    -- Test hotkeys popup with override_label_bgs option
+    function()
+        -- Test with override_label_bgs = true
+        local custom_widget = hotkeys_widget.new({
+            override_label_bgs = true,
+            label_bg = "#FF0000"
+        })
+
+        -- show_help triggers _load_widget_settings which sets properties
+        local s = awful.screen.focused()
+        custom_widget:show_help(nil, s)
+
+        assert(custom_widget.override_label_bgs == true)
+        assert(custom_widget.label_bg == "#FF0000")
+
+        -- Dismiss the popup (processed on next event loop iteration)
+        root.fake_input("key_press", "Escape")
+        root.fake_input("key_release", "Escape")
+
+        return true
+    end,
+    -- Test hotkeys popup with override_label_bgs = false (default)
+    function()
+        local default_widget = hotkeys_widget.new({
+            override_label_bgs = false
+        })
+
+        local s = awful.screen.focused()
+        default_widget:show_help(nil, s)
+
+        assert(default_widget.override_label_bgs == false)
+
+        root.fake_input("key_press", "Escape")
+        root.fake_input("key_release", "Escape")
+
+        return true
+    end,
     -- Test the `c:activate{}` keybindings.
     function()
         client.connect_signal("request::activate", function()
