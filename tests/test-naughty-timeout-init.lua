@@ -16,8 +16,7 @@ local notification = require("naughty.notification")
 local runner = require("_runner")
 
 -- Register a request::preset handler to enable the new API path.
-naughty.connect_signal("request::preset", function(n, context, args)
-end)
+naughty.connect_signal("request::preset", function() end)
 
 -- Register a display handler so notifications are "shown"
 naughty.connect_signal("request::display", function(n)
