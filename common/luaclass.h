@@ -23,6 +23,7 @@
 #define AWESOME_COMMON_LUACLASS
 
 #include "common/signal.h"
+#include "common/util.h"
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -132,14 +133,14 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
 }
 
 #define LUA_CLASS_FUNCS(prefix, lua_class) \
-    static inline int                                                          \
+    static inline int mayused                                                  \
     luaA_##prefix##_class_add_signal(lua_State *L)                             \
     {                                                                          \
         luaA_deprecate(L, "signal usage without add_signal()");                \
         return 0;                                                              \
     }                                                                          \
                                                                                \
-    static inline int                                                          \
+    static inline int mayused                                                  \
     luaA_##prefix##_class_connect_signal(lua_State *L)                         \
     {                                                                          \
         luaA_class_connect_signal_from_stack(L, &(lua_class),                  \
@@ -147,7 +148,7 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
         return 0;                                                              \
     }                                                                          \
                                                                                \
-    static inline int                                                          \
+    static inline int mayused                                                  \
     luaA_##prefix##_class_disconnect_signal(lua_State *L)                      \
     {                                                                          \
         luaA_class_disconnect_signal_from_stack(L, &(lua_class),               \
@@ -155,7 +156,7 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
         return 0;                                                              \
     }                                                                          \
                                                                                \
-    static inline int                                                          \
+    static inline int mayused                                                  \
     luaA_##prefix##_class_emit_signal(lua_State *L)                            \
     {                                                                          \
         luaA_class_emit_signal(L, &(lua_class), luaL_checkstring(L, 1),        \
@@ -163,20 +164,20 @@ luaA_checkudataornil(lua_State *L, int udx, lua_class_t *class)
         return 0;                                                              \
     }                                                                          \
                                                                                \
-    static inline int                                                          \
+    static inline int mayused                                                  \
     luaA_##prefix##_class_instances(lua_State *L)                              \
     {                                                                          \
         lua_pushinteger(L, (lua_class).instances);                             \
         return 1;                                                              \
     }                                                                          \
                                                                                \
-    static inline int                                                          \
+    static inline int mayused                                                  \
     luaA_##prefix##_set_index_miss_handler(lua_State *L)                       \
     {                                                                          \
         return luaA_registerfct(L, 1, &(lua_class).index_miss_handler);        \
     }                                                                          \
                                                                                \
-    static inline int                                                          \
+    static inline int mayused                                                  \
     luaA_##prefix##_set_newindex_miss_handler(lua_State *L)                    \
     {                                                                          \
         return luaA_registerfct(L, 1, &(lua_class).newindex_miss_handler);     \
