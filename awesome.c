@@ -58,7 +58,15 @@
 
 #include <glib-unix.h>
 
-awesome_t globalconf;
+awesome_t globalconf = {
+    .keygrabber = LUA_REFNIL,
+    .mousegrabber = LUA_REFNIL,
+    .exit_code = EXIT_SUCCESS,
+    .focus = {
+        .need_update = true,
+    },
+    .preferred_icon_size = 0,
+};
 
 /** argv used to run awesome */
 static char **awesome_argv;
@@ -582,9 +590,6 @@ main(int argc, char **argv)
     setvbuf(stdout, NULL, _IOLBF, 0);
     setvbuf(stderr, NULL, _IOLBF, 0);
 
-    globalconf.keygrabber = LUA_REFNIL;
-    globalconf.mousegrabber = LUA_REFNIL;
-    globalconf.exit_code = EXIT_SUCCESS;
     globalconf.api_level = awesome_default_api_level();
     buffer_init(&globalconf.startup_errors);
 
@@ -673,12 +678,6 @@ main(int argc, char **argv)
     sa.sa_handler = signal_child;
     sa.sa_flags = SA_NOCLDSTOP | SA_RESTART;
     sigaction(SIGCHLD, &sa, 0);
-
-    /* We have no clue where the input focus is right now */
-    globalconf.focus.need_update = true;
-
-    /* set the default preferred icon size */
-    globalconf.preferred_icon_size = 0;
 
     /* X stuff */
     globalconf.connection = xcb_connect(NULL, &globalconf.default_screen);
