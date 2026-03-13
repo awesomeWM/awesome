@@ -326,15 +326,13 @@ luaA_pixbuf_to_surface(lua_State *L)
  * @tparam string name The file name.
  * @treturn gears.surface A cairo surface as light user datum.
  * @treturn nil|string The error message, if any.
- * @staticfct load_image
+ * @deprecatedstaticmtd awesome.load_image
+ * @see awesome.pixbuf_to_surface
  */
 static int
 luaA_load_image(lua_State *L)
 {
-    /* TODO: Deprecate this function, Lua can use GdkPixbuf directly plus
-     * awesome.pixbuf_to_surface
-     */
-
+    luaA_deprecate(L, "awesome.pixbuf_to_surface");
     GError *error = NULL;
     const char *filename = luaL_checkstring(L, 1);
     cairo_surface_t *surface = draw_load_image(L, filename, &error);
