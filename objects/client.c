@@ -2733,13 +2733,6 @@ client_set_fullscreen(lua_State *L, int cidx, bool s)
     if(c->fullscreen != s)
     {
         /* become fullscreen! */
-        if(s)
-        {
-            /* You can only be part of one of the special layers. */
-            client_set_below(L, cidx, false);
-            client_set_above(L, cidx, false);
-            client_set_ontop(L, cidx, false);
-        }
         int abs_cidx = luaA_absindex(L, cidx); \
         lua_pushstring(L, "fullscreen");
         c->fullscreen = s;
@@ -2838,13 +2831,6 @@ client_set_above(lua_State *L, int cidx, bool s)
 
     if(c->above != s)
     {
-        /* You can only be part of one of the special layers. */
-        if(s)
-        {
-            client_set_below(L, cidx, false);
-            client_set_ontop(L, cidx, false);
-            client_set_fullscreen(L, cidx, false);
-        }
         c->above = s;
         stack_windows();
         luaA_object_emit_signal(L, cidx, "property::above", 0);
@@ -2863,13 +2849,6 @@ client_set_below(lua_State *L, int cidx, bool s)
 
     if(c->below != s)
     {
-        /* You can only be part of one of the special layers. */
-        if(s)
-        {
-            client_set_above(L, cidx, false);
-            client_set_ontop(L, cidx, false);
-            client_set_fullscreen(L, cidx, false);
-        }
         c->below = s;
         stack_windows();
         luaA_object_emit_signal(L, cidx, "property::below", 0);
@@ -2906,13 +2885,6 @@ client_set_ontop(lua_State *L, int cidx, bool s)
 
     if(c->ontop != s)
     {
-        /* You can only be part of one of the special layers. */
-        if(s)
-        {
-            client_set_above(L, cidx, false);
-            client_set_below(L, cidx, false);
-            client_set_fullscreen(L, cidx, false);
-        }
         c->ontop = s;
         stack_windows();
         luaA_object_emit_signal(L, cidx, "property::ontop", 0);
