@@ -622,6 +622,14 @@ function notification:set_timeout(timeout)
         end
 
         self.timer = timer_die
+    else
+        -- Stop and clear any existing timer so reset_timeout() cannot
+        -- accidentally restart a stale reference.
+        if self.timer and self.timer.started then
+            self.timer:stop()
+        end
+
+        self.timer = nil
     end
     self.die = die
     self._private.timeout = timeout
@@ -1099,12 +1107,10 @@ local function create(args)
     end
 
     -- Because otherwise the setter logic would not be executed
-    if n._private.timeout then
-        n:set_timeout(n._private.timeout
-            or (n.preset and n.preset.timeout)
-            or cst.config.timeout
-        )
-    end
+    n:set_timeout(n._private.timeout
+        or (n.preset and n.preset.timeout)
+        or cst.config.defaults.timeout
+    )
 
     return n
 end
