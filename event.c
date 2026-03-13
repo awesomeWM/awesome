@@ -392,25 +392,25 @@ event_handle_configurerequest(xcb_configure_request_event_t *ev)
 
         /* Request the changes to be applied */
         luaA_object_push(L, c);
-        lua_pushstring(L, "ewmh");     /* context */
+        lua_pushliteral(L, "ewmh");     /* context */
         lua_newtable(L);               /* props */
 
         /* area, it needs to be directly in the `hints` table to comply with
            the "protocol"
          */
-        lua_pushstring(L, "x");
+        lua_pushliteral(L, "x");
         lua_pushinteger(L, geometry.x);
         lua_rawset(L, -3);
 
-        lua_pushstring(L, "y");
+        lua_pushliteral(L, "y");
         lua_pushinteger(L, geometry.y);
         lua_rawset(L, -3);
 
-        lua_pushstring(L, "width");
+        lua_pushliteral(L, "width");
         lua_pushinteger(L, geometry.width);
         lua_rawset(L, -3);
 
-        lua_pushstring(L, "height");
+        lua_pushliteral(L, "height");
         lua_pushinteger(L, geometry.height);
         lua_rawset(L, -3);
 
@@ -898,7 +898,6 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
     if(ev->subCode == XCB_RANDR_NOTIFY_OUTPUT_CHANGE) {
         xcb_randr_output_t output = ev->u.oc.output;
         uint8_t connection = ev->u.oc.connection;
-        const char *connection_str = NULL;
         xcb_randr_get_output_info_reply_t *info;
         lua_State *L = globalconf_get_lua_State();
 
@@ -914,20 +913,19 @@ event_handle_randr_output_change_notify(xcb_randr_notify_event_t *ev)
         if(!info)
             return;
 
-        switch(connection) {
-            case XCB_RANDR_CONNECTION_CONNECTED:
-                connection_str = "Connected";
-                break;
-            case XCB_RANDR_CONNECTION_DISCONNECTED:
-                connection_str = "Disconnected";
-                break;
-            default:
-                connection_str = "Unknown";
-                break;
+        lua_pushlstring(L, (char*)xcb_randr_get_output_info_name(info), xcb_randr_get_output_info_name_length(info));
+        switch (connection) {
+        case XCB_RANDR_CONNECTION_CONNECTED:
+            lua_pushliteral(L, "Connected");
+            break;
+        case XCB_RANDR_CONNECTION_DISCONNECTED:
+            lua_pushliteral(L, "Disconnected");
+            break;
+        default:
+            lua_pushliteral(L, "Unknown");
+            break;
         }
 
-        lua_pushlstring(L, (char *)xcb_randr_get_output_info_name(info), xcb_randr_get_output_info_name_length(info));
-        lua_pushstring(L, connection_str);
         signal_object_emit(L, &global_signals, "screen::change", 2);
 
         p_delete(&info);

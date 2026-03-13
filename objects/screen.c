@@ -396,19 +396,19 @@ luaA_viewport_get_outputs(lua_State *L, viewport_t *a)
     foreach(output, a->outputs) {
         lua_createtable(L, 3, 0);
 
-        lua_pushstring(L, "mm_width");
+        lua_pushliteral(L, "mm_width");
         lua_pushinteger(L, output->mm_width);
         lua_settable(L, -3);
 
-        lua_pushstring(L, "mm_height");
+        lua_pushliteral(L, "mm_height");
         lua_pushinteger(L, output->mm_height);
         lua_settable(L, -3);
 
-        lua_pushstring(L, "name");
+        lua_pushliteral(L, "name");
         lua_pushstring(L, output->name);
         lua_settable(L, -3);
 
-        lua_pushstring(L, "viewport_id");
+        lua_pushliteral(L, "viewport_id");
         lua_pushinteger(L, a->id);
         lua_settable(L, -3);
 
@@ -434,20 +434,20 @@ luaA_viewports(lua_State *L)
         lua_newtable(L);
 
         /* The geometry */
-        lua_pushstring(L, "geometry");
+        lua_pushliteral(L, "geometry");
 
         lua_newtable(L);
 
-        lua_pushstring(L, "x");
+        lua_pushliteral(L, "x");
         lua_pushinteger(L, a->x);
         lua_settable(L, -3);
-        lua_pushstring(L, "y");
+        lua_pushliteral(L, "y");
         lua_pushinteger(L, a->y);
         lua_settable(L, -3);
-        lua_pushstring(L, "width");
+        lua_pushliteral(L, "width");
         lua_pushinteger(L, a->width);
         lua_settable(L, -3);
-        lua_pushstring(L, "height");
+        lua_pushliteral(L, "height");
         lua_pushinteger(L, a->height);
         lua_settable(L, -3);
 
@@ -455,12 +455,12 @@ luaA_viewports(lua_State *L)
         lua_settable(L, -3);
 
         /* Add the outputs table to the arguments */
-        lua_pushstring(L, "outputs");
+        lua_pushliteral(L, "outputs");
         luaA_viewport_get_outputs(L, a);
         lua_settable(L, -3);
 
         /* Add an identifier to better detect when screens are removed */
-        lua_pushstring(L, "id");
+        lua_pushliteral(L, "id");
         lua_pushinteger(L, a->id);
         lua_settable(L, -3);
 
@@ -1609,11 +1609,11 @@ static int
 luaA_screen_get_managed(lua_State *L, screen_t *s)
 {
     if (s->lifecycle & SCREEN_LIFECYCLE_LUA)
-        lua_pushstring(L, "Lua");
+        lua_pushliteral(L, "Lua");
     else if (s->lifecycle & SCREEN_LIFECYCLE_C)
-        lua_pushstring(L, "C");
+        lua_pushliteral(L, "C");
     else
-        lua_pushstring(L, "none");
+        lua_pushliteral(L, "none");
 
     return 1;
 }
