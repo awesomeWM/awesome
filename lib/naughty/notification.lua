@@ -598,6 +598,11 @@ function notification:set_timeout(timeout)
 
     if self.timer and self._private.timeout == timeout then return end
 
+    -- Stop old timer unconditionally before branching
+    if self.timer and self.timer.started then
+        self.timer:stop()
+    end
+
     -- 0 == never
     if timeout > 0 then
         local timer_die = timer { timeout = timeout }
@@ -616,12 +621,9 @@ function notification:set_timeout(timeout)
             timer_die:start()
         end
 
-        -- Prevent a memory leak and the accumulation of active timers
-        if self.timer and self.timer.started then
-            self.timer:stop()
-        end
-
         self.timer = timer_die
+    else
+        self.timer = nil
     end
     self.die = die
     self._private.timeout = timeout
