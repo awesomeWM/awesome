@@ -1886,6 +1886,11 @@ client_focus_update(client_t *c)
     client_set_urgent(L, -1, false);
 
     if(focused_new) {
+        /* The stacking layer of fullscreen clients depends on focus state
+         * (see client_layer_translator), so a focus change requires restacking
+         * to ensure the correct layer assignment is applied. */
+        stack_windows();
+
         lua_pushboolean(L, true);
         luaA_object_emit_signal(L, -2, "property::active", 1);
         luaA_object_emit_signal(L, -1, "focus", 0);

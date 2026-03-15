@@ -165,6 +165,9 @@ stack_refresh()
     if(!need_stack_refresh)
         return;
 
+    /* Suppress spurious enter/leave events caused by restacking */
+    client_ignore_enterleave_events();
+
     xcb_window_t next = XCB_NONE;
 
     /* stack desktop windows */
@@ -196,6 +199,8 @@ stack_refresh()
         }
 
     need_stack_refresh = false;
+
+    client_restore_enterleave_events();
 }
 
 
