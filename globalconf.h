@@ -41,7 +41,6 @@
 #include "objects/key.h"
 #include "common/xembed.h"
 #include "common/xcursor.h"
-#include "common/buffer.h"
 
 #define ROOT_WINDOW_EVENT_MASK \
     (const uint32_t []) { \
@@ -148,7 +147,7 @@ typedef struct
         lua_State *real_L_dont_use_directly;
     } L;
     /** All errors messages from loading config files */
-    buffer_t startup_errors;
+    GString* startup_errors;
     /** main loop that awesome is running on */
     GMainLoop *loop;
     /** The key grabber function */
