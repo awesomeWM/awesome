@@ -136,35 +136,37 @@ gen_client("C2")
     --DOC_NEWLINE
     client.connect_signal("request::default_keybindings", function()
         awful.keyboard.append_client_keybindings({
+               group = "client",
             awful.key({modkey}, "Print",
                 function (c) saved_screenshot { auto_save_delay = 0, client = c } end ,
-                {description = "take client screenshot", group = "client"}),
+                {description = "take client screenshot"}),
             awful.key({modkey, "Shift"}, "Print",
                 function (c) saved_screenshot { auto_save_delay = 0, interactive = true, client = c } end ,
-                {description = "take interactive client screenshot", group = "client"}),
+                {description = "take interactive client screenshot"}),
             awful.key({modkey, "Control"}, "Print",
                 function (c) delayed_screenshot { auto_save_delay = 5, client = c } end ,
-                {description = "take screenshot in 5 seconds", group = "client"}),
+                {description = "take screenshot in 5 seconds"}),
             awful.key({modkey, "Shift", "Control"}, "Print",
                 function (c) delayed_screenshot { auto_save_delay = 5, interactive = true, client = c } end ,
-                {description = "take interactive screenshot in 5 seconds", group = "client"}),
+                {description = "take interactive screenshot in 5 seconds"}),
         })
     end)
     --DOC_NEWLINE
 
     awful.keyboard.append_global_keybindings({
+           group = "client",
         awful.key({}, "Print",
             function () saved_screenshot { auto_save_delay = 0 } end ,
-            {description = "take screenshot", group = "client"}),
+            {description = "take screenshot"}),
         awful.key({"Shift"}, "Print",
             function () saved_screenshot { auto_save_delay = 0, interactive = true } end ,
-            {description = "take interactive screenshot", group = "client"}),
+            {description = "take interactive screenshot"}),
         awful.key({"Control"}, "Print",
             function () delayed_screenshot { auto_save_delay = 5 } end ,
-            {description = "take screenshot in 5 seconds", group = "client"}),
+            {description = "take screenshot in 5 seconds"}),
         awful.key({"Shift", "Control"}, "Print",
             function () delayed_screenshot { auto_save_delay = 5, interactive = true } end ,
-            {description = "take interactive screenshot in 5 seconds", group = "client"}),
+            {description = "take interactive screenshot in 5 seconds"}),
     })
 
 --DOC_HIDE_START
