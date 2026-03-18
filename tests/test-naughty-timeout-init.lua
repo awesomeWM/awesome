@@ -47,10 +47,8 @@ table.insert(steps, function()
     -- Now set timeout to 0, meaning "never expire"
     n_timeout_zero.timeout = 0
 
-    -- The timeout property should be 0
-    assert(n_timeout_zero._private.timeout == 0,
-        string.format("expected _private.timeout=0, got %s",
-            tostring(n_timeout_zero._private.timeout)))
+    assert(n_timeout_zero.timeout == 0,
+        string.format("expected timeout=0, got %d", n_timeout_zero.timeout))
 
     -- The old timer (5s) should have been stopped and cleared.
     -- set_timeout(0) must stop the old timer and nil out self.timer so that
@@ -70,8 +68,7 @@ table.insert(steps, function()
     n_timeout_zero:reset_timeout()
 
     assert(n_timeout_zero.timer == nil,
-        "timer should be nil after timeout=0; reset_timeout() must not "..
-        "restart a stale timer reference")
+        "regression: reset_timeout() after timeout=0 should not recreate timer")
 
     return true
 end)
@@ -89,29 +86,22 @@ table.insert(steps, function()
     -- The default timeout from cst.config.defaults is 5 seconds.
     -- set_timeout() should have been called with that value.
     assert(n_default.timer ~= nil,
-        "no timer created for notification without explicit timeout - "..
-        "constructor guard `if n._private.timeout` skips set_timeout() "..
-        "when timeout is nil")
+        "regression: notification without explicit timeout should get a timer")
 
     assert(n_default.timer.started,
         "timer exists but is not started")
 
-    assert(n_default._private.timeout == 5,
-        string.format("expected default timeout=5, got %s",
-            tostring(n_default._private.timeout)))
+    assert(n_default.timeout == 5,
+        string.format("expected default timeout=5, got %d", n_default.timeout))
 
     return true
 end)
 
 -- Cleanup
 table.insert(steps, function()
-    if n_timeout_zero and not n_timeout_zero._private.is_destroyed then
-        n_timeout_zero:destroy()
-    end
-    if n_default and not n_default._private.is_destroyed then
-        n_default:destroy()
-    end
+    n_timeout_zero:destroy()
+    n_default:destroy()
     return true
 end)
 
-runner.run_steps(steps, { kill_clients = false })
+runner.run_steps(steps)
