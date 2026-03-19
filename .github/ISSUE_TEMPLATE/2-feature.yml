@@ -1,0 +1,25 @@
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+name: Feature Request
+description: Propose a new feature.
+labels: ["feature", "triage"]
+projects: ["awesomeWM/awesome"]
+type: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this feature request!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: Describe your idea
+    validations:
+      required: true
+  - type: upload
+    id: screenshots
+    attributes:
+      label: Upload screenshots
+      description: If applicable, add screenshots to help explain your idea.
+    validations:
+      required: false

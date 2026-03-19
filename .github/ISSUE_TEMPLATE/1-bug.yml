@@ -1,0 +1,72 @@
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/configuring-issue-templates-for-your-repository
+# https://docs.github.com/en/communities/using-templates-to-encourage-useful-issues-and-pull-requests/syntax-for-githubs-form-schema
+name: Bug Report
+description: File a bug report.
+labels: ["bug", "triage"]
+projects: ["awesomeWM/awesome"]
+type: bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to fill out this bug report!
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: How to reproduce the issue?
+      description: step-by-step instructions on what to do
+      placeholder: 1) ... 2) ... 3) PROFIT
+    validations:
+      required: true
+  - type: textarea
+    id: awesome-version-output
+    attributes:
+      label: "Output of `awesome --version`"
+      description: please use FULL command output, not version only
+      placeholder: paste it here
+    validations:
+      required: true
+  - type: textarea
+    id: result-actual
+    attributes:
+      label: Actual Result
+      placeholder: what happened
+    validations:
+      required: false
+  - type: textarea
+    id: result-expected
+    attributes:
+      label: Expected Result
+      placeholder: what should happen
+    validations:
+      required: false
+  - type: checkboxes
+    id: debug-config
+    attributes:
+      label: Default Config File
+      description: Can you reproduce the same issue with default config file
+      options:
+        - label: "I can reproduce the same problem with default `rc.lua` file"
+  - type: checkboxes
+    id: debug-argb
+    attributes:
+      label: ARGB mode
+      description: "If you experience visual glitches, have you tried running AwesomeWM with `--no-argb` flag."
+      options:
+        - label: "I experience visual glitches and tried running AwesomeWM in no-argb mode and still can reproduce the problem"
+  - type: textarea
+    # @TODO: add common steps for debugging and retrieve extra info from clients etc
+    id: logs
+    attributes:
+      label: Relevant log output
+      description: Please copy and paste any relevant log output. This will be automatically formatted into code, so no need for backticks.
+      render: shell
+    validations:
+      required: false
+  - type: upload
+    id: screenshots
+    attributes:
+      label: Upload screenshots
+      description: If applicable, add screenshots to help explain your problem.
+    validations:
+      required: false
