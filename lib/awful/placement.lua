@@ -646,6 +646,34 @@ local function rect_to_point(rect, corner_i, corner_j)
     }
 end
 
+-- Ensure a rectangle doesn't shrink beyond a fixed corner of an existing one
+-- Drawable and placement args parameters allow this to account for border width
+local function clamp_rect(drawable, args, old_geo, new_geo, fixed_corner)
+    local border_width = (not args.ignore_border_width) and drawable.border_width or 0
+
+    if fixed_corner[1] > 0 then
+        local max = old_geo.x + old_geo.width
+        if new_geo.width <= 0 or new_geo.x >= max then
+            new_geo.x = max - border_width * 2 - 1
+            new_geo.width = 1
+        end
+    elseif new_geo.width <= 0 or new_geo.x < old_geo.x then
+        new_geo.x = old_geo.x
+        new_geo.width = 1
+    end
+
+    if fixed_corner[2] > 0 then
+        local max = old_geo.y + old_geo.height
+        if new_geo.height <= 0 or new_geo.y >= max then
+            new_geo.y = max - border_width * 2 - 1
+            new_geo.height = 1
+        end
+    elseif new_geo.height <= 0 or new_geo.y < old_geo.y then
+        new_geo.y = old_geo.y
+        new_geo.height = 1
+    end
+end
+
 -- Create a pair of rectangles used to set the relative areas.
 -- v=vertical, h=horizontal
 local function get_cross_sections(abs_geo, mode)
@@ -827,9 +855,9 @@ end
 
 -- Remove border from drawable geometry
 local function remove_border(drawable, args, geo)
-    local bw    = (not args.ignore_border_width) and drawable.border_width or 0
-    geo.width  = geo.width  - 2*bw
-    geo.height = geo.height - 2*bw
+    local bw   = (not args.ignore_border_width) and drawable.border_width or 0
+    geo.width  = math.max(geo.width  - 2*bw, 0)
+    geo.height = math.max(geo.height - 2*bw, 0)
 end
 
 --- Move a drawable to the closest corner of the parent geometry (such as the
@@ -1139,7 +1167,7 @@ function placement.resize_to_mouse(d, args)
     args = add_context(args, "resize_to_mouse")
 
     local coords = capi.mouse.coords()
-    local ngeo   = geometry_common(d, args)
+    local ogeo   = geometry_common(d, args)
     local h_only = args.axis == "horizontal"
     local v_only = args.axis == "vertical"
 
@@ -1175,18 +1203,19 @@ function placement.resize_to_mouse(d, args)
 
     -- Use p0 (mouse), p1 and p2 to create a rectangle
     local pts = resize_to_point_map[corner]
-    local p1  = pts.p1 and rect_to_point(ngeo, pts.p1[1], pts.p1[2]) or coords
-    local p2  = pts.p2 and rect_to_point(ngeo, pts.p2[1], pts.p2[2]) or coords
+    local p1  = pts.p1 and rect_to_point(ogeo, pts.p1[1], pts.p1[2]) or coords
+    local p2  = pts.p2 and rect_to_point(ogeo, pts.p2[1], pts.p2[2]) or coords
 
     -- Create top_left and bottom_right points, convert to rectangle
     ngeo = rect_from_points(
-        pts.y_only and ngeo.x               or math.min(p1.x, p2.x),
-        pts.x_only and ngeo.y               or math.min(p1.y, p2.y),
-        pts.y_only and ngeo.x + ngeo.width  or math.max(p2.x, p1.x),
-        pts.x_only and ngeo.y + ngeo.height or math.max(p2.y, p1.y)
+        pts.y_only and ogeo.x               or math.min(p1.x, p2.x),
+        pts.x_only and ogeo.y               or math.min(p1.y, p2.y),
+        pts.y_only and ogeo.x + ogeo.width  or math.max(p2.x, p1.x),
+        pts.x_only and ogeo.y + ogeo.height or math.max(p2.y, p1.y)
     )
 
     remove_border(d, args, ngeo)
+    clamp_rect(d, args, ogeo, ngeo, pts.p1 or pts.p2)
 
     -- Now, correct the geometry by the given size_hints offset
     if d.apply_size_hints then
