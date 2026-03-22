@@ -1207,7 +1207,7 @@ function placement.resize_to_mouse(d, args)
     local p2  = pts.p2 and rect_to_point(ogeo, pts.p2[1], pts.p2[2]) or coords
 
     -- Create top_left and bottom_right points, convert to rectangle
-    ngeo = rect_from_points(
+    local ngeo = rect_from_points(
         pts.y_only and ogeo.x               or math.min(p1.x, p2.x),
         pts.x_only and ogeo.y               or math.min(p1.y, p2.y),
         pts.y_only and ogeo.x + ogeo.width  or math.max(p2.x, p1.x),

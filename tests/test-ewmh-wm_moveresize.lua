@@ -221,7 +221,7 @@ end)
 table.insert(steps, function()
     if not signal_buffer["request::mouse_move"] then return end
 
-    assert_signal("request::mouse_move", function(context, args)
+    assert_signal("request::mouse_move", function(_, args)
         assert(args.button      == 2)
         assert(args.mouse_pos.x == 380)
         assert(args.mouse_pos.y == 130)
