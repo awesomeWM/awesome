@@ -132,8 +132,12 @@ client_layer_translator(client_t *c)
     /* first deal with user set attributes */
     if(c->ontop)
         return WINDOW_LAYER_ONTOP;
-    /* Fullscreen windows only get their own layer when they have the focus */
-    else if(c->fullscreen && globalconf.focus.client == c)
+    /* Fullscreen windows only get their own layer when they are the most
+     * recently raised client.  Using the stack position (instead of focus)
+     * ensures that focus changes alone (e.g. sloppy / mouse-enter focus)
+     * do not alter the stacking order of fullscreen windows. */
+    else if(c->fullscreen && globalconf.stack.len
+            && globalconf.stack.tab[globalconf.stack.len-1] == c)
         return WINDOW_LAYER_FULLSCREEN;
     else if(c->above)
         return WINDOW_LAYER_ABOVE;
