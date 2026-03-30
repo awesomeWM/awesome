@@ -4,7 +4,7 @@ name: Feature Request
 description: Propose a new feature.
 labels: ["feature", "triage"]
 projects: ["awesomeWM/awesome"]
-type: bug
+type: feature
 body:
   - type: markdown
     attributes:
