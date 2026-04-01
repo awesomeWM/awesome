@@ -9,6 +9,7 @@
 -- Grab environment we need
 local surface = require("gears.surface")
 local cairo = require("lgi").cairo
+local timer = require("gears.timer")
 local capi =
 {
     client = client,
@@ -98,6 +99,17 @@ function shape.update.all(c)
     shape.update.input(c)
 end
 
+--- Schedules shape.update.all to be called next frame.
+-- @function awful.client.shape.update.all
+-- @tparam client c The client to act on
+function shape.update.all_delayed(c)
+    timer.delayed_call(function()
+        if c.valid then
+            shape.update.all(c)
+        end
+    end)
+end
+
 --- Update a client's bounding shape from the shape the client set itself.
 -- @function awful.client.shape.update.bounding
 -- @tparam client c The client to act on
@@ -136,9 +148,8 @@ end
 capi.client.connect_signal("property::shape_client_bounding", shape.update.bounding)
 capi.client.connect_signal("property::shape_client_clip", shape.update.clip)
 capi.client.connect_signal("property::shape_client_input", shape.update.input)
-capi.client.connect_signal("property::size", shape.update.all)
 capi.client.connect_signal("property::border_width", shape.update.all)
-capi.client.connect_signal("internal::update_shapes", shape.update.all)
+capi.client.connect_signal("internal::update_shapes", shape.update.all_delayed)
 
 return shape
 
