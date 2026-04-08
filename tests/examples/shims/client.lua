@@ -51,7 +51,6 @@ local native_property_defaults = {
     shape_input           = nil,
     client_shape_bounding = nil,
     client_shape_clip     = nil,
-    client_shape_input    = nil,
 
     -- Those have special code.
     maximized            = nil,
