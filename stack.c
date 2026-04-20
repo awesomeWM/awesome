@@ -21,11 +21,9 @@
 
 #include "stack.h"
 #include "ewmh.h"
-#include "objects/client.h"
-#include "objects/drawin.h"
 
 void
-stack_client_remove(client_t *c)
+stack_client_remove(lua_State *L, client_t *c, bool silent, const char *context)
 {
     foreach(client, globalconf.stack)
         if(*client == c)
@@ -34,39 +32,65 @@ stack_client_remove(client_t *c)
             break;
         }
     ewmh_update_net_client_list_stacking();
-    stack_windows();
+
+    if (!silent)
+        stack_windows(L, context, c, NULL);
 }
 
 /** Push the client at the beginning of the client stack.
+ * \param L The Lua context.
  * \param c The client to push.
+ * \param context An human readable reason of why this was done.
  */
 void
-stack_client_push(client_t *c)
+stack_client_push(lua_State *L, client_t *c, const char *context)
 {
-    stack_client_remove(c);
+    stack_client_remove(L, c, true, "");
     client_array_push(&globalconf.stack, c);
     ewmh_update_net_client_list_stacking();
-    stack_windows();
+    stack_windows(L, context, c, NULL);
 }
 
 /** Push the client at the end of the client stack.
+ * \param L The Lua context.
  * \param c The client to push.
+ * \param context An human readable reason of why this was done.
  */
 void
-stack_client_append(client_t *c)
+stack_client_append(lua_State *L, client_t *c, const char *context)
 {
-    stack_client_remove(c);
+    stack_client_remove(L, c, true, "");
     client_array_append(&globalconf.stack, c);
     ewmh_update_net_client_list_stacking();
-    stack_windows();
+    stack_windows(L, context, c, NULL);
 }
 
-static bool need_stack_refresh = false;
-
 void
-stack_windows(void)
+stack_windows(lua_State *L, const char *context, client_t *c, drawin_t *d)
 {
-    need_stack_refresh = true;
+    /* Context */
+    lua_pushstring(L, context);
+
+    /* Create hints table */
+    lua_newtable(L);
+
+    lua_pushstring(L, "client");
+    if (c)
+        luaA_object_push(L, c);
+    else
+        lua_pushnil(L);
+
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "drawin");
+    if (d)
+        luaA_object_push(L, d);
+    else
+        lua_pushnil(L);
+
+    lua_settable(L, -3);
+
+    luaA_class_emit_signal(L, &client_class, "request::restack", 2);
 }
 
 /** Stack a window above another window, without causing errors.
@@ -107,95 +131,48 @@ stack_client_above(client_t *c, xcb_window_t previous)
     return previous;
 }
 
-/** Stacking layout layers */
-typedef enum
-{
-    /** This one is a special layer */
-    WINDOW_LAYER_IGNORE,
-    WINDOW_LAYER_DESKTOP,
-    WINDOW_LAYER_BELOW,
-    WINDOW_LAYER_NORMAL,
-    WINDOW_LAYER_ABOVE,
-    WINDOW_LAYER_FULLSCREEN,
-    WINDOW_LAYER_ONTOP,
-    /** This one only used for counting and is not a real layer */
-    WINDOW_LAYER_COUNT
-} window_layer_t;
-
-/** Get the real layer of a client according to its attribute (fullscreen, …)
- * \param c The client.
- * \return The real layer.
+/**
+ * Allow Lua to define the stacking order of clients and wiboxes.
+ *
+ * The table must contain `client` and `wibox` object. Index `1` is the closest
+ * to the root (wallpaper) and the last index is the closest to the top.
+ *
+ * @staticfct root.set_stacking_order
+ * @tparam table stacking_order
  */
-static window_layer_t
-client_layer_translator(client_t *c)
-{
-    /* first deal with user set attributes */
-    if(c->ontop)
-        return WINDOW_LAYER_ONTOP;
-    /* Fullscreen windows only get their own layer when they have the focus */
-    else if(c->fullscreen && globalconf.focus.client == c)
-        return WINDOW_LAYER_FULLSCREEN;
-    else if(c->above)
-        return WINDOW_LAYER_ABOVE;
-    else if(c->below)
-        return WINDOW_LAYER_BELOW;
-    /* check for transient attr */
-    else if(c->transient_for)
-        return WINDOW_LAYER_IGNORE;
-
-    /* then deal with windows type */
-    switch(c->type)
-    {
-      case WINDOW_TYPE_DESKTOP:
-        return WINDOW_LAYER_DESKTOP;
-      default:
-        break;
-    }
-
-    return WINDOW_LAYER_NORMAL;
-}
-
-/** Restack clients.
- * \todo It might be worth stopping to restack everyone and only stack `c'
- * relatively to the first matching in the list.
- */
-void
-stack_refresh()
-{
-    if(!need_stack_refresh)
-        return;
-
+int
+luaA_set_stacking_order(lua_State *L) {
     xcb_window_t next = XCB_NONE;
 
-    /* stack desktop windows */
-    for(window_layer_t layer = WINDOW_LAYER_DESKTOP; layer < WINDOW_LAYER_BELOW; layer++)
-        foreach(node, globalconf.stack)
-            if(client_layer_translator(*node) == layer)
-                next = stack_client_above(*node, next);
+    if(lua_gettop(L) == 1)
+    {
+        luaA_checktable(L, 1);
 
-    /* first stack not ontop drawin window */
-    foreach(drawin, globalconf.drawins)
-        if(!(*drawin)->ontop)
+        lua_pushnil(L);
+
+        while(lua_next(L, 1))
         {
-            stack_window_above((*drawin)->window, next);
-            next = (*drawin)->window;
+            if (luaA_class_get(L, -1) == &client_class)
+            {
+                client_t *c = luaA_object_ref_class(L, -1, &client_class);
+                next = stack_client_above(c, next);
+                luaA_object_unref(L, c);
+            }
+            else if (luaA_class_get(L, -1) == &drawin_class)
+            {
+                drawin_t *d = luaA_object_ref_class(L, -1, &drawin_class);
+                stack_window_above(d->window, next);
+                next = d->window;
+                luaA_object_unref(L, d);
+            }
+            else
+                return luaL_error(L, "set_stacking_order only works on clients and drawins");
         }
 
-    /* then stack clients */
-    for(window_layer_t layer = WINDOW_LAYER_BELOW; layer < WINDOW_LAYER_COUNT; layer++)
-        foreach(node, globalconf.stack)
-            if(client_layer_translator(*node) == layer)
-                next = stack_client_above(*node, next);
+        lua_pop(L, 1);
+    }
 
-    /* then stack ontop drawin window */
-    foreach(drawin, globalconf.drawins)
-        if((*drawin)->ontop)
-        {
-            stack_window_above((*drawin)->window, next);
-            next = (*drawin)->window;
-        }
-
-    need_stack_refresh = false;
+    return 0;
 }
 
 

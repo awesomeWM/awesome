@@ -830,8 +830,14 @@ event_handle_maprequest(xcb_map_request_event_t *ev)
             luaA_object_push(L, c);
             client_set_minimized(L, -1, false);
             lua_pop(L, 1);
-            /* it will be raised, so just update ourself */
-            client_raise(c);
+
+            lua_pushstring(L, "maprequest");
+            lua_newtable(L);
+            lua_pushstring(L, "client");
+            luaA_object_push(L, c);
+            lua_rawset(L, -3);
+
+            luaA_object_emit_signal(L, -3, "request::raise", 2);
         }
     }
     else
