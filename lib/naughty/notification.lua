@@ -1101,12 +1101,10 @@ local function create(args)
     end
 
     -- Because otherwise the setter logic would not be executed
-    if n._private.timeout then
-        n:set_timeout(n._private.timeout
-            or (n.preset and n.preset.timeout)
-            or cst.config.timeout
-        )
-    end
+    n:set_timeout(n._private.timeout
+        or (n.preset and n.preset.timeout)
+        or cst.config.defaults.timeout
+    )
 
     return n
 end
