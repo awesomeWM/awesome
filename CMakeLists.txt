@@ -70,7 +70,6 @@ set(AWE_SRCS
     ${BUILD_DIR}/xrdb.c
     ${BUILD_DIR}/common/atoms.c
     ${BUILD_DIR}/common/backtrace.c
-    ${BUILD_DIR}/common/buffer.c
     ${BUILD_DIR}/common/luaclass.c
     ${BUILD_DIR}/common/lualib.c
     ${BUILD_DIR}/common/luaobject.c

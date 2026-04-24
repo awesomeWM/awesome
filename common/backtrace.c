@@ -21,6 +21,7 @@
 
 #include "config.h"
 #include "common/backtrace.h"
+#include "common/util.h"
 
 #ifdef HAS_EXECINFO
 #include <execinfo.h>
@@ -31,11 +32,10 @@
 /** Get a backtrace.
   * \param buf The buffer to fill with backtrace.
   */
-void
-backtrace_get(buffer_t *buf)
+GString*
+backtrace_get(void)
 {
-    buffer_init(buf);
-
+    GString *buf = g_string_new(NULL);
 #ifdef HAS_EXECINFO
     void *stack[MAX_STACK_SIZE];
     char **bt;
@@ -49,14 +49,15 @@ backtrace_get(buffer_t *buf)
         for(int i = 0; i < stack_size; i++)
         {
             if(i > 0)
-                buffer_addsl(buf, "\n");
-            buffer_adds(buf, bt[i]);
+                g_string_append(buf, "\n");
+            g_string_append(buf, bt[i]);
         }
         p_delete(&bt);
     }
     else
 #endif
-        buffer_addsl(buf, "Cannot get backtrace symbols.");
+    g_string_append(buf, "Cannot get backtrace symbols.");
+    return buf;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
