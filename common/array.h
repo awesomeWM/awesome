@@ -91,7 +91,9 @@
                     (arr->len - pos - len) * sizeof(*items));               \
             arr->len += count - len;                                        \
         }                                                                   \
-        memcpy(arr->tab + pos, items, count * sizeof(*items));              \
+        if (count > 0) {                                                    \
+            memcpy(arr->tab + pos, items, count * sizeof(*items));          \
+        }                                                                   \
     }                                                                       \
     static inline type_t pfx##_array_take(pfx##_array_t *arr, int pos) {    \
         type_t res = arr->tab[pos];                                         \
