@@ -40,16 +40,17 @@ xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
        && (reply->type == XCB_ATOM_STRING
            || reply->type == UTF8_STRING
            || reply->type == COMPOUND_TEXT)
-       && reply->format == 8
-       && xcb_get_property_value_length(reply))
+       && reply->format == 8)
     {
-        /* We need to copy it that way since the string may not be
-         * NULL-terminated */
         int len = xcb_get_property_value_length(reply);
-        char *value = p_new(char, len + 1);
-        memcpy(value, xcb_get_property_value(reply), len);
-        value[len] = '\0';
-        return value;
+        if (len > 0) {
+            /* We need to copy it that way since the string may not be
+            * NULL-terminated */
+            char* value = p_new(char, len + 1);
+            memcpy(value, xcb_get_property_value(reply), (size_t)len);
+            value[len] = '\0';
+            return value;
+        }
     }
     return NULL;
 }
