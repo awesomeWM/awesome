@@ -148,6 +148,8 @@ set(AWESOME_DEPENDENCIES
     xcb-icccm
     xcb-icccm>=0.3.8
     xcb-xfixes
+    xcb-composite
+    xcb-damage
     # NOTE: it's not clear what version is required, but 1.10 works at least.
     # See https://github.com/awesomeWM/awesome/pull/149#issuecomment-94208356.
     xcb-xkb
