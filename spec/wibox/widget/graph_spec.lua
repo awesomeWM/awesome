@@ -522,6 +522,34 @@ describe("wibox.widget.graph", function()
                 assert.spy(widget.step_shape).was_called(1)
             end)
 
+            it("is called only between group_start() and group_end()", function()
+                local inside_group = nil
+                widget.group_start = spy.new(function(_, group_idx)
+                    assert.is_nil(inside_group)
+                    inside_group = group_idx
+                end)
+                widget.group_finish = spy.new(function(_, group_idx)
+                    assert.is_equal(group_idx, inside_group)
+                    inside_group = nil
+                end)
+                widget.step_shape = spy.new(function()
+                    assert.is_number(inside_group)
+                end)
+
+                push_data(widget, data)
+                push_data(widget, data2, 3)
+
+                widget:draw(context, cr, unpack(dimensions))
+
+                -- Callbacks should have been called for each data group,
+                -- including the empty second group,
+                assert.spy(widget.group_start).was_called(3)
+                assert.spy(widget.step_shape).was_called(#data + #data2)
+                assert.spy(widget.group_finish).was_called(3)
+                -- and group_finish() was the last of them.
+                assert.is_nil(inside_group)
+            end)
+
             it("is disabled by falsy group_colors", function()
                 -- TODO: if should_draw_data_group() gets decided on,
                 -- this should be rewritten in terms of it and
@@ -539,6 +567,312 @@ describe("wibox.widget.graph", function()
                 assert.spy(widget.step_shape).was_called(#data2)
             end)
         end) -- end describe(step_shape)
+
+        local function validate_draw_callback_options(options, group_idx, step_width)
+            if step_width then
+                -- Compare with the value passed as a parameter.
+                assert.is.equal(step_width, options._step_width)
+            end
+            assert.is.number(options._step_width)
+            assert.is.number(options._step_spacing)
+            assert.is.number(options._width)
+            assert.is.number(options._height)
+            assert.is.number(options._group_idx)
+            if group_idx then
+                -- Compare with the value passed as a parameter.
+                assert.is.equal(group_idx, options._group_idx)
+            end
+            -- Ensure it's integer.
+            assert.is.equal(math.floor(options._group_idx), options._group_idx)
+            assert.is.equal(widget, options._graph)
+            -- It also contains the draw context
+            assert.is.equal("fake context", options.fake_context)
+        end
+
+        describe("property step_hook()", function()
+            it("is not called when there are no values", function()
+                widget.step_hook = spy.new()
+
+                widget:draw(context, cr, unpack(dimensions))
+                widget:draw(context, cr, unpack(dimensions))
+
+                -- No values to draw, so no shapes drawn
+                assert.spy(widget.step_hook).was_not_called()
+            end)
+
+            it("is called to draw values", function()
+                widget.step_hook = spy.new()
+
+                -- It is called once for each value.
+                push_data(widget, data)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.step_hook).was_called(#data)
+
+                -- All data is drawn despite the gap between data groups
+                push_data(widget, data2, 3)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.step_hook).was_called(2*#data + #data2)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.step_hook).was_called(3*#data + 2*#data2)
+            end)
+
+            it("receives proper arguments from draw()", function()
+                widget.step_hook = spy.new(function(_, _, _, _, step_width, options)
+                    validate_draw_callback_options(options, nil, step_width)
+                end)
+                push_data(widget, data)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.step_hook).was_called_with(
+                    cr, -- cairo
+                    match.is_number(), -- x
+                    match.is_number(), -- value_y
+                    match.is_number(), -- baseline_y
+                    match.is_number(), -- step_width
+                    match.is_table() -- options
+                )
+            end)
+
+            it("receives NaNs from draw()", function()
+                local nans_encountered = 0
+                widget.step_hook = spy.new(function(_, x, y, b, step_width)
+                    if not(y == y) then
+                        nans_encountered = nans_encountered + 1
+                    end
+                    -- These are never NaNs though.
+                    assert.is_equal(x, x)
+                    assert.is_equal(b, b)
+                    assert.is_equal(step_width, step_width)
+                end)
+
+                -- When there are no NaNs in data, there are no NaNs.
+                push_data(widget, data)
+                push_data(widget, data2, 3)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.is.equal(0, nans_encountered)
+                -- Write out arguments in full once so that one doesn't
+                -- forget to update this test if arguments get changed.
+                assert.spy(widget.step_hook).was_called_with(
+                    cr, -- cairo
+                    match.is_number(), -- x
+                    match.is_number(), -- value_y
+                    match.is_number(), -- baseline_y
+                    match.is_number(), -- step_width
+                    match.is_table() -- options
+                )
+
+                -- When there is as much as a single NaN, we get it,
+                widget:add_value(0/0, 3)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.is.equal(1, nans_encountered)
+                -- no matter in which group,
+                widget:add_value(0/0, 1)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.is.equal(3, nans_encountered)
+                -- even in a previously empty one.
+                widget:add_value(0/0, 2)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.is.equal(6, nans_encountered)
+            end)
+
+            it("overrides step_shape()", function()
+                -- Even if step_shape is set after step_hook
+                widget.step_hook = spy.new()
+                widget.step_shape = spy.new()
+
+                push_data(widget, data)
+                push_data(widget, data2, 3)
+
+                widget:draw(context, cr, unpack(dimensions))
+
+                -- step_hook should have been called
+                assert.spy(widget.step_hook).was_called(#data + #data2)
+                -- and step_shape should not.
+                assert.spy(widget.step_shape).was_not.called()
+            end)
+
+            it("'s errors are not silenced by draw()", function()
+                widget.step_hook = spy.new(function() assert(false) end)
+                push_data(widget, data)
+
+                assert.has.errors(function()
+                   widget:draw(context, cr, unpack(dimensions))
+                end)
+                assert.spy(widget.step_hook).was_called(1)
+            end)
+
+            it("is called only between group_start() and group_end()", function()
+                local inside_group = nil
+                widget.group_start = spy.new(function(_, group_idx)
+                    assert.is_nil(inside_group)
+                    inside_group = group_idx
+                end)
+                widget.group_finish = spy.new(function(_, group_idx)
+                    assert.is_equal(group_idx, inside_group)
+                    inside_group = nil
+                end)
+                widget.step_hook = spy.new(function(_, _, _, _, _, options)
+                    assert.is_equal(options._group_idx, inside_group)
+                end)
+
+                push_data(widget, data)
+                push_data(widget, data2, 3)
+
+                widget:draw(context, cr, unpack(dimensions))
+
+                -- Callbacks should have been called for each data group,
+                -- including the empty second group,
+                assert.spy(widget.group_start).was_called(3)
+                assert.spy(widget.step_hook).was_called(#data + #data2)
+                assert.spy(widget.group_finish).was_called(3)
+                -- and group_finish() was the last of them.
+                assert.is_nil(inside_group)
+            end)
+
+            it("is disabled by falsy group_colors", function()
+                -- TODO: if should_draw_data_group() gets decided on,
+                -- this should be rewritten in terms of it and
+                -- should_draw_data_group() should be tested by colors in turn.
+                widget.step_hook = spy.new()
+                widget.group_colors = { "#feedf00d", "#deadbeef", "#0badcafe" }
+                push_data(widget, data, 1)
+                push_data(widget, data, 2)
+                push_data(widget, data2, 3)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.step_hook).was_called(2*#data + #data2)
+                widget.step_hook:clear()
+                widget.group_colors = { nil, false, "#feedf00d" }
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.step_hook).was_called(#data2)
+            end)
+
+            it("always starts drawing values starting with x=0", function()
+                local first_value = nil
+                widget.step_hook = function(_, x)
+                    if first_value == nil then
+                        first_value = x
+                    end
+                end
+                widget.group_finish = spy.new(function(_, group_idx)
+                    assert.is.equal(group_idx ~= 2 and 0 or nil, first_value)
+                    first_value = nil
+                end)
+                push_data(widget, data, 1)
+                push_data(widget, data2, 3)
+
+                -- With default settings.
+                widget:draw(context, cr, unpack(dimensions))
+                -- And with step_width.
+                widget.step_width = 3
+                widget:draw(context, cr, unpack(dimensions))
+                -- And with step_spacing.
+                widget.step_spacing = 3
+                widget:draw(context, cr, unpack(dimensions))
+
+                assert.spy(widget.group_finish).was_called(9)
+            end)
+
+        end) -- end describe(step_hook)
+
+        describe("property group_start()", function()
+            it("is called by draw() for each data group", function()
+                widget.group_start = spy.new()
+                -- Not used, when there are no data groups.
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_start).was_not.called()
+                -- Used once for each data group (even empty ones, as it
+                -- happens, though that is not really necessary).
+                -- But I'm testing for it here too, so that possible
+                -- future behavior change can be detected, and it can
+                -- be decided, if it's ok to break.
+                push_data(widget, data, 1)
+                push_data(widget, data2, 3)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_start).was_called(3)
+                assert.spy(widget.group_start).was_called_with(cr, 1, match.is_table())
+                assert.spy(widget.group_start).was_called_with(cr, 2, match.is_table())
+                assert.spy(widget.group_start).was_called_with(cr, 3, match.is_table())
+            end)
+
+            it("receives proper arguments from draw()", function()
+                widget.group_start = spy.new(function(_, group_idx, options)
+                    validate_draw_callback_options(options, group_idx)
+                end)
+                push_data(widget, data)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_start).was_called_with(cr, 1, match.is_table())
+            end)
+
+            it("'s errors are not silenced by draw()", function()
+                widget.group_start = spy.new(function() assert(false) end)
+                push_data(widget, data)
+
+                assert.has.errors(function()
+                   widget:draw(context, cr, unpack(dimensions))
+                end)
+                assert.spy(widget.group_start).was_called(1)
+            end)
+
+            it("shifts coordinates when set to a number", function()
+                local x_coords = {}
+                widget.step_hook = function(_, x)
+                    table.insert(x_coords, x)
+                end
+                -- First a run without setting it.
+                assert.is_nil(widget.group_start)
+                push_data(widget, data)
+                widget:draw(context, cr, unpack(dimensions))
+                -- Now a run with setting it to a number.
+                local x_coords_unshifted = {unpack(x_coords)}
+                x_coords = {}
+                widget.group_start = 3
+                widget:draw(context, cr, unpack(dimensions))
+
+                assert.is.equal(#x_coords_unshifted, #x_coords)
+                for i, x in ipairs(x_coords_unshifted) do
+                    assert.is.equal(x+3, x_coords[i])
+                end
+            end)
+        end) -- end describe(group_start)
+
+        describe("property group_finish()", function()
+            it("is called by draw() for each data group", function()
+                widget.group_finish = spy.new()
+                -- Not used, when there are no data groups.
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_finish).was_not.called()
+                -- Used once for each data group (even empty ones, as it
+                -- happens, though that is not really necessary).
+                -- But I'm testing for it here too, so that possible
+                -- future behavior change can be detected, and it can
+                -- be decided, if it's ok to break.
+                push_data(widget, data, 1)
+                push_data(widget, data2, 3)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_finish).was_called(3)
+                assert.spy(widget.group_finish).was_called_with(cr, 1, match.is_table())
+                assert.spy(widget.group_finish).was_called_with(cr, 2, match.is_table())
+                assert.spy(widget.group_finish).was_called_with(cr, 3, match.is_table())
+            end)
+
+            it("receives proper arguments from draw()", function()
+                widget.group_finish = spy.new(function(_, group_idx, options)
+                    validate_draw_callback_options(options, group_idx)
+                end)
+                push_data(widget, data)
+                widget:draw(context, cr, unpack(dimensions))
+                assert.spy(widget.group_finish).was_called_with(cr, 1, match.is_table())
+            end)
+
+            it("'s errors are not silenced by draw()", function()
+                widget.group_finish = spy.new(function() assert(false) end)
+                push_data(widget, data)
+
+                assert.has.errors(function()
+                   widget:draw(context, cr, unpack(dimensions))
+                end)
+                assert.spy(widget.group_finish).was_called(1)
+            end)
+        end) -- end describe(group_finish)
 
         describe("method compute_drawn_values_num()", function()
             it("'s default implementation computes things correctly", function()
@@ -843,6 +1177,18 @@ describe("wibox.widget.graph", function()
                     assert.is.equal(3, magic_color_used)
                     assert.spy(s).was_called(9)
                     s:clear()
+                    -- Also used, when group_start is set to number,
+                    assert.is_nil(widget.group_start)
+                    widget.group_start = 3
+                    widget:draw(context, cr, unpack(dimensions))
+                    assert.is.equal(5, magic_color_used)
+                    assert.spy(s).was_called(4)
+                    s:clear()
+                    -- but not when group_start is set to function.
+                    widget.group_start = function() end
+                    widget:draw(context, cr, unpack(dimensions))
+                    assert.is.equal(5, magic_color_used)
+                    assert.spy(s).was_not_called()
                 end)
 
                 it("'s returned color is set early, so as to be available in the corresponding step_shape()", function()
@@ -853,6 +1199,27 @@ describe("wibox.widget.graph", function()
                     end
                     widget.step_shape = function()
                         if current_data_group % 2 == 1 then
+                            assert.is.equal(magic_color, current_cr_source)
+                        else
+                            assert.is_not.equal(magic_color, current_cr_source)
+                        end
+                    end
+                    assert.is.equal(0, magic_color_used)
+                    assert.is_nil(current_cr_source)
+                    push_data(widget, data, 1)
+                    push_data(widget, data2, 2)
+                    push_data(widget, data2, 3)
+                    push_data(widget, data, 4)
+                    widget:draw(context, cr, unpack(dimensions))
+                    assert.is.equal(2, magic_color_used)
+                end)
+
+                it("'s returned color is set early, so as to be available in the corresponding step_hook()", function()
+                    widget.pick_data_group_color = function(_, data_group)
+                        return (data_group % 2 == 1) and magic_color or "#feedf00d"
+                    end
+                    widget.step_hook = function(_, _, _, _, _, options)
+                        if options._group_idx % 2 == 1 then
                             assert.is.equal(magic_color, current_cr_source)
                         else
                             assert.is_not.equal(magic_color, current_cr_source)
