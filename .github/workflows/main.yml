@@ -163,31 +163,9 @@ jobs:
         with:
           luaVersion: ${{ matrix.lua_version }}
 
-      - name: Cache luarocks
-        id: cache-luarocks
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: /tmp/luarocks
-          # The build input for luarocks changes per test, so we need separate caches
-          key: ${{ github.workflow }}-${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.8.0
-
-      - name: Install fresh Luarocks
-        if: steps.cache-luarocks.outputs.cache-hit != 'true'
-        run: |
-          wget -O /tmp/luarocks.tar.gz https://github.com/luarocks/luarocks/archive/v3.8.0.tar.gz
-          mkdir /tmp/luarocks
-          tar -xf /tmp/luarocks.tar.gz -C /tmp/luarocks --strip-components=1
-          cd /tmp/luarocks
-          ./configure --lua-version=${{ matrix.lua_version }} --with-lua-include=${LUAINCLUDE} ${{ matrix.luarocks_args }}
-          make build
-          sudo make install
-
-      - name: Install cached Luarocks
-        if: steps.cache-luarocks.outputs.cache-hit == 'true'
-        run: |
-          cd /tmp/luarocks
-          sudo make install
-
+      - name: Install Luarocks
+        uses: leafo/gh-actions-luarocks@35d062def313a7699a0d513e996bcf4352f05389 # v6.1.0
+        
       - name: Cache xcb-errors
         id: cache-xcb-errors
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -226,20 +204,20 @@ jobs:
       - name: Install rocks
         run: |
           if [ "${{ matrix.lua_name }}" != "lua5.4" ]; then
-            sudo -H luarocks install lgi ${{ matrix.lgi_version }}
+            luarocks install lgi ${{ matrix.lgi_version }}
           fi
-          sudo -H luarocks install ldoc
-          sudo -H luarocks install busted
+          luarocks install ldoc
+          luarocks install busted
 
       - name: Install QA check rocks
         if: matrix.check_qa
         run: |
-          sudo -H luarocks install luacheck
-          sudo -H luarocks install depgraph
+          luarocks install luacheck
+          luarocks install depgraph
 
       - name: Install cluacov rock
         if: matrix.coverage
-        run: sudo -H luarocks install cluacov
+        run: luarocks install cluacov
 
       - name: Create Build Environment
         run: cmake -E make_directory -B "${{ github.workspace }}/build"
@@ -291,7 +269,7 @@ jobs:
       - name: Install and run
         run: |
           cd "${{ github.workspace }}/build"
-          sudo make install
+          sudo --preserve-env=LUA_PATH,LUA_CPATH,PATH make install
           awesome --version
 
       - name: Run integration tests
