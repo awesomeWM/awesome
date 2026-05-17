@@ -34,8 +34,6 @@ jobs:
           - test_name: "lua5.4"
             lua_version: "5.4"
             lua_name: "lua5.4"
-            lua_library: "/usr/local/lib/liblua.a"
-            lua_include: "/usr/local/include"
             manual_screens: true
 
           - test_name: "codecov-lua5.3"
@@ -54,7 +52,7 @@ jobs:
             lua_name: "lua5.1"
 
           - test_name: "luajit"
-            lua_version: "5.1"
+            lua_version: "luajit-master"
             lua_name: "luajit"
             lua_library: ".lua/lib/libluajit-5.1.a"
             lua_include: ".lua/include/luajit-2.0"
@@ -71,8 +69,8 @@ jobs:
 
     env:
       LUA: ${{ matrix.lua_version }}
-      LUAINCLUDE: ${{ matrix.lua_include || format('/usr/include/lua{0}', matrix.lua_version) }}
-      LUALIBRARY: ${{ matrix.lua_library || format('/usr/lib/x86_64-linux-gnu/liblua{0}.so', matrix.lua_version) }}
+      LUAINCLUDE: ${{ matrix.lua_include || '.lua/include' }}
+      LUALIBRARY: ${{ matrix.lua_library || '.lua/lib/liblua.a' }}
       TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }}
       TEST_TIMEOUT: "100"
       CI: "true"
@@ -156,31 +154,14 @@ jobs:
       - name: Install downloaded packages
         run: sudo dpkg -i /var/cache/apt/archives/*.deb
 
-      - name: Install Lua packages
-        if: matrix.lua_version != '5.4'
-        run: |
-          sudo apt-get install liblua${{ matrix.lua_version }}-dev lua${{ matrix.lua_version }}
-          
       # Check out repository to ${{ github.workspace }}
       # Automatically picks the current branch/PR
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Install LuaJIT
-        if: matrix.lua_name == 'luajit'
-        uses: luarocks/gh-actions-lua@989f8e6ffba55ce1817e236478c98558e598776c #v11
+      - name: Install Lua
+        uses: leafo/gh-actions-lua@6919171ccf181b826f44b9bca76307b577217377 #v13.0.0
         with:
-          luaVersion: luajit-master
-
-      # Ubuntu 20.04 hasn't a package for Lua 5.4, we need to build it from source.
-      - name: Build and Install Lua 5.4
-        if: matrix.lua_version == '5.4'
-        run: |
-          wget -O /tmp/lua-5.4.3.tar.gz http://www.lua.org/ftp/lua-5.4.3.tar.gz
-          tar -xf /tmp/lua-5.4.3.tar.gz -C /tmp
-          cd /tmp/lua-5.4.3
-          make all
-          make test
-          sudo make install
+          luaVersion: ${{ matrix.lua_version }}
 
       - name: Cache luarocks
         id: cache-luarocks
@@ -239,7 +220,7 @@ jobs:
           unzip /tmp/lgi.zip -d /tmp
           cd /tmp/lgi-master
           sed -i 's/5.1/5.4/' lgi/Makefile
-          make all
+          make all CFLAGS="-I$LUAINCLUDE"
           sudo make install
 
       - name: Install rocks
