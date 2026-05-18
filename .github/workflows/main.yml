@@ -68,12 +68,11 @@ jobs:
             test_prev_commits: true
 
     env:
-      LUA: ${{ matrix.lua_version }}
       LUAINCLUDE: ${{ matrix.lua_include || '.lua/include' }}
       LUALIBRARY: ${{ matrix.lua_library || '.lua/lib/liblua.a' }}
-      TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }}
-      TEST_TIMEOUT: "100"
-      CI: "true"
+      TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }} # Indirect usage by tests
+      TEST_TIMEOUT: "100" # Indirect usage by tests
+      CI: "true" # Indirect usage by tests
 
     steps:
       # Create a cache invalidation key based on the current year + week.
