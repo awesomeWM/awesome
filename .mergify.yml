@@ -1,17 +1,36 @@
+shared:
+  merge_conditions: &merge_conditions
+    - label != mergify/no-merge
+    - '#approved-reviews-by >= 2'
+    - check-success = lua5.4
+    - check-success = codecov-lua5.3
+    - check-success = lua5.2
+    - check-success = luajit
+    - check-success = fixed-lgi-lua5.2
+    - check-success = lua5.1
+    - check-success = main
+    - status-success = codecov/patch
+
 pull_request_rules:
-  - name: automatic merge
+  - name: dismiss stale reviews on update
     conditions:
+      - base=master
       - label!=no-mergify
-      - '#approved-reviews-by>=2'
-      - check-success=lua5.4
-      - check-success=codecov-lua5.3
-      - check-success=lua5.2
-      - check-success=luajit
-      - check-success=fixed-lgi-lua5.2
-      - check-success=lua5.1
-      - check-success=main
-      - status-success=codecov/patch
+    actions:
+      dismiss_reviews: {}
+
+  - name: automatic merge [SQUASH]
+    conditions: 
+      - and: *merge_conditions
+      - label = mergify/squash     
     actions:
       merge:
         method: squash
-      dismiss_reviews: {}
+
+  - name: automatic merge [MERGE]
+    conditions:
+      - and: *merge_conditions
+      - label != mergify/squash
+    actions:
+      merge:
+        method: merge
