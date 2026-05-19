@@ -34,9 +34,6 @@ jobs:
           - test_name: "lua5.4"
             lua_version: "5.4"
             lua_name: "lua5.4"
-            lua_library: "/usr/local/lib/liblua.a"
-            lua_include: "/usr/local/include"
-            manual_screens: true
 
           - test_name: "codecov-lua5.3"
             lua_version: "5.3"
@@ -54,7 +51,7 @@ jobs:
             lua_name: "lua5.1"
 
           - test_name: "luajit"
-            lua_version: "5.1"
+            lua_version: "luajit-master"
             lua_name: "luajit"
             lua_library: ".lua/lib/libluajit-5.1.a"
             lua_include: ".lua/include/luajit-2.0"
@@ -70,12 +67,11 @@ jobs:
             test_prev_commits: true
 
     env:
-      LUA: ${{ matrix.lua_version }}
-      LUAINCLUDE: ${{ matrix.lua_include || format('/usr/include/lua{0}', matrix.lua_version) }}
-      LUALIBRARY: ${{ matrix.lua_library || format('/usr/lib/x86_64-linux-gnu/liblua{0}.so', matrix.lua_version) }}
-      TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }}
-      TEST_TIMEOUT: "100"
-      CI: "true"
+      LUAINCLUDE: ${{ matrix.lua_include || '.lua/include' }}
+      LUALIBRARY: ${{ matrix.lua_library || '.lua/lib/liblua.a' }}
+      TESTS_SCREEN_SIZE: ${{ matrix.tests_screen_size }} # Indirect usage by tests
+      TEST_TIMEOUT: "100" # Indirect usage by tests
+      CI: "true" # Indirect usage by tests
 
     steps:
       # Create a cache invalidation key based on the current year + week.
@@ -156,57 +152,18 @@ jobs:
       - name: Install downloaded packages
         run: sudo dpkg -i /var/cache/apt/archives/*.deb
 
-      - name: Install Lua packages
-        if: matrix.lua_version != '5.4'
-        run: |
-          sudo apt-get install liblua${{ matrix.lua_version }}-dev lua${{ matrix.lua_version }}
-          
       # Check out repository to ${{ github.workspace }}
       # Automatically picks the current branch/PR
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
 
-      - name: Install LuaJIT
-        if: matrix.lua_name == 'luajit'
-        uses: luarocks/gh-actions-lua@989f8e6ffba55ce1817e236478c98558e598776c #v11
+      - name: Install Lua
+        uses: leafo/gh-actions-lua@6919171ccf181b826f44b9bca76307b577217377 #v13.0.0
         with:
-          luaVersion: luajit-master
+          luaVersion: ${{ matrix.lua_version }}
 
-      # Ubuntu 20.04 hasn't a package for Lua 5.4, we need to build it from source.
-      - name: Build and Install Lua 5.4
-        if: matrix.lua_version == '5.4'
-        run: |
-          wget -O /tmp/lua-5.4.3.tar.gz http://www.lua.org/ftp/lua-5.4.3.tar.gz
-          tar -xf /tmp/lua-5.4.3.tar.gz -C /tmp
-          cd /tmp/lua-5.4.3
-          make all
-          make test
-          sudo make install
-
-      - name: Cache luarocks
-        id: cache-luarocks
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: /tmp/luarocks
-          # The build input for luarocks changes per test, so we need separate caches
-          key: ${{ github.workflow }}-${{ runner.os }}-${{ matrix.test_name }}-luarocks-3.8.0
-
-      - name: Install fresh Luarocks
-        if: steps.cache-luarocks.outputs.cache-hit != 'true'
-        run: |
-          wget -O /tmp/luarocks.tar.gz https://github.com/luarocks/luarocks/archive/v3.8.0.tar.gz
-          mkdir /tmp/luarocks
-          tar -xf /tmp/luarocks.tar.gz -C /tmp/luarocks --strip-components=1
-          cd /tmp/luarocks
-          ./configure --lua-version=${{ matrix.lua_version }} --with-lua-include=${LUAINCLUDE} ${{ matrix.luarocks_args }}
-          make build
-          sudo make install
-
-      - name: Install cached Luarocks
-        if: steps.cache-luarocks.outputs.cache-hit == 'true'
-        run: |
-          cd /tmp/luarocks
-          sudo make install
-
+      - name: Install Luarocks
+        uses: leafo/gh-actions-luarocks@35d062def313a7699a0d513e996bcf4352f05389 # v6.1.0
+        
       - name: Cache xcb-errors
         id: cache-xcb-errors
         uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
@@ -239,26 +196,26 @@ jobs:
           unzip /tmp/lgi.zip -d /tmp
           cd /tmp/lgi-master
           sed -i 's/5.1/5.4/' lgi/Makefile
-          make all
+          make all CFLAGS="-I$LUAINCLUDE"
           sudo make install
 
       - name: Install rocks
         run: |
           if [ "${{ matrix.lua_name }}" != "lua5.4" ]; then
-            sudo -H luarocks install lgi ${{ matrix.lgi_version }}
+            luarocks install lgi ${{ matrix.lgi_version }}
           fi
-          sudo -H luarocks install ldoc
-          sudo -H luarocks install busted
+          luarocks install ldoc
+          luarocks install busted
 
       - name: Install QA check rocks
         if: matrix.check_qa
         run: |
-          sudo -H luarocks install luacheck
-          sudo -H luarocks install depgraph
+          luarocks install luacheck
+          luarocks install depgraph
 
       - name: Install cluacov rock
         if: matrix.coverage
-        run: sudo -H luarocks install cluacov
+        run: luarocks install cluacov
 
       - name: Create Build Environment
         run: cmake -E make_directory -B "${{ github.workspace }}/build"
@@ -310,7 +267,7 @@ jobs:
       - name: Install and run
         run: |
           cd "${{ github.workspace }}/build"
-          sudo make install
+          sudo --preserve-env=LUA_PATH,LUA_CPATH,PATH make install
           awesome --version
 
       - name: Run integration tests
