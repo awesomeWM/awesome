@@ -14,8 +14,8 @@ shared:
 pull_request_rules:
   - name: dismiss stale reviews on update
     conditions:
-      - base=master
-      - label!=no-mergify
+      - base = master
+      - label != mergify/no-merge
     actions:
       dismiss_reviews: {}
 
