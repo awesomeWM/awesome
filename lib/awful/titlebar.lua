@@ -993,13 +993,18 @@ function titlebar.widget.button(c, name, selector, action)
                     img = "inactive"
                 end
             end
-            local prefix = "normal"
-            if c.active then
-                prefix = "focus"
+            -- Ordered list of state prefixes to try, most specific first, so a
+            -- theme that ships no images for the urgent (or focus) state falls
+            -- back gracefully: urgent -> focus -> normal.
+            local prefixes
+            if c.urgent then
+                prefixes = { "urgent", "focus", "normal" }
+            elseif c.active then
+                prefixes = { "focus", "normal" }
+            else
+                prefixes = { "normal" }
             end
-            if img ~= "" then
-                prefix = prefix .. "_"
-            end
+            local sep = img ~= "" and "_" or ""
             local state = ret.state
             if state ~= "" then
                 state = "_" .. state
@@ -1010,13 +1015,18 @@ function titlebar.widget.button(c, name, selector, action)
                 or default_tooltip_messages[name .. "_" .. img]
                 or default_tooltip_messages[name]
                 or name
-            -- First try with a prefix based on the client's focus state,
-            -- then try again without that prefix if nothing was found,
-            -- and finally, try a fallback for compatibility with Awesome 3.5 themes
-            local theme = beautiful["titlebar_" .. name .. "_button_" .. prefix .. img .. state]
-                       or beautiful["titlebar_" .. name .. "_button_" .. prefix .. img]
-                       or beautiful["titlebar_" .. name .. "_button_" .. img]
-                       or beautiful["titlebar_" .. name .. "_button_" .. prefix .. "_inactive"]
+            -- First try with a prefix based on the client's state, falling back
+            -- to less specific states, then without a prefix, and finally a
+            -- fallback for compatibility with Awesome 3.5 themes.
+            local theme
+            for _, prefix in ipairs(prefixes) do
+                theme = beautiful["titlebar_" .. name .. "_button_" .. prefix .. sep .. img .. state]
+                     or beautiful["titlebar_" .. name .. "_button_" .. prefix .. sep .. img]
+                if theme then break end
+            end
+            theme = theme
+                 or beautiful["titlebar_" .. name .. "_button_" .. img]
+                 or beautiful["titlebar_" .. name .. "_button_" .. prefixes[1] .. sep .. "_inactive"]
             if theme then
                 img = theme
             end
@@ -1063,9 +1073,11 @@ function titlebar.widget.button(c, name, selector, action)
     update()
 
     -- We do magic based on whether a client is focused above, so we need to
-    -- connect to the corresponding signal here.
+    -- connect to the corresponding signal here. The urgent state also selects
+    -- a distinct button image, so react to it too.
     update_on_signal(c, "focus", ret)
     update_on_signal(c, "unfocus", ret)
+    update_on_signal(c, "property::urgent", ret)
 
     return ret
 end
