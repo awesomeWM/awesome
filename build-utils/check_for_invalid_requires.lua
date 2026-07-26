@@ -5,14 +5,7 @@
 -- white-list below. This is done to mitigate the risk of cyclic dependencies
 -- between modules and to (hopefully) enforce a bit of sane code structure.
 
-local have_depgraph, depgraph = pcall(require, "depgraph")
-
-if not have_depgraph then
-    print("depgraph not found")
-    print(depgraph)
-    print("(this error is non-fatal; we just skip its use)")
-    os.exit(0)
-end
+local depgraph = require("depgraph")
 
 local allowed_deps = {
     gears = {
