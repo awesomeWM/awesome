@@ -76,18 +76,12 @@ describe("awful.permissions.client_geometry_requests", function()
                 return self._tags
             end
 
-            function ret:to_selected_tags()
-                self._tags = self.screen.selected_tags
-            end
-
             return ret
         end
 
         it("makes transients from sticky parents sticky", function()
             local s = {}
             local parent_tag = { screen = s }
-            local current_tag = { screen = s }
-            s.selected_tags = { current_tag }
 
             local parent = make_client {
                 screen = s,
@@ -108,8 +102,6 @@ describe("awful.permissions.client_geometry_requests", function()
         it("places already-sticky transients with their parent", function()
             local s = {}
             local parent_tag = { screen = s }
-            local unrelated_tag = { screen = s }
-            s.selected_tags = { unrelated_tag }
 
             local parent = make_client {
                 screen = s,
