@@ -317,7 +317,9 @@ function permissions.tag(c, t, hints) --luacheck: no unused
             c.screen = c.transient_for.screen
             local tags = c.transient_for:tags()
             c:tags(#tags > 0 and tags or c.transient_for.screen.selected_tags)
-            c.sticky = c.transient_for.sticky
+            if c.transient_for.sticky then
+                c.sticky = true
+            end
         else
             c:to_selected_tags()
         end
