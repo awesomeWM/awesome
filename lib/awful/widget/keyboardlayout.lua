@@ -214,25 +214,33 @@ function keyboardlayout.get_groups_from_group_names(group_names)
     -- corresponding callback function.  Check if those extracted is country
     -- specific part of a layout.  If so, add it to 'layout_groups'; otherwise,
     -- ignore it.
+    --
+    -- The layout tokens are consecutive, so stop at the first non-layout token
+    -- that follows them.  The X server truncates the symbols name it hands out,
+    -- and the tail of a cut off option token can look like a country code:
+    -- "...+group(shifts_toggle):1+group(shifts_toggle):2" reported as
+    -- "...+group(shifts_toggle):1+gr", would add Greece as group 1.
     local layout_groups = {}
     for i = 1, #tokens do
+        local vendor, file, section, group_idx
         for pattern, callback in pairs(pattern_and_callback_pairs) do
-            local vendor, file, section, group_idx = callback(tokens[i], pattern)
+            vendor, file, section, group_idx = callback(tokens[i], pattern)
             if file then
-                if not keyboardlayout.xkeyboard_country_code[file] then
-                    break
-                end
-
-                if section then
-                    section = string.gsub(section, "%(([%w-_]+)%)", "%1")
-                end
-
-                table.insert(layout_groups, { vendor = vendor,
-                                              file = file,
-                                              section = section,
-                                              group_idx = tonumber(group_idx) })
                 break
             end
+        end
+
+        if file and keyboardlayout.xkeyboard_country_code[file] then
+            if section then
+                section = string.gsub(section, "%(([%w-_]+)%)", "%1")
+            end
+
+            table.insert(layout_groups, { vendor = vendor,
+                                          file = file,
+                                          section = section,
+                                          group_idx = tonumber(group_idx) })
+        elseif #layout_groups > 0 then
+            break
         end
     end
 

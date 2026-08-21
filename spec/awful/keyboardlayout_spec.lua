@@ -91,6 +91,19 @@ describe("awful.widget.keyboardlayout get_groups_from_group_names", function()
             { file = "jp", group_idx = 1, vendor = "macintosh_vndr", section = "usmac" },
             { file = "jp", group_idx = 2, vendor = "macintosh_vndr", section = "mac" },
         },
+        -- truncated names, where the tail of a cut off option token looks
+        -- like a country code
+        ["pc+us(altgr-intl)+de(nodeadkeys):2+inet(evdev)+compose(rctrl)+eurosign(5)+group(shifts_toggle):1+gr"] = {
+            { file = "us", group_idx = 1, section = "altgr-intl" },
+            { file = "de", group_idx = 2, section = "nodeadkeys" }
+        },
+        ["pc+us+inet(evdev)+gr"] = {
+            { file = "us", group_idx = 1 }
+        },
+        ["pc+jp+us:2+inet(evdev)+capslock(hyper)+in"] = {
+            { file = "jp", group_idx = 1 },
+            { file = "us", group_idx = 2 }
+        },
     }
 
     for arg, expected in pairs(tests) do
