@@ -118,6 +118,25 @@ describe("awful.permissions.client_geometry_requests", function()
             assert.is_true(child.sticky)
             assert.is.same({ parent_tag }, child:tags())
         end)
+
+        it("uses selected tags when a transient parent is untagged", function()
+            local s = {}
+            local selected_tag = { screen = s }
+            s.selected_tags = { selected_tag }
+
+            local parent = make_client {
+                screen = s,
+            }
+            local child = make_client {
+                screen = s,
+                sticky = true,
+                transient_for = parent,
+            }
+
+            permissions.tag(child)
+
+            assert.is.same({ selected_tag }, child:tags())
+        end)
     end)
 end)
 
