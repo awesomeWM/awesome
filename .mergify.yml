@@ -23,7 +23,7 @@ pull_request_rules:
   - name: automatic merge [SQUASH]
     conditions: 
       - and: *merge_conditions
-      - label = mergify/squash     
+      - label != mergify/merge
     actions:
       merge:
         method: squash
@@ -31,7 +31,7 @@ pull_request_rules:
   - name: automatic merge [MERGE]
     conditions:
       - and: *merge_conditions
-      - label != mergify/squash
+      - label = mergify/merge
     actions:
       merge:
         method: merge
