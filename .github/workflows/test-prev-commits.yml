@@ -1,0 +1,190 @@
+---
+name: Test Previous Commits
+
+on:
+  # Trigger on pull request events for PRs that have `master` as their target branch
+  pull_request:
+    branches: [master]
+
+
+defaults:
+  run:
+    # GitHub Actions adds `errexit` and `pipefail` by default, but we add `xtrace`
+    # to improve debugging some of the longer scripts.
+    shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  test-prev-commits:
+    runs-on: ubuntu-24.04
+    name: test-prev-commits
+
+    env:
+      TEST_TIMEOUT: "100" # Indirect usage by tests
+      CI: "true" # Indirect usage by tests
+
+    steps:
+      # Create a cache invalidation key based on the current year + week.
+      # This way, packages will be checked for updates once every week.
+      - name: Get Date
+        id: get-date
+        run: echo "date=$(/bin/date -u "+%Y%W")" >> $GITHUB_OUTPUT
+      
+      - name: Cache apt packages
+        id: cache-apt
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: /var/cache/apt/archives
+          # The trailing number serves as a version flag that can be incremented
+          # to invalidate the cache after changing the list of packages.
+          key: ${{ github.workflow }}-${{ runner.os }}-${{ steps.get-date.outputs.date }}-apt-4
+
+      - name: Download apt packages
+        if: steps.cache-apt.outputs.cache-hit != 'true'
+        run: |
+          sudo apt-get update
+          sudo apt-get install --download-only -y --no-install-recommends \
+            asciidoctor \
+            cmake \
+            dbus-x11 \
+            gettext \
+            gir1.2-gtk-3.0 \
+            gir1.2-pango-1.0 \
+            git \
+            libdbus-1-dev \
+            libgirepository1.0-dev \
+            libnotify-bin \
+            libpango1.0-dev \
+            libstartup-notification0-dev \
+            libx11-xcb-dev \
+            libxcb-cursor-dev \
+            libxcb-icccm4-dev \
+            libxcb-keysyms1-dev \
+            libxcb-randr0-dev \
+            libxcb-shape0-dev \
+            libxcb-util0-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xinerama0-dev \
+            libxcb-xkb-dev \
+            libxcb-xrm-dev \
+            libxcb-xtest0-dev \
+            libxdg-basedir-dev \
+            libxkbcommon-dev \
+            libxkbcommon-x11-dev \
+            wmctrl \
+            x11-apps \
+            xcb-proto \
+            xdotool \
+            xorg \
+            xserver-xephyr \
+            xterm \
+            xutils-dev \
+            xvfb \
+            zsh \
+            lua-discount \
+            fonts-noto-core \
+            fonts-dejavu-core \
+            fonts-roboto-unhinted \
+            fonts-open-sans \
+            imagemagick \
+            libgdk-pixbuf-2.0-dev \
+            librsvg2-dev
+
+      - name: Install downloaded packages
+        run: sudo dpkg -i /var/cache/apt/archives/*.deb
+
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          # test-prev-commits.sh needs full history for rev-list/bisect traversal.
+          fetch-depth: 0
+
+      - name: Install Lua
+        uses: luarocks/gh-actions-lua@85e2287697275df96334743ac654241a8fd34ab3 # v13
+
+      # Get the Lua version string (e.g., "5.5") and store it in an environment
+      # variable for later use.
+      - name: Detect Lua version
+        run: |
+          LUA_VERSION_SHORT="$(lua -e 'print(_VERSION:match("(%d+%.%d+)$"))')"
+          echo "LUA_VERSION_SHORT=$LUA_VERSION_SHORT" >> "$GITHUB_ENV"
+      
+      # gh-actions-lua install Lua in a non-standard location, so we need to add
+      # it to the CMake prefix path.
+      - name: Set Lua prefix
+        run: echo "CMAKE_PREFIX_PATH=${{ github.workspace }}/.lua${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}" >> "$GITHUB_ENV"
+
+      - name: Install Luarocks
+        uses: luarocks/gh-actions-luarocks@95d2308a0aff36ad31ebadca493ed14853399842 # v7
+
+      - name: Cache xcb-errors
+        id: cache-xcb-errors
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: /tmp/xcb-errors
+          key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-1.0.1
+
+      - name: Install fresh xcb-errors
+        if: steps.cache-xcb-errors.outputs.cache-hit != 'true'
+        run: |
+          wget -O /tmp/xcb-errors.tar.xz https://xorg.freedesktop.org/archive/individual/lib/xcb-util-errors-1.0.1.tar.xz
+          mkdir /tmp/xcb-errors
+          tar -xf /tmp/xcb-errors.tar.xz -C /tmp/xcb-errors/ --strip-components=1
+          cd /tmp/xcb-errors
+          ./configure --prefix=/usr
+          make
+          sudo make install
+
+      - name: Install cached xcb-errors
+        if: steps.cache-xcb-errors.outputs.cache-hit == 'true'
+        run: |
+          cd /tmp/xcb-errors
+          sudo make install
+
+      - name: Build and Install LGI
+        run: |
+          wget -O /tmp/lgi.zip https://github.com/pavouk/lgi/archive/refs/heads/master.zip
+          unzip /tmp/lgi.zip -d /tmp
+          cd /tmp/lgi-master
+          sed -i "s/5.1/$LUA_VERSION_SHORT/" lgi/Makefile
+          make all CFLAGS="-I${{ github.workspace }}/.lua/include"
+          sudo make install
+
+      - name: Install rocks
+        run: |
+          luarocks install busted
+
+      - name: Build Awesome version string
+        run: |
+          # If this workflow is triggered by a pull request, we get a base branch.
+          # Otherwise, check if the current commit has a meaningful name.
+          if [ -n "${{ github.base_ref }}" ]; then
+            AWESOME_VERSION="${{ github.base_ref }}"
+          else
+            AWESOME_VERSION="$(git rev-parse --abbrev-ref HEAD)"
+          fi
+
+          AWESOME_VERSION="${AWESOME_VERSION}-g$(git rev-parse --short HEAD)"
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            AWESOME_VERSION="${AWESOME_VERSION}-PR${{ github.event.number }}"
+          fi
+
+          echo "AWESOME_VERSION=${AWESOME_VERSION}" >> ${GITHUB_ENV}
+
+      - name: Test previous commits
+        run: |
+          export CMAKE_CONFIG="-DAWESOME_VERSION=$AWESOME_VERSION \
+          -DGENERATE_DOC=OFF \
+          -DGENERATE_MANPAGES=OFF \
+          -DDO_COVERAGE=OFF \
+          -DSTRICT_TESTS=true \
+          -DCMAKE_C_FLAGS=-Werror"
+
+          build-utils/test-prev-commits.sh \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}" \
+            --skip-clean-check
+
+# vim: filetype=yaml:expandtab:shiftwidth=2:tabstop=2

@@ -68,7 +68,6 @@ jobs:
             tests_screen_size: "1921x1079"
             check_qa: true
             empty_theme_while_loading: true
-            test_prev_commits: true
 
     env:
       LUAINCLUDE: ${{ matrix.lua_include || '.lua/include' }}
@@ -240,9 +239,7 @@ jobs:
 
           AWESOME_VERSION="${AWESOME_VERSION}-g$(git rev-parse --short HEAD)"
 
-          if [ "${{ github.event_name }}" == "pull_request" &&  -n "${{ matrix.test_prev_commits }}" ]; then
-            AWESOME_VERSION="${AWESOME_VERSION}-PR${{ github.event.number }}"
-          elif [ "${{ github.event_name }}" == "pull_request" ]; then
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
             AWESOME_VERSION="v9999-PR${{ github.event.number }}"
           fi
 
@@ -346,64 +343,5 @@ jobs:
       - name: Run qa tests
         if: matrix.check_qa
         run: cd "${{ github.workspace }}/build" && make check-qa
-
-      # Check each commit separately (to make git-bisect less annoying).
-      - name: Test previous commits
-        if: matrix.test_prev_commits && github.event_name == 'pull_request'
-        run: |
-          git remote add fork "${{ github.event.pull_request.head.repo.clone_url }}"
-          # `actions/checkout` creates a shallow repo (`--depth 1`) by default,
-          # which is fine for everything up until now. But we need individual commits now.
-          # And we only want to unshallow now, to not slow down the checkout for other jobs.
-          git fetch --unshallow --all
-
-          rev_list="$(git rev-list --bisect-all origin/${{ github.base_ref }}..fork/${{ github.head_ref }})"
-          # The most recent commit has already been tested. So if that's the
-          # only commit in the PR, we can stop here.
-          if [[ $(echo "$rev_list" | wc -l) -lt 2 ]]; then
-            exit 0
-          fi
-
-          commits="$(echo "$rev_list" | grep -v 'dist=0' | cut -d' ' -f 1)"
-          n="$(echo "$commits" | wc -l)"
-
-          echo "Testing $n commits:"
-          echo "$commits" | xargs -I{} git log -1 --pretty='%h %s' {}
-
-          failed=""
-          for commit in $commits; do
-            echo "Testing commit $commit"
-
-            # Some files are updated when compiling...
-            git checkout --force "$commit"
-            git show --stat --oneline
-
-            cmake -S ${{ github.workspace }} -B "${{ github.workspace}}/build" \
-              -DAWESOME_VERSION=$AWESOME_VERSION \
-              -DLUA_LIBRARY=$LUALIBRARY \
-              -DLUA_INCLUDE_DIR=$LUAINCLUDE \
-              -DGENERATE_DOC=OFF \
-              -DGENERATE_MANPAGES=OFF \
-              -DDO_COVERAGE=OFF \
-              -DTEST_MANUAL_SCREENS=${{ matrix.manual_screens }} \
-              -DSTRICT_TESTS=true \
-              -DCMAKE_C_FLAGS="-Werror"
-
-            cd "${{ github.workspace}}/build"
-            if ! ( make && make check-unit ); then
-              failed="$failed $commit"
-            fi
-          done
-
-          git checkout --quiet --force fork/${{ github.head_ref }}
-          if [ -n "$failed" ]; then
-            echo "Checks failed for these commits:"
-
-            for c in $failed; do
-              git show --no-patch --pretty="%h %s (%an, %ad)" "$c"
-            done
-
-            exit 1
-          fi
 
 # vim: filetype=yaml:expandtab:shiftwidth=2:tabstop=2
