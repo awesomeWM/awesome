@@ -9,6 +9,7 @@ shared:
     - check-success = luajit
     - check-success = fixed-lgi-lua5.2
     - check-success = lua5.1
+    - check-success = test-prev-commits
     - check-success = main
     - status-success = codecov/patch
 
