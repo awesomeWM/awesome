@@ -32,6 +32,7 @@ pull_request_rules:
     conditions:
       - and: *merge_conditions
       - label = mergify/merge
+      - check-success = test-prev-commits
     actions:
       merge:
         method: merge
