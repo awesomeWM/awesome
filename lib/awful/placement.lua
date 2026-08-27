@@ -39,7 +39,8 @@
 --
 -- **margins** (*number* or *table*):
 --
---  A table with left, right, top, bottom keys or a number
+--  A table with left, right, top, bottom keys or a number. Fractional values
+--  are rounded to a whole number of pixels.
 --
 -- **parent** (client, wibox, mouse or screen):
 --
@@ -58,7 +59,8 @@
 --
 -- **offset** (*table or number*):
 --
--- The offset(s) to apply to the new geometry.
+-- The offset(s) to apply to the new geometry. Fractional values are rounded
+-- to a whole number of pixels.
 --
 -- **store_geometry** (*boolean*):
 --
@@ -348,7 +350,22 @@ local function get_decoration(args)
         top  = args.margins or 0 , bottom = args.margins or 0
     }
 
-    return m, offset
+    -- The margins and offsets are added to the geometry when it is read and
+    -- removed again when it is written back, but the C code rounds the drawin
+    -- geometry to whole pixels. Fractional values, such as half of an odd
+    -- theme size, would make that round trip grow the drawable by one pixel on
+    -- every pass of an attached placement, until the C stack overflows (#4121).
+    return {
+        left   = gmath.round(m.left   or 0),
+        right  = gmath.round(m.right  or 0),
+        top    = gmath.round(m.top    or 0),
+        bottom = gmath.round(m.bottom or 0),
+    }, {
+        x      = gmath.round(offset.x      or 0),
+        y      = gmath.round(offset.y      or 0),
+        width  = gmath.round(offset.width  or 0),
+        height = gmath.round(offset.height or 0),
+    }
 end
 
 --- Apply some modifications before applying the new geometry.
