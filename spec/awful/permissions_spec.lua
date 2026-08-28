@@ -56,6 +56,88 @@ describe("awful.permissions.client_geometry_requests", function()
         -- Table passed as argument should not have been modified.
         assert.is.same(hints, {x=0, width=400, y=0})
     end)
+
+    describe("tag", function()
+        local function make_client(args)
+            args = args or {}
+
+            local ret = {
+                screen = args.screen,
+                sticky = args.sticky or false,
+                transient_for = args.transient_for,
+                _tags = args.tags or {},
+            }
+
+            function ret:tags(tags)
+                if tags then
+                    self._tags = tags
+                end
+
+                return self._tags
+            end
+
+            return ret
+        end
+
+        it("makes transients from sticky parents sticky", function()
+            local s = {}
+            local parent_tag = { screen = s }
+
+            local parent = make_client {
+                screen = s,
+                sticky = true,
+                tags = { parent_tag },
+            }
+            local child = make_client {
+                screen = s,
+                transient_for = parent,
+            }
+
+            permissions.tag(child)
+
+            assert.is_true(child.sticky)
+            assert.is.same({ parent_tag }, child:tags())
+        end)
+
+        it("places already-sticky transients with their parent", function()
+            local s = {}
+            local parent_tag = { screen = s }
+
+            local parent = make_client {
+                screen = s,
+                tags = { parent_tag },
+            }
+            local child = make_client {
+                screen = s,
+                sticky = true,
+                transient_for = parent,
+            }
+
+            permissions.tag(child)
+
+            assert.is_true(child.sticky)
+            assert.is.same({ parent_tag }, child:tags())
+        end)
+
+        it("uses selected tags when a transient parent is untagged", function()
+            local s = {}
+            local selected_tag = { screen = s }
+            s.selected_tags = { selected_tag }
+
+            local parent = make_client {
+                screen = s,
+            }
+            local child = make_client {
+                screen = s,
+                sticky = true,
+                transient_for = parent,
+            }
+
+            permissions.tag(child)
+
+            assert.is.same({ selected_tag }, child:tags())
+        end)
+    end)
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
