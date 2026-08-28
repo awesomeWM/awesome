@@ -43,6 +43,8 @@ Additionally, the following optional dependencies exist:
   documentation
 - [busted](https://olivinelabs.com/busted/) for running unit tests
 - [luacheck](https://github.com/mpeterv/luacheck) for static code analysis
+- [depgraph](https://github.com/starius/lua-depgraph) for validating
+  `require()` dependencies in `make check-requires`
 - [LuaCov](https://keplerproject.github.io/luacov/) for collecting code coverage
   information
 - libexecinfo on systems where libc does not provide `backtrace_symbols()` to
@@ -137,6 +139,6 @@ Individual test categories can be run as well:
 * `make check-integration`: Run integration tests within a Xephyr session.
 * `make check-qa`: Run `luacheck` against the Lua library
 * `make check-unit`: Run unit tests with `busted` against the Lua library. You can also run `busted <options> ./spec` if you want to specify options for `busted`.
-* `make check-requires`: Check for invalid `require()` calls.
+* `make check-requires`: Check for invalid `require()` calls. This test requires `depgraph`.
 * `make check-examples`: Run integration tests within the examples in `./tests/examples`.
 * `make check-themes`: Test themes.

@@ -295,7 +295,7 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-examples
 
       - name: Run requires tests
-        if: matrix.coverage
+        if: matrix.check_qa
         run: cd "${{ github.workspace }}/build" && make check-requires
 
       - name: Run themes tests

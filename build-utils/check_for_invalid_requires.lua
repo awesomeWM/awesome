@@ -8,10 +8,10 @@
 local have_depgraph, depgraph = pcall(require, "depgraph")
 
 if not have_depgraph then
-    print("depgraph not found")
-    print(depgraph)
-    print("(this error is non-fatal; we just skip its use)")
-    os.exit(0)
+    io.stderr:write("depgraph not found\n")
+    io.stderr:write(tostring(depgraph) .. "\n")
+    io.stderr:write("depgraph is required for check-requires\n")
+    os.exit(1)
 end
 
 local allowed_deps = {
