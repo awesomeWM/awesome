@@ -50,6 +50,7 @@ typedef struct drawable_t drawable_t;
 drawable_t *drawable_allocator(lua_State *, drawable_refresh_callback *, void *);
 void drawable_set_geometry(lua_State *, int, area_t);
 void drawable_class_setup(lua_State *);
+void drawable_invalidate(drawable_t *d);
 
 #endif
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
