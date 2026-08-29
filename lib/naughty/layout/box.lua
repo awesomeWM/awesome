@@ -117,18 +117,21 @@ end
 
 local function finish(self)
     self.visible = false
-    assert(init_screen(self.screen)[self.position])
 
-    for k, v in ipairs(init_screen(self.screen)[self.position]) do
+    local position = self._private.index_position or self.position
+
+    assert(init_screen(self.screen)[position])
+
+    for k, v in ipairs(init_screen(self.screen)[position]) do
         if v == self then
-            table.remove(init_screen(self.screen)[self.position], k)
+            table.remove(init_screen(self.screen)[position], k)
             break
         end
     end
 
     local preset = (self._private.notification[1] or {}).preset
 
-    update_position(self.position, preset)
+    update_position(position, preset)
 
     disconnect(self)
 
@@ -277,6 +280,11 @@ local function init(self, notification)
     self:_apply_size_now()
 
     table.insert(init_screen(s)[position], self)
+
+    -- Record the position the box was indexed under. `self.position` reads it
+    -- back from the notification, whose value can fall back to
+    -- `beautiful.notification_position` and thus change while displayed.
+    self._private.index_position = position
 
     self._private.update = function() update_position(position, preset) end
     self._private.hide = function(_, value)

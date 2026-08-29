@@ -1126,6 +1126,26 @@ table.insert(steps, function()
     return true
 end)
 
+-- The theme border width must reach the popup built by the legacy handler
+-- (#3786). The property level is covered by `test-naughty-theme-fallback.lua`;
+-- this is about the wibox that only this code path creates.
+table.insert(steps, function()
+    beautiful.notification_border_width = 7
+
+    local n = naughty.notification {
+        title   = "foo",
+        message = "bar",
+        timeout = 25000,
+    }
+
+    assert(n.box.border_width == 7)
+
+    n:destroy()
+    beautiful.notification_border_width = nil
+
+    return true
+end)
+
 -- Add a "new API" handler.
 local current_template, had_error, handler_called = nil
 
