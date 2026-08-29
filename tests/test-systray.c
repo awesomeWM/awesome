@@ -65,13 +65,26 @@ static xcb_window_t find_systray(xcb_connection_t *conn, xcb_atom_t net_system_t
     return owner;
 }
 
-static uint32_t get_color(xcb_connection_t *conn, xcb_screen_t *screen, uint16_t red, uint16_t green, uint16_t blue) {
-    xcb_alloc_color_reply_t *reply = xcb_alloc_color_reply(conn, xcb_alloc_color(conn, screen->default_colormap, red, green, blue), NULL);
+static uint32_t get_color(xcb_connection_t *conn, xcb_colormap_t cm, uint16_t red, uint16_t green, uint16_t blue) {
+    xcb_alloc_color_reply_t *reply = xcb_alloc_color_reply(conn, xcb_alloc_color(conn, cm, red, green, blue), NULL);
     if (!reply)
         fatal("Error allocating color");
     uint32_t pixel = reply->pixel;
     free(reply);
     return pixel;
+}
+
+static uint8_t find_visual_depth(const xcb_screen_t *s, xcb_visualid_t visual)
+{
+    xcb_depth_iterator_t depth_iter = xcb_screen_allowed_depths_iterator(s);
+
+    if(depth_iter.data)
+        for(; depth_iter.rem; xcb_depth_next (&depth_iter))
+            for(xcb_visualtype_iterator_t visual_iter = xcb_depth_visuals_iterator(depth_iter.data);
+                visual_iter.rem; xcb_visualtype_next (&visual_iter))
+                if(visual == visual_iter.data->visual_id)
+                    return depth_iter.data->depth;
+    return 0;
 }
 
 int main() {
@@ -82,15 +95,54 @@ int main() {
     }
     atoms_init(conn);
     xcb_screen_t* screen = xcb_aux_get_screen(conn, default_screen);
+    xcb_window_t systray_owner = find_systray(conn, systray_atom(conn, default_screen));
+
+    // Try to use tray visual hint, if requested.
+    char *use_hint_var = getenv("USE_TRAY_VISUAL_HINT");
+    bool use_tray_visual_hint = use_hint_var && *use_hint_var;
+    xcb_visualid_t tray_visual_id;
+    uint8_t tray_depth;
+    if (use_tray_visual_hint) {
+        xcb_get_property_reply_t *tray_visual_r =
+            xcb_get_property_reply(
+                conn, xcb_get_property(conn, false, systray_owner,
+                                       _NET_SYSTEM_TRAY_VISUAL,
+                                       XCB_ATOM_VISUALID, 0, 1),
+                NULL);
+        tray_visual_id = screen->root_visual;
+        if(tray_visual_r != NULL && xcb_get_property_value_length(tray_visual_r)) {
+            tray_visual_id = *(uint32_t *)xcb_get_property_value(tray_visual_r);
+            p_delete(&tray_visual_r);
+        }
+        tray_depth = find_visual_depth(screen, tray_visual_id);
+        if (tray_depth == 0) {
+            fatal("Error getting visual hint\n");
+        }
+    } else {
+        tray_visual_id= screen->root_visual;
+        tray_depth = screen->root_depth;
+    }
+
+    xcb_colormap_t cm = xcb_generate_id(conn);
+    xcb_create_colormap(conn, XCB_COLORMAP_ALLOC_NONE,
+                        cm, screen->root,
+                        tray_visual_id);
 
     // Create a window for the systray icon
     xcb_window_t window = xcb_generate_id(conn);
-    xcb_create_window(conn, screen->root_depth, window, screen->root, 0, 0, 10, 10, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
-            screen->root_visual, XCB_CW_BACK_PIXEL, (uint32_t[]) { get_color(conn, screen, 0xffff, 0x9999, 0x0000) });
+    xcb_create_window(conn, tray_depth, window, screen->root, 0, 0, 10, 10, 0, XCB_WINDOW_CLASS_INPUT_OUTPUT,
+                      tray_visual_id,
+                      (use_tray_visual_hint ? XCB_CW_BACK_PIXEL : XCB_CW_BACK_PIXMAP)
+                          | XCB_CW_BORDER_PIXEL | XCB_CW_COLORMAP,
+                      (uint32_t[]) {
+                          use_tray_visual_hint
+                              ? get_color(conn, cm, 0xffff, 0x9999, 0x0000)
+                              : XCB_BACK_PIXMAP_PARENT_RELATIVE,
+                          screen->black_pixel, cm
+                      });
     xcb_change_property(conn, XCB_PROP_MODE_REPLACE, window, _XEMBED_INFO, _XEMBED_INFO, 32, 2, (uint32_t[]) { 0, 1 });
 
     // Make our window a systray icon
-    xcb_window_t systray_owner = find_systray(conn, systray_atom(conn, default_screen));
     xcb_client_message_event_t ev;
 
     p_clear(&ev, 1);

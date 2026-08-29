@@ -29,6 +29,8 @@
 #include <xcb/xcb.h>
 #include <xcb/xcb_icccm.h>
 #include <xcb/xcb_atom.h>
+#include <xcb/damage.h>
+#include <cairo-xcb.h>
 
 #define SYSTEM_TRAY_REQUEST_DOCK 0 /* Begin icon docking */
 
@@ -44,13 +46,29 @@ systray_init(void)
 
     globalconf.systray.window = xcb_generate_id(globalconf.connection);
     globalconf.systray.background_pixel = xscreen->black_pixel;
-    xcb_create_window(globalconf.connection, xscreen->root_depth,
-                      globalconf.systray.window,
-                      xscreen->root,
-                      -1, -1, 1, 1, 0,
-                      XCB_COPY_FROM_PARENT, xscreen->root_visual,
-                      XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK, (const uint32_t [])
-                      { xscreen->black_pixel, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT });
+    if (globalconf.is_compositing) {
+        xcb_create_window(globalconf.connection, globalconf.default_depth,
+                          globalconf.systray.window,
+                          xscreen->root,
+                          -1, -1, 1, 1, 0,
+                          XCB_COPY_FROM_PARENT, globalconf.visual->visual_id,
+                          XCB_CW_BACK_PIXEL | XCB_CW_BORDER_PIXEL | XCB_CW_EVENT_MASK | XCB_CW_COLORMAP,
+                          (const uint32_t [])
+                          { xscreen->black_pixel, xscreen->black_pixel, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT, globalconf.default_cmap });
+        xcb_damage_create(globalconf.connection, xcb_generate_id(globalconf.connection), globalconf.systray.window, XCB_DAMAGE_REPORT_LEVEL_NON_EMPTY);
+        xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
+                            globalconf.systray.window, _NET_SYSTEM_TRAY_VISUAL,
+                            XCB_ATOM_VISUALID, 32, 1, (const uint32_t [])
+                            { globalconf.visual->visual_id });
+    } else {
+        xcb_create_window(globalconf.connection, xscreen->root_depth,
+                          globalconf.systray.window,
+                          xscreen->root,
+                          -1, -1, 1, 1, 0,
+                          XCB_COPY_FROM_PARENT, xscreen->root_visual,
+                          XCB_CW_BACK_PIXEL | XCB_CW_EVENT_MASK, (const uint32_t [])
+                          { xscreen->black_pixel, XCB_EVENT_MASK_SUBSTRUCTURE_REDIRECT });
+    }
     xwindow_set_class_instance(globalconf.systray.window);
     xwindow_set_name_static(globalconf.systray.window, "Awesome systray window");
 
@@ -130,6 +148,8 @@ int
 systray_request_handle(xcb_window_t embed_win)
 {
     xembed_window_t em;
+    xcb_get_geometry_cookie_t geom_c;
+    xcb_get_geometry_reply_t *geom_r;
     xcb_get_property_cookie_t em_cookie;
     const uint32_t select_input_val[] =
     {
@@ -142,12 +162,27 @@ systray_request_handle(xcb_window_t embed_win)
     if(xembed_getbywin(&globalconf.embedded, embed_win))
         return -1;
 
+    geom_c = xcb_get_geometry(globalconf.connection, embed_win);
+    if(!(geom_r = xcb_get_geometry_reply(globalconf.connection, geom_c, NULL)))
+        return -1;
+    em.depth = geom_r->depth;
+    p_delete(&geom_r);
+
     p_clear(&em_cookie, 1);
 
     em_cookie = xembed_info_get_unchecked(globalconf.connection, embed_win);
 
     xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_EVENT_MASK,
                                  select_input_val);
+
+
+    if (globalconf.is_compositing && em.depth != globalconf.default_depth) {
+        /* Disable the message because the test runner is not happy with warnings. This should rarely happen anyway. */
+        /* warn("Fixing the background of the systray window 0x%x possibly because the client does not support composition.", embed_win); */
+        xcb_change_window_attributes(globalconf.connection, embed_win, XCB_CW_BACK_PIXEL,
+                                     (const uint32_t []){ globalconf.systray.background_pixel });
+        xcb_clear_area(globalconf.connection, 1, embed_win, 0, 0, 0, 0);
+    }
 
     /* we grab the window, but also make sure it's automatically reparented back
      * to the root window if we should die.
@@ -376,12 +411,21 @@ luaA_systray(lua_State *L)
                 && globalconf.systray.background_pixel != bg_color.pixel)
         {
             uint32_t config_back[] = { bg_color.pixel };
-            globalconf.systray.background_pixel = bg_color.pixel;
-            xcb_change_window_attributes(globalconf.connection,
-                                         globalconf.systray.window,
-                                         XCB_CW_BACK_PIXEL, config_back);
-            xcb_clear_area(globalconf.connection, 1, globalconf.systray.window, 0, 0, 0, 0);
-            force_redraw = true;
+            if (globalconf.is_compositing) {
+                foreach(em, globalconf.embedded)
+                    if (em->depth != globalconf.default_depth) {
+                        xcb_change_window_attributes(
+                            globalconf.connection, em->win, XCB_CW_BACK_PIXEL, config_back);
+                        xcb_clear_area(globalconf.connection, 1, em->win, 0, 0, 0, 0);
+                    }
+            } else {
+                globalconf.systray.background_pixel = bg_color.pixel;
+                xcb_change_window_attributes(globalconf.connection,
+                                             globalconf.systray.window,
+                                             XCB_CW_BACK_PIXEL, config_back);
+                xcb_clear_area(globalconf.connection, 1, globalconf.systray.window, 0, 0, 0, 0);
+                force_redraw = true;
+            }
         }
 
         if(globalconf.systray.parent != w)
@@ -411,6 +455,31 @@ luaA_systray(lua_State *L)
     lua_pushinteger(L, systray_num_visible_entries());
     luaA_object_push(L, globalconf.systray.parent);
     return 2;
+}
+
+/** Return the native surface of the systray if composite is enabled.
+ * \param L The Lua VM state.
+ * \return the number of element returned. (1)
+  * \luastack
+ * \lparam width The width of the systray surface.
+ * \lparam height The height of the systray surface.
+ */
+int
+luaA_systray_surface(lua_State *L)
+{
+    if (!globalconf.is_compositing) {
+        lua_pushnil(L);
+        return 1;
+    }
+
+    int width = luaL_checkinteger(L, 1);
+    int height = luaL_checkinteger(L, 2);
+    /* Lua has to make sure to free the ref or we have a leak */
+    lua_pushlightuserdata(
+        L, cairo_xcb_surface_create(
+            globalconf.connection, globalconf.systray.window, globalconf.visual,
+            width, height));
+    return 1;
 }
 
 // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

@@ -9,7 +9,9 @@
 
 local wbase = require("wibox.widget.base")
 local drawable = require("wibox.drawable")
+local cairo = require("lgi").cairo
 local beautiful = require("beautiful")
+local gcolor = require("gears.color")
 local gtable = require("gears.table")
 local capi = {
     awesome = awesome,
@@ -46,6 +48,11 @@ local display_on_screen = "primary"
 --
 -- @beautiful beautiful.systray_icon_spacing
 -- @tparam[opt=0] integer systray_icon_spacing The icon spacing
+
+--- Whether to skip drawing the systray background when compositing the systray icons.
+--
+-- @beautiful beautiful.systray_skip_bg
+-- @tparam[opt=0] boolean Whether to skip drawing the systray background
 
 local function should_display_on(s)
     if display_on_screen == "primary" then
@@ -95,6 +102,23 @@ function systray:draw(context, cr, width, height)
     end
     capi.awesome.systray(context.wibox.drawin, math.ceil(x), math.ceil(y),
                          base, is_rotated, bg, reverse, spacing, rows)
+
+    local surf_width, surf_height =
+        base * rows + spacing * (rows - 1),
+        base * cols + spacing * (cols - 1)
+    if is_rotated then
+        surf_width, surf_height = surf_height, surf_width
+    end
+    local surf_raw = capi.awesome.systray_surface(surf_width, surf_height)
+    if surf_raw then
+        local surf = cairo.Surface(surf_raw, true)
+        if not beautiful.systray_skip_bg then
+            cr:set_source(gcolor(bg))
+            cr:paint()
+        end
+        cr:set_source_surface(surf, 0, 0)
+        cr:paint()
+    end
 end
 
 -- Private API. Does not appear in LDoc on purpose. This function is called
