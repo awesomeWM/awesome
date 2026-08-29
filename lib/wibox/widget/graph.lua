@@ -23,6 +23,7 @@ local math = math
 local math_max = math.max
 local math_min = math.min
 local table = table
+local type = type
 local color = require("gears.color")
 local gdebug = require("gears.debug")
 local gtable = require("gears.table")
@@ -183,6 +184,8 @@ local graph = { mt = {} }
 
 --- The step shape.
 --
+-- If `step_hook` property is also set, this property is ignored.
+--
 --@DOC_wibox_widget_graph_step_shape_EXAMPLE@
 --
 -- @property step_shape
@@ -230,6 +233,136 @@ local graph = { mt = {} }
 -- @propemits true false
 -- @see gears.color
 
+--- Control what is done before drawing each data group.
+--
+-- This property can be set to a `group_start_callback` function,
+-- a number, or nil.
+--
+-- When `group_start` is nil (default), the default implementation
+-- is used, which does `cr:set_source(data group's color)`.
+-- It is user's responsibility to set colors how they wish,
+-- if they set this property to their own function.
+--
+-- As a convenience, `group_start` property can be set to a number,
+-- then this number will be used for bar shifting of all groups as
+-- described for the return value of `group_start_callback`.
+-- The group's color will then be set appropriately too,
+-- as with group_start = nil.
+--
+-- @DOC_wibox_widget_graph_custom_draw_outline_EXAMPLE@
+--
+-- @property group_start
+-- @within Advanced drawing properties
+-- @tparam function|number|nil group_start
+-- @propemits true false
+
+--- User callback for preparing to draw a data group.
+--
+-- This callback is called once for each drawn data group, when its
+-- values are about to be drawn.
+--
+-- `group_start_callback` may return a number, which would be added
+-- to the x coordinate of all bars of the current group,
+-- i.e. shifting its bars horizontally. This can be useful e.g.
+-- for ensuring sharpness of 1px-thin vertical lines or ensuring
+-- that the bars from different groups don't obscure each other.
+-- User mustn't return more values from the callback than one,
+-- they are reserved for future use.
+--
+-- @DOC_wibox_widget_graph_custom_draw_group_shift_EXAMPLE@
+--
+-- @within Advanced drawing callbacks
+-- @callback group_start_callback
+-- @tparam cairo.Context cr Cairo context
+-- @tparam number group_idx The index of the currently drawn data group
+-- @tparam @{draw_callback_options} options Additional info (@{draw_callback_options})
+-- @treturn number|nil common horizontal offset for all bars of the group
+-- @see group_start
+
+--- Control what is done after drawing each data group.
+--
+-- This property can be set to a `group_finish_callback` function or nil.
+--
+-- When `group_finish` is nil (default), the default implementation
+-- is used, which does `cr:fill()`.
+--
+-- @DOC_wibox_widget_graph_custom_draw_line_EXAMPLE@
+--
+-- @property group_finish
+-- @within Advanced drawing properties
+-- @tparam function|nil group_finish
+-- @propemits true false
+
+--- User callback for completing drawing a data group.
+--
+-- This callback is called once for each drawn data group, right after its
+-- values were drawn.
+--
+-- At the moment of calling this callback, the cairo context is populated
+-- with paths corresponding to bar shapes of the data group, but no actual
+-- painting has taken place. This callback is supposed to do something about it.
+--
+-- @within Advanced drawing callbacks
+-- @callback group_finish_callback
+-- @tparam cairo.Context cr Cairo context
+-- @tparam number group_idx The index of the currently drawn data group
+-- @tparam @{draw_callback_options} options Additional info (@{draw_callback_options})
+-- @see group_finish
+
+--- Control what is done to draw each value.
+--
+-- This property can be set to a `step_hook_callback` function or nil.
+--
+-- When `step_hook` is nil (default), the default implementation
+-- is used, which draws the values as `step_shape` bars.
+--
+-- @DOC_wibox_widget_graph_bezier_curve_EXAMPLE@
+--
+-- @property step_hook
+-- @within Advanced drawing properties
+-- @tparam function|nil step_hook
+-- @propemits true false
+-- @see gears.math
+
+--- User callback for drawing a value.
+--
+-- This function is called in succession to draw the values of a data group,
+-- starting with the newest value.
+--
+-- Prior to this, the `group_start_callback` will be called once for
+-- the data group. And after `step_hook` was called for all values
+-- necessary, the `group_finish_callback` will be called once.
+--
+-- A drawing session consists of repeating the above steps for each drawn
+-- data group. The order of drawing of data groups is unspecified.
+--
+-- This function can assume, that nothing except itself interferes with
+-- the widget or cairo context state between the paired
+-- `group_start_callback`/`group_finish_callback` calls.
+--
+-- The coordinate system of the cairo context during all calls is the
+-- one with (0,0) and (width, height) corresponding to the top-left
+-- and the bottom-right corner of the graph's value drawing area respectively.
+--
+-- The parameters of this callback are pretty straightforward.
+-- It deserves a note though, that the baseline\_y parameter could vary between
+-- successive calls, because e.g. for stacked graphs, baseline\_y corresponds
+-- to the tops of the bars of the lower data group.
+--
+-- It's also not necessary that `baseline_y >= value_y`, the opposite holds e.g.
+-- for graphs with values smaller than `baseline_value`.
+--
+-- @within Advanced drawing callbacks
+-- @callback step_hook_callback
+-- @tparam cairo.Context cr Cairo context
+-- @tparam number x The horizontal coordinate of the left edge of the bar.
+-- @tparam number value_y The vertical coordinate corresponding to the drawn value.
+-- Can be a NaN.
+-- @tparam number baseline_y The vertical coordinate corresponding to the baseline.
+-- @tparam number step_width Same as `step_width` (but never nil).
+-- @tparam @{draw_callback_options} options Additional info (@{draw_callback_options}).
+-- @see step_hook
+
 --- The graph foreground color
 -- Used, when the `color` property isn't set.
 --
@@ -254,6 +387,7 @@ local properties = { "width", "height", "border_color", "stack",
                      "step_spacing", "step_width", "border_width",
                      "clamp_bars", "baseline_value",
                      "capacity", "nan_color", "nan_indication",
+                     "group_start", "group_finish", "step_hook",
                      "group_colors",
 }
 
@@ -538,21 +672,39 @@ local function graph_choose_coordinate_system(self, scaling_values, drawn_values
     return min_value, max_value, baseline_y
 end
 
-local function graph_draw_values(self, cr, _, height, drawn_values_num)
+local function default_group_start_impl(cr, group_idx, options)
+    -- Set the data series' color early, in case the user
+    -- wants to do their own painting inside step_shape()
+    cr:set_source(color(options._graph:pick_data_group_color(group_idx)))
+    -- Pass the user-given constant group offset, if any
+    return options._graph._private.group_start
+end
+
+local function default_group_finish_impl(cr, _group_idx, _options) --luacheck: ignore 212/_.*
+    cr:fill()
+end
+
+local function default_step_hook_impl(cr, x, value_y, baseline_y, step_width, options)
+    local step_height = baseline_y - value_y
+    if not (step_height == step_height) then
+        return -- is NaN
+    end
+    -- Shift to the bar beginning
+    options._cairo_translate(cr, x, value_y)
+    options._graph._private.step_shape(cr, step_width, step_height)
+    -- Undo the shift
+    options._cairo_set_matrix(cr, options._pristine_transform)
+end
+
+local function graph_draw_values(self, context, cr, width, height, drawn_values_num)
     local values = self._private.values
 
-    local step_shape = self._private.step_shape
     local step_spacing = self._private.step_spacing or prop_fallbacks.step_spacing
     local step_width = self._private.step_width or prop_fallbacks.step_width
 
     -- Cache methods used in the inner loop for a 3x performance boost
     local cairo_rectangle = cr.rectangle
-    local cairo_translate = cr.translate
-    local cairo_set_matrix = cr.set_matrix
     local map_coords = graph_map_value_to_widget_coordinates
-
-    -- Preserve the transform centered at the top-left corner of the graph
-    local pristine_transform = step_shape and cr:get_matrix()
 
     local drawn_values, scaling_values = graph_preprocess_values(self, values, drawn_values_num)
     -- If preprocessor returned drawn_values = nil, then simply draw the values we have
@@ -565,14 +717,67 @@ local function graph_draw_values(self, cr, _, height, drawn_values_num)
         self, scaling_values, drawn_values_num, height
     )
 
+    --- A bag of potentially useful things passed into user's draw callbacks.
+    --
+    -- An fresh instance of this table is created each time
+    -- awesome asks the widget to redraw itself.
+    --
+    -- The user can also add their own values to this table to conveniently
+    -- pass data pertaining to the same drawing session between callbacks, but
+    -- all underscore-prefixed keys are reserved for future use by the widget.
+    --
+    -- @within Advanced drawing fields
+    -- @table draw_callback_options
+    -- @tfield number _step_width `step_width` for the current step.
+    -- @tfield number _step_spacing = step_spacing, -- `step_spacing` for the current step.
+    -- @tfield number _width The width of the values draw area.
+    -- @tfield number _height The height of the values draw area.
+    -- @tfield number _group_idx Index of the currently drawn data group.
+    -- @tfield wibox.widget.graph _graph The graph widget itself, explicitly named.
+    local options = setmetatable({
+        _step_width = step_width,
+        _step_spacing = step_spacing,
+        _width = width,
+        _height = height,
+        _group_idx = nil, -- will be set later
+        _graph = self,
+    }, {__index = context})
+
+    -- The user callback to call before drawing each data group
+    local group_start = self._private.group_start
+    if not group_start or type(group_start) == "number" then
+        group_start = default_group_start_impl
+    end
+
+    -- The user callback to call after drawing each data group
+    local group_finish = self._private.group_finish
+    if not group_finish then
+        group_finish = default_group_finish_impl
+    end
+
+    -- The user callback for drawing each data bar
+    local step_hook = self._private.step_hook
+    if not step_hook then
+        local step_shape = self._private.step_shape
+        if step_shape then
+            -- Preserve the transform centered at the top-left corner of the graph
+            options._pristine_transform = cr:get_matrix()
+            options._cairo_translate = cr.translate
+            options._cairo_set_matrix = cr.set_matrix
+            step_hook = default_step_hook_impl
+        end
+    end
+
     local nan_x = self._private.nan_indication and {}
     local prev_y = self._private.stack and {}
 
     for group_idx, group_values in ipairs(drawn_values) do
         if graph_should_draw_data_group(self, group_idx) then
-            -- Set the data series' color early, in case the user
-            -- wants to do their own painting inside step_shape()
-            cr:set_source(color(self:pick_data_group_color(group_idx)))
+            options._group_idx = group_idx
+            -- group_start() callback prepares context for drawing a data group.
+            -- It can give us a horizontal offset for all data group bars.
+            local offset_x = group_start(cr, group_idx, options)
+            offset_x = offset_x or 0
 
             for i = 1, math_min(#group_values, drawn_values_num) do
                 local value = group_values[i]
@@ -581,26 +786,23 @@ local function graph_draw_values(self, cr, _, height, drawn_values_num)
                 local not_nan = value_y == value_y
 
                 -- The coordinate of the i-th bar's left edge
-                local x = (i-1)*(step_width + step_spacing)
+                local x = (i-1)*(step_width + step_spacing) + offset_x
 
-                if not_nan then
-                    local base_y = baseline_y
-                    if prev_y then
-                        -- Draw from where the previous stacked series left off
-                        base_y = prev_y[i] or base_y
-                        -- Save our y for the next stacked series
+                local base_y = baseline_y
+                if prev_y then
+                    -- Draw from where the previous stacked series left off
+                    base_y = prev_y[i] or base_y
+                    -- Save our y for the next stacked series
+                    if not_nan then
                         prev_y[i] = value_y
                     end
+                end
 
-                    if step_shape then
-                        -- Shift to the bar beginning
-                        cairo_translate(cr, x, value_y)
-                        step_shape(cr, step_width, base_y - value_y)
-                        -- Undo the shift
-                        cairo_set_matrix(cr, pristine_transform)
-                    else
-                        cairo_rectangle(cr, x, value_y, step_width, base_y - value_y)
-                    end
+                if step_hook then
+                    -- step_hook() is expected to handle NaNs itself
+                    step_hook(cr, x, value_y, base_y, step_width, options)
+                elseif not_nan then
+                    cairo_rectangle(cr, x, value_y, step_width, base_y - value_y)
                 end
 
                 if not not_nan and nan_x then
@@ -609,8 +811,8 @@ local function graph_draw_values(self, cr, _, height, drawn_values_num)
                 end
             end
 
-            -- Paint the data series
-            cr:fill()
+            -- group_finish() callback does what is needed to paint the data group
+            group_finish(cr, group_idx, options)
         end
     end
 
@@ -624,7 +826,7 @@ local function graph_draw_values(self, cr, _, height, drawn_values_num)
     end
 end
 
-function graph:draw(_, cr, width, height)
+function graph:draw(context, cr, width, height)
     local border_width = self._private.border_width or prop_fallbacks.border_width
     local drawn_values_num = self:compute_drawn_values_num(width-2*border_width)
 
@@ -647,7 +849,7 @@ function graph:draw(_, cr, width, height)
         local values_width = width - 2*border_width
         local values_height = height - 2*border_width
 
-        graph_draw_values(self, cr, values_width, values_height, drawn_values_num)
+        graph_draw_values(self, context, cr, values_width, values_height, drawn_values_num)
 
         -- Undo the cr:translate() for the border and step shapes
         cr:restore()
