@@ -76,7 +76,6 @@ systray_init(void)
 static void
 systray_register(void)
 {
-    xcb_client_message_event_t ev;
     xcb_screen_t *xscreen = globalconf.screen;
 
     if(globalconf.systray.registered)
@@ -85,15 +84,18 @@ systray_register(void)
     globalconf.systray.registered = true;
 
     /* Fill event */
-    p_clear(&ev, 1);
-    ev.response_type = XCB_CLIENT_MESSAGE;
-    ev.window = xscreen->root;
-    ev.format = 32;
-    ev.type = MANAGER;
-    ev.data.data32[0] = globalconf.timestamp;
-    ev.data.data32[1] = globalconf.systray.atom;
-    ev.data.data32[2] = globalconf.systray.window;
-    ev.data.data32[3] = ev.data.data32[4] = 0;
+    xcb_client_message_event_t ev = {
+        .response_type = XCB_CLIENT_MESSAGE,
+        .window = xscreen->root,
+        .format = 32,
+        .type = MANAGER,
+        .data = {
+            .data32 = {
+                globalconf.timestamp,
+                globalconf.systray.atom,
+                globalconf.systray.window,
+            } }
+    };
 
     xcb_set_selection_owner(globalconf.connection,
                             globalconf.systray.window,
