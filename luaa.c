@@ -771,9 +771,9 @@ luaA_awesome_index(lua_State *L)
 
     if(A_STREQ(buf, "startup_errors"))
     {
-        if (globalconf.startup_errors.len == 0)
+        if (globalconf.startup_errors->len == 0)
             return 0;
-        lua_pushstring(L, globalconf.startup_errors.s);
+        lua_pushlstring(L, globalconf.startup_errors->str,globalconf.startup_errors->len);
         return 1;
     }
 
@@ -862,9 +862,8 @@ luaA_panic(lua_State *L)
 {
     warn("unprotected error in call to Lua API (%s)",
          lua_tostring(L, -1));
-    buffer_t buf;
-    backtrace_get(&buf);
-    warn("dumping backtrace\n%s", buf.s);
+    GString* buf = backtrace_get();
+    warn("dumping backtrace\n%s", buf->str);
     warn("restarting awesome");
     awesome_restart();
     return 0;
@@ -1214,9 +1213,9 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
 static void
 luaA_startup_error(const char *err)
 {
-    if (globalconf.startup_errors.len > 0)
-        buffer_addsl(&globalconf.startup_errors, "\n\n");
-    buffer_adds(&globalconf.startup_errors, err);
+    if (globalconf.startup_errors->len > 0)
+        g_string_append(globalconf.startup_errors, "\n\n");
+    g_string_append(globalconf.startup_errors, err);
 }
 
 static bool

@@ -125,9 +125,9 @@ luaA_object_decref(lua_State *L, int tud, const void *pointer)
     /* Did we find the item in our table? (tointeger(nil)-1) is -1 */
     if (count < 0)
     {
-        buffer_t buf;
-        backtrace_get(&buf);
-        warn("BUG: Reference not found: %d %p\n%s", tud, pointer, buf.s);
+        GString* buf = backtrace_get();
+        warn("BUG: Reference not found: %d %p\n%s", tud, pointer, buf->str);
+        g_string_free(buf, TRUE);
 
         /* Pop reference count and metatable */
         lua_pop(L, 2);

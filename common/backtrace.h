@@ -22,9 +22,9 @@
 #ifndef AWESOME_COMMON_BACKTRACE
 #define AWESOME_COMMON_BACKTRACE
 
-#include "common/buffer.h"
+#include <glib.h>
 
-void backtrace_get(buffer_t *);
+GString* backtrace_get(void);
 
 #endif
 

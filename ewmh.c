@@ -305,20 +305,18 @@ ewmh_update_net_current_desktop(lua_State *L)
 void
 ewmh_update_net_desktop_names(void)
 {
-    buffer_t buf;
-
-    buffer_inita(&buf, BUFSIZ);
+    GString* buf = g_string_new(NULL);
 
     foreach(tag, globalconf.tags)
     {
-        buffer_adds(&buf, tag_get_name(*tag));
-        buffer_addc(&buf, '\0');
+        g_string_append(buf,tag_get_name(*tag));
+        g_string_append_c(buf, '\0');
     }
 
     xcb_change_property(globalconf.connection, XCB_PROP_MODE_REPLACE,
 			globalconf.screen->root,
-			_NET_DESKTOP_NAMES, UTF8_STRING, 8, buf.len, buf.s);
-    buffer_wipe(&buf);
+			_NET_DESKTOP_NAMES, UTF8_STRING, 8, buf->len, buf->str);
+    g_string_free(buf, TRUE);
 }
 
 static void
