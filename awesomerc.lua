@@ -508,6 +508,7 @@ ruled.client.connect_signal("request::rules", function()
         -- @DOC_CSD_TITLEBARS@
         id         = "titlebars",
         rule_any   = { type = { "normal", "dialog" } },
+        except     = { requests_no_titlebar = true   },
         properties = { titlebars_enabled = true      }
     }
 
