@@ -282,12 +282,12 @@ local steps = {
         if count == 2 then
             assert(hotkeys_popup ~= nil)
             assert(hotkeys_popup.visible)
-            -- Should disappear on anykey
-            root.fake_input("key_press", "Super_L")
+            -- Should disappear on escape (awful.prompt)
+            root.fake_input("key_press", "Escape")
 
         elseif count == 3 then
             assert(not hotkeys_popup.visible)
-            root.fake_input("key_release", "Super_L")
+            root.fake_input("key_release", "Escape")
             test_context.hotkeys01_clients_before = #client.get()
             -- imitate fake client with name "vim"
             -- so hotkeys widget will offer vim hotkeys:
@@ -314,11 +314,11 @@ local steps = {
                 assert(visible_hotkeys_widget ~= nil)
                 assert(visible_hotkeys_widget.current_page == 2)
                 root.fake_input("key_release", "Next")
-                -- Should disappear on anykey
-                root.fake_input("key_press", "Super_L")
+                -- Should disappear on escape (awful.prompt)
+                root.fake_input("key_press", "Escape")
             elseif (count - test_context.hotkeys01_count_vim) == 3 then
                 assert(not visible_hotkeys_widget)
-                root.fake_input("key_release", "Super_L")
+                root.fake_input("key_release", "Escape")
                 return true
             end
         end
