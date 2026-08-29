@@ -652,6 +652,7 @@ function taglist.new(args, filter, buttons, style, update_function, base_widget)
     })
 
     gtable.crush(w, taglist, true)
+    rawset(w, "filter", nil)
 
     gtable.crush(w._private, {
         style           = args.style or {},
