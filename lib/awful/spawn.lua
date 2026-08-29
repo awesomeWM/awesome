@@ -514,8 +514,25 @@ function spawn.read_lines(input_stream, line_callback, done_callback, close)
             stream:close()
         end
         stream:set_buffer_size(0)
-        if done_callback then
-            protected_call(done_callback)
+
+        -- Break upvalue references so GC can reclaim this closure cluster
+        -- after LGI's autodestroy guard fires (one GC cycle later).  Without
+        -- this, the start_read <-> finish_read mutual cycle and the chain of
+        -- upvalues (stream, line_callback, done_callback, accumulated stdout)
+        -- survive 3+ incremental GC cycles, causing gigabytes of retention
+        -- when easy_async is called at high frequency (e.g. widget timers).
+        -- Capture done_callback before clearing all upvalues.
+        -- Breaking start_read <-> finish_read mutual cycle here allows the
+        -- entire closure cluster to be reclaimed in one GC sweep after LGI's
+        -- autodestroy guard fires, instead of surviving 3+ incremental cycles.
+        local cb = done_callback
+        start_read    = nil
+        finish_read   = nil
+        stream        = nil
+        line_callback = nil
+        done_callback = nil
+        if cb then
+            protected_call(cb)
         end
     end
     local start_read, finish_read
