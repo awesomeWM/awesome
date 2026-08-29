@@ -686,7 +686,7 @@ event_handle_enternotify(xcb_enter_notify_event_t *ev)
         /* When there are multiple X screens with awesome running separate
          * instances, reset focus.
          */
-        globalconf.focus.need_update = true;
+        client_focus_need_update();
     }
 }
 
