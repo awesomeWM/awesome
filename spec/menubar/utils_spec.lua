@@ -145,4 +145,20 @@ describe("menubar.utils lookup_icon_uncached", function()
     end)
 end)
 
+describe("menubar.utils parse_desktop_file", function()
+    it('check Path field', function()
+        local root = (os.getenv("SOURCE_DIRECTORY") or '.') .. "/spec/menubar"
+        local program = utils.parse_desktop_file(root .. '/usr/share/applications/path.desktop')
+        assert.are.equal(program.cmdline, 'cd /home/ && ls')
+        assert.is_true(program.with_shell)
+    end)
+
+    it('check Terminal field', function()
+        local root = (os.getenv("SOURCE_DIRECTORY") or '.') .. "/spec/menubar"
+        local program = utils.parse_desktop_file(root .. '/usr/share/applications/term.desktop')
+        assert.are.equal(program.cmdline, 'cd /home/ && ' .. utils.terminal .. ' -e ls')
+        assert.is_true(program.with_shell)
+    end)
+end)
+
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
