@@ -94,6 +94,8 @@
 #define unlikely(expr)  expr
 #endif
 
+#define maybe_unused __attribute__ ((unused))
+
 static inline void * __attribute__ ((malloc)) xmalloc(ssize_t size)
 {
     void *ptr;
