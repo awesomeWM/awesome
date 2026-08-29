@@ -94,27 +94,34 @@ end
 -- @treturn screen The newly focused screen.
 -- @request client activate screen.focus granted The most recent focused client
 --  for this screen should be re-activated.
-function screen.focus(_screen)
+function screen.focus(_screen, ...)
     client = client or require("awful.client")
     if type(_screen) == "number" and _screen > capi.screen.count() then _screen = screen.focused() end
     _screen = get_screen(_screen)
+    if select('#', ...) == 0 then center_mouse = false else center_mouse = select(1, ...) or false end
 
     -- screen and pos for current screen
     local s = get_screen(capi.mouse.screen)
     local pos
-
-    if not _screen.mouse_per_screen then
-        -- This is the first time we enter this screen,
-        -- keep relative mouse position on the new screen.
+    -- center the mouse if requested, else restore previous position
+    if center_mouse then
         pos = capi.mouse.coords()
-        local relx = (pos.x - s.geometry.x) / s.geometry.width
-        local rely = (pos.y - s.geometry.y) / s.geometry.height
-
-        pos.x = _screen.geometry.x + relx * _screen.geometry.width
-        pos.y = _screen.geometry.y + rely * _screen.geometry.height
+        pos.x = _screen.geometry.x +  _screen.geometry.width/2
+        pos.y = _screen.geometry.y +  _screen.geometry.height/2
     else
-        -- restore mouse position
-        pos = _screen.mouse_per_screen
+        if not _screen.mouse_per_screen then
+            -- This is the first time we enter this screen,
+            -- keep relative mouse position on the new screen.
+            pos = capi.mouse.coords()
+            local relx = (pos.x - s.geometry.x) / s.geometry.width
+            local rely = (pos.y - s.geometry.y) / s.geometry.height
+
+            pos.x = _screen.geometry.x + relx * _screen.geometry.width
+            pos.y = _screen.geometry.y + rely * _screen.geometry.height
+        else
+            -- restore mouse position
+            pos = _screen.mouse_per_screen
+        end
     end
 
     -- save pointer position of current screen
