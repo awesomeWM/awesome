@@ -54,6 +54,10 @@ end
 -- @beautiful beautiful.menubar_bg_normal
 -- @param color
 
+--- Menubar base background color.
+-- @beautiful beautiful.menubar_bg_base
+-- @param color
+
 --- Menubar border width.
 -- @beautiful beautiful.menubar_border_width
 -- @tparam[opt=0] number menubar_border_width
@@ -458,6 +462,7 @@ end
 -- @staticfct menubar.show
 -- @usebeautiful beautiful.menubar_fg_normal
 -- @usebeautiful beautiful.menubar_bg_normal
+-- @usebeautiful beautiful.menubar_bg_base
 -- @usebeautiful beautiful.menubar_border_width
 -- @usebeautiful beautiful.menubar_border_color
 -- @usebeautiful beautiful.menubar_fg_focus
@@ -466,7 +471,7 @@ end
 function menubar.show(scr)
     scr = get_screen(scr or awful.screen.focused() or 1)
     local fg_color = theme.menubar_fg_normal or theme.menu_fg_normal or theme.fg_normal
-    local bg_color = theme.menubar_bg_normal or theme.menu_bg_normal or theme.bg_normal
+    local bg_color = theme.menubar_bg_base or theme.menubar_bg_normal or theme.menu_bg_normal or theme.bg_normal
     local border_width = theme.menubar_border_width or theme.menu_border_width or 0
     local border_color = theme.menubar_border_color or theme.menu_border_color
     local font = theme.menubar_font or theme.font or "Monospace 10"
