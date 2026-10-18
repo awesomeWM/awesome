@@ -542,6 +542,210 @@ local default_tooltip_messages = {
 -- @tparam gears.surface|string path
 -- @see gears.surface
 
+--- The urgent client non-floating button image.
+--
+-- @beautiful beautiful.titlebar_floating_button_urgent
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The urgent client non-maximized button image.
+--
+-- @beautiful beautiful.titlebar_maximized_button_urgent
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The urgent client minimize button image.
+--
+-- @beautiful beautiful.titlebar_minimize_button_urgent
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+urgent client minimize button image.
+--
+-- @beautiful beautiful.titlebar_minimize_button_urgent_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+urgent minimize button image.
+--
+-- @beautiful beautiful.titlebar_minimize_button_urgent_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The urgent client close button image.
+--
+-- @beautiful beautiful.titlebar_close_button_urgent
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+urgent close button image.
+--
+-- @beautiful beautiful.titlebar_close_button_urgent_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+urgent close button image.
+--
+-- @beautiful beautiful.titlebar_close_button_urgent_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The urgent client non-ontop button image.
+--
+-- @beautiful beautiful.titlebar_ontop_button_urgent
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The urgent client sticky button image.
+--
+-- @beautiful beautiful.titlebar_sticky_button_urgent
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The floating+urgent client button image.
+--
+-- @beautiful beautiful.titlebar_floating_button_urgent_active
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+floating+urgent button image.
+--
+-- @beautiful beautiful.titlebar_floating_button_urgent_active_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+floating+urgent button image.
+--
+-- @beautiful beautiful.titlebar_floating_button_urgent_active_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The maximized+urgent button image.
+--
+-- @beautiful beautiful.titlebar_maximized_button_urgent_active
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+maximized+urgent button image.
+--
+-- @beautiful beautiful.titlebar_maximized_button_urgent_active_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+maximized+urgent button image.
+--
+-- @beautiful beautiful.titlebar_maximized_button_urgent_active_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The ontop+urgent button image.
+--
+-- @beautiful beautiful.titlebar_ontop_button_urgent_active
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+ontop+urgent button image.
+--
+-- @beautiful beautiful.titlebar_ontop_button_urgent_active_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+ontop+urgent button image.
+--
+-- @beautiful beautiful.titlebar_ontop_button_urgent_active_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The sticky+urgent button image.
+--
+-- @beautiful beautiful.titlebar_sticky_button_urgent_active
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+sticky+urgent button image.
+--
+-- @beautiful beautiful.titlebar_sticky_button_urgent_active_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+sticky+urgent button image.
+--
+-- @beautiful beautiful.titlebar_sticky_button_urgent_active_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The inactive+urgent+floating button image.
+--
+-- @beautiful beautiful.titlebar_floating_button_urgent_inactive
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+inactive+urgent+floating button image.
+--
+-- @beautiful beautiful.titlebar_floating_button_urgent_inactive_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+inactive+urgent+floating button image.
+--
+-- @beautiful beautiful.titlebar_floating_button_urgent_inactive_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The inactive+urgent+maximized button image.
+--
+-- @beautiful beautiful.titlebar_maximized_button_urgent_inactive
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+inactive+urgent+maximized button image.
+--
+-- @beautiful beautiful.titlebar_maximized_button_urgent_inactive_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+inactive+urgent+maximized button image.
+--
+-- @beautiful beautiful.titlebar_maximized_button_urgent_inactive_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The inactive+urgent+ontop button image.
+--
+-- @beautiful beautiful.titlebar_ontop_button_urgent_inactive
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+inactive+urgent+ontop button image.
+--
+-- @beautiful beautiful.titlebar_ontop_button_urgent_inactive_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+inactive+urgent+ontop button image.
+--
+-- @beautiful beautiful.titlebar_ontop_button_urgent_inactive_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The inactive+urgent+sticky button image.
+--
+-- @beautiful beautiful.titlebar_sticky_button_urgent_inactive
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The hovered+inactive+urgent+sticky button image.
+--
+-- @beautiful beautiful.titlebar_sticky_button_urgent_inactive_hover
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
+--- The pressed+inactive+urgent+sticky button image.
+--
+-- @beautiful beautiful.titlebar_sticky_button_urgent_inactive_press
+-- @tparam gears.surface|string path
+-- @see gears.surface
+
 --- The message in the close button tooltip.
 -- @beautiful beautiful.titlebar_tooltip_messages_close
 -- @tparam string titlebar_tooltip_messages_close
@@ -944,8 +1148,11 @@ end
 -- gets redrawn when needed by calling the returned widget's `:update()` method.
 -- The selector function should return a value describing a state. If the value
 -- is a boolean, either `"active"` or `"inactive"` are used. The actual image is
--- then found in the theme as `titlebar_[name]_button_[normal/focus]_[state]`.
--- If that value does not exist, the focused state is ignored for the next try.
+-- then found in the theme as `titlebar_[name]_button_[prefix]_[state]`, where
+-- the prefix is `urgent` for an urgent client, `focus` for the focused client
+-- and `normal` otherwise. When the theme has no image for a prefix, the next
+-- one is tried in the order `urgent`, `focus`, `normal`; when none has one,
+-- the prefix is dropped for the next try.
 --
 -- @tparam client c The client for which a button is created.
 -- @tparam string name Name of the button, used for accessing the theme and
@@ -1088,18 +1295,25 @@ end
 -- @tparam client c The client for which the button is wanted.
 -- @usebeautiful beautiful.titlebar_floating_button_normal
 -- @usebeautiful beautiful.titlebar_floating_button_focus
+-- @usebeautiful beautiful.titlebar_floating_button_urgent
 -- @usebeautiful beautiful.titlebar_floating_button_normal_active
 -- @usebeautiful beautiful.titlebar_floating_button_normal_active_hover
 -- @usebeautiful beautiful.titlebar_floating_button_normal_active_press
 -- @usebeautiful beautiful.titlebar_floating_button_focus_active
+-- @usebeautiful beautiful.titlebar_floating_button_urgent_active
 -- @usebeautiful beautiful.titlebar_floating_button_focus_active_hover
+-- @usebeautiful beautiful.titlebar_floating_button_urgent_active_hover
 -- @usebeautiful beautiful.titlebar_floating_button_focus_active_press
+-- @usebeautiful beautiful.titlebar_floating_button_urgent_active_press
 -- @usebeautiful beautiful.titlebar_floating_button_normal_inactive
 -- @usebeautiful beautiful.titlebar_floating_button_normal_inactive_hover
 -- @usebeautiful beautiful.titlebar_floating_button_normal_inactive_press
 -- @usebeautiful beautiful.titlebar_floating_button_focus_inactive
+-- @usebeautiful beautiful.titlebar_floating_button_urgent_inactive
 -- @usebeautiful beautiful.titlebar_floating_button_focus_inactive_hover
+-- @usebeautiful beautiful.titlebar_floating_button_urgent_inactive_hover
 -- @usebeautiful beautiful.titlebar_floating_button_focus_inactive_press
+-- @usebeautiful beautiful.titlebar_floating_button_urgent_inactive_press
 function titlebar.widget.floatingbutton(c)
     local widget = titlebar.widget.button(c, "floating", aclient.object.get_floating, aclient.floating.toggle)
     update_on_signal(c, "property::floating", widget)
@@ -1111,16 +1325,23 @@ end
 -- @constructorfct awful.titlebar.widget.maximizedbutton
 -- @tparam client c The client for which the button is wanted.
 -- @usebeautiful beautiful.titlebar_maximized_button_focus_active
+-- @usebeautiful beautiful.titlebar_maximized_button_urgent_active
 -- @usebeautiful beautiful.titlebar_maximized_button_focus_active_hover
+-- @usebeautiful beautiful.titlebar_maximized_button_urgent_active_hover
 -- @usebeautiful beautiful.titlebar_maximized_button_focus_active_press
+-- @usebeautiful beautiful.titlebar_maximized_button_urgent_active_press
 -- @usebeautiful beautiful.titlebar_maximized_button_normal_inactive
 -- @usebeautiful beautiful.titlebar_maximized_button_normal_inactive_hover
 -- @usebeautiful beautiful.titlebar_maximized_button_normal_inactive_press
 -- @usebeautiful beautiful.titlebar_maximized_button_focus_inactive
+-- @usebeautiful beautiful.titlebar_maximized_button_urgent_inactive
 -- @usebeautiful beautiful.titlebar_maximized_button_focus_inactive_hover
+-- @usebeautiful beautiful.titlebar_maximized_button_urgent_inactive_hover
 -- @usebeautiful beautiful.titlebar_maximized_button_focus_inactive_press
+-- @usebeautiful beautiful.titlebar_maximized_button_urgent_inactive_press
 -- @usebeautiful beautiful.titlebar_maximized_button_normal
 -- @usebeautiful beautiful.titlebar_maximized_button_focus
+-- @usebeautiful beautiful.titlebar_maximized_button_urgent
 -- @usebeautiful beautiful.titlebar_maximized_button_normal_active
 -- @usebeautiful beautiful.titlebar_maximized_button_normal_active_hover
 -- @usebeautiful beautiful.titlebar_maximized_button_normal_active_press
@@ -1142,8 +1363,11 @@ end
 -- @usebeautiful beautiful.titlebar_minimize_button_normal_hover
 -- @usebeautiful beautiful.titlebar_minimize_button_normal_press
 -- @usebeautiful beautiful.titlebar_minimize_button_focus
+-- @usebeautiful beautiful.titlebar_minimize_button_urgent
 -- @usebeautiful beautiful.titlebar_minimize_button_focus_hover
+-- @usebeautiful beautiful.titlebar_minimize_button_urgent_hover
 -- @usebeautiful beautiful.titlebar_minimize_button_focus_press
+-- @usebeautiful beautiful.titlebar_minimize_button_urgent_press
 function titlebar.widget.minimizebutton(c)
     local widget = titlebar.widget.button(c, "minimize",
                                           function() return "" end,
@@ -1160,8 +1384,11 @@ end
 -- @usebeautiful beautiful.titlebar_close_button_normal_hover
 -- @usebeautiful beautiful.titlebar_close_button_normal_press
 -- @usebeautiful beautiful.titlebar_close_button_focus
+-- @usebeautiful beautiful.titlebar_close_button_urgent
 -- @usebeautiful beautiful.titlebar_close_button_focus_hover
+-- @usebeautiful beautiful.titlebar_close_button_urgent_hover
 -- @usebeautiful beautiful.titlebar_close_button_focus_press
+-- @usebeautiful beautiful.titlebar_close_button_urgent_press
 function titlebar.widget.closebutton(c)
     return titlebar.widget.button(c, "close", function() return "" end, function(cl) cl:kill() end)
 end
@@ -1172,18 +1399,25 @@ end
 -- @tparam client c The client for which the button is wanted.
 -- @usebeautiful beautiful.titlebar_ontop_button_normal
 -- @usebeautiful beautiful.titlebar_ontop_button_focus
+-- @usebeautiful beautiful.titlebar_ontop_button_urgent
 -- @usebeautiful beautiful.titlebar_ontop_button_normal_active
 -- @usebeautiful beautiful.titlebar_ontop_button_normal_active_hover
 -- @usebeautiful beautiful.titlebar_ontop_button_normal_active_press
 -- @usebeautiful beautiful.titlebar_ontop_button_focus_active
+-- @usebeautiful beautiful.titlebar_ontop_button_urgent_active
 -- @usebeautiful beautiful.titlebar_ontop_button_focus_active_hover
+-- @usebeautiful beautiful.titlebar_ontop_button_urgent_active_hover
 -- @usebeautiful beautiful.titlebar_ontop_button_focus_active_press
+-- @usebeautiful beautiful.titlebar_ontop_button_urgent_active_press
 -- @usebeautiful beautiful.titlebar_ontop_button_normal_inactive
 -- @usebeautiful beautiful.titlebar_ontop_button_normal_inactive_hover
 -- @usebeautiful beautiful.titlebar_ontop_button_normal_inactive_press
 -- @usebeautiful beautiful.titlebar_ontop_button_focus_inactive
+-- @usebeautiful beautiful.titlebar_ontop_button_urgent_inactive
 -- @usebeautiful beautiful.titlebar_ontop_button_focus_inactive_hover
+-- @usebeautiful beautiful.titlebar_ontop_button_urgent_inactive_hover
 -- @usebeautiful beautiful.titlebar_ontop_button_focus_inactive_press
+-- @usebeautiful beautiful.titlebar_ontop_button_urgent_inactive_press
 function titlebar.widget.ontopbutton(c)
     local widget = titlebar.widget.button(c, "ontop",
                                           function(cl) return cl.ontop end,
@@ -1197,18 +1431,25 @@ end
 -- @tparam client c The client for which the button is wanted.
 -- @usebeautiful beautiful.titlebar_sticky_button_normal
 -- @usebeautiful beautiful.titlebar_sticky_button_focus
+-- @usebeautiful beautiful.titlebar_sticky_button_urgent
 -- @usebeautiful beautiful.titlebar_sticky_button_normal_active
 -- @usebeautiful beautiful.titlebar_sticky_button_normal_active_hover
 -- @usebeautiful beautiful.titlebar_sticky_button_normal_active_press
 -- @usebeautiful beautiful.titlebar_sticky_button_focus_active
+-- @usebeautiful beautiful.titlebar_sticky_button_urgent_active
 -- @usebeautiful beautiful.titlebar_sticky_button_focus_active_hover
+-- @usebeautiful beautiful.titlebar_sticky_button_urgent_active_hover
 -- @usebeautiful beautiful.titlebar_sticky_button_focus_active_press
+-- @usebeautiful beautiful.titlebar_sticky_button_urgent_active_press
 -- @usebeautiful beautiful.titlebar_sticky_button_normal_inactive
 -- @usebeautiful beautiful.titlebar_sticky_button_normal_inactive_hover
 -- @usebeautiful beautiful.titlebar_sticky_button_normal_inactive_press
 -- @usebeautiful beautiful.titlebar_sticky_button_focus_inactive
+-- @usebeautiful beautiful.titlebar_sticky_button_urgent_inactive
 -- @usebeautiful beautiful.titlebar_sticky_button_focus_inactive_hover
+-- @usebeautiful beautiful.titlebar_sticky_button_urgent_inactive_hover
 -- @usebeautiful beautiful.titlebar_sticky_button_focus_inactive_press
+-- @usebeautiful beautiful.titlebar_sticky_button_urgent_inactive_press
 function titlebar.widget.stickybutton(c)
     local widget = titlebar.widget.button(c, "sticky",
                                           function(cl) return cl.sticky end,
