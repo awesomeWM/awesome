@@ -29,95 +29,13 @@ jobs:
       SOURCE_DATE_EPOCH: "1893456000"
 
     steps:
-      # Create a cache invalidation key based on the current year + week.
-      # This way, packages will be checked for updates once every week.
-      - name: Get Date
-        id: get-date
-        run: echo "date=$(/bin/date -u "+%Y%W")" >> $GITHUB_OUTPUT
-
-      - name: Cache apt packages
-        id: cache-apt
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: /var/cache/apt/archives
-          # The trailing number serves as a version flag that can be incremented
-          # to invalidate the cache after changing the list of packages.
-          key: ${{ github.workflow }}-${{ runner.os }}-${{ steps.get-date.outputs.date }}-apt-3
-
-      - name: Download apt packages
-        if: steps.cache-apt.outputs.cache-hit != 'true'
-        run: |
-          sudo apt-get update
-          sudo apt-get install --download-only -y --no-install-recommends \
-            asciidoctor \
-            cmake \
-            dbus-x11 \
-            gettext \
-            gir1.2-gtk-3.0 \
-            gir1.2-pango-1.0 \
-            git \
-            imagemagick \
-            libdbus-1-dev \
-            libgdk-pixbuf-2.0-dev \
-            libgirepository1.0-dev \
-            libnotify-bin \
-            libpango1.0-dev \
-            librsvg2-dev \
-            libstartup-notification0-dev \
-            libx11-xcb-dev \
-            libxcb-cursor-dev \
-            libxcb-icccm4-dev \
-            libxcb-keysyms1-dev \
-            libxcb-randr0-dev \
-            libxcb-shape0-dev \
-            libxcb-util0-dev \
-            libxcb-xfixes0-dev \
-            libxcb-xinerama0-dev \
-            libxcb-xkb-dev \
-            libxcb-xrm-dev \
-            libxcb-xtest0-dev \
-            libxdg-basedir-dev \
-            libxkbcommon-dev \
-            libxkbcommon-x11-dev \
-            xutils-dev \
-            lua-discount \
-            liblua5.3-dev \
-            lua5.3
-
-      - name: Install downloaded packages
-        run: |
-          sudo dpkg -i /var/cache/apt/archives/*.deb
-
-      - name: Cache luarocks
-        id: cache-luarocks
-        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
-        with:
-          path: /tmp/luarocks
-          key: ${{ github.workflow }}-${{ runner.os }}-luarocks-3.5.0
-
-      - name: Install fresh Luarocks
-        if: steps.cache-luarocks.outputs.cache-hit != 'true'
-        run: |
-          wget -O /tmp/luarocks.tar.gz https://github.com/luarocks/luarocks/archive/v3.5.0.tar.gz
-          mkdir /tmp/luarocks
-          tar -xf /tmp/luarocks.tar.gz -C /tmp/luarocks --strip-components=1
-          cd /tmp/luarocks
-          ./configure
-          make build
-          sudo make install
-
-      - name: Install cached Luarocks
-        if: steps.cache-luarocks.outputs.cache-hit == 'true'
-        run: |
-          cd /tmp/luarocks
-          sudo make install
-
-      - name: Install rocks
-        run: |
-          sudo -H luarocks install lgi
-          sudo -H luarocks install ldoc
-
       - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+
+      - uses: ./.github/actions/install-deps-action
+        id: install-deps
+
+      - name: Set Lua prefix
+        run: echo "CMAKE_PREFIX_PATH=${{ steps.install-deps.outputs.lua-prefix }}${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}" >> "$GITHUB_ENV"
 
       - name: Build Awesome version string
         run: |
@@ -159,4 +77,5 @@ jobs:
           APIDOC_TOKEN: ${{ secrets.AWESOME_ROBOT_TOKEN || github.token }}
           GITHUB_COMPARE: ${{ github.event.compare }}
         run: .github/scripts/apidoc.sh
+
 # vim: filetype=yaml:expandtab:shiftwidth=2:tabstop=2
