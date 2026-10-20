@@ -33,35 +33,28 @@ jobs:
         include:
           - test_name: "lua5.5"
             lua_version: "5.5"
-            lua_name: "lua5.5"
 
           - test_name: "lua5.4"
             lua_version: "5.4"
-            lua_name: "lua5.4"
 
           - test_name: "codecov-lua5.3"
             lua_version: "5.3"
-            lua_name: "lua5.3"
             coverage: "codecov"
             manual_screens: true
 
           - test_name: "lua5.2"
             lua_version: "5.2"
-            lua_name: "lua5.2"
             manual_screens: true
 
           - test_name: "lua5.1"
             lua_version: "5.1"
-            lua_name: "lua5.1"
 
           - test_name: "luajit"
             lua_version: "luajit-master"
-            lua_name: "luajit"
 
           # Lua 5.2 with fixed lgi version and screen size not divisible by 2.
           - test_name: "fixed-lgi-lua5.2"
             lua_version: "5.2"
-            lua_name: "lua5.2"
             lgi_version: "0.9.2"
             tests_screen_size: "1921x1079"
             check_qa: true
