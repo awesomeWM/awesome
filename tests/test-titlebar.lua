@@ -4,6 +4,8 @@ local rules = require("ruled.client")
 local spawn = require("awful.spawn")
 local gdebug = require("gears.debug")
 local textbox = require("wibox.widget.textbox")
+local beautiful = require("beautiful")
+local cairo = require("lgi").cairo
 
 local lua_executable = os.getenv("LUA")
 if lua_executable == nil or lua_executable == "" then
@@ -238,6 +240,48 @@ local steps = {
         if #events == 0 then return end
 
         local c = client.get()[1]
+
+        kill_client(c)
+
+        return true
+    end,
+    function()
+        if #client.get() > 0 then return end
+
+        spawn("xterm", {titlebars_enabled=true})
+
+        return true
+    end,
+    function()
+        if #client.get() ~= 1 then return end
+
+        local c = client.get()[1]
+        client.focus = nil
+
+        -- One image per state, told apart by its size.
+        local function image(size)
+            return cairo.ImageSurface.create(cairo.Format.ARGB32, size, size)
+        end
+        beautiful.titlebar_close_button_normal = image(1)
+        beautiful.titlebar_close_button_focus = image(2)
+        beautiful.titlebar_close_button_urgent = image(3)
+        local button = titlebar.widget.closebutton(c)
+        assert(button._private.image:get_width() == 1, "unfocused client: normal image expected")
+
+        -- The button follows the urgent state of the client.
+        c.urgent = true
+        assert(button._private.image:get_width() == 3, "urgent client: urgent image expected")
+        c.urgent = false
+        assert(button._private.image:get_width() == 1, "urgency cleared: normal image expected")
+
+        -- Without an urgent image the focus one is used, then the normal one.
+        beautiful.titlebar_close_button_urgent = nil
+        c.urgent = true
+        assert(button._private.image:get_width() == 2, "urgent client without urgent image: focus image expected")
+        beautiful.titlebar_close_button_focus = nil
+        c.urgent = false
+        c.urgent = true
+        assert(button._private.image:get_width() == 1, "urgent client with only a normal image: normal image expected")
 
         kill_client(c)
 
