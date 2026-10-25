@@ -74,6 +74,7 @@ describe("menubar.utils lookup_icon_uncached", function()
 
         assert_found_in_path('awesome',  '/.icons/awesome/64x64/apps/awesome.png')
         assert_found_in_path('awesome2', '/.icons/awesome/scalable/apps/awesome2.png')
+        assert_found_in_path('awesome3', '/.icons/awesome/256x256/apps/awesome3.png')
     end)
 
     -- No argument
