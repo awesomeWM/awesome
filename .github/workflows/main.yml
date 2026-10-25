@@ -93,22 +93,8 @@ jobs:
         run: cmake -E make_directory -B "${{ github.workspace }}/build"
 
       - name: Build Awesome version string
-        run: |
-          # If this workflow is triggered by a pull request, we get a base branch.
-          # Otherwise, check if the current commit has a meaningful name.
-          if [ -n "${{ github.base_ref }}" ]; then
-            AWESOME_VERSION="${{ github.base_ref }}"
-          else
-            AWESOME_VERSION="$(git rev-parse --abbrev-ref HEAD)"
-          fi
-
-          AWESOME_VERSION="${AWESOME_VERSION}-g$(git rev-parse --short HEAD)"
-
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            AWESOME_VERSION="v9999-PR${{ github.event.number }}"
-          fi
-
-          echo "AWESOME_VERSION=${AWESOME_VERSION}" >> ${GITHUB_ENV}
+        id: build-awesome-version-string
+        uses: ./.github/actions/build-awesome-version-string-action
 
       - name: Configure CMake
         run: |
@@ -120,7 +106,7 @@ jobs:
           fi
 
           cmake -S ${{ github.workspace }} -B "${{ github.workspace}}/build" \
-            -DAWESOME_VERSION=$AWESOME_VERSION \
+            -DAWESOME_VERSION=${{ steps.build-awesome-version-string.outputs.awesome-version }} \
             "${cmake_args[@]}" \
             -DGENERATE_DOC=OFF \
             -DGENERATE_MANPAGES=OFF \
