@@ -1,0 +1,59 @@
+---
+name: Test Previous Commits
+
+on:
+  # Trigger on pull request events for PRs that have `master` as their target branch
+  pull_request:
+    branches: [master]
+
+
+defaults:
+  run:
+    # GitHub Actions adds `errexit` and `pipefail` by default, but we add `xtrace`
+    # to improve debugging some of the longer scripts.
+    shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+jobs:
+  test-prev-commits:
+    runs-on: ubuntu-24.04
+    name: test-prev-commits
+
+    env:
+      TEST_TIMEOUT: "100" # Indirect usage by tests
+      CI: "true" # Indirect usage by tests
+
+    steps:
+      - uses: actions/checkout@08c6903cd8c0fde910a37f88322edcfb5dd907a8 # v5.0.0
+        with:
+          # test-prev-commits.sh needs full history for rev-list/bisect traversal.
+          fetch-depth: 0
+      
+      - uses: ./.github/actions/install-deps-action
+        id: install-deps
+
+      - name: Set Lua prefix
+        run: echo "CMAKE_PREFIX_PATH=${{ steps.install-deps.outputs.lua-prefix }}${CMAKE_PREFIX_PATH:+:$CMAKE_PREFIX_PATH}" >> "$GITHUB_ENV"
+
+      - name: Build Awesome version string
+        id: build-awesome-version-string
+        uses: ./.github/actions/build-awesome-version-string-action
+
+      - name: Test previous commits
+        run: |
+          export CMAKE_CONFIG=" \
+            -DAWESOME_VERSION=${{ steps.build-awesome-version-string.outputs.awesome-version }} \
+            -DGENERATE_DOC=OFF \
+            -DGENERATE_MANPAGES=OFF \
+            -DDO_COVERAGE=OFF \
+            -DSTRICT_TESTS=true \
+            -DCMAKE_C_FLAGS=-Werror"
+
+          build-utils/test-prev-commits.sh \
+            "${{ github.event.pull_request.base.sha }}" \
+            "${{ github.event.pull_request.head.sha }}" \
+            --skip-clean-check
+
+# vim: filetype=yaml:expandtab:shiftwidth=2:tabstop=2

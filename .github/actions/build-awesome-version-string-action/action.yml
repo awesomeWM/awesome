@@ -1,0 +1,35 @@
+---
+name: 'Build Awesome Version String'
+description: 'Build Awesome Version String based on Actions '
+
+
+outputs:
+  awesome-version:
+    description: 'The generated Awesome version string'
+    value: ${{ steps.build-awesome-version-string.outputs.awesome-version }}
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Build Awesome version string
+      id: build-awesome-version-string
+      shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+      run: |
+        # If this workflow is triggered by a pull request, we get a base branch.
+        # Otherwise, check if the current commit has a meaningful name.
+        if [ -n "${{ github.base_ref }}" ]; then
+          AWESOME_VERSION="${{ github.base_ref }}"
+        else
+          AWESOME_VERSION="$(git rev-parse --abbrev-ref HEAD)"
+        fi
+
+        AWESOME_VERSION="${AWESOME_VERSION}-g$(git rev-parse --short HEAD)"
+
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          AWESOME_VERSION="v9999-PR${{ github.event.number }}"
+        fi
+
+        echo "awesome-version=${AWESOME_VERSION}" >> ${GITHUB_ENV}
+
+# vim: filetype=yaml:expandtab:shiftwidth=2:tabstop=2

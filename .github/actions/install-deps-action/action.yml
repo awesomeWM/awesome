@@ -1,0 +1,170 @@
+---
+name: 'Install Dependencies Action'
+description: 'Install dependencies to build and run Awesome'
+
+inputs:
+  lua-version:
+    description: 'Version of Lua to install'
+  lgi-version:
+    description: 'Version of LGI to install. Only available when using Lua version < 5.4, upper version get installed from sources.'
+
+outputs:
+  lua-prefix:
+    description: 'Path to the Lua installation prefix'
+    value: ${{ steps.lua-prefix.outputs.path }}
+
+runs:
+  using: "composite"
+  steps:
+
+      # Create a cache invalidation key based on the current year + week.
+      # This way, packages will be checked for updates once every week.
+      - name: Get Date
+        id: get-date
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: echo "date=$(/bin/date -u "+%Y%W")" >> $GITHUB_OUTPUT
+
+
+      - name: Cache apt packages
+        id: cache-apt
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: /var/cache/apt/archives
+          # The trailing number serves as a version flag that can be incremented
+          # to invalidate the cache after changing the list of packages.
+          key: ${{ github.workflow }}-${{ runner.os }}-${{ steps.get-date.outputs.date }}-apt-4
+          
+      - name: Download apt packages
+        if: steps.cache-apt.outputs.cache-hit != 'true'
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: |
+          sudo apt-get update
+          sudo apt-get install --download-only -y --no-install-recommends \
+            asciidoctor \
+            cmake \
+            dbus-x11 \
+            gettext \
+            gir1.2-gtk-3.0 \
+            gir1.2-pango-1.0 \
+            git \
+            libdbus-1-dev \
+            libgirepository1.0-dev \
+            libnotify-bin \
+            libpango1.0-dev \
+            libstartup-notification0-dev \
+            libx11-xcb-dev \
+            libxcb-cursor-dev \
+            libxcb-icccm4-dev \
+            libxcb-keysyms1-dev \
+            libxcb-randr0-dev \
+            libxcb-shape0-dev \
+            libxcb-util0-dev \
+            libxcb-xfixes0-dev \
+            libxcb-xinerama0-dev \
+            libxcb-xkb-dev \
+            libxcb-xrm-dev \
+            libxcb-xtest0-dev \
+            libxdg-basedir-dev \
+            libxkbcommon-dev \
+            libxkbcommon-x11-dev \
+            wmctrl \
+            x11-apps \
+            xcb-proto \
+            xdotool \
+            xorg \
+            xserver-xephyr \
+            xterm \
+            xutils-dev \
+            xvfb \
+            zsh \
+            lua-discount \
+            fonts-noto-core \
+            fonts-dejavu-core \
+            fonts-roboto-unhinted \
+            fonts-open-sans \
+            imagemagick \
+            libgdk-pixbuf-2.0-dev \
+            librsvg2-dev
+
+      - name: Install downloaded packages
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: sudo dpkg -i /var/cache/apt/archives/*.deb
+
+      - name: Install Lua using upstream default
+        if: inputs.lua-version == ''
+        uses: luarocks/gh-actions-lua@85e2287697275df96334743ac654241a8fd34ab3 # v13
+
+      - name: Install specified Lua version
+        if: inputs.lua-version != ''
+        uses: luarocks/gh-actions-lua@85e2287697275df96334743ac654241a8fd34ab3 # v13
+        with:
+          luaVersion: ${{ inputs.lua-version }}
+
+      - name: Detect installed Lua version
+        id: detect-lua-version
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: |
+          version="$(lua -e 'print(_VERSION:match("(%d+%.%d+)$"))')"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Set Lua prefix output
+        id: lua-prefix
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: echo "path=$GITHUB_WORKSPACE/.lua" >> "$GITHUB_OUTPUT"
+      
+      - name: Install Luarocks
+        uses: luarocks/gh-actions-luarocks@95d2308a0aff36ad31ebadca493ed14853399842 # v7
+        
+      - name: Cache xcb-errors
+        id: cache-xcb-errors
+        uses: actions/cache@0400d5f644dc74513175e3cd8d07132dd4860809 # v4.2.4
+        with:
+          path: /tmp/xcb-errors
+          key: ${{ github.workflow }}-${{ runner.os }}-xcb-errors-1.0.1
+
+      - name: Install fresh xcb-errors
+        if: steps.cache-xcb-errors.outputs.cache-hit != 'true'
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: |
+          wget -O /tmp/xcb-errors.tar.xz https://xorg.freedesktop.org/archive/individual/lib/xcb-util-errors-1.0.1.tar.xz
+          mkdir /tmp/xcb-errors
+          tar -xf /tmp/xcb-errors.tar.xz -C /tmp/xcb-errors/ --strip-components=1
+          cd /tmp/xcb-errors
+          ./configure --prefix=/usr
+          make
+          sudo make install
+
+      - name: Install cached xcb-errors
+        if: steps.cache-xcb-errors.outputs.cache-hit == 'true'
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: |
+          cd /tmp/xcb-errors
+          sudo make install
+
+      # Only LGI git master supports Lua > 5.3. We need to build it from source.
+      - name: Build and Install LGI
+        if: steps.detect-lua-version.outputs.version == '5.4' || steps.detect-lua-version.outputs.version == '5.5'
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: |
+          wget -O /tmp/lgi.zip https://github.com/pavouk/lgi/archive/refs/heads/master.zip
+          unzip /tmp/lgi.zip -d /tmp
+          cd /tmp/lgi-master
+          sed -i 's/5.1/${{ steps.detect-lua-version.outputs.version }}/' lgi/Makefile
+          make all CFLAGS="-I${{ github.workspace }}/.lua/include"
+          sudo make install
+      
+      - name: Install rocks
+        shell: /bin/bash -o errexit -o pipefail -o xtrace {0}
+        run: |
+          if [[ "${{ steps.detect-lua-version.outputs.version }}" != "5.4" && "${{ steps.detect-lua-version.outputs.version }}" != "5.5" ]]; then
+            luarocks install lgi ${{ inputs.lgi-version }}
+          fi
+
+          # Ldoc is not yet released for Lua 5.5, install from the development rockspec
+          if [ "${{ steps.detect-lua-version.outputs.version }}" == "5.5" ]; then
+            luarocks install https://raw.githubusercontent.com/lunarmodules/ldoc/refs/heads/master/ldoc-dev-1.rockspec
+          else
+            luarocks install ldoc
+          fi
+          
+          luarocks install busted
