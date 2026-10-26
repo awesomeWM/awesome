@@ -188,8 +188,15 @@ local function handler(_, client, context, args) --luacheck: no unused_args
         end
 
         -- Quit when the button is released
-        for _,v in pairs(coords.buttons) do
-            if v then return true end
+        if args.mouse_buttons and #args.mouse_buttons > 0 then
+            for _,v in ipairs(args.mouse_buttons) do
+                if coords.buttons[v] then return true end
+            end
+        else
+            -- If no button is given, quit if all buttons are released
+            for _,v in pairs(coords.buttons) do
+                if v then return true end
+            end
         end
 
         -- Only resize after the mouse is released, this avoids losing content
