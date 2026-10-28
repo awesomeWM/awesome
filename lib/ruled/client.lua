@@ -167,7 +167,7 @@ end
 -- @treturn bool True if at least one rule is matched, false otherwise.
 -- @staticfct ruled.client.matches_list
 function module.matches_list(c, rules)
-    return crules:matchesrules(c, rules)
+    return crules:matches_rules(c, rules)
 end
 
 --- Remove a source.
