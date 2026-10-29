@@ -13,6 +13,19 @@ local async_spawns_done = 0
 local io_spawns_done = 0
 local exit_yay, exit_snd = nil, nil
 
+-- Corner cases for spawn.easy_async: {command, expected stdout, expected stderr}
+local easy_async_cases = {
+    -- No output at all
+    { "true", "", "" },
+    -- A single empty line
+    { "echo; echo >&2", "\n", "\n" },
+    { "echo out1; echo out2; echo err >&2", "out1\nout2\n", "err\n" },
+    -- A missing newline at the end is added
+    { "printf out; printf err >&2", "out\n", "err\n" },
+    -- A trailing empty line is kept
+    { "printf 'out\\n\\n'; printf 'err\\n\\n' >&2", "out\n\n", "err\n\n" },
+}
+
 -- * Using spawn with array is already covered by the test client.
 -- * spawn with startup notification is covered by test-spawn-snid.lua
 
@@ -84,6 +97,15 @@ local steps = {
                     async_spawns_done = async_spawns_done + 1
                 end
             end)
+            for _, case in ipairs(easy_async_cases) do
+                local cmd, exp_stdout, exp_stderr = case[1], case[2], case[3]
+                spawn.easy_async({"sh", "-c", cmd}, function(stdout, stderr, reason, code)
+                    assert(stdout == exp_stdout, cmd .. ": stdout == '" .. stdout .. "'")
+                    assert(stderr == exp_stderr, cmd .. ": stderr == '" .. stderr .. "'")
+                    assert(reason == "exit" and code == 0, cmd)
+                    async_spawns_done = async_spawns_done + 1
+                end)
+            end
             local steps_yay = 0
             spawn.with_line_callback("echo yay", {
                                      stdout = function(line)
@@ -155,10 +177,9 @@ local steps = {
 
             spawn.once(tiny_client("client1"), {tag=screen[1].tags[2]})
         end
-        if spawns_done == 3 then
+        if spawns_done == 3 and async_spawns_done == 2 + #easy_async_cases then
             assert(exit_yay == 0)
             assert(exit_snd == 42)
-            assert(async_spawns_done == 2)
             return true
         end
     end,
