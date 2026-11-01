@@ -36,14 +36,14 @@
 static inline char *
 xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
 {
-    int len = xcb_get_property_value_length(reply);
     if(reply
        && (reply->type == XCB_ATOM_STRING
            || reply->type == UTF8_STRING
            || reply->type == COMPOUND_TEXT)
-       && reply->format == 8
-       && len >= 0)
+       && reply->format == 8)
     {
+        int len = xcb_get_property_value_length(reply);
+        if (len <= 0) return NULL;
         /* We need to copy it that way since the string may not be
          * NULL-terminated */
         char *value = p_new(char, len + 1);
