@@ -46,6 +46,8 @@ xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
         /* We need to copy it that way since the string may not be
          * NULL-terminated */
         int len = xcb_get_property_value_length(reply);
+        if (len <= 0)
+            return NULL;
         char *value = p_new(char, len + 1);
         memcpy(value, xcb_get_property_value(reply), len);
         value[len] = '\0';
