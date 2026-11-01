@@ -43,10 +43,11 @@ xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
        && reply->format == 8)
     {
         int len = xcb_get_property_value_length(reply);
-        if (len <= 0) return NULL;
+        if (len <= 0)
+            return NULL;
+        size_t size = (size_t)len;
         /* We need to copy it that way since the string may not be
          * NULL-terminated */
-        size_t size = (size_t)len;
         char *value = p_new(char, size + 1);
         memcpy(value, xcb_get_property_value(reply), size);
         value[size] = '\0';
