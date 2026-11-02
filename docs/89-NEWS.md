@@ -591,7 +591,7 @@ It is now possible to display the list of active keyboard shortcuts by pressing
 
 ### New tag and layout properties
 
-[![Client geometry](../images/tag_props.svg)](../classes/tag.html)
+[![Client geometry](images/tag_props.svg)](../classes/tag.html)
 
 #### Generic useless gap
 
