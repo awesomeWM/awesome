@@ -36,15 +36,15 @@
 static inline char *
 xutil_get_text_property_from_reply(xcb_get_property_reply_t *reply)
 {
+    int len;
     if(reply
        && (reply->type == XCB_ATOM_STRING
            || reply->type == UTF8_STRING
            || reply->type == COMPOUND_TEXT)
-       && reply->format == 8)
+       && reply->format == 8
+       && (len = xcb_get_property_value_length(reply)) > 0)
     {
-        int len = xcb_get_property_value_length(reply);
-        if (len <= 0)
-            return NULL;
+        /* cast from int to size_t before `+1` can turn INTMAX into overflow */
         size_t size = (size_t)len;
         /* We need to copy it that way since the string may not be
          * NULL-terminated */
