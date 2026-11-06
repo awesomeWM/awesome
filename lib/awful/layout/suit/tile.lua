@@ -129,13 +129,21 @@ local function mouse_resize_handler(c, _, _, _, orientation)
                                       -- client where we have to use different settings.
                                       local wfact
                                       local wfact_x, wfact_y
-                                      if (geom.y+geom.height+useless_gap+tile.resize_edge_tolerance) > (wa.y+wa.height) then
+                                      if (
+                                            geom.y + geom.height + useless_gap + tile.resize_edge_tolerance
+                                      ) > (
+                                            wa.y + wa.height
+                                      ) then
                                           wfact_y = (geom.y + geom.height - coords.y) / wa.height
                                       else
                                           wfact_y = (coords.y - geom.y) / wa.height
                                       end
 
-                                      if (geom.x+geom.width+useless_gap+tile.resize_edge_tolerance) > (wa.x+wa.width) then
+                                      if (
+                                            geom.x + geom.width + useless_gap + tile.resize_edge_tolerance
+                                      ) > (
+                                            wa.x + wa.width
+                                      ) then
                                           wfact_x = (geom.x + geom.width - coords.x) / wa.width
                                       else
                                           wfact_x = (coords.x - geom.x) / wa.width
