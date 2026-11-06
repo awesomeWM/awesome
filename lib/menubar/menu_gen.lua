@@ -13,6 +13,9 @@ local utils = require("menubar.utils")
 local pairs = pairs
 local ipairs = ipairs
 local table = table
+local lgi = require("lgi")
+local gio = lgi.Gio
+local protected_call = require("gears.protected_call")
 
 local menu_gen = {}
 
@@ -75,6 +78,28 @@ local function get_category_name_and_usage_by_type(app_type)
     end
 end
 
+local do_protected_call, call_callback
+do
+    -- Lua 5.1 cannot yield across a protected call. Instead of hardcoding a
+    -- check, we check for this problem: The following coroutine yields true on
+    -- success (so resume() returns true, true). On failure, pcall returns
+    -- false and a message, so resume() returns true, false, message.
+    local _, has_yieldable_pcall = coroutine.resume(coroutine.create(function()
+        return pcall(coroutine.yield, true)
+    end))
+    if has_yieldable_pcall then
+        do_protected_call = protected_call.call
+        call_callback = function(callback, ...)
+            return callback(...)
+        end
+    else
+        do_protected_call = function(f, ...)
+            return f(...)
+        end
+        call_callback = protected_call.call
+    end
+end
+
 --- Generate an array of all visible menu entries.
 -- @tparam function callback Will be fired when all menu entries were parsed
 -- with the resulting list of menu entries as argument.
@@ -89,46 +114,47 @@ function menu_gen.generate(callback)
     local unique_entries = {}
     local dirs_parsed = 0
 
-    for _, dir in ipairs(menu_gen.all_menu_dirs) do
-        utils.parse_dir(dir, function(entries)
-            entries = entries or {}
-            for _, entry in ipairs(entries) do
-                -- Check whether to include program in the menu
-                if entry.show and entry.Name and entry.cmdline then
-                    local unique_key = entry.Name .. '\0' .. entry.cmdline
-                    if not unique_entries[unique_key] then
-                        local target_category = nil
-                        -- Check if the program falls into at least one of the
-                        -- usable categories. Set target_category to be the id
-                        -- of the first category it finds.
-                        if entry.categories then
-                            for _, category in pairs(entry.categories) do
-                                local cat_key, cat_use =
-                                get_category_name_and_usage_by_type(category)
-                                if cat_key and cat_use then
-                                    target_category = cat_key
-                                    break
+    gio.Async.start(do_protected_call)(function()
+        for _, dir in ipairs(menu_gen.all_menu_dirs) do
+            utils.parse_dir(dir, function(entries)
+                entries = entries or {}
+                for _, entry in ipairs(entries) do
+                    -- Check whether to include program in the menu
+                    if entry.show and entry.Name and entry.cmdline then
+                        local unique_key = entry.desktop_file_id
+                        if not unique_entries[unique_key] then
+                            local target_category = nil
+                            -- Check if the program falls into at least one of the
+                            -- usable categories. Set target_category to be the id
+                            -- of the first category it finds.
+                            if entry.categories then
+                                for _, category in pairs(entry.categories) do
+                                    local cat_key, cat_use = get_category_name_and_usage_by_type(category)
+                                    if cat_key and cat_use then
+                                        target_category = cat_key
+                                        break
+                                    end
                                 end
                             end
-                        end
 
-                        local name = utils.rtrim(entry.Name) or ""
-                        local cmdline = utils.rtrim(entry.cmdline) or ""
-                        local icon = entry.icon_path or nil
-                        table.insert(result, { name = name,
-                                     cmdline = cmdline,
-                                     icon = icon,
-                                     category = target_category })
-                        unique_entries[unique_key] = true
+                            local name = utils.rtrim(entry.Name) or ""
+                            local cmdline = utils.rtrim(entry.cmdline) or ""
+                            local icon = entry.icon_path or nil
+                            table.insert(
+                                result,
+                                { name = name, cmdline = cmdline, icon = icon, category = target_category }
+                            )
+                            unique_entries[unique_key] = true
+                        end
                     end
                 end
-            end
-            dirs_parsed = dirs_parsed + 1
-            if dirs_parsed == #menu_gen.all_menu_dirs then
-                callback(result)
-            end
-        end)
-    end
+                dirs_parsed = dirs_parsed + 1
+                if dirs_parsed == #menu_gen.all_menu_dirs then
+                    call_callback(callback, result)
+                end
+            end)
+        end
+    end)
 end
 
 return menu_gen
