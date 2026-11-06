@@ -92,6 +92,10 @@ gtable.crush(naughty, require("naughty.constants"))
 
 --- Defaults for `naughty.notify`.
 --
+-- These values apply only when neither the notification itself (constructor
+-- arguments or `ruled.notification` rules), its preset, nor the theme
+-- (`beautiful.notification_*`) provides a value.
+--
 -- @table naughty.config.defaults
 -- @tfield[opt=5] integer timeout
 -- @tfield[opt=""] string text
@@ -272,8 +276,11 @@ local function update_index(n)
     local s = get_screen(n.screen
         or (n.preset and n.preset.screen)
         or screen.focused())
+    local pos = n.position
+
     naughty.notifications[s] = naughty.notifications[s] or {}
-    table.insert(naughty.notifications[s][n.position], n)
+    table.insert(naughty.notifications[s][pos], n)
+    n._private.index_position = pos
 end
 
 --- Notification state.
@@ -490,11 +497,16 @@ local function cleanup(self, reason)
     end
     local scr = self.screen
 
-    assert(naughty.notifications[scr][self.position][self.idx] == self)
+    -- Use the position the notification was indexed under rather than its
+    -- current one. `position` can fall back to `beautiful.notification_position`,
+    -- and the theme changing emits no `property::position` to re-index with.
+    local pos = self._private.index_position or self.position
+
+    assert(naughty.notifications[scr][pos][self.idx] == self)
     remove_from_index(self)
 
     -- Update all indices
-    for k, n in ipairs(naughty.notifications[scr][self.position]) do
+    for k, n in ipairs(naughty.notifications[scr][pos]) do
         n.idx = k
     end
 
@@ -700,10 +712,14 @@ local function register(notification, args)
     end
 
     -- insert the notification to the table
+    local pos = notification.position
+
     table.insert(naughty._active, notification)
-    table.insert(naughty.notifications[s][notification.position], notification)
-    notification.idx    = #naughty.notifications[s][notification.position]
+    table.insert(naughty.notifications[s][pos], notification)
+    notification.idx    = #naughty.notifications[s][pos]
     notification.screen = s
+
+    notification._private.index_position = pos
 
     notification._private.registered = true
 
