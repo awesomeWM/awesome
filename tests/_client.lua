@@ -25,16 +25,21 @@ local function open_window(class, title, options)
         default_height = options.default_height or 100,
         title          = title
     }
+    if options.resize_increment or options.custom_titlebar then
+        -- These require Gtk3, but may fail with an obscure message with Gtk2.
+        -- Produce a better error message instead.
+        assert(tonumber(require("lgi").Gtk._version) >= 3, "Gtk 3 required, but not found")
+    end
     if options.gravity then
         window:set_gravity(tonumber(options.gravity))
     end
     if options.snid and options.snid ~= "" then
         window:set_startup_id(options.snid)
     end
+    if options.custom_titlebar then
+        window:set_titlebar(Gtk.Label { label = title })
+    end
     if options.resize_increment then
-        -- This requires Gtk3, but fails with an obscure message with Gtk2.
-        -- Produce a better error message instead.
-        assert(tonumber(require("lgi").Gtk._version) >= 3, "Gtk 3 required, but not found")
         local geom = Gdk.Geometry {
             width_inc = 200,
             height_inc = 200,
@@ -194,6 +199,9 @@ local function new(_, class, title, sn_rules, callback, resize_increment, args)
     end
     if args.minimize_after then
         options = options .. "minimize_after,"
+    end
+    if args.custom_titlebar then
+        options = options .. "custom_titlebar,"
     end
 
     if args.size then

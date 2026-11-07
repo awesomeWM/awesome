@@ -35,6 +35,9 @@
 #define _NET_WM_STATE_ADD 1
 #define _NET_WM_STATE_TOGGLE 2
 
+#define _NET_WM_MOVERESIZE_MOVE 8
+#define _NET_WM_MOVERESIZE_CANCEL 11
+
 #define ALL_DESKTOPS 0xffffffff
 
 /** Update client EWMH hints.
@@ -141,6 +144,7 @@ ewmh_init(void)
         _NET_DESKTOP_NAMES,
         _NET_ACTIVE_WINDOW,
         _NET_CLOSE_WINDOW,
+        _NET_WM_MOVERESIZE,
         _NET_FRAME_EXTENTS,
         _NET_WM_NAME,
         _NET_WM_STRUT_PARTIAL,
@@ -455,6 +459,34 @@ ewmh_process_desktop(client_t *c, uint32_t desktop)
     }
 }
 
+const char *moveresize_size_dir_map[] = {
+    "top_left", "top", "top_right", "right",
+    "bottom_right", "bottom", "bottom_left", "left"
+};
+
+static void
+push_moveresize_data(lua_State *L, const uint32_t data[5])
+{
+    lua_newtable(L);
+
+    lua_pushstring(L, "mouse_pos");
+    lua_newtable(L);
+
+    lua_pushstring(L, "x");
+    lua_pushnumber(L, data[0]);
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "y");
+    lua_pushnumber(L, data[1]);
+    lua_settable(L, -3);
+
+    lua_settable(L, -3);
+
+    lua_pushstring(L, "button");
+    lua_pushnumber(L, data[3]);
+    lua_settable(L, -3);
+}
+
 int
 ewmh_process_client_message(xcb_client_message_event_t *ev)
 {
@@ -509,6 +541,47 @@ ewmh_process_client_message(xcb_client_message_event_t *ev)
 
             luaA_object_emit_signal(L, -3, "request::activate", 2);
             lua_pop(L, 1);
+        }
+    }
+    else if(ev->type == _NET_WM_MOVERESIZE)
+    {
+        if((c = client_getbywin(ev->window)))
+        {
+            lua_State *L = globalconf_get_lua_State();
+            uint32_t dir = ev->data.data32[2];
+            if(dir < 8) /* It's _NET_WM_MOVERESIZE_SIZE_* */
+            {
+                luaA_object_push(L, c);
+                lua_pushstring(L, "ewmh");
+                push_moveresize_data(L, ev->data.data32);
+
+                lua_pushstring(L, "corner");
+                lua_pushstring(L, moveresize_size_dir_map[dir]);
+                lua_settable(L, -3);
+
+                luaA_object_emit_signal(L, -3, "request::mouse_resize", 2);
+                lua_pop(L, 1);
+            }
+            else
+            {
+                switch(dir)
+                {
+                    case _NET_WM_MOVERESIZE_MOVE:
+                        luaA_object_push(L, c);
+                        lua_pushstring(L, "ewmh");
+                        push_moveresize_data(L, ev->data.data32);
+                        luaA_object_emit_signal(L, -3, "request::mouse_move", 2);
+                        lua_pop(L, 1);
+                        break;
+                    case _NET_WM_MOVERESIZE_CANCEL:
+                        luaA_object_push(L, c);
+                        lua_pushstring(L, "ewmh");
+                        luaA_object_emit_signal(L, -2, "request::mouse_cancel", 1);
+                        lua_pop(L, 1);
+                        break;
+                    /* Simply ignore the _NET_WM_MOVERESIZE_*_KEYBOARD cases like i3 does */
+                }
+            }
         }
     }
 
