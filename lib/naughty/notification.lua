@@ -23,6 +23,7 @@ local gfs      = require("gears.filesystem")
 local cst      = require("naughty.constants")
 local naughty  = require("naughty.core")
 local gdebug   = require("gears.debug")
+local beautiful = require("beautiful")
 local pcommon = require("awful.permissions._common")
 
 local notification = {}
@@ -321,7 +322,7 @@ local notification = {}
 
 --- Border width.
 -- @property border_width
--- @tparam[opt=beautiful.notification_border_width or 0] number|nil border_width
+-- @tparam[opt=beautiful.notification_border_width or naughty.config.defaults.border_width] number|nil border_width
 -- @negativeallowed false
 -- @propertyunit pixel
 -- @propbeautiful
@@ -667,6 +668,19 @@ function notification:get_text()
     return self:get_message()
 end
 
+-- Properties which fall back to the `beautiful.notification_<name>` theme
+-- variables, as documented in the property definitions above. The theme value
+-- ranks below values set on the notification (directly, using the constructor
+-- arguments or by `ruled.notification`) and below the preset, but above the
+-- built-in `naughty.config.defaults`.
+local beautiful_fallback = {
+    bg           = true, border_color = true, border_width = true,
+    fg           = true, font         = true, height       = true,
+    icon_size    = true, margin       = true, max_width    = true,
+    opacity      = true, position     = true, shape        = true,
+    width        = true,
+}
+
 local properties = {
     "message"  , "title"   , "timeout" , "hover_timeout"     ,
     "app_name" , "position", "ontop"   , "border_width"      ,
@@ -680,6 +694,9 @@ local properties = {
 }
 
 for _, prop in ipairs(properties) do
+    -- Resolved once per property rather than on every getter call.
+    local beautiful_key = beautiful_fallback[prop] and "notification_"..prop
+
     notification["get_"..prop] = notification["get_"..prop] or function(self)
         -- It's possible this could be called from the `request::preset` handler.
         -- `rawget()` is necessary to avoid a stack overflow.
@@ -687,6 +704,7 @@ for _, prop in ipairs(properties) do
 
         return self._private[prop]
             or (preset and preset[prop])
+            or (beautiful_key and beautiful[beautiful_key])
             or cst.config.defaults[prop]
     end
 
@@ -936,9 +954,13 @@ local function select_legacy_preset(n, args)
         end
     end
 
-    -- gather variables together
+    -- gather variables together.
+    --
+    -- `naughty.config.defaults` is intentionally *not* joined into the
+    -- preset. It is the final fallback of the property getters, below the
+    -- `beautiful.notification_*` theme variables. Joining it here would rank
+    -- it above the theme and shadow it.
     rawset(n, "preset", gtable.join(
-        cst.config.defaults or {},
         args.preset or cst.config.presets.normal or {},
         rawget(n, "preset") or {}
     ))
@@ -951,8 +973,15 @@ local function select_legacy_preset(n, args)
         end
     end
 
-    if n.preset.screen then
-        n._private.weak_screen[1] = capi.screen[n.preset.screen]
+    -- `screen` is not a generated property, so it has no getter to fall back
+    -- to `naughty.config.defaults`. It has to be resolved here, where the
+    -- defaults used to arrive through the preset. Note that this, like the
+    -- rest of this function, only covers the legacy path; `ruled.notification`
+    -- has never applied `naughty.config.defaults.screen`.
+    local scr = n.preset.screen or cst.config.defaults.screen
+
+    if scr then
+        n._private.weak_screen[1] = capi.screen[scr]
     end
 end
 

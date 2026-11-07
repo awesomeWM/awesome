@@ -116,20 +116,37 @@ local function update_style(self)
     end
 end
 
+-- The notification property getters fall back to `beautiful.notification_<prop>`.
+-- This widget has its own, more specific, `_normal`/`_selected` variables, so a
+-- value which only reached the notification through the global theme must not
+-- override them. `_private` holds the value set on the notification itself;
+-- preset values count as such because `select_legacy_preset` copies the preset
+-- into `_private` (and `ruled.notification` applies presets through setters).
+local function pick(notification, style, prop, style_prop)
+    return notification._private[prop]
+        or style[style_prop or prop]
+        or notification[prop]
+end
+
 local function wb_label(notification, self)
     -- Get the title
     local title = notification.title
 
     local style = self._private.style_cache[notification.selected and "selected" or "normal"]
 
-    if notification.fg or style.fg then
-        title = "<span color='" .. (notification.fg or style.fg) .. "'>" .. title .. "</span>"
+    local fg = pick(notification, style, "fg")
+
+    if fg then
+        title = "<span color='" .. fg .. "'>" .. title .. "</span>"
     end
 
-    return title, notification.bg or style.bg, style.bg_image, notification.icon, {
-        shape              = notification.shape         or style.shape,
+    return title, pick(notification, style, "bg"), style.bg_image, notification.icon, {
+        -- `border_width` deliberately keeps the old order. `notification.border_width`
+        -- has always been non-nil (`naughty.config.defaults.border_width`), so
+        -- `shape_border_width` was already unreachable here before this change.
+        shape              = pick(notification, style, "shape"),
         shape_border_width =  notification.border_width or style.shape_border_width,
-        shape_border_color =  notification.border_color or style.shape_border_color,
+        shape_border_color = pick(notification, style, "border_color", "shape_border_color"),
         icon_size          =  style.icon_size,
     }
 end
