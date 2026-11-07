@@ -208,7 +208,7 @@ function focus.global_bydirection(dir, c, stacked)
 
     -- if focus not changed, we must change screen
     if sel == capi.client.focus then
-        screen.focus_bydirection(dir, scr)
+        screen.focus_bydirection(dir, screen.focused())
         if scr ~= get_screen(screen.focused()) then
             local cltbl = client.visible(screen.focused(), stacked)
             local geomtbl = {}
