@@ -83,7 +83,7 @@ jobs:
         if: matrix.check_qa
         run: |
           luarocks install luacheck
-          luarocks install depgraph
+          luarocks install https://raw.githubusercontent.com/Aire-One/depgraph/refs/heads/main/depgraph-scm-1.rockspec
 
       - name: Install cluacov rock
         if: matrix.coverage
@@ -149,7 +149,7 @@ jobs:
         run: cd "${{ github.workspace }}/build" && make check-examples
 
       - name: Run requires tests
-        if: matrix.coverage
+        if: matrix.check_qa
         run: cd "${{ github.workspace }}/build" && make check-requires
 
       - name: Run themes tests
