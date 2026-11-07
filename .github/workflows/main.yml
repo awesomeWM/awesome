@@ -83,7 +83,7 @@ jobs:
         if: matrix.check_qa
         run: |
           luarocks install luacheck
-          luarocks install depgraph
+          luarocks install https://raw.githubusercontent.com/Aire-One/depgraph/refs/heads/main/depgraph-scm-1.rockspec
 
       - name: Install cluacov rock
         if: matrix.coverage
