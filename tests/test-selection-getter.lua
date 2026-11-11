@@ -186,7 +186,7 @@ runner.run_steps{
             assert(pixbuf.width == 1900)
             assert(pixbuf.height == 1600)
             assert(pixbuf.colorspace == "RGB")
-            assert(pixbuf["has-alpha"] == false)
+            assert(pixbuf["has-alpha"] == true)
 
             assert(not continue)
             continue = true

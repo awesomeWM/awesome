@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   test-prev-commits:
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-26.04
     name: test-prev-commits
 
     env:
