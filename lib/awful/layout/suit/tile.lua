@@ -46,10 +46,9 @@ local tile = {}
 -- @tfield[opt="true"] boolean awful.layout.suit.tile.resize_jump_to_corner
 tile.resize_jump_to_corner = true
 
---- Additional tolerance when detecting workarea edges during mouse resizing.
--- @tfield[opt="15"] number awful.layout.suit.tile.resize_edge_tolerance
-tile.resize_edge_tolerance = 15
 
+-- Tolerance for detecting clients extending beyond the workarea.
+local resize_edge_tolerance = 15
 
 local function mouse_resize_handler(c, _, _, _, orientation)
     orientation = orientation or "tile"
@@ -65,37 +64,37 @@ local function mouse_resize_handler(c, _, _, _, orientation)
 
     if orientation == "tile" then
         cursor = "cross"
-        if g.height+useless_gap+tile.resize_edge_tolerance > wa.height then
+        if g.height+useless_gap+resize_edge_tolerance > wa.height then
             offset = g.height * .5
             cursor = "sb_h_double_arrow"
-        elseif g.y+g.height+useless_gap+tile.resize_edge_tolerance <= wa.y+wa.height then
+        elseif g.y+g.height+useless_gap+resize_edge_tolerance <= wa.y+wa.height then
             offset = g.height
         end
         corner_coords = { x = wa.x + wa.width * mwfact, y = g.y + offset }
     elseif orientation == "left" then
         cursor = "cross"
-        if g.height+useless_gap+tile.resize_edge_tolerance >= wa.height then
+        if g.height+useless_gap+resize_edge_tolerance >= wa.height then
             offset = g.height * .5
             cursor = "sb_h_double_arrow"
-        elseif g.y+useless_gap+g.height+tile.resize_edge_tolerance <= wa.y+wa.height then
+        elseif g.y+useless_gap+g.height+resize_edge_tolerance <= wa.y+wa.height then
             offset = g.height
         end
         corner_coords = { x = wa.x + wa.width * (1 - mwfact), y = g.y + offset }
     elseif orientation == "bottom" then
         cursor = "cross"
-        if g.width+useless_gap+tile.resize_edge_tolerance >= wa.width then
+        if g.width+useless_gap+resize_edge_tolerance >= wa.width then
             offset = g.width * .5
             cursor = "sb_v_double_arrow"
-        elseif g.x+g.width+useless_gap+tile.resize_edge_tolerance <= wa.x+wa.width then
+        elseif g.x+g.width+useless_gap+resize_edge_tolerance <= wa.x+wa.width then
             offset = g.width
         end
         corner_coords = { y = wa.y + wa.height * mwfact, x = g.x + offset}
     else
         cursor = "cross"
-        if g.width+useless_gap+tile.resize_edge_tolerance >= wa.width then
+        if g.width+useless_gap+resize_edge_tolerance >= wa.width then
             offset = g.width * .5
             cursor = "sb_v_double_arrow"
-        elseif g.x+g.width+useless_gap+tile.resize_edge_tolerance <= wa.x+wa.width then
+        elseif g.x+g.width+useless_gap+resize_edge_tolerance <= wa.x+wa.width then
             offset = g.width
         end
         corner_coords = { y = wa.y + wa.height * (1 - mwfact), x= g.x + offset }
@@ -130,7 +129,7 @@ local function mouse_resize_handler(c, _, _, _, orientation)
                                       local wfact
                                       local wfact_x, wfact_y
                                       if (
-                                            geom.y + geom.height + useless_gap + tile.resize_edge_tolerance
+                                            geom.y + geom.height + useless_gap + resize_edge_tolerance
                                       ) > (
                                             wa.y + wa.height
                                       ) then
@@ -140,7 +139,7 @@ local function mouse_resize_handler(c, _, _, _, orientation)
                                       end
 
                                       if (
-                                            geom.x + geom.width + useless_gap + tile.resize_edge_tolerance
+                                            geom.x + geom.width + useless_gap + resize_edge_tolerance
                                       ) > (
                                             wa.x + wa.width
                                       ) then
