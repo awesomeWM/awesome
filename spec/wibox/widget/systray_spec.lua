@@ -13,7 +13,10 @@ local drawable_mock = {
         systray_widget = widget
     end
 }
-local beautiful_mock = {}
+local beautiful_mock = {
+    -- Only test the layout of the XEmbed icons (no D-Bus).
+    systray_statusnotifier = false,
+}
 package.loaded["wibox.drawable"] = drawable_mock
 package.loaded.beautiful = beautiful_mock
 
