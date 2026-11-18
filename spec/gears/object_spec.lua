@@ -4,6 +4,7 @@
 ---------------------------------------------------------------------------
 
 local object = require("gears.object")
+local gdebug = require("gears.debug")
 
 describe("gears.object", function()
     local obj
@@ -185,6 +186,29 @@ describe("gears.object", function()
             object{enable_auto_signals=true, enable_properties=false}
         end)
     end)
+
+    it(
+        "signal callback with exception shouldn't break the emit_signal function",
+        function()
+            -- Stop the error reporting during tests
+            local orig_print_error = gdebug.print_error
+            gdebug.print_error = function() end
+
+            local cb = spy.new(function() end)
+            obj:connect_signal("error", function()
+                error "error"
+            end)
+            obj:connect_signal("error", function()
+                cb()
+            end)
+
+            obj:emit_signal "error"
+            assert.spy(cb).was_called()
+
+            -- Restore gdebug
+            gdebug.print_error = orig_print_error
+        end
+    )
 end)
 
 -- vim: filetype=lua:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80

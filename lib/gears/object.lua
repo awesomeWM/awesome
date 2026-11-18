@@ -14,6 +14,7 @@ local pairs = pairs
 local type = type
 local error = error
 local properties = require("gears.object.properties")
+local protected_call = require("gears.protected_call")
 
 local object = { properties = properties, mt = {} }
 
@@ -136,13 +137,13 @@ end
 function object:emit_signal(name, ...)
     local sig = find_signal(self, name)
     for func in pairs(sig.strong) do
-        func(self, ...)
+        protected_call(func, self, ...)
     end
     for func in pairs(sig.weak) do
-        func(self, ...)
+        protected_call(func, self, ...)
     end
     for _, func in ipairs(self._global_receivers) do
-        func(name, self, ...)
+        protected_call(func, name, self, ...)
     end
 end
 
@@ -162,7 +163,7 @@ function object._setup_class_signals(t, args)
             assert(name)
             for _, func in pairs(conns[name] or {}) do
                 if condition(...) then return end
-                func(...)
+                protected_call(func, ...)
             end
         end
     end
