@@ -500,7 +500,8 @@ viewport_add(lua_State *L, int x, int y, int w, int h)
         }
     } while (a && (a = a->next));
 
-    viewport_t *node = malloc(sizeof(viewport_t));
+    viewport_t *node = calloc(1, sizeof(viewport_t));
+    assert( node != NULL );
     node->x      = x;
     node->y      = y;
     node->width  = w;
