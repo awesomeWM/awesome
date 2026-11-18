@@ -208,7 +208,11 @@ local function perform_action(o)
         current_item = 1
         return true, "", new_prompt
     elseif shownitems[current_item].cmdline then
-        awful.spawn(shownitems[current_item].cmdline)
+        if (shownitems[current_item].with_shell) then
+            awful.spawn.with_shell(shownitems[current_item].cmdline)
+        else
+            awful.spawn(shownitems[current_item].cmdline)
+        end
         -- load count_table from cache file
         local count_table = load_count_table()
         -- increase count

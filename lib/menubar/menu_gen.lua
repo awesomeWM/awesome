@@ -115,9 +115,11 @@ function menu_gen.generate(callback)
                         local name = utils.rtrim(entry.Name) or ""
                         local cmdline = utils.rtrim(entry.cmdline) or ""
                         local icon = entry.icon_path or nil
+                        local with_shell = entry.with_shell or false
                         table.insert(result, { name = name,
                                      cmdline = cmdline,
                                      icon = icon,
+                                     with_shell = with_shell,
                                      category = target_category })
                         unique_entries[unique_key] = true
                     end
