@@ -163,7 +163,7 @@ typedef struct
         /** Focused client */
         client_t *client;
         /** Is there a focus change pending? */
-        bool need_update;
+        guint source_id;
         /** When nothing has the input focus, this window actually is focused */
         xcb_window_t window_no_focus;
     } focus;
@@ -201,7 +201,9 @@ typedef struct
     /** Our default color map */
     xcb_colormap_t default_cmap;
     /** Do we have to reban clients? */
-    bool need_lazy_banning;
+    guint banning_update_id;
+    /** Do we have to update the stacking order? */
+    guint stacking_update_id;
     /** Tag list */
     tag_array_t tags;
     /** List of registered xproperties */
