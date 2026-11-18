@@ -73,6 +73,19 @@ _warn(int line, const char *fct, const char *fmt, ...)
     fprintf(stderr, "\n");
 }
 
+/** Print debug message on stderr.
+ */
+void
+_debug(int line, const char *fct, const char *fmt, ...)
+{
+    va_list ap;
+    va_start(ap, fmt);
+    fprintf(stderr, "D: awesome: %s:%d: ", fct, line);
+    vfprintf(stderr, fmt, ap);
+    va_end(ap);
+    fprintf(stderr, "\n");
+}
+
 /** \brief safe limited strcpy.
  *
  * Copies at most min(<tt>n-1</tt>, \c l) characters from \c src into \c dst,
