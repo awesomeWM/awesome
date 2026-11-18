@@ -24,10 +24,6 @@
 
 #define CONNECTED_SUFFIX "::connected"
 
-DO_ARRAY(lua_class_t *, lua_class, DO_NOTHING)
-
-static lua_class_array_t luaA_classes;
-
 /** Convert a object to a udata if possible.
  * \param L The Lua VM state.
  * \param ud The index.
@@ -282,8 +278,6 @@ luaA_class_setup(lua_State *L, lua_class_t *class,
     class->instances = 0;
     class->index_miss_handler = LUA_REFNIL;
     class->newindex_miss_handler = LUA_REFNIL;
-
-    lua_class_array_append(&luaA_classes, class);
 }
 
 void
