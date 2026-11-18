@@ -207,11 +207,12 @@ luaA_class_gc(lua_State *L)
      * this object. This is needed since other __gc methods can still use this.
      * We also make sure that `item.valid == false`.
      */
-    lua_newtable(L);
-    lua_pushcfunction(L, luaA_class_index_invalid);
-    lua_setfield(L, -2, "__index");
-    lua_pushcfunction(L, luaA_class_newindex_invalid);
-    lua_setfield(L, -2, "__newindex");
+    const luaL_Reg meta[] = {
+        {"__index", luaA_class_index_invalid},
+        {"__newindex", luaA_class_newindex_invalid},
+        {}
+    };
+    luaA_newlib(L, meta);
     lua_setmetatable(L, 1);
     return 0;
 }
