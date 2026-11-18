@@ -254,7 +254,10 @@ local function setup_signals(w)
     local function clone_signal(name)
         -- When "name" is emitted on wibox.drawin, also emit it on wibox
         obj:connect_signal(name, function(_, ...)
-            w:emit_signal(name, ...)
+            local wb = obj.get_wibox()
+            if wb then
+                wb:emit_signal(name, ...)
+            end
         end)
     end
 
@@ -296,16 +299,30 @@ local function new(args)
     local ret = object()
     local w = capi.drawin(args)
 
+    local weak_wibox = setmetatable({ret}, {__mode = "v"})
+
+    -- Strong ref
     function w.get_wibox()
         return ret
     end
 
     ret.drawin = w
-    ret._drawable = wibox.drawable(w.drawable, { wibox = ret },
+
+    -- Do not pass a strong reference to the wibox, it will confuse the GC.
+    local context_skeleton = setmetatable({}, {
+        __index = function(_, key)
+            if key == "wibox" then return weak_wibox[1] end
+
+            return nil
+        end
+    })
+
+    ret._drawable = wibox.drawable(w.drawable, context_skeleton,
         "wibox drawable (" .. object.modulename(3) .. ")")
 
+    -- Weak ref
     function ret._drawable.get_wibox()
-        return ret
+        return weak_wibox[1]
     end
 
     ret._drawable:_inform_visible(w.visible)
@@ -328,13 +345,7 @@ local function new(args)
     ret:set_fg(args.fg or beautiful.fg_normal)
 
     -- Add __tostring method to metatable.
-    local mt = {}
     local orig_string = tostring(ret)
-    mt.__tostring = function()
-        return string.format("wibox: %s (%s)",
-                             tostring(ret._drawable), orig_string)
-    end
-    ret = setmetatable(ret, mt)
 
     -- Make sure the wibox is drawn at least once
     ret.draw()
@@ -359,6 +370,10 @@ local function new(args)
             else
                 rawset(self, k, v)
             end
+        end,
+        __tostring = function()
+            return string.format("wibox: %s (%s)",
+                                tostring(ret._drawable), orig_string)
         end
     })
 
