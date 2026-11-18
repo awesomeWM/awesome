@@ -170,7 +170,7 @@ int luaA_object_emit_signal_simple(lua_State *);
         p_clear(p, 1);                                                         \
         (lua_class).instances++;                                               \
         luaA_settype(L, &(lua_class));                                         \
-        lua_newtable(L);                                                       \
+        lua_createtable(L, 0, 1);  /* for the data field */                    \
         lua_newtable(L);                                                       \
         lua_setmetatable(L, -2);                                               \
         lua_newtable(L);                                                       \
