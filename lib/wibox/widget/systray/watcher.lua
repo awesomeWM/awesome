@@ -10,6 +10,15 @@
 -- Both the `org.kde` and the `org.freedesktop` flavors of the protocol are
 -- supported. In practice, almost all applications use the KDE one.
 --
+-- Many applications (Chromium and Electron based ones in particular) only
+-- register their item once, when they start. So that their icons survive an
+-- `awesome.restart`, the watcher adopts the items which are already on the bus
+-- when it acquires its name:
+--
+-- * the items registered with the previous awesome instance, which saves them
+--   in `$XDG_RUNTIME_DIR` when restarting;
+-- * the items owning a well-known `<prefix>.StatusNotifierItem-*` name.
+--
 -- @author WooParadog
 -- @copyright 2026 WooParadog
 -- @module wibox.widget.systray.watcher
@@ -20,11 +29,34 @@ local Gio, GLib, GObject = lgi.Gio, lgi.GLib, lgi.GObject
 local gdebug = require("gears.debug")
 local protected_call = require("gears.protected_call")
 
+local capi = { awesome = awesome }
+
 local module = {}
 
 local watchers = {}
 
 local OBJECT_PATH = "/StatusNotifierWatcher"
+
+-- How long to wait for an existing item to answer before ignoring it.
+local ADOPT_TIMEOUT = 2000
+
+-- Where the items are saved across `awesome.restart`.
+local function state_file(prefix)
+    local display = (os.getenv("DISPLAY") or ""):gsub("[^%w]", "_")
+
+    return GLib.build_filenamev {
+        GLib.get_user_runtime_dir(),
+        "awesome-sni-" .. display .. "-" .. prefix,
+    }
+end
+
+local function split_item(item)
+    local slash = item:find("/", 1, true)
+
+    if not slash then return item, "/StatusNotifierItem" end
+
+    return item:sub(1, slash - 1), item:sub(slash)
+end
 
 local function make_interface_info(prefix)
     local function arg(name, signature)
@@ -140,6 +172,128 @@ local function new_watcher(prefix, connection)
         end
     end
 
+    local function add_item(service, path)
+        local item = service .. path
+
+        for _, v in ipairs(self.items) do
+            if v == item then return end
+        end
+
+        table.insert(self.items, item)
+
+        -- If the name is already gone, the item is removed right away.
+        watch_name(service, function() remove_item(item) end)
+
+        emit("StatusNotifierItemRegistered", GLib.Variant("(s)", { item }))
+        emit_properties_changed { "RegisteredStatusNotifierItems" }
+    end
+
+    local function call_bus(method, params, callback)
+        self.connection:call(
+            "org.freedesktop.DBus", "/org/freedesktop/DBus",
+            "org.freedesktop.DBus", method, params, nil,
+            Gio.DBusCallFlags.NONE, -1, nil,
+            function(c, res)
+                local ret = c:call_finish(res)
+                if ret then protected_call(callback, ret.value[1]) end
+            end
+        )
+    end
+
+    -- Add an existing item, if it really exports a StatusNotifierItem, then
+    -- call `on_done` (whether it was added or not).
+    local function adopt(service, path, on_done)
+        self.connection:call(
+            service, path, "org.freedesktop.DBus.Properties", "Get",
+            GLib.Variant("(ss)", { self.prefix .. ".StatusNotifierItem", "Id" }),
+            nil, Gio.DBusCallFlags.NO_AUTO_START, ADOPT_TIMEOUT, nil,
+            function(c, res)
+                local ret = c:call_finish(res)
+                if ret and self.owned then
+                    protected_call(add_item, service, path)
+                end
+                if on_done then protected_call(on_done) end
+            end
+        )
+    end
+
+    -- Is the application owning `unique_name` already registered?
+    local function has_owner(unique_name)
+        for _, v in ipairs(self.items) do
+            if v:sub(1, #unique_name + 1) == unique_name .. "/" then
+                return true
+            end
+        end
+
+        return false
+    end
+
+    -- The items owning a well-known name, unless their application is
+    -- already registered using its unique name.
+    local function adopt_named()
+        local name_prefix = self.prefix .. ".StatusNotifierItem-"
+
+        call_bus("ListNames", nil, function(names)
+            for _, name in ipairs(names) do
+                if name:sub(1, #name_prefix) == name_prefix then
+                    call_bus("GetNameOwner", GLib.Variant("(s)", { name }),
+                        function(owner)
+                            if not has_owner(owner) then
+                                adopt(name, "/StatusNotifierItem")
+                            end
+                        end)
+                end
+            end
+        end)
+    end
+
+    -- Adopt the items which already exist on the bus.
+    local function adopt_existing()
+        -- The items of the previous awesome instance come first: they have
+        -- the right object path and keep their order.
+        local saved = {}
+        local file = state_file(self.prefix)
+        local f = io.open(file, "r")
+
+        if f then
+            for line in f:lines() do
+                if line ~= "" then table.insert(saved, line) end
+            end
+
+            f:close()
+            os.remove(file)
+        end
+
+        -- Adopt them one at a time, to keep the order.
+        local function next_saved(i)
+            if not saved[i] then return adopt_named() end
+
+            local service, path = split_item(saved[i])
+            adopt(service, path, function() next_saved(i + 1) end)
+        end
+
+        next_saved(1)
+    end
+
+    self.adopt_existing = adopt_existing
+
+    -- Save the items for the next instance when restarting.
+    capi.awesome.connect_signal("exit", function(restart)
+        local file = state_file(self.prefix)
+
+        if not (restart and self.owned and #self.items > 0) then
+            os.remove(file)
+            return
+        end
+
+        local f = io.open(file, "w")
+
+        if f then
+            f:write(table.concat(self.items, "\n"), "\n")
+            f:close()
+        end
+    end)
+
     local methods = {}
 
     function methods.RegisterStatusNotifierItem(sender, params, invocation)
@@ -156,20 +310,9 @@ local function new_watcher(prefix, connection)
             service, path = sender, "/StatusNotifierItem"
         end
 
-        local item = service .. path
-
         invocation:return_value(GLib.Variant("()"))
 
-        for _, v in ipairs(self.items) do
-            if v == item then return end
-        end
-
-        table.insert(self.items, item)
-
-        watch_name(service, function() remove_item(item) end)
-
-        emit("StatusNotifierItemRegistered", GLib.Variant("(s)", { item }))
-        emit_properties_changed { "RegisteredStatusNotifierItems" }
+        add_item(service, path)
     end
 
     function methods.RegisterStatusNotifierHost(sender, params, invocation)
@@ -240,6 +383,7 @@ local function new_watcher(prefix, connection)
         Gio.BusNameOwnerFlags.NONE,
         GObject.Closure(function()
             self.owned = true
+            protected_call(adopt_existing)
         end),
         GObject.Closure(function()
             if self.owned then
@@ -271,6 +415,15 @@ function module.start(prefix, connection)
 
     watchers[prefix] = new_watcher(prefix, connection)
 end
+
+-- Adopt the existing items again (for the tests).
+function module._adopt_existing(prefix)
+    local w = watchers[prefix]
+    if w and w.owned then w.adopt_existing() end
+end
+
+-- The file where the items are saved across restarts (for the tests).
+module._state_file = state_file
 
 return module
 

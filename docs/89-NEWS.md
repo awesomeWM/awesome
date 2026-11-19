@@ -41,6 +41,8 @@ This document was last updated at commit v4.3-197-g9085ed631.
   `StatusNotifierHost` D-Bus services, so bridges such as `snixembed` are no
   longer needed (and should not be used, since they would duplicate the
   icons). Set `beautiful.systray_statusnotifier = false` to disable it.
+  The items survive `awesome.restart()`, even those of applications (such as
+  Chromium and Electron ones) which only register their item when they start.
 
 ## Noteworthy fixes
 

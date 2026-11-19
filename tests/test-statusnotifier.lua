@@ -11,6 +11,7 @@ local Gio, GLib, GObject = lgi.Gio, lgi.GLib, lgi.GObject
 local gdebug = require("gears.debug")
 local statusnotifier = require("wibox.widget.systray.statusnotifier")
 local dbusmenu = require("wibox.widget.systray.dbusmenu")
+local watcher = require("wibox.widget.systray.watcher")
 
 -- Record the warnings (they are still printed).
 local warnings = {}
@@ -191,20 +192,26 @@ end
 -- object path (like KDE applications do).
 local named = { title = "Named app" }
 
-local function start_named_app()
+-- The items adopted from the bus.
+local adopted = {}
+
+-- Export a minimal item at `path` on a new connection.
+local function new_item_connection(path)
     local address = Gio.dbus_address_get_for_bus_sync(Gio.BusType.SESSION)
 
-    named.conn = Gio.DBusConnection.new_for_address_sync(address,
+    local conn = Gio.DBusConnection.new_for_address_sync(address,
         Gio.DBusConnectionFlags.AUTHENTICATION_CLIENT +
         Gio.DBusConnectionFlags.MESSAGE_BUS_CONNECTION, nil, nil)
 
-    named.conn:register_object("/StatusNotifierItem", item_info,
+    conn:register_object(path, item_info,
         GObject.Closure(function(_, _, _, _, _, _, invocation)
             invocation:return_value(GLib.Variant("()"))
         end),
         GObject.Closure(function(_, _, _, _, name)
             if name == "Id" then return GLib.Variant("s", "named-app") end
-            if name == "Title" then return GLib.Variant("s", named.title) end
+            if name == "Title" then
+                return GLib.Variant("s", named.title or "")
+            end
             if name == "Menu" then return GLib.Variant("o", "/") end
             if name == "IconPixmap" then return GLib.Variant("a(iiay)", {}) end
             if name == "ToolTip" then
@@ -215,12 +222,20 @@ local function start_named_app()
         end),
         nil)
 
-    named.name = "org.kde.StatusNotifierItem-4242-1"
+    return conn
+end
 
-    local ret = named.conn:call_sync("org.freedesktop.DBus", "/org/freedesktop/DBus",
+local function own_name(conn, name)
+    local ret = conn:call_sync("org.freedesktop.DBus", "/org/freedesktop/DBus",
         "org.freedesktop.DBus", "RequestName",
-        GLib.Variant("(su)", { named.name, 0 }), nil, Gio.DBusCallFlags.NONE, -1)
+        GLib.Variant("(su)", { name, 0 }), nil, Gio.DBusCallFlags.NONE, -1)
     assert(ret and ret.value[1] == 1, "could not own the name")
+end
+
+local function start_named_app()
+    named.conn = new_item_connection("/StatusNotifierItem")
+    named.name = "org.kde.StatusNotifierItem-4242-1"
+    own_name(named.conn, named.name)
 
     named.conn:call("org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher",
         "org.kde.StatusNotifierWatcher", "RegisterStatusNotifierItem",
@@ -568,6 +583,76 @@ local steps = {
 
         assert(count_icons() == 0)
 
+        return true
+    end,
+
+    -- Items already on the bus are adopted when the watcher (re)starts, even
+    -- if they never register again (like Chromium and Electron apps after
+    -- an `awesome.restart`).
+    function(count)
+        if count == 1 then
+            -- An item with a well-known name, which never registers.
+            adopted.named_conn = new_item_connection("/StatusNotifierItem")
+            own_name(adopted.named_conn, "org.kde.StatusNotifierItem-4343-1")
+
+            -- An item only known by the unique name of its connection, as
+            -- saved by the previous awesome instance. A dead item is saved
+            -- too, as well as the named item, which must not be duplicated.
+            adopted.unique_conn = new_item_connection("/Custom/Path")
+            adopted.unique_name = adopted.unique_conn:get_unique_name()
+
+            local f = assert(io.open(watcher._state_file("org.kde"), "w"))
+            f:write(adopted.unique_name, "/Custom/Path\n")
+            f:write(":1.999999/StatusNotifierItem\n")
+            f:write("org.kde.StatusNotifierItem-4343-1/StatusNotifierItem\n")
+            f:close()
+
+            watcher._adopt_existing("org.kde")
+        end
+
+        local items = statusnotifier.get_items()
+
+        if #items < 2 then return end
+
+        local found = {}
+
+        for _, i in ipairs(items) do
+            found[i.service .. i.path] = true
+        end
+
+        assert(found[adopted.unique_name .. "/Custom/Path"])
+        assert(found["org.kde.StatusNotifierItem-4343-1/StatusNotifierItem"])
+
+        -- The state file is consumed.
+        assert(not io.open(watcher._state_file("org.kde"), "r"))
+
+        -- Wait a bit to check that nothing else shows up.
+        if count < 10 then return end
+
+        assert(#statusnotifier.get_items() == 2, #statusnotifier.get_items())
+        assert(count_icons() == 2)
+
+        return true
+    end,
+
+    -- Adopting again does not duplicate anything.
+    function(count)
+        if count == 1 then
+            watcher._adopt_existing("org.kde")
+        end
+
+        if count < 10 then return end
+
+        assert(#statusnotifier.get_items() == 2, #statusnotifier.get_items())
+
+        adopted.named_conn:close_sync(nil)
+        adopted.unique_conn:close_sync(nil)
+
+        return true
+    end,
+
+    function()
+        if #statusnotifier.get_items() > 0 then return end
         return true
     end,
 }
