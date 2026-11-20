@@ -193,7 +193,9 @@ local function apply_properties(self, raw)
         if not variant_equal(old[name], raw[name]) then
             local v = raw[name]
             local value = nil
-            if v then value = v.value end
+            -- All these properties are basic types. `.value` returns
+            -- containers as userdata, which are not useful here.
+            if v and not v:is_container() then value = v.value end
             self._private.values[lua_name] = value
             changed = true
             self:emit_signal("property::" .. lua_name, value)

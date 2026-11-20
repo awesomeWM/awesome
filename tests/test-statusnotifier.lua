@@ -12,12 +12,24 @@ local statusnotifier = require("wibox.widget.systray.statusnotifier")
 local dbusmenu = require("wibox.widget.systray.dbusmenu")
 local watcher = require("wibox.widget.systray.watcher")
 
--- Record the warnings (they are still printed).
+-- Record the warnings. The expected ones are not printed, since any warning
+-- in the log fails the test (`tests/run.sh -W`). The others still are.
 local warnings = {}
 local print_warning = gdebug.print_warning
 
+local expected_warnings = {
+    -- The bogus item registered on purpose.
+    "^statusnotifier: Cannot read the properties of [^ ]*/NoSuchItem, " ..
+        "ignoring the item$",
+}
+
 function gdebug.print_warning(message)
     table.insert(warnings, message)
+
+    for _, pattern in ipairs(expected_warnings) do
+        if tostring(message):match(pattern) then return end
+    end
+
     print_warning(message)
 end
 
@@ -245,14 +257,24 @@ local function start_named_app()
         end)
 end
 
+-- Call `callback` with the value of a watcher property, as a GLib.Variant.
 local function watcher_property(name, callback)
     app_conn:call("org.kde.StatusNotifierWatcher", "/StatusNotifierWatcher",
         "org.freedesktop.DBus.Properties", "Get",
         GLib.Variant("(ss)", { "org.kde.StatusNotifierWatcher", name }), nil,
         Gio.DBusCallFlags.NONE, -1, nil, function(c, res)
             local ret = c:call_finish(res)
-            callback(ret and ret:get_child_value(0):get_variant().value)
+            callback(ret and ret:get_child_value(0):get_variant())
         end)
+end
+
+-- Convert an array variant to a table. Arrays are not unpacked by `.value`.
+local function array_to_table(v)
+    local ret = {}
+    for i = 0, v:n_children() - 1 do
+        table.insert(ret, v:get_child_value(i).value)
+    end
+    return ret
 end
 
 -- The test ---------------------------------------------------------------------
@@ -322,7 +344,7 @@ local function sni_names()
         "org.freedesktop.DBus", "ListNames", nil, nil,
         Gio.DBusCallFlags.NONE, -1)
     local names = {}
-    for _, name in ipairs(ret.value[1]) do
+    for _, name in ipairs(array_to_table(ret:get_child_value(0))) do
         if name:find("%.StatusNotifier[WH]") then
             table.insert(names, name)
         end
@@ -388,7 +410,7 @@ local steps = {
         assert(width == 20, width)
 
         watcher_property("IsStatusNotifierHostRegistered", function(v)
-            host_registered = v
+            host_registered = v and v.value
         end)
 
         return true
@@ -402,7 +424,7 @@ local steps = {
     end,
 
     -- An item whose object does not exist is never displayed. The initial
-    -- load is retried a few times, then a single warning is printed.
+    -- load is retried a few times, then a single warning is emitted.
     function(count)
         if count == 1 then
             bogus_registered_at = GLib.get_monotonic_time()
@@ -604,30 +626,22 @@ local steps = {
         return true
     end,
 
-    -- Enabling them again starts everything again. The fake application is
-    -- only known by its unique name and path, so the new watcher does not
-    -- adopt it (only the items saved by `awesome.restart()` and those owning
-    -- a well-known name are). Like real applications do when the watcher
-    -- appears, it registers again.
+    -- Enabling them again starts everything again. The fake application does
+    -- not register again (like Chromium and Electron based applications,
+    -- which only register once): the new watcher adopts the items of the
+    -- previous one. The bogus item is not adopted, since it does not exist.
     function(count)
         if count == 1 then
             tray.statusnotifier_enabled = true
             assert(enabled_changes[2] == true)
         end
 
-        if not disabled.registered then
-            if not has_owner("org.kde.StatusNotifierWatcher") then return end
-            if not has_owner("org.freedesktop.StatusNotifierWatcher") then
-                return
-            end
-            register_app()
-            disabled.registered = true
-        end
-
         if added == disabled.added then return end
 
         assert(added == disabled.added + 1)
         assert(item ~= disabled.item)
+        assert(item.service == disabled.item.service)
+        assert(item.path == "/StatusNotifierItem")
         assert(item.title == "New title")
         assert(#statusnotifier.get_items() == 1)
         assert(count_icons() == 1)
@@ -638,18 +652,43 @@ local steps = {
         return true
     end,
 
+    -- Registering again does not duplicate the item.
+    function(count)
+        if count == 1 then
+            register_app()
+        end
+
+        if count < 5 then return end
+
+        assert(added == disabled.added + 1, added)
+        assert(#statusnotifier.get_items() == 1)
+        assert(count_icons() == 1)
+
+        return true
+    end,
+
     -- The watcher sees the host again, and nothing is duplicated.
     function(count)
         if count == 1 then
-            host_registered = nil
+            host_registered, disabled.watcher_items = nil, nil
             watcher_property("IsStatusNotifierHostRegistered", function(v)
-                host_registered = v
+                host_registered = v and v.value
+            end)
+            watcher_property("RegisteredStatusNotifierItems", function(v)
+                disabled.watcher_items = v and array_to_table(v)
             end)
         end
 
-        if host_registered == nil or count < 5 then return end
+        if host_registered == nil or not disabled.watcher_items then return end
+        if count < 5 then return end
 
         assert(host_registered == true)
+
+        -- The item is registered once, and the bogus item was not adopted.
+        local items = disabled.watcher_items
+        assert(#items == 1, #items)
+        assert(items[1] == item.service .. "/StatusNotifierItem", items[1])
+
         assert(#sni_names() == 4, #sni_names())
         assert(#statusnotifier.get_items() == 1)
         assert(added == disabled.added + 1)

@@ -209,8 +209,8 @@ end
 local function split_list(value)
     local ret = {}
 
-    for v in (value or ""):gmatch("[^,;]+") do
-        v = v:match("^%s*(.-)%s*$")
+    for entry in (value or ""):gmatch("[^,;]+") do
+        local v = entry:match("^%s*(.-)%s*$")
         if v ~= "" then table.insert(ret, v) end
     end
 

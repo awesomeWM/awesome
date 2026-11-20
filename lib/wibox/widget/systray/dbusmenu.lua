@@ -75,7 +75,10 @@ function dbusmenu.parse_layout(v)
 
         if key == "icon-data" then
             node.props[key] = icon.variant_bytes(val)
-        else
+        elseif not val:is_container() then
+            -- The other used properties are basic types. Containers (like
+            -- `shortcut`, an `aas`) are not used, and `.value` would return
+            -- them as userdata.
             node.props[key] = val.value
         end
     end

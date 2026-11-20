@@ -17,6 +17,8 @@
 --
 -- * the items registered with the previous awesome instance, which saves them
 --   in `$XDG_RUNTIME_DIR` when restarting;
+-- * the items registered before the watcher was stopped, when it is started
+--   again (for example when `statusnotifier_enabled` is toggled);
 -- * the items owning a well-known `<prefix>.StatusNotifierItem-*` name.
 --
 -- @author WooParadog
@@ -37,6 +39,10 @@ local watchers = {}
 
 -- The prefixes of the watchers started so far.
 local known_prefixes = {}
+
+-- The items of the stopped watchers, adopted when they start again:
+-- prefix -> ordered list of "service/path" strings.
+local stopped_items = {}
 
 local OBJECT_PATH = "/StatusNotifierWatcher"
 
@@ -191,6 +197,10 @@ local function new_watcher(prefix, connection)
         emit_properties_changed { "RegisteredStatusNotifierItems" }
     end
 
+    -- Call `callback` with the first value of the reply, as a GLib.Variant.
+    -- Arrays are not unpacked by `.value` (and lgi returns a userdata, which
+    -- `ipairs` does not accept with all Lua versions), so the callbacks walk
+    -- them using `n_children` / `get_child_value`.
     local function call_bus(method, params, callback)
         self.connection:call(
             "org.freedesktop.DBus", "/org/freedesktop/DBus",
@@ -198,7 +208,7 @@ local function new_watcher(prefix, connection)
             Gio.DBusCallFlags.NONE, -1, nil,
             function(c, res)
                 local ret = c:call_finish(res)
-                if ret then protected_call(callback, ret.value[1]) end
+                if ret then protected_call(callback, ret:get_child_value(0)) end
             end
         )
     end
@@ -239,11 +249,13 @@ local function new_watcher(prefix, connection)
         local name_prefix = self.prefix .. ".StatusNotifierItem-"
 
         call_bus("ListNames", nil, function(names)
-            for _, name in ipairs(names) do
+            for i = 0, names:n_children() - 1 do
+                local name = names:get_child_value(i).value
+
                 if name:sub(1, #name_prefix) == name_prefix then
                     call_bus("GetNameOwner", GLib.Variant("(s)", { name }),
                         function(owner)
-                            if not has_owner(owner) then
+                            if not has_owner(owner.value) then
                                 adopt(name, "/StatusNotifierItem")
                             end
                         end)
@@ -254,8 +266,9 @@ local function new_watcher(prefix, connection)
 
     -- Adopt the items which already exist on the bus.
     local function adopt_existing()
-        -- The items of the previous awesome instance come first: they have
-        -- the right object path and keep their order.
+        -- The items of the previous awesome instance and of the previous
+        -- watcher of this instance come first: they have the right object
+        -- path and keep their order.
         local saved = {}
         local file = state_file(self.prefix)
         local f = io.open(file, "r")
@@ -268,6 +281,12 @@ local function new_watcher(prefix, connection)
             f:close()
             os.remove(file)
         end
+
+        for _, v in ipairs(stopped_items[self.prefix] or {}) do
+            table.insert(saved, v)
+        end
+
+        stopped_items[self.prefix] = nil
 
         -- Adopt them one at a time, to keep the order.
         local function next_saved(i)
@@ -398,8 +417,17 @@ end
 
 -- Release the name, unexport the object and stop watching the items and
 -- hosts. The items are not unregistered: they register again (or are
--- adopted) when a watcher appears.
+-- adopted) when a watcher appears. They are kept, so that they are adopted if
+-- this watcher is started again.
 local function stop_watcher(self)
+    if self.owned and #self.items > 0 then
+        local items = {}
+
+        for k, v in ipairs(self.items) do items[k] = v end
+
+        stopped_items[self.prefix] = items
+    end
+
     self.stopped = true
     self.owned = false
 
