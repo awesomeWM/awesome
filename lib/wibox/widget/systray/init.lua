@@ -6,9 +6,11 @@
 -- * The legacy XEmbed icons (`_NET_SYSTEM_TRAY`).
 -- * The StatusNotifierItems, which many applications (Electron, Qt,
 --   Chromium, libappindicator, KDE, ...) use to export their icon and menu over
---   D-Bus. For these, awesome provides the `org.kde.StatusNotifierWatcher`
---   D-Bus service, so programs such as `snixembed` are not needed (and would
---   display each icon twice).
+--   D-Bus. For these, awesome provides the `StatusNotifierWatcher` D-Bus
+--   service (both `org.kde.StatusNotifierWatcher` and
+--   `org.freedesktop.StatusNotifierWatcher`), so programs such as `snixembed`
+--   are not needed (and would display each icon twice). When another program
+--   already provides it, that one is used instead.
 --
 -- For StatusNotifierItems:
 --
@@ -20,8 +22,15 @@
 --   it, the application is asked to display its own menu.
 -- * Scrolling is forwarded to the item.
 --
--- The StatusNotifierItems can be disabled with
--- `beautiful.systray_statusnotifier`.
+-- The items registered with awesome are kept across `awesome.restart()`: they
+-- are saved in `$XDG_RUNTIME_DIR` and adopted by the new instance, as are the
+-- items owning a well-known `org.kde.StatusNotifierItem-*` name.
+--
+-- The StatusNotifierItem support can be disabled with the
+-- `statusnotifier_enabled` property:
+--
+--    local tray = wibox.widget.systray()
+--    tray.statusnotifier_enabled = false
 --
 -- @author Uli Schlachter
 -- @copyright 2010 Uli Schlachter
@@ -55,6 +64,8 @@ local horizontal = true
 local base_size = nil
 local reverse = false
 local display_on_screen = "primary"
+local statusnotifier_enabled = true
+local show_passive = true
 
 -- The StatusNotifierItem support (loaded on demand).
 local statusnotifier, sni_icon = nil, nil
@@ -87,20 +98,6 @@ local sni_icon_size = nil
 --
 -- @beautiful beautiful.systray_icon_spacing
 -- @tparam[opt=0] integer systray_icon_spacing The icon spacing
-
---- Display the StatusNotifierItems (D-Bus tray icons).
---
--- This must be set before the systray widget is created.
---
--- @beautiful beautiful.systray_statusnotifier
--- @tparam[opt=true] boolean systray_statusnotifier
-
---- Display the StatusNotifierItems with the `Passive` status.
---
--- Applications use this status when their icon is not important.
---
--- @beautiful beautiful.systray_show_passive
--- @tparam[opt=true] boolean systray_show_passive
 
 --- The color used for symbolic StatusNotifierItem icons (`foo-symbolic`).
 --
@@ -520,11 +517,11 @@ function systray:layout(context, width, height)
 end
 
 local function update_sni_items()
-    local show_passive = beautiful.systray_show_passive ~= false
-
     sni_items = {}
 
-    for _, item in ipairs(statusnotifier.get_items()) do
+    local items = statusnotifier and statusnotifier.get_items() or {}
+
+    for _, item in ipairs(items) do
         if show_passive or item.status ~= "Passive" then
             table.insert(sni_items, item)
         end
@@ -537,7 +534,10 @@ local function update_sni_items()
 end
 
 local function start_statusnotifier()
-    if statusnotifier then return end
+    if statusnotifier then
+        statusnotifier.start()
+        return
+    end
 
     statusnotifier = require("wibox.widget.systray.statusnotifier")
     sni_icon = require("wibox.widget.systray.icon")
@@ -566,6 +566,15 @@ local function start_statusnotifier()
     end)
 
     statusnotifier.start()
+    update_sni_items()
+end
+
+-- Remove all StatusNotifierItems and release everything on the bus.
+local function stop_statusnotifier()
+    if not statusnotifier then return end
+
+    tooltip.hide()
+    statusnotifier.stop()
     update_sni_items()
 end
 
@@ -668,6 +677,60 @@ function systray:set_screen(s)
     end
 end
 
+--- Display the StatusNotifierItems (D-Bus tray icons).
+--
+-- When this is `false`, awesome does not provide the StatusNotifierWatcher
+-- and StatusNotifierHost D-Bus services and only the XEmbed icons are
+-- displayed. The D-Bus services are started shortly after the widget is
+-- created, so setting this to `false` right after creating the widget (or
+-- before, using `wibox.widget.systray.set_statusnotifier_enabled(false)`)
+-- prevents them from ever being started. Setting it to `false` later
+-- removes the StatusNotifierItems and stops the services.
+--
+-- @property statusnotifier_enabled
+-- @tparam[opt=true] boolean statusnotifier_enabled
+-- @propemits true false
+
+function systray:set_statusnotifier_enabled(enabled)
+    statusnotifier_enabled = get_args(self, enabled)
+
+    if not statusnotifier_enabled then
+        stop_statusnotifier()
+    elseif instance then
+        start_statusnotifier()
+    end
+
+    if instance then
+        instance:emit_signal("property::statusnotifier_enabled",
+            statusnotifier_enabled)
+    end
+end
+
+function systray:get_statusnotifier_enabled()
+    return statusnotifier_enabled
+end
+
+--- Display the StatusNotifierItems with the `Passive` status.
+--
+-- Applications use this status when their icon is not important. This only
+-- applies to the StatusNotifierItems, the XEmbed icons have no status.
+--
+-- @property show_passive
+-- @tparam[opt=true] boolean show_passive
+-- @propemits true false
+
+function systray:set_show_passive(show)
+    show_passive = get_args(self, show)
+    update_sni_items()
+    if instance then
+        instance:emit_signal("property::show_passive", show_passive)
+    end
+end
+
+function systray:get_show_passive()
+    return show_passive
+end
+
 --- Create the systray widget.
 --
 -- Note that this widget can only exist once.
@@ -678,8 +741,6 @@ end
 -- @usebeautiful beautiful.bg_systray
 -- @usebeautiful beautiful.systray_icon_spacing
 -- @usebeautiful beautiful.systray_max_rows
--- @usebeautiful beautiful.systray_statusnotifier
--- @usebeautiful beautiful.systray_show_passive
 -- @usebeautiful beautiful.systray_symbolic_color
 -- @usebeautiful beautiful.systray_icon_theme
 -- @usebeautiful beautiful.icon_theme Fallback when
@@ -727,9 +788,12 @@ local function new(revers)
 
     drawable._set_systray_widget(ret)
 
-    if beautiful.systray_statusnotifier ~= false then
-        start_statusnotifier()
-    end
+    -- Leave some time to disable the StatusNotifierItems.
+    gtimer.delayed_call(function()
+        if statusnotifier_enabled then
+            start_statusnotifier()
+        end
+    end)
 
     return ret
 end

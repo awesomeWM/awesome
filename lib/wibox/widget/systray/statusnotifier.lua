@@ -50,6 +50,12 @@ local prefixes = { "org.kde", "org.freedesktop" }
 local started = false
 local connection
 
+-- Incremented by `stop`, to ignore the pending `start`.
+local generation = 0
+
+-- The bus resources of each host: prefix -> { own_id, watch_id, ... }
+local hosts = {}
+
 -- All known items, in registration order.
 local items = {}
 
@@ -134,10 +140,13 @@ local function start_host(prefix)
     local host_name = string.format("%s.StatusNotifierHost-%d",
         prefix, ok and pid or 0)
 
+    local host = {}
+    hosts[prefix] = host
+
     local subscriptions = {}
 
     -- Register the host name. Some applications check that it exists.
-    Gio.bus_own_name_on_connection(connection, host_name,
+    host.own_id = Gio.bus_own_name_on_connection(connection, host_name,
         Gio.BusNameOwnerFlags.NONE, nil, nil)
 
     local function on_watcher_appeared(_, _, owner)
@@ -173,7 +182,7 @@ local function start_host(prefix)
             nil, Gio.DBusCallFlags.NONE, -1, nil,
             function(c, res)
                 local ret = c:call_finish(res)
-                if not ret then return end
+                if not ret or hosts[prefix] ~= host then return end
 
                 local list = ret:get_child_value(0):get_variant()
 
@@ -192,9 +201,11 @@ local function start_host(prefix)
         clear_items(prefix)
     end
 
+    host.on_watcher_vanished = on_watcher_vanished
+
     -- When our own watcher does not own the name, another one does. In both
     -- cases, the host talks to the current owner over D-Bus.
-    Gio.bus_watch_name_on_connection(connection, interface,
+    host.watch_id = Gio.bus_watch_name_on_connection(connection, interface,
         Gio.BusNameWatcherFlags.NONE,
         GObject.Closure(function(...)
             protected_call(on_watcher_appeared, ...)
@@ -203,6 +214,28 @@ local function start_host(prefix)
             protected_call(on_watcher_vanished, ...)
         end)
     )
+end
+
+-- Stop a host: stop watching the watcher, forget about its items and
+-- release the host name.
+local function stop_host(prefix)
+    local host = hosts[prefix]
+
+    if not host then return end
+
+    hosts[prefix] = nil
+
+    -- No callback is called once the name is unwatched.
+    Gio.bus_unwatch_name(host.watch_id)
+    host.on_watcher_vanished()
+    Gio.bus_unown_name(host.own_id)
+end
+
+local function start_all()
+    for _, prefix in ipairs(prefixes) do
+        watcher.start(prefix, connection)
+        start_host(prefix)
+    end
 end
 
 --- Start the StatusNotifierWatcher and StatusNotifierHost.
@@ -217,6 +250,13 @@ function module.start()
 
     started = true
 
+    if connection then
+        start_all()
+        return
+    end
+
+    local gen = generation
+
     Gio.bus_get(Gio.BusType.SESSION, nil, function(_, res)
         local conn, err = Gio.bus_get_finish(res)
 
@@ -228,11 +268,31 @@ function module.start()
 
         connection = conn
 
-        for _, prefix in ipairs(prefixes) do
-            watcher.start(prefix, connection)
-            start_host(prefix)
-        end
+        -- `stop` was called in the meantime.
+        if gen ~= generation then return end
+
+        start_all()
     end)
+end
+
+--- Stop the StatusNotifierWatcher and StatusNotifierHost.
+--
+-- All items are removed (`item::removed` is emitted for each displayed item)
+-- and everything owned, exported or watched on the bus is released. The
+-- module can be started again later.
+--
+-- @staticfct wibox.widget.systray.statusnotifier.stop
+-- @noreturn
+function module.stop()
+    if not started then return end
+
+    started = false
+    generation = generation + 1
+
+    for _, prefix in ipairs(prefixes) do
+        stop_host(prefix)
+        watcher.stop(prefix)
+    end
 end
 
 --- Get all items currently displayed.

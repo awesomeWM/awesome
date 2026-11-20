@@ -35,6 +35,9 @@ local module = {}
 
 local watchers = {}
 
+-- The prefixes of the watchers started so far.
+local known_prefixes = {}
+
 local OBJECT_PATH = "/StatusNotifierWatcher"
 
 -- How long to wait for an existing item to answer before ignoring it.
@@ -203,6 +206,8 @@ local function new_watcher(prefix, connection)
     -- Add an existing item, if it really exports a StatusNotifierItem, then
     -- call `on_done` (whether it was added or not).
     local function adopt(service, path, on_done)
+        if self.stopped then return end
+
         self.connection:call(
             service, path, "org.freedesktop.DBus.Properties", "Get",
             GLib.Variant("(ss)", { self.prefix .. ".StatusNotifierItem", "Id" }),
@@ -276,23 +281,6 @@ local function new_watcher(prefix, connection)
     end
 
     self.adopt_existing = adopt_existing
-
-    -- Save the items for the next instance when restarting.
-    capi.awesome.connect_signal("exit", function(restart)
-        local file = state_file(self.prefix)
-
-        if not (restart and self.owned and #self.items > 0) then
-            os.remove(file)
-            return
-        end
-
-        local f = io.open(file, "w")
-
-        if f then
-            f:write(table.concat(self.items, "\n"), "\n")
-            f:close()
-        end
-    end)
 
     local methods = {}
 
@@ -382,10 +370,12 @@ local function new_watcher(prefix, connection)
         self.interface,
         Gio.BusNameOwnerFlags.NONE,
         GObject.Closure(function()
+            if self.stopped then return end
             self.owned = true
             protected_call(adopt_existing)
         end),
         GObject.Closure(function()
+            if self.stopped then return end
             if self.owned then
                 gdebug.print_warning(
                     "statusnotifier: Lost the " .. self.interface .. " name"
@@ -406,6 +396,42 @@ local function new_watcher(prefix, connection)
     return self
 end
 
+-- Release the name, unexport the object and stop watching the items and
+-- hosts. The items are not unregistered: they register again (or are
+-- adopted) when a watcher appears.
+local function stop_watcher(self)
+    self.stopped = true
+    self.owned = false
+
+    Gio.bus_unown_name(self.own_id)
+    self.connection:unregister_object(self.registration_id)
+
+    for _, entry in pairs(self.name_watch) do
+        Gio.bus_unwatch_name(entry.id)
+    end
+
+    self.items, self.hosts, self.name_watch = {}, {}, {}
+end
+
+-- Save the items for the next instance when restarting.
+local function on_exit(restart)
+    for prefix in pairs(known_prefixes) do
+        local w = watchers[prefix]
+        local file = state_file(prefix)
+
+        if restart and w and w.owned and #w.items > 0 then
+            local f = io.open(file, "w")
+
+            if f then
+                f:write(table.concat(w.items, "\n"), "\n")
+                f:close()
+            end
+        else
+            os.remove(file)
+        end
+    end
+end
+
 --- Start the watcher for a protocol prefix (`org.kde` or `org.freedesktop`).
 -- @tparam string prefix The protocol prefix.
 -- @tparam Gio.DBusConnection connection The session bus connection.
@@ -413,7 +439,24 @@ end
 function module.start(prefix, connection)
     if watchers[prefix] then return end
 
+    if not next(known_prefixes) then
+        capi.awesome.connect_signal("exit", on_exit)
+    end
+
+    known_prefixes[prefix] = true
     watchers[prefix] = new_watcher(prefix, connection)
+end
+
+--- Stop the watcher for a protocol prefix.
+-- @tparam string prefix The protocol prefix.
+-- @noreturn
+function module.stop(prefix)
+    local w = watchers[prefix]
+
+    if not w then return end
+
+    watchers[prefix] = nil
+    stop_watcher(w)
 end
 
 -- Adopt the existing items again (for the tests).

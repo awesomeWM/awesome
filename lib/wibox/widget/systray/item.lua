@@ -266,12 +266,10 @@ local function initial_load_failed(self)
     priv.load_attempts = (priv.load_attempts or 0) + 1
 
     if priv.load_attempts < max_load_attempts then
-        if priv.retry_queued then return end
+        if priv.retry_timer then return end
 
-        priv.retry_queued = true
-
-        gtimer.start_new(load_retry_delay, function()
-            priv.retry_queued = false
+        priv.retry_timer = gtimer.start_new(load_retry_delay, function()
+            priv.retry_timer = nil
             self:refresh()
             return false
         end)
@@ -539,6 +537,11 @@ function item:_remove()
     if self._private.removed then return end
 
     self._private.removed = true
+
+    if self._private.retry_timer then
+        self._private.retry_timer:stop()
+        self._private.retry_timer = nil
+    end
 
     if self._private.subscription then
         self._private.connection:signal_unsubscribe(self._private.subscription)

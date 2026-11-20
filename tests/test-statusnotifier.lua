@@ -5,7 +5,6 @@
 
 local runner = require("_runner")
 local wibox = require("wibox")
-local beautiful = require("beautiful")
 local lgi = require("lgi")
 local Gio, GLib, GObject = lgi.Gio, lgi.GLib, lgi.GObject
 local gdebug = require("gears.debug")
@@ -306,6 +305,44 @@ end)
 
 local host_registered, menu, bogus_registered_at, bogus_warned_at
 
+-- Is `name` owned on the session bus?
+local function has_owner(name)
+    local conn = Gio.bus_get_sync(Gio.BusType.SESSION)
+    local ret = conn:call_sync("org.freedesktop.DBus", "/org/freedesktop/DBus",
+        "org.freedesktop.DBus", "NameHasOwner",
+        GLib.Variant("(s)", { name }), nil,
+        Gio.DBusCallFlags.NONE, -1)
+    return ret and ret.value[1]
+end
+
+-- The StatusNotifierWatcher and StatusNotifierHost names on the bus.
+local function sni_names()
+    local conn = Gio.bus_get_sync(Gio.BusType.SESSION)
+    local ret = conn:call_sync("org.freedesktop.DBus", "/org/freedesktop/DBus",
+        "org.freedesktop.DBus", "ListNames", nil, nil,
+        Gio.DBusCallFlags.NONE, -1)
+    local names = {}
+    for _, name in ipairs(ret.value[1]) do
+        if name:find("%.StatusNotifier[WH]") then
+            table.insert(names, name)
+        end
+    end
+    return names
+end
+
+-- The number of functions connected to a statusnotifier signal.
+local function count_handlers(name)
+    local n = 0
+    for _ in pairs(statusnotifier._signals[name].strong) do n = n + 1 end
+    return n
+end
+
+local enabled_changes, disabled = {}, {}
+
+tray:connect_signal("property::statusnotifier_enabled", function(_, v)
+    table.insert(enabled_changes, v)
+end)
+
 local steps = {
     -- Wait for our watcher to be up, then start the application.
     function()
@@ -435,7 +472,7 @@ local steps = {
     -- Passive items can be hidden.
     function(count)
         if count == 1 then
-            beautiful.systray_show_passive = false
+            tray.show_passive = false
             app.status = "Passive"
             app_conn:emit_signal(nil, "/StatusNotifierItem",
                 "org.kde.StatusNotifierItem", "NewStatus",
@@ -445,8 +482,8 @@ local steps = {
         if item.status ~= "Passive" then return end
 
         assert(count_icons() == 0)
-        beautiful.systray_show_passive = nil
-        wibox.widget.systray.refresh_icons()
+        assert(#statusnotifier.get_items() == 1)
+        tray.show_passive = true
         assert(count_icons() == 1)
 
         return true
@@ -522,6 +559,104 @@ local steps = {
         end
 
         if not closed then return end
+
+        return true
+    end,
+
+    -- Disabling the StatusNotifierItems removes them and releases
+    -- everything on the bus.
+    function(count)
+        if count == 1 then
+            assert(tray.statusnotifier_enabled == true)
+            disabled.item = item
+            disabled.added = added
+            disabled.handlers = count_handlers("item::added")
+            assert(#sni_names() == 4, #sni_names())
+            tray.statusnotifier_enabled = false
+            assert(tray.statusnotifier_enabled == false)
+            assert(enabled_changes[1] == false)
+
+            -- The items are removed synchronously.
+            assert(removed == 1, removed)
+            assert(#statusnotifier.get_items() == 0)
+            assert(count_icons() == 0)
+            assert(item._private.removed)
+            assert(not item._private.subscription)
+        end
+
+        if has_owner("org.kde.StatusNotifierWatcher") then return end
+        if #sni_names() > 0 then return end
+
+        assert(count_icons() == 0)
+
+        return true
+    end,
+
+    -- Nothing comes back while disabled.
+    function(count)
+        if count < 5 then return end
+
+        assert(#sni_names() == 0)
+        assert(#statusnotifier.get_items() == 0)
+        assert(count_icons() == 0)
+        assert(added == disabled.added)
+
+        return true
+    end,
+
+    -- Enabling them again starts everything again. The fake application is
+    -- only known by its unique name and path, so the new watcher does not
+    -- adopt it (only the items saved by `awesome.restart()` and those owning
+    -- a well-known name are). Like real applications do when the watcher
+    -- appears, it registers again.
+    function(count)
+        if count == 1 then
+            tray.statusnotifier_enabled = true
+            assert(enabled_changes[2] == true)
+        end
+
+        if not disabled.registered then
+            if not has_owner("org.kde.StatusNotifierWatcher") then return end
+            if not has_owner("org.freedesktop.StatusNotifierWatcher") then
+                return
+            end
+            register_app()
+            disabled.registered = true
+        end
+
+        if added == disabled.added then return end
+
+        assert(added == disabled.added + 1)
+        assert(item ~= disabled.item)
+        assert(item.title == "New title")
+        assert(#statusnotifier.get_items() == 1)
+        assert(count_icons() == 1)
+
+        -- The signals are not connected twice.
+        assert(count_handlers("item::added") == disabled.handlers)
+
+        return true
+    end,
+
+    -- The watcher sees the host again, and nothing is duplicated.
+    function(count)
+        if count == 1 then
+            host_registered = nil
+            watcher_property("IsStatusNotifierHostRegistered", function(v)
+                host_registered = v
+            end)
+        end
+
+        if host_registered == nil or count < 5 then return end
+
+        assert(host_registered == true)
+        assert(#sni_names() == 4, #sni_names())
+        assert(#statusnotifier.get_items() == 1)
+        assert(added == disabled.added + 1)
+        assert(count_icons() == 1)
+
+        -- For the next step.
+        removed = 0
 
         return true
     end,
