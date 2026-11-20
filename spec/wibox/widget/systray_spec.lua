@@ -35,6 +35,11 @@ _G.screen = {
 
 local systray = require("wibox.widget.systray")
 
+-- Only test the layout of the XEmbed icons (no D-Bus). The StatusNotifierItem
+-- support is started from a delayed call, which this `awesome` mock never
+-- runs, but disable it explicitly anyway.
+systray.set_statusnotifier_enabled(false)
+
 require("wibox.test_utils") -- For assert.widget_fit
 require("wibox.widget.base").rect_to_device_geometry = function() return 0, 0, 0, 0 end
 
