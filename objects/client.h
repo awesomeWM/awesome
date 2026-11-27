@@ -120,6 +120,8 @@ struct client_t
     char *startup_id;
     /** True if the client is sticky */
     bool sticky;
+    /** True if the client should be kept mapped when banned */
+    bool keep_mapped;
     /** Has urgency hint */
     bool urgent;
     /** True if the client is hidden */
@@ -217,6 +219,7 @@ bool client_resize(client_t *, area_t, bool);
 void client_unmanage(client_t *, client_unmanage_t);
 void client_kill(client_t *);
 void client_set_sticky(lua_State *, int, bool);
+void client_set_keep_mapped(lua_State *, int, bool);
 void client_set_above(lua_State *, int, bool);
 void client_set_below(lua_State *, int, bool);
 void client_set_modal(lua_State *, int, bool);
