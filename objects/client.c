@@ -1235,6 +1235,18 @@ lua_class_t client_class;
  */
 
 /**
+ * Keep the client mapped when it is banned.
+ *
+ * Instead of being unmapped, the client is moved outside the viewport. This
+ * allows compositors (for example Xcomposite) to keep capturing the window.
+ *
+ * @property keep_mapped
+ * @tparam[opt=false] boolean keep_mapped
+ * @propemits false false
+ * @see sticky
+ */
+
+/**
  * Indicate if the client is modal.
  *
  * A transient window is a client that "belongs" to another
@@ -1790,6 +1802,17 @@ client_ban(client_t *c)
 {
     if(!c->isbanned)
     {
+        if(c->keep_mapped && !c->minimized && !c->hidden)
+        {
+            uint32_t off[2] = { (uint32_t)-30000, (uint32_t)-30000 };
+            xcb_configure_window(globalconf.connection, c->frame_window,
+                                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, off);
+            c->isbanned = true;
+
+            client_ban_unfocus(c);
+            return;
+        }
+
         client_ignore_enterleave_events();
         xcb_unmap_window(globalconf.connection, c->frame_window);
         client_restore_enterleave_events();
@@ -2656,6 +2679,24 @@ client_set_sticky(lua_State *L, int cidx, bool s)
     }
 }
 
+/** Set a client keep_mapped, or not.
+ * \param L The Lua VM state.
+ * \param cidx The client index.
+ * \param s Set or not the client keep_mapped.
+ */
+void
+client_set_keep_mapped(lua_State *L, int cidx, bool s)
+{
+    client_t *c = luaA_checkudata(L, cidx, &client_class);
+
+    if(c->keep_mapped != s)
+    {
+        c->keep_mapped = s;
+        banning_need_update();
+        luaA_object_emit_signal(L, cidx, "property::keep_mapped", 0);
+    }
+}
+
 /** Set a client focusable, or not.
  * \param L The Lua VM state.
  * \param cidx The client index.
@@ -2901,6 +2942,14 @@ client_unban(client_t *c)
         client_ignore_enterleave_events();
         xcb_map_window(globalconf.connection, c->frame_window);
         client_restore_enterleave_events();
+
+        if(c->keep_mapped && !c->minimized && !c->hidden)
+        {
+            uint32_t pos[2] = { (uint32_t)c->geometry.x,
+                                (uint32_t)c->geometry.y };
+            xcb_configure_window(globalconf.connection, c->frame_window,
+                                 XCB_CONFIG_WINDOW_X | XCB_CONFIG_WINDOW_Y, pos);
+        }
 
         c->isbanned = false;
 
@@ -3835,6 +3884,13 @@ luaA_client_set_sticky(lua_State *L, client_t *c)
 }
 
 static int
+luaA_client_set_keep_mapped(lua_State *L, client_t *c)
+{
+    client_set_keep_mapped(L, -3, luaA_checkboolean(L, -1));
+    return 0;
+}
+
+static int
 luaA_client_set_size_hints_honor(lua_State *L, client_t *c)
 {
     c->size_hints_honor = luaA_checkboolean(L, -1);
@@ -3931,6 +3987,7 @@ LUA_OBJECT_EXPORT_PROPERTY(client, client_t, urgent, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, above, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, below, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, sticky, lua_pushboolean)
+LUA_OBJECT_EXPORT_PROPERTY(client, client_t, keep_mapped, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, size_hints_honor, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_horizontal, lua_pushboolean)
 LUA_OBJECT_EXPORT_PROPERTY(client, client_t, maximized_vertical, lua_pushboolean)
@@ -4663,6 +4720,12 @@ client_class_setup(lua_State *L)
             .new = (lua_class_propfunc_t) luaA_client_set_sticky,
             .index = (lua_class_propfunc_t) luaA_client_get_sticky,
             .newindex = (lua_class_propfunc_t) luaA_client_set_sticky,
+        },
+        {
+            .name = "keep_mapped",
+            .new = (lua_class_propfunc_t) luaA_client_set_keep_mapped,
+            .index = (lua_class_propfunc_t) luaA_client_get_keep_mapped,
+            .newindex = (lua_class_propfunc_t) luaA_client_set_keep_mapped,
         },
         {
             .name = "size_hints_honor",
